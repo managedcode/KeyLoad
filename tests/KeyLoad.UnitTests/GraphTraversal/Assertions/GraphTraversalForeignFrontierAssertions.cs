@@ -12,7 +12,7 @@ internal static class GraphTraversalForeignFrontierAssertions
     internal static async Task Healthy(DatabaseEngine owner, ZoneTreeStore store, GraphTraversalForeignFrontierState state,
         GraphTraversalIntegrityContinuation? continuation, CancellationToken token)
     {
-        var image = GraphShortestPathFullStoreImage.Bytes(store);
+        var image = CanonicalStoreImage.Bytes(store);
         var position = store.Position;
         var actual = owner.Traverse(GraphCrossPartitionTestSupport.Root, state.Source.Partition,
             GraphCrossPartitionTestSupport.Graph, state.Source, TwoHops, MaximumVertices, MaximumEdges, cancellationToken: token);

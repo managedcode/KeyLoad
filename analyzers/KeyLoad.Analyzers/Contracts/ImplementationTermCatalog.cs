@@ -16,6 +16,7 @@ internal static class ImplementationTermCatalog
     internal const string TestPath = "/tests/";
     internal const string BenchmarkPath = "/benchmarks/";
     internal const string AspireHostPath = "/build/KeyLoad.AppHost/";
+    internal const string LoadTestsHostPath = "/build/KeyLoad.LoadTests.AppHost/";
     internal const string TestOwnerPath = "/Fixtures/";
     internal const string OrleansWord = "Orleans";
     internal const string ActivationWord = "activation";
@@ -35,6 +36,8 @@ internal static class ImplementationTermCatalog
     internal const string DataRuntimeAssembly = "KeyLoad.Clustering";
     internal const string DataRuntimeNamespace = "KeyLoad.Clustering";
     internal const string DataServerAssembly = "KeyLoad.Server";
+    internal const string NativeLoggingProcessorAssembly = "OpenTelemetry";
+    internal const string NativeLoggingProcessorType = "OpenTelemetry.SimpleLogRecordExportProcessor";
     internal const string DataRecordFamiliesType = "KeyLoad.Core.Features.ClusterRouting.Contracts.PartitionRecordFamilies";
     internal const string DataReadKindType = "KeyLoad.Clustering.GrainReadKind";
     internal const string DataRequestPhaseType = "KeyLoad.Clustering.GrainRequestPhase";
@@ -96,7 +99,13 @@ internal static class ImplementationTermCatalog
     internal static readonly string[] DataControlMembers =
     [
         "KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons.BenchmarkArtifactOptions.SampleChunkDirectory",
-        "KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons.BenchmarkArtifactOptions.InvalidSource"
+        "KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons.BenchmarkArtifactOptions.InvalidSource",
+        "KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateAnalyticsAssertions.MaximumSamples",
+        "KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateColdMutations.AppendSamplesKind",
+        "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlClusterTokens.SeriesSet",
+        "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlClusterTokens.SampleId",
+        "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlClusterTokens.SampleValue",
+        "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlClusterTokens.SampleAt"
     ];
     internal static readonly string[] NativeModelContracts =
     [
@@ -112,11 +121,11 @@ internal static class ImplementationTermCatalog
         "KeyLoad.AdminNodeSnapshot", "KeyLoad.OperationalAnalyticsCounters",
         "KeyLoad.OperationalAnalyticsReport", "KeyLoad.OperationalAnalyticsRow",
         "KeyLoad.SiteTests.Features.BenchmarkComparisons.SiteIsolatedFixture",
-        "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerContainer",
-        "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerObservationPolicy",
-        "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceSampleBudget",
-        "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceSampler",
-        "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceEvidenceCollector",
+        "KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons.ScaleServerContainer",
+        "KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons.ScaleServerObservationPolicy",
+        "KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons.ScaleServerResourceSampleBudget",
+        "KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons.ScaleServerResourceSampler",
+        "KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons.ScaleServerResourceEvidenceCollector",
         "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.RawStorageReportData",
         "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.NativeSerializationReportData"
     ];
@@ -128,14 +137,14 @@ internal static class ImplementationTermCatalog
         "KeyLoad.Comparisons.VectorComparisonProfile.LatencySampleCount",
         "KeyLoad.Comparisons.VectorComparisonProfileValues.LatencySampleCount",
         "KeyLoad.Comparisons.VectorProfileJsonFields.LatencySampleCount",
-        "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceOptions.SupportedMaxSampleMetadataBytes",
-        "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceOptions.SupportedMaxSamples",
-        "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceOptions.MaxSampleMetadataBytes",
-        "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceOptions.MaxSamples",
-        "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceBounds.MinimumSamples",
-        "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceBounds.SamplingMissing",
-        "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceProcess.ReadBoundedAsync(System.IO.Stream, int, int, System.Threading.CancellationToken)",
-        "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceProcess.DrainBoundedAsync(System.IO.Stream, int, System.Threading.CancellationToken)",
+        "KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons.ScaleServerResourceOptions.SupportedMaxSampleMetadataBytes",
+        "KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons.ScaleServerResourceOptions.SupportedMaxSamples",
+        "KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons.ScaleServerResourceOptions.MaxSampleMetadataBytes",
+        "KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons.ScaleServerResourceOptions.MaxSamples",
+        "KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons.ScaleServerResourceBounds.MinimumSamples",
+        "KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons.ScaleServerResourceBounds.SamplingMissing",
+        "KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons.ScaleServerResourceProcess.ReadBoundedAsync(System.IO.Stream, int, int, System.Threading.CancellationToken)",
+        "KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons.ScaleServerResourceProcess.DrainBoundedAsync(System.IO.Stream, int, System.Threading.CancellationToken)",
         "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.Neo4jHarnessConstants.SamplesCsvFile",
         "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.ScaleServerCancellationProbe.SamplingMissing",
         "KeyLoad.ComparisonTests.Features.BenchmarkComparisons.ScaleServerCancellationProbe.SampleCountField",

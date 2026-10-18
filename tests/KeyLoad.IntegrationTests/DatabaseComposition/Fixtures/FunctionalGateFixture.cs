@@ -15,13 +15,13 @@ internal sealed partial class FunctionalGateFixture : IAsyncDisposable
     private readonly Lock disposalGate = new();
     private readonly bool coldReopen;
     private IDistributedApplicationTestingBuilder? builder;
-    private LocalClusterImageTestSession? imageSession;
     private Task? disposal;
     private ClusterFixtureDiagnostics? diagnostics;
     private string[] diagnosticSecrets = [];
     private Action<string>? saveStartupEvidence;
     private bool started;
-    internal ContainerRuntimeControl? ColdRuntime
+    private string? processEvidenceDirectory;
+    internal ProcessRuntimeControl? ColdRuntime
     {
         get; private set;
     }
@@ -69,22 +69,14 @@ internal sealed partial class FunctionalGateFixture : IAsyncDisposable
 
     private async Task InitializeAsync(int nodes, CancellationToken token)
     {
-        using var preparationBound = new CancellationTokenSource(TimeSpan.FromMinutes(15), TimeProvider.System);
-        using var preparation = CancellationTokenSource.CreateLinkedTokenSource(token, preparationBound.Token);
-        imageSession = await LocalClusterImageTestSession.StartIfSelectedAsync(preparation.Token).ConfigureAwait(false);
-        var selection = imageSession?.Selection;
-        if (selection is null && LocalClusterImageSelection.Read() is not null)
-        {
-            throw new InvalidOperationException("The functional fixture requires its own selected local image preparation session.");
-        }
         var arguments = FunctionalGateFixtureStartup.Arguments(Root, nodes, ReplicaCount, coldReopen,
-            fileContenders.Enabled, selection);
+            fileContenders.Enabled);
         using var startupBound = new CancellationTokenSource(TimeSpan.FromMinutes(2), TimeProvider.System);
         using var startup = CancellationTokenSource.CreateLinkedTokenSource(token, startupBound.Token);
         builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(arguments.ToArray(), startup.Token)
             .ConfigureAwait(false);
         ClusterFixtureComposition.ConfigureLogging(builder);
-        var containers = FunctionalGateImageModel.ReadContainerNames(builder, NodeNames);
+        var resources = FunctionalGateProjectModel.ReadResourceNames(builder, NodeNames);
         App = await builder.BuildAsync(startup.Token).ConfigureAwait(false);
         var profile = ClusterFixtureProfile.ReadProfile(Root);
         AdminKey = profile.AdminKey;
@@ -93,21 +85,13 @@ internal sealed partial class FunctionalGateFixture : IAsyncDisposable
         diagnostics = new(App);
         diagnostics.Start(App.Services.GetRequiredService<ResourceLoggerService>());
         var repository = ClusterFixtureDiagnostics.FindRepositoryRoot().FullName;
-        ColdRuntime = new(App, containers, repository, selection);
-        var identity = selection is null ? null
-            : await LocalClusterImageIdentity.VerifyBeforeStartAsync(App, repository, selection, NodeNames, startup.Token)
-                .ConfigureAwait(false);
-        if (identity is null)
-        {
-            await FunctionalGateImageModel.VerifyPublishedImageAsync(App, NodeNames, startup.Token).ConfigureAwait(false);
-        }
+        ColdRuntime = new(App, resources, repository);
         await App.StartAsync(startup.Token).ConfigureAwait(false);
         await AspireStartupReadiness.WaitForHealthyAsync(App, NodeNames, startup.Token).ConfigureAwait(false);
-        if (identity is not null)
-        {
-            await LocalClusterImageIdentity.VerifyStartedContainersAsync(identity, containers, NodeNames, startup.Token)
-                .ConfigureAwait(false);
-        }
+        processEvidenceDirectory = new ClusterFailureReceipts().RequireRunOutput(TestContext.ResultsDirectory);
+        Directory.CreateDirectory(processEvidenceDirectory);
+        _ = await ClusterFixtureApplicationStartup.CaptureAsync(App, NodeNames, processEvidenceDirectory,
+            "native-process-startup.json", startup.Token).ConfigureAwait(false);
         started = true;
         PhysicalFiles = await FunctionalGatePhysicalFileAssertions.CaptureLiveAsync(this, startup.Token).ConfigureAwait(false);
     }

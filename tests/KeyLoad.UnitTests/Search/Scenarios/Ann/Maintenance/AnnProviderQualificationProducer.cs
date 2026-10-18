@@ -60,7 +60,7 @@ internal static class AnnProviderQualificationProducer
         var operation = Create(owner, OperationKind.Batch, id, new CommandRequest(id, owner.Source.Partition, mutations));
         var result = owner.Submit(operation, explicitTime: false, token);
         await AnnProviderQualificationHistoryAssertions.SaveAsync(owner, state, operation, result, expected);
-        await Assert.That(owner.ReadStoredOutcome(operation.Id).CanonicalSequence).IsEqualTo(next);
+        await Assert.That(owner.ReadStoredOutcome(operation.CommandId).CanonicalSequence).IsEqualTo(next);
     }
 
     private static Command<DatabaseCommand> Create<T>(AnnProviderQualificationOwner owner, OperationKind kind, Guid id, T request)

@@ -17,7 +17,7 @@ internal static class GraphSearchIntegrityAssertions
         GraphTraversalIntegrityState state, GraphTraversalIntegrityContinuation? continuation,
         GraphSearchIntegrityOperator selected, bool filtered, CancellationToken token)
     {
-        var image = GraphShortestPathFullStoreImage.Bytes(store);
+        var image = CanonicalStoreImage.Bytes(store);
         var cut = store.Position;
         var actual = await new SearchEngine(owner, UnitExecutionOptions.QueryExecution()).GraphSearchAsync(
             P.Root, GraphSearchIntegrityRecipe.Request(state, selected, filtered), token);
@@ -29,7 +29,7 @@ internal static class GraphSearchIntegrityAssertions
         GraphTraversalIntegrityState state, GraphSearchIntegrityOperator selected, bool filtered,
         GraphTraversalIntegrityFault fault, CancellationToken token)
     {
-        var image = GraphShortestPathFullStoreImage.Bytes(store);
+        var image = CanonicalStoreImage.Bytes(store);
         var cut = store.Position;
         GraphSearchResult? result = null;
         var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(async () =>
@@ -59,7 +59,7 @@ internal static class GraphSearchIntegrityAssertions
     internal static async Task ReplayAsync(DatabaseEngine owner, ZoneTreeStore store,
         CommandRequest command, CommitReceipt expected, byte[] original)
     {
-        var image = GraphShortestPathFullStoreImage.Bytes(store);
+        var image = CanonicalStoreImage.Bytes(store);
         var cut = store.Position;
         await ReceiptAsync(expected, GraphStorageReferenceFixture.Submit(owner, command).Get<CommitReceipt>());
         await Assert.That(Outcome(store, command).SequenceEqual(original)).IsTrue();

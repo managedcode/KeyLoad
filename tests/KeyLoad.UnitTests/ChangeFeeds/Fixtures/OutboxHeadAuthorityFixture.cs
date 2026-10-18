@@ -16,13 +16,13 @@ internal static class OutboxHeadAuthorityFixture
     internal const string BytesDetail = "The committed outbox byte accounting does not match the reclaimed entry.";
     internal const string QuotaDetail = "The committed outbox quota is exhausted; advance consumers and reclaim retained entries.";
 
-    internal static Command<DatabaseCommand> Operation<T>(OperationKind kind, Guid id, T request)
-        => new(id, kind, Root, default, global::System.Text.Json.JsonSerializer.Serialize(request, JsonDefaults.Options));
+    internal static Command<DatabaseCommand> Operation<T>(DatabaseEngine owner, OperationKind kind, Guid id, T request)
+        => owner.CreateCommand(kind, id, Root, owner.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
 
-    internal static Command<DatabaseCommand> Write(PartitionRef partition, string id)
+    internal static Command<DatabaseCommand> Write(DatabaseEngine owner, PartitionRef partition, string id)
     {
         var command = Guid.NewGuid();
-        return Operation(OperationKind.Batch, command,
+        return Operation(owner, OperationKind.Batch, command,
             new CommandRequest(command, partition, [new PutDocument(Collection, id, "{\"n\":3}", 0L)]));
     }
 
@@ -32,7 +32,7 @@ internal static class OutboxHeadAuthorityFixture
         await OutboxHeadAuthorityAssertions.ExactAsync(database.Database.GetOutboxStatus(Root, database.Partition).Head,
             new OutboxHead(0L, 1L, 0L, 0L));
         var id = Guid.NewGuid();
-        var seed = Operation(OperationKind.Batch, id, new CommandRequest(id, database.Partition,
+        var seed = Operation(database.Database, OperationKind.Batch, id, new CommandRequest(id, database.Partition,
             [new PutDocument(Collection, "a", "{\"n\":1}", 0L), new PutDocument(Collection, "b", "{\"n\":2}", 0L)]));
         var seedResult = database.Database.ApplyEmbedded(seed, token);
         var receipt = seedResult.Get<CommitReceipt>();
@@ -46,13 +46,13 @@ internal static class OutboxHeadAuthorityFixture
             ?? throw new InvalidOperationException(MissingRow);
         await OutboxHeadAuthorityAssertions.ExactAsync(database.Database.GetOutboxStatus(Root, database.Partition).Head,
             new OutboxHead(2L, 1L, 2L, first.LongLength + second.LongLength));
-        var quota = Write(database.Partition, "c");
+        var quota = Write(database.Database, database.Partition, "c");
         var failure = database.Database.ApplyEmbedded(quota, token);
         await OutboxHeadAuthorityAssertions.ExactAsync(failure,
             Result<object>.Fail(Errors.Problem(ErrorCode.ResourceExhausted, QuotaDetail)));
         await Assert.That(database.Database.GetDocument(Root, new(database.Partition, Collection, "c"), cancellationToken: token)).IsNull();
         var purgeId = Guid.NewGuid();
-        var purge = Operation(OperationKind.PurgeOutbox, purgeId, new PurgeOutboxRequest(purgeId, database.Partition, 2L));
+        var purge = Operation(database.Database, OperationKind.PurgeOutbox, purgeId, new PurgeOutboxRequest(purgeId, database.Partition, 2L));
         return new(database.Partition, seed, receipt, seedResult, quota, failure, purge, key, original, first.LongLength + second.LongLength, first.LongLength);
     }
 

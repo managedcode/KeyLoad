@@ -26,7 +26,7 @@ internal static class BlobSupersessionAssertions
             (long)BlobRangeIntegrityFixture.PayloadBytes + BlobSupersessionPublication.Payload.Length, 2, 0);
         foreach (var command in first.Commands.Concat(second.Commands))
         {
-            var replay = owner.ApplyEmbedded(BlobPublishedLifetimeOperations.Original(command), cancellationToken: token);
+            var replay = owner.ApplyEmbedded(BlobPublishedLifetimeOperations.Original(owner, command), cancellationToken: token);
             await BlobWholeFlowAssertions.Exact(replay, command.Original);
             await BlobWholeFlowAssertions.Unchanged(store, position, image);
         }

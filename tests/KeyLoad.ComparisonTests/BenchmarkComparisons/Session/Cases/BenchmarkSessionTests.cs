@@ -1,6 +1,6 @@
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>AC-BSESSION-002/003/004/006: the native test container shares one live Aspire topology.</summary>
+/// <summary>AC-BSESSION-002/003/004/006: the native client owns its workload against one selected live Aspire topology.</summary>
 internal sealed class BenchmarkSessionTests
 {
     [Test]

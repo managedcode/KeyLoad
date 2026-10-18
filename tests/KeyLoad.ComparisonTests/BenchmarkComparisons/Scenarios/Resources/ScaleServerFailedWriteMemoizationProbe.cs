@@ -1,6 +1,6 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.AppHost.Features.BenchmarkComparisons;
+using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.Comparisons;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,10 +15,9 @@ internal static class ScaleServerFailedWriteMemoizationProbe
     private const string ProbeDirectory = "failed-write-probe";
     private const string WorkerFile = "session-state.json";
     private const string EvidenceFile = "session-resource-evidence.json";
-    private const string SessionIdentityEnvironment = "KEYLOAD_BENCHMARK_SESSION_ID";
 
     internal static async Task VerifyAsync(DistributedApplication app,
-        ContainerResource[] containers, BenchmarkSessionSelection selection, string root, string evidenceDirectory, CancellationToken token)
+        ContainerResource[] containers, BenchmarkSessionSelection selection, string root, string evidenceDirectory, string sessionId, CancellationToken token)
     {
         var output = Path.Combine(root, ProbeDirectory);
         Directory.CreateDirectory(output);
@@ -29,7 +28,7 @@ internal static class ScaleServerFailedWriteMemoizationProbe
             applicationStopping: app.Services.GetRequiredService<IHostApplicationLifetime>().ApplicationStopping,
             executionOptions: app.Services.GetRequiredService<IOptions<ScaleServerResourceOptions>>(),
             provenanceOptions: app.Services.GetRequiredService<IOptions<BenchmarkProvenanceOptions>>(),
-            sessionId: ComparisonImageProtocol.RequiredEnvironment(SessionIdentityEnvironment),
+            sessionId: sessionId,
             provider: app.Services.GetRequiredService<TimeProvider>());
         var failures = new List<Exception>();
         Exception? expected = null;

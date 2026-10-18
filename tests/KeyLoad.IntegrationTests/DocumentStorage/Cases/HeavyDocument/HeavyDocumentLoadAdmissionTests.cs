@@ -1,4 +1,3 @@
-using KeyLoad.IntegrationTests.Features.CodeQuality;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
@@ -10,7 +9,6 @@ internal sealed class HeavyDocumentLoadAdmissionTests
     private const string BroadFilter = "/*/*/*/*";
     private const string OtherFilter = "/*/*/ClusterTests/*";
     private const string CoverageSwitch = "--coverage";
-    private const string CoverageSetting = HeavyDocumentLoadAdmission.CoverageSection + ":ServerMode";
 
     [Test]
     [Arguments(false)]
@@ -36,9 +34,6 @@ internal sealed class HeavyDocumentLoadAdmissionTests
     [Arguments("missing-parallelism")]
     [Arguments("duplicate-parallelism")]
     [Arguments("coverage-switch")]
-    [Arguments("coverage-preparation")]
-    [Arguments("coverage-mode")]
-    [Arguments("coverage-setting")]
     public void NativeSelectionRejectsBeforeOwnershipThenHealthyExclusiveCallContinues(string invalid)
     {
         using var configuration = new ConfigurationManager();
@@ -69,15 +64,6 @@ internal sealed class HeavyDocumentLoadAdmissionTests
                 break;
             case "coverage-switch":
                 arguments.Add(CoverageSwitch);
-                break;
-            case "coverage-preparation":
-                configuration[HeavyDocumentLoadAdmission.CoveragePreparationEnvironment] = "[]";
-                break;
-            case "coverage-mode":
-                configuration[NativeCoverageClusterFixtureProtocol.ModeEnvironment] = NativeCoverageClusterFixtureProtocol.Mode;
-                break;
-            case "coverage-setting":
-                configuration[CoverageSetting] = NativeCoverageClusterFixtureProtocol.Mode;
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(invalid));

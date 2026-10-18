@@ -1,5 +1,4 @@
-using System.Text.Json;
-using Aspire.Hosting.ApplicationModel;
+using KeyLoad.AppHost.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
@@ -16,20 +15,14 @@ internal static class FunctionalGatePhysicalFileAssertions
     internal static async Task<FunctionalGatePhysicalFileEvidence> CaptureLiveAsync(FunctionalGateFixture fixture,
         CancellationToken token)
     {
-        var model = fixture.App.Services.GetRequiredService<DistributedApplicationModel>();
         var owners = new List<FunctionalGatePhysicalFileOwner>();
         var nodeIds = new HashSet<Guid>();
         foreach (var name in fixture.NodeNames)
         {
             token.ThrowIfCancellationRequested();
-            var resource = model.Resources.OfType<ContainerResource>().Single(item => item.Name == name);
-            var container = resource.Annotations.OfType<ContainerNameAnnotation>().Single().Name;
-            var runtime = await ContainerRuntimeDocker.InspectAsync(container, token);
-            if (runtime.State != ContainerRuntimeProtocol.RunningState)
-            {
-                throw new InvalidOperationException(Failure);
-            }
-            var directory = await ReadMountAsync(container, Path.Combine(fixture.Root, name), token);
+            var runtime = ProjectProcessEvidence.Read(fixture.App.ResourceNotifications, name);
+            var directory = FunctionalGateFileOwnershipAssertions.Directory(fixture, name);
+            RequireDirectory(directory);
             var status = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, name, fixture.AdminKey,
                 async caller =>
                 {
@@ -38,6 +31,8 @@ internal static class FunctionalGatePhysicalFileAssertions
                         McpCallerTools.AdminStatus, token))).Value;
                     await Assert.That(mcp.NodeId).IsEqualTo(sdk.NodeId);
                     await Assert.That(mcp.Incarnation).IsEqualTo(sdk.Incarnation);
+                    await Assert.That(sdk.ProcessId).IsEqualTo(runtime.ProcessId);
+                    await Assert.That(mcp.ProcessId).IsEqualTo(runtime.ProcessId);
                     return sdk;
                 }, token);
             if (!Guid.TryParse(status.NodeId, out var nodeId) || nodeId == Guid.Empty
@@ -45,37 +40,9 @@ internal static class FunctionalGatePhysicalFileAssertions
             {
                 throw new InvalidOperationException(Failure);
             }
-            owners.Add(new(name, container, directory, nodeId, status.Incarnation, runtime));
+            owners.Add(new(name, directory, nodeId, status.Incarnation, runtime));
         }
         return new([.. owners]);
-    }
-
-    private static async Task<string> ReadMountAsync(string container, string expected, CancellationToken token)
-    {
-        var result = await ContainerRuntimeDocker.RunAsync([Inspect, Format, MountFormat, container], token);
-        ContainerRuntimeDocker.EnsureSuccessful(result, Inspect, container);
-        using var json = JsonDocument.Parse(result.StandardOutput);
-        var root = json.RootElement;
-        if (!root.GetProperty(Running).GetBoolean()
-            || root.GetProperty(DataDirectory).GetString() != FunctionalGatePhysicalFileProtocol.ContainerDirectory)
-        {
-            throw new InvalidOperationException(Failure);
-        }
-        var mounts = root.GetProperty(Mounts).EnumerateArray()
-            .Where(row => row.GetProperty(Destination).GetString() == FunctionalGatePhysicalFileProtocol.ContainerDirectory).ToArray();
-        if (mounts.Length != RequiredDataMounts || mounts[0].GetProperty(FunctionalGatePhysicalFileProtocol.Type).GetString() != Bind
-            || !mounts[0].GetProperty(Writable).GetBoolean())
-        {
-            throw new InvalidOperationException(Failure);
-        }
-        var source = mounts[0].GetProperty(Source).GetString();
-        if (source is null || source.Length > MaximumPathCharacters || !Path.IsPathFullyQualified(source)
-            || !string.Equals(Path.GetFullPath(source), Path.GetFullPath(expected), StringComparison.Ordinal))
-        {
-            throw new InvalidOperationException(Failure);
-        }
-        RequireDirectory(source);
-        return source;
     }
 
     internal static void RequireStopped(FunctionalGateFixture fixture, FunctionalGatePhysicalFileEvidence evidence)
@@ -91,11 +58,8 @@ internal static class FunctionalGatePhysicalFileAssertions
         {
             RequireDirectory(owner.Directory);
             var canonical = Path.Combine(owner.Directory, Canonical);
-            var replica = Path.Combine(owner.Directory, Replica);
             RequireIdentity(canonical, owner.NodeId, owner.Incarnation);
-            RequireIdentity(replica, null, owner.Incarnation);
             RequireTree(canonical, files);
-            RequireTree(replica, files);
         }
     }
 

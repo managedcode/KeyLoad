@@ -47,8 +47,7 @@ internal static class TypedQueueGraphReplayFixture
              new QueueToGraph(QueueGraphIdentityState.Graph, QueueGraphIdentityState.Queue,
                 QueueGraphIdentityState.Prefix, MaximumMessages, FromCollection, ToCollection)]),
             at.AddSeconds(ForwardOffsetSeconds));
-        var command = global::System.Text.Json.JsonSerializer.Deserialize<CommandRequest>(
-            failed.PayloadJson, JsonDefaults.Options)!;
+        var command = NativeSerialization.Deserialize<CommandRequest>(failed.Value!.Input.Span);
         var healthy = await QueueGraphIdentityFlow.CompileAsync(
             db.Database, command with
             {

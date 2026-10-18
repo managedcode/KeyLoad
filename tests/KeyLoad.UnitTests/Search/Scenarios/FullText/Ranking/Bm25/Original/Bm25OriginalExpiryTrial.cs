@@ -11,7 +11,7 @@ internal static class Bm25OriginalExpiryTrial
         var unadmitted = flow.Capture(null);
         var success = flow.Publish(admitted);
         await flow.RequireHealthyAsync(admitted, success);
-        var admittedEntry = NativeSerialization.Serialize(owner.Entry(admitted.Id));
+        var admittedEntry = NativeSerialization.Serialize(owner.Entry(admitted.CommandId));
         var firstPhase = NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((admitted).Value!.Input.Span);
         var secondPhase = NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((unadmitted).Value!.Input.Span);
         var clock = owner.Database.EvaluationClock;
@@ -27,20 +27,20 @@ internal static class Bm25OriginalExpiryTrial
         await beforeWait.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(owner));
         await Bm25OriginalExpiryAssertions.ReplayAsync(flow, admitted, success, admittedEntry, expiry);
         var expired = flow.Reissue(unadmitted);
-        await Assert.That(expired.EvaluatedAt >= expiry).IsTrue();
+        await Assert.That(new DateTimeOffset(expired.Timestamp) >= expiry).IsTrue();
         await Bm25OriginalExpiryAssertions.PhaseAsync(unadmitted, expired);
         var family = Bm25OriginalExpiryAssertions.Family(flow);
         var beforeFailure = Bm25OriginalPhaseRecoveryState.Read(owner);
         var failed = flow.Publish(expired);
         await Bm25OriginalExpiryAssertions.FailureAsync(flow, expired, failed, beforeFailure, family);
-        var failedEntry = NativeSerialization.Serialize(owner.Entry(expired.Id));
+        var failedEntry = NativeSerialization.Serialize(owner.Entry(expired.CommandId));
         await Bm25OriginalExpiryAssertions.ReplayAsync(flow, unadmitted, failed, failedEntry, expiry);
         var beforeCold = Bm25OriginalPhaseRecoveryState.Read(owner);
         owner.Reopen();
         await beforeCold.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(owner));
         await Bm25OriginalExpiryAssertions.ReplayAsync(flow, admitted, success, admittedEntry, expiry);
         await Bm25OriginalExpiryAssertions.ReplayAsync(flow, unadmitted, failed, failedEntry, expiry);
-        var healthy = flow.Capture(admitted.Id);
+        var healthy = flow.Capture(admitted.CommandId);
         await flow.RequireHealthyAsync(healthy, flow.Publish(healthy));
     }
 }

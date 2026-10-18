@@ -63,7 +63,7 @@ internal sealed class DocumentScalarIndexMutationTests
         var sameValueElsewhere = DocumentCrudFixture.SubmitAt(database,
             DocumentCrudFixture.Root, otherPartition,
             new PutDocument(Collection, DocumentId, "{\"label\":\"beta\"}", 0));
-        await Assert.That(sameValueElsewhere.Error).IsNull();
+        await Assert.That(Errors.Code(sameValueElsewhere.Problem)).IsNull();
         await DocumentCrudFixture.AssertIndexedIds(database, "label", IndexName, Beta,
             [DocumentId], otherPartition);
         await DocumentCrudFixture.AssertIndexedIds(database, "label", IndexName, Beta,

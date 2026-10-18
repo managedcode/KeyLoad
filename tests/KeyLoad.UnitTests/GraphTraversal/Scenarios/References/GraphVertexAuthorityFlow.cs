@@ -26,7 +26,7 @@ internal static class GraphVertexAuthorityFlow
             new DeleteEdge(GraphTraversalIntegrityFixture.Graph, state.DamagedEdge.Id, 1L));
         var upsertFailure = await GraphVertexAuthorityAssertions.RefusedMutation(database.Database, database.Store, upsert);
         var removeFailure = await GraphVertexAuthorityAssertions.RefusedMutation(database.Database, database.Store, remove);
-        var corruptImage = GraphShortestPathFullStoreImage.Bytes(database.Store);
+        var corruptImage = CanonicalStoreImage.Bytes(database.Store);
         var corruptPosition = database.Store.Position;
         database.Store.Dispose();
         GraphTraversalIntegrityContinuation continuation;
@@ -57,7 +57,7 @@ internal static class GraphVertexAuthorityFlow
             continuation = GraphTraversalIntegrityFixture.Continue(owner, state);
             await GraphVertexAuthorityAssertions.Healthy(owner, cold, state, continuation, token);
             await GraphTraversalIntegrityAssertions.Replay(owner, cold, continuation.Command, continuation.Receipt);
-            continuedImage = GraphShortestPathFullStoreImage.Bytes(cold);
+            continuedImage = CanonicalStoreImage.Bytes(cold);
             continuedPosition = cold.Position;
         }
         using var secondCold = new ZoneTreeStore(new(database.Directory), database.StorageExecution, UnitExecutionOptions.PointCacheExecution());

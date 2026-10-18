@@ -35,7 +35,7 @@ internal sealed class GraphSearchClusterSiloRestartTests(ClusterFixture fixture)
         {
             var selectedIndex = await SelectSiloIndexAsync(clients.Administrators, cancellationToken);
             stoppedNode = Nodes[selectedIndex];
-            await fixture.KillContainerAsync(stoppedNode, "graph-search-cluster-silo-restart", cancellationToken);
+            await fixture.KillServerAsync(stoppedNode, "graph-search-cluster-silo-restart", cancellationToken);
             var survivor = await GraphSearchClusterSurvivorReadiness.WaitAsync(scenario,
                 clients.Administrators, Nodes, selectedIndex, cancellationToken);
             var original = await McpCallerAssertions.SdkSuccessAsync(await clients.Readers[survivor]
@@ -43,7 +43,7 @@ internal sealed class GraphSearchClusterSiloRestartTests(ClusterFixture fixture)
             await GraphSearchClusterSiloRestartLiterals.HitsAsync(scenario, original, added: false);
             await ClusterReplicationTestSupport.MissingCopiesAsync(
                 await clients.Administrators[survivor].CommitAsync(addition, cancellationToken));
-            await fixture.RestartContainerAsync(stoppedNode, cancellationToken);
+            await fixture.RestartServerAsync(stoppedNode, cancellationToken);
             restarted = true;
             await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(stoppedNode,
                 WaitBehavior.WaitOnResourceUnavailable, cancellationToken);
@@ -136,7 +136,7 @@ internal sealed class GraphSearchClusterSiloRestartTests(ClusterFixture fixture)
         try
         {
             using var recovery = new CancellationTokenSource(TimeSpan.FromSeconds(45), TimeProvider.System);
-            await fixture.RestartContainerAsync(node, recovery.Token);
+            await fixture.RestartServerAsync(node, recovery.Token);
             await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(node,
                 WaitBehavior.WaitOnResourceUnavailable, recovery.Token);
             foreach (var admin in administrators)

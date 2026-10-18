@@ -6,6 +6,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Documents/document-contract.json" LogicalName="KeyLoad.Comparisons.DocumentContract" />
     <ProjectReference Include="../../src/KeyLoad.Client/KeyLoad.Client.csproj" />
+    <ProjectReference Include="../../src/KeyLoad.Diagnostics/KeyLoad.Diagnostics.csproj" />
     <PackageReference Include="ManagedCode.TimeSeries" />
     <PackageReference Include="Npgsql" />
     <PackageReference Include="RabbitMQ.Client" />

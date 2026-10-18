@@ -1,5 +1,5 @@
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.AppHost.Features.BenchmarkComparisons;
+using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
@@ -13,11 +13,11 @@ internal sealed class IsolatedSurrealDbResourceTests
         await using var fixture = new IsolatedResourceTopologyFixture("SurrealDB", 1);
         IsolatedSurrealDbResources.Add(fixture.Context);
         var resources = fixture.Build();
-        await Assert.That(resources.Length).IsEqualTo(2);
+        await Assert.That(resources.Length).IsEqualTo(1);
         var node = resources.Single(item => item.Name == "isolated-surrealdb");
-        var runner = resources.Single(item => item.Name == IsolatedResourceTopologyFixture.RunnerName);
+        var runner = fixture.Context.Client;
         await IsolatedResourceTopologyFixture.VerifyWaitsAsync(runner, [node]);
-        await VerifyNodeAsync(node, fixture.Context.Root);
+        await VerifyNodeAsync(node);
         var runnerEnvironment = await IsolatedResourceTopologyFixture.EnvironmentAsync(runner);
         await Assert.That(runnerEnvironment[IsolatedResourceTopologyFixture.NativePrefix + "Endpoints__0"])
             .IsEqualTo("{isolated-surrealdb.bindings.http.url}");
@@ -33,12 +33,12 @@ internal sealed class IsolatedSurrealDbResourceTests
     {
         await using var fixture = new IsolatedResourceTopologyFixture("SurrealDB", count);
         await Assert.That(() => IsolatedSurrealDbResources.Add(fixture.Context)).Throws<InvalidOperationException>();
-        await Assert.That(fixture.Build().Length).IsEqualTo(1);
+        await Assert.That(fixture.Build().Length).IsEqualTo(0);
         await Assert.That(fixture.Context.Builder.Resources.OfType<ParameterResource>().Any()).IsFalse();
         await Assert.That(Directory.Exists(Path.Combine(fixture.Context.Root, "native"))).IsFalse();
     }
 
-    internal static async Task VerifyNodeAsync(ContainerResource node, string root)
+    internal static async Task VerifyNodeAsync(ContainerResource node)
     {
         var image = node.Annotations.OfType<ContainerImageAnnotation>().Single();
         await Assert.That(image.Registry).IsNull();
@@ -46,7 +46,8 @@ internal sealed class IsolatedSurrealDbResourceTests
         await Assert.That(image.Tag).IsNull();
         await Assert.That(image.SHA256).IsEqualTo(BenchmarkResources.SurrealDbDigest[7..]);
         var mount = node.Annotations.OfType<ContainerMountAnnotation>().Single(item => item.Target == "/data");
-        await Assert.That(mount.Source).IsEqualTo(Path.Combine(root, "native", "isolated-surrealdb"));
+        await Assert.That(mount.Source).IsNull();
+        await Assert.That(mount.Type).IsEqualTo(ContainerMountType.Volume);
         await Assert.That(mount.IsReadOnly).IsFalse();
         await Assert.That(node.Annotations.OfType<EndpointAnnotation>().Single(item => item.Name == "http").TargetPort).IsEqualTo(8000);
         var environment = await IsolatedResourceTopologyFixture.EnvironmentAsync(node);

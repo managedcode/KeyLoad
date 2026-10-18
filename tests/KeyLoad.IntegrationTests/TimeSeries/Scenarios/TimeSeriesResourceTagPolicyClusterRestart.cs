@@ -12,15 +12,15 @@ internal static class TimeSeriesResourceTagPolicyClusterRestart
         var failures = new List<Exception>();
         foreach (var node in nodes)
         {
-            await ServerFailureObserver.ObserveAsync(() => fixture.KillContainerAsync(node, Scenario, token), failures);
+            await ServerFailureObserver.ObserveAsync(() => fixture.KillServerAsync(node, Scenario, token), failures);
         }
         foreach (var node in nodes)
         {
-            await ServerFailureObserver.ObserveAsync(async () => await fixture.BeginContainerRestartAsync(node, token), failures);
+            await ServerFailureObserver.ObserveAsync(async () => await fixture.BeginProcessRestartAsync(node, token), failures);
         }
         foreach (var node in nodes)
         {
-            await ServerFailureObserver.ObserveAsync(() => fixture.RestartContainerAsync(node, token), failures);
+            await ServerFailureObserver.ObserveAsync(() => fixture.RestartServerAsync(node, token), failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }

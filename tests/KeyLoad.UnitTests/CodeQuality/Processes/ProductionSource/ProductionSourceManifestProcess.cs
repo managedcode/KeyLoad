@@ -81,7 +81,7 @@ internal static class ProductionSourceManifestProcess
             disposed = true;
         }, failures);
         await ServerFailureObserver.ObserveAsync(deadline.CancelAsync, failures).ConfigureAwait(false);
-        global::KeyLoad.UnitTests.Features.CodeQuality.NativeCoverageImageNodeSettlement.ThrowFailures(failures);
+        global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
         return result is null
             ? throw new InvalidOperationException(Failure)
             : result with

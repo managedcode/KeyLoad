@@ -15,7 +15,6 @@ internal static class NativeTextIncrementalSessionOperations
         CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        using var stage = session.Budget.EnterStageCancellation(token);
         session.Require(request.SessionId, request.Maintenance, principal.Id);
         var fresh = NativeTextSeedCollector.Capture(database, principal.Id,
             new(session.Request.Consumer, session.Request.IndexGeneration, session.Request.Collection,

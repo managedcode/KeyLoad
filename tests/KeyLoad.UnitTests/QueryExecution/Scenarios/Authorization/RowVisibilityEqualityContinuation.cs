@@ -54,7 +54,7 @@ internal static class RowVisibilityEqualityContinuation
     private static async Task ReadAsync(TestDatabase db, QueryEngine engine, ZoneTreeStore store,
         string owner, bool indexed, bool parameterized, QueryRow[] rows)
     {
-        var image = GraphShortestPathFullStoreImage.Bytes(store);
+        var image = CanonicalStoreImage.Bytes(store);
         var cut = store.Position;
         var path = indexed ? EqualityAccessPathSupport.IndexPath : EqualityAccessPathSupport.PointPath;
         foreach (var reversed in new[] { false, true })
@@ -80,20 +80,20 @@ internal static class RowVisibilityEqualityContinuation
             await Assert.That(JsonDefaults.Serialize(explain.Rows).AsSpan().SequenceEqual(JsonDefaults.Serialize(explanation))).IsTrue();
             await PageAsync(explain, cut, path);
         }
-        await Assert.That(GraphShortestPathFullStoreImage.Bytes(store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
+        await Assert.That(CanonicalStoreImage.Bytes(store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
         await Assert.That(store.Position).IsEqualTo(cut);
     }
 
     internal static async Task ReplayAsync(DatabaseEngine engine, ZoneTreeStore store,
         CommandRequest command, CommitReceipt receipt, byte[] outcome)
     {
-        var image = GraphShortestPathFullStoreImage.Bytes(store);
+        var image = CanonicalStoreImage.Bytes(store);
         var cut = store.Position;
         var operation = engine.CreateCommand(OperationKind.Batch, command.CommandId, EqualityAccessPathSupport.Root, default, JsonSerializer.Serialize(command, JsonDefaults.Options));
         var replay = engine.ApplyEmbedded(operation, cancellationToken: default).Get<CommitReceipt>();
         await Assert.That(JsonDefaults.Serialize(replay).AsSpan().SequenceEqual(JsonDefaults.Serialize(receipt))).IsTrue();
         await Assert.That(Outcome(store, command).AsSpan().SequenceEqual(outcome)).IsTrue();
-        await Assert.That(GraphShortestPathFullStoreImage.Bytes(store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
+        await Assert.That(CanonicalStoreImage.Bytes(store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
         await Assert.That(store.Position).IsEqualTo(cut);
     }
 

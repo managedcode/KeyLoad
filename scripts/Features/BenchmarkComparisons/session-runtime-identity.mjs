@@ -53,9 +53,10 @@ export function validateSessionRuntimeImport(value, cohort, expected = null) {
     && typeof value.workspace === 'string' && path.isAbsolute(value.workspace)
     && ['x64', 'arm64'].includes(value.architecture) && /^\d+\.\d+\.\d+$/.test(value.sdkVersion ?? '')
     && Number.isSafeInteger(value.fileCount) && value.fileCount > 0 && value.fileCount <= runtimeBundle.maximumFiles && Array.isArray(value.assemblies)
-    && value.assemblies.length === 2 && new Set(value.assemblies.map(item => item.role)).size === 2
+    && value.assemblies.length === runtimeBundle.assemblies.length
+    && new Set(value.assemblies.map(item => item.role)).size === runtimeBundle.assemblies.length
     && value.assemblies.every(item => exact(item, ['role', 'path', 'sha256', 'pdbPath', 'pdbSha256'])
-      && ['outer-tests', 'apphost'].includes(item.role) && typeof item.path === 'string'
+      && runtimeBundle.assemblies.some(([role]) => role === item.role) && typeof item.path === 'string'
       && item.path === runtimeBundle.assemblies.find(([role]) => role === item.role)?.[1] + '.dll'
       && item.pdbPath === runtimeBundle.assemblies.find(([role]) => role === item.role)?.[1] + '.pdb'
       && sessionHash(item.sha256) && sessionHash(item.pdbSha256)));

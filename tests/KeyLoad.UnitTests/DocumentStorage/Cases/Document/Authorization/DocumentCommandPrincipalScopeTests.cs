@@ -31,8 +31,12 @@ internal sealed class DocumentCommandPrincipalScopeTests
         var secondReceipt = database.Submit(OperationKind.Batch, secondCommand, SecondPrincipal, commandId).Get<CommitReceipt>();
         await AssertReceipt(firstReceipt, commandId, FirstDocument);
         await AssertReceipt(secondReceipt, commandId, SecondDocument);
-        await AssertReceipt(OutcomeStoreOracle.ReadPartition(database.Store, database.Partition, FirstPrincipal, commandId)!.Get<CommitReceipt>(), commandId, FirstDocument);
-        await AssertReceipt(OutcomeStoreOracle.ReadPartition(database.Store, database.Partition, SecondPrincipal, commandId)!.Get<CommitReceipt>(), commandId, SecondDocument);
+        var firstStored = OutcomeStoreOracle.ReadPartition(database.Store, database.Partition, FirstPrincipal, commandId)
+            ?? throw new InvalidOperationException("The first principal's scoped outcome is missing.");
+        var secondStored = OutcomeStoreOracle.ReadPartition(database.Store, database.Partition, SecondPrincipal, commandId)
+            ?? throw new InvalidOperationException("The second principal's scoped outcome is missing.");
+        await AssertReceipt(firstStored.Get<CommitReceipt>(), commandId, FirstDocument);
+        await AssertReceipt(secondStored.Get<CommitReceipt>(), commandId, SecondDocument);
         var firstOutcomeBytes = DocumentCommandOutcomeTestSupport.OutcomeBytes(database, FirstPrincipal, commandId);
         var secondOutcomeBytes = DocumentCommandOutcomeTestSupport.OutcomeBytes(database, SecondPrincipal, commandId);
         var committedOutbox = DocumentCommandOutcomeTestSupport.CaptureOutbox(database);

@@ -11,26 +11,12 @@ namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 
 internal static class ClusterFixtureComposition
 {
-    private const string InvalidContainerModel = "The Aspire model must expose exactly the three named Orleans container resources.";
+    private const string InvalidProjectModel = "The Aspire model must expose exactly the three named Orleans project resources.";
 
-    internal static (string Root, string[] Arguments) PrepareArguments(
-        string root, KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageClusterFixtureOwner? coverage,
-        LocalClusterImageSelection.Selection? localImage)
-    {
-        var arguments = coverage?.CreateArguments() ??
-            [$"{ClusterFixtureProtocol.DataRootArgument}{root}", ClusterFixtureProtocol.EphemeralArgument,
-                ClusterFixtureProtocol.SiloCountArgument, ClusterFixtureProtocol.ReplicaCountArgument];
-        arguments = [.. arguments, KeyLoad.AppHost.Features.ClusterReplication.ContainerFaultCommandProtocol.EnabledArgument];
-        if (coverage is not null)
-        {
-            root = coverage.Root;
-        }
-        if (localImage is not null)
-        {
-            arguments = [.. arguments, .. localImage.CreateWaveArguments()];
-        }
-        return (root, arguments);
-    }
+    internal static string[] PrepareArguments(string root)
+        => [$"{ClusterFixtureProtocol.DataRootArgument}{root}", ClusterFixtureProtocol.EphemeralArgument,
+            ClusterFixtureProtocol.SiloCountArgument, ClusterFixtureProtocol.ReplicaCountArgument,
+            KeyLoad.AppHost.Features.ClusterReplication.ProcessFaultCommandProtocol.EnabledArgument];
 
     internal static async Task<IDistributedApplicationTestingBuilder> CreateBuilderAsync(
         string[] arguments, KeyLoad.IntegrationTests.Features.Authorization.FoundationOtlpClusterSelection? telemetry,
@@ -68,7 +54,7 @@ internal static class ClusterFixtureComposition
 
         foreach (var number in Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount))
         {
-            var node = builder.CreateResourceBuilder(builder.Resources.OfType<ContainerResource>()
+            var node = builder.CreateResourceBuilder(builder.Resources.OfType<ProjectResource>()
                 .Single(resource => resource.Name == ClusterFixtureProtocol.NodeName(number)));
             node.WithEnvironment(ClusterFixtureProtocol.CommandBytesSetting,
                 bytes.ToString(System.Globalization.CultureInfo.InvariantCulture));
@@ -86,7 +72,7 @@ internal static class ClusterFixtureComposition
         limits.Validate();
         foreach (var number in Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount))
         {
-            var node = builder.CreateResourceBuilder(builder.Resources.OfType<ContainerResource>()
+            var node = builder.CreateResourceBuilder(builder.Resources.OfType<ProjectResource>()
                 .Single(resource => resource.Name == ClusterFixtureProtocol.NodeName(number)));
             node.WithEnvironment(ClusterFixtureProtocol.HttpBodyBytesSetting,
                 limits.MaxBodyBytes.ToString(System.Globalization.CultureInfo.InvariantCulture));
@@ -128,20 +114,18 @@ internal static class ClusterFixtureComposition
         }
     }
 
-    internal static Dictionary<string, string> GetContainerNames(IDistributedApplicationTestingBuilder builder)
+    internal static string[] GetResourceNames(IDistributedApplicationTestingBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
-        var names = builder.Resources.OfType<ContainerResource>()
+        var names = builder.Resources.OfType<ProjectResource>()
             .Where(resource => ClusterFixtureProtocol.IsNodeName(resource.Name))
-            .ToDictionary(resource => resource.Name,
-                resource => resource.Annotations.OfType<ContainerNameAnnotation>().Single().Name, StringComparer.Ordinal);
-        if (names.Count != ClusterFixtureProtocol.NodeCount
+            .Select(resource => resource.Name).ToArray();
+        if (names.Length != ClusterFixtureProtocol.NodeCount
             || Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount)
-                .Any(number => !names.ContainsKey(ClusterFixtureProtocol.NodeName(number))))
+                .Any(number => !names.Contains(ClusterFixtureProtocol.NodeName(number), StringComparer.Ordinal)))
         {
-            throw new InvalidOperationException(InvalidContainerModel);
+            throw new InvalidOperationException(InvalidProjectModel);
         }
-
         return names;
     }
 

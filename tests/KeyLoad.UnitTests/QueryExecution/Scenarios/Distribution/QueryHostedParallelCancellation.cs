@@ -54,8 +54,8 @@ internal static class QueryHostedParallelCancellation
         await secondCaller.CancelAsync().ConfigureAwait(false);
         observer.ReleaseAll();
         using var cleanup = new CancellationTokenSource(cluster.Nodes[0].Timing.ShutdownTimeout, TimeProvider.System);
-        await QueryHostedSearchSettlement.JoinAsync(firstCall, firstCaller, first, cleanup.Token, failures).ConfigureAwait(false);
-        await QueryHostedSearchSettlement.JoinAsync(secondCall, secondCaller, second, cleanup.Token, failures).ConfigureAwait(false);
+        await QueryHostedSearchSettlement.JoinAsync(firstCall, firstCaller, first, failures, cleanup.Token).ConfigureAwait(false);
+        await QueryHostedSearchSettlement.JoinAsync(secondCall, secondCaller, second, failures, cleanup.Token).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

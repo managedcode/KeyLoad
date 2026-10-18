@@ -53,7 +53,7 @@ internal sealed class ProductionSourceManifestSettlementTests
 
         await Assert.That(failures.Count).IsEqualTo(1);
         var projected = Assert.ThrowsExactly<TimeoutException>(
-            () => NativeCoverageImageNodeSettlement.ThrowFailures(failures));
+            () => global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures));
         await Assert.That(projected).IsSameReferenceAs(timeout);
     }
 
@@ -65,7 +65,7 @@ internal sealed class ProductionSourceManifestSettlementTests
         var original = new AggregateException(fatal, sibling);
 
         var projected = Assert.ThrowsExactly<AggregateException>(
-            () => NativeCoverageImageNodeSettlement.ThrowFailures([original]))!;
+            () => global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny([original]))!;
 
         await Assert.That(projected).IsSameReferenceAs(original);
         await Assert.That(projected.InnerExceptions.Count).IsEqualTo(2);
@@ -83,7 +83,7 @@ internal sealed class ProductionSourceManifestSettlementTests
         var cleanup = new InvalidOperationException(CleanupFailure);
 
         var projected = Assert.ThrowsExactly<AggregateException>(
-            () => NativeCoverageImageNodeSettlement.ThrowFailures([original, cleanup]))!;
+            () => global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny([original, cleanup]))!;
 
         await Assert.That(projected.InnerExceptions.Count).IsEqualTo(2);
         await Assert.That(projected.InnerExceptions[0]).IsSameReferenceAs(original);

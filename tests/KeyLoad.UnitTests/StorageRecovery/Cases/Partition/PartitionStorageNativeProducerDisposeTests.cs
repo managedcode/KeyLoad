@@ -4,6 +4,6 @@ internal sealed class PartitionStorageNativeProducerDisposeTests
 {
     [Test]
     [NotInParallel]
-    public Task ActualActiveNativeApplicationDisposeJoinsThreeOriginalStorageProducersBeforeSameRootsHealthyTwoCold()
+    public Task ActualActiveNativeApplicationDisposeJoinsNativeWorkBeforeSameRootHealthyTwoCold()
         => PartitionStorageNativeProducerDisposeFlow.RunAsync(TestContext.Current!.Execution.CancellationToken);
 }

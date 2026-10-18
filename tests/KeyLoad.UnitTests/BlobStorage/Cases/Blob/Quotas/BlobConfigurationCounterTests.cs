@@ -42,8 +42,8 @@ internal sealed class BlobConfigurationCounterTests
         var secondBlob = new BlobRef(database.Partition, ResourceName, SecondBlobId);
         var objectLimit = Begin(database, secondBlob, 1, Guid.NewGuid());
         var uploadLimit = Begin(database, firstBlob, 1, Guid.NewGuid());
-        await Assert.That(objectLimit.Error).IsEqualTo(ErrorCode.ResourceExhausted);
-        await Assert.That(uploadLimit.Error).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(objectLimit.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(uploadLimit.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
 
         Abort(database, firstBlob, firstUpload);
         var replacementUpload = Guid.NewGuid();
@@ -52,7 +52,7 @@ internal sealed class BlobConfigurationCounterTests
         Abort(database, firstBlob, replacementUpload);
 
         var exhaustedVersion = Begin(database, firstBlob, 1, Guid.NewGuid());
-        await Assert.That(exhaustedVersion.Error).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(exhaustedVersion.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
     }
 
     private static void Configure(TestDatabase database, ResourceDefinition definition)

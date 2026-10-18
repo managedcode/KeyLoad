@@ -25,21 +25,22 @@ internal static class SampleChunkPendingWindowEnrollmentBound
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            rejected = fixture.Owner.Database.ApplyEmbedded(operation, cancellationToken: default);
-            originals.Add((operation, rejected));
+            var actual = fixture.Owner.Database.ApplyEmbedded(operation, cancellationToken: default);
+            rejected = actual;
+            originals.Add((operation, actual));
             var expected = Result<object>.Fail(Errors.Problem(ErrorCode.ResourceExhausted, Exhausted));
-            await Assert.That(SampleRollupWholeFlow.Outcome(rejected)).IsEqualTo(SampleRollupWholeFlow.Outcome(expected));
-            await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+            await Assert.That(SampleRollupWholeFlow.Outcome(actual)).IsEqualTo(SampleRollupWholeFlow.Outcome(expected));
+            await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
 
         }, failures);
         await ServerFailureObserver.ObserveAsync(async () =>
             await Assert.That(fixture.Raw()).IsEqualTo(raw), failures);
         await ServerFailureObserver.ObserveAsync(() =>
             trial.RequireAsync(firstMerged: false, secondCorrected: false), failures);
-        if (rejected is not null)
+        if (rejected is { } retained)
         {
             await ServerFailureObserver.ObserveAsync(() => SampleChunkCorrectionBoundColdAssertions.ReplayAsync(
-                fixture.Owner.Database, fixture.Owner.Store, operation, rejected), failures);
+                fixture.Owner.Database, fixture.Owner.Store, operation, retained), failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }

@@ -19,7 +19,7 @@ internal sealed class DatabaseCompositionDeterminismTests
     private const string MessageBodySpace = "message-body";
     private const string MessageMetadataSpace = "message-meta";
     private const int OneSecondDeadline = 1;
-    private const long ReplicationIndex = 42;
+    private const long NextSequence = 1;
     private const int EvaluationDelayMinutes = 5;
 
     [Test]
@@ -46,8 +46,11 @@ internal sealed class DatabaseCompositionDeterminismTests
             var probe = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits), jumping);
             var elapsedFailure = Assert.ThrowsExactly<KeyLoadException>(probe.Check);
             await Assert.That(elapsedFailure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-            var leftReceipt = leftEngine.Apply(operation, ReplicationIndex).Get<CommitReceipt>();
-            var rightReceipt = rightEngine.Apply(operation, ReplicationIndex).Get<CommitReceipt>();
+            var sequence = checked(leftEngine.LastApplied + NextSequence);
+            await Assert.That(rightEngine.LastApplied).IsEqualTo(sequence - NextSequence);
+            var callerToken = TestContext.Current!.Execution.CancellationToken;
+            var leftReceipt = leftEngine.ApplyStorageOperation(operation, sequence, callerToken).Result.Get<CommitReceipt>();
+            var rightReceipt = rightEngine.ApplyStorageOperation(operation, sequence, callerToken).Result.Get<CommitReceipt>();
 
             await Assert.That(leftReceipt.Mutations.Length).IsEqualTo(2);
             foreach (var effect in leftReceipt.Mutations)
@@ -61,8 +64,8 @@ internal sealed class DatabaseCompositionDeterminismTests
                 MessagePrefix + EdgePrefix + SourceId)).IsTrue();
             await Assert.That(SameStored<MessageBody>(left, right, MessageBodySpace, Queue,
                 MessagePrefix + EdgePrefix + SourceId)).IsTrue();
-            await Assert.That(leftEngine.LastApplied).IsEqualTo(ReplicationIndex);
-            await Assert.That(rightEngine.LastApplied).IsEqualTo(ReplicationIndex);
+            await Assert.That(leftEngine.LastApplied).IsEqualTo(sequence);
+            await Assert.That(rightEngine.LastApplied).IsEqualTo(sequence);
         });
     }
 

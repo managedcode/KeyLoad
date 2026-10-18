@@ -14,7 +14,7 @@ internal static class ProjectionPartitionIsolationSettlement
         await ProjectionConsumerIdentityAssertions.ExactAsync(result, new ProjectionBatchResult(result.Receipt, false, 2L));
         outcomes.Add(new(source.Complete, completed));
         await FilterAsync(owner, source.Consumer, source.Definition, 2L, 3L, outcomes, token);
-        var purge = ProjectionPartitionIsolationFixture.Purge(source.Partition, 3L);
+        var purge = ProjectionPartitionIsolationFixture.Purge(owner, source.Partition, 3L);
         var purged = owner.ApplyEmbedded(purge, token);
         await ProjectionConsumerIdentityAssertions.ExactAsync(purged.Get<OutboxHead>(), new OutboxHead(3L, 4L, 0L, 0L));
         outcomes.Add(new(purge, purged));
@@ -28,7 +28,7 @@ internal static class ProjectionPartitionIsolationSettlement
         await ProjectionConsumerIdentityAssertions.ExactAsync(batch,
             new ProjectionBatch(new(consumer, definition, checkpoint, false), [], through, batch.Token, false));
         var id = Guid.NewGuid();
-        var operation = ProjectionConsumerIdentityFixture.Operation(OperationKind.CommitProjectionBatch, id,
+        var operation = ProjectionConsumerIdentityFixture.Operation(owner, OperationKind.CommitProjectionBatch, id,
             new CommitProjectionBatchRequest(id, consumer, batch.Token, []));
         var advanced = owner.ApplyEmbedded(operation, token);
         var result = advanced.Get<ProjectionBatchResult>();

@@ -24,7 +24,7 @@ internal static class NativeConnectionIdentityCollisionAssertions
         var actual = Capture(state);
         await Assert.That(actual.RowHashes.SequenceEqual(before.RowHashes)).IsTrue();
         await Assert.That(actual.Position).IsEqualTo(before.Position);
-        await Assert.That(actual.Journal).IsEqualTo(before.Journal);
+        await Assert.That(actual.Cut).IsEqualTo(before.Cut);
         await Assert.That(ReferenceEquals(original, state.Scenario.Observation.Read(state.OriginalRequest))).IsTrue();
         await ProbeAsync(state, state.OriginalRequest, state.First, state.Original);
         await Assert.That(original.Disposed.Task.IsCompleted).IsFalse();

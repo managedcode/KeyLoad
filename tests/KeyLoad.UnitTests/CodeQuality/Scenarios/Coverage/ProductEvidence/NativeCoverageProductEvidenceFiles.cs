@@ -1,7 +1,6 @@
 using System.Security.Cryptography;
 using System.Text.Json.Nodes;
 using System.Xml;
-using KeyLoad.AppHost.Features.CodeQuality;
 
 namespace KeyLoad.UnitTests.Features.CodeQuality;
 

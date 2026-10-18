@@ -39,8 +39,8 @@ internal sealed class SampleChunkRetentionWholeFlowTests
         var sameId = fixture.Commit(Guid.NewGuid(), new OpenSampleChunkWindow(SampleChunkCanonicalFixture.Set,
             SampleChunkCanonicalFixture.Series, fixture.WindowId, SampleChunkCanonicalFixture.Until,
             SampleChunkCanonicalFixture.Until.AddHours(WindowHours)));
-        await Assert.That(sameId.Error).IsEqualTo(ErrorCode.Conflict);
-        await Assert.That(sameId.Json).IsNull();
+        await Assert.That(Errors.Code(sameId.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(sameId.Value).IsNull();
         var freshId = Guid.NewGuid();
         fixture.Commit(new OpenSampleChunkWindow(SampleChunkCanonicalFixture.Set,
             SampleChunkCanonicalFixture.Series, freshId, SampleChunkCanonicalFixture.Until,

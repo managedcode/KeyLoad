@@ -11,17 +11,15 @@ internal static class FunctionalColdReopenProfileProtocol
     internal const string Nodes = "KeyLoadTests:FunctionalNodeCount";
     internal const string Ephemeral = "KeyLoad:Ephemeral";
     internal const string DataRoot = "KeyLoad:DataRoot";
+    private const string SiloCount = "KeyLoad:SiloCount";
+    private const string ReplicaCount = "KeyLoad:ReplicaCount";
     internal const string True = "true";
     internal const string False = "false";
     internal const string Nested = ":Nested";
-    internal const string Suite = "KeyLoadTests:Suite";
     internal const string LoggerControl = "KeyLoadTests:LoggerModelControl";
     internal const string Benchmark = "Benchmarks:Enabled";
     private const string GuidFormat = "N";
     private const string Prefix = "keyload-functional-cold-profile-";
-    private const string Image = "ghcr.io/managedcode/keyload:current@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-    private const string ContainerUser = "KeyLoad:ContainerUser";
-    private const string User = "1000:1000";
     internal static string NewRoot() => Path.Combine(Path.GetTempPath(), Prefix + Guid.NewGuid().ToString(GuidFormat));
 
     internal static IDistributedApplicationBuilder Create(string root, int nodes, bool cold, bool faults,
@@ -32,11 +30,11 @@ internal static class FunctionalColdReopenProfileProtocol
         {
             [Ephemeral] = True,
             [DataRoot] = root,
-            [ContainerUser] = User,
-            [ContainerImageOptions.ServerKey] = Image,
+            [SiloCount] = (nodes == 0 ? 3 : nodes).ToString(CultureInfo.InvariantCulture),
+            [ReplicaCount] = (nodes == 0 ? 3 : nodes).ToString(CultureInfo.InvariantCulture),
             [Nodes] = nodes == 0 ? null : nodes.ToString(CultureInfo.InvariantCulture),
             [FunctionalColdReopenProfile.Setting] = cold ? True : null,
-            [ContainerFaultCommandProtocol.EnabledSetting] = faults ? True : null
+            [ProcessFaultCommandProtocol.EnabledSetting] = faults ? True : null
         };
         foreach (var item in overrides)
         {

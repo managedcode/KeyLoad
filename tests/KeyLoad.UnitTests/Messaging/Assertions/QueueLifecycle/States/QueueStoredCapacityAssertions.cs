@@ -40,7 +40,7 @@ internal static class QueueStoredCapacityAssertions
             }
             await ImageAsync(store, position, image);
             await Assert.That(store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(partition,
-                QueueEnqueueColdProtocol.Root, operation.Id)))).IsNull();
+                QueueEnqueueColdProtocol.Root, operation.CommandId)))).IsNull();
             await Assert.That(owner.GetDocument(QueueEnqueueColdProtocol.Root,
                 new(partition, QueueEnqueueColdProtocol.Collection, QueueEnqueueColdProtocol.RefusedDocument))).IsNull();
         }

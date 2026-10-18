@@ -1,12 +1,10 @@
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>Builds real child-process settings for the container execution identity boundary.</summary>
+/// <summary>Builds real child-process settings for the original workflow execution identity boundary.</summary>
 internal static class ComparisonExecutionIdentitySupport
 {
     internal const string InvalidCode = "ComparisonExecutionIdentityInvalid";
     internal const string MissingKeyPrefix = "Missing benchmark setting: ";
-    internal const string LoadGeneratorImage = "Benchmarks__LoadGeneratorImage";
-    internal const string KeyLoadImage = "Benchmarks__Images__KeyLoad";
     internal const string SourceRevision = "Benchmarks__SourceRevision";
     internal const string EvidenceProfile = "Benchmarks__EvidenceProfile";
     internal const string Topology = "Benchmarks__Topology";
@@ -19,15 +17,12 @@ internal static class ComparisonExecutionIdentitySupport
     internal const string Revision = "0123456789abcdef0123456789abcdef01234567";
     internal const string OtherRevision = "fedcba9876543210fedcba9876543210fedcba98";
     internal const string ImageDigest = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
-    internal const string KeyLoadImageValue = "127.0.0.1:5000/keyload/server:0123456789ab-37070000000-1@sha256:" + ImageDigest;
-    internal const string LoadGeneratorImageValue = "127.0.0.1:5000/keyload/comparisons:0123456789ab-37070000000-1@sha256:" + ImageDigest;
     internal const string PrivateCanary = "private-provenance-canary-6af143";
 
     internal static Dictionary<string, string> ValidSettings(string profile = "session-v1")
     {
         var settings = ComparisonHostBindingsSupport.ValidSettings();
-        settings[LoadGeneratorImage] = LoadGeneratorImageValue;
-        settings[KeyLoadImage] = KeyLoadImageValue;
+        settings["GITHUB_ACTIONS"] = "true";
         settings[SourceRevision] = Revision;
         settings[EvidenceProfile] = profile;
         settings[RunId] = "37070000000";

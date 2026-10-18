@@ -27,7 +27,7 @@ internal sealed class BlobStorageCompareAndSwapTests
         var rejected = BlobStorageTestSupport.CompleteResult(db, blob, competingUpload,
             Chain(db, blob, competingUpload, CompetingContent));
 
-        await Assert.That(rejected.Error).IsEqualTo(ErrorCode.RevisionConflict);
+        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.RevisionConflict);
         await Assert.That(operations.Metadata(PrincipalId, new(blob))!.Revision).IsEqualTo(FirstRevision);
         await Assert.That(operations.Read(PrincipalId, new(blob, winner.Revision, 0, FirstContent.Length))
             .Bytes.Span.SequenceEqual(System.Text.Encoding.UTF8.GetBytes(FirstContent))).IsTrue();

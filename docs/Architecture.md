@@ -90,8 +90,10 @@ own; scaling means adding silos to the Orleans cluster.
   Orleans -> results are gathered -> returned to the caller.
 - **Background work.** Queue deadlines, due and recurring work, remote
   transfers, ANN projection and time-series chunk work never check leadership.
-  Orleans `[StatelessWorker]` grains (one or many activations, each with its own
-  identity) accept events, buffer them in memory and, on an Orleans timer whose
+  Orleans `[StatelessWorker]` grains share a logical pool key. Orleans automatically
+  creates and retires activations as load changes; application code does not address
+  individual activations. Each activation accepts events, buffers them in memory
+  and, on an Orleans timer whose
   interval is a typed option (for example 5 seconds), write the batch through
   the normal grain -> ZoneTree owner path.
 - **Identifiers.** Every grain key and every identifier for objects, counters
@@ -117,6 +119,31 @@ flowchart LR
     Worker -->|Orleans timer batch| Partition
 ```
 
+### Storage-mode contract and current qualification
+
+Two storage modes are required. With a **shared volume**, all silos can reach the
+configured partition paths without copying data. One ordinary Orleans grain owns
+each open physical partition; the other silos call it. Orleans owns activation
+placement and movement. The storage owner closes its actual handles before another
+activation reopens that partition. ZoneTree's native WAL opens with exclusive file
+sharing, so several live writable instances over the same files are unsupported.
+The actual filesystem must preserve the required locking and flush semantics.
+
+With **isolated volumes**, typed Orleans calls reach the owners of the required
+logical partitions. The caller bounds parallel work and merges partial results.
+A physical replica is another copy of one partition, not another partition to count
+in the result. Stateless workers perform interchangeable Task-based work using
+Orleans-managed activation pools.
+
+The current runtime eagerly opens a silo-local store and applies full copies.
+Shared-volume lazy ownership and distributed partition-query execution remain open
+implementation and qualification gates. A configured mount or a full-copy cluster
+does not qualify either behavior.
+
+Sources: [Orleans stateless workers](https://learn.microsoft.com/en-us/dotnet/orleans/grains/stateless-worker-grains),
+[native grain directory](https://learn.microsoft.com/en-us/dotnet/orleans/host/grain-directory),
+and [the pinned ZoneTree WAL open contract](https://github.com/ZoneTree/ZoneTree/blob/ec774af2223bd87457a0aa985908f0b4e508e4c8/src/ZoneTree/WAL/Sync/SyncFileSystemWriteAheadLog.cs#L55-L63).
+
 Credentials and authorization policies are persisted in the database; callers
 never supply trusted roles. Standard ASP.NET Core authentication admits HTTP,
 SDK and MCP callers, and ManagedCode.Orleans.Identity carries the verified
@@ -136,8 +163,8 @@ needs a provider that participates in the canonical ZoneTree commit.
 Runtime projects under `src/` have distinct consumers and responsibilities:
 Abstractions (shared contracts), Client (external SDK), Cli (operator
 executable), Core (database semantics and authorization evaluation), Query (SQL
-compilation, search and change feeds), Clustering (Orleans grains and routing),
-Replication (copies through Orleans calls to `ReplicaCount` ZoneTree owners),
+compilation, search and change feeds), Clustering (Orleans grains, routing and
+copies through native calls to `ReplicaCount` silo-local ZoneTree owners),
 Storage.ZoneTree (physical storage, local archive transfer and native file IO),
 Server (host composition, public API, health, service discovery, resilience and
 OpenTelemetry) and Diagnostics (BCL-only bounded phase telemetry shared by
@@ -146,8 +173,9 @@ does not depend on domain execution or the server host.
 
 `src/` contains runtime product code only. Compiler rules live in `analyzers/`;
 the Aspire AppHost and shared build targets live in `build/`; tests and
-benchmarks keep their own roots. Test runners, the crash-test process, compiler
-analyzers, the AppHost, benchmark entry, generated-consumer fixtures, the native
+benchmarks keep their own roots. Recovery tests own their native child-process
+scenarios in the same test assembly. Compiler analyzers, the AppHost, benchmark
+entry, generated-consumer fixtures, the native
 comparison library and the TUnit comparison host keep their distinct execution
 boundaries.
 

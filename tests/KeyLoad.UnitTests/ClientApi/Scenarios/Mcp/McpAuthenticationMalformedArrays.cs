@@ -68,7 +68,7 @@ internal static class McpAuthenticationMalformedArrays
     {
         if (fault == McpAuthenticationArrayFault.WrongReferenceType)
         {
-            // Omitted type metadata reaches the actual reference-target compatibility check.
+            // Omitted type metadata reaches the actual reference-target assignability check.
             if (!ReferenceCodec.TryWriteReferenceField(ref writer, delta, typeof(ScopeGrant), principal.Grants[0]))
             {
                 throw new InvalidOperationException("The genuine completed grant reference was not registered.");

@@ -19,9 +19,9 @@ internal static class RowRevisionInferenceRequests
         return new(Guid.NewGuid(), partition, [mutation]);
     }
 
-    internal static Command<DatabaseCommand> Operation(CommandRequest command)
-        => new(command.CommandId, OperationKind.Batch, P.Reader, default,
-            JsonSerializer.Serialize(command, JsonDefaults.Options));
+    internal static Command<DatabaseCommand> Operation(global::KeyLoad.Core.DatabaseEngine database, CommandRequest command)
+        => database.CreateCommand(OperationKind.Batch, command.CommandId, P.Reader,
+            database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(command));
 
     internal static string ReceiptKind(string kind) => kind switch
     {

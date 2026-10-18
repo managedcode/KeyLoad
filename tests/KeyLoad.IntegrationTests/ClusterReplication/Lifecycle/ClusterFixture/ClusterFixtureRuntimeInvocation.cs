@@ -2,17 +2,17 @@ namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 
 internal static class ClusterFixtureRuntimeInvocation
 {
-    internal const string RuntimeControllerUnavailable = "The Aspire container runtime controller is not initialized.";
+    internal const string RuntimeControllerUnavailable = "The Aspire native process controller is not initialized.";
     internal const string DiagnosticsUnavailable = "The Aspire diagnostic capture is not initialized.";
 
-    internal static Task KillAsync(Func<ContainerRuntimeControl> requireRuntime, string resourceName, string scenario, CancellationToken cancellationToken)
+    internal static Task KillAsync(Func<ProcessRuntimeControl> requireRuntime, string resourceName, string scenario, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(resourceName);
         ArgumentException.ThrowIfNullOrWhiteSpace(scenario);
         return requireRuntime().KillAsync(resourceName, scenario, cancellationToken);
     }
 
-    internal static Task RestartAsync(Func<ContainerRuntimeControl> requireRuntime, string resourceName, CancellationToken cancellationToken)
+    internal static Task RestartAsync(Func<ProcessRuntimeControl> requireRuntime, string resourceName, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(resourceName);
         return requireRuntime().RestartAsync(resourceName, cancellationToken);

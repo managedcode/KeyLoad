@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 
-/// <summary>Authenticates one source-bound session before opening native clients.</summary>
+/// <summary>Validates the selected native session and retains original workflow provenance when present.</summary>
 [KeyLoad.ConfigurationBinding]
 internal sealed record BenchmarkSessionHostSettings(string SessionId, IsolatedHostSettings Native)
 {
@@ -27,24 +27,25 @@ internal sealed record BenchmarkSessionHostSettings(string SessionId, IsolatedHo
         var nodes = int.Parse(IsolatedHostSettings.Required(configuration, BenchmarkSessionSelection.NodeCountSetting),
             NumberStyles.None, CultureInfo.InvariantCulture);
         var selection = BenchmarkSessionContract.ResourceSelection(target, nodes);
-        var revision = IsolatedHostSettings.Required(configuration, ComparisonHostConstants.SourceRevision);
+        var revision = configuration[ComparisonHostConstants.SourceRevision];
         var identity = ComparisonExecutionIdentity.ReadSession(configuration, revision, selection.Topology);
-        var job = long.Parse(IsolatedHostSettings.Required(configuration, IsolatedHostConstants.JobId),
-            NumberStyles.None, CultureInfo.InvariantCulture);
+        var job = identity.Provenance is null ? (long?)null
+            : long.Parse(IsolatedHostSettings.Required(configuration, IsolatedHostConstants.JobId),
+                NumberStyles.None, CultureInfo.InvariantCulture);
         var output = IsolatedHostSettings.Required(configuration, ComparisonHostConstants.Output);
-        var image = IsolatedHostSettings.Required(configuration, IsolatedHostConstants.Image);
+        var unsupported = BenchmarkSessionContract.UnsupportedTopologies
+            .SingleOrDefault(item => item.Target == target && item.NodeCounts.Contains(nodes))?.Reason;
+        var image = target == IsolatedHostConstants.KeyLoad || unsupported is not null ? null
+            : IsolatedHostSettings.Required(configuration, IsolatedHostConstants.Image);
         var execution = NativeComparisonExecutionRegistration.ReadHost(configuration);
-        if (job <= MissingJobId || !Path.IsPathFullyQualified(output)
-            || !ComparisonExecutionIdentityImageReference.IsValid(image, execution)
-            || target == IsolatedHostConstants.KeyLoad && image != identity.KeyLoadImage)
+        if (job is <= MissingJobId || !Path.IsPathFullyQualified(output)
+            || target != IsolatedHostConstants.KeyLoad && unsupported is null && !ComparisonExecutionIdentityImageReference.IsValid(image!, execution))
         {
             throw new InvalidOperationException(Profile);
         }
         var provenance = identity.Provenance;
-        var worker = new BenchmarkSessionWorker(target, nodes, revision,
-            provenance.RunId, provenance.Attempt, provenance.Repository, provenance.Ref, provenance.Workflow, job);
-        var unsupported = BenchmarkSessionContract.UnsupportedTopologies
-            .SingleOrDefault(item => item.Target == target && item.NodeCounts.Contains(nodes))?.Reason;
+        var worker = new BenchmarkSessionWorker(target, nodes, provenance is null ? null : revision,
+            provenance?.RunId, provenance?.Attempt, provenance?.Repository, provenance?.Ref, provenance?.Workflow, job);
         return new(IsolatedHostSettings.Required(configuration, SessionIdSetting),
             new(selection, identity, worker, Path.GetFullPath(output),
                 IsolatedHostSettings.Required(configuration, ComparisonHostConstants.Storage),

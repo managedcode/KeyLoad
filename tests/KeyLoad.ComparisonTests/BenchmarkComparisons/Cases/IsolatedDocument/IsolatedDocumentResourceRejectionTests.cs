@@ -1,5 +1,5 @@
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.AppHost.Features.BenchmarkComparisons;
+using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
@@ -20,11 +20,11 @@ internal sealed class IsolatedDocumentResourceRejectionTests
     {
         await using var invalid = new IsolatedResourceTopologyFixture(target, 4);
         Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => Add(target, invalid.Context));
-        await Assert.That(invalid.Context.Builder.Resources.Count).IsEqualTo(1);
+        await Assert.That(invalid.Context.Builder.Resources.Count).IsEqualTo(0);
         await Assert.That(Directory.Exists(invalid.Context.Root)).IsFalse();
         await using var foreign = new IsolatedResourceTopologyFixture("Redis", 1);
         Assert.ThrowsExactly<InvalidOperationException>(() => Add(target, foreign.Context));
-        await Assert.That(foreign.Context.Builder.Resources.Count).IsEqualTo(1);
+        await Assert.That(foreign.Context.Builder.Resources.Count).IsEqualTo(0);
         await Assert.That(Directory.Exists(foreign.Context.Root)).IsFalse();
     }
 
@@ -32,7 +32,7 @@ internal sealed class IsolatedDocumentResourceRejectionTests
     [Test]
     [Arguments(OpenSearch, "/usr/share/opensearch/data")]
     [Arguments(Kurrent, "/var/lib/kurrentdb")]
-    public async Task SeparateCellsHaveDisjointDataVolumeNames(string target, string data)
+    public async Task SeparateCellsAllocateIndependentAnonymousDataVolumes(string target, string data)
     {
         await using var first = new IsolatedResourceTopologyFixture(target, 3);
         await using var second = new IsolatedResourceTopologyFixture(target, 3);
@@ -41,12 +41,12 @@ internal sealed class IsolatedDocumentResourceRejectionTests
         var original = DataVolumes(first.Build(), data);
         var following = DataVolumes(second.Build(), data);
         await Assert.That(original.Length).IsEqualTo(3);
-        await Assert.That(original.Intersect(following, StringComparer.Ordinal)).IsEmpty();
+        await Assert.That(original.Intersect(following, ReferenceEqualityComparer.Instance)).IsEmpty();
     }
 
-    private static string[] DataVolumes(ContainerResource[] resources, string target)
+    private static ContainerMountAnnotation[] DataVolumes(ContainerResource[] resources, string target)
         => resources.SelectMany(node => node.Annotations.OfType<ContainerMountAnnotation>())
-            .Where(mount => mount.Target == target).Select(mount => mount.Source!).ToArray();
+            .Where(mount => mount.Target == target).ToArray();
 
     private static void Add(string target, IsolatedResourceContext context)
     {

@@ -1,3 +1,4 @@
+using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 
@@ -12,7 +13,8 @@ internal static class QueueLifecycleBackupRestore
     internal static async Task RunAsync(ZoneTreeStore source, QueueLifecycleTestState original, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        var root = Path.Combine(Path.GetTempPath(), Prefix + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(Path.GetTempPath())),
+            Prefix + Guid.NewGuid().ToString("N"));
         var backup = Path.Combine(root, Backup);
         var target = Path.Combine(root, Target);
         var failures = new List<Exception>();
@@ -21,8 +23,8 @@ internal static class QueueLifecycleBackupRestore
         {
             Directory.CreateDirectory(root);
             var image = QueueLifecycleImage.Capture(source, original.Lane);
-            var position = source.CreateBackup(backup);
-            ZoneTreeStore.Restore(backup, target, UnitExecutionOptions.StorageExecution());
+            var position = source.CreateBackup(backup, token);
+            ZoneTreeStore.Restore(backup, target, UnitExecutionOptions.StorageExecution(), cancellationToken: token);
             restored = new(new(target), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
             await Assert.That(restored.Identity.Incarnation).IsNotEqualTo(source.Identity.Incarnation);
             var database = QueueWholeFlowStorage.Open(restored);
@@ -33,7 +35,9 @@ internal static class QueueLifecycleBackupRestore
             await Assert.That(Errors.Code(database.Apply(prior.Operation).Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
             await Assert.That(restored.Position).IsEqualTo(before);
             await QueueLifecycleImage.SameAsync(restored, original.Lane, image);
-            await Assert.That(QueueLifecycleOperations.Complete(database, new(original.Partition, original.Time), original.OriginalPending!, DeliveryAction.Ack).Error)
+            var stale = QueueLifecycleOperations.Complete(database, new(original.Partition, original.Time),
+                original.OriginalPending!, DeliveryAction.Ack);
+            await Assert.That(Errors.Code(stale.Problem))
                 .IsEqualTo(ErrorCode.TokenInvalidated);
             await QueueLifecycleImage.SameAsync(restored, original.Lane, image);
             var state = new QueueLifecycleTestState(original.Partition, original.Time);

@@ -42,7 +42,7 @@ internal sealed class AnnProjectionPinAuthorityTests
             .SequenceEqual(baselineEntry)).IsTrue();
 
         var cleanup = AnnProjectionPinTestSupport.Release(database, consumer);
-        await Assert.That(cleanup.Error).IsNull();
+        await Assert.That(Errors.Code(cleanup.Problem)).IsNull();
         await Assert.That(database.Database.GetOutboxStatus(AnnProjectionPinTestSupport.Principal, database.Partition)
             .Consumers.Single().Released).IsTrue();
     }
@@ -60,13 +60,13 @@ internal sealed class AnnProjectionPinAuthorityTests
 
         var commit = AnnProjectionPinTestSupport.CommitEmpty(database, consumer, batch,
             principal, Guid.NewGuid(), TimeProvider.System.GetUtcNow());
-        await Assert.That(commit.Error).IsEqualTo(expected);
+        await Assert.That(Errors.Code(commit.Problem)).IsEqualTo(expected);
 
         var release = AnnProjectionPinTestSupport.Release(database, consumer, principal);
-        await Assert.That(release.Error).IsEqualTo(expected);
+        await Assert.That(Errors.Code(release.Problem)).IsEqualTo(expected);
 
         var purge = AnnProjectionPinTestSupport.Purge(database,
             database.Database.GetOutboxStatus(AnnProjectionPinTestSupport.Principal, database.Partition).Head.Tail, principal);
-        await Assert.That(purge.Error).IsEqualTo(expected);
+        await Assert.That(Errors.Code(purge.Problem)).IsEqualTo(expected);
     }
 }

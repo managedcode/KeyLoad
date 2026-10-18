@@ -15,17 +15,17 @@ internal static class SampleChunkSubnormalClusterCold
         foreach (var node in Nodes)
         {
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() =>
-                fixture.KillContainerAsync(node, SampleChunkClusterProtocol.ColdScenario, token), failures).ConfigureAwait(false);
+                fixture.KillServerAsync(node, SampleChunkClusterProtocol.ColdScenario, token), failures).ConfigureAwait(false);
         }
         foreach (var node in Nodes)
         {
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() =>
-                fixture.BeginContainerRestartAsync(node, token), failures).ConfigureAwait(false);
+                fixture.BeginProcessRestartAsync(node, token), failures).ConfigureAwait(false);
         }
         foreach (var node in Nodes)
         {
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() =>
-                fixture.RestartContainerAsync(node, token), failures).ConfigureAwait(false);
+                fixture.RestartServerAsync(node, token), failures).ConfigureAwait(false);
         }
         foreach (var node in Nodes)
         {

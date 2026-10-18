@@ -206,5 +206,5 @@ internal sealed class KeyLoadClientTransportTests
     }
 
     private static NodeStatus Status(string nodeId)
-        => new(nodeId, Guid.Empty, 1, nodeId, 3, DurabilityProfile.ProcessDurable, true, Environment.ProcessId);
+        => new(nodeId, Guid.Empty, 1, 3, 2, DurabilityProfile.ProcessDurable, true, Environment.ProcessId, 1L);
 }

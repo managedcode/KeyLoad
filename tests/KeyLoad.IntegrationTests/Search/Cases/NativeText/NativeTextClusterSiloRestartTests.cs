@@ -36,7 +36,7 @@ internal sealed class NativeTextClusterSiloRestartTests(ClusterFixture fixture)
         {
             var selectedIndex = await SelectSiloIndexAsync(nodes, clients.Administrators, cancellationToken);
             stoppedNode = nodes[selectedIndex];
-            await fixture.KillContainerAsync(stoppedNode, NativeTextClusterScenario.FailureScenario, cancellationToken);
+            await fixture.KillServerAsync(stoppedNode, NativeTextClusterScenario.FailureScenario, cancellationToken);
             var survivorIndex = Enumerable.Range(0, nodes.Length).First(index => index != selectedIndex);
             await WaitReadyAsync(clients.Administrators[survivorIndex], cancellationToken);
             await VerifyUpdatedSearchAsync(scenario, clients.Callers[survivorIndex], clients.Secret,
@@ -45,7 +45,7 @@ internal sealed class NativeTextClusterSiloRestartTests(ClusterFixture fixture)
                 await clients.Administrators[survivorIndex].CommitAsync(update.Command, cancellationToken));
             await VerifyUpdatedSearchAsync(scenario, clients.Callers[survivorIndex], clients.Secret,
                 nodes[survivorIndex], cancellationToken);
-            await fixture.RestartContainerAsync(stoppedNode, cancellationToken);
+            await fixture.RestartServerAsync(stoppedNode, cancellationToken);
             restarted = true;
             await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(stoppedNode,
                 WaitBehavior.WaitOnResourceUnavailable, cancellationToken);
@@ -138,7 +138,7 @@ internal sealed class NativeTextClusterSiloRestartTests(ClusterFixture fixture)
         try
         {
             using var recovery = new CancellationTokenSource(TimeSpan.FromSeconds(45), TimeProvider.System);
-            await fixture.RestartContainerAsync(stoppedNode, recovery.Token);
+            await fixture.RestartServerAsync(stoppedNode, recovery.Token);
             await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(stoppedNode,
                 WaitBehavior.WaitOnResourceUnavailable, recovery.Token);
             await WaitForClusterAsync(nodes, administrators, recovery.Token);

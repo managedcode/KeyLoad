@@ -22,7 +22,7 @@ internal static class PartitionQueryClusterSiloRestart
         Exception? primary = null;
         try
         {
-            await fixture.KillContainerAsync(selectedSilo, PartitionQueryClusterProtocol.NodeFailureScenario,
+            await fixture.KillServerAsync(selectedSilo, PartitionQueryClusterProtocol.NodeFailureScenario,
                 cancellationToken).ConfigureAwait(false);
             stopped = true;
             using (var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1))
@@ -90,7 +90,7 @@ internal static class PartitionQueryClusterSiloRestart
     {
         using var recovery = new CancellationTokenSource(TimeSpan.FromSeconds(45), TimeProvider.System);
         var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(() => fixture.RestartContainerAsync(selectedSilo, recovery.Token), failures)
+        await ServerFailureObserver.ObserveAsync(() => fixture.RestartServerAsync(selectedSilo, recovery.Token), failures)
             .ConfigureAwait(false);
         if (failures.Count == 0)
         {

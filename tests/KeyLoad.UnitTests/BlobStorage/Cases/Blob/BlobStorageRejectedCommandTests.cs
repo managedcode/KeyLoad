@@ -28,7 +28,7 @@ internal sealed class BlobStorageRejectedCommandTests
         var invalidId = Guid.NewGuid();
 
         var invalidHash = SubmitPart(db, blob, uploadId, ValidBytes, IncorrectHash, invalidId);
-        await Assert.That(invalidHash.Error).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(Errors.Code(invalidHash.Problem)).IsEqualTo(ErrorCode.Validation);
         await BlobRejectedCommandColdFlow.DomainUnchanged(db.Database, blob, uploadId, beforeInvalid);
         var afterInvalidHash = operations.UploadInfo(PrincipalId, new(blob, uploadId))!;
         await Assert.That(afterInvalidHash.StoredBytes).IsEqualTo(0L);
@@ -41,7 +41,7 @@ internal sealed class BlobStorageRejectedCommandTests
         var changedId = Guid.NewGuid();
         var changedHash = BlobIntegrity.PartHash(ChangedBytes);
         var changedDuplicate = SubmitPart(db, blob, uploadId, ChangedBytes, changedHash, changedId);
-        await Assert.That(changedDuplicate.Error).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(changedDuplicate.Problem)).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(operations.UploadInfo(PrincipalId, new(blob, uploadId))!.StoredBytes)
             .IsEqualTo((long)ValidBytes.Length);
 

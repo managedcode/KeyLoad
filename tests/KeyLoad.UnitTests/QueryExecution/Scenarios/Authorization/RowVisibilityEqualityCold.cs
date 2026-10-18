@@ -12,7 +12,7 @@ internal static class RowVisibilityEqualityCold
     {
         var identity = db.Store.Identity;
         var cut = db.Store.Position;
-        var image = GraphShortestPathFullStoreImage.Bytes(db.Store);
+        var image = CanonicalStoreImage.Bytes(db.Store);
         db.Store.Dispose();
         Exception? primary = null;
         var failures = new List<Exception>();
@@ -30,7 +30,7 @@ internal static class RowVisibilityEqualityCold
                 await Assert.That(cold.Identity.Incarnation).IsEqualTo(identity.Incarnation);
                 await Assert.That(cold.Identity.ReadGeneration).IsGreaterThanOrEqualTo(identity.ReadGeneration);
                 await Assert.That(cold.Position).IsEqualTo(cut);
-                await Assert.That(GraphShortestPathFullStoreImage.Bytes(cold).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
+                await Assert.That(CanonicalStoreImage.Bytes(cold).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
                 await RowVisibilityEqualityContinuation.HealthyAsync(db, engine, cold, owner, indexed, parameterized);
                 await RowVisibilityEqualityContinuation.ReplayAsync(database, cold, command, receipt, outcome);
                 await RowVisibilityEqualityContinuation.HealthyAsync(db, engine, cold, owner, indexed, parameterized);

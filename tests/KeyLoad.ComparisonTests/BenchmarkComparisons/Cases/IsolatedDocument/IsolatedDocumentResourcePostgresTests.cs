@@ -1,5 +1,5 @@
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.AppHost.Features.BenchmarkComparisons;
+using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 using T = KeyLoad.ComparisonTests.Features.BenchmarkComparisons.IsolatedDocumentResourceTokens;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
@@ -28,17 +28,17 @@ internal sealed class IsolatedDocumentResourcePostgresTests
         var resources = fixture.Build();
         var nodes = resources.Where(node => node.Name != IsolatedResourceTopologyFixture.RunnerName).ToArray();
         await IsolatedDocumentResourceAssertions.VerifyNodesAsync(nodes, count, Prefix, BenchmarkResources.PostgresDigest);
-        await IsolatedResourceTopologyFixture.VerifyWaitsAsync(fixture.Context.Runner.Resource, nodes);
-        await IsolatedDocumentResourceAssertions.VerifyEndpointsAsync(fixture.Context.Runner.Resource, nodes, T.Tcp);
+        await IsolatedResourceTopologyFixture.VerifyWaitsAsync(fixture.Context.Client, nodes);
+        await IsolatedDocumentResourceAssertions.VerifyEndpointsAsync(fixture.Context.Client, nodes, T.Tcp);
         var primary = nodes[0];
         var password = await IsolatedDocumentResourceAssertions.SecretAsync(primary, Password);
-        var environment = await IsolatedResourceTopologyFixture.EnvironmentAsync(fixture.Context.Runner.Resource);
+        var environment = await IsolatedResourceTopologyFixture.EnvironmentAsync(fixture.Context.Client);
         await Assert.That(environment[IsolatedDocumentResourceAssertions.Image]).IsEqualTo(
             "docker.io/pgvector/pgvector:0.8.6-pg18@" + BenchmarkResources.PostgresDigest);
         await Assert.That(environment.ContainsKey(IsolatedDocumentResourceAssertions.Connection)).IsTrue();
         foreach (var node in nodes)
         {
-            await IsolatedDocumentResourceAssertions.VerifyDataAsync(node, Data, fixture.Context.Root);
+            await IsolatedDocumentResourceAssertions.VerifyDataAsync(node, Data);
             await IsolatedDocumentResourceAssertions.VerifyScriptMountAsync(node, EntryScript);
             await Assert.That(node.Entrypoint).IsEqualTo(T.CommandShell);
             var configuration = await IsolatedResourceTopologyFixture.ConfigurationAsync(node);

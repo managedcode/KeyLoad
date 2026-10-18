@@ -11,11 +11,8 @@ internal static class ProjectionConcurrentCommitHealthy
         var source = state.Source;
         var id = Guid.NewGuid();
         var mutation = new PutDocument(ProjectionConsumerIdentityFixture.Source, "c", SourceJson, 0L);
-        var command = ProjectionConsumerIdentityFixture.Operation(OperationKind.Batch, id,
-            new CommandRequest(id, source.Partition, [mutation])) with
-        {
-            EvaluatedAt = source.Time
-        };
+        var command = ProjectionConsumerIdentityFixture.Operation(owner, OperationKind.Batch, id,
+            new CommandRequest(id, source.Partition, [mutation]), source.Time);
         token.ThrowIfCancellationRequested();
         var produced = FeedNativeHealthyAdmission.Submit(owner, command, explicitTime: true, token);
         var receipt = produced.Get<CommitReceipt>();
@@ -29,7 +26,7 @@ internal static class ProjectionConcurrentCommitHealthy
         await ProjectionConsumerIdentityAssertions.ExactAsync(batch,
             new ProjectionBatch(new(source.Consumer, source.Definition, 3L, false), [entry], 4L, batch.Token, false));
         var effectId = Guid.NewGuid();
-        var effect = ProjectionConsumerIdentityFixture.Operation(OperationKind.CommitProjectionBatch, effectId,
+        var effect = ProjectionConsumerIdentityFixture.Operation(owner, OperationKind.CommitProjectionBatch, effectId,
             new CommitProjectionBatchRequest(effectId, source.Consumer, batch.Token,
                 [new PutDocument(ProjectionConsumerIdentityFixture.Target, "healthy", EffectJson, 0L)]));
         var completed = FeedNativeHealthyAdmission.Submit(owner, effect, explicitTime: false, token);
@@ -57,7 +54,7 @@ internal static class ProjectionConcurrentCommitHealthy
         await ProjectionConsumerIdentityAssertions.ExactAsync(tail,
             new ProjectionBatch(new(source.Consumer, source.Definition, 4L, false), [], 5L, tail.Token, false));
         var id = Guid.NewGuid();
-        var operation = ProjectionConsumerIdentityFixture.Operation(OperationKind.CommitProjectionBatch, id,
+        var operation = ProjectionConsumerIdentityFixture.Operation(owner, OperationKind.CommitProjectionBatch, id,
             new CommitProjectionBatchRequest(id, source.Consumer, tail.Token, []));
         var outcome = owner.ApplyEmbedded(operation, token);
         var result = outcome.Get<ProjectionBatchResult>();

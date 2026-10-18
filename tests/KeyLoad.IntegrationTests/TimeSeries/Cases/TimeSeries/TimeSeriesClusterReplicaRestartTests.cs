@@ -43,7 +43,7 @@ internal sealed class TimeSeriesClusterReplicaRestartTests(ClusterFixture fixtur
             var scenario = await PrepareSeriesAsync(fixture, deadline.Token);
             var selectedIndex = await SelectSiloIndexAsync(clients, deadline.Token);
             var selectedNode = NodeName(selectedIndex + FirstNode);
-            await fixture.KillContainerAsync(selectedNode, FailureScenario, deadline.Token);
+            await fixture.KillServerAsync(selectedNode, FailureScenario, deadline.Token);
             stoppedNode = selectedNode;
 
             var survivorIndex = Enumerable.Range(0, NodeCount).First(index => index != selectedIndex);
@@ -62,7 +62,7 @@ internal sealed class TimeSeriesClusterReplicaRestartTests(ClusterFixture fixtur
             await Assert.That(initial.Sample?.Sample.EventId).IsEqualTo(InitialSampleId);
             await Assert.That(initial.Sample?.Sample.Value).IsEqualTo(3d);
 
-            await fixture.RestartContainerAsync(stoppedNode, deadline.Token);
+            await fixture.RestartServerAsync(stoppedNode, deadline.Token);
             restarted = true;
             await ClusterReplicationTestSupport.EventuallyAsync(async () =>
             {
@@ -150,7 +150,7 @@ internal sealed class TimeSeriesClusterReplicaRestartTests(ClusterFixture fixtur
         using var recovery = new CancellationTokenSource(ReadinessLifetime, TimeProvider.System);
         try
         {
-            await fixture.RestartContainerAsync(node, recovery.Token);
+            await fixture.RestartServerAsync(node, recovery.Token);
             var index = NodeIndex(node);
             await ClusterReplicationTestSupport.EventuallyAsync(async () =>
             {

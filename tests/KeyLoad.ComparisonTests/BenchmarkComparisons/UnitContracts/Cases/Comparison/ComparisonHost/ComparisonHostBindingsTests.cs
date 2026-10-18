@@ -58,6 +58,7 @@ internal sealed class ComparisonHostBindingsTests
     {
         var settings = SessionHostStartupSupport.ValidSettings();
         settings[SessionHostStartupSupport.Target] = "RabbitMQ";
+        settings[SessionHostStartupSupport.Image] = "docker.io/library/rabbitmq:4.2.4-management@" + BenchmarkResources.RabbitDigest;
         settings[SessionHostStartupSupport.User] = "benchmark";
         settings[SessionHostStartupSupport.Password] = SessionHostStartupSupport.Canary;
         settings[SessionHostStartupSupport.Connection] = "amqp://127.0.0.1:1/";

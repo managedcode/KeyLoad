@@ -5,6 +5,7 @@ internal sealed class NativeTextIncrementalSessions
 {
     private readonly Lock gate = new();
     private readonly Dictionary<Guid, NativeTextIncrementalSession> sessions = [];
+    private readonly Dictionary<Guid, NativeMaintenanceSessionWork> work = [];
     private readonly int maximumSessions;
     private bool closed;
 
@@ -12,6 +13,37 @@ internal sealed class NativeTextIncrementalSessions
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maximumSessions);
         this.maximumSessions = maximumSessions;
+    }
+
+    internal void BeginWork(Guid id, NativeMaintenanceSessionWork original)
+    {
+        lock (gate)
+        {
+            ObjectDisposedException.ThrowIf(closed, this);
+            if (work.Count >= maximumSessions || !work.TryAdd(id, original))
+            {
+                throw NativeTextErrors.BoundExceeded();
+            }
+        }
+    }
+
+    internal void Own(NativeTextIncrementalSession actual)
+    {
+        lock (gate)
+        {
+            if (!ReferenceEquals(work.GetValueOrDefault(actual.Id), actual.Work) || !sessions.TryAdd(actual.Id, actual))
+            {
+                throw NativeTextErrors.Ownership();
+            }
+        }
+    }
+
+    internal NativeMaintenanceSessionWork? FindWork(Guid id)
+    {
+        lock (gate)
+        {
+            return work.GetValueOrDefault(id);
+        }
     }
 
     internal void Add(NativeTextIncrementalSession actual)
@@ -23,12 +55,12 @@ internal sealed class NativeTextIncrementalSessions
             {
                 throw NativeTextErrors.Mismatch();
             }
-            if (sessions.Count >= maximumSessions || sessions.Values.Any(current =>
+            if (sessions.Count > maximumSessions || sessions.Values.Any(current => !ReferenceEquals(current, actual) &&
                 string.Equals(current.GenerationLeaf, actual.GenerationLeaf, StringComparison.Ordinal)))
             {
                 throw NativeTextErrors.BoundExceeded();
             }
-            if (!sessions.TryAdd(actual.Id, actual))
+            if (!sessions.TryGetValue(actual.Id, out var owned) || !ReferenceEquals(owned, actual))
             {
                 throw NativeTextErrors.Mismatch();
             }
@@ -46,19 +78,25 @@ internal sealed class NativeTextIncrementalSessions
 
     internal void Retire(Guid id)
     {
-        NativeTextIncrementalSession actual;
+        NativeTextIncrementalSession? actual;
+        NativeMaintenanceSessionWork? original;
         lock (gate)
         {
-            if (!sessions.TryGetValue(id, out var found))
-            {
-                return;
-            }
-            actual = found;
+            actual = sessions.GetValueOrDefault(id);
+            original = work.GetValueOrDefault(id);
         }
-        NativeTextIncrementalSessionLifetime.DisposeNative(actual);
+        if (actual is not null)
+        {
+            NativeTextIncrementalSessionLifetime.DisposeNative(actual);
+        }
+        else
+        {
+            original?.DisposeAfterStage();
+        }
         lock (gate)
         {
             sessions.Remove(id);
+            work.Remove(id);
         }
     }
 
@@ -88,15 +126,15 @@ internal sealed class NativeTextIncrementalSessions
 
     internal void DisposeAfterWorkerJoin()
     {
-        NativeTextIncrementalSession[] originals;
+        Guid[] originals;
         lock (gate)
         {
-            originals = sessions.Values.ToArray();
+            originals = work.Keys.ToArray();
         }
         var failures = new List<Exception>();
-        foreach (var actual in originals)
+        foreach (var id in originals)
         {
-            ServerFailureObserver.Observe(() => Retire(actual.Id), failures);
+            ServerFailureObserver.Observe(() => Retire(id), failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }

@@ -12,7 +12,7 @@ internal sealed class RelationalSchemaTests
     private const int MaximumColumns = 256;
 
     [Test]
-    public async Task AcAisql002SchemaPersistsAndChangingItsContractRequiresMigration()
+    public async Task AcAisql002SchemaPersistsAndRejectsContractChanges()
     {
         using var database = new TestDatabase();
         var definition = RelationalTestData.Definition();
@@ -26,7 +26,7 @@ internal sealed class RelationalSchemaTests
                 column.Name == RelationalTestData.Name ? column with { Nullable = true } : column)])
         };
         RelationalRowValidation.ValidateSchema(changed);
-        await Assert.That(RelationalTestData.ConfigureResult(database, changed).Error).IsEqualTo(ErrorCode.UnsupportedCapability);
+        await Assert.That(Errors.Code(RelationalTestData.ConfigureResult(database, changed).Problem)).IsEqualTo(ErrorCode.UnsupportedCapability);
         var persistedAfter = database.Store.Read(view => database.Database.Resource(view, database.Partition, RelationalTestData.Table));
         await Assert.That(JsonDefaults.Serialize(persistedAfter).SequenceEqual(JsonDefaults.Serialize(persisted))).IsTrue();
     }
@@ -52,7 +52,7 @@ internal sealed class RelationalSchemaTests
         ];
         foreach (var candidate in invalid)
         {
-            await Assert.That(RelationalTestData.ConfigureResult(database, candidate).Error).IsEqualTo(ErrorCode.Validation);
+            await Assert.That(Errors.Code(RelationalTestData.ConfigureResult(database, candidate).Problem)).IsEqualTo(ErrorCode.Validation);
         }
         var missing = Assert.ThrowsExactly<KeyLoadException>(() => database.Store.Read(view =>
             database.Database.Resource(view, database.Partition, RelationalTestData.Table)));
@@ -89,6 +89,6 @@ internal sealed class RelationalSchemaTests
         {
             RelationalSchema = new(RelationalTestData.Key, columns)
         };
-        await Assert.That(RelationalTestData.ConfigureResult(database, overLimit).Error).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(RelationalTestData.ConfigureResult(database, overLimit).Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
     }
 }

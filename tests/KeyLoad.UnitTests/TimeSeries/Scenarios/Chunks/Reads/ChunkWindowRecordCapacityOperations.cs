@@ -57,21 +57,22 @@ internal static class ChunkWindowRecordCapacityOperations
         Result<object>? refused = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            refused = fixture.Owner.Database.ApplyEmbedded(operation, cancellationToken: default);
-            originals.Add((operation, refused));
+            var actual = fixture.Owner.Database.ApplyEmbedded(operation, cancellationToken: default);
+            refused = actual;
+            originals.Add((operation, actual));
             var expected = Result<object>.Fail(Errors.Problem(ErrorCode.ResourceExhausted, Exhausted));
-            await Assert.That(SampleRollupWholeFlow.Outcome(refused)).IsEqualTo(SampleRollupWholeFlow.Outcome(expected));
-            await Assert.That(Errors.Code(refused.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+            await Assert.That(SampleRollupWholeFlow.Outcome(actual)).IsEqualTo(SampleRollupWholeFlow.Outcome(expected));
+            await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
 
         }, failures);
         await ServerFailureObserver.ObserveAsync(async () =>
             await Assert.That(fixture.Raw()).IsEqualTo(raw), failures);
         await ServerFailureObserver.ObserveAsync(() => ChunkWindowRecordCapacityAssertions.InitialAsync(
             fixture, expired: false), failures);
-        if (refused is not null)
+        if (refused is { } retained)
         {
             await ServerFailureObserver.ObserveAsync(() => SampleChunkCorrectionBoundColdAssertions.ReplayAsync(
-                fixture.Owner.Database, fixture.Owner.Store, operation, refused), failures);
+                fixture.Owner.Database, fixture.Owner.Store, operation, retained), failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }

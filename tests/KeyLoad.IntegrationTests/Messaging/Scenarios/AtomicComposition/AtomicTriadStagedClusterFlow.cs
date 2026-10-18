@@ -15,8 +15,6 @@ internal static class AtomicTriadStagedClusterFlow
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 await fixture.InitializeAsync();
-                fixture.RegisterNativeCoverageCase<AtomicTriadStagedClusterTests>(
-                    nameof(AtomicTriadStagedClusterTests.RepeatedTriadLateDuplicateThenSixReceiptsCurrentPrincipalAndTwoColdOwners));
                 AtomicTriadStagedClusterState state;
                 using (var deadline = McpCallerDeadline.Create())
                 {

@@ -62,7 +62,7 @@ internal sealed class BlobHeadStateAuthorizationTests
         Write(database, AliceId, blob, uploadId, TailPartOrdinal, TailPart);
         var info = operations.UploadInfo(AliceId, new(blob, uploadId));
         await Assert.That(info?.StoredBytes).IsEqualTo(FirstPart.Length + TailLength);
-        await Assert.That(Reclaim(database, AliceId, blob, uploadId, Guid.NewGuid()).Error)
+        await Assert.That(Errors.Code(Reclaim(database, AliceId, blob, uploadId, Guid.NewGuid()).Problem))
             .IsEqualTo(ErrorCode.Conflict);
     }
 
@@ -77,7 +77,7 @@ internal sealed class BlobHeadStateAuthorizationTests
         var deleteId = Guid.NewGuid();
         var deniedDelete = Apply(database, OperationKind.DeleteBlob, AliceId, deleteId,
             new DeleteBlobRequest(deleteId, blob, CurrentRevision));
-        await Assert.That(deniedBegin.Error).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(deniedBegin.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(Errors.Code(deniedComplete.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(Errors.Code(deniedDelete.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
     }
@@ -86,7 +86,7 @@ internal sealed class BlobHeadStateAuthorizationTests
         BlobStorageOperations operations, BlobRef blob, Guid currentUploadId)
     {
         var currentReclaim = Reclaim(database, "root", blob, currentUploadId, Guid.NewGuid());
-        await Assert.That(currentReclaim.Error).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(currentReclaim.Problem)).IsEqualTo(ErrorCode.Conflict);
         var unchangedHead = operations.Metadata("root", new(blob));
         await Assert.That(unchangedHead?.Revision).IsEqualTo(CurrentRevision);
         await Assert.That(unchangedHead?.VersionId == currentUploadId).IsTrue();
@@ -96,10 +96,10 @@ internal sealed class BlobHeadStateAuthorizationTests
         BlobStorageOperations operations, BlobRef blob, Guid uploadId)
     {
         ConfigurePrincipal(database, Principal(NoManageId, AliceOwnerId, Capability.BlobRead | Capability.BlobWrite));
-        await Assert.That(Reclaim(database, NoManageId, blob, uploadId, Guid.NewGuid()).Error)
+        await Assert.That(Errors.Code(Reclaim(database, NoManageId, blob, uploadId, Guid.NewGuid()).Problem))
             .IsEqualTo(ErrorCode.PermissionDenied);
         ConfigureAlice(database, revoked: true, policyEpoch: 2);
-        await Assert.That(Reclaim(database, AliceId, blob, uploadId, Guid.NewGuid()).Error)
+        await Assert.That(Errors.Code(Reclaim(database, AliceId, blob, uploadId, Guid.NewGuid()).Problem))
             .IsEqualTo(ErrorCode.Unauthenticated);
         ConfigureAlice(database, revoked: false, policyEpoch: 3);
 

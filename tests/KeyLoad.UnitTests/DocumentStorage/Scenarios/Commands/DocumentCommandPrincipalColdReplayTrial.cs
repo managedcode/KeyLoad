@@ -15,8 +15,8 @@ internal static class DocumentCommandPrincipalColdReplayTrial
         var sharedId = Guid.NewGuid();
         var first = Commit(owner, Create(owner, sharedId, FirstPrincipal, FirstDocument, FirstJson, 0));
         var second = Commit(owner, Create(owner, sharedId, SecondPrincipal, SecondDocument, SecondJson, 0));
-        await Assert.That(first.Entry.Index).IsEqualTo(baseline.LastIndex + 1L);
-        await Assert.That(second.Entry.Index).IsEqualTo(baseline.LastIndex + 2L);
+        await Assert.That(first.Entry.CanonicalSequence).IsEqualTo(baseline.Applied + 1L);
+        await Assert.That(second.Entry.CanonicalSequence).IsEqualTo(baseline.Applied + 2L);
         await DocumentCommandPrincipalColdReplayAssertions.IndependentAsync(owner, first, second, tail + 2L);
         await DocumentCommandPrincipalColdReplayAssertions.DocumentsAsync(owner, healthy: false);
         await ConflictsAsync(owner, sharedId, first, second);

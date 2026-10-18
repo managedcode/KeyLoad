@@ -18,6 +18,9 @@ internal static class ProductionSourceManifestNativeIdentityAssertions
     private const string DllProperty = "dll";
     private const string PdbProperty = "pdb";
     private const string ModuleNameProperty = "moduleName";
+    private const string DllSha256Property = "dllSha256";
+    private const string PdbSha256Property = "pdbSha256";
+    private const string MvidProperty = "mvid";
     private const string PdbGuidProperty = "pdbGuid";
     private const string PdbStampProperty = "pdbStamp";
     private const string InvalidSource = "The native identity oracle input is outside its original compilation root.";
@@ -37,7 +40,7 @@ internal static class ProductionSourceManifestNativeIdentityAssertions
         using var stream = File.OpenRead(path);
         var hash = await SHA256.HashDataAsync(stream, cancellationToken);
         await Assert.That(Convert.ToHexStringLower(hash))
-            .IsEqualTo(identity.GetProperty(NativeCoverageImageFields.DllSha256).GetString());
+            .IsEqualTo(identity.GetProperty(DllSha256Property).GetString());
         stream.Position = Zero;
         using var pe = new PEReader(stream, PEStreamOptions.LeaveOpen);
         var reader = pe.GetMetadataReader();
@@ -46,7 +49,7 @@ internal static class ProductionSourceManifestNativeIdentityAssertions
         await Assert.That(name).IsEqualTo(expectedModule + DllExtension);
         await Assert.That(name).IsEqualTo(identity.GetProperty(ModuleNameProperty).GetString());
         await Assert.That(reader.GetGuid(module.Mvid).ToString(GuidFormat))
-            .IsEqualTo(identity.GetProperty(NativeCoverageImageFields.Mvid).GetString());
+            .IsEqualTo(identity.GetProperty(MvidProperty).GetString());
         var entries = pe.ReadDebugDirectory().Where(entry => entry.Type == DebugDirectoryEntryType.CodeView).ToArray();
         await Assert.That(entries.Length).IsEqualTo(SingleCodeViewRecord);
         var codeView = pe.ReadCodeViewDebugDirectoryData(entries[Zero]);
@@ -59,7 +62,7 @@ internal static class ProductionSourceManifestNativeIdentityAssertions
         using var stream = File.OpenRead(path);
         var hash = await SHA256.HashDataAsync(stream, cancellationToken);
         await Assert.That(Convert.ToHexStringLower(hash))
-            .IsEqualTo(identity.GetProperty(NativeCoverageImageFields.PdbSha256).GetString());
+            .IsEqualTo(identity.GetProperty(PdbSha256Property).GetString());
         stream.Position = Zero;
         using var provider = MetadataReaderProvider.FromPortablePdbStream(stream, MetadataStreamOptions.LeaveOpen);
         var identifier = provider.GetMetadataReader().DebugMetadataHeader!.Id;

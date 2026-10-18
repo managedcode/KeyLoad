@@ -16,8 +16,6 @@ internal static class QueryCapabilityVersionClusterFlow
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 await fixture.InitializeAsync();
-                fixture.RegisterNativeCoverageCase<QueryCapabilityVersionClusterWholeFlowTests>(
-                    nameof(QueryCapabilityVersionClusterWholeFlowTests.ManifestVersionsAndBuilderSqlMcpPagesExplainPersistedReaderRepairAndTwoColdOwners));
                 QueryCapabilityVersionClusterState state;
                 using (var deadline = McpCallerDeadline.Create())
                 {

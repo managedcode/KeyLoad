@@ -25,10 +25,13 @@ internal sealed class SampleSequenceIntegrityFixture : IDisposable
         get; set;
     }
     internal DatabaseEngine Database => ColdDatabase ?? (!sourceJoined ? Source.Owner.Database : throw new InvalidOperationException(Unknown));
-    internal List<(Command<DatabaseCommand> Operation, Result<object> Result, CommandRequest Command, CommitReceipt Expected)> Originals { get; } = [];
+    internal List<(Command<DatabaseCommand> Operation, Result<object> Result, CommandRequest Command, CommitReceipt Expected, byte[] OutcomeBytes)> Originals { get; } = [];
     internal byte[] Counter => KeySpace.Partition("sample-sequence", Source.Owner.Partition,
         SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series);
     internal void RetainEvidence() => preserve = true;
+    internal (long AppliedPosition, long StorePosition) ReadCanonicalCut()
+        => Store.Read(view => (view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
+            ? NativeSerialization.Deserialize<long>(bytes) : default(long), Store.Position));
 
     internal void Reopen()
     {

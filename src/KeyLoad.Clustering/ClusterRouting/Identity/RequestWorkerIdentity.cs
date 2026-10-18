@@ -4,7 +4,5 @@ namespace KeyLoad.Clustering;
 internal static class RequestWorkerIdentity
 {
     private const string RequestPool = "requests";
-    private const string CommandPool = "commands";
-    internal static string ForCommands() => CommandPool;
     internal static string ForRequests() => RequestPool;
 }

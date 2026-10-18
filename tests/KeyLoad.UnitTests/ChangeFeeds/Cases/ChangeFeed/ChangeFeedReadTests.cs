@@ -24,11 +24,11 @@ internal sealed class ChangeFeedReadTests
             var id = Guid.NewGuid();
             return engine.Apply(engine.CreateCommand(OperationKind.Batch, id, "root", TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(new CommandRequest(id, db.Partition, [.. mutations]), JsonDefaults.Options)));
         }
-        await Assert.That(Write(new PutDocument("orders", "a", "{}"), new PutDocument("orders", "b", "{}")).Error).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(Write(new PutDocument("orders", "a", "{}"), new PutDocument("orders", "b", "{}")).Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(engine.GetOutboxStatus("root", db.Partition).Head.Tail).IsEqualTo(0);
         await Assert.That(engine.GetDocument("root", new(db.Partition, "orders", "a"))).IsNull();
         Write(new PutDocument("orders", "a", "{}")).Get<CommitReceipt>();
-        await Assert.That(Write(new PutDocument("orders", "b", "{}")).Error).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(Write(new PutDocument("orders", "b", "{}")).Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
         var purgeId = Guid.NewGuid();
         db.Submit(OperationKind.PurgeOutbox, new PurgeOutboxRequest(purgeId, db.Partition, 1), id: purgeId).Get<OutboxHead>();
         Write(new PutDocument("orders", "b", "{}")).Get<CommitReceipt>();

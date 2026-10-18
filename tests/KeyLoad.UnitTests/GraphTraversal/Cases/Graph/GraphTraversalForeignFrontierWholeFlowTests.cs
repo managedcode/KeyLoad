@@ -13,7 +13,7 @@ internal sealed class GraphTraversalForeignFrontierWholeFlowTests
         var state = GraphTraversalForeignFrontierFixture.Seed(database);
         var token = TestContext.Current!.Execution.CancellationToken;
         await GraphTraversalForeignFrontierAssertions.Healthy(database.Database, database.Store, state, null, token);
-        var image = GraphShortestPathFullStoreImage.Bytes(database.Store);
+        var image = CanonicalStoreImage.Bytes(database.Store);
         var position = database.Store.Position;
         database.Store.Dispose();
         GraphTraversalIntegrityContinuation continuation;
@@ -24,7 +24,7 @@ internal sealed class GraphTraversalForeignFrontierWholeFlowTests
             await GraphTraversalForeignFrontierAssertions.Healthy(owner, cold, state, null, token);
             continuation = GraphTraversalForeignFrontierFixture.Continue(owner, state);
             await GraphTraversalForeignFrontierAssertions.Healthy(owner, cold, state, continuation, token);
-            image = GraphShortestPathFullStoreImage.Bytes(cold);
+            image = CanonicalStoreImage.Bytes(cold);
             position = cold.Position;
         }
         using var secondCold = new ZoneTreeStore(new(database.Directory), database.StorageExecution, UnitExecutionOptions.PointCacheExecution());

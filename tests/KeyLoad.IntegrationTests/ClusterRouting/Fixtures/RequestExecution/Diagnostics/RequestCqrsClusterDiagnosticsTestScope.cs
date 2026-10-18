@@ -13,7 +13,7 @@ internal sealed class RequestCqrsClusterDiagnosticsTestScope(Guid waveId, Reques
     private RequestCqrsClusterDiagnostics? diagnostics;
     private RequestCqrsClusterDiagnosticsScopeStreamOwner? streamOwner;
     private RequestCqrsClusterDiagnosticsIndependentConsumer? independentConsumer;
-    internal ContainerResource[] resources = [];
+    internal ProjectResource[] resources = [];
     private readonly RequestCqrsClusterDiagnosticsSubscriberObserver subscriberObserver = new();
     private string? dataRoot;
     private string? artifactPath;

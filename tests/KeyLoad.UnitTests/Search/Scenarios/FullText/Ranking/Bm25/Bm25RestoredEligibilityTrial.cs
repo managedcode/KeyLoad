@@ -14,7 +14,7 @@ internal static class Bm25RestoredEligibilityTrial
         var seeded = await Bm25PortableFamilyBackupSeed.CreateAsync(fixture, token);
         var original = fixture.Source.ReadStoredOutcome(seeded.Heads[0].Generation).PreparedCommand!;
         var receipt = OutcomeStoreOracle.ReadPartition(fixture.Source.Store, fixture.Source.Partition,
-            Bm25PortableFamilyBackupSeed.Root, original.CommandId)!.Get<CommitReceipt>();
+            Bm25PortableFamilyBackupSeed.Root, original.CommandId)!.Value.Get<CommitReceipt>();
         var source = Bm25RestoredEligibilityAssertions.Cut(fixture.Source.Store, fixture.Source.Database,
             fixture.Source.ReadCanonicalCut(), token);
         var targetPath = await RestoreAsync(fixture, token);

@@ -11,7 +11,7 @@ internal static class QueryRuleOptimizationCold
     internal static async Task RunAsync(QueryRuleOptimizationFixture fixture, bool includeNull, bool includeMissing, CancellationToken token)
     {
         var db = fixture.Harness;
-        var image = GraphShortestPathFullStoreImage.Bytes(db.Store);
+        var image = CanonicalStoreImage.Bytes(db.Store);
         var cut = db.Store.Position;
         var identity = db.Store.Identity;
         var bytes = NativeSerialization.Serialize(identity);

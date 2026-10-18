@@ -24,7 +24,7 @@ internal static class CompositionBoundReferenceNativeAssertions
     internal static async Task OriginalAsync(SafeProjectorOperationDatabase owner, CompositionBoundReferenceNativeState state,
         CompositionBoundReferenceNativeCommand command)
     {
-        var retained = owner.Entry(command.Operation).PreparedCommand!;
+        var retained = owner.ReadOutcome(command.Operation).PreparedCommand!;
         await Assert.That(retained.CommandId).IsEqualTo(command.Operation.CommandId);
         await Assert.That(retained.Value!.Input.Span.SequenceEqual(command.Operation.Value!.Input.Span)).IsTrue();
         await Assert.That(DatabaseCommandFingerprint.Compute(retained)).IsEqualTo(DatabaseCommandFingerprint.Compute(command.Operation));
@@ -53,12 +53,12 @@ internal static class CompositionBoundReferenceNativeAssertions
         var identity = NativeSerialization.Serialize(owner.Store.Identity);
         var position = owner.Store.Position;
         var applied = owner.Database.LastApplied;
-        var journal = owner.ReadCut();
+        var journal = owner.ReadCanonicalCut();
         await operation();
         await Assert.That(TeamRowPolicyAssertions.Image(owner.Store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
         await Assert.That(NativeSerialization.Serialize(owner.Store.Identity).SequenceEqual(identity)).IsTrue();
         await Assert.That(owner.Store.Position).IsEqualTo(position);
         await Assert.That(owner.Database.LastApplied).IsEqualTo(applied);
-        await Assert.That(owner.ReadCut()).IsEqualTo(journal);
+        await Assert.That(owner.ReadCanonicalCut()).IsEqualTo(journal);
     }
 }

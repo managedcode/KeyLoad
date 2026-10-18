@@ -39,7 +39,7 @@ internal static class RowRevisionBatchInferenceFlow
         db.Commit(new PutDocument(P.Collection, P.Hidden, P.Original, P.OriginalRevision,
             new(OwnerId: P.Reader), ExplicitReplacement: true));
         var healthy = Command(db, kind, P.RepairRevision);
-        var operation = RowRevisionInferenceRequests.Operation(healthy);
+        var operation = RowRevisionInferenceRequests.Operation(db.Database, healthy);
         var actual = db.Database.ApplyEmbedded(operation, token);
         await RowRevisionBatchInferenceAssertions.HealthyAsync(db.Database, db.Store, db.Partition,
             healthy, actual, kind, token);

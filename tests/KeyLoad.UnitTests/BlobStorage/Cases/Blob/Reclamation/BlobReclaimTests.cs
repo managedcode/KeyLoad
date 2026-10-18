@@ -24,7 +24,7 @@ internal sealed class BlobReclaimTests
         var metadata = PublishMultipart(db, blob);
         var uploadId = metadata.VersionId ?? throw new InvalidOperationException("Published test data must have a version.");
         var attempted = Reclaim(db, blob, uploadId, PartLimit, Guid.NewGuid());
-        await Assert.That(attempted.Error).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(attempted.Problem)).IsEqualTo(ErrorCode.Conflict);
 
         var deleted = Delete(db, blob, metadata.Revision);
         var tombstone = deleted.Value;
@@ -68,7 +68,7 @@ internal sealed class BlobReclaimTests
 
         var beforeExpiry = Reclaim(db, blob, uploadId, PartLimit, Guid.NewGuid(),
             startedAt.AddSeconds(BlobLimits.MinimumUploadTtlSeconds - 1));
-        await Assert.That(beforeExpiry.Error).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(beforeExpiry.Problem)).IsEqualTo(ErrorCode.Conflict);
 
         var reclaimId = Guid.NewGuid();
         var expired = ReclaimTyped(db, blob, uploadId, PartLimit, reclaimId,

@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
-using KeyLoad.AppHost.Features.CodeQuality;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.BackupRestore;
 using KeyLoad.UnitTests.Features.TestInfrastructure;

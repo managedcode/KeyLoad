@@ -11,7 +11,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>Starts only the selected real database with the production AppHost resource composer.</summary>
+/// <summary>Starts only the selected real database with the owning load-infrastructure AppHost.</summary>
 internal sealed class NativeDatabaseFlowFixture(DistributedApplication application, string root, string target) : IAsyncDisposable
 {
     private const string HttpEndpoint = "http";
@@ -21,7 +21,6 @@ internal sealed class NativeDatabaseFlowFixture(DistributedApplication applicati
     private const string PasswordParameter = "isolated-surrealdb-password";
     private const string Basic = "Basic";
     private const string User = "root:";
-    private const string NativeRunner = "comparisons";
     private static TimeSpan Deadline => NativeExecutionPolicyFixture.Harness().Value.NativeDatabaseFlowTimeout;
 
     internal static IOptions<NativeComparisonExecutionOptions> ExecutionOptions => NativeExecutionPolicyFixture.Read();
@@ -43,15 +42,13 @@ internal sealed class NativeDatabaseFlowFixture(DistributedApplication applicati
 
     private static async Task<DistributedApplication> BuildNativeApplicationAsync(string target, string root, CancellationToken token)
     {
-        var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(
+        var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_LoadTests_AppHost>(
             ["--Benchmarks:Enabled=true", "--" + BenchmarkSessionSelection.TargetSetting + "=" + target,
                 "--" + BenchmarkSessionSelection.NodeCountSetting + "=1", "--Benchmarks:Session=true",
                 "--Benchmarks:SessionId=native-flow", "--Benchmarks:EvidenceProfile=" + BenchmarkSessionContract.Profile,
                 "--Benchmarks:DataRoot=" + root, "--Benchmarks:Output=" + Path.Combine(root, "reports")], token);
         try
         {
-            var runner = builder.Resources.OfType<ContainerResource>().Single(resource => resource.Name == NativeRunner);
-            builder.Resources.Remove(runner);
             return await builder.BuildAsync(token);
         }
         catch (Exception failure)

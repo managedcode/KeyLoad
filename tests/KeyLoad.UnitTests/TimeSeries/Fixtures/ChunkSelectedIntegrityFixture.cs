@@ -65,7 +65,7 @@ internal sealed class ChunkSelectedIntegrityFixture : IDisposable
     internal Command<DatabaseCommand> Operation(Mutation mutation)
     {
         var id = Guid.NewGuid();
-        return new(id, OperationKind.Batch, SampleChunkCanonicalFixture.Principal, Owner.EvaluationClock.GetUtcNow(),
+        return Owner.CreateCommand(OperationKind.Batch, id, SampleChunkCanonicalFixture.Principal, Owner.EvaluationClock.GetUtcNow(),
             JsonSerializer.Serialize(new CommandRequest(id, Partition, [mutation]), JsonDefaults.Options));
     }
 

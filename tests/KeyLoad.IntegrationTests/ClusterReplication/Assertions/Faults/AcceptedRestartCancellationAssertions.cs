@@ -1,3 +1,5 @@
+using KeyLoad.AppHost.Features.ClusterReplication;
+
 namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 
 /// <summary>Proves interrupted native health settlement preserves the actual accepted replacement.</summary>
@@ -11,7 +13,7 @@ internal static class AcceptedRestartCancellationAssertions
         OperationCanceledException? original = null;
         try
         {
-            await fixture.RestartContainerAsync(resourceName, interrupted.Token);
+            await fixture.RestartServerAsync(resourceName, interrupted.Token);
         }
         catch (OperationCanceledException failure)
         {
@@ -22,11 +24,11 @@ internal static class AcceptedRestartCancellationAssertions
         await fixture.SaveFailureDiagnosticsAsync(cancellationToken);
     }
 
-    internal static async Task SameReplacementAsync(ContainerRuntimeInspection accepted,
+    internal static async Task SameReplacementAsync(ClusterFixture fixture, ProcessFaultCommandProtocol.Identity accepted,
         CancellationToken cancellationToken)
     {
-        var actual = await ContainerRuntimeDocker.InspectAsync(accepted.Id, cancellationToken);
-        await Assert.That(actual.State).IsEqualTo(ContainerRuntimeProtocol.RunningState);
+        cancellationToken.ThrowIfCancellationRequested();
+        var actual = ProjectProcessIdentity.Read(fixture.App.ResourceNotifications, accepted.ResourceName);
         await Assert.That(actual).IsEqualTo(accepted);
     }
 }

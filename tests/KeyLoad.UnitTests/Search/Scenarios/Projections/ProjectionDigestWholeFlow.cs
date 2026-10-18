@@ -41,9 +41,10 @@ internal static class ProjectionDigestWholeFlow
         if (!effect)
         {
             var beforeRepair = fixture.Harness.Store.Position;
-            continued = fixture.Harness.Submit(OperationKind.Batch, continuation, EventProjectionFixture.WorkerId, continuation.CommandId);
-            await ProjectionDigestAssertions.ReceiptAsync(fixture, continuation, continued.Get<CommitReceipt>(), beforeRepair);
-            await ReplayAsync(fixture, continuation, continued);
+            var actual = fixture.Harness.Submit(OperationKind.Batch, continuation, EventProjectionFixture.WorkerId, continuation.CommandId);
+            continued = actual;
+            await ProjectionDigestAssertions.ReceiptAsync(fixture, continuation, actual.Get<CommitReceipt>(), beforeRepair);
+            await ReplayAsync(fixture, continuation, actual);
         }
         await ProjectionDigestAssertions.HealthyAsync(fixture, schema: 1L);
         await ReplayAsync(fixture, command, result);
@@ -54,9 +55,9 @@ internal static class ProjectionDigestWholeFlow
         await ReplayAsync(fixture, malformed.Command, malformed.Result);
         await ProjectionDigestAssertions.HealthyAsync(fixture, schema: 1L);
         await ReplayAsync(fixture, command, result);
-        if (continued is not null)
+        if (continued is { } observed)
         {
-            await ReplayAsync(fixture, continuation, continued);
+            await ReplayAsync(fixture, continuation, observed);
         }
         await ProjectionDigestReclassification.RunAsync(fixture, request);
         await ReplayAsync(fixture, malformed.Command, malformed.Result);

@@ -14,8 +14,6 @@ internal sealed class McpOutputSchemaTests
     private const string ErrorCodeKey = "errorCode";
     private const string FabricatedStatus = "statusCode";
     private const string SafeDetail = "A safe bounded failure.";
-    private const string OwnershipEpoch = "ownershipEpoch";
-    private const long DefaultOwnershipEpoch = 1;
     private const string AdditionalProperties = "additionalProperties";
     private const string ObjectType = "object";
     private const string Durability = "durability";
@@ -56,18 +54,6 @@ internal sealed class McpOutputSchemaTests
             .Select(value => value.GetString() ?? throw new InvalidOperationException())).IsEquivalentTo(names);
         await Assert.That(actual.TryGetProperty(FabricatedStatus, out _)).IsFalse();
         await Assert.That(schema.GetProperty(AdditionalProperties).ValueKind).IsEqualTo(JsonValueKind.False);
-    }
-
-    /// <summary>Optional ownership epoch retains its canonical constructor default without becoming required.</summary>
-    [Test]
-    public async Task AcMcp003CanonicalCommandConstructorDefaultRemainsDocumented()
-    {
-        var input = McpSchemaFactory.CreateInput(typeof(CommandRequest), false);
-        var request = McpSchemaInspector.DefinedRequest(input);
-        await Assert.That(request.GetProperty(McpSchemaInspector.Properties).GetProperty(OwnershipEpoch)
-            .GetProperty(McpSchemaInspector.Default).GetInt64()).IsEqualTo(DefaultOwnershipEpoch);
-        await Assert.That(request.GetProperty(McpSchemaInspector.Required).EnumerateArray()
-            .Any(value => value.GetString() == OwnershipEpoch)).IsFalse();
     }
 
     /// <summary>Absent-object reads retain nullable domain fields in nonnull responses; dynamic SQL retains its actual root shape.</summary>

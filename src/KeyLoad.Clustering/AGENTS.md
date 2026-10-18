@@ -11,6 +11,19 @@
 - Apply the installed Orleans skill at `/Users/ksemenenko/.codex/skills/orleans/SKILL.md` and relevant lifecycle/hosting references before implementing Orleans decisions.
 - Activation migration must not move storage ownership. Preserve native Orleans membership behavior and cancellation; never claim local or single-node tests qualify cluster.
 
+## Storage access modes
+
+Follow [ADR-136](../../docs/ADR/ADR-136-native-orleans-partition-ownership.md).
+Isolated volumes have silo-local file owners reached through Orleans. A shared
+volume requires one open owner for each mutable physical partition, lazy opening
+and joined close before another silo reopens the same files; no data copies are
+created by a shared mount. Never open the same mutable ZoneTree eagerly on every
+silo. Cross-partition queries address logical partitions once and aggregate
+bounded partial results without counting replicas twice. These lifetime and
+query paths remain open implementation and qualification gates; a configuration
+flag alone does not implement them. StatelessWorker activations are automatically
+managed by Orleans and are not individually addressable.
+
 ## Boundaries and protected risks
 
 Follow the [root policy](../../AGENTS.md) and the owning feature specification. Keep changes in their actual owner, preserve unrelated work, and remove replaced code together with exclusive callers and fixtures. Use native Orleans calls for distributed execution and silo-local ZoneTree owners for files. Preserve persisted authorization, operation correctness, resource bounds, cancellation and joined shutdown. Never turn a static check or focused test into a claim of complete runtime qualification.

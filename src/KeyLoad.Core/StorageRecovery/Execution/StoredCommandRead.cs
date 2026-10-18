@@ -26,6 +26,7 @@ public sealed partial class DatabaseEngine
             {
                 return null;
             }
+            ValidateStoredSubmissionIdentity(view, original, selected, outcome);
             _ = ReadValidatedSubmissionOutcome(view, original, verifiedSelection: selected);
             RequireStoredCanonicalSequence(view, outcome, siloLocal: false);
             var retained = OwnCommand(outcome.PreparedCommand);

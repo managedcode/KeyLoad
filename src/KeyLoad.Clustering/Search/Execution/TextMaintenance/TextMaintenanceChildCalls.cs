@@ -1,23 +1,18 @@
 using System.Security.Cryptography;
-using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
-using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Orleans.Serialization;
 
 namespace KeyLoad.Clustering;
 
-internal sealed class TextMaintenanceChildCalls(DecodedGrainRequest parent, Func<string, CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> executeChild,
-    IServiceProvider services, GrainRequestCodec codec, TimeProvider clock,
-    Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
-    IOptions<GrainRoutingOptions> routing, ILogger diagnostics, IResourceLifetimeWorkBinding binding)
+internal sealed class TextMaintenanceChildCalls(DecodedGrainRequest parent,
+    Func<string, CancellationToken, Task<GrainOperationReply>> executeChild, Func<Guid, Task> abort,
+    IServiceProvider services, GrainRequestCodec codec, ILogger diagnostics, IResourceLifetimeWorkBinding binding)
 {
-    private readonly Func<INativeTextMaintenance> borrowNative = services.GetRequiredService<Func<INativeTextMaintenance>>();
     internal Guid ParentRequestId => parent.Envelope.RequestId;
     internal Guid SessionId { get; } = Guid.NewGuid();
-    internal DatabaseEngine Database => services.GetRequiredService<DatabaseEngine>();
+    internal DatabaseLimits Limits => services.GetRequiredService<IOptions<DatabaseLimits>>().Value;
 
     internal Task<TextMaintenanceCapabilityResult> CapabilityAsync(TextIndexMaintenanceRequest request,
         TextMaintenanceCapabilityKind kind, CancellationToken token)
@@ -37,21 +32,19 @@ internal sealed class TextMaintenanceChildCalls(DecodedGrainRequest parent, Func
         Guid commandId, CancellationToken token) where TResult : class
         => DispatchAsync<TResult>(NativeSerialization.Serialize(request), null, kind, commandId, token);
 
-    internal Task AbortAsync() => borrowNative().AbortAsync(SessionId);
+    internal Task AbortAsync() => abort(SessionId);
 
     private async Task<TResult> DispatchAsync<TResult>(byte[] payload, GrainReadKind? read,
         OperationKind? command, Guid commandId, CancellationToken token) where TResult : class
     {
-        token.ThrowIfCancellationRequested();
-        codec.ValidateScope(parent.Envelope);
-        GrainIdentityContext.Validate(parent.Envelope, parent.Envelope.RequestId);
-        var principal = GrainRequestAuthority.ReloadForRequest(Database, parent.Envelope, clock);
-        GrainRequestAuthority.RequireAdministrator(principal);
         var actorId = Guid.NewGuid();
         string signed;
         try
         {
-            signed = codec.CreateTextMaintenanceChild(actorId, principal.Id, read, command,
+            token.ThrowIfCancellationRequested();
+            codec.ValidateScope(parent.Envelope);
+            GrainIdentityContext.Validate(parent.Envelope, parent.Envelope.RequestId);
+            signed = codec.CreateTextMaintenanceChild(actorId, parent.Envelope.PrincipalId!, read, command,
                 commandId, payload, parent.Envelope.ExpiresAt);
         }
         catch (Exception)
@@ -68,7 +61,7 @@ internal sealed class TextMaintenanceChildCalls(DecodedGrainRequest parent, Func
                 {
                     invoked = true;
                     return executeChild(value, cancellation);
-                }, services, codec, clock, serializer, routing, binding, payload, token).ConfigureAwait(true);
+                }, services, codec, binding, payload, token).ConfigureAwait(true);
         }
         catch (KeyLoadException error) when (invoked && command is not null)
         {

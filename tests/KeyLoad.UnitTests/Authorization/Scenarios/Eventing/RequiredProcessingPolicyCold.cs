@@ -13,7 +13,7 @@ internal static class RequiredProcessingPolicyCold
         (Command<DatabaseCommand> Operation, CommitReceipt Receipt, byte[] Outcome) healthy, CancellationToken token)
     {
         var db = fixture.Harness;
-        var image = GraphShortestPathFullStoreImage.Bytes(db.Store);
+        var image = CanonicalStoreImage.Bytes(db.Store);
         var position = db.Store.Position;
         var identity = db.Store.Identity;
         var bytes = NativeSerialization.Serialize(identity);

@@ -6,8 +6,6 @@ internal sealed class BenchmarkSessionConfigurationTests
     [Test]
     [Arguments("KEYLOAD_COMPARISON_JOB_ID", "0")]
     [Arguments("KEYLOAD_COMPARISON_JOB_ID", "111047630080" + BenchmarkSessionStartupFixture.Canary)]
-    [Arguments("Benchmarks__LoadGeneratorImage", "mutable:" + BenchmarkSessionStartupFixture.Canary)]
-    [Arguments("Benchmarks__Native__Image", "mutable:" + BenchmarkSessionStartupFixture.Canary)]
     [Arguments("GITHUB_SHA", "fedcba9876543210fedcba9876543210fedcba98")]
     [Arguments("Benchmarks__NodeCount", "0")]
     [Arguments("Benchmarks__Scenario", "pointread")]
@@ -23,11 +21,9 @@ internal sealed class BenchmarkSessionConfigurationTests
 
     [Test]
     [Arguments("KEYLOAD_COMPARISON_JOB_ID")]
-    [Arguments("Benchmarks__LoadGeneratorImage")]
     [Arguments("GITHUB_RUN_ID")]
-    [Arguments("Benchmarks__Native__Image")]
     [Arguments("Benchmarks__Output")]
-    public async Task MissingRequiredIdentityNeverFallsBackToInheritedContext(string key)
+    public async Task MissingRequiredIdentityRejectsBeforeNativeAllocation(string key)
     {
         using var fixture = new BenchmarkSessionStartupFixture();
         var settings = fixture.Settings();

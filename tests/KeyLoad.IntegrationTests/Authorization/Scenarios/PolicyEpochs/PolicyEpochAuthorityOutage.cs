@@ -25,7 +25,7 @@ internal static class PolicyEpochAuthorityOutage
             foreach (var node in StoppedNodes)
             {
                 stopped.Add(node);
-                await fixture.KillContainerAsync(node, Scenario, token);
+                await fixture.KillServerAsync(node, Scenario, token);
             }
             await ReadAvailableAsync(reader, state, cursors, token);
             await ClusterReplicationTestSupport.MissingCopiesAsync(await root.CommitAsync(state.Seed, token));
@@ -72,11 +72,11 @@ internal static class PolicyEpochAuthorityOutage
         foreach (var node in stopped)
         {
             await ServerFailureObserver.ObserveAsync(async () =>
-                await fixture.BeginContainerRestartAsync(node, token), failures);
+                await fixture.BeginProcessRestartAsync(node, token), failures);
         }
         foreach (var node in stopped)
         {
-            await ServerFailureObserver.ObserveAsync(() => fixture.RestartContainerAsync(node, token), failures);
+            await ServerFailureObserver.ObserveAsync(() => fixture.RestartServerAsync(node, token), failures);
         }
     }
 }

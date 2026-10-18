@@ -1,6 +1,6 @@
 using System.Globalization;
 using System.Net;
-using KeyLoad.AppHost.Features.BenchmarkComparisons;
+using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 using KeyLoad.Comparisons.Targets;
 using KurrentDB.Client;
 
@@ -24,7 +24,7 @@ internal sealed class IsolatedKurrentDiscoverySettingsTests
         await using var fixture = new IsolatedResourceTopologyFixture(Target, count);
         IsolatedKurrentResources.Add(fixture.Context);
         _ = fixture.Build();
-        var environment = await IsolatedResourceTopologyFixture.EnvironmentAsync(fixture.Context.Runner.Resource);
+        var environment = await IsolatedResourceTopologyFixture.EnvironmentAsync(fixture.Context.Client);
         var settings = KurrentNativeSettings.CreateWriter(environment[IsolatedDocumentResourceAssertions.Connection]);
         var connectivity = settings.ConnectivitySettings;
         await Assert.That(connectivity.NodePreference).IsEqualTo(NodePreference.Leader);

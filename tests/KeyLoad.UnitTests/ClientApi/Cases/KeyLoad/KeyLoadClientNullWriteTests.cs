@@ -16,7 +16,6 @@ internal sealed class KeyLoadClientNullWriteTests
     private const string Json = """{"value":1}""";
     private const long Revision = 1;
     private const long Position = 7;
-    private const long Epoch = 2;
     private const string AtomicPartition = "literal-atomic-partition";
     private const string PartitionId = "partition";
     private const string DocumentAbsence = "{\"document\":null}";
@@ -152,7 +151,7 @@ internal sealed class KeyLoadClientNullWriteTests
         var partition = new PartitionRef("tenant", "database", "domain", PartitionId);
         var command = new CommandRequest(Guid.NewGuid(), partition,
             [new PutDocument(Collection, Document, Json, ExpectedRevision: 0)]);
-        var receipt = new CommitReceipt(command.CommandId, new(Guid.NewGuid(), AtomicPartition, Position, Epoch), [new("document.put", Collection, Document, Revision)], DurabilityProfile.ProcessDurable, 1);
+        var receipt = new CommitReceipt(command.CommandId, new(Guid.NewGuid(), AtomicPartition, Position), [new("document.put", Collection, Document, Revision)], DurabilityProfile.ProcessDurable, 1);
         var reference = new EntityRef(partition, Collection, Document);
         var document = new DocumentResult(reference, Revision, Json, false, []);
         var requests = new List<CommandRequest>();

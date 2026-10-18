@@ -1,9 +1,6 @@
 name: Native benchmark session setup
-description: Import the common source-bound Docker images and compiled test runtime.
+description: Authenticate this job and import the exact compiled native server, client and Aspire runtime.
 inputs:
-  image-artifact-id:
-    description: Same-run immutable native image bundle
-    required: true
   runtime-artifact-id:
     description: Same-run immutable compiled runner bundle
     required: true
@@ -22,23 +19,6 @@ runs:
     - name: Verify this GitHub session job
       shell: bash
       run: node scripts/Features/BenchmarkComparisons/session-github-job.mjs
-    - name: Download source-bound Docker images
-      uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131
-      with:
-        artifact-ids: ${{ inputs.image-artifact-id }}
-        path: ${{ runner.temp }}/keyload-image-bundle
-    - name: Import and verify Docker images
-      id: images
-      shell: bash
-      run: node scripts/Features/BenchmarkComparisons/import-images.mjs --bundle="$RUNNER_TEMP/keyload-image-bundle"
-    - name: Configure imported Docker images
-      env:
-        KEYLOAD_SERVER_IMAGE: ${{ steps.images.outputs.server-image }}
-        KEYLOAD_RUNNER_IMAGE: ${{ steps.images.outputs.load-generator-image }}
-      shell: bash
-      run: |
-        test -n "$KEYLOAD_SERVER_IMAGE" && test -n "$KEYLOAD_RUNNER_IMAGE"
-        printf 'KeyLoad__ContainerImages__Server=%s\nBenchmarks__ContainerImages__LoadGenerator=%s\nKEYLOAD_IMAGE_RECEIPT=%s\n' "$KEYLOAD_SERVER_IMAGE" "$KEYLOAD_RUNNER_IMAGE" "$RUNNER_TEMP/keyload-images/image-receipt.json" >> "$GITHUB_ENV"
     - name: Download compiled benchmark runtime
       uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131
       with:

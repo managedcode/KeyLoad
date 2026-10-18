@@ -34,6 +34,39 @@ internal sealed class NativeTextIncrementalWorker : IAsyncDisposable
         }
     }
 
+    internal async Task RunCleanupAsync(Action operation)
+    {
+        TaskCompletionSource original;
+        while (true)
+        {
+            Task? pending;
+            lock (gate)
+            {
+                ObjectDisposedException.ThrowIf(closed, this);
+                pending = active?.Task;
+                if (pending is null)
+                {
+                    original = new(TaskCreationOptions.RunContinuationsAsynchronously);
+                    active = original;
+                    break;
+                }
+            }
+            await pending.ConfigureAwait(false);
+        }
+        try
+        {
+            operation();
+        }
+        finally
+        {
+            lock (gate)
+            {
+                original.TrySetResult();
+                active = null;
+            }
+        }
+    }
+
     public ValueTask DisposeAsync()
     {
         lock (gate)

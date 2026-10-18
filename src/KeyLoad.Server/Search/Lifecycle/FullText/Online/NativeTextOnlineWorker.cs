@@ -7,18 +7,31 @@ internal sealed class NativeTextOnlineWorker : IAsyncDisposable
     private TaskCompletionSource? active;
     private bool closed;
 
-    internal async Task<T> RunAsync<T>(Func<Task<T>> operation)
+    internal Task<T> RunAsync<T>(Func<Task<T>> operation) => RunCoreAsync(operation, false);
+    internal Task<T> RunCleanupAsync<T>(Func<Task<T>> operation) => RunCoreAsync(operation, true);
+
+    private async Task<T> RunCoreAsync<T>(Func<Task<T>> operation, bool waitForAccepted)
     {
         TaskCompletionSource original;
-        lock (gate)
+        while (true)
         {
-            ObjectDisposedException.ThrowIf(closed, this);
-            if (active is not null)
+            Task? pending;
+            lock (gate)
             {
-                throw NativeTextErrors.Busy();
+                ObjectDisposedException.ThrowIf(closed, this);
+                pending = active?.Task;
+                if (pending is null)
+                {
+                    original = new(TaskCreationOptions.RunContinuationsAsynchronously);
+                    active = original;
+                    break;
+                }
+                if (!waitForAccepted)
+                {
+                    throw NativeTextErrors.Busy();
+                }
             }
-            original = new(TaskCreationOptions.RunContinuationsAsynchronously);
-            active = original;
+            await pending.ConfigureAwait(false);
         }
         try
         {

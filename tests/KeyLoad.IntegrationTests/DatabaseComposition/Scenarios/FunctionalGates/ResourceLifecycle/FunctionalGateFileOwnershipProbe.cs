@@ -9,15 +9,15 @@ using P = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateFi
 
 namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
-/// <summary>Joins every original competing container before its live owner's files can be released.</summary>
+/// <summary>Joins every original competing process before its live owner's files can be released.</summary>
 internal static class FunctionalGateFileOwnershipProbe
 {
     internal static async Task RunAsync(FunctionalGateFixture fixture, CancellationToken token)
     {
         var settlement = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         fixture.RegisterFileContenderSettlement(settlement.Task);
-        var tasks = new List<Task<string>>();
-        var ids = new List<string>();
+        var tasks = new List<Task<int>>();
+        var ids = new List<int>();
         var settled = new bool[P.SiloCount];
         var failures = new List<Exception>();
         try
@@ -28,9 +28,8 @@ internal static class FunctionalGateFileOwnershipProbe
                 var owner = await FunctionalGateFileOwnershipAssertions.RuntimeAsync(fixture,
                     ExclusiveOwnerContentionResources.OwnerName, refused: false, token);
                 var saved = fixture.PhysicalFiles!.Owners.Single(value => value.Resource == ExclusiveOwnerContentionResources.OwnerName);
-                await Assert.That(owner.Id).IsEqualTo(saved.Runtime.Id);
-                await Assert.That(owner.Image).IsEqualTo(saved.Runtime.ImageId);
-                await Assert.That(owner.Configured).IsEqualTo(saved.Runtime.ConfigImage);
+                await Assert.That(owner.ProcessId).IsEqualTo(saved.Runtime.ProcessId);
+                await Assert.That(owner.Executable).IsEqualTo(saved.Runtime.Binary.ExecutablePath);
                 await Assert.That(owner.Source).IsEqualTo(saved.Directory);
                 var output = new ClusterFailureReceipts().RequireRunOutput(TestContext.ResultsDirectory);
                 var names = ExclusiveOwnerContentionResources.ResourceNames;
@@ -60,11 +59,11 @@ internal static class FunctionalGateFileOwnershipProbe
             }
         }
         ServerFailureObserver.ThrowIfAny(failures);
-        await Assert.That(ids.Distinct(StringComparer.Ordinal).Count()).IsEqualTo(P.SiloCount);
+        await Assert.That(ids.Distinct().Count()).IsEqualTo(P.SiloCount);
     }
 
-    private static async Task<string> RunOneAsync(FunctionalGateFixture fixture, string name,
-        (string Source, string Image, string Configured, string Id, string Inspection) owner,
+    private static async Task<int> RunOneAsync(FunctionalGateFixture fixture, string name,
+        (string Source, string Project, string Executable, int ProcessId, string Launch, string Inspection) owner,
         string results, Action<bool> settle, CancellationToken token)
     {
         var stopped = false;
@@ -78,7 +77,7 @@ internal static class FunctionalGateFileOwnershipProbe
             var commands = fixture.App.Services.GetRequiredService<ResourceCommandService>();
             var logs = FunctionalGateFileOwnershipLogs.ReadAsync(fixture, name, lifetime.Token);
             var terminal = WaitForExitAsync(fixture, name, lifetime.Token);
-            var id = string.Empty;
+            var id = 0;
             try
             {
                 await ServerFailureObserver.ObserveAsync(async () =>
@@ -91,10 +90,11 @@ internal static class FunctionalGateFileOwnershipProbe
                     var text = await logs.ConfigureAwait(false);
                     var actual = await FunctionalGateFileOwnershipAssertions.RuntimeAsync(fixture, name, refused: true, lifetime.Token);
                     await Assert.That(actual.Source).IsEqualTo(owner.Source);
-                    await Assert.That(actual.Image).IsEqualTo(owner.Image);
-                    await Assert.That(actual.Configured).IsEqualTo(owner.Configured);
-                    await Assert.That(actual.Id).IsNotEqualTo(owner.Id);
-                    id = actual.Id;
+                    await Assert.That(actual.Project).IsEqualTo(owner.Project);
+                    await Assert.That(actual.Executable).IsEqualTo(owner.Executable);
+                    await Assert.That(actual.Launch).IsEqualTo(owner.Launch);
+                    await Assert.That(actual.ProcessId).IsNotEqualTo(owner.ProcessId);
+                    id = actual.ProcessId;
                     var output = Path.Combine(results, P.EvidenceDirectory, name);
                     var logsDirectory = Path.Combine(output, P.LogEvidence);
                     var runtimeDirectory = Path.Combine(output, P.RuntimeEvidence);
@@ -135,8 +135,7 @@ internal static class FunctionalGateFileOwnershipProbe
         }, failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            _ = await ContainerRuntimeDocker.WaitForExitedAsync(
-                FunctionalGateFileOwnershipAssertions.ContainerName(fixture, name), name, cleanup.Token);
+            await fixture.App.ResourceNotifications.WaitForResourceAsync(name, static current => current.Snapshot.ExitCode is not null, cleanup.Token);
         }, failures).ConfigureAwait(false);
         return failures.Count == before;
     }

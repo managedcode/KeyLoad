@@ -12,15 +12,15 @@ internal static class NativeTextProtectedPublicColdRestart
         var failures = new List<Exception>();
         foreach (var node in nodes)
         {
-            await ServerFailureObserver.ObserveAsync(() => fixture.KillContainerAsync(node, "native-text-protected-public-cold", token), failures);
+            await ServerFailureObserver.ObserveAsync(() => fixture.KillServerAsync(node, "native-text-protected-public-cold", token), failures);
         }
         foreach (var node in nodes)
         {
-            await ServerFailureObserver.ObserveAsync(async () => await fixture.BeginContainerRestartAsync(node, token), failures);
+            await ServerFailureObserver.ObserveAsync(async () => await fixture.BeginProcessRestartAsync(node, token), failures);
         }
         foreach (var node in nodes)
         {
-            await ServerFailureObserver.ObserveAsync(() => fixture.RestartContainerAsync(node, token), failures);
+            await ServerFailureObserver.ObserveAsync(() => fixture.RestartServerAsync(node, token), failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }

@@ -38,16 +38,10 @@ internal static class NativeAnnMaintenanceLifecycle
     {
         await originalOperations.ConfigureAwait(false);
         var actual = getOwner();
-        try
+        if (actual is not null)
         {
-            if (actual is not null)
-            {
-                await actual.DisposeAsync().ConfigureAwait(false);
-            }
+            await actual.DisposeAsync().ConfigureAwait(false);
         }
-        finally
-        {
-            clearSession();
-        }
+        clearSession();
     }
 }

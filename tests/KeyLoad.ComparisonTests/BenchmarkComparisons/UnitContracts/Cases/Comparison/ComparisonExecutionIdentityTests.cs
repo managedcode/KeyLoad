@@ -1,7 +1,7 @@
 using SessionFields = KeyLoad.ComparisonTests.Features.BenchmarkComparisons.BenchmarkSessionEvidenceKeys;
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>Verifies digest-backed normal-host provenance failures through the real CLI process.</summary>
+/// <summary>Verifies original workflow provenance failures through the real native client process.</summary>
 internal sealed class ComparisonExecutionIdentityTests
 {
     private const string SingleProfile = "smoke-single";
@@ -18,17 +18,6 @@ internal sealed class ComparisonExecutionIdentityTests
     }
 
     [Test]
-    public async Task AcImage002MissingKeyLoadDigestReferenceNamesOnlyItsSetting()
-    {
-        var settings = ComparisonExecutionIdentitySupport.ValidSettings();
-        settings.Remove(ComparisonExecutionIdentitySupport.KeyLoadImage);
-        var result = await ComparisonExecutionIdentitySupport.RunAsync(settings);
-
-        await ComparisonExecutionIdentitySupport.AssertSafeFailureAsync(result,
-            ComparisonExecutionIdentitySupport.MissingKeyPrefix + "Benchmarks:Images:KeyLoad");
-    }
-
-    [Test]
     public async Task AcImage005NonPositiveGitHubRunIdFailsWithSafeCode()
     {
         var settings = ComparisonExecutionIdentitySupport.ValidSettings();
@@ -37,30 +26,6 @@ internal sealed class ComparisonExecutionIdentityTests
 
         await ComparisonExecutionIdentitySupport.AssertSafeFailureAsync(result,
             ComparisonExecutionIdentitySupport.InvalidCode);
-    }
-
-    [Test]
-    public async Task AcImage002MalformedLoadGeneratorDigestFailsWithoutEchoingReference()
-    {
-        var settings = ComparisonExecutionIdentitySupport.ValidSettings();
-        settings[ComparisonExecutionIdentitySupport.LoadGeneratorImage] =
-            "registry.invalid/private-path?token=" + ComparisonExecutionIdentitySupport.PrivateCanary;
-        var result = await ComparisonExecutionIdentitySupport.RunAsync(settings);
-
-        await ComparisonExecutionIdentitySupport.AssertSafeFailureAsync(result,
-            ComparisonExecutionIdentitySupport.InvalidCode, ComparisonExecutionIdentitySupport.PrivateCanary);
-    }
-
-    [Test]
-    public async Task AcImage002MalformedKeyLoadDigestFailsWithoutEchoingReference()
-    {
-        var settings = ComparisonExecutionIdentitySupport.ValidSettings();
-        settings[ComparisonExecutionIdentitySupport.KeyLoadImage] =
-            "registry.invalid/private-path?token=" + ComparisonExecutionIdentitySupport.PrivateCanary;
-        var result = await ComparisonExecutionIdentitySupport.RunAsync(settings);
-
-        await ComparisonExecutionIdentitySupport.AssertSafeFailureAsync(result,
-            ComparisonExecutionIdentitySupport.InvalidCode, ComparisonExecutionIdentitySupport.PrivateCanary);
     }
 
     [Test]
@@ -123,11 +88,11 @@ internal sealed class ComparisonExecutionIdentityTests
     public async Task AcImage005IdentityIsValidatedBeforeNativeClientEndpoints()
     {
         var settings = ComparisonExecutionIdentitySupport.ValidSettings();
-        settings.Remove(ComparisonExecutionIdentitySupport.LoadGeneratorImage);
+        settings.Remove(ComparisonExecutionIdentitySupport.RunId);
         settings[SessionFields.FirstEndpointEnvironment] = ComparisonExecutionIdentitySupport.PrivateCanary;
         var result = await ComparisonExecutionIdentitySupport.RunAsync(settings);
         await ComparisonExecutionIdentitySupport.AssertSafeFailureAsync(result,
-            ComparisonExecutionIdentitySupport.MissingKeyPrefix + "Benchmarks:LoadGeneratorImage",
+            ComparisonExecutionIdentitySupport.MissingKeyPrefix + "GITHUB_RUN_ID",
             ComparisonExecutionIdentitySupport.PrivateCanary);
     }
     [Test]

@@ -8,7 +8,7 @@ using ModelContextProtocol.Protocol;
 namespace KeyLoad.IntegrationTests.Features.ClientApi;
 
 /// <summary>AC-MCPGW-001/002/004: compact discovery resolves canonical capabilities through the genuine official client.</summary>
-/// <param name="fixture">The initialized actual Docker/Aspire Orleans application.</param>
+/// <param name="fixture">The initialized actual native Aspire Orleans application.</param>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class McpDiscoveryTests(ClusterFixture fixture)

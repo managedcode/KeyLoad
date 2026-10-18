@@ -86,7 +86,7 @@ internal sealed class BlobStorageLifecycleTests
         BlobStorageTestSupport.Begin(db, blob, uploadId, bytes.Length, 0);
 
         var outOfOrder = BlobStorageTestSupport.WriteResult(db, blob, uploadId, 1, tailPart);
-        await Assert.That(outOfOrder.Error is ErrorCode.Validation or ErrorCode.Conflict).IsTrue();
+        await Assert.That(Errors.Code(outOfOrder.Problem) is ErrorCode.Validation or ErrorCode.Conflict).IsTrue();
         await Assert.That(operations.Metadata(PrincipalId, new(blob))).IsNull();
         var firstWrite = BlobStorageTestSupport.Write(db, blob, uploadId, 0, firstPart);
         var duplicatePart = BlobStorageTestSupport.Write(db, blob, uploadId, 0, firstPart);

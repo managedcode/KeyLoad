@@ -52,7 +52,7 @@ internal static class GraphLabelUseOperations
 
     internal static async Task ObserveAsync(ZoneTreeStore store, Func<Task> operation)
     {
-        var image = GraphShortestPathFullStoreImage.Bytes(store);
+        var image = CanonicalStoreImage.Bytes(store);
         var position = store.Position;
         var identity = NativeSerialization.Serialize(store.Identity);
         var failures = new List<Exception>();
@@ -66,7 +66,7 @@ internal static class GraphLabelUseOperations
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            await Assert.That(GraphShortestPathFullStoreImage.Bytes(store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
+            await Assert.That(CanonicalStoreImage.Bytes(store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
         }, failures);
         await ServerFailureObserver.ObserveAsync(async () =>
         {

@@ -20,4 +20,4 @@ flowchart LR
 
 Canonical roles: Unit BlobStorage Cases/BlobSupersessionTests; Helpers/BlobSupersessionTrial and BlobSupersessionPublication; Assertions/BlobSupersessionAssertions; Models/BlobSupersessionVersion. Product implementation is unchanged. Server/SDK/MCP/frontend: N/A to this additional native kernel case; existing public cluster qualification remains required.
 
-Source implementation requires current-image verification; compiler/current-image TUnit/native runtime/Linux/process/cluster/SDK/MCP and endurance gates OPEN. No native replica journal/ACK, process-kill, cross-store atomicity, public historical read or performance claim follows from same-root kernel reopen.
+Source implementation requires current-image verification; compiler/current-image TUnit/native runtime/Linux/process/cluster/SDK/MCP and endurance gates OPEN. Same-root kernel reopening does not qualify configured-copy acknowledgements, process-kill recovery, cross-store atomicity, public historical reads or performance.

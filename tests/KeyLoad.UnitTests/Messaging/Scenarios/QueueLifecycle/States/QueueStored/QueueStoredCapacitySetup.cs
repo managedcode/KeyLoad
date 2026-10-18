@@ -1,4 +1,5 @@
 using System.Text.Json;
+using KeyLoad.Core;
 using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -32,10 +33,12 @@ internal static class QueueStoredCapacitySetup
                 new EnqueueMessage(QueueEnqueueColdProtocol.Queue, QueueEnqueueColdProtocol.Healthy, QueueEnqueueColdProtocol.HealthyJson)]);
         var receive = new ReceiveRequest(Guid.NewGuid(), lane);
         return new(producer, original, scheduledAt,
-            Operation(OperationKind.Batch, enqueue, enqueue.CommandId, time),
-            Operation(OperationKind.Receive, receive, receive.RequestId, time));
+            Operation(fixture.Database, OperationKind.Batch, enqueue, enqueue.CommandId, time),
+            Operation(fixture.Database, OperationKind.Receive, receive, receive.RequestId, time));
     }
 
-    internal static Command<DatabaseCommand> Operation<T>(OperationKind kind, T payload, Guid id, DateTimeOffset time)
-        => new(id, kind, QueueEnqueueColdProtocol.Root, time, JsonSerializer.Serialize(payload, JsonDefaults.Options));
+    internal static Command<DatabaseCommand> Operation<T>(DatabaseEngine owner, OperationKind kind,
+        T payload, Guid id, DateTimeOffset time)
+        => owner.CreateCommand(kind, id, QueueEnqueueColdProtocol.Root, time,
+            JsonSerializer.Serialize(payload, JsonDefaults.Options));
 }

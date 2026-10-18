@@ -1,6 +1,8 @@
 using Aspire.Hosting;
+using System.Text.Json;
+using KeyLoad.Diagnostics.Features.ResourceExecution;
 using KeyLoad.AppHost.Features.TestInfrastructure;
-using KeyLoad.IntegrationTests.Features.CodeQuality;
+using KeyLoad.AppHost.Features.ClusterReplication;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 
@@ -9,40 +11,34 @@ internal static class ClusterFixtureApplicationStartup
     internal static ClusterFixtureColdStartObservation ObserveColdStart(string root)
         => new(root, Directory.Exists(root), File.Exists(root));
 
-    internal static async Task StartAsync(DistributedApplication application, string repository,
-        IReadOnlyDictionary<string, string> containerNames, NativeCoverageClusterFixtureOwner? coverage,
-        LocalClusterImageSelection.Selection? selection, CancellationToken token)
+    internal static async Task<string> StartAsync(DistributedApplication application, IReadOnlyCollection<string> names,
+        CancellationToken token)
     {
-        var identity = coverage is null
-            ? await ReadLocalIdentityAsync(application, repository, selection, token).ConfigureAwait(false)
-            : null;
-        if (coverage is null && identity is null)
-        {
-            await ClusterFixtureImageIdentity.VerifyAsync(application, token).ConfigureAwait(false);
-        }
-        else if (coverage is not null)
-        {
-            await coverage.VerifyBeforeStartAsync(application, token).ConfigureAwait(false);
-        }
         await application.StartAsync(token).ConfigureAwait(false);
-        var readinessNodes = Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount)
-            .Select(ClusterFixtureProtocol.NodeName);
-        await AspireStartupReadiness.WaitForHealthyAsync(application, readinessNodes, token).ConfigureAwait(false);
-        if (identity is not null)
-        {
-            await LocalClusterImageIdentity.VerifyStartedContainersAsync(identity, containerNames,
-                ClusterFixtureLocalImageLifecycle.ExpectedNames, token).ConfigureAwait(false);
-        }
-        if (coverage is not null)
-        {
-            await coverage.VerifyStartedAsync(containerNames, token).ConfigureAwait(false);
-        }
+        await AspireStartupReadiness.WaitForHealthyAsync(application, names, token).ConfigureAwait(false);
+        var output = new ClusterFailureReceipts().RequireRunOutput(TestContext.ResultsDirectory);
+        Directory.CreateDirectory(output);
+        _ = await CaptureAsync(application, names, output, "native-process-startup.json", token).ConfigureAwait(false);
+        return output;
     }
 
-    private static async Task<LocalClusterImageIdentity.Identity?> ReadLocalIdentityAsync(DistributedApplication application,
-        string repository, LocalClusterImageSelection.Selection? selection, CancellationToken token)
-        => selection is null
-            ? await LocalClusterImageIdentity.VerifyBeforeStartAsync(application, repository, token).ConfigureAwait(false)
-            : await LocalClusterImageIdentity.VerifyBeforeStartAsync(application, repository, selection,
-                ClusterFixtureLocalImageLifecycle.ExpectedNames, token).ConfigureAwait(false);
+    internal static async Task<NativeProcessEvidence[]> CaptureAsync(DistributedApplication application,
+        IReadOnlyCollection<string> names, string output, string fileName, CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        var observed = names.Select(name => ProjectProcessEvidence.Read(application.ResourceNotifications, name)).ToArray();
+        await WriteAsync(output, fileName, observed, token).ConfigureAwait(false);
+        return observed;
+    }
+
+    internal static async Task WriteAsync<T>(string output, string fileName, T original, CancellationToken token)
+    {
+        await using var stream = new FileStream(Path.Combine(output, fileName), new FileStreamOptions
+        {
+            Mode = FileMode.CreateNew, Access = FileAccess.Write, Share = FileShare.None,
+            Options = FileOptions.Asynchronous
+        });
+        await JsonSerializer.SerializeAsync(stream, original, cancellationToken: token).ConfigureAwait(false);
+        await stream.FlushAsync(token).ConfigureAwait(false);
+    }
 }

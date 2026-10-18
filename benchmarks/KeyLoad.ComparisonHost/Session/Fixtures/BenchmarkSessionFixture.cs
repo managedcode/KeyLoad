@@ -35,6 +35,7 @@ internal sealed class BenchmarkSessionFixture : IAsyncInitializer, IAsyncDisposa
     private IsolatedHostTargetOwner? owner;
     private BenchmarkSession? session;
     private ImmutableArray<BenchmarkSessionAssembly> assemblies;
+    private BenchmarkSessionProcesses? processes;
 
     public BenchmarkSessionFixture()
     {
@@ -63,6 +64,7 @@ internal sealed class BenchmarkSessionFixture : IAsyncInitializer, IAsyncDisposa
         input.AddEnvironmentVariables();
         settings = BenchmarkSessionHostSettings.Read(input);
         assemblies = BenchmarkSessionArtifacts.Assemblies();
+        processes = BenchmarkSessionProcessEvidence.Read(input, settings.Native.Selection);
         if (settings.Native.UnsupportedReason is null)
         {
             owner = new(NativeComparisonExecutionRegistration.Read(input),
@@ -141,7 +143,7 @@ internal sealed class BenchmarkSessionFixture : IAsyncInitializer, IAsyncDisposa
         var outcome = reason is not null ? Unavailable : outcomes.Values.Any(status => status == Failed) ? Failure : Success;
         var profile = owner?.ObservedProfile;
         if (capabilitiesUnavailable || !outcomes.ContainsValue(Measured)
-            && profile is not { Image: not null, Cluster: not null })
+            && profile is not { Cluster: not null })
         {
             profile = null;
         }
@@ -149,7 +151,8 @@ internal sealed class BenchmarkSessionFixture : IAsyncInitializer, IAsyncDisposa
             new(BenchmarkSessionHostSettings.Profile, input.SessionId, worker.Target, worker.NodeCount,
                 worker.SourceRevision, worker.RunId, worker.Attempt, worker.JobId,
                 worker.Repository, worker.Ref, worker.Workflow,
-                new(unavailable is null ? input.Native.Native?.Image : null, input.Native.Identity.LoadGeneratorImage), profile,
+                new(unavailable is null ? input.Native.Native?.Image : null),
+                processes ?? throw new InvalidOperationException(BenchmarkSessionHostSettings.Profile), profile,
                 new(RuntimeInformation.OSDescription, RuntimeInformation.ProcessArchitecture.ToString(),
                     Environment.ProcessorCount, RuntimeInformation.FrameworkDescription, input.Native.Storage), assemblies,
                 artifacts.ToImmutableArray(), outcome, reason), input.Native.HostExecution);

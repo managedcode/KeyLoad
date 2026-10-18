@@ -3,7 +3,7 @@ using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>Creates genuine serialized or explicitly encoded JSON for response and transport boundary regressions.</summary>
+/// <summary>Creates genuine serialized or explicitly encoded JSON for response and transport boundary checks.</summary>
 internal static class McpResponseBoundaryTestData
 {
     internal const char Padding = 'a';

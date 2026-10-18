@@ -27,8 +27,8 @@ internal static class DocumentPatchAtomicityAssertions
         var stored = OutcomeStoreOracle.ReadPartition(owner.Store, owner.Source.Partition, Root, operation.CommandId)
             ?? throw new InvalidOperationException("The original scoped native outcome is missing.");
         await BytesAsync(NativeSerialization.Serialize(result), NativeSerialization.Serialize(stored));
-        await Assert.That(stored.Error).IsEqualTo(Errors.Code(result.Problem));
-        await Assert.That(stored.SafeDetail).IsEqualTo(result.Problem?.Detail);
+        await Assert.That(Errors.Code(stored.Problem)).IsEqualTo(Errors.Code(result.Problem));
+        await Assert.That(stored.Problem?.Detail).IsEqualTo(result.Problem?.Detail);
         if (Errors.Code(result.Problem) is null)
         {
             await BytesAsync(NativeSerialization.Serialize(result.Get<CommitReceipt>()), NativeSerialization.Serialize(stored.Get<CommitReceipt>()));
@@ -40,7 +40,8 @@ internal static class DocumentPatchAtomicityAssertions
         var entryBytes = NativeSerialization.Serialize(original);
         var resultBytes = NativeSerialization.Serialize(result);
         await BytesAsync(resultBytes, NativeSerialization.Serialize(owner.Submit(operation)));
-        await BytesAsync(resultBytes, NativeSerialization.Serialize(owner.Database.ResolveOutcome(operation)));
+        var resolved = owner.Database.ResolveOutcome(operation);
+        await BytesAsync(resultBytes, NativeSerialization.Serialize(resolved));
         await BytesAsync(entryBytes, NativeSerialization.Serialize(owner.Entry(operation.CommandId)));
         await before.RequireAsync(DocumentPatchAtomicityState.Read(owner));
     }

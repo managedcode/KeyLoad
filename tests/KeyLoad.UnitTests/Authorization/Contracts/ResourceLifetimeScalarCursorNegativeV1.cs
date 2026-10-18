@@ -2,7 +2,7 @@ using KeyLoad.Query.Features.QueryExecution;
 
 namespace KeyLoad.UnitTests.Features.Authorization;
 
-/// <summary>Unsupported historical input only; no current constructor or production fallback.</summary>
+/// <summary>Malformed scalar cursor input used to verify explicit rejection.</summary>
 [Orleans.GenerateSerializer, Orleans.Alias(ResourceLifetimeCursorNegativeProtocol.ScalarAlias)]
 internal sealed record ResourceLifetimeScalarCursorNegativeV1(
     [property: Orleans.Id(QueryCursorContract.PurposeField)] string Purpose,

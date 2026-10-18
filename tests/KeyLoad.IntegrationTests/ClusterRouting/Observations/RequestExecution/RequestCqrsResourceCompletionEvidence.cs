@@ -75,7 +75,7 @@ internal sealed class RequestCqrsResourceCompletionEvidence
             CaptureCanceledAfterJoin = captureCanceled
         };
 
-    internal void CompleteResourceStream(ResourceLoggerService logger, ContainerResource resource,
+    internal void CompleteResourceStream(ResourceLoggerService logger, ProjectResource resource,
         Func<string, TaskStatus?> statusFor, List<Exception> failures,
         Action<RequestCqrsLifecycleStage>? failureObserver, RequestCqrsLifecycleStage stage)
     {

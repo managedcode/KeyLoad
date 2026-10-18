@@ -32,7 +32,7 @@ internal sealed class ProductionSourceManifestScenario : IDisposable
                 () => scenario.VerifyCreateTamperAndFollowupAsync(cancellationToken), failures).ConfigureAwait(false);
             ServerFailureObserver.Observe(scenario.Dispose, failures);
         }
-        global::KeyLoad.UnitTests.Features.CodeQuality.NativeCoverageImageNodeSettlement.ThrowFailures(failures);
+        global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 
     public void Dispose() => Directory.Delete(evidenceRoot, recursive: true);
@@ -59,7 +59,6 @@ internal sealed class ProductionSourceManifestScenario : IDisposable
         await ProductionSourceManifestAssertions.AssertManifestAsync(evidenceRoot);
         await NativeUnitImageAdmissionFlow.VerifyAsync(evidenceRoot, executionOptions, cancellationToken);
         await NativeFunctionalReportAdmissionFlow.VerifyAsync(evidenceRoot, executionOptions, cancellationToken);
-        await NativeCoverageClusterContributorAdmissionFlow.VerifyAsync(Path.Combine(evidenceRoot, ManifestFile), cancellationToken);
         await VerifyUnsupportedScalarRejectedAsync(cancellationToken);
         await VerifyTamperRejectedAsync(ManifestFile, cancellationToken);
         await VerifyTamperRejectedAsync("functional-coverage.test-image.recovery.json", cancellationToken);
@@ -87,7 +86,7 @@ internal sealed class ProductionSourceManifestScenario : IDisposable
         }, failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(
             () => File.WriteAllBytesAsync(manifestPath, original, CancellationToken.None), failures).ConfigureAwait(false);
-        global::KeyLoad.UnitTests.Features.CodeQuality.NativeCoverageImageNodeSettlement.ThrowFailures(failures);
+        global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
         await VerifyRestoredAcceptedAsync(cancellationToken);
     }
 
@@ -108,7 +107,7 @@ internal sealed class ProductionSourceManifestScenario : IDisposable
         }, failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(
             () => File.WriteAllBytesAsync(manifestPath, original, CancellationToken.None), failures).ConfigureAwait(false);
-        global::KeyLoad.UnitTests.Features.CodeQuality.NativeCoverageImageNodeSettlement.ThrowFailures(failures);
+        global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 
     private async Task VerifyRestoredAcceptedAsync(CancellationToken cancellationToken)
@@ -116,7 +115,6 @@ internal sealed class ProductionSourceManifestScenario : IDisposable
         var result = await ProductionSourceManifestProcess.RunAsync(executionOptions, Verify, evidenceRoot, cancellationToken);
         await AssertSuccessfulProcessAsync(result);
         await ProductionSourceManifestAssertions.AssertManifestAsync(evidenceRoot);
-        await NativeCoverageClusterContributorAdmissionFlow.VerifyAsync(Path.Combine(evidenceRoot, ManifestFile), cancellationToken);
     }
 
     private static async Task AssertSuccessfulProcessAsync(ProductionSourceManifestProcessResult result)

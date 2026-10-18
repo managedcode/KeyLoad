@@ -1,37 +1,25 @@
-using KeyLoad.AppHost.Features.BenchmarkComparisons;
-using KeyLoad.AppHost.Features.TestInfrastructure;
-using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.AppHost.Hosting;
 
-/// <summary>Composes KeyLoad resources for the process and native fixture hosts.</summary>
-[ConfigurationBinding]
+/// <summary>Composes only native KeyLoad project processes and Orleans membership storage.</summary>
 internal static class KeyLoadResources
 {
-    /// <summary>Composes the simultaneous Docker CLUSTER cluster and optional comparison dependencies.</summary>
-    internal static void AddKeyLoad(IDistributedApplicationBuilder builder)
+    private const string InvalidMode = "Comparison workloads belong to KeyLoad.LoadTests.AppHost; native tests use their TUnit entry point.";
+
+    public static void AddKeyLoad(IDistributedApplicationBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
-        builder.Services.TryAddSingleton(TimeProvider.System);
-        var runtimeOptions = AppHostOptionsRegistration.Get(builder);
-        var tests = runtimeOptions.Control.Value.Tests;
-        if (tests is not null)
+        builder.Services.AddSingleton(TimeProvider.System);
+        var runtime = AppHostOptionsRegistration.Get(builder);
+        var control = runtime.Control.Value;
+        if (control.TargetSelected || control.BenchmarksEnabled || control.ComparisonSelectorsPresent)
         {
-            TestSuiteResources.Add(builder, tests);
-            return;
-        }
-        if (runtimeOptions.Control.Value.TargetSelected)
-        {
-            IsolatedBenchmarkResources.Add(builder);
-            return;
+            throw new InvalidOperationException(InvalidMode);
         }
         var configuration = global::AppHostConfiguration.Read(builder);
-        if (configuration.BenchmarkMode)
-        {
-            throw new InvalidOperationException(BenchmarkSessionResourceOptions.Profile);
-        }
-        var profile = global::ClusterProfileStore.Open(configuration.DataRoot, AppHostOptionsRegistration.Get(builder).Profile);
-        _ = global::ClusterResources.Add(builder, profile, configuration.DataRoot, configuration.Ephemeral,
-            functionalNodeCount: runtimeOptions.Control.Value.FunctionalNodeCount);
+        var profile = global::ClusterProfileStore.Open(configuration.DataRoot, runtime.Profile);
+        global::ClusterResources.Add(builder, profile, configuration.DataRoot, configuration.Ephemeral,
+            functionalNodeCount: control.FunctionalNodeCount);
     }
 }

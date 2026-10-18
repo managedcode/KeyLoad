@@ -46,9 +46,9 @@ internal sealed class ConnectionNativeGraphPolicyTests
         await Assert.That(manager.IsTransitionAllowed(Transition(connection, nameof(IConnectionGrain.CloseAsync),
             commit, nameof(IDatabaseCommitGrain.GetReadOwnerAsync)))).IsFalse();
         await Assert.That(manager.IsTransitionAllowed(Transition(connection, execute,
-            partition, nameof(ICommandPartitionGrain.ExecuteAsync)))).IsFalse();
-        await Assert.That(manager.IsTransitionAllowed(Transition(worker, execute,
             partition, nameof(ICommandPartitionGrain.ExecuteAsync)))).IsTrue();
+        await Assert.That(manager.IsTransitionAllowed(Transition(worker, nameof(IRequestWorkerGrain.ExecuteAsync),
+            partition, nameof(ICommandPartitionGrain.ExecuteAsync)))).IsFalse();
         await Assert.That(manager.IsTransitionAllowed(Transition(worker, nameof(IRequestWorkerGrain.ExecuteCommandAsync),
             partition, nameof(ICommandPartitionGrain.ExecuteAsync)))).IsFalse();
         await Assert.That(manager.IsTransitionAllowed(Transition(partition, nameof(ICommandPartitionGrain.ExecuteAsync),
@@ -66,20 +66,25 @@ internal sealed class ConnectionNativeGraphPolicyTests
         var worker = typeof(IRequestWorkerGrain).FullName!;
         var partition = typeof(ICommandPartitionGrain).FullName!;
         var service = typeof(PartitionStorageGrainService).FullName!;
-        foreach (var method in new[] { nameof(IRequestWorkerGrain.ExecuteStreamAsync), nameof(IRequestWorkerGrain.ExecuteCommandAsync) })
+        foreach (var method in new[] { nameof(IRequestWorkerGrain.ExecuteAsync), nameof(IRequestWorkerGrain.ExecuteCommandAsync) })
         {
-            await Assert.That(manager.IsTransitionAllowed(Transition(service, Constants.AnyMethod, worker, method))).IsTrue();
+            await Assert.That(manager.IsTransitionAllowed(Transition(service, Constants.AnyMethod, worker, method)))
+                .IsFalse();
             await Assert.That(manager.IsTransitionAllowed(Transition(connection,
-                nameof(IConnectionGrain.ExecuteStreamAsync), worker, method))).IsFalse();
+                nameof(IConnectionGrain.ExecuteStreamAsync), worker, method)))
+                .IsEqualTo(method == nameof(IRequestWorkerGrain.ExecuteAsync));
+            await Assert.That(manager.IsTransitionAllowed(Transition(connection,
+                nameof(IConnectionGrain.CloseAsync), worker, method))).IsFalse();
             await Assert.That(manager.IsTransitionAllowed(Transition(partition,
-                nameof(ICommandPartitionGrain.ExecuteAsync), worker, method))).IsFalse();
+                nameof(ICommandPartitionGrain.ExecuteAsync), worker, method)))
+                .IsEqualTo(method == nameof(IRequestWorkerGrain.ExecuteCommandAsync));
             await Assert.That(manager.IsTransitionAllowed(Transition(Constants.UnknownCallerId,
                 Constants.AnyMethod, worker, method))).IsFalse();
             await Assert.That(manager.IsTransitionAllowed(Client(worker, method))).IsFalse();
         }
         await Assert.That(manager.IsTransitionAllowed(Transition(service, Constants.AnyMethod,
             worker, nameof(IConnectionGrain.CloseAsync)))).IsFalse();
-        await Assert.That(manager.IsTransitionAllowed(Transition(worker, nameof(IRequestWorkerGrain.ExecuteStreamAsync),
+        await Assert.That(manager.IsTransitionAllowed(Transition(worker, nameof(IRequestWorkerGrain.ExecuteAsync),
             connection, nameof(IConnectionGrain.ExecuteStreamAsync)))).IsFalse();
     }
 
@@ -95,9 +100,10 @@ internal sealed class ConnectionNativeGraphPolicyTests
         var cut = scenario.Fixture.Database.ReadCanonicalCut();
         using var identity = new GrainRequestIdentityScope(scenario.Fixture.Cluster.ServiceProvider,
             principal, requestId, command.CommandId, token, connectionId: scenario.Fixture.ConnectionId);
-        var worker = grains.GetGrain<IRequestWorkerGrain>(RequestWorkerIdentity.ForCommands());
+        var worker = grains.GetGrain<IRequestWorkerGrain>(RequestWorkerIdentity.ForRequests());
+        var owner = scenario.Fixture.Hosts.Nodes[0].Services.GetRequiredService<global::Orleans.Runtime.ILocalSiloDetails>().SiloAddress;
         var workerFailure = await Assert.ThrowsExactlyAsync<InvalidOperationException>(
-            () => worker.ExecuteCommandAsync(signed, partition, token));
+            () => worker.ExecuteCommandAsync(owner, signed, partition, token));
         await Assert.That(workerFailure!.Message).IsEqualTo(
             $"Transition from {Constants.ClientCallerId} to {typeof(IRequestWorkerGrain).FullName} is not allowed.");
         var partitionFailure = await Assert.ThrowsExactlyAsync<InvalidOperationException>(

@@ -18,7 +18,8 @@ internal static class OrleansTelemetryAncestryOperation
         await Assert.That(reply.Error).IsNull();
         var receipt = NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as CommitReceipt
             ?? throw new InvalidOperationException(OrleansTelemetryAncestryProtocol.MissingReceipt);
-        var entry = fixture.Database.ReadStoredOutcome(commandId);
+        var entry = OutcomeStoreOracle.ReadStored(fixture.Database.Database, commandId,
+            TestContext.Current!.Execution.CancellationToken);
         var expected = new CommitReceipt(commandId, new(placement.Incarnation, fixture.Database.Partition.AtomicPartitionId, entry.CanonicalSequence), [new(OrleansTelemetryAncestryProtocol.PutKind, OrleansTelemetryAncestryProtocol.Collection,
                 documentId, OrleansTelemetryAncestryProtocol.FirstRevision)], fixture.Database.Store.Identity.Durability, (fixture.Database.Store.Identity.Durability == DurabilityProfile.Buffered ? 0 : 1));
         await EqualAsync(expected, receipt);
@@ -48,9 +49,8 @@ internal static class OrleansTelemetryAncestryOperation
                 OrleansTelemetryAncestryProtocol.Json, false, []), actual);
         }
         var retained = OutcomeStoreOracle.ReadPartition(fixture.Database.Store, fixture.Database.Partition,
-            principal.Id, commandId);
-        await Assert.That(retained).IsNotNull();
-        await EqualAsync(expected, retained!.Get<CommitReceipt>());
+            principal.Id, commandId) ?? throw new InvalidOperationException(OrleansTelemetryAncestryProtocol.MissingReceipt);
+        await EqualAsync(expected, retained.Get<CommitReceipt>());
     }
 
     private static async Task EqualAsync<T>(T expected, T actual)

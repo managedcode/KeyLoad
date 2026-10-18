@@ -23,7 +23,7 @@ internal static class DeclaredResponseEofAssertions
         await Assert.That(operation.Value!.Kind).IsEqualTo(OperationKind.Batch);
         await Assert.That(operation.UserId!).IsEqualTo(principal.Id);
         await EqualAsync(command, NativeSerialization.Deserialize<CommandRequest>((operation).Value!.Input.Span));
-        var expected = new CommitReceipt(command.CommandId, new(placement.Incarnation, command.Partition.AtomicPartitionId, entry.CanonicalSequence), [new(PutKind, ConnectionNativeProtocol.Collection, Document, Revision)], DurabilityProfile.ProcessDurable, 1);
+        var expected = new CommitReceipt(command.CommandId, new(placement.Incarnation, command.Partition.AtomicPartitionId, entry.CanonicalSequence), [new(PutKind, ConnectionNativeProtocol.Collection, Document, Revision)], DurabilityProfile.ProcessDurable, 2);
         await EqualAsync(expected, original);
         await Assert.That(original!.Mutations.All(value => value.CompositionReferences.IsEmpty)).IsTrue();
         await DocumentAsync(scenario);
@@ -60,7 +60,7 @@ internal static class DeclaredResponseEofAssertions
         var actual = Capture(scenario, principal, command);
         await Assert.That(actual.Rows.SequenceEqual(original.Rows)).IsTrue();
         await Assert.That(actual.PhysicalPosition).IsEqualTo(original.PhysicalPosition);
-        await Assert.That(actual.Journal).IsEqualTo(original.Journal);
+        await Assert.That(actual.Cut).IsEqualTo(original.Cut);
         await Assert.That(actual.Outcome.SequenceEqual(original.Outcome)).IsTrue();
         await Assert.That(DocumentCommandOutcomeTestSupport.OutboxEqual(actual.Outbox, original.Outbox)).IsTrue();
     }

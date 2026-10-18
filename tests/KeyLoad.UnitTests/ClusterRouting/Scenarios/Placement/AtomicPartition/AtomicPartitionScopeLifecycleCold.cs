@@ -20,7 +20,6 @@ internal static class AtomicPartitionScopeLifecycleCold
             ServerFailureObserver.Observe(() =>
             {
                 database = QueueWholeFlowStorage.Open(store);
-                PhysicalShardTestBootstrap.RequireExisting(database);
             }, failures);
             if (database is not null && failures.Count == 0)
             {

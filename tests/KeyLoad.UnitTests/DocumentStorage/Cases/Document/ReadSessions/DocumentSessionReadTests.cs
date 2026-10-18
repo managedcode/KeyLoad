@@ -22,7 +22,7 @@ internal sealed class DocumentSessionReadTests
     {
         using var db = new TestDatabase();
         db.Configure(Collection, ResourceKind.Collection);
-        var receipt = Apply(db, FirstJson, Invalid, First);
+        var receipt = Apply(db, FirstJson, Invalid);
         var reference = new EntityRef(db.Partition, Collection, DocumentId);
         var request = new GetDocumentRequest(reference, receipt.Token);
         var native = NativeSerialization.Deserialize<GetDocumentRequest>(NativeSerialization.Serialize(request));
@@ -36,7 +36,7 @@ internal sealed class DocumentSessionReadTests
             receipt.Token with { Incarnation = Guid.NewGuid() },
             receipt.Token with { AtomicPartitionId = Guid.NewGuid().ToString() },
             receipt.Token with { Position = Invalid },
-            receipt.Token with { Position = Second }
+            receipt.Token with { Position = receipt.Token.Position + First }
         ];
         foreach (var token in rejected)
         {
@@ -57,7 +57,7 @@ internal sealed class DocumentSessionReadTests
                 await LiteralAsync(db.Database.GetDocument(Root, reference, receipt.Token), reference, FirstJson, First);
             }
         }
-        var next = Apply(db, SecondJson, First, Second);
+        var next = Apply(db, SecondJson, First);
         await LiteralAsync(db.Database.GetDocument(Root, reference, receipt.Token), reference, SecondJson, Second);
         await LiteralAsync(db.Database.GetDocument(Root, reference, next.Token), reference, SecondJson, Second);
     }
@@ -67,7 +67,7 @@ internal sealed class DocumentSessionReadTests
     {
         using var db = new TestDatabase();
         db.Configure(Collection, ResourceKind.Collection);
-        var receipt = Apply(db, FirstJson, Invalid, First);
+        var receipt = Apply(db, FirstJson, Invalid);
         var reference = new EntityRef(db.Partition, Collection, DocumentId);
         var before = Snapshot(db);
         var position = db.Store.Position;
@@ -86,7 +86,7 @@ internal sealed class DocumentSessionReadTests
     {
         using var db = new TestDatabase();
         db.Configure(Collection, ResourceKind.Collection);
-        var receipt = Apply(db, FirstJson, Invalid, First);
+        var receipt = Apply(db, FirstJson, Invalid);
         var reference = new EntityRef(db.Partition, Collection, DocumentId);
         var principal = new PrincipalRecord(Reader, db.Partition.TenantId,
             [new(db.Partition.DatabaseId, Collection, Capability.DocumentsRead)], []);
@@ -120,7 +120,7 @@ internal sealed class DocumentSessionReadTests
     {
         using var db = new TestDatabase();
         db.Configure(Collection, ResourceKind.Collection);
-        var receipt = Apply(db, FirstJson, Invalid, First);
+        var receipt = Apply(db, FirstJson, Invalid);
         var reference = new EntityRef(db.Partition, Collection, DocumentId);
         var original = db.Store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes))
             ?? throw new InvalidOperationException("The native applied seed is missing.");
@@ -143,7 +143,7 @@ internal sealed class DocumentSessionReadTests
     {
         using var db = new TestDatabase();
         db.Configure(Collection, ResourceKind.Collection);
-        var receipt = Apply(db, FirstJson, Invalid, First);
+        var receipt = Apply(db, FirstJson, Invalid);
         var reference = new EntityRef(db.Partition, Collection, DocumentId);
         var original = db.Store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes))
             ?? throw new InvalidOperationException("The native applied seed is missing.");
@@ -159,16 +159,16 @@ internal sealed class DocumentSessionReadTests
         await Assert.That(db.Store.Position).IsEqualTo(position);
         db.Store.Commit((transaction, _) => { transaction.Put(KeySpace.AppliedBytes, original); return true; });
         await LiteralAsync(db.Database.GetDocument(Root, reference, receipt.Token), reference, FirstJson, First);
-        var next = Apply(db, SecondJson, First, Second);
+        var next = Apply(db, SecondJson, First);
         await LiteralAsync(db.Database.GetDocument(Root, reference, receipt.Token), reference, SecondJson, Second);
         await LiteralAsync(db.Database.GetDocument(Root, reference, next.Token), reference, SecondJson, Second);
     }
 
-    private static CommitReceipt Apply(TestDatabase db, string json, long revision, long applied)
+    private static CommitReceipt Apply(TestDatabase db, string json, long revision)
     {
         var id = Guid.NewGuid();
         var command = new CommandRequest(id, db.Partition, [new PutDocument(Collection, DocumentId, json, revision, ExplicitReplacement: revision > Invalid)]);
-        return db.Database.Apply(db.Database.CreateCommand(OperationKind.Batch, id, Root, db.Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(command, JsonDefaults.Options)), applied).Get<CommitReceipt>();
+        return db.Database.Apply(db.Database.CreateCommand(OperationKind.Batch, id, Root, db.Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(command, JsonDefaults.Options))).Get<CommitReceipt>();
     }
 
     private static (string Key, string Value)[] Snapshot(TestDatabase db) => db.Store.Read(view =>

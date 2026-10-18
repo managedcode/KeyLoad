@@ -82,6 +82,5 @@ internal static class NativeTextCapturedCommitAuthorityAssertions
         await Assert.That(token.AtomicPartitionId).IsEqualTo(partition.AtomicPartitionId);
         await Assert.That(token.Incarnation != Guid.Empty).IsTrue();
         await Assert.That(token.Position).IsGreaterThan(0L);
-        await Assert.That(token.OwnershipEpoch).IsGreaterThan(0L);
     }
 }

@@ -15,7 +15,7 @@ internal static class CommandOutcomePartitionScopeTestData
     internal const string SecondJson = "{\"scope\":\"second\"}";
 
     internal static Command<DatabaseCommand> Operation<T>(TestDatabase database, Guid id, OperationKind kind, T request)
-        => new(id, kind, "root", database.Database.EvaluationClock.GetUtcNow(),
+        => database.Database.CreateCommand(kind, id, "root", database.Database.EvaluationClock.GetUtcNow(),
             JsonSerializer.Serialize(request, JsonDefaults.Options));
 
     internal static StoredOutcome ReadStored(TestDatabase database, Command<DatabaseCommand> operation)

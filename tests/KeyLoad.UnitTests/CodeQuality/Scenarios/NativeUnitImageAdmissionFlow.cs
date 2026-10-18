@@ -35,7 +35,7 @@ internal static class NativeUnitImageAdmissionFlow
         }, failures);
         await ServerFailureObserver.ObserveAsync(
             () => File.WriteAllBytesAsync(path, original, CancellationToken.None), failures);
-        global::KeyLoad.UnitTests.Features.CodeQuality.NativeCoverageImageNodeSettlement.ThrowFailures(failures);
+        global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
         await AssertAcceptedAsync(await NativeUnitImageAdmissionReader.ReadAsync(evidenceRoot, options, token));
         await Assert.That((await File.ReadAllBytesAsync(path, token)).SequenceEqual(original)).IsTrue();
     }

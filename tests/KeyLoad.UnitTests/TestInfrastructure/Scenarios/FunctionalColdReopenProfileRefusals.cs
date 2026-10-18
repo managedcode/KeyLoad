@@ -31,13 +31,12 @@ internal static class FunctionalColdReopenProfileRefusals
         yield return [new(P.Nodes, null)];
         yield return [new(P.Nodes, "2")];
         yield return [new(P.Nodes + P.Nested, P.True)];
-        yield return [new(ContainerFaultCommandProtocol.EnabledSetting, null)];
-        yield return [new(ContainerFaultCommandProtocol.EnabledSetting, P.False)];
+        yield return [new(ProcessFaultCommandProtocol.EnabledSetting, null)];
+        yield return [new(ProcessFaultCommandProtocol.EnabledSetting, P.False)];
         yield return [new(FunctionalColdReopenProfile.Setting, null)];
         yield return [new(P.Ephemeral, P.False)];
         yield return [new(P.DataRoot, string.Empty)];
         yield return [new(P.DataRoot, "relative")];
-        yield return [new(P.Suite, "unit")];
         yield return [new(P.LoggerControl, P.True)];
         yield return [new(P.Benchmark, P.True)];
     }

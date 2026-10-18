@@ -102,7 +102,7 @@ internal sealed class JsonTextQueueReplayTests
         await Assert.ThrowsExactlyAsync<AssertionException>(() => NativeReplayResultAssertions.Same<ReceiveResult>(
             original with
             {
-                NativeValue = changed
+                Value = changed
             }, original));
     }
 }

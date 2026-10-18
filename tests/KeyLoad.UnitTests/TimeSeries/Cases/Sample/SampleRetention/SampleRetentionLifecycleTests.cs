@@ -179,7 +179,6 @@ internal sealed class SampleRetentionLifecycleTests
 
             store = new(new ZoneTreeStoreOptions(path), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
             var reopened = new DatabaseEngine(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
-            PhysicalShardTestBootstrap.RequireExisting(reopened);
             var status = reopened.ReadSampleRetention(SampleAggregateTestData.RootPrincipal,
                 new(new("tenant", "database", "orders", CustomerId),
                     SampleAggregateTestData.Set, SampleAggregateTestData.Series));
@@ -212,7 +211,6 @@ internal sealed class SampleRetentionLifecycleTests
             ClusterAdministrator = true
         },
             DatabaseEngine.Credential("root", "root", "root.unit-test-credential-32-characters"));
-        PhysicalShardTestBootstrap.Bootstrap(database, "root");
         database.Apply(database.CreateCommand(OperationKind.ConfigureResource, Guid.NewGuid(), "root", TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(new ConfigureResourceRequest("tenant", "database",
                 new ResourceDefinition(SampleAggregateTestData.Set, ResourceKind.TimeSeries, "orders")), JsonDefaults.Options)));
         return database;

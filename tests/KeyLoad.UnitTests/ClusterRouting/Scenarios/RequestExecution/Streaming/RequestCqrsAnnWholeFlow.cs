@@ -50,7 +50,7 @@ internal static class RequestCqrsAnnWholeFlow
         await RequestCqrsAnnOriginalReplay.RequireAsync(fixture, restore, restored.Result, token);
         var noOp = await NoOpSequenceAsync(fixture, restore, restored.Result, token);
         var originalLeaf = RequestCqrsAnnResultAssertions.Manifest(fixture, noOp).GenerationLeaf;
-        await RequestCqrsAnnPinnedRetirementFlow.RunAsync(fixture, request, noOp, originalLeaf, token);
+        await RequestCqrsAnnPinnedLifetimeFlow.RunAsync(fixture, noOp, originalLeaf, token);
     }
     private static async Task<AnnMaintenanceRequest> NoOpSequenceAsync(RequestCqrsHostedRuntimeFixture fixture,
         AnnMaintenanceRequest restore, AnnMaintenanceResult restored, CancellationToken token)

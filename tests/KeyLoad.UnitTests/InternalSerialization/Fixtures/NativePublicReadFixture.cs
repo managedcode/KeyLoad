@@ -15,8 +15,7 @@ internal static class NativePublicReadFixture
     internal const string Label = "next";
     internal static readonly PhysicalShardRecord ExpectedOwner = new(
         Guid.Parse("10213243-5465-7687-98a9-bacbdcedfe0f"),
-        Guid.Parse("00112233-4455-6677-8899-aabbccddeeff"),
-        ["configured-voter-a", "configured-voter-b", "configured-voter-c"], 1);
+        Guid.Parse("00112233-4455-6677-8899-aabbccddeeff"));
     private const string Path = "/@id";
     private const string Alias = "document";
     private const string MissingProjection = "A query projection entry is missing.";

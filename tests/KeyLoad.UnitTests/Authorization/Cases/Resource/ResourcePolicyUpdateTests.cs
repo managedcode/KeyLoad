@@ -24,7 +24,7 @@ internal sealed class ResourcePolicyUpdateTests
         var documentBytesBefore = fixture.DocumentBytes()!;
 
         var first = fixture.Apply(operation);
-        var receiptBytes = fixture.OutcomeBytes(operation.Id)!;
+        var receiptBytes = fixture.OutcomeBytes(operation.CommandId)!;
         var storedAfterApply = fixture.Resource();
         var resourceBytesAfter = fixture.ResourceBytes()!;
         var documentBytesAfter = fixture.DocumentBytes()!;
@@ -40,8 +40,8 @@ internal sealed class ResourcePolicyUpdateTests
         await Assert.That(documentBytesAfter.SequenceEqual(documentBytesBefore)).IsTrue();
         await Assert.That(fixture.DocumentBytes()!.SequenceEqual(documentBytesBefore)).IsTrue();
         await Assert.That(Errors.Code(retry.Problem)).IsEqualTo(Errors.Code(first.Problem));
-        await Assert.That(retry.Json).IsEqualTo(first.Json);
-        await Assert.That(fixture.OutcomeBytes(operation.Id)!.SequenceEqual(receiptBytes)).IsTrue();
+        await Assert.That(NativeSerialization.Serialize(retry).AsSpan().SequenceEqual(NativeSerialization.Serialize(first))).IsTrue();
+        await Assert.That(fixture.OutcomeBytes(operation.CommandId)!.SequenceEqual(receiptBytes)).IsTrue();
     }
 
     [Test]

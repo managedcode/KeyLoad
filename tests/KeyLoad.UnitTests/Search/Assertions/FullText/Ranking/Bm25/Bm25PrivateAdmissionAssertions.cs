@@ -1,3 +1,4 @@
+using KeyLoad.UnitTests.Features.ResourceExecution;
 using KeyLoad.Core.Features.Search;
 using ManagedCode.Communication;
 using TUnit.Assertions.Enums;
@@ -26,8 +27,8 @@ internal static class Bm25PrivateAdmissionAssertions
         await Assert.That(phase.Current.Statistics.DocumentFrequencies).IsEquivalentTo([1], CollectionOrdering.Matching);
         var stored = database.Store.Read(view => view.ReadOwnedValue(Bm25CorpusKeys.Current(phase.Current)))
             ?? throw new InvalidOperationException("The actual private corpus publication is missing.");
-        await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(NativeSerialization.Serialize(phase.Current), stored);
-        await ReplicaSubmissionOutcomeFlow.RequireResultAsync(result, database.Database.ResolveSubmissionOutcome(
+        await NativeReplayResultAssertions.BytesAsync(NativeSerialization.Serialize(phase.Current), stored);
+        await NativeReplayResultAssertions.SameAsync(result, database.Database.ResolveSubmissionOutcome(
             database.ReadStoredOutcome(phase.CommandId).PreparedCommand!));
     }
 }

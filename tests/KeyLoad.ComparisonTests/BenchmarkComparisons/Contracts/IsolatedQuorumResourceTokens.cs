@@ -5,8 +5,6 @@ internal static class IsolatedQuorumResourceTokens
     internal const string Qdrant = "Qdrant";
     internal const string Rabbit = "RabbitMQ";
     internal const string Profile = "intensive-1k-c16";
-    internal const string Runner = "isolated-model-runner";
-    internal const string ModelImage = "model-runner";
     internal const string TemporaryPrefix = "keyload-isolated-quorum-model-";
     internal const string NativeDirectory = "native";
     internal const string NativePrefix = "Benchmarks__Native__";

@@ -130,9 +130,9 @@ internal sealed class ZoneTreePointCacheCapacityTests
         {
             await entered.Task.WaitAsync(WaitLimit, TimeProvider.System);
             var before = store.GetPointCacheDiagnostics();
-            var fallback = store.Read(view => view.ReadOwnedValue(keys[17]));
+            var nativeValue = store.Read(view => view.ReadOwnedValue(keys[17]));
             var pressured = store.GetPointCacheDiagnostics();
-            await Assert.That(fallback).IsEquivalentTo(new byte[] { 17 });
+            await Assert.That(nativeValue).IsEquivalentTo(new byte[] { 17 });
             await Assert.That(pressured.EvictionAttempts - before.EvictionAttempts).IsEqualTo(16L);
             await Assert.That(pressured.AdmissionBypasses - before.AdmissionBypasses).IsEqualTo(1L);
         }

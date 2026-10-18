@@ -16,11 +16,11 @@ internal sealed class GraphShortestPathIntegrityWholeFlowTests
         var state = GraphTraversalIntegrityFixture.Seed(database);
         var token = TestContext.Current!.Execution.CancellationToken;
         await GraphShortestPathIntegrityAssertions.Healthy(database.Database, database.Store, state, null, filtered, token);
-        var healthyImage = GraphShortestPathFullStoreImage.Bytes(database.Store);
+        var healthyImage = CanonicalStoreImage.Bytes(database.Store);
         var ownedFault = GraphTraversalIntegrityFaultRows.Install(database.Store, state, fault);
         await GraphShortestPathIntegrityAssertions.Refuse(database.Database, database.Store, state, filtered, token);
         await GraphShortestPathIntegrityAssertions.Refuse(database.Database, database.Store, state, filtered, token);
-        var corruptImage = GraphShortestPathFullStoreImage.Bytes(database.Store);
+        var corruptImage = CanonicalStoreImage.Bytes(database.Store);
         var corruptPosition = database.Store.Position;
         database.Store.Dispose();
         GraphTraversalIntegrityContinuation continuation;
@@ -38,7 +38,7 @@ internal sealed class GraphShortestPathIntegrityWholeFlowTests
             continuation = GraphTraversalIntegrityFixture.Continue(owner, state);
             await GraphShortestPathIntegrityAssertions.Healthy(owner, cold, state, continuation, filtered, token);
             await GraphTraversalIntegrityAssertions.Replay(owner, cold, continuation.Command, continuation.Receipt);
-            continuedImage = GraphShortestPathFullStoreImage.Bytes(cold);
+            continuedImage = CanonicalStoreImage.Bytes(cold);
             continuedPosition = cold.Position;
         }
         using var secondCold = new ZoneTreeStore(new(database.Directory), database.StorageExecution, UnitExecutionOptions.PointCacheExecution());

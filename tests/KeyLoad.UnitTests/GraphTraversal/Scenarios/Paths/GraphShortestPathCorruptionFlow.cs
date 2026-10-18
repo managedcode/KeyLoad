@@ -101,20 +101,20 @@ internal static class GraphShortestPathCorruptionFlow
     internal static async Task RefuseAsync(DatabaseEngine owner, ZoneTreeStore store,
         GraphShortestPathRequest request, CancellationToken cancellationToken)
     {
-        var image = GraphShortestPathFullStoreImage.Bytes(store);
+        var image = CanonicalStoreImage.Bytes(store);
         var position = store.Position;
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => owner.ShortestPath(
             GraphShortestPathTestSupport.RootPrincipal, request, cancellationToken: cancellationToken));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(store.Position).IsEqualTo(position);
-        await Assert.That(GraphShortestPathFullStoreImage.Bytes(store).SequenceEqual(image)).IsTrue();
+        await Assert.That(CanonicalStoreImage.Bytes(store).SequenceEqual(image)).IsTrue();
     }
 
     internal static async Task HealthyAsync(DatabaseEngine owner, ZoneTreeStore store,
         EdgeRecord expected, CancellationToken cancellationToken)
     {
         var position = store.Position;
-        var image = GraphShortestPathFullStoreImage.Bytes(store);
+        var image = CanonicalStoreImage.Bytes(store);
         var actual = owner.ShortestPath(GraphShortestPathTestSupport.RootPrincipal, Request(expected),
             cancellationToken: cancellationToken);
         await Assert.That(actual.Version).IsEqualTo(ContractVersion);
@@ -124,7 +124,7 @@ internal static class GraphShortestPathCorruptionFlow
         await Assert.That(actual.Edges.SequenceEqual([expected])).IsTrue();
         await Assert.That(actual.CutPosition).IsEqualTo(position);
         await Assert.That(store.Position).IsEqualTo(position);
-        await Assert.That(GraphShortestPathFullStoreImage.Bytes(store).SequenceEqual(image)).IsTrue();
+        await Assert.That(CanonicalStoreImage.Bytes(store).SequenceEqual(image)).IsTrue();
     }
 
     private static byte[] EdgeKey(EdgeRecord edge)

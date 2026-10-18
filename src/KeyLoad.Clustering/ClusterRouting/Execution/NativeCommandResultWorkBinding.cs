@@ -1,7 +1,6 @@
 using System.Collections.Immutable;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.Clustering;
 
@@ -11,9 +10,9 @@ internal static class NativeCommandResultWorkBinding
     private const string Uncertain = "The write outcome is unknown. Retry the same command ID.";
     private const string OriginalFailureKey = "keyload.native-command-work-binding-failure";
 
-    internal static async Task BindBeforePublicationAsync(IServiceProvider services,
+    internal static async Task BindBeforePublicationAsync(DatabaseEngine database, ICommitCoordinator coordinator,
         TimeProvider clock, DecodedGrainRequest request, GrainOperationReply reply,
-        ReadExecutionBudget work, IResourceLifetimeWorkBinding binding, CancellationToken token)
+        IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         if (reply.Error is not null)
         {
@@ -21,8 +20,11 @@ internal static class NativeCommandResultWorkBinding
         }
         try
         {
+            var work = new ReadExecutionBudget(database.OperationLimitsOptions, clock, token);
+            work.ConstrainLifetime(request.Envelope.ExpiresAt);
+            work.AttachResourceLifetimeBinding(binding);
             var proof = RequireProof(request, reply);
-            await BindCurrentAsync(services, clock, request, proof, proof.Lifetimes,
+            await BindCurrentAsync(database, coordinator, clock, request, proof, proof.Lifetimes,
                 work, binding, token).ConfigureAwait(true);
             work.CheckResult(GrainNativePayload.Read<GrainValue>(reply.Payload).Value);
             work.Check();
@@ -35,15 +37,37 @@ internal static class NativeCommandResultWorkBinding
         }
     }
 
-    private static async Task BindCurrentAsync(IServiceProvider services, TimeProvider clock,
+    internal static void BindReturned(DecodedGrainRequest request, GrainOperationReply reply,
+        ReadExecutionBudget work, IResourceLifetimeWorkBinding binding)
+    {
+        if (reply.Error is not null)
+        {
+            return;
+        }
+        try
+        {
+            var proof = RequireProof(request, reply);
+            work.CheckResult(proof);
+            binding.Bind(proof.Lifetimes);
+            work.CheckResult(GrainNativePayload.Read<GrainValue>(reply.Payload).Value);
+            work.Check();
+        }
+        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            var unknown = Errors.Fail(ErrorCode.UnknownWriteOutcome, Uncertain);
+            unknown.Data[OriginalFailureKey] = error;
+            throw unknown;
+        }
+    }
+
+    private static async Task BindCurrentAsync(DatabaseEngine database, ICommitCoordinator coordinator, TimeProvider clock,
         DecodedGrainRequest request, NativeCommandWorkProofV1 proof,
         ImmutableArray<ResourceLifetimeV1> lifetimes, ReadExecutionBudget work,
         IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
-        var database = services.GetRequiredService<DatabaseEngine>();
         work.RequireResourceLifetimeBinding(binding);
         work.CheckResult(proof);
-        await services.GetRequiredService<Func<ICommitCoordinator>>()().ReadBarrierAsync(token).ConfigureAwait(true);
+        await coordinator.ReadBarrierAsync(token).ConfigureAwait(true);
         GrainIdentityContext.Validate(request.Envelope, request.Envelope.RequestId);
         var principal = GrainRequestAuthority.ReloadForRequest(database, request.Envelope, clock);
         database.BindAuthenticatedCommandResultLifetimes(principal.Id, proof.PolicyEpoch,

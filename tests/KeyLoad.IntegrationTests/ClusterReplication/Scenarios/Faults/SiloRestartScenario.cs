@@ -19,22 +19,22 @@ internal static class SiloRestartScenario
     internal static async Task RunAsync(ClusterFixture fixture)
     {
         using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(2), TimeProvider.System);
-        var stoppedContainers = new HashSet<string>(StringComparer.Ordinal);
+        var stoppedProcesses = new HashSet<string>(StringComparer.Ordinal);
         SiloRestartRunState? state = null;
         try
         {
             state = await PrepareAsync(fixture, timeout.Token);
-            state = await RestartSelectedSiloAsync(fixture, state, stoppedContainers, timeout.Token);
+            state = await RestartSelectedSiloAsync(fixture, state, stoppedProcesses, timeout.Token);
             await SiloRestartQueueScenario.ProcessAsync(state, Collection, Jobs, timeout.Token);
             var projectionBatch = await ProcessSubscriptionAsync(state, timeout.Token);
             var projectionThroughSequence = await CommitProjectionAsync(state, projectionBatch, timeout.Token);
             await SiloRestartRecoveryScenario.VerifyUnavailableCopiesAndRecoveryAsync(
-                fixture, state, projectionThroughSequence, stoppedContainers, timeout.Token);
+                fixture, state, projectionThroughSequence, stoppedProcesses, timeout.Token);
         }
         catch (Exception failure) when (IsNonFatalCleanupFailure(failure))
         {
-            await SaveFailureDiagnosticsAsync(fixture, failure);
-            await RestoreFailedClusterAsync(fixture, state?.Clients, stoppedContainers, failure);
+            await SiloRestartRecoveryScenario.SaveFailureDiagnosticsAsync(fixture, failure);
+            await RestoreFailedClusterAsync(fixture, state?.Clients, stoppedProcesses, failure);
             throw;
         }
     }
@@ -44,7 +44,7 @@ internal static class SiloRestartScenario
         var clients = Enumerable.Range(1, NodeCount).Select(number => fixture.Client(NodeName(number))).ToArray();
         var partition = new PartitionRef("integration", "database", Collection, Guid.NewGuid().ToString(PartitionKeyFormat));
         var resources = await ConfigureResourcesAsync(clients, partition, cancellationToken);
-        var command = await CommitInitialBatchAsync(clients, partition, cancellationToken);
+        var command = await SiloRestartInitialBatch.CommitAsync(clients, partition, Success, cancellationToken);
         await VerifyInitialReplicasAsync(clients, partition, resources.Subscription, cancellationToken);
         var liveRequest = new AstQueryRequest(partition, new(Collection, null, [new("*", "*")], null, [], 100), AllowFullScan: true);
         var liveSnapshot = Success(await clients[1].StartLiveQueryAsync(new(liveRequest), cancellationToken));
@@ -75,10 +75,6 @@ internal static class SiloRestartScenario
         return (projectionConsumer, subscription);
     }
 
-    private static Task<SiloRestartInitialCommand> CommitInitialBatchAsync(KeyLoadClient[] clients,
-        PartitionRef partition, CancellationToken cancellationToken)
-        => SiloRestartInitialBatch.CommitAsync(clients, partition, Success, cancellationToken);
-
     private static async Task VerifyInitialReplicasAsync(KeyLoadClient[] clients, PartitionRef partition,
         SubscriptionRef subscription, CancellationToken cancellationToken)
     {
@@ -91,15 +87,15 @@ internal static class SiloRestartScenario
     }
 
     private static async Task<SiloRestartRunState> RestartSelectedSiloAsync(ClusterFixture fixture, SiloRestartRunState state,
-        HashSet<string> stoppedContainers, CancellationToken cancellationToken)
+        HashSet<string> stoppedProcesses, CancellationToken cancellationToken)
     {
         var statuses = (await Task.WhenAll(state.Clients.Select(client => client.StatusAsync(cancellationToken)))).Select(Success).ToArray();
         await Assert.That(statuses.All(status => status.SiloCount == NodeCount && status.ReplicaCount == NodeCount)).IsTrue();
         await Assert.That(statuses.Select(status => status.NodeId).Distinct(StringComparer.Ordinal).Count()).IsEqualTo(NodeCount);
         var selectedIndex = NodeCount - 1;
         var selectedNode = NodeName(selectedIndex + 1);
-        stoppedContainers.Add(selectedNode);
-        await fixture.KillContainerAsync(selectedNode,
+        stoppedProcesses.Add(selectedNode);
+        await fixture.KillServerAsync(selectedNode,
             SiloFailure, cancellationToken);
         var survivors = Enumerable.Range(0, NodeCount).Where(index => index != selectedIndex).ToArray();
         var surviving = state.Clients[survivors[0]];
@@ -107,36 +103,24 @@ internal static class SiloRestartScenario
         await VerifyInitialReplicasAsync(survivors.Select(index => state.Clients[index]).ToArray(),
             state.Partition, state.Subscription, cancellationToken);
         await MissingCopiesAsync(await surviving.CommitAsync(state.Command, cancellationToken));
-        await fixture.RestartContainerAsync(selectedNode, cancellationToken);
+        await fixture.RestartServerAsync(selectedNode, cancellationToken);
         await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(selectedNode, cancellationToken);
-        stoppedContainers.Remove(selectedNode);
+        stoppedProcesses.Remove(selectedNode);
         return state with
         {
             Survivors = survivors
         };
     }
 
-    private static async Task SaveFailureDiagnosticsAsync(ClusterFixture fixture, Exception failure)
-    {
-        try
-        {
-            await fixture.SaveFailureDiagnosticsAsync();
-        }
-        catch (Exception diagnosticsFailure) when (IsNonFatalCleanupFailure(diagnosticsFailure))
-        {
-            failure.Data[ClusterDiagnosticsFailureKey] = diagnosticsFailure;
-        }
-    }
-
     private static async Task RestoreFailedClusterAsync(ClusterFixture fixture, KeyLoadClient[]? clients,
-        IEnumerable<string> stoppedContainers, Exception failure)
+        IEnumerable<string> stoppedProcesses, Exception failure)
     {
         using var recoveryTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(45), TimeProvider.System);
-        foreach (var node in stoppedContainers.Order(StringComparer.Ordinal))
+        foreach (var node in stoppedProcesses.Order(StringComparer.Ordinal))
         {
             try
             {
-                await fixture.RestartContainerAsync(node, recoveryTimeout.Token);
+                await fixture.RestartServerAsync(node, recoveryTimeout.Token);
             }
             catch (Exception restartFailure) when (IsNonFatalCleanupFailure(restartFailure))
             {

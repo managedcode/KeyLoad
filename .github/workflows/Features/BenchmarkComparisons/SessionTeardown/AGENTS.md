@@ -2,7 +2,7 @@
 
 ## Purpose, entry points and ownership
 
-Owns the existing job-owned Docker registry shutdown and retention of original native logs/test results. Follow root and workflow policies and ADR-142. Aspire/TUnit owns database startup and disposal; this action performs no per-case reset, measurement, cleanup matrix or report fabrication. Preserve same-job image receipts, failure diagnostics, native test results and least-privileged artifact upload.
+Owns retention of original native database/client logs and test results after the fixture joins and disposes its own Aspire infrastructure. Follow root and workflow policies and ADR-142. Aspire/TUnit owns database startup and disposal; this action performs no per-case reset, measurement, cleanup matrix or report fabrication. Preserve same-job source/runtime/process receipts, failure diagnostics, native test results and least-privileged artifact upload. Never clean unrelated Docker resources.
 
 ## Boundaries and protected risks
 

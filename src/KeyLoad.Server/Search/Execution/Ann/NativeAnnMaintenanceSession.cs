@@ -5,9 +5,11 @@ using KeyLoad.Query.Features.Search;
 namespace KeyLoad.Server.Features.Search;
 
 internal sealed class NativeAnnMaintenanceSession(Guid id, AnnMaintenanceRequest request,
-    string principalId, AnnSeed upper, NativeAnnManifest? original, NativeAnnMaintenanceMemoryLease memory)
+    string principalId, AnnSeed upper, NativeAnnManifest? original, NativeAnnMaintenanceMemoryLease memory,
+    NativeMaintenanceSessionWork work)
 {
     private NativeAnnStageObservation? observation;
+    internal NativeMaintenanceSessionWork Work { get; } = work;
 
     internal void ObserveStage(AnnMaintenanceCapabilityKind kind, AnnWorkBudget budget)
         => Volatile.Write(ref observation, new(kind, budget));

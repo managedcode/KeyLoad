@@ -19,7 +19,7 @@ internal static class GraphIncomingRowAuthorityAssertions
     internal static async Task HealthyAsync(DatabaseEngine engine, ZoneTreeStore store,
         EntityRef source, EntityRef target, string reader, bool repairedTarget)
     {
-        var image = GraphShortestPathFullStoreImage.Bytes(store);
+        var image = CanonicalStoreImage.Bytes(store);
         var cut = store.Position;
         var actual = engine.ReadIncomingGraphEdges(reader,
             new ReadIncomingGraphEdgesRequestV1(PageVersion, target, Graph, IncomingLimit));
@@ -30,19 +30,19 @@ internal static class GraphIncomingRowAuthorityAssertions
             .IsEqualTo(JsonSerializer.Serialize(expected, JsonDefaults.Options));
         await DocumentAsync(engine, source, reader, RepairedRevision);
         await DocumentAsync(engine, target, reader, repairedTarget ? RepairedRevision : EdgeRevision);
-        await Assert.That(GraphShortestPathFullStoreImage.Bytes(store)).IsEquivalentTo(image);
+        await Assert.That(CanonicalStoreImage.Bytes(store)).IsEquivalentTo(image);
         await Assert.That(store.Position).IsEqualTo(cut);
     }
 
     internal static async Task RefusedAsync(DatabaseEngine engine, ZoneTreeStore store,
         EntityRef target, string reader, ErrorCode expected)
     {
-        var image = GraphShortestPathFullStoreImage.Bytes(store);
+        var image = CanonicalStoreImage.Bytes(store);
         var cut = store.Position;
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => engine.ReadIncomingGraphEdges(reader,
             new ReadIncomingGraphEdgesRequestV1(PageVersion, target, Graph, IncomingLimit)));
         await Assert.That(failure.Code).IsEqualTo(expected);
-        await Assert.That(GraphShortestPathFullStoreImage.Bytes(store)).IsEquivalentTo(image);
+        await Assert.That(CanonicalStoreImage.Bytes(store)).IsEquivalentTo(image);
         await Assert.That(store.Position).IsEqualTo(cut);
     }
 

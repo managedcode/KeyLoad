@@ -19,7 +19,6 @@ internal sealed class CompetingInboxPublicTests
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 await fixture.InitializeAsync();
-                fixture.RegisterNativeCoverageCase<CompetingInboxPublicTests>(nameof(SeparatelyIssuedSdkAndOfficialMcpCompeteForOneInboxThenCurrentInputRepairAndTwoCold));
                 await CompetingInboxPublicFlow.RunAsync(new(fixture, equivalent, TimeProvider.System), joined.Token);
             }, failures);
         }, failures);

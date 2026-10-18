@@ -19,7 +19,7 @@ internal sealed record QueueDeadlineClusterSelection(string PrincipalId)
         }
         foreach (var number in Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount))
         {
-            var node = builder.CreateResourceBuilder(builder.Resources.OfType<ContainerResource>()
+            var node = builder.CreateResourceBuilder(builder.Resources.OfType<ProjectResource>()
                 .Single(resource => resource.Name == ClusterFixtureProtocol.NodeName(number)));
             node.WithEnvironment(PrincipalSetting, PrincipalId);
         }

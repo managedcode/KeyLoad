@@ -1,5 +1,4 @@
 using System.Text.Json;
-using KeyLoad.AppHost.Features.CodeQuality;
 using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.CodeQuality;

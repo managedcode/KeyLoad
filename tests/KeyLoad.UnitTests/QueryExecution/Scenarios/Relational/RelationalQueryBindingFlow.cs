@@ -24,7 +24,7 @@ internal static class RelationalQueryBindingFlow
         var engine = new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution());
         await RelationalQueryBindingAssertions.InvalidAsync(engine, fixture.Store, fixture.Partition, token);
         var seed = Seed(fixture);
-        var expectedToken = fixture.Store.Read(view => DatabaseEngine.Token(view, fixture.Partition, fixture.Store.Position));
+        var expectedToken = fixture.Store.Read(view => fixture.Database.Token(view, fixture.Partition, fixture.Database.LastApplied));
         await BinderFieldLineagePages.EqualAsync(new CommitReceipt(seed.Command.CommandId, expectedToken, [new("putDocument", Collection, Id, Revision)], DurabilityProfile.ProcessDurable, 1), seed.Receipt);
         await RelationalQueryBindingAssertions.RecordAsync(fixture.Database, fixture.Partition, token);
         await RelationalQueryBindingAssertions.InvalidAsync(engine, fixture.Store, fixture.Partition, token);

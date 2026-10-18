@@ -93,15 +93,15 @@ internal static class ProjectionPublicPolicyCold
         var failures = new List<Exception>();
         foreach (var node in ProjectionPublicPolicyProtocol.Nodes)
         {
-            await ServerFailureObserver.ObserveAsync(() => fixture.KillContainerAsync(node, ProjectionPublicPolicyProtocol.ColdScenario, token), failures);
+            await ServerFailureObserver.ObserveAsync(() => fixture.KillServerAsync(node, ProjectionPublicPolicyProtocol.ColdScenario, token), failures);
         }
         foreach (var node in ProjectionPublicPolicyProtocol.Nodes)
         {
-            await ServerFailureObserver.ObserveAsync(async () => await fixture.BeginContainerRestartAsync(node, token), failures);
+            await ServerFailureObserver.ObserveAsync(async () => await fixture.BeginProcessRestartAsync(node, token), failures);
         }
         foreach (var node in ProjectionPublicPolicyProtocol.Nodes)
         {
-            await ServerFailureObserver.ObserveAsync(() => fixture.RestartContainerAsync(node, token), failures);
+            await ServerFailureObserver.ObserveAsync(() => fixture.RestartServerAsync(node, token), failures);
         }
         foreach (var node in ProjectionPublicPolicyProtocol.Nodes)
         {

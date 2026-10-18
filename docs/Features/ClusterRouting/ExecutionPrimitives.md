@@ -57,4 +57,4 @@ Background work never checks leadership. A stateless worker accepts events, buff
 
 ## Verification
 
-Real TUnit operations through the .NET SDK and official MCP client against the Aspire-owned Docker cluster, plus focused unit tests of the stateless-worker buffer and the ID helper. Existing tests that still exercise leader-gated due waits (for example `RecurringDueWaitTests`) describe the code being replaced and do not qualify AC-ORL-011.
+Real TUnit operations through the .NET SDK and official MCP client against the Aspire-owned Docker cluster, plus focused unit tests of the stateless-worker buffer and the ID helper. AC-ORL-011 requires the current StatelessWorker event-buffer and native grain-timer path; source presence does not qualify its actual cancellation, flush and joined shutdown behavior.

@@ -29,5 +29,6 @@
   </Folder>
   <Folder Name="/build/">
     <Project Path="build/KeyLoad.AppHost/KeyLoad.AppHost.csproj" />
+    <Project Path="build/KeyLoad.LoadTests.AppHost/KeyLoad.LoadTests.AppHost.csproj" />
   </Folder>
 </Solution>

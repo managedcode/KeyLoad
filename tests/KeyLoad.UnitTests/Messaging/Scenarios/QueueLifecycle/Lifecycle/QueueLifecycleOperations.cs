@@ -36,15 +36,16 @@ internal static class QueueLifecycleOperations
         foreach (var (operation, result) in state.Failures)
         {
             var actual = state.SubmitOriginal(database, operation);
-            await Assert.That(actual.Error).IsEqualTo(result.Error);
-            await Assert.That(actual.SafeDetail).IsEqualTo(result.SafeDetail);
-            await Assert.That(actual.Json).IsEqualTo(result.Json);
+            await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(Errors.Code(result.Problem));
+            await Assert.That(actual.Problem?.Detail).IsEqualTo(result.Problem?.Detail);
+            await Assert.That(NativeSerialization.Serialize(actual).AsSpan()
+                .SequenceEqual(NativeSerialization.Serialize(result))).IsTrue();
             await Assert.That(actual.Value).IsNull();
             await QueueLifecycleReplayCutAssertions.SameAsync(database.Store, before);
         }
         foreach (var (operation, result) in state.Successes)
         {
-            if (operation.Kind == OperationKind.Receive)
+            if (operation.Value!.Kind == OperationKind.Receive)
             {
                 var current = result.Get<ReceiveResult>().Deliveries.All(item => item.Id == currentMessageId);
                 await QueueReceiveReplayAssertions.SameAsync(database.Store, state.Partition, operation, result, current,
@@ -53,11 +54,11 @@ internal static class QueueLifecycleOperations
                 continue;
             }
             var actual = state.SubmitOriginal(database, operation);
-            if (operation.Kind == OperationKind.SetDispatch)
+            if (operation.Value!.Kind == OperationKind.SetDispatch)
             {
                 await DispatchReplayAsync(actual, result);
             }
-            else if (operation.Kind == OperationKind.ConfigurePrincipal)
+            else if (operation.Value!.Kind == OperationKind.ConfigurePrincipal)
             {
                 await NativeReplayResultAssertions.Same<PrincipalRecord>(actual, result);
             }
@@ -71,7 +72,8 @@ internal static class QueueLifecycleOperations
 
     private static async Task DispatchReplayAsync(Result<object> actual, Result<object> expected)
     {
-        await Assert.That(actual.Json).IsEqualTo(expected.Json);
+        await Assert.That(NativeSerialization.Serialize(actual).AsSpan()
+            .SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
         await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(Errors.Code(expected.Problem));
         await Assert.That(actual.Problem?.Detail).IsEqualTo(expected.Problem?.Detail);
         await Assert.That(actual.Value?.GetType()).IsEqualTo(typeof(bool));

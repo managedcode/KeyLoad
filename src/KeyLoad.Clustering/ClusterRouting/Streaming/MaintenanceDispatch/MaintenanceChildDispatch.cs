@@ -1,19 +1,15 @@
 using KeyLoad.Core.Features.ResourceExecution;
 using ManagedCode.Communication.CQRS;
-using Microsoft.Extensions.Options;
-using Orleans.Serialization;
 
 namespace KeyLoad.Clustering;
 
-/// <summary>Joins one originally reserved native child without interpreting its business reply.</summary>
+/// <summary>Joins one native Task child before restoring its identity and owned payload.</summary>
 internal static class MaintenanceChildDispatch
 {
     internal static async Task<GrainOperationReply> ExecuteAsync(DecodedGrainRequest parent, string signed,
         Guid actorId, Guid commandId,
-        Func<string, CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> executeChild,
-        IServiceProvider services, GrainRequestCodec codec, TimeProvider clock,
-        Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
-        IOptions<GrainRoutingOptions> routing, IResourceLifetimeWorkBinding binding,
+        Func<string, CancellationToken, Task<GrainOperationReply>> executeChild,
+        IServiceProvider services, GrainRequestCodec codec, IResourceLifetimeWorkBinding binding,
         byte[]? ownedPayload, CancellationToken token)
     {
         var admission = new MaintenanceChildDispatchAdmission(ownedPayload);
@@ -21,9 +17,8 @@ internal static class MaintenanceChildDispatch
         GrainOperationReply? result = null;
         try
         {
-            admission.Open(parent, signed, actorId, commandId, services, codec, clock, binding, token);
-            result = await GrainRequestStreamConsumer.DrainAsync(cancellation => executeChild(signed, cancellation),
-                serializer, actorId, clock, routing, admission.Token).ConfigureAwait(true);
+            admission.Open(parent, signed, actorId, commandId, services, codec, binding, token);
+            result = await executeChild(signed, admission.Token).ConfigureAwait(true);
         }
         catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
         {
@@ -33,9 +28,16 @@ internal static class MaintenanceChildDispatch
         {
             failures.Add(failure);
         }
+        if (failures.Count != NoFailures || result?.Error is not null)
+        {
+            await admission.CancelAsync(failures).ConfigureAwait(true);
+        }
         admission.PrepareCleanup(failures);
         admission.Dispose();
-        await admission.CompleteAsync(failures).ConfigureAwait(true);
+        if (failures.Count != NoFailures && result?.Error is { } original)
+        {
+            failures.Insert(NoFailures, Errors.Fail(original, result.SafeDetail ?? GrainRoutingProtocol.InvalidRequest));
+        }
         ThrowIfAny(failures);
         return result ?? throw Errors.Fail(ErrorCode.Corruption, GrainRoutingProtocol.InvalidRequest);
     }

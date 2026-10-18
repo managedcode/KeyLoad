@@ -51,7 +51,7 @@ internal static class DeniedCommandRepairContinuation
         var current = Fresh(fixture.Database, fixture.Partition, writer.Id, RepairedRevision, RepairedJson);
         var position = fixture.Store.Position;
         var result = fixture.Database.Apply(current);
-        await ReceiptAsync(fixture.Store, fixture.Partition, result.Get<CommitReceipt>(), current.Id, position, RepairedRevision);
+        await ReceiptAsync(fixture.Store, fixture.Partition, result.Get<CommitReceipt>(), current.CommandId, position, RepairedRevision);
         await DocumentAsync(fixture.Database, fixture.Partition, RepairedRevision, RepairedJson, expectedReference);
         await ReplayAsync(fixture.Database, fixture.Store, current, result);
         await OldDeniedAsync(fixture.Database, fixture.Store, fixture.Partition, original, outcome);
@@ -102,7 +102,7 @@ internal static class DeniedCommandRepairContinuation
         var fresh = Fresh(database, partition, principal, ColdRevision, ColdJson);
         var position = store.Position;
         var result = database.Apply(fresh);
-        await ReceiptAsync(store, partition, result.Get<CommitReceipt>(), fresh.Id, position, ColdRevision);
+        await ReceiptAsync(store, partition, result.Get<CommitReceipt>(), fresh.CommandId, position, ColdRevision);
         await DocumentAsync(database, partition, ColdRevision, ColdJson, expectedReference);
         await ReplayAsync(database, store, fresh, result);
     }
@@ -113,8 +113,8 @@ internal static class DeniedCommandRepairContinuation
         var id = Guid.NewGuid();
         var command = new CommandRequest(id, partition,
             [new PutDocument(Collection, Document, json, revision - NextPosition)]);
-        return new(id, OperationKind.Batch, principal, database.EvaluationClock.GetUtcNow(),
-            JsonSerializer.Serialize(command, JsonDefaults.Options));
+        return database.CreateCommand(OperationKind.Batch, id, principal, database.EvaluationClock.GetUtcNow(),
+            NativeSerialization.Serialize(command));
     }
 
     private static async Task OldDeniedAsync(DatabaseEngine database, ZoneTreeStore store,
@@ -122,7 +122,9 @@ internal static class DeniedCommandRepairContinuation
     {
         var position = store.Position;
         var bytes = QueueWholeFlowStorage.Bytes(store);
-        var denied = database.Apply(database.OwnCommand(new Command<DatabaseCommand> { CommandId = original.CommandId, UserId = original.UserId, Timestamp = (database.EvaluationClock.GetUtcNow()).UtcDateTime, Value = original.Value }));
+        var retry = database.OwnCommand(original);
+        retry.Timestamp = database.EvaluationClock.GetUtcNow().UtcDateTime;
+        var denied = database.Apply(retry);
         await Assert.That(Errors.Code(denied.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(denied.Problem?.Detail).IsEqualTo(ChangedPolicy);
 
@@ -138,7 +140,9 @@ internal static class DeniedCommandRepairContinuation
     {
         var position = store.Position;
         var bytes = QueueWholeFlowStorage.Bytes(store);
-        var replay = database.Apply(database.OwnCommand(new Command<DatabaseCommand> { CommandId = original.CommandId, UserId = original.UserId, Timestamp = (database.EvaluationClock.GetUtcNow()).UtcDateTime, Value = original.Value }));
+        var retry = database.OwnCommand(original);
+        retry.Timestamp = database.EvaluationClock.GetUtcNow().UtcDateTime;
+        var replay = database.Apply(retry);
         await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
         await UnchangedAsync(store, position, bytes);
     }

@@ -55,7 +55,7 @@ internal static class Bm25PortableFamilyBackupTrial
         foreach (var receipt in expected)
         {
             var actual = OutcomeStoreOracle.ReadPartition(fixture.Target!, fixture.Source.Partition,
-                Bm25PortableFamilyBackupSeed.Root, receipt.CommandId)!.Get<CommitReceipt>();
+                Bm25PortableFamilyBackupSeed.Root, receipt.CommandId)!.Value.Get<CommitReceipt>();
             await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(receipt)))
                 .IsTrue();
         }

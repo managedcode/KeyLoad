@@ -87,8 +87,7 @@ internal sealed class Bm25OriginalPhaseRecoveryFlow(Bm25OriginalPhaseRecoveryOwn
         }
         var submitted = issuerMustDeny ? original : Reissue(original);
         var result = Publish(submitted);
-        await Assert.That(result.Error).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(result.Json).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(result.Value).IsNull();
         await Assert.That(Errors.Code(owner.Database.ResolveOutcome(submitted).Problem)).IsEqualTo(ErrorCode.PermissionDenied);
         await before.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(owner));

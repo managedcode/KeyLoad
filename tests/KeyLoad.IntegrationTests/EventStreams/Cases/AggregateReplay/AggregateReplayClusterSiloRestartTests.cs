@@ -1,3 +1,4 @@
+using KeyLoad.AppHost.Features.ClusterReplication;
 using Aspire.Hosting.ApplicationModel;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
@@ -10,7 +11,7 @@ namespace KeyLoad.IntegrationTests.Features.EventStreams;
 internal sealed class AggregateReplayClusterSiloRestartTests(ClusterFixture fixture)
 {
     [Test]
-    public async Task AcEvent008SnapshotTailCommandRecoversAcrossSiloLossAndContainerRestart()
+    public async Task AcEvent008SnapshotTailCommandRecoversAcrossSiloLossAndProcessRestart()
     {
         await ExecuteAsync(interruptAcceptedRestart: false);
     }
@@ -45,23 +46,23 @@ internal sealed class AggregateReplayClusterSiloRestartTests(ClusterFixture fixt
         {
             var selectedIndex = await SelectSiloIndexAsync(nodes, administrators, cancellationToken);
             stoppedNode = nodes[selectedIndex];
-            await fixture.KillContainerAsync(stoppedNode, AggregateReplayClusterTokens.FailureScenario, cancellationToken);
+            await fixture.KillServerAsync(stoppedNode, AggregateReplayClusterTokens.FailureScenario, cancellationToken);
             var survivorIndex = Enumerable.Range(0, nodes.Length).First(index => index != selectedIndex);
             await WaitUntilReadyAsync(administrators[survivorIndex], cancellationToken);
             var frozen = scenario.FailoverCommand(Guid.NewGuid());
             await ClusterReplicationTestSupport.MissingCopiesAsync(await clients[survivorIndex].CommitAsync(frozen, cancellationToken));
 
-            ContainerRuntimeInspection? accepted = null;
+            ProcessFaultCommandProtocol.Identity? accepted = null;
             if (interruptAcceptedRestart)
             {
-                accepted = await fixture.BeginContainerRestartAsync(stoppedNode, cancellationToken);
+                accepted = await fixture.BeginProcessRestartAsync(stoppedNode, cancellationToken);
                 await AcceptedRestartCancellationAssertions.InterruptAsync(fixture, stoppedNode, cancellationToken);
             }
-            await fixture.RestartContainerAsync(stoppedNode, cancellationToken);
+            await fixture.RestartServerAsync(stoppedNode, cancellationToken);
             restarted = true;
             if (accepted is not null)
             {
-                await AcceptedRestartCancellationAssertions.SameReplacementAsync(accepted, cancellationToken);
+                await AcceptedRestartCancellationAssertions.SameReplacementAsync(fixture, accepted, cancellationToken);
             }
             await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(stoppedNode,
                 WaitBehavior.WaitOnResourceUnavailable, cancellationToken);
@@ -148,7 +149,7 @@ internal sealed class AggregateReplayClusterSiloRestartTests(ClusterFixture fixt
     {
         try
         {
-            await fixture.RestartContainerAsync(stoppedNode, cancellationToken);
+            await fixture.RestartServerAsync(stoppedNode, cancellationToken);
             await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(stoppedNode,
                 WaitBehavior.WaitOnResourceUnavailable, cancellationToken);
             await Assert.That(Directory.Exists(Path.Combine(fixture.Root, stoppedNode))).IsTrue();

@@ -10,15 +10,15 @@ internal static class InboxProcessingClusterCold
         var failures = new List<Exception>();
         foreach (var node in InboxProcessingClusterProtocol.Nodes)
         {
-            await ServerFailureObserver.ObserveAsync(() => fixture.KillContainerAsync(node, InboxProcessingClusterProtocol.Cold, token), failures).ConfigureAwait(false);
+            await ServerFailureObserver.ObserveAsync(() => fixture.KillServerAsync(node, InboxProcessingClusterProtocol.Cold, token), failures).ConfigureAwait(false);
         }
         foreach (var node in InboxProcessingClusterProtocol.Nodes)
         {
-            await ServerFailureObserver.ObserveAsync(() => fixture.BeginContainerRestartAsync(node, token), failures).ConfigureAwait(false);
+            await ServerFailureObserver.ObserveAsync(() => fixture.BeginProcessRestartAsync(node, token), failures).ConfigureAwait(false);
         }
         foreach (var node in InboxProcessingClusterProtocol.Nodes)
         {
-            await ServerFailureObserver.ObserveAsync(() => fixture.RestartContainerAsync(node, token), failures).ConfigureAwait(false);
+            await ServerFailureObserver.ObserveAsync(() => fixture.RestartServerAsync(node, token), failures).ConfigureAwait(false);
         }
         foreach (var node in InboxProcessingClusterProtocol.Nodes)
         {

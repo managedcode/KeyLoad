@@ -27,7 +27,7 @@ internal sealed class QueueWorkerClusterChild : IAsyncDisposable
     {
         exit = process.WaitForExitAsync();
         output = ReadOutputAsync(process.StandardOutput);
-        error = LocalImageOwnedProcessLifetime.ReadBoundedAsync(process.StandardError,
+        error = OwnedProcessLifetime.ReadBoundedAsync(process.StandardError,
             ExternalQueueWorkerCrashProtocol.MaximumFrameCharacters);
     }
 
@@ -124,7 +124,7 @@ internal sealed class QueueWorkerClusterChild : IAsyncDisposable
     {
         if (started)
         {
-            await ServerFailureObserver.ObserveAsync(() => LocalImageOwnedProcessLifetime.TerminateAndJoinAsync(
+            await ServerFailureObserver.ObserveAsync(() => OwnedProcessLifetime.TerminateAndJoinAsync(
                 process, exit, output, error, failures), failures);
         }
         ServerFailureObserver.Observe(process.Dispose, failures);

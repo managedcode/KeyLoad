@@ -43,7 +43,6 @@ internal sealed class ResourcePolicyUpdateFixture : IDisposable
         {
             ClusterAdministrator = true
         }, DatabaseEngine.Credential(RootId, RootId, RootCredential));
-        PhysicalShardTestBootstrap.Bootstrap(Database, RootId);
         Apply(ConfigureResource(new(Collection, ResourceKind.Collection, DomainId)
         {
             SchemaVersion = initialSchemaVersion
@@ -71,8 +70,8 @@ internal sealed class ResourcePolicyUpdateFixture : IDisposable
         {
             ExpectedSchemaVersion = expectedSchemaVersion
         };
-        return new(operationId ?? Guid.NewGuid(), OperationKind.ConfigureResource, principalId,
-            TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(payload, JsonDefaults.Options));
+        return Database.CreateCommand(OperationKind.ConfigureResource, operationId ?? Guid.NewGuid(), principalId,
+            TimeProvider.System.GetUtcNow(), NativeSerialization.Serialize(payload));
     }
 
     internal Result<object> Apply(Command<DatabaseCommand> operation) => Database.Apply(operation);

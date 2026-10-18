@@ -1,5 +1,5 @@
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.AppHost.Features.BenchmarkComparisons;
+using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 using T = KeyLoad.ComparisonTests.Features.BenchmarkComparisons.IsolatedDocumentResourceTokens;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
@@ -23,8 +23,8 @@ internal sealed class IsolatedDocumentResourceOpenSearchTests
         var nodes = resources.Where(node => node.Name != IsolatedResourceTopologyFixture.RunnerName).ToArray();
         await IsolatedDocumentResourceAssertions.VerifyNodesAsync(nodes, count, Prefix, BenchmarkResources.OpenSearchDigest);
         await IsolatedDocumentResourceAssertions.VerifyVolumesAsync(nodes, T.OpenSearchData);
-        await IsolatedResourceTopologyFixture.VerifyWaitsAsync(fixture.Context.Runner.Resource, nodes);
-        await IsolatedDocumentResourceAssertions.VerifyEndpointsAsync(fixture.Context.Runner.Resource, nodes, T.Http);
+        await IsolatedResourceTopologyFixture.VerifyWaitsAsync(fixture.Context.Client, nodes);
+        await IsolatedDocumentResourceAssertions.VerifyEndpointsAsync(fixture.Context.Client, nodes, T.Http);
         var names = string.Join(',', nodes.Select(node => node.Name));
         foreach (var node in nodes)
         {
@@ -40,7 +40,7 @@ internal sealed class IsolatedDocumentResourceOpenSearchTests
             await Assert.That(node.Annotations.OfType<WaitAnnotation>()).IsEmpty();
             await Assert.That(node.Annotations.OfType<HealthCheckAnnotation>().Count()).IsEqualTo(1);
         }
-        var runner = await IsolatedResourceTopologyFixture.EnvironmentAsync(fixture.Context.Runner.Resource);
+        var runner = await IsolatedResourceTopologyFixture.EnvironmentAsync(fixture.Context.Client);
         await Assert.That(runner[IsolatedDocumentResourceAssertions.Image]).IsEqualTo(
             "opensearchproject/opensearch:3.6.0@" + BenchmarkResources.OpenSearchDigest);
         await Assert.That(runner.ContainsKey(IsolatedDocumentResourceAssertions.NativePrefix + T.NativePassword)).IsFalse();

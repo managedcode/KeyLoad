@@ -5,9 +5,11 @@ using KeyLoad.UnitTests.Features.ResourceExecution;
 using ManagedCode.Communication.Commands;
 using static KeyLoad.UnitTests.Features.GraphTraversal.GraphReferenceLifetimeNativeProtocol;
 
+using KeyLoad.UnitTests.Features.Messaging;
+
 namespace KeyLoad.UnitTests.Features.GraphTraversal;
 
-/// <summary>Proves Core.Apply corruption rollback without entering the CLUSTER append/materializer path.</summary>
+/// <summary>Proves actual local corruption rollback and repaired storage while every canonical copy retains its cut.</summary>
 internal static class GraphReferenceLifetimeNativeTupleIntegrity
 {
     private const int FaultAndRepairCommits = 2;
@@ -19,7 +21,7 @@ internal static class GraphReferenceLifetimeNativeTupleIntegrity
     internal static async Task VerifyAsync(NativeDropRuntimeProfile profile, string graph,
         EntityRef anchor, EntityRef target, CancellationToken token)
     {
-        await Task.WhenAll(profile.Hosts.Nodes.Select(node => node.Partition.Coordinator.ReadBarrierAsync(token)));
+        await Task.WhenAll(profile.Hosts.Nodes.Select(node => node.Database.Coordinator.ReadBarrierAsync(token)));
         var store = profile.Source.Store;
         var clean = Capture(profile);
         var key = DocumentStorageKeys.RecordKey(target);
@@ -53,14 +55,14 @@ internal static class GraphReferenceLifetimeNativeTupleIntegrity
         }), failures);
         ServerFailureObserver.ThrowIfAny(failures);
         await UnchangedAsync(profile, clean, FaultAndRepairCommits);
-        await Task.WhenAll(profile.Hosts.Nodes.Select(node => node.Partition.Coordinator.ReadBarrierAsync(token)));
+        await Task.WhenAll(profile.Hosts.Nodes.Select(node => node.Database.Coordinator.ReadBarrierAsync(token)));
         await GraphReferenceLifetimeNativeReads.HealthyAsync(profile, graph, anchor, target, token);
     }
 
     private static async Task ReadsAsync(NativeDropRuntimeProfile profile, string graph,
         EntityRef anchor, EntityRef target, CancellationToken token)
     {
-        var image = ControlledPartitionMovementRawImage.Bytes(profile.Source.Store);
+        var image = QueueWholeFlowStorage.Bytes(profile.Source.Store);
         var cut = profile.Source.Store.Position;
         var traversal = Assert.ThrowsExactly<KeyLoadException>(() => profile.Source.Database.Traverse(
             PartitionStoreProtocol.AdministratorId, NativeDropRuntimeProtocol.Partition, graph,
@@ -80,7 +82,7 @@ internal static class GraphReferenceLifetimeNativeTupleIntegrity
                 }, Depth, Vertices, Edges), cancellationToken: token));
         await CorruptionAsync(path);
         await Assert.That(profile.Source.Store.Position).IsEqualTo(cut);
-        await Assert.That(ControlledPartitionMovementRawImage.Bytes(profile.Source.Store).SequenceEqual(image)).IsTrue();
+        await Assert.That(QueueWholeFlowStorage.Bytes(profile.Source.Store).SequenceEqual(image)).IsTrue();
     }
 
     private static async Task WritesAsync(NativeDropRuntimeProfile profile, string graph,
@@ -96,7 +98,7 @@ internal static class GraphReferenceLifetimeNativeTupleIntegrity
             var command = new CommandRequest(Guid.NewGuid(), NativeDropRuntimeProtocol.Partition,
                 [new PutDocument(AnchorCollection, RollbackWitness, Attributes), mutation]);
             var operation = profile.Source.Database.CreateCommand(OperationKind.Batch, command.CommandId,
-                PartitionStoreProtocol.AdministratorId, profile.Source.Clock.GetUtcNow(), NativeSerialization.Serialize(command));
+                PartitionStoreProtocol.AdministratorId, profile.Node.Clock.GetUtcNow(), NativeSerialization.Serialize(command));
             var verified = profile.Source.Database.OwnCommand(operation);
             await RefuseWriteAsync(profile, verified, token);
             await RefuseWriteAsync(profile, verified, token);
@@ -114,15 +116,19 @@ internal static class GraphReferenceLifetimeNativeTupleIntegrity
     }
 
     private static OwnerCut[] Capture(NativeDropRuntimeProfile profile)
-        => profile.Hosts.Nodes.Select(node => new OwnerCut(node, node.Store.Identity.NodeId,
-            node.Store.Identity.Incarnation, node.Store.Position, node.Database.LastApplied,
-            NativeSerialization.Serialize(node.Log.State), ControlledPartitionMovementRawImage.Bytes(node.Store))).ToArray();
+        => profile.Hosts.Nodes.Select(node =>
+        {
+            var owner = node.Database;
+            var cut = owner.ReadCanonicalCut();
+            return new OwnerCut(owner, owner.Store.Identity.NodeId, owner.Store.Identity.Incarnation,
+                cut.StorePosition, cut.AppliedPosition, QueueWholeFlowStorage.Bytes(owner.Store));
+        }).ToArray();
 
     private static async Task UnchangedAsync(NativeDropRuntimeProfile profile, OwnerCut[] expected,
         int sourceFixtureCommits = NoFixtureCommits)
     {
-        await Assert.That(profile.Hosts.Nodes.Count).IsEqualTo(SixNativeOwners);
-        await Assert.That(expected.Length).IsEqualTo(SixNativeOwners);
+        await Assert.That(profile.Hosts.Nodes.Length).IsEqualTo(NativeDropRuntimeProtocol.NativeNodes);
+        await Assert.That(expected.Length).IsEqualTo(NativeDropRuntimeProtocol.NativeNodes);
         foreach (var cut in expected)
         {
             var delta = ReferenceEquals(cut.Owner, profile.Source) ? sourceFixtureCommits : NoFixtureCommits;
@@ -130,15 +136,13 @@ internal static class GraphReferenceLifetimeNativeTupleIntegrity
             await Assert.That(cut.Owner.Store.Identity.Incarnation).IsEqualTo(cut.Incarnation);
             await Assert.That(cut.Owner.Store.Position).IsEqualTo(cut.Position + delta);
             await Assert.That(cut.Owner.Database.LastApplied).IsEqualTo(cut.Applied);
-            await Assert.That(NativeSerialization.Serialize(cut.Owner.Log.State).SequenceEqual(cut.LogState)).IsTrue();
-            await Assert.That(ControlledPartitionMovementRawImage.Bytes(cut.Owner.Store).SequenceEqual(cut.Image)).IsTrue();
+            await Assert.That(QueueWholeFlowStorage.Bytes(cut.Owner.Store).SequenceEqual(cut.Image)).IsTrue();
         }
     }
 
     private const int NoFixtureCommits = 0;
-    private const int SixNativeOwners = 6;
-    private sealed record OwnerCut(ControlledPartitionMovementNativeHost Owner, Guid NodeId, Guid Incarnation,
-        long Position, long Applied, byte[] LogState, string[] Image);
+    private sealed record OwnerCut(RequestCqrsHostedDatabase Owner, Guid NodeId, Guid Incarnation,
+        long Position, long Applied, string[] Image);
 
     private static async Task CorruptionAsync(KeyLoadException error)
     {

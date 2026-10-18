@@ -12,6 +12,10 @@ export const runtimeBundle = Object.freeze({
   assemblies: Object.freeze([
     ['outer-tests', 'tests/KeyLoad.ComparisonTests/bin/Release/net10.0/KeyLoad.ComparisonTests'],
     ['apphost', 'build/KeyLoad.AppHost/bin/Release/net10.0/KeyLoad.AppHost'],
+    ['load-apphost', 'build/KeyLoad.LoadTests.AppHost/bin/Release/net10.0/KeyLoad.LoadTests.AppHost'],
+    ['server', 'src/KeyLoad.Server/bin/Release/net10.0/KeyLoad.Server'],
+    ['comparison-client', 'benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/KeyLoad.ComparisonHost'],
+    ['comparisons', 'benchmarks/KeyLoad.Comparisons/bin/Release/net10.0/KeyLoad.Comparisons'],
   ]),
 });
 
@@ -24,7 +28,7 @@ export function allowedRuntimePath(value) {
     || /[\u0000-\u001f\u007f\\]/u.test(value) || path.posix.normalize(value) !== value
     || value.split('/').some(part => part === '' || part === '.' || part === '..')) return false;
   return value.startsWith(runtimeBundle.packages + '/')
-    || /^(?:src|tests|benchmarks)\/[A-Za-z0-9_.-]+\/(?:bin\/Release|obj)\//u.test(value);
+    || /^(?:src|tests|benchmarks|build|analyzers)\/[A-Za-z0-9_.-]+\/(?:bin\/Release|obj)\//u.test(value);
 }
 
 export function validateRuntimeInventory(value) {

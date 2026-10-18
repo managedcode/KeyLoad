@@ -21,23 +21,27 @@ internal static class SampleSequenceIntegrityAssertions
     internal static async Task ReadRefusalAsync(SampleSequenceIntegrityFixture fixture, CancellationToken token)
     {
         var image = SampleChunkCorrectionBoundColdAssertions.Image(fixture.Store);
-        var position = fixture.Store.Position;
+        var cut = fixture.ReadCanonicalCut();
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Database.ReadSampleChunkWindow(P.Principal,
             fixture.Source.Request, token));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(SampleChunkCorrectionBoundColdAssertions.Image(fixture.Store)).IsEqualTo(image);
-        await Assert.That(fixture.Store.Position).IsEqualTo(position);
+        await Assert.That(fixture.ReadCanonicalCut()).IsEqualTo(cut);
     }
 
     internal static async Task ReplayAsync(SampleSequenceIntegrityFixture fixture,
-        Command<DatabaseCommand> original, Result<object> expected)
+        Command<DatabaseCommand> original, Result<object> expected, byte[] outcomeBytes, CancellationToken token)
     {
         var image = SampleChunkCorrectionBoundColdAssertions.Image(fixture.Store);
-        var position = fixture.Store.Position;
-        var actual = fixture.Database.ResolveOutcome(original);
+        var cut = fixture.ReadCanonicalCut();
+        var actual = fixture.Database.ApplyEmbedded(original, token);
         await NativeReplayResultAssertions.Same<CommitReceipt>(actual, expected);
+        await NativeReplayResultAssertions.Same<CommitReceipt>(fixture.Database.ResolveOutcome(original), expected);
+        var retained = fixture.Store.Read(view => view.ReadOwnedValue(OutcomeStoreOracle.Key(original)));
+        await Assert.That(retained).IsNotNull();
+        await Assert.That(retained!.AsSpan().SequenceEqual(outcomeBytes)).IsTrue();
         await Assert.That(SampleChunkCorrectionBoundColdAssertions.Image(fixture.Store)).IsEqualTo(image);
-        await Assert.That(fixture.Store.Position).IsEqualTo(position);
+        await Assert.That(fixture.ReadCanonicalCut()).IsEqualTo(cut);
     }
 
     internal static async Task HealthyAsync(SampleSequenceIntegrityFixture fixture, bool merged, CancellationToken token)

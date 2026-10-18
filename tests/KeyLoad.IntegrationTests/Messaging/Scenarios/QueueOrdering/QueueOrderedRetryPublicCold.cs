@@ -11,9 +11,9 @@ internal static class QueueOrderedRetryPublicCold
         NodeStatus before, bool healthy, CancellationToken token)
     {
         var killed = await Task.WhenAll(QueueLifecyclePublicProtocol.Nodes.Select(node => ObserveAsync(
-            () => fixture.KillContainerAsync(node, QueueOrderedRetryPublicProtocol.ColdScenario, token))));
+            () => fixture.KillServerAsync(node, QueueOrderedRetryPublicProtocol.ColdScenario, token))));
         var restarted = await Task.WhenAll(QueueLifecyclePublicProtocol.Nodes.Select(node => ObserveAsync(
-            () => fixture.RestartContainerAsync(node, token))));
+            () => fixture.RestartServerAsync(node, token))));
         ServerFailureObserver.ThrowIfAny([.. killed.SelectMany(row => row), .. restarted.SelectMany(row => row)]);
         foreach (var node in QueueLifecyclePublicProtocol.Nodes)
         {

@@ -57,7 +57,7 @@ internal static class RevokedOutcomeAdmissionValues
     {
         for (var attempt = 0; attempt < 2; attempt++)
         {
-            var actual = fixture.Database.Apply(RevokedOutcomeAdmissionFixture.Operation(fixture.Original));
+            var actual = fixture.Database.Apply(fixture.Operation(fixture.Original));
             await EqualAsync(actual, Result<object>.Fail(Errors.Problem(code, detail)));
             await Assert.That(actual.Value).IsNull();
             await OriginalAsync(fixture);
@@ -66,7 +66,7 @@ internal static class RevokedOutcomeAdmissionValues
     internal static async Task FreshReplayAsync(RevokedOutcomeAdmissionFixture fixture)
     {
         var command = fixture.Fresh ?? throw new InvalidOperationException("The fresh producer is missing.");
-        await NativeReplayResultAssertions.Same<CommitReceipt>(fixture.Database.Apply(RevokedOutcomeAdmissionFixture.Operation(command)), fixture.FreshResult!);
+        await NativeReplayResultAssertions.Same<CommitReceipt>(fixture.Database.Apply(fixture.Operation(command)), fixture.FreshResult!);
         await Assert.That(fixture.ReadOutcome(command.CommandId).AsSpan().SequenceEqual(fixture.FreshOutcome)).IsTrue();
         await OriginalAsync(fixture);
     }

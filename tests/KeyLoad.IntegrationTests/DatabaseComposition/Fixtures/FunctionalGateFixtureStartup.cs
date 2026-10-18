@@ -29,8 +29,7 @@ internal static class FunctionalGateFixtureStartup
         }
     }
 
-    internal static List<string> Arguments(string root, int nodes, int replicas, bool coldReopen, bool exclusiveOwnerContention,
-        LocalClusterImageSelection.Selection? selection)
+    internal static List<string> Arguments(string root, int nodes, int replicas, bool coldReopen, bool exclusiveOwnerContention)
     {
         var arguments = new List<string>
         {
@@ -43,15 +42,11 @@ internal static class FunctionalGateFixtureStartup
         if (coldReopen)
         {
             arguments.Add(FunctionalColdReopenProfile.EnabledArgument);
-            arguments.Add(ContainerFaultCommandProtocol.EnabledArgument);
+            arguments.Add(ProcessFaultCommandProtocol.EnabledArgument);
         }
         if (exclusiveOwnerContention)
         {
             arguments.Add(KeyLoad.AppHost.Features.StorageRecovery.ExclusiveOwnerContentionProfile.EnabledArgument);
-        }
-        if (selection is not null)
-        {
-            arguments.AddRange(selection.CreateWaveArguments());
         }
         return arguments;
     }

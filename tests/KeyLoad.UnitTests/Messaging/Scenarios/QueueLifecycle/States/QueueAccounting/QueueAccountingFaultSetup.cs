@@ -33,7 +33,7 @@ internal static class QueueAccountingFaultSetup
         }
         var time = expires ? start.AddSeconds(QueueAccountingFaultProtocol.ExpiredEvaluationSeconds)
             : kind == QueueAccountingOperation.Reclaim ? start.AddSeconds(QueueAccountingFaultProtocol.ReclaimEvaluationSeconds) : start;
-        var operation = Operation(lane, kind, delivery?.Token, time);
+        var operation = Operation(fixture.Database, lane, kind, delivery?.Token, time);
         var metadata = fixture.Database.InspectMessage(QueueAccountingFaultProtocol.Root, lane, message.MessageId)!.Metadata;
         var scheduled = kind == QueueAccountingOperation.ScheduledExpiry;
         await Assert.That(metadata).IsEqualTo(new MessageMetadata(message.MessageId,
@@ -72,23 +72,24 @@ internal static class QueueAccountingFaultSetup
         _ => throw new ArgumentOutOfRangeException(nameof(column))
     };
 
-    private static Command<DatabaseCommand> Operation(QueueLaneRef lane, QueueAccountingOperation kind, string? token, DateTimeOffset time)
+    private static Command<DatabaseCommand> Operation(DatabaseEngine owner, QueueLaneRef lane,
+        QueueAccountingOperation kind, string? token, DateTimeOffset time)
     {
         var id = Guid.NewGuid();
         if (kind == QueueAccountingOperation.Processing)
         {
-            return new(id, OperationKind.Processing, QueueAccountingFaultProtocol.Root, time,
+            return owner.CreateCommand(OperationKind.Processing, id, QueueAccountingFaultProtocol.Root, time,
                 JsonSerializer.Serialize(new ProcessingRequest(id, lane, token!, QueueAccountingFaultProtocol.Handler,
                     QueueAccountingFaultProtocol.One, [new PutDocument(QueueAccountingFaultProtocol.Collection,
                         QueueAccountingFaultProtocol.Document, QueueAccountingFaultProtocol.Payload)]), JsonDefaults.Options));
         }
         if (kind is QueueAccountingOperation.Ack or QueueAccountingOperation.Nack)
         {
-            return new(id, OperationKind.Delivery, QueueAccountingFaultProtocol.Root, time,
+            return owner.CreateCommand(OperationKind.Delivery, id, QueueAccountingFaultProtocol.Root, time,
                 JsonSerializer.Serialize(new DeliveryCommand(id, lane, token!, kind == QueueAccountingOperation.Ack
                     ? DeliveryAction.Ack : DeliveryAction.Nack), JsonDefaults.Options));
         }
-        return new(id, OperationKind.Receive, QueueAccountingFaultProtocol.Root, time,
+        return owner.CreateCommand(OperationKind.Receive, id, QueueAccountingFaultProtocol.Root, time,
             JsonSerializer.Serialize(new ReceiveRequest(id, lane, LeaseSeconds: QueueAccountingFaultProtocol.LeaseSeconds), JsonDefaults.Options));
     }
 }

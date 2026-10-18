@@ -15,15 +15,15 @@ internal sealed class AtomicTriadStagedClusterCold
         var scenario = ModelSqlClusterColdOwnership.Require(fixture).Claim(fixture);
         foreach (var node in QueueProducerClusterProtocol.Nodes)
         {
-            await ServerFailureObserver.ObserveAsync(() => fixture.KillContainerAsync(node, scenario, token), failures);
+            await ServerFailureObserver.ObserveAsync(() => fixture.KillServerAsync(node, scenario, token), failures);
         }
         foreach (var node in QueueProducerClusterProtocol.Nodes)
         {
-            await ServerFailureObserver.ObserveAsync(() => fixture.BeginContainerRestartAsync(node, token), failures);
+            await ServerFailureObserver.ObserveAsync(() => fixture.BeginProcessRestartAsync(node, token), failures);
         }
         foreach (var node in QueueProducerClusterProtocol.Nodes)
         {
-            await ServerFailureObserver.ObserveAsync(() => fixture.RestartContainerAsync(node, token), failures);
+            await ServerFailureObserver.ObserveAsync(() => fixture.RestartServerAsync(node, token), failures);
         }
         foreach (var node in QueueProducerClusterProtocol.Nodes)
         {

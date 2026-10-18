@@ -17,8 +17,8 @@ internal sealed class SampleRollupPolicyTests
         var stats = SampleRollupWholeFlow.Rollups(db);
         var id = Guid.NewGuid();
         var failure = SampleRollupWholeFlow.Commit(db, id, SampleRollupWholeFlow.Refresh(1), Reader);
-        await Assert.That(failure.Error).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(failure.Json).IsNull();
+        await Assert.That(Errors.Code(failure.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(failure.Value).IsNull();
         await Assert.That(SampleRollupWholeFlow.Raw(db)).IsEqualTo(raw);
         await Assert.That(SampleRollupWholeFlow.Rollups(db)).IsEqualTo(stats);
         var image = SampleRollupWholeFlow.Image(db);

@@ -31,7 +31,7 @@ internal static class CompositionLinkLifetimeJsonAssertions
         {
             await EqualAsync(new DocumentResult(reference, 1, json, false, []),
                 owner.Database.GetDocument(P.Root, reference, cancellationToken: token));
-            await EqualAsync(new DocumentRecord(reference, 1, json, new(), state.Seed.EvaluatedAt),
+            await EqualAsync(new DocumentRecord(reference, 1, json, new(), new DateTimeOffset(state.Seed.Timestamp)),
                 owner.Store.Read(view => view.GetRecord<DocumentRecord>(DocumentStorageKeys.RecordKey(reference))));
         }
         var edge = new EdgeRecord(P.Edge, state.From, state.To, P.Label, P.EmptyJson, 1);
@@ -53,12 +53,12 @@ internal static class CompositionLinkLifetimeJsonAssertions
         var identity = NativeSerialization.Serialize(owner.Store.Identity);
         var position = owner.Store.Position;
         var applied = owner.Database.LastApplied;
-        var journal = owner.ReadCut();
+        var journal = owner.ReadCanonicalCut();
         await body();
         await Assert.That(TeamRowPolicyAssertions.Image(owner.Store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
         await Assert.That(NativeSerialization.Serialize(owner.Store.Identity).SequenceEqual(identity)).IsTrue();
         await Assert.That(owner.Store.Position).IsEqualTo(position);
         await Assert.That(owner.Database.LastApplied).IsEqualTo(applied);
-        await Assert.That(owner.ReadCut()).IsEqualTo(journal);
+        await Assert.That(owner.ReadCanonicalCut()).IsEqualTo(journal);
     }
 }

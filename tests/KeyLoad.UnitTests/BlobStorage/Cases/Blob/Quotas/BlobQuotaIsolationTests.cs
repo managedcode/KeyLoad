@@ -41,7 +41,7 @@ internal sealed class BlobQuotaIsolationTests
         Begin(db, first, SmallLimit, Guid.NewGuid()).Get<BlobCommitResult<BlobUploadInfo>>();
 
         var sameResourceFailure = Begin(db, sameResourceOtherPartition, 1, Guid.NewGuid());
-        await Assert.That(sameResourceFailure.Error).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(sameResourceFailure.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
         Begin(db, separateResource, SmallLimit, Guid.NewGuid()).Get<BlobCommitResult<BlobUploadInfo>>();
     }
 
@@ -57,7 +57,7 @@ internal sealed class BlobQuotaIsolationTests
 
         var rejectedUploadId = Guid.NewGuid();
         var rejected = Begin(db, secondBlob, RejectedGlobalReservation, rejectedUploadId);
-        await Assert.That(rejected.Error).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
         var operations = new BlobStorageOperations(db.Database);
         await Assert.That(operations.UploadInfo(PrincipalId, new(secondBlob, rejectedUploadId))).IsNull();
     }

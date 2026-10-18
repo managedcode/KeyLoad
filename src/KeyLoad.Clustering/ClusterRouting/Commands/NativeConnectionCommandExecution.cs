@@ -1,6 +1,7 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
@@ -19,14 +20,12 @@ internal static class NativeConnectionCommandExecution
             GrainIdentityContext.Validate(request.Envelope, request.Envelope.RequestId);
             var partition = GrainPartitionResolver.Resolve(request);
             stage = GrainFailureStage.CapabilityExecution;
-            var database = services.GetRequiredService<DatabaseEngine>();
-            var work = new ReadExecutionBudget(database.OperationLimitsOptions, clock, token);
+            var work = new ReadExecutionBudget(services.GetRequiredService<IOptions<DatabaseLimits>>(), clock, token);
             work.ConstrainLifetime(request.Envelope.ExpiresAt);
             work.AttachResourceLifetimeBinding(binding);
             var target = grains.GetGrain<ICommandPartitionGrain>(partition);
             var reply = await target.ExecuteAsync(signed, token).ConfigureAwait(true);
-            await NativeCommandResultWorkBinding.BindBeforePublicationAsync(services, clock, request, reply,
-                work, binding, token).ConfigureAwait(true);
+            NativeCommandResultWorkBinding.BindReturned(request, reply, work, binding);
             return reply;
         }
         catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))

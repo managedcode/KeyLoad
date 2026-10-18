@@ -6,10 +6,10 @@ namespace KeyLoad.UnitTests.Features.ChangeFeeds;
 
 internal static class ProjectionCheckpointRetentionFixture
 {
-    internal static Command<DatabaseCommand> Purge(PartitionRef partition, long through, int limit)
+    internal static Command<DatabaseCommand> Purge(DatabaseEngine owner, PartitionRef partition, long through, int limit)
     {
         var id = Guid.NewGuid();
-        return ProjectionConsumerIdentityFixture.Operation(OperationKind.PurgeOutbox, id, new PurgeOutboxRequest(id, partition, through, limit));
+        return ProjectionConsumerIdentityFixture.Operation(owner, OperationKind.PurgeOutbox, id, new PurgeOutboxRequest(id, partition, through, limit));
     }
 
     internal static async Task<ProjectionCheckpointRetentionState> WarmAsync(TestDatabase database,
@@ -17,13 +17,13 @@ internal static class ProjectionCheckpointRetentionFixture
     {
         var source = await ProjectionConsumerIdentityFixture.SeedAsync(database, token);
         await ProjectionConsumerIdentityAssertions.OriginalBatchAsync(database.Database, source);
-        var pinned = Purge(source.Partition, 2L, 2);
+        var pinned = Purge(database.Database, source.Partition, 2L, 2);
         var refused = database.Database.ApplyEmbedded(pinned, token);
         await ProjectionCheckpointRetentionAssertions.PinnedAsync(refused);
         await ProjectionConsumerIdentityAssertions.OriginalBatchAsync(database.Database, source);
         await ProjectionConsumerIdentityAssertions.SourcesAsync(database.Database, source.Partition);
-        var probe = Purge(source.Partition, 2L, 2);
-        await Assert.That(probe.Id).IsNotEqualTo(pinned.Id);
+        var probe = Purge(database.Database, source.Partition, 2L, 2);
+        await Assert.That(probe.CommandId).IsNotEqualTo(pinned.CommandId);
         var state = NativeSerialization.Deserialize<ProjectionConsumerInfo>(source.Original)
             ?? throw new InvalidOperationException(ProjectionConsumerIdentityFixture.MissingRow);
         database.Store.Commit((transaction, _) => { global::KeyLoad.Storage.StorageRecords.PutRecord(transaction, source.Key, state with { Checkpoint = ahead ? 3L : -1L }); return true; });

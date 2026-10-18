@@ -18,7 +18,12 @@ internal sealed class RevokedOutcomeAdmissionFixture : IDisposable
     internal ZoneTreeStore Store { get; set; } = null!;
     internal DatabaseEngine Database { get; set; } = null!;
     internal CommandRequest Original { get; private set; } = null!;
-    internal Result<object> OriginalResult { get; private set; } = null!;
+    private Result<object>? originalResult;
+    internal Result<object> OriginalResult
+    {
+        get => originalResult ?? throw new InvalidOperationException("The original revoked-outcome operation has not completed.");
+        private set => originalResult = value;
+    }
     internal byte[] OriginalOutcome { get; private set; } = [];
     internal byte[] OriginalLocator { get; private set; } = [];
     internal CommandRequest? Fresh
@@ -67,8 +72,8 @@ internal sealed class RevokedOutcomeAdmissionFixture : IDisposable
         };
         Harness.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal)).Get<PrincipalRecord>();
     }
-    internal static Command<DatabaseCommand> Operation(CommandRequest command)
-        => new(command.CommandId, OperationKind.Batch, Worker, Epoch, JsonSerializer.Serialize(command, JsonDefaults.Options));
+    internal Command<DatabaseCommand> Operation(CommandRequest command)
+        => Database.CreateCommand(OperationKind.Batch, command.CommandId, Worker, Epoch, NativeSerialization.Serialize(command));
     internal CommandRequest Next() => new(Guid.NewGuid(), Harness.Partition,
         [new PutDocument(Documents, "c", "{\"value\":3}", 0),
          new AppendEvents(Events, "stream", [new("healthy", "Created", "{\"event\":2}")], ExpectedStreamRevision.Exact(1)),

@@ -11,7 +11,7 @@ namespace KeyLoad.IntegrationTests.Features.ClientApi;
 internal static class McpCallerHttp
 {
     /// <summary>Uses the actual Orleans endpoint while leaving request deadlines with the caller's token.</summary>
-    /// <param name="fixture">The initialized real Docker/Aspire cluster.</param>
+    /// <param name="fixture">The initialized real native Aspire cluster.</param>
     /// <param name="node">The native Aspire resource name.</param>
     /// <returns>The disposable actual HTTP client, with no substituted handler.</returns>
     internal static HttpClient Create(ClusterFixture fixture, string node)

@@ -28,7 +28,7 @@ internal sealed class NativeSourceManifestChildSettlementTests
         await Assert.That(cancellation).IsNotNull();
         await Assert.That(cancellation!.CancellationToken).IsEqualTo(joined.Caller);
         var projected = Assert.ThrowsExactly<TaskCanceledException>(
-            () => NativeCoverageImageNodeSettlement.ThrowFailures([.. joined.Failures]));
+            () => global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny([.. joined.Failures]));
         await Assert.That(projected).IsSameReferenceAs(cancellation);
     }
 }

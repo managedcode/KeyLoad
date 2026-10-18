@@ -3,7 +3,7 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Xml.Linq;
-using KeyLoad.AppHost.Features.BenchmarkComparisons;
+using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 using SessionFields = KeyLoad.ComparisonTests.Features.BenchmarkComparisons.BenchmarkSessionEvidenceKeys;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
@@ -32,8 +32,12 @@ internal static class BenchmarkSessionManifest
         var state = JsonNode.Parse(bytes)?.AsObject() ?? throw new InvalidDataException(Invalid);
         ValidateCohort(state, selected);
         await VerifyCasesAsync(root, state[SessionFields.Cases]!.AsArray(), token);
-        var runtimeImport = await ReadAsync(Path.Combine(root, RuntimeImport), token);
-        state[SessionFields.OuterRuntime] = new JsonObject { [SessionFields.Path] = RuntimeImport, [SessionFields.Sha256] = Hash(runtimeImport) };
+        state[SessionFields.OuterRuntime] = null;
+        if (state[SessionFields.RunId] is not null)
+        {
+            var runtimeImport = await ReadAsync(Path.Combine(root, RuntimeImport), token);
+            state[SessionFields.OuterRuntime] = new JsonObject { [SessionFields.Path] = RuntimeImport, [SessionFields.Sha256] = Hash(runtimeImport) };
+        }
         state[SessionFields.NativeReport] = await NativeReportAsync(root, exit, token);
         var qualification = await ReadAsync(Path.Combine(root, BenchmarkSessionQualifications.FileName), token);
         state[SessionFields.QualificationReport] = new JsonObject
@@ -73,8 +77,14 @@ internal static class BenchmarkSessionManifest
         Require(state[SessionFields.SchemaVersion]?.GetValue<string>() == "session-v1"
             && state[SessionFields.SessionId]?.GetValue<string>() == selected.SessionId
             && state[SessionFields.Target]?.GetValue<string>() == selected.Target
-            && state[SessionFields.NodeCount]?.GetValue<int>() == selected.NodeCount
-            && state[SessionFields.SourceRevision]?.GetValue<string>() == provenance.SourceRevision
+            && state[SessionFields.NodeCount]?.GetValue<int>() == selected.NodeCount);
+        if (!string.Equals(provenance.Actions, bool.TrueString, StringComparison.OrdinalIgnoreCase))
+        {
+            Require(new[] { SessionFields.SourceRevision, SessionFields.RunId, SessionFields.Attempt, SessionFields.JobId,
+                SessionFields.Repository, SessionFields.Reference, SessionFields.Workflow }.All(field => state[field] is null));
+            return;
+        }
+        Require(state[SessionFields.SourceRevision]?.GetValue<string>() == provenance.SourceRevision
             && state[SessionFields.RunId]?.GetValue<long>().ToString(CultureInfo.InvariantCulture) == provenance.WorkflowRunId
             && state[SessionFields.Attempt]?.GetValue<int>().ToString(CultureInfo.InvariantCulture) == provenance.RunAttempt
             && state[SessionFields.JobId]?.GetValue<long>().ToString(CultureInfo.InvariantCulture) == provenance.JobId

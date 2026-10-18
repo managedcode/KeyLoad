@@ -1,76 +1,61 @@
+using KeyLoad.Server;
 using Aspire.Hosting;
-using KeyLoad.AppHost.Features.CodeQuality;
-using KeyLoad.IntegrationTests.Features.CodeQuality;
+using Aspire.Hosting.ApplicationModel;
+using KeyLoad.AppHost.Features.ClusterReplication;
+using KeyLoad.Diagnostics.Features.ResourceExecution;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 
 internal static class ClusterFixtureApplicationShutdown
 {
-    internal static async Task<(bool Stopped, IReadOnlyDictionary<string, ContainerRuntimeInspection>? Nodes)> CollectAsync(
-        DistributedApplication? owned, NativeCoverageCleanupDeadline? deadline,
-        NativeCoverageClusterFixtureOwner? coverage, bool hasRuntime, List<Exception> failures, CancellationToken token)
-    {
-        var failurePosition = failures.Count;
-        var pending = RunAsync(owned, deadline, coverage, hasRuntime, failures, token);
-        await Task.WhenAny(pending).ConfigureAwait(false);
-        if (pending.IsCompletedSuccessfully)
-        {
-            return await pending.ConfigureAwait(false);
-        }
-        if (pending.Exception is { } aggregate)
-        {
-            failures.InsertRange(failurePosition, aggregate.InnerExceptions);
-        }
-        else if (pending.IsCanceled)
-        {
-            try
-            {
-                await pending.ConfigureAwait(false);
-            }
-            catch (OperationCanceledException failure)
-            {
-                failures.Insert(failurePosition, failure);
-            }
-        }
-        return (false, null);
-    }
-
-    internal static async Task<(bool Stopped, IReadOnlyDictionary<string, ContainerRuntimeInspection>? Nodes)> RunAsync(
-        DistributedApplication? owned, NativeCoverageCleanupDeadline? deadline,
-        NativeCoverageClusterFixtureOwner? coverage, bool hasRuntime, List<Exception> failures, CancellationToken token)
+    internal static async Task<bool> CollectAsync(DistributedApplication? owned, IReadOnlyCollection<string> names,
+        string? output, List<Exception> failures, CancellationToken token)
     {
         if (owned is null)
         {
-            return (false, null);
+            return true;
         }
-        try
+        NativeProcessEvidence[] observed = [];
+        if (output is not null)
         {
-            if (deadline is null)
-            {
-                await owned.StopAsync(token).ConfigureAwait(false);
-            }
-            else
-            {
-                await deadline.WaitAsync(() => owned.StopAsync(token)).ConfigureAwait(false);
-            }
-            IReadOnlyDictionary<string, ContainerRuntimeInspection>? nodes = null;
-            if (coverage is not null && hasRuntime)
-            {
-                nodes = await coverage.VerifyStoppedAsync(deadline!, token).ConfigureAwait(false);
-            }
-            return (true, nodes);
+            await ServerFailureObserver.ObserveAsync(async () =>
+                observed = await ClusterFixtureApplicationStartup.CaptureAsync(owned, names, output,
+                    "native-process-before-shutdown.json", token).ConfigureAwait(false), failures).ConfigureAwait(false);
         }
-        finally
+        var stopped = false;
+        await ServerFailureObserver.ObserveAsync(async () =>
         {
-            if (deadline is null)
-            {
-                await ClusterFixtureCleanup.CollectFailureAsync(() => owned.DisposeAsync().AsTask(), failures)
-                    .ConfigureAwait(false);
-            }
-            else
-            {
-                await deadline.CollectAsync(() => owned.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
-            }
+            await owned.StopAsync(token).ConfigureAwait(false);
+            stopped = true;
+        }, failures).ConfigureAwait(false);
+        if (stopped && observed.Length == names.Count && output is not null)
+        {
+            await ServerFailureObserver.ObserveAsync(
+                () => WriteJoinedAsync(owned, observed, output, token), failures).ConfigureAwait(false);
         }
+        await ServerFailureObserver.ObserveAsync(() => owned.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        return stopped;
+    }
+
+    internal static Task WriteJoinedAsync(DistributedApplication application, NativeProcessEvidence[] originals,
+        string output, CancellationToken token)
+    {
+        var resources = originals.Select(original =>
+        {
+            ProcessRuntimeKilledOwnerValidation.RequireExited(original);
+            if (!application.ResourceNotifications.TryGetCurrentState(original.Name, out var actual)
+                || actual.Resource is not ProjectResource || actual.Resource.Name != original.Name)
+            {
+                throw new InvalidDataException("The original native shutdown resource observation is unavailable.");
+            }
+            return new
+            {
+                original.Name, original.ProcessId, original.StartedAtUtc, original.AspireStartedAtUtc,
+                actual.Snapshot.ExitCode, actual.Snapshot.StartTimeStamp, actual.Snapshot.StopTimeStamp,
+                State = actual.Snapshot.State?.Text
+            };
+        }).ToArray();
+        return ClusterFixtureApplicationStartup.WriteAsync(output, "native-process-shutdown.json",
+            new { JoinedAtUtc = TimeProvider.System.GetUtcNow(), Processes = originals, Resources = resources }, token);
     }
 }

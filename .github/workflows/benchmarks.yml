@@ -16,18 +16,17 @@ concurrency:
 env:
   NUGET_PACKAGES: ${{ github.workspace }}/artifacts/benchmark-runtime/packages
 jobs:
-  comparison-images:
-    name: Build Docker images
+  comparison-runtime:
+    name: Prepare comparison runtime
     if: github.repository == 'managedcode/KeyLoad' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 150
     outputs:
       databases: ${{ steps.plan.outputs.database_matrices }}
-      bundle-artifact-id: ${{ steps.images-bundle.outputs.artifact-id }}
       runtime-artifact-id: ${{ steps.runtime-bundle.outputs.artifact-id }}
     env:
       GH_TOKEN: ${{ github.token }}
-      KEYLOAD_COMPARISON_JOB_NAME: Build Docker images
+      KEYLOAD_COMPARISON_JOB_NAME: Prepare comparison runtime
     steps:
       - name: Download source code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -46,9 +45,9 @@ jobs:
       - name: Check repository rules
         run: node scripts/Features/RepositoryGovernance/verify.mjs
       - name: Test benchmark contracts
-        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/KeyLoad.UnitTests*/*/*' --KeyLoadTests:ResultsDirectory=TestResults/benchmark-contracts --KeyLoadTests:ReportTrx=true
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/(BenchmarkSessionConfigurationTests|BenchmarkSessionContractTests|BenchmarkSessionNativeParserTests|BenchmarkSessionProgressTests|BenchmarkTopologyConfigurationTests|BenchmarkTopologyTargetTests|CentralAppHostOptionsTests|ComparisonCorpusTests|ComparisonExceptionTests|ComparisonExecutionIdentityReferenceTests|ComparisonExecutionIdentityTests|ComparisonGraphOracleTests|ComparisonHostBindingsTests|ComparisonHostCleanupTests|ComparisonHostStartupDiagnosticsTests|ComparisonHostStartupTests|ComparisonParallelismSelectionTests|ComparisonSerializationBufferPolicyTests|ComparisonStatisticsTests|ComparisonTopologyTests|CompiledBenchmarkRuntimeBundleTests|DocumentFinalCopyProofTests|DocumentFunctionalGateTests|DocumentNativeAcquisitionTests|EmbeddedBenchmarkContractTests|EmbeddedBenchmarkGeneratedConsumerTests|HttpTargetArgumentTests|ImmutableComparisonContractTests|IsolatedAggregateFileTests|IsolatedAggregateJsonTests|IsolatedAggregateNodeLifetimeTests|IsolatedCurrentJobCacheTests|IsolatedCurrentJobTests|IsolatedGitHubFailureDiagnosticsTests|IsolatedGitHubFileTests|IsolatedGitHubHeaderTests|IsolatedGitHubMetadataTests|IsolatedGitHubRateTests|IsolatedGitHubTransientTests|IsolatedKeyLoadMutationTests|IsolatedKnownCurrentJobTests|IsolatedMutationCorpusTests|IsolatedMutationOracleTests|IsolatedNeo4jMutationTests|IsolatedRedisMutationTests|KeyLoadTimeSeriesIntensiveReceiptTests|KeyLoadTimeSeriesIntensiveResultTests|KeyLoadTimeSeriesIntensiveSeedTests|KeyLoadTimeSeriesIntensiveTopologyTests|KurrentCleanupStateTests|KurrentGossipVersionTests|KurrentSetupDiagnosticFormatterTests|LargeStreamCleanupPermissionTests|NativeComparisonAdapterPolicyTests|NativeComparisonDiagnosticPolicyTests|NativeComparisonDiagnosticProjectionTests|NativeComparisonMongoPolicyTests|NativeComparisonSerializationPolicyTests|NativeComparisonSerializationProjectionTests|NativeDocumentTopologyKurrentTests|NativeDocumentTopologyMongoTests|NativeDocumentTopologyOpenSearchMembershipTests|NativeDocumentTopologyOpenSearchTests|NativeDocumentTopologyPostgresTests|NativeQuorumTopologyConfigurationTests|NativeQuorumTopologyQdrantTests|NativeQuorumTopologyRabbitTests|NativeSerializationBenchmarkCancellationTests|NativeSerializationBenchmarkCorpusTests|NativeSerializationBenchmarkGeneratedConsumerTests|NativeSerializationBenchmarkManifestTests|NativeSerializationBenchmarkMetadataTests|NativeSerializationBenchmarkOwnershipTests|NativeSerializationGitHubDeadlineTests|NativeSerializationGitHubStepTests|NativeSerializationReportValidatorTests|NativeTargetArgumentTests|NativeWorkloadTestReportRetentionTests|OpenSearchHealthPolicyTests|OutboxFailureDiagnosticClassifierTests|OutboxFailureDiagnosticFormatterTests|PostgresVectorPayloadContractTests|PostgresVectorQueryContractTests|QdrantVectorContractTests|RawStorageBenchmarkTests|RawStorageCrudTests|RawStorageLifetimeTests|RawStorageReportValidatorTests|RequestCqrsImageJournalTests|SampleChunkBenchmarkConsumerTests|ScaleServerCgroupCpuFormatTests|ScaleServerHostEvidenceTests|ScaleServerMemoryCurrentFormatTests|ScaleServerResourceBoundsTests|ScaleServerResourceCancellationTests|ScaleServerResourceEvidenceParserTests|ScaledCorpusReadbackTests|ScaledRawStorageBenchmarkTests|ScaledRawStorageBoundsTests|ScaledRawStorageCorpusTests|ScaledRawStorageExecutionPolicyTests|ScaledRawStorageFixtureLifetimeTests|ScaledRawStorageFixtureTests|ScaledRawStorageOwnerTests|ScaledRawStorageProcessMemoryTests|ScaledRawStorageReadOrderTests|ScaledRawStorageSettingsTests|SessionCohortContractTests|SiteQualificationStartupTests|SourceCheckoutIdentityTests|StreamCorpusTests|TimeSeriesIntensiveAppendOracleTests|TimeSeriesIntensiveAppendValidationTests|TimeSeriesIntensiveAttemptLedgerTests|TimeSeriesIntensiveAttemptOrderTests|TimeSeriesIntensiveCallScopeTests|TimeSeriesIntensiveCompactEncodingTests|TimeSeriesIntensiveCompletionTests|TimeSeriesIntensiveCorpusTests|TimeSeriesIntensiveDigestTests|TimeSeriesIntensiveExceptionBoundaryTests|TimeSeriesIntensiveFailureMappingTests|TimeSeriesIntensiveNativeFailureFactTests|TimeSeriesIntensiveObservedFailureTests|TimeSeriesIntensiveOracleReferenceTests|TimeSeriesIntensiveOracleTests|TimeSeriesIntensivePreparedExpectationTests|TimeSeriesIntensivePreparedPhaseTests|TimeSeriesIntensiveSummaryTests|TimeSeriesIntensiveTagScopeTests|TimeSeriesIntensiveValidatedDigestTests|TimeSeriesIntensiveValidationTests|TimeSeriesIntensiveWorkerPartitionTests|TimeSeriesIntensiveWriterTests|TimescaleTimeSeriesIntensiveContextTests|TimescaleTimeSeriesIntensiveReceiptTests|TimescaleTimeSeriesIntensiveSessionTests|VectorCorpusContractTests|VectorExecutionCadenceTests|VectorIndexContractTests|VectorProfileContractTests|VectorResponseContractTests)/*' --KeyLoadTests:ResultsDirectory=TestResults/benchmark-contracts --KeyLoadTests:ReportTrx=true
       - name: Test canonical benchmark worker selection
-        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/KeyLoad.UnitTests*/(BenchmarkSessionContractTests|SessionCohortContractTests|CompiledBenchmarkRuntimeBundleTests)/*' --KeyLoadTests:ResultsDirectory=TestResults/session-contracts --KeyLoadTests:ReportTrx=true
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/(BenchmarkSessionContractTests|SessionCohortContractTests|CompiledBenchmarkRuntimeBundleTests)/*' --KeyLoadTests:ResultsDirectory=TestResults/session-contracts --KeyLoadTests:ReportTrx=true
       - name: Test prompt termination on Aspire resource failures
         run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/AspireFailure*/*' --KeyLoadTests:ResultsDirectory=TestResults/aspire-failure --KeyLoadTests:ReportTrx=true
       - name: Plan the shared database sessions
@@ -64,41 +63,12 @@ jobs:
       - name: Check Docker
         if: (github.event_name == 'push' || inputs.mode == 'full')
         run: docker version
-      - name: Check bounded Docker registry readiness
-        if: (github.event_name == 'push' || inputs.mode == 'full')
-        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ImageRegistryReadinessTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/registry-readiness
-      - name: Build KeyLoad server and benchmark Docker images
-        id: images
-        if: (github.event_name == 'push' || inputs.mode == 'full')
-        run: node scripts/Features/BenchmarkComparisons/prepare-images.mjs
-      - name: Configure Docker image references
-        if: (github.event_name == 'push' || inputs.mode == 'full')
-        env:
-          KEYLOAD_SERVER_IMAGE: ${{ steps.images.outputs.server-image }}
-          KEYLOAD_RUNNER_IMAGE: ${{ steps.images.outputs.load-generator-image }}
-        run: |
-          test -n "$KEYLOAD_SERVER_IMAGE" && test -n "$KEYLOAD_RUNNER_IMAGE"
-          printf 'KeyLoad__ContainerImages__Server=%s\nBenchmarks__ContainerImages__LoadGenerator=%s\nKEYLOAD_IMAGE_RECEIPT=%s\n' "$KEYLOAD_SERVER_IMAGE" "$KEYLOAD_RUNNER_IMAGE" "$RUNNER_TEMP/keyload-images/image-receipt.json" >> "$GITHUB_ENV"
       - name: Check native benchmark preparation contracts
         if: (github.event_name == 'push' || inputs.mode == 'full')
         uses: ./.github/workflows/Features/BenchmarkComparisons/SessionContracts
-      - name: Check Docker image export and import
-        id: roundtrip
-        if: (github.event_name == 'push' || inputs.mode == 'full')
-        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/ImageBundleRealTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/image-roundtrip
       - name: Verify GitHub job identity
         if: (github.event_name == 'push' || inputs.mode == 'full')
-        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedGitHubCurrentJobTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-images/job-identity
-      - name: Save Docker images
-        id: images-bundle
-        if: (github.event_name == 'push' || inputs.mode == 'full')
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
-        with:
-          name: comparison-image-bundle
-          path: ${{ runner.temp }}/keyload-image-bundle/*
-          if-no-files-found: error
-          compression-level: 0
-          retention-days: 90
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=comparison '--KeyLoadTests:Filter=/*/*/IsolatedGitHubCurrentJobTests/*' --KeyLoadTests:ResultsDirectory=TestResults/comparison-runtime/job-identity
       - name: Pack the compiled benchmark runtime
         if: (github.event_name == 'push' || inputs.mode == 'full')
         run: node scripts/Features/BenchmarkComparisons/compiled-test-bundle.mjs --pack
@@ -122,32 +92,27 @@ jobs:
           if-no-files-found: error
           compression-level: 0
           retention-days: 90
-      - name: Clean up Docker registry after image failure
-        if: ${{ always() && steps.roundtrip.outcome != 'success' && (steps.images.outcome == 'success' || steps.images.outcome == 'failure' || steps.images.outcome == 'cancelled') }}
-        run: node scripts/Features/BenchmarkComparisons/cleanup-images.mjs
       - name: Save original preparation diagnostics
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: comparison-images-qualification
+          name: comparison-runtime-qualification
           path: |
             TestResults/**
             artifacts/qualification/**
             artifacts/code-quality/**
-            ${{ runner.temp }}/keyload-images/**
-            ${{ runner.temp }}/keyload-images-build/**
             ${{ runner.temp }}/keyload-cell-github/**
           if-no-files-found: error
           retention-days: 90
   comparison-keyload:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
-    needs: [comparison-images]
+    needs: [comparison-runtime]
     runs-on: ubuntu-latest
     timeout-minutes: 240
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.comparison-images.outputs.databases).keyload }}
+      matrix: ${{ fromJSON(needs.comparison-runtime.outputs.databases).keyload }}
     env: &database-environment
       GH_TOKEN: ${{ github.token }}
       KEYLOAD_BENCHMARK_SESSION_ID: ${{ matrix.id }}
@@ -161,11 +126,10 @@ jobs:
       - name: Download source code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Prepare the native database session
-        id: images
+        id: setup
         uses: ./.github/workflows/Features/BenchmarkComparisons/SessionSetup
         with:
-          image-artifact-id: ${{ needs.comparison-images.outputs.bundle-artifact-id }}
-          runtime-artifact-id: ${{ needs.comparison-images.outputs.runtime-artifact-id }}
+          runtime-artifact-id: ${{ needs.comparison-runtime.outputs.runtime-artifact-id }}
       - name: Run database workload
         id: workload
         run: dotnet tests/KeyLoad.ComparisonTests/bin/Release/net10.0/KeyLoad.ComparisonTests.dll --output Detailed --github-reporter-style full --maximum-parallel-tests 1 --minimum-expected-tests 1 --treenode-filter '/*/*/BenchmarkSessionTests/*' --results-directory "$KEYLOAD_COMPARISON_EVIDENCE_DIRECTORY/TestResults" --report-trx --timeout 210m
@@ -186,122 +150,121 @@ jobs:
         if: always()
         uses: ./.github/workflows/Features/BenchmarkComparisons/SessionTeardown
         with:
-          setup-outcome: ${{ steps.images.outcome }}
           artifact-name: comparison-case-qualification-session-${{ matrix.id }}
   comparison-postgresql:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
-    needs: [comparison-images]
+    needs: [comparison-runtime]
     runs-on: ubuntu-latest
     timeout-minutes: 240
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.comparison-images.outputs.databases).postgresql }}
+      matrix: ${{ fromJSON(needs.comparison-runtime.outputs.databases).postgresql }}
     env: *database-environment
     steps: *database-steps
   comparison-qdrant:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
-    needs: [comparison-images]
+    needs: [comparison-runtime]
     runs-on: ubuntu-latest
     timeout-minutes: 240
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.comparison-images.outputs.databases).qdrant }}
+      matrix: ${{ fromJSON(needs.comparison-runtime.outputs.databases).qdrant }}
     env: *database-environment
     steps: *database-steps
   comparison-rabbitmq:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
-    needs: [comparison-images]
+    needs: [comparison-runtime]
     runs-on: ubuntu-latest
     timeout-minutes: 240
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.comparison-images.outputs.databases).rabbitmq }}
+      matrix: ${{ fromJSON(needs.comparison-runtime.outputs.databases).rabbitmq }}
     env: *database-environment
     steps: *database-steps
   comparison-redis:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
-    needs: [comparison-images]
+    needs: [comparison-runtime]
     runs-on: ubuntu-latest
     timeout-minutes: 240
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.comparison-images.outputs.databases).redis }}
+      matrix: ${{ fromJSON(needs.comparison-runtime.outputs.databases).redis }}
     env: *database-environment
     steps: *database-steps
   comparison-neo4j:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
-    needs: [comparison-images]
+    needs: [comparison-runtime]
     runs-on: ubuntu-latest
     timeout-minutes: 240
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.comparison-images.outputs.databases).neo4j }}
+      matrix: ${{ fromJSON(needs.comparison-runtime.outputs.databases).neo4j }}
     env: *database-environment
     steps: *database-steps
   comparison-mongodb:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
-    needs: [comparison-images]
+    needs: [comparison-runtime]
     runs-on: ubuntu-latest
     timeout-minutes: 240
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.comparison-images.outputs.databases).mongodb }}
+      matrix: ${{ fromJSON(needs.comparison-runtime.outputs.databases).mongodb }}
     env: *database-environment
     steps: *database-steps
   comparison-opensearch:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
-    needs: [comparison-images]
+    needs: [comparison-runtime]
     runs-on: ubuntu-latest
     timeout-minutes: 240
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.comparison-images.outputs.databases).opensearch }}
+      matrix: ${{ fromJSON(needs.comparison-runtime.outputs.databases).opensearch }}
     env: *database-environment
     steps: *database-steps
   comparison-kurrentdb:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
-    needs: [comparison-images]
+    needs: [comparison-runtime]
     runs-on: ubuntu-latest
     timeout-minutes: 240
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.comparison-images.outputs.databases).kurrentdb }}
+      matrix: ${{ fromJSON(needs.comparison-runtime.outputs.databases).kurrentdb }}
     env: *database-environment
     steps: *database-steps
   comparison-surrealdb:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
-    needs: [comparison-images]
+    needs: [comparison-runtime]
     runs-on: ubuntu-latest
     timeout-minutes: 240
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.comparison-images.outputs.databases).surrealdb }}
+      matrix: ${{ fromJSON(needs.comparison-runtime.outputs.databases).surrealdb }}
     env: *database-environment
     steps: *database-steps
   comparison-helixdb:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
-    needs: [comparison-images]
+    needs: [comparison-runtime]
     runs-on: ubuntu-latest
     timeout-minutes: 240
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.comparison-images.outputs.databases).helixdb }}
+      matrix: ${{ fromJSON(needs.comparison-runtime.outputs.databases).helixdb }}
     env: *database-environment
     steps: *database-steps
   keyload-functional-heavy-load:
     name: KeyLoad functional CLUSTER million-record ingestion
     if: (github.event_name == 'push' || inputs.mode == 'full')
-    needs: [comparison-images]
+    needs: [comparison-runtime]
     runs-on: ubuntu-latest
     timeout-minutes: 180
     steps:
@@ -309,16 +272,11 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Prepare real functional CLUSTER ingestion
         uses: ./.github/workflows/Features/BenchmarkComparisons/FunctionalHeavyLoadSetup
-        with:
-          bundle-artifact-id: ${{ needs.comparison-images.outputs.bundle-artifact-id }}
       - name: Test exclusive heavy-load admission
         run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=cluster '--KeyLoadTests:Filter=/*/*/HeavyDocumentLoadAdmissionTests/*' --KeyLoadTests:ResultsDirectory=TestResults/cluster-heavy-admission --KeyLoadTests:ReportTrx=true
       - name: Test ingestion while SDK and MCP reads are active
         run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=cluster '--KeyLoadTests:Filter=/*/*/HeavyDocumentLoadClusterTests/*' --KeyLoadTests:HeavyLoad:Enabled=true --KeyLoadTests:TimeoutMinutes=140 --KeyLoadTests:ResultsDirectory=TestResults/cluster-heavy-load --KeyLoadTests:ReportTrx=true
-      - name: Clean up this job's Docker registry
-        if: always()
-        run: node scripts/Features/BenchmarkComparisons/cleanup-images.mjs
-      - name: Save original functional load results and image receipts
+      - name: Save original functional load results and native process receipts
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
@@ -326,14 +284,13 @@ jobs:
           path: |
             TestResults/cluster-heavy-admission/**
             TestResults/cluster-heavy-load/**
-            ${{ runner.temp }}/keyload-images/**
             artifacts/code-quality/**
           if-no-files-found: error
           retention-days: 90
   comparison-aggregate:
     name: Combine benchmark results
-    needs: [comparison-images, comparison-keyload, comparison-postgresql, comparison-qdrant, comparison-rabbitmq, comparison-redis, comparison-neo4j, comparison-mongodb, comparison-opensearch, comparison-kurrentdb, comparison-surrealdb, comparison-helixdb, keyload-functional-heavy-load]
-    if: ${{ always() && !cancelled() && (github.event_name == 'push' || inputs.mode == 'full') && needs.comparison-images.result == 'success' }}
+    needs: [comparison-runtime, comparison-keyload, comparison-postgresql, comparison-qdrant, comparison-rabbitmq, comparison-redis, comparison-neo4j, comparison-mongodb, comparison-opensearch, comparison-kurrentdb, comparison-surrealdb, comparison-helixdb, keyload-functional-heavy-load]
+    if: ${{ always() && !cancelled() && (github.event_name == 'push' || inputs.mode == 'full') && needs.comparison-runtime.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 150
     env:
@@ -365,7 +322,7 @@ jobs:
           retention-days: 90
   website-trigger:
     name: Trigger Website
-    needs: [comparison-images, comparison-keyload, comparison-postgresql, comparison-qdrant, comparison-rabbitmq, comparison-redis, comparison-neo4j, comparison-mongodb, comparison-opensearch, comparison-kurrentdb, comparison-surrealdb, comparison-helixdb, keyload-functional-heavy-load, comparison-aggregate]
+    needs: [comparison-runtime, comparison-keyload, comparison-postgresql, comparison-qdrant, comparison-rabbitmq, comparison-redis, comparison-neo4j, comparison-mongodb, comparison-opensearch, comparison-kurrentdb, comparison-surrealdb, comparison-helixdb, keyload-functional-heavy-load, comparison-aggregate]
     if: >-
       always() && !cancelled() &&
       (github.event_name == 'push' || inputs.mode == 'full') &&

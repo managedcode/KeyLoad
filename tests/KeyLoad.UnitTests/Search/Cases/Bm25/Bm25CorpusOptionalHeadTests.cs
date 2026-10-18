@@ -1,3 +1,4 @@
+using KeyLoad.UnitTests.Features.ResourceExecution;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Server;
 
@@ -28,10 +29,10 @@ internal sealed class Bm25CorpusOptionalHeadTests
             {
                 restore = true;
                 flow.Database.Store.Commit((transaction, _) => { transaction.Put(key, invalid); return true; });
-                var before = ReplicaSubmissionOutcomeState.Read(flow.Database);
+                var before = CanonicalStoreCut.Read(flow.Database);
                 await Assert.That(flow.Current()).IsNull();
                 await Assert.That((await flow.SearchAsync()).Single().Document.Reference.Id).IsEqualTo("first");
-                await before.RequireAsync(ReplicaSubmissionOutcomeState.Read(flow.Database));
+                await before.RequireAsync(CanonicalStoreCut.Read(flow.Database));
             }, failures);
             if (restore)
             {
@@ -43,11 +44,11 @@ internal sealed class Bm25CorpusOptionalHeadTests
             }
             ServerFailureObserver.ThrowIfAny(failures);
             var restored = flow.Database.Store.Read(view => view.ReadOwnedValue(key))!;
-            await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(bytes, restored);
-            var healthyBefore = ReplicaSubmissionOutcomeState.Read(flow.Database);
+            await NativeReplayResultAssertions.BytesAsync(bytes, restored);
+            var healthyBefore = CanonicalStoreCut.Read(flow.Database);
             await Assert.That(flow.Current()!.DocumentCount).IsEqualTo(1);
             await Assert.That(flow.Current()!.TotalLength).IsEqualTo(1L);
             await Assert.That((await flow.SearchAsync()).Single().Document.Reference.Id).IsEqualTo("first");
-            await healthyBefore.RequireAsync(ReplicaSubmissionOutcomeState.Read(flow.Database));
+            await healthyBefore.RequireAsync(CanonicalStoreCut.Read(flow.Database));
         });
 }

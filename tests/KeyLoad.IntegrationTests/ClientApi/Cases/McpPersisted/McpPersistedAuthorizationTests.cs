@@ -4,7 +4,7 @@ using KeyLoad.IntegrationTests.Features.DocumentStorage;
 namespace KeyLoad.IntegrationTests.Features.ClientApi;
 
 /// <summary>AC-MCP-002/003: persisted grants and server scope govern each actual official tool execution.</summary>
-/// <param name="fixture">The initialized actual Docker/Aspire Orleans application.</param>
+/// <param name="fixture">The initialized actual native Aspire Orleans application.</param>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class McpPersistedAuthorizationTests(ClusterFixture fixture)

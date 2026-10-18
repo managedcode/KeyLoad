@@ -15,8 +15,8 @@ internal static class TextMaintenanceReplay
         for (var pageNumber = InitialPage; pageNumber < maximumPages; pageNumber++)
         {
             var page = await children.ReadAsync<ReadProjectionBatchRequest, ProjectionBatch>(GrainReadKind.ProjectionBatch,
-                new(request.Consumer, children.Database.Limits.MaxResults,
-                    children.Database.Limits.MaxProjectionBatchBytes, state.ReplayUpperSequence), token).ConfigureAwait(true);
+                new(request.Consumer, children.Limits.MaxResults,
+                    children.Limits.MaxProjectionBatchBytes, state.ReplayUpperSequence), token).ConfigureAwait(true);
             if (page.ThroughSequence == page.Consumer.Checkpoint)
             {
                 if (page.HasMore || page.ThroughSequence != state.ReplayUpperSequence || !page.Entries.IsEmpty)

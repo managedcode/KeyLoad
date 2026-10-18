@@ -1,4 +1,5 @@
 using Aspire.Hosting.ApplicationModel;
+using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
@@ -8,9 +9,7 @@ internal static class IsolatedDocumentResourceAssertions
     internal const string Endpoints = NativePrefix + "Endpoints__";
     internal const string Image = NativePrefix + "Image";
     internal const string Connection = NativePrefix + "ConnectionString";
-    private const string NativeDirectory = "native";
     private const string MissingSecret = "IsolatedDocumentResourceSecretMissing";
-    private const string VolumePrefix = "keyload-isolated-";
 
     internal static async Task VerifyNodesAsync(ContainerResource[] nodes, int count, string prefix, string digest)
     {
@@ -25,36 +24,33 @@ internal static class IsolatedDocumentResourceAssertions
         }
     }
 
-    internal static async Task VerifyDataAsync(ContainerResource node, string target, string root)
+    internal static async Task VerifyDataAsync(ContainerResource node, string target)
     {
         var mount = node.Annotations.OfType<ContainerMountAnnotation>().Single(item => item.Target == target);
-        await Assert.That(mount.Type).IsEqualTo(ContainerMountType.BindMount);
+        await Assert.That(mount.Type).IsEqualTo(ContainerMountType.Volume);
         await Assert.That(mount.IsReadOnly).IsFalse();
-        await Assert.That(mount.Source).IsEqualTo(Path.Combine(root, NativeDirectory, node.Name));
-        if (!OperatingSystem.IsWindows())
-        {
-            await Assert.That(File.GetUnixFileMode(mount.Source!)).IsEqualTo(
-                UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
-        }
+        await Assert.That(mount.Source).IsNull();
+        await Assert.That(node.Annotations.OfType<ContainerLifetimeAnnotation>().Single().Lifetime)
+            .IsEqualTo(ContainerLifetime.Session);
     }
 
     internal static async Task VerifyVolumesAsync(ContainerResource[] nodes, string target)
     {
         var mounts = nodes.Select(node => node.Annotations.OfType<ContainerMountAnnotation>().Single(item => item.Target == target)).ToArray();
         await Assert.That(mounts.All(mount => mount.Type == ContainerMountType.Volume && !mount.IsReadOnly)).IsTrue();
-        await Assert.That(mounts.Select(mount => mount.Source).Distinct(StringComparer.Ordinal).Count()).IsEqualTo(nodes.Length);
-        await Assert.That(mounts.All(mount => !string.IsNullOrWhiteSpace(mount.Source))).IsTrue();
-        await Assert.That(mounts.All(mount => mount.Source!.StartsWith(VolumePrefix, StringComparison.Ordinal))).IsTrue();
+        await Assert.That(mounts.Distinct(ReferenceEqualityComparer.Instance).Count()).IsEqualTo(nodes.Length);
+        await Assert.That(mounts.All(mount => mount.Source is null)).IsTrue();
+        await Assert.That(nodes.All(node => node.Annotations.OfType<ContainerLifetimeAnnotation>().Single().Lifetime
+            == ContainerLifetime.Session)).IsTrue();
     }
 
-    internal static async Task VerifyEndpointsAsync(ContainerResource runner, ContainerResource[] nodes, string endpoint)
+    internal static async Task VerifyEndpointsAsync(LoadTestClientSettings client, ContainerResource[] nodes, string endpoint)
     {
-        var configuration = await IsolatedResourceTopologyFixture.ConfigurationAsync(runner);
-        var endpoints = configuration.EnvironmentVariablesWithUnprocessed.Where(pair => pair.Key.StartsWith(Endpoints, StringComparison.Ordinal)).ToDictionary();
+        var endpoints = client.Values.Where(pair => pair.Key.StartsWith(Endpoints, StringComparison.Ordinal)).ToDictionary();
         await Assert.That(endpoints.Count).IsEqualTo(nodes.Length);
         for (var index = 0; index < nodes.Length; index++)
         {
-            var value = endpoints[Endpoints + index].Unprocessed;
+            var value = endpoints[Endpoints + index];
             await Assert.That(value).IsTypeOf<EndpointReference>();
             var reference = (EndpointReference)value;
             await Assert.That(reference.Resource).IsSameReferenceAs(nodes[index]);

@@ -1,4 +1,5 @@
 using Aspire.Hosting.ApplicationModel;
+using static KeyLoad.IntegrationTests.Features.ClusterReplication.ClusterReplicationTestSupport;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 
@@ -10,14 +11,14 @@ internal static class SiloRestartRecoveryScenario
     private const string Materialized = "materialized";
 
     internal static async Task VerifyUnavailableCopiesAndRecoveryAsync(ClusterFixture fixture, SiloRestartRunState state,
-        long projectionThroughSequence, ISet<string> stoppedContainers, CancellationToken cancellationToken)
+        long projectionThroughSequence, ISet<string> stoppedProcesses, CancellationToken cancellationToken)
     {
         var surviving = state.Clients[state.Survivors[0]];
         foreach (var index in Enumerable.Range(0, NodeCount).Where(index => index != state.Survivors[0]))
         {
             var node = ClusterReplicationTestSupport.NodeName(index + 1);
-            stoppedContainers.Add(node);
-            await fixture.KillContainerAsync(node, SiloFailure, cancellationToken);
+            stoppedProcesses.Add(node);
+            await fixture.KillServerAsync(node, SiloFailure, cancellationToken);
         }
         var pending = new CommandRequest(Guid.NewGuid(), state.Partition,
             [new PutDocument(Collection, "after-silo-loss", "{}")]);
@@ -27,8 +28,8 @@ internal static class SiloRestartRecoveryScenario
         foreach (var index in Enumerable.Range(0, NodeCount).Where(index => index != state.Survivors[0]))
         {
             var node = ClusterReplicationTestSupport.NodeName(index + 1);
-            await fixture.RestartContainerAsync(node, cancellationToken);
-            stoppedContainers.Remove(node);
+            await fixture.RestartServerAsync(node, cancellationToken);
+            stoppedProcesses.Remove(node);
         }
 
         await ClusterReplicationTestSupport.EventuallyAsync(
@@ -45,6 +46,18 @@ internal static class SiloRestartRecoveryScenario
         await Assert.That(document!.Revision).IsEqualTo(1);
         await Assert.That(document.Json).IsEqualTo("{}");
         await VerifyAllNodesReadyAsync(fixture, state, projectionThroughSequence, cancellationToken);
+    }
+
+    internal static async Task SaveFailureDiagnosticsAsync(ClusterFixture fixture, Exception failure)
+    {
+        try
+        {
+            await fixture.SaveFailureDiagnosticsAsync();
+        }
+        catch (Exception diagnosticsFailure) when (IsNonFatalCleanupFailure(diagnosticsFailure))
+        {
+            failure.Data[ClusterDiagnosticsFailureKey] = diagnosticsFailure;
+        }
     }
 
     private static async Task VerifyAllNodesReadyAsync(ClusterFixture fixture, SiloRestartRunState state,

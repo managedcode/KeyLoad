@@ -13,7 +13,7 @@ internal sealed class RequestCqrsClusterDiagnosticsCleanup : IAsyncDisposable
     private readonly CancellationTokenSource lifetime = new();
     private CancellationTokenSource cleanupDeadline = new();
     private readonly ResourceLoggerService logger;
-    private readonly ContainerResource[] resources;
+    private readonly ProjectResource[] resources;
     private readonly RequestCqrsClusterMcpRejectionNodeCapture[] nodes;
     private readonly Guid waveId;
     private readonly Task[] subscriptions;
@@ -24,7 +24,7 @@ internal sealed class RequestCqrsClusterDiagnosticsCleanup : IAsyncDisposable
     private bool forcedCancellationRequested;
 
     internal RequestCqrsClusterDiagnosticsCleanup(Guid waveId, ResourceLoggerService logger,
-        ContainerResource[] resources, RequestCqrsClusterMcpRejectionNodeCapture[] nodes,
+        ProjectResource[] resources, RequestCqrsClusterMcpRejectionNodeCapture[] nodes,
         Action<RequestCqrsLifecycleStage>? failureObserver = null,
         RequestCqrsClusterSubscriberTransitionHooks? subscriberTransitions = null)
     {
@@ -161,7 +161,7 @@ internal sealed class RequestCqrsClusterDiagnosticsCleanup : IAsyncDisposable
             failureObserver, RequestCqrsLifecycleStage.CaptureForcedJoin);
     }
 
-    private async Task CaptureNodeAsync(ResourceLoggerService resourceLogger, ContainerResource resource,
+    private async Task CaptureNodeAsync(ResourceLoggerService resourceLogger, ProjectResource resource,
         RequestCqrsClusterMcpRejectionNodeCapture node)
     {
         try

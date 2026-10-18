@@ -9,8 +9,8 @@ internal static class ExclusiveOwnerContentionResources
     private const string Third = "file-owner-contender3";
     internal static string[] ResourceNames => [First, Second, Third];
 
-    internal static IResourceBuilder<ContainerResource>[] Add(bool enabled, IResourceBuilder<ContainerResource> owner,
-        Func<string, IResourceBuilder<ContainerResource>> create)
+    internal static IResourceBuilder<ProjectResource>[] Add(bool enabled, IResourceBuilder<ProjectResource> owner,
+        Func<string, IResourceBuilder<ProjectResource>> create)
     {
         if (!enabled)
         {

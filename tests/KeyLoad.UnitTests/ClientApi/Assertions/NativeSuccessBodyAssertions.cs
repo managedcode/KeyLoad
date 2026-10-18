@@ -18,7 +18,7 @@ internal static class NativeSuccessBodyAssertions
         await Assert.That(operation.UserId!).IsEqualTo(state.Principal.Id);
         await DeclaredResponseEofAssertions.EqualAsync(state.Endpoint.Healthy,
             NativeSerialization.Deserialize<CommandRequest>((operation).Value!.Input.Span));
-        var expected = new CommitReceipt(state.Endpoint.Healthy.CommandId, new(placement.Incarnation, state.Endpoint.Healthy.Partition.AtomicPartitionId, entry.CanonicalSequence), [new(D.PutKind, ConnectionNativeProtocol.Collection, D.Document, P.HealthyRevision)], DurabilityProfile.ProcessDurable, 1);
+        var expected = new CommitReceipt(state.Endpoint.Healthy.CommandId, new(placement.Incarnation, state.Endpoint.Healthy.Partition.AtomicPartitionId, entry.CanonicalSequence), [new(D.PutKind, ConnectionNativeProtocol.Collection, D.Document, P.HealthyRevision)], DurabilityProfile.ProcessDurable, 2);
         await DeclaredResponseEofAssertions.EqualAsync(expected, state.Endpoint.HealthyReceipt);
         await DeclaredResponseEofAssertions.EqualAsync(expected, sdk);
         await Assert.That((state.Endpoint.HealthyReceipt ?? throw new InvalidOperationException(P.Failure))
@@ -69,7 +69,7 @@ internal static class NativeSuccessBodyAssertions
         var actual = DeclaredResponseEofAssertions.Capture(state.Scenario, state.Principal, state.Endpoint.Healthy);
         await Assert.That(actual.Rows.SequenceEqual(original.Rows)).IsTrue();
         await Assert.That(actual.PhysicalPosition).IsEqualTo(original.PhysicalPosition);
-        await Assert.That(actual.Journal).IsEqualTo(original.Journal);
+        await Assert.That(actual.Cut).IsEqualTo(original.Cut);
         await Assert.That(actual.Outcome.SequenceEqual(original.Outcome)).IsTrue();
         await Assert.That(DocumentCommandOutcomeTestSupport.OutboxEqual(actual.Outbox, original.Outbox)).IsTrue();
         var first = DeclaredResponseEofAssertions.Capture(state.Scenario, state.Principal, state.Endpoint.Original);

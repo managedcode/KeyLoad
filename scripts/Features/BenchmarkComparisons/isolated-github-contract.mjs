@@ -1,7 +1,7 @@
 export const GH = Object.freeze({
   repository: 'managedcode/KeyLoad', workflow: 'Benchmarks', workflowPath: '.github/workflows/benchmarks.yml',
   api: 'repos/managedcode/KeyLoad/actions', host: 'github.com', apiVersion: '2022-11-28',
-  imageJob: 'Build Docker images', imageArtifact: 'comparison-image-bundle',
+  imageJob: 'Prepare comparison runtime', imageArtifact: 'comparison-image-bundle',
   imageSteps: Object.freeze(['Check Docker image export and import', 'Save Docker images']),
   workerSteps: Object.freeze(['Run database workload', 'Save benchmark results']),
   pageSize: 100, pages: 40, items: 4000, metadataBytes: 16777216, workerZipBytes: 134217728,

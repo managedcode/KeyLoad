@@ -32,7 +32,6 @@ internal sealed class EventProjectionHarness : IDisposable
         {
             ClusterAdministrator = true
         }, DatabaseEngine.Credential(RootId, RootId, RootCredential));
-        PhysicalShardTestBootstrap.Bootstrap(Database, RootId);
         bootstrapped = true;
     }
 
@@ -61,7 +60,6 @@ internal sealed class EventProjectionHarness : IDisposable
     {
         Store.Dispose();
         Open();
-        PhysicalShardTestBootstrap.RequireExisting(Database);
     }
 
     public void Dispose()

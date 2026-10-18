@@ -1,11 +1,7 @@
-using System.Text;
-
 namespace KeyLoad.UnitTests.Features.InternalSerialization;
 
 internal sealed class NativeUnknownWellKnownHeaderTests
 {
-    private const string NullJson = "null";
-    private const string Voter = "voter";
     [Test]
     [Arguments(NativeUnknownWellKnownHeaderScope.Envelope, 0u)]
     [Arguments(NativeUnknownWellKnownHeaderScope.Value, 1u)]
@@ -32,19 +28,4 @@ internal sealed class NativeUnknownWellKnownHeaderTests
         await Assert.That(NativeSerialization.Deserialize<NativeUnknownWellKnownHeaderRecord>(valid)).IsEqualTo(expected);
     }
 
-    [Test]
-    public async Task AcR17002OriginalCurrentReplicaNullMetadataReproducerIsCorruption()
-    {
-        var invalid = Encoding.UTF8.GetBytes(NullJson);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => NativeSerialization.Validate(invalid)).Code)
-            .IsEqualTo(ErrorCode.Corruption);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => NativeSerialization.Deserialize<object>(invalid)).Code)
-            .IsEqualTo(ErrorCode.Corruption);
-        var expected = new VoteRequest(Voter, 2, 0, 0);
-        var valid = ReplicaProtocolCodec.Serialize(expected);
-        await Assert.That(ReplicaProtocolCodec.Deserialize<VoteRequest>(valid)).IsEqualTo(expected);
-        invalid.CopyTo(valid, ReplicaProtocol.PayloadPrefixBytes);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => ReplicaProtocolCodec.Deserialize<VoteRequest>(valid)).Code)
-            .IsEqualTo(ErrorCode.Corruption);
-    }
 }

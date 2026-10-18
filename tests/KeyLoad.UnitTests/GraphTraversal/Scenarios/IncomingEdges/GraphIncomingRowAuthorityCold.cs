@@ -14,7 +14,7 @@ internal static class GraphIncomingRowAuthorityCold
     {
         var identity = database.Store.Identity;
         var cut = database.Store.Position;
-        var image = GraphShortestPathFullStoreImage.Bytes(database.Store);
+        var image = CanonicalStoreImage.Bytes(database.Store);
         database.Store.Dispose();
         Exception? primary = null;
         var failures = new List<Exception>();
@@ -29,7 +29,7 @@ internal static class GraphIncomingRowAuthorityCold
                 await Assert.That(cold.Identity.Incarnation).IsEqualTo(identity.Incarnation);
                 await Assert.That(cold.Identity.ReadGeneration).IsGreaterThanOrEqualTo(identity.ReadGeneration);
                 await Assert.That(cold.Position).IsEqualTo(cut);
-                await Assert.That(GraphShortestPathFullStoreImage.Bytes(cold)).IsEquivalentTo(image);
+                await Assert.That(CanonicalStoreImage.Bytes(cold)).IsEquivalentTo(image);
                 await GraphIncomingRowAuthorityAssertions.HealthyAsync(engine, cold, source, target, reader, repairedTarget);
                 await ReplayAsync(engine, cold, repairs);
                 await GraphIncomingRowAuthorityAssertions.HealthyAsync(engine, cold, source, target, reader, repairedTarget);
@@ -68,7 +68,7 @@ internal static class GraphIncomingRowAuthorityCold
     {
         foreach (var repair in repairs)
         {
-            var image = GraphShortestPathFullStoreImage.Bytes(store);
+            var image = CanonicalStoreImage.Bytes(store);
             var cut = store.Position;
             var operation = engine.CreateCommand(OperationKind.Batch, repair.Request.CommandId, Root, default, JsonSerializer.Serialize(repair.Request, JsonDefaults.Options));
             var replay = engine.ApplyEmbedded(operation, cancellationToken: default).Get<CommitReceipt>();
@@ -77,7 +77,7 @@ internal static class GraphIncomingRowAuthorityCold
             var outcome = store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(
                 repair.Request.Partition, Root, repair.Request.CommandId)));
             await Assert.That(outcome).IsEquivalentTo(repair.Outcome);
-            await Assert.That(GraphShortestPathFullStoreImage.Bytes(store)).IsEquivalentTo(image);
+            await Assert.That(CanonicalStoreImage.Bytes(store)).IsEquivalentTo(image);
             await Assert.That(store.Position).IsEqualTo(cut);
         }
     }

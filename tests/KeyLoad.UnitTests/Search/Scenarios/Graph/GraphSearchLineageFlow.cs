@@ -22,7 +22,7 @@ internal static class GraphSearchLineageFlow
                 await GraphSearchLineageValues.RefusedAsync(state, ErrorCode.PermissionDenied, GraphSearchLineageProtocol.Denied);
                 await state.PolicyAsync(GraphSearchLineageProtocol.RepairedEpoch, true);
                 await GraphSearchLineageValues.HealthyAsync(state);
-                var image = GraphShortestPathFullStoreImage.Bytes(state.Store);
+                var image = CanonicalStoreImage.Bytes(state.Store);
                 var position = state.Store.Position;
                 var identity = state.Store.Identity;
                 state.Harness.JoinOwnedResources();

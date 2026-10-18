@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text.Json;
-using KeyLoad.AppHost.Features.CodeQuality;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Hosting;
 using KeyLoad.UnitTests.Features.BackupRestore;
@@ -37,7 +36,7 @@ internal static class NativeCoverageMergeProcess
     {
         using var configuration = new ConfigurationManager();
         configuration.AddEnvironmentVariables();
-        var coverage = AppHostOptionsRegistration.BindNativeCoverage(configuration).Value;
+        var coverage = AppHostOptionsRegistration.Bind<NativeCoverageExecutionOptions>(configuration.GetSection(NativeCoverageExecutionOptions.SectionName), value => value.IsValid(), NativeCoverageExecutionOptions.ValidationMessage).Value;
         if (!coverage.IsValid())
         {
             throw new InvalidOperationException(NativeCoverageExecutionOptions.ValidationMessage);
@@ -51,7 +50,7 @@ internal static class NativeCoverageMergeProcess
     internal static NativeCoverageImageSourceSnapshot CaptureCliSource(ToolingOptions options)
     {
         var limits = options.Coverage;
-        var source = NativeCoverageImageFixture.CliOutput;
+        var source = NativeCoverageCliDeployment.CliOutput;
         return NativeCoverageImageSourceSnapshot.Capture(source, limits.MaximumFiles,
             limits.MaximumFileBytes, limits.MaximumTotalBytes, limits.MaximumPathCharacters,
             limits.ReadBufferBytes);
@@ -60,7 +59,7 @@ internal static class NativeCoverageMergeProcess
     internal static void VerifyCliSource(ToolingOptions options, NativeCoverageImageSourceSnapshot source)
     {
         var limits = options.Coverage;
-        source.VerifyUnchanged(NativeCoverageImageFixture.CliOutput, limits.MaximumFiles,
+        source.VerifyUnchanged(NativeCoverageCliDeployment.CliOutput, limits.MaximumFiles,
             limits.MaximumFileBytes, limits.MaximumTotalBytes, limits.MaximumPathCharacters,
             limits.ReadBufferBytes);
     }
@@ -189,7 +188,7 @@ internal static class NativeCoverageMergeProcess
         for (var directory = new DirectoryInfo(AppContext.BaseDirectory); directory is not null; directory = directory.Parent)
         {
             if (File.Exists(Path.Combine(directory.FullName, SolutionFile))
-                && File.Exists(Path.Combine(directory.FullName, NativeCoverageImageFixture.CliOutputRelativePath,
+                && File.Exists(Path.Combine(directory.FullName, NativeCoverageCliDeployment.CliOutputRelativePath,
                     CliAssemblyName)))
             {
                 return directory.FullName;

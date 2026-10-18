@@ -21,13 +21,13 @@ internal static class CompositionLinkLifetimeJsonFlow
         }
         else
         {
-            await A.ReceiptAsync(new(enqueue.Id, owner.NextToken(), [new("enqueue", P.Queue, P.Message, 1)], DurabilityProfile.ProcessDurable, 1), owner.Submit(enqueue).Get<CommitReceipt>());
+            await A.ReceiptAsync(new(enqueue.CommandId, owner.NextToken(), [new("enqueue", P.Queue, P.Message, 1)], DurabilityProfile.ProcessDurable, 1), owner.Submit(enqueue).Get<CommitReceipt>());
             failed = S.Issue(owner, [new QueueToGraph(P.Graph, P.Queue, P.Prefix, 1, P.From, P.To)], token);
         }
         var saved = malformed == P.Duplicate ? null : payload;
         var detail = malformed == P.Duplicate ? P.DuplicateProperty : P.InvalidLink;
         await A.ModelsAsync(owner, state, saved, false, token);
-        var before = CompositionLinkLifetimeJsonConservation.Capture(owner, failed);
+        var before = CompositionLinkFailureImage.Capture(owner, failed);
         await FailureAsync(owner, failed, detail);
         await before.RequireFailureAsync(owner, failed, detail);
         await A.ModelsAsync(owner, state, saved, false, token);
@@ -57,9 +57,9 @@ internal static class CompositionLinkLifetimeJsonFlow
     {
         var payload = P.Payload(state.From, state.To);
         var enqueue = S.Issue(owner, [new EnqueueMessage(P.HealthyQueue, P.Message, payload)], token);
-        await A.ReceiptAsync(new(enqueue.Id, owner.NextToken(), [new("enqueue", P.HealthyQueue, P.Message, 1)], DurabilityProfile.ProcessDurable, 1), owner.Submit(enqueue).Get<CommitReceipt>());
+        await A.ReceiptAsync(new(enqueue.CommandId, owner.NextToken(), [new("enqueue", P.HealthyQueue, P.Message, 1)], DurabilityProfile.ProcessDurable, 1), owner.Submit(enqueue).Get<CommitReceipt>());
         var forward = S.Issue(owner, [new QueueToGraph(P.Graph, P.HealthyQueue, P.Prefix, 1, P.From, P.To)], token);
-        var expected = new CommitReceipt(forward.Id, owner.NextToken(), [new("upsertEdge", P.Graph, P.Edge, 1) { CompositionReferences = [state.From, state.To] }], DurabilityProfile.ProcessDurable, 1);
+        var expected = new CommitReceipt(forward.CommandId, owner.NextToken(), [new("upsertEdge", P.Graph, P.Edge, 1) { CompositionReferences = [state.From, state.To] }], DurabilityProfile.ProcessDurable, 1);
         await A.ReceiptAsync(expected, owner.Submit(forward).Get<CommitReceipt>());
         await A.ModelsAsync(owner, state, saved, true, token);
         await A.UnchangedAsync(owner, async () =>

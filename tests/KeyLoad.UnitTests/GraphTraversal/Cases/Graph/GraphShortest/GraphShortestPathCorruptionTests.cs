@@ -23,7 +23,7 @@ internal sealed class GraphShortestPathCorruptionTests
         await GraphShortestPathCorruptionFlow.HealthyAsync(database.Database, database.Store, expected, token);
         GraphShortestPathCorruptionFlow.Inject(database.Store, expected, testCase);
         await GraphShortestPathCorruptionFlow.RefuseAsync(database.Database, database.Store, request, token);
-        var corruptImage = GraphShortestPathFullStoreImage.Bytes(database.Store);
+        var corruptImage = CanonicalStoreImage.Bytes(database.Store);
         var corruptPosition = database.Store.Position;
         database.Store.Dispose();
 
@@ -31,7 +31,7 @@ internal sealed class GraphShortestPathCorruptionTests
             UnitExecutionOptions.PointCacheExecution());
         var owner = database.CreateConfiguredDatabase(reopened);
         await Assert.That(reopened.Position).IsEqualTo(corruptPosition);
-        await Assert.That(GraphShortestPathFullStoreImage.Bytes(reopened).SequenceEqual(corruptImage)).IsTrue();
+        await Assert.That(CanonicalStoreImage.Bytes(reopened).SequenceEqual(corruptImage)).IsTrue();
         await GraphShortestPathCorruptionFlow.RefuseAsync(owner, reopened, request, token);
         GraphShortestPathCorruptionFlow.Repair(reopened, expected, testCase);
         await GraphShortestPathCorruptionFlow.HealthyAsync(owner, reopened, expected, token);

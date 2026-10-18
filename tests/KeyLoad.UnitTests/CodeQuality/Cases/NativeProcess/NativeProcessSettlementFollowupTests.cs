@@ -35,7 +35,7 @@ internal sealed class NativeProcessSettlementFollowupTests
         await Assert.That(cancellation).IsNotNull();
         await Assert.That(cancellation!.CancellationToken).IsEqualTo(child.Caller);
         var projected = Assert.ThrowsExactly<TaskCanceledException>(
-            () => NativeCoverageImageNodeSettlement.ThrowFailures([.. child.Failures]));
+            () => global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny([.. child.Failures]));
         await Assert.That(projected).IsSameReferenceAs(cancellation);
 
         await RejectsRealOversizedChildOutputAsync(token).ConfigureAwait(false);

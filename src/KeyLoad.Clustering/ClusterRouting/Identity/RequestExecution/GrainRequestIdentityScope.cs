@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
 using ManagedCode.Orleans.Identity.Core.Constants;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,22 +20,33 @@ internal sealed class GrainRequestIdentityScope : IDisposable
     internal GrainRequestIdentityScope(IServiceProvider runtimeServices, PrincipalRecord? principal,
         Guid requestId, Guid commandId, CancellationToken cancellationToken,
         global::Orleans.Runtime.SiloAddress? placement = null, Guid connectionId = default)
-        : this(runtimeServices, principal?.Id, requestId, commandId, placement, connectionId, cancellationToken)
+        : this(runtimeServices, principal is null ? null : GrainIdentityContext.CreatePrincipal(principal.Id),
+            new(requestId, commandId, connectionId, runtimeServices.GetService<ILocalSiloDetails>()?.SiloAddress),
+            placement, cancellationToken)
     {
     }
 
     internal static GrainRequestIdentityScope ForRuntimeJournal(IServiceProvider runtimeServices,
         Guid requestId, Guid commandId, Guid connectionId, CancellationToken cancellationToken)
-        => new(runtimeServices, RuntimeJournalIdentity.ProtectedPrincipalId, requestId, commandId,
-            null, connectionId, cancellationToken);
+        => new(runtimeServices, GrainIdentityContext.CreatePrincipal(RuntimeJournalIdentity.ProtectedPrincipalId),
+            new(requestId, commandId, connectionId, runtimeServices.GetService<ILocalSiloDetails>()?.SiloAddress),
+            null, cancellationToken);
 
-    private GrainRequestIdentityScope(IServiceProvider runtimeServices, string? subject,
-        Guid requestId, Guid commandId, global::Orleans.Runtime.SiloAddress? placement,
-        Guid connectionId, CancellationToken cancellationToken)
+    internal static GrainRequestIdentityScope ForChild(IServiceProvider services, GrainRequestEnvelope parent,
+        Guid requestId, Guid commandId, CancellationToken cancellationToken)
     {
-        var state = new GrainRequestContextState(requestId, commandId, connectionId,
-            runtimeServices.GetService<ILocalSiloDetails>()?.SiloAddress);
-        var claims = subject is null ? null : GrainIdentityContext.CreatePrincipal(subject);
+        GrainIdentityContext.Validate(parent, parent.RequestId);
+        var principal = parent.PrincipalId
+            ?? throw Errors.Fail(ErrorCode.Unauthenticated, GrainRoutingProtocol.MissingPrincipal);
+        return new(services, GrainIdentityContext.CreatePrincipal(principal),
+            new(requestId, commandId, NativeConnectionExecutionIdentity.Resolve(services),
+                services.GetService<ILocalSiloDetails>()?.SiloAddress), null, cancellationToken);
+    }
+
+    private GrainRequestIdentityScope(IServiceProvider runtimeServices, ClaimsPrincipal? claims,
+        GrainRequestContextState state, global::Orleans.Runtime.SiloAddress? placement,
+        CancellationToken cancellationToken)
+    {
         NativeRequestContextAdmission.Admit(runtimeServices, claims, state, cancellationToken, placement);
         placementSelected = placement is not null;
         previousPlacement = RequestContext.Get(PlacementKey);

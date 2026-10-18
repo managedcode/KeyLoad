@@ -20,18 +20,32 @@ aggregate results -> caller. Independent operations on a connection have separat
 request IDs, cancellation and bounded resources. Stable command IDs deduplicate
 retries. Clients cannot choose trusted connection identities or roles.
 
-Every silo owns its own ZoneTree files, native WAL, locks and ordered apply gate.
-A silo-local Grain Service owns storage lifetime; local code borrows it through
-DI. Activations route operations and never move open files or storage handles.
-Replica copies use typed Orleans Grain Service calls to target silos found through
-native Orleans membership. `KeyLoad:SiloCount` and `KeyLoad:ReplicaCount` are
-independent positive startup settings; copies cannot exceed available silos.
-KeyLoad imposes no artificial silo-count limit. Acknowledgements must describe the
-actual persisted copies and tested failure contract.
+Storage has two explicit contracts. A shared volume exposes the same configured
+storage paths to all silos without copying data. Each physical partition still
+has one ordinary Orleans grain owner and one open ZoneTree instance; other silos
+call that owner. Orleans chooses and relocates the activation. Existing file
+ownership guards remain mandatory, and reopening waits for actual handle release.
+A shared mount is not permission for several processes to write the same ZoneTree
+files concurrently. Shared-volume support remains an open implementation and
+qualification gate until its lazy owner lifetime and filesystem behavior are proven.
+
+With isolated storage, each silo-local Grain Service owns that node's ZoneTree
+files, native WAL, locks and ordered apply gate. Local code borrows storage through
+DI; activations never transfer file handles. Copies use typed Orleans Grain Service
+calls to target silos found through native Orleans membership. `KeyLoad:SiloCount`
+and `KeyLoad:ReplicaCount` are independent positive startup settings; copies cannot
+exceed available silos. A distributed query calls the owners of the required logical
+partitions with bounded concurrency and merges their results; physical copies of
+the same partition are not separate query inputs. KeyLoad imposes no artificial
+silo-count limit. Acknowledgements describe actual persisted copies and tested
+failure contracts. Current full-copy execution is not proof of partition fan-out.
 
 Background queue, ANN and time-series work uses Orleans `[StatelessWorker]`
-grains. Each activation accepts events, holds a bounded buffer and flushes on a
-native grain timer with a typed interval option. No leadership check gates this
+grains. Orleans automatically creates and retires their activations according to
+load. A shared helper creates the logical pool key; application code never creates
+per-activation worker IDs or manages its own pool. Each activation accepts events,
+holds a bounded buffer and flushes on a native grain timer with a typed interval
+option. No leadership check gates this
 work. Durable delivery and idempotent effects are separate from an in-memory
 buffer. Grain Services own per-silo resources; workers own activation-local work.
 Choose native timers, reminders, Streams, Journaling and Durable Jobs by their
@@ -187,8 +201,15 @@ C# fixtures own Aspire startup, readiness, discovered endpoints, real SDK and
 MCP clients, fault injection and joined cleanup. AppHost owns all container
 lifecycle and resource commands; tests never start independent containers or
 substitute graceful shutdown for an abrupt fault. Unit and process tests use
-only the infrastructure they actually require. Package server containers with
-native .NET SDK `PublishContainer`; do not maintain a product Dockerfile.
+only the infrastructure they actually require. `KeyLoad.AppHost` starts native
+KeyLoad services through `AddProject` and required Azurite resources for development
+and functional tests. `KeyLoad.LoadTests.AppHost` is separate: it starts only the
+selected database infrastructure, waits for readiness and exposes endpoints;
+client code owns load execution and measurements. Each AppHost removes its own
+session containers and volumes on joined teardown after success, failure or
+cancellation. Preserve unrelated Docker resources. Normal builds and test startup
+never publish or build a KeyLoad server image. Explicit release delivery packages
+containers with native .NET SDK `PublishContainer`; maintain no product Dockerfile.
 
 Complete solution build, unit tests, real process recovery, actual Aspire cluster
 SDK/MCP operations, coverage and fault/endurance checks remain distinct mandatory

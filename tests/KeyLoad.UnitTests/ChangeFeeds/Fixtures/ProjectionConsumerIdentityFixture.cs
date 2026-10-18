@@ -15,8 +15,10 @@ internal static class ProjectionConsumerIdentityFixture
     internal const string MissingRow = "The native projection flow requires its original committed consumer.";
     internal const string Detail = "The committed projection consumer does not match its canonical identity.";
 
-    internal static Command<DatabaseCommand> Operation<T>(OperationKind kind, Guid id, T request)
-        => new(id, kind, Root, default, global::System.Text.Json.JsonSerializer.Serialize(request, JsonDefaults.Options));
+    internal static Command<DatabaseCommand> Operation<T>(DatabaseEngine owner, OperationKind kind, Guid id, T request,
+        DateTimeOffset? evaluatedAt = null)
+        => owner.CreateCommand(kind, id, Root, evaluatedAt ?? owner.EvaluationClock.GetUtcNow(),
+            NativeSerialization.Serialize(request));
 
     internal static async Task<ProjectionConsumerIdentityState> SeedAsync(TestDatabase database, CancellationToken token)
     {
@@ -25,18 +27,15 @@ internal static class ProjectionConsumerIdentityFixture
         var consumer = new ProjectionConsumerRef(database.Partition, ConsumerName);
         var definition = new ProjectionConsumerDefinition(1L, [Source], ["putDocument"]);
         var configureId = Guid.NewGuid();
-        var configure = Operation(OperationKind.ConfigureProjectionConsumer, configureId,
+        var configure = Operation(database.Database, OperationKind.ConfigureProjectionConsumer, configureId,
             new ConfigureProjectionConsumerRequest(configureId, consumer, definition));
         var configured = database.Database.ApplyEmbedded(configure, token);
         await ProjectionConsumerIdentityAssertions.ExactAsync(configured.Get<ProjectionConsumerInfo>(),
             new ProjectionConsumerInfo(consumer, definition, 0L, false));
         var seedId = Guid.NewGuid();
         var time = FeedAuthorityClock.Epoch;
-        var seed = Operation(OperationKind.Batch, seedId, new CommandRequest(seedId, database.Partition,
-            [new PutDocument(Source, "a", "{\"n\":1}", 0L), new PutDocument(Source, "b", "{\"n\":2}", 0L)])) with
-        {
-            EvaluatedAt = time
-        };
+        var seed = Operation(database.Database, OperationKind.Batch, seedId, new CommandRequest(seedId, database.Partition,
+            [new PutDocument(Source, "a", "{\"n\":1}", 0L), new PutDocument(Source, "b", "{\"n\":2}", 0L)]), time);
         token.ThrowIfCancellationRequested();
         var seeded = database.Database.Apply(seed);
         var receipt = seeded.Get<CommitReceipt>();
@@ -44,10 +43,10 @@ internal static class ProjectionConsumerIdentityFixture
             new("putDocument", Source, "a", 1L), new("putDocument", Source, "b", 1L));
         var batch = database.Database.ReadProjectionBatch(Root, new(consumer));
         var completeId = Guid.NewGuid();
-        var complete = Operation(OperationKind.CommitProjectionBatch, completeId,
+        var complete = Operation(database.Database, OperationKind.CommitProjectionBatch, completeId,
             new CommitProjectionBatchRequest(completeId, consumer, batch.Token, [new PutDocument(Target, "effect", "{\"sourceCount\":2}", 0L)]));
         var againId = Guid.NewGuid();
-        var again = Operation(OperationKind.ConfigureProjectionConsumer, againId,
+        var again = Operation(database.Database, OperationKind.ConfigureProjectionConsumer, againId,
             new ConfigureProjectionConsumerRequest(againId, consumer, definition));
         var key = KeySpace.Partition(ConsumerSpace, database.Partition, ConsumerName);
         var original = database.Store.Read(view => view.ReadOwnedValue(key)) ?? throw new InvalidOperationException(MissingRow);

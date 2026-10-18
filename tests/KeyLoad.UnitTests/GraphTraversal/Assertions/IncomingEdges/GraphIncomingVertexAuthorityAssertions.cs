@@ -9,7 +9,7 @@ internal static class GraphIncomingVertexAuthorityAssertions
     internal static async Task Refuse(DatabaseEngine owner, ZoneTreeStore store,
         GraphTraversalIntegrityState state, CancellationToken token)
     {
-        var image = GraphShortestPathFullStoreImage.Bytes(store);
+        var image = CanonicalStoreImage.Bytes(store);
         var cut = store.Position;
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => Read(owner, state.DamagedEdge.To, token));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
@@ -20,7 +20,7 @@ internal static class GraphIncomingVertexAuthorityAssertions
     internal static async Task Healthy(DatabaseEngine owner, ZoneTreeStore store,
         GraphTraversalIntegrityState state, EdgeRecord? continuation, CancellationToken token)
     {
-        var image = GraphShortestPathFullStoreImage.Bytes(store);
+        var image = CanonicalStoreImage.Bytes(store);
         var cut = store.Position;
         var actual = Read(owner, state.DamagedEdge.To, token);
         GraphIncomingEdgeRowV1[] rows = continuation is null

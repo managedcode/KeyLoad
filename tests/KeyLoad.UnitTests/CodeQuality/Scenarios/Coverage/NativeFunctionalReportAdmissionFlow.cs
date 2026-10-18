@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using KeyLoad.AppHost.Features.CodeQuality;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.UnitTests.Features.CodeQuality.Processes;
 using Microsoft.Extensions.Options;

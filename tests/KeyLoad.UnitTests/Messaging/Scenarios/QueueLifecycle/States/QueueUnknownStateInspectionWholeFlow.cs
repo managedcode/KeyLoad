@@ -85,7 +85,7 @@ internal static class QueueUnknownStateInspectionWholeFlow
 
     private static async Task FinishAsync(DatabaseEngine owner, ZoneTreeStore store, QueueLifecycleTestState state)
     {
-        var operation = QueueLifecycleConditionOperations.Cancel(state);
+        var operation = QueueLifecycleConditionOperations.Cancel(owner, state);
         var result = owner.Apply(operation);
         result.Get<CommitReceipt>();
         state.Successes.Add((operation, result));

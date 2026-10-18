@@ -11,8 +11,6 @@ internal sealed class SampleChunkLifecycleClusterTests(ClusterFixture fixture)
     [Test]
     public async Task AcChunk007009011NativeBackgroundMergePreservesLiteralRowsReceiptsAndCurrentPolicy()
     {
-        fixture.RegisterNativeCoverageCase<SampleChunkLifecycleClusterTests>(nameof(
-            AcChunk007009011NativeBackgroundMergePreservesLiteralRowsReceiptsAndCurrentPolicy));
         var failures = new List<Exception>();
         McpCallerDeadline? deadline = null;
         HttpClient? http = null;

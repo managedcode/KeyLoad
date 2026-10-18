@@ -1,15 +1,9 @@
-using KeyLoad.AppHost.Features.TestInfrastructure;
-
 namespace KeyLoad.AppHost.Hosting;
 
 /// <summary>Validated build-time application and topology selectors shared by the Aspire graph.</summary>
 [ConfigurationOptions]
 internal sealed class AppHostControlOptions
 {
-    internal TestSuiteSettings? Tests
-    {
-        get; set;
-    }
     internal bool Ephemeral
     {
         get; set;
@@ -26,7 +20,7 @@ internal sealed class AppHostControlOptions
     {
         get; set;
     }
-    internal bool ContainerFaults
+    internal bool ProcessFaults
     {
         get; set;
     }

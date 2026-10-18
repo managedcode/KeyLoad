@@ -47,11 +47,7 @@ internal sealed class McpCatalogTests
             await Assert.That(actual.OutputSchema.GetProperty(TypeKey).GetString()).IsEqualTo(ObjectType);
         }
         await QueueDispatchMcpCatalogAssertions.RequireAsync();
-        await McpRemoteGraphCatalogExpectations.RequireAsync();
         await global::KeyLoad.UnitTests.Features.QueryExecution.DistributedSearchMcpSchemaAssertions.RequireAsync();
-        await global::KeyLoad.UnitTests.Features.EventStreams.EventFeedTailCatalogAssertions.RequireAsync();
-        await global::KeyLoad.UnitTests.Features.EventStreams.EventFeedOfferCatalogAssertions.RequireAsync();
-        await global::KeyLoad.UnitTests.Features.EventStreams.EventFeedSettlementCatalogAssertions.RequireAsync();
     }
 
     /// <summary>Rejects case-changed names and prevents internal authentication or membership discovery.</summary>

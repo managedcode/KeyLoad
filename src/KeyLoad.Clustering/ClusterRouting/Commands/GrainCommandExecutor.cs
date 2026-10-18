@@ -54,10 +54,17 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
             stage = GrainFailureStage.ReplyEncoding;
             await ObservePhaseAsync(request, GrainRequestPhase.SubmitReturned, context, operationToken).ConfigureAwait(true);
             var reply = GrainReplyFactory.Operation(result: result, cancellationToken: operationToken, options: options);
-            return work is null || reply.Error is not null ? reply : reply with
+            if (work is null || reply.Error is not null)
+            {
+                return reply;
+            }
+            reply = reply with
             {
                 WorkProof = NativeCommandWorkAdmission.Capture(request, work, principal.PolicyEpoch)
             };
+            await NativeCommandResultWorkBinding.BindBeforePublicationAsync(database, coordinator, clock,
+                request, reply, work, operationToken).ConfigureAwait(true);
+            return reply;
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
         {

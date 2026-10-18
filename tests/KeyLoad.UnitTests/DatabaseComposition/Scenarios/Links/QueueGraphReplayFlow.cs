@@ -24,16 +24,16 @@ internal static class QueueGraphReplayFlow
         var reverseCommand = new CommandRequest(Guid.NewGuid(), db.Partition,
             [new GraphToQueueMutation(QueueGraphIdentityState.Queue, QueueGraphIdentityState.Graph,
                 source.From, QueueGraphReplayState.ReversePrefix)]);
-        var reverse = await QueueGraphIdentityFlow.CompileAsync(db.Database, reverseCommand, source.Healthy.EvaluatedAt.AddSeconds(1));
+        var reverse = await QueueGraphIdentityFlow.CompileAsync(db.Database, reverseCommand, new DateTimeOffset(source.Healthy.Timestamp).AddSeconds(1));
         var receipt = db.Database.Apply(reverse).Get<CommitReceipt>();
-        await QueueGraphReplayAssertions.ReverseReceiptAsync(source, db.Store, reverse.Id, receipt);
+        await QueueGraphReplayAssertions.ReverseReceiptAsync(source, db.Store, reverse.CommandId, receipt);
         var continuation = DatabaseCompositionExpectedReferences.Capture(db,
             new(db.Partition, QueueGraphIdentityState.Collection, QueueGraphReplayState.Continuation));
         var next = await QueueGraphIdentityFlow.CompileAsync(db.Database, new(Guid.NewGuid(), db.Partition,
             [new PutDocument(QueueGraphIdentityState.Collection, QueueGraphReplayState.Continuation,
                 QueueGraphReplayState.ContinuationJson),
                 new GraphToQueueMutation(QueueGraphIdentityState.Queue, QueueGraphIdentityState.Graph,
-                    source.From, QueueGraphReplayState.NextPrefix)]), reverse.EvaluatedAt.AddSeconds(1));
+                    source.From, QueueGraphReplayState.NextPrefix)]), new DateTimeOffset(reverse.Timestamp).AddSeconds(1));
         var state = new QueueGraphReplayState(source, reverse, NativeSerialization.Serialize(receipt), next, continuation);
         await QueueGraphReplayAssertions.ReplaysAsync(state, db.Database, db.Store, continued: false);
         var reference = from ? source.First.Reference : source.Second.Reference;

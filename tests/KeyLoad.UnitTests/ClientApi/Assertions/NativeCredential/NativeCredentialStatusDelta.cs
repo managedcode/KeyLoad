@@ -22,9 +22,9 @@ internal static class NativeCredentialStatusDelta
         }
         var actual = NativeCredentialStatusAssertions.Capture(state);
         await NativeCredentialStatusAssertions.RequireRowsAsync(rows, actual.RowHashes);
-        await Assert.That(actual.Journal.LastIndex).IsEqualTo(checked(before.Journal.LastIndex + P.First));
-        await Assert.That(actual.Journal.CommittedIndex).IsEqualTo(actual.Journal.LastIndex);
-        await Assert.That(actual.Journal.Term).IsEqualTo(before.Journal.Term);
+        await Assert.That(actual.Cut.AppliedPosition).IsEqualTo(checked(before.Cut.AppliedPosition + P.First));
+        await Assert.That(actual.Cut.StorePosition).IsEqualTo(checked(before.Cut.StorePosition + P.First));
+        await Assert.That(entry.CanonicalSequence).IsEqualTo(actual.Cut.AppliedPosition);
     }
 
     private static void Put(Dictionary<string, string> rows, byte[] key, byte[] value)

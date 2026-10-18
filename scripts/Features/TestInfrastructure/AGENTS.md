@@ -1,13 +1,14 @@
-# TestInfrastructure local image tooling
+# TestInfrastructure tooling
 
 ## Purpose, entry points and ownership
 
-- This slice owns only the explicitly selected local cluster test-image producer and its bounded ownership receipts.
-- Never create Docker database nodes here; only the Aspire-owned cluster child AppHost composes node resources.
-- Do not consume or synthesize GitHub source/run identities, registry manifests, qualification receipts, or benchmark evidence.
-- Hash the actual supported Dockerfile context inputs and fail closed on unsupported ignore rules, links, input mutation, excessive files/bytes, ambiguous Docker identity, and unknown producer actions.
-- Own only the unique image tag supplied by the Aspire AppHost. Cleanup must revalidate source/invocation labels and image ID, prove no matching container exists, and invoke image removal without force/prune. Preserve receipts and all unrelated Docker resources.
-- Every subprocess has a bounded deadline, bounded drained output, cancellation settlement, and joined readers/process before the producer exits.
+- Owns `run-tests.mjs`, the bounded argument selector for the native TUnit entry.
+- C# test fixtures own Aspire startup, readiness, discovered endpoints and joined teardown.
+- `KeyLoad.AppHost` starts native KeyLoad project processes and required Azurite resources.
+- `KeyLoad.LoadTests.AppHost` owns selected comparison infrastructure. Client code executes workloads and measurements outside the resource graph.
+- Normal builds and test startup never publish a KeyLoad container. Explicit release delivery uses the .NET SDK `PublishContainer` target.
+- AppHost cleanup removes only resources created for its session, including after failures and cancellation.
+- Preserve original native test, process and coverage evidence; do not claim container identities for native processes.
 
 ## Boundaries and protected risks
 

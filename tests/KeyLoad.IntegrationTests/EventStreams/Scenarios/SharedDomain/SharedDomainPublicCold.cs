@@ -14,15 +14,15 @@ internal static class SharedDomainPublicCold
         string[] nodes = [McpCallerProtocol.Node1, McpCallerProtocol.Node2, McpCallerProtocol.Node3];
         foreach (var node in nodes)
         {
-            await ServerFailureObserver.ObserveAsync(() => fixture.KillContainerAsync(node, ColdScenario, token), failures).ConfigureAwait(false);
+            await ServerFailureObserver.ObserveAsync(() => fixture.KillServerAsync(node, ColdScenario, token), failures).ConfigureAwait(false);
         }
         foreach (var node in nodes)
         {
-            await ServerFailureObserver.ObserveAsync(() => fixture.BeginContainerRestartAsync(node, token), failures).ConfigureAwait(false);
+            await ServerFailureObserver.ObserveAsync(() => fixture.BeginProcessRestartAsync(node, token), failures).ConfigureAwait(false);
         }
         foreach (var node in nodes)
         {
-            await ServerFailureObserver.ObserveAsync(() => fixture.RestartContainerAsync(node, token), failures).ConfigureAwait(false);
+            await ServerFailureObserver.ObserveAsync(() => fixture.RestartServerAsync(node, token), failures).ConfigureAwait(false);
         }
         foreach (var node in nodes)
         {

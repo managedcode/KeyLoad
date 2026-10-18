@@ -1,4 +1,3 @@
-using KeyLoad.AppHost.Features.CodeQuality;
 
 namespace KeyLoad.UnitTests.Features.CodeQuality;
 

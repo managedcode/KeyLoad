@@ -44,7 +44,7 @@ internal static class AtomicTriadOutboxFlow
             {
                 CommandId = Guid.NewGuid()
             };
-            var healthy = AtomicTriadOutboxFixture.Operation(command);
+            var healthy = AtomicTriadOutboxFixture.Operation(engine, command);
             var result = engine.ApplyEmbedded(healthy, token);
             await AtomicTriadOutboxCommitted.RequireAsync(engine, store, command, result.Get<CommitReceipt>());
             await AtomicTriadOutboxImage.ReplayAsync(engine, store, healthy, result, token);
@@ -68,12 +68,12 @@ internal static class AtomicTriadOutboxFlow
     {
         AtomicTriadOutboxFixture.Configure(source);
         var id = Guid.NewGuid();
-        var seed = AtomicTriadOutboxFixture.Operation(new CommandRequest(id, source.Partition,
+        var seed = AtomicTriadOutboxFixture.Operation(source.Database, new CommandRequest(id, source.Partition,
             [new PutDocument(AtomicTriadOutboxFixture.Collection, "seed", "{\"number\":1}", 0L)]));
         var seeded = source.Database.ApplyEmbedded(seed, token);
         seeded.Get<CommitReceipt>();
         var command = AtomicTriadOutboxFixture.Command(source.Partition, rotation);
-        var operation = AtomicTriadOutboxFixture.Operation(command);
+        var operation = AtomicTriadOutboxFixture.Operation(source.Database, command);
         var image = AtomicTriadOutboxImage.Domain(source.Store, source.Partition);
         var refusal = source.Database.ApplyEmbedded(operation, token);
         await AtomicTriadOutboxImage.ExactAsync(refusal,
@@ -83,7 +83,7 @@ internal static class AtomicTriadOutboxFlow
         await AtomicTriadOutboxImage.AbsentAsync(source.Database, source.Partition);
         await AtomicTriadOutboxImage.ReplayAsync(source.Database, source.Store, operation, refusal, token);
         var purgeId = Guid.NewGuid();
-        return new(command, operation, refusal, seed, seeded, AtomicTriadOutboxFixture.Operation(OperationKind.PurgeOutbox,
+        return new(command, operation, refusal, seed, seeded, AtomicTriadOutboxFixture.Operation(source.Database, OperationKind.PurgeOutbox,
             purgeId, new PurgeOutboxRequest(purgeId, source.Partition, AtomicTriadOutboxFixture.SeedCount)));
     }
 }

@@ -4,7 +4,18 @@ A provider-owned, runtime-only native snapshot lease ([ADR-097](../../ADR/ADR-09
 
 The silo-local Grain Service reads the canonical sequence directly from the supplied read view. An absent sequence record denotes the initial zero cut; malformed bytes retain their native rejection. It captures the store identity and any local storage position under that same gate. A callback must not call `DatabaseEngine.LastApplied` or enter another `Store.Read`, because those operations acquire the store gate again.
 
-The native index builder scans while the canonical read gate is held, and copying an entire database would add unbounded retained memory. ZoneTree 1.9.8 supports a native snapshot iterator which excludes later writes and pins its segments, but the runtime shutdown does not track escaped iterators. The chosen design is one finite provider-owned lease with copied callback bytes and explicit shutdown joining. It introduces no other database and does not move storage ownership.
+The native index builder scans while the canonical read gate is held, and copying an entire database would add unbounded retained memory. The pinned ZoneTree engine supports a native snapshot iterator which excludes later writes and pins its segments, but the runtime shutdown does not track escaped iterators. The chosen design is one finite provider-owned lease with copied callback bytes and explicit shutdown joining. It introduces no other database and does not move storage ownership.
+
+`DatabaseEngine.ReadStoredCommand` selects the exact persisted outcome by principal,
+command identity and atomic scope under one synchronous read gate. It validates
+the current principal, original content fingerprint, outcome incarnation and
+scope before returning the owned prepared command and its canonical sequence.
+A fresh identity with no persisted outcome returns null. Cancellation is checked
+inside the gate before lookup and before returning; this does not interrupt an
+already running native lock acquisition. The retained-command cases use 65 real
+commits, unchanged whole-store images, exact command bytes, changed-content
+refusal, prepared-command corruption and repair, healthy follow-up and two cold
+opens. Full unit execution and delivered-source qualification remain open.
 
 ## Concurrent document and index scan
 

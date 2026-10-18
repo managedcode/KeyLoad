@@ -1,9 +1,6 @@
 using KeyLoad.AppHost.Features.ClusterReplication;
-using KeyLoad.AppHost.Features.CodeQuality;
 using KeyLoad.AppHost.Features.StorageRecovery;
 using KeyLoad.AppHost.Features.TestInfrastructure;
-using KeyLoad.AppHost.Features.TestInfrastructure.Validation;
-using KeyLoad.Comparisons;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
@@ -13,12 +10,15 @@ namespace KeyLoad.AppHost.Hosting;
 [ConfigurationBinding]
 internal static class AppHostControlOptionsRegistration
 {
-    internal const string InvalidContainerFaultSelection = "Container fault commands require an explicit ephemeral CLUSTER test profile.";
+    internal const string InvalidProcessFaultSelection = "Process fault commands require an explicit ephemeral functional or selected KeyLoad load profile.";
     private const string BenchmarkSection = "Benchmarks";
     private const string LoggerModelControlSetting = "KeyLoadTests:LoggerModelControl";
     private const string LoggerModelControlEnabledValue = "true";
     private const string EphemeralSetting = "KeyLoad:Ephemeral";
     private const string BenchmarksEnabledSetting = "Benchmarks:Enabled";
+    private const string BenchmarkTargetSetting = "Benchmarks:Target";
+    private const string BenchmarkSessionSetting = "Benchmarks:Session";
+    private const string BenchmarkDataRootSetting = "Benchmarks:DataRoot";
     private const string DataRootSetting = "KeyLoad:DataRoot";
     private const string InvalidLoggerModelControl = "The C1 logger model control selection is invalid.";
     private const string FunctionalNodeCountSetting = "KeyLoadTests:FunctionalNodeCount";
@@ -26,18 +26,16 @@ internal static class AppHostControlOptionsRegistration
     private const string InvalidFunctionalTopology = "Functional topology requires a positive number of real ephemeral silos and an exclusive owned data root.";
     private const int SectionPresenceCount = 1;
 
-    internal static IOptions<AppHostControlOptions> Bind(IConfiguration configuration, IOptions<TestExecutionOptions> execution,
-        IOptions<NativeCoverageExecutionOptions> coverage)
+    internal static IOptions<AppHostControlOptions> Bind(IConfiguration configuration)
     {
         var options = new OptionsManager<AppHostControlOptions>(
             new OptionsFactory<AppHostControlOptions>([new ConfigureOptions<AppHostControlOptions>(value =>
             {
-                value.Tests = TestSuiteSettings.Read(configuration, execution, coverage);
                 value.Ephemeral = configuration.GetValue<bool>(EphemeralSetting);
                 value.BenchmarksEnabled = configuration.GetValue<bool>(BenchmarksEnabledSetting);
-                value.TargetSelected = configuration[BenchmarkSessionSelection.TargetSetting] is not null;
+                value.TargetSelected = configuration[BenchmarkTargetSetting] is not null;
                 value.ComparisonSelectorsPresent = HasSection(configuration, BenchmarkSection);
-                value.ContainerFaults = ReadContainerFaults(configuration, value);
+                value.ProcessFaults = ReadProcessFaults(configuration, value);
                 value.LoggerModelControl = ReadLoggerModelControl(configuration, value);
                 value.FunctionalColdReopen = FunctionalColdReopenProfile.Read(configuration, value);
                 value.FunctionalNodeCount = ReadFunctionalNodeCount(configuration, value);
@@ -60,24 +58,26 @@ internal static class AppHostControlOptionsRegistration
             || configuration[EphemeralSetting] != LoggerModelControlEnabledValue
             || string.IsNullOrWhiteSpace(configuration[DataRootSetting])
             || !Path.IsPathFullyQualified(configuration[DataRootSetting]!)
-            || options.Tests is not null || options.BenchmarksEnabled
+            || options.BenchmarksEnabled
             || options.TargetSelected || options.ComparisonSelectorsPresent
-            || options.ContainerFaults && !options.FunctionalColdReopen
-            || options.LoggerModelControl
-            || TestSuiteSelectionValidator.HasRetiredBenchmarkSelection(configuration))
+            || options.ProcessFaults && !options.FunctionalColdReopen
+            || options.LoggerModelControl)
         {
             throw new InvalidOperationException(InvalidFunctionalTopology);
         }
         return count;
     }
 
-    private static bool ReadContainerFaults(IConfiguration configuration, AppHostControlOptions options)
+    private static bool ReadProcessFaults(IConfiguration configuration, AppHostControlOptions options)
     {
-        var enabled = configuration.GetValue<bool>(ContainerFaultCommandProtocol.EnabledSetting);
-        if (enabled && (!options.Ephemeral || options.BenchmarksEnabled || options.TargetSelected
-            || options.ComparisonSelectorsPresent))
+        var enabled = configuration.GetValue<bool>(ProcessFaultCommandProtocol.EnabledSetting);
+        var selectedLoad = options.BenchmarksEnabled && configuration[BenchmarkTargetSetting] == "KeyLoad"
+            && configuration.GetValue<bool>(BenchmarkSessionSetting)
+            && configuration[BenchmarkDataRootSetting] is { } root && Path.IsPathFullyQualified(root);
+        if (enabled && (!options.Ephemeral || !selectedLoad && (options.BenchmarksEnabled || options.TargetSelected
+            || options.ComparisonSelectorsPresent)))
         {
-            throw new InvalidOperationException(InvalidContainerFaultSelection);
+            throw new InvalidOperationException(InvalidProcessFaultSelection);
         }
         return enabled;
     }
@@ -94,11 +94,8 @@ internal static class AppHostControlOptionsRegistration
 
         if (selected != LoggerModelControlEnabledValue
             || hasNestedSelection
-            || options.Tests is not null
             || options.BenchmarksEnabled
             || options.TargetSelected || options.ComparisonSelectorsPresent
-            || TestSuiteSelectionValidator.HasRetiredBenchmarkSelection(configuration)
-            || configuration[LocalClusterImageRequest.EnabledSetting] == LoggerModelControlEnabledValue
             || configuration[EphemeralSetting] != LoggerModelControlEnabledValue
             || string.IsNullOrWhiteSpace(configuration[DataRootSetting]))
         {

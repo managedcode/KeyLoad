@@ -1,3 +1,4 @@
+using KeyLoad.UnitTests.Features.ResourceExecution;
 using KeyLoad.Core.Features.Search;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
@@ -12,8 +13,8 @@ internal static class NativeTextBm25EligibilityTrial
         var noise = Mutation(flow, new PutDocument("orders", "noise", "{\"text\":\"quiet\"}"));
         var original = flow.Capture(null);
         var receipt = flow.Publish(original);
-        await Assert.That(receipt.Error).IsNull();
-        var entry = NativeSerialization.Serialize(flow.Owner.Entry(original.Id));
+        await Assert.That(Errors.Code(receipt.Problem)).IsNull();
+        var entry = NativeSerialization.Serialize(flow.Owner.Entry(original.CommandId));
         var head = NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((original).Value!.Input.Span).Current;
         var raw = Bm25ColdInvalidationAssertions.HeadBytes(flow.Owner, head);
         await Assert.That(head.Statistics.DocumentCount).IsEqualTo(3);
@@ -26,7 +27,7 @@ internal static class NativeTextBm25EligibilityTrial
         await NativeTextBm25EligibilityPages.RequireAsync(flow, false, true, false);
         var deleted = Mutation(flow, new DeleteDocument("orders", "noise", 1));
         await NativeTextBm25EligibilityPages.RequireAsync(flow, false, true, false);
-        await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(raw, Bm25ColdInvalidationAssertions.HeadBytes(flow.Owner, head));
+        await NativeReplayResultAssertions.BytesAsync(raw, Bm25ColdInvalidationAssertions.HeadBytes(flow.Owner, head));
         await Bm25ColdInvalidationAssertions.MutationReplayAsync(flow, [second, noise, patch, deleted]);
         await Bm25ColdInvalidationAssertions.ReplayAsync(flow, original, receipt, entry);
         await NativeTextBm25EligibilityPages.RequireAsync(flow, false, true, false);

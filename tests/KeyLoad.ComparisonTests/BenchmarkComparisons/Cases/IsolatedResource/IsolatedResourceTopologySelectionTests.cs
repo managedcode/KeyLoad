@@ -1,5 +1,5 @@
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.AppHost.Features.BenchmarkComparisons;
+using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
@@ -57,8 +57,9 @@ internal sealed class IsolatedResourceTopologySelectionTests
     private static async Task VerifyUnallocatedAsync(IsolatedResourceTopologyFixture fixture)
     {
         var resources = fixture.Build();
-        await Assert.That(resources.Length).IsEqualTo(1);
-        await Assert.That(resources[0].Name).IsEqualTo(IsolatedResourceTopologyFixture.RunnerName);
+        await Assert.That(resources).IsEmpty();
+        await Assert.That(fixture.Projects).IsEmpty();
+        await Assert.That(fixture.Context.Client.Values).IsEmpty();
         await Assert.That(fixture.Context.Builder.Resources.OfType<ParameterResource>().Any()).IsFalse();
         await Assert.That(Directory.Exists(fixture.Context.Root)).IsFalse();
     }

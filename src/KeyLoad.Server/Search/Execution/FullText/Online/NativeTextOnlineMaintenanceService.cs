@@ -46,45 +46,65 @@ internal sealed partial class NativeTextOnlineMaintenanceService : INativeOnline
 
     public Task<OnlineTextCapabilityResult> ExecuteAsync(PrincipalRecord principal,
         OnlineTextCapabilityRequest request, DateTimeOffset originalExpiry, CancellationToken token)
-        => worker.RunAsync(() => ExecuteOwnedAsync(principal, request, originalExpiry, null, null, token));
+        => worker.RunAsync(() => ExecuteOwnedAsync(principal, request, originalExpiry, null, token));
 
     public Task<OnlineTextCapabilityResult> ExecuteBoundAsync(PrincipalRecord principal,
         OnlineTextCapabilityRequest request, DateTimeOffset originalExpiry,
         IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
-        var parent = NativeTextMaintenanceBinding.Parent(binding);
-        var budget = new ReadExecutionBudget(options.Core.DatabaseLimits, clock, parent.Cancellation);
-        budget.ConstrainLifetime(originalExpiry);
-        budget.AttachResourceLifetimeBinding(parent);
-        return worker.RunAsync(() => ExecuteOwnedAsync(principal, request, originalExpiry, budget, parent, token));
+        ArgumentNullException.ThrowIfNull(binding);
+        return worker.RunAsync(() => ExecuteOwnedAsync(principal, request, originalExpiry, binding, token));
     }
 
     private async Task<OnlineTextCapabilityResult> ExecuteOwnedAsync(PrincipalRecord principal,
-        OnlineTextCapabilityRequest request, DateTimeOffset expiry, ReadExecutionBudget? originalBudget,
-        IResourceLifetimeWorkBinding? originalBinding, CancellationToken token)
+        OnlineTextCapabilityRequest request, DateTimeOffset expiry,
+        IResourceLifetimeWorkBinding? binding, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         await catalog.ObserveCompletedRetirementsAsync().ConfigureAwait(false);
-        if (!principal.ClusterAdministrator || request.SessionId == Guid.Empty
+        if (!principal.ClusterAdministrator || principal.Revoked || request.SessionId == Guid.Empty
             || request.Request.NodeId != database.Store.Identity.NodeId)
         {
             throw NativeTextErrors.Ownership();
         }
-        if (request.Kind == OnlineTextCapabilityKind.ResolveOriginal)
+        var session = request.Kind == OnlineTextCapabilityKind.ResolveOriginal ? null : sessions.Require(request.SessionId);
+        var work = session?.Work ?? new NativeMaintenanceSessionWork(options.Core.DatabaseLimits, clock, expiry, shutdown.Token);
+        var retained = session is not null;
+        try
         {
-            var resolved = await ResolveCommittedOriginalAsync(principal, request, expiry, originalBudget, token).ConfigureAwait(false);
-            if (resolved is not null)
+            if (!retained)
             {
-                return resolved;
+                sessions.BeginWork(request.SessionId, work);
+            }
+            using var stage = work.EnterStage(binding, token);
+            work.RequireExpiry(expiry);
+            if (request.Kind == OnlineTextCapabilityKind.ResolveOriginal)
+            {
+                var resolved = await ResolveCommittedOriginalAsync(principal, request, expiry, work.Budget, token).ConfigureAwait(false);
+                if (resolved is not null)
+                {
+                    return resolved;
+                }
+                session = await sessions.AddOwnedAsync(new(request.SessionId, request.Request, principal.Id, expiry, work))
+                    .ConfigureAwait(false);
+                retained = true;
+            }
+            return await ExecuteStageAsync(session ?? throw NativeTextErrors.Ownership(), principal, request, expiry)
+                .ConfigureAwait(false);
+        }
+        finally
+        {
+            if (!retained)
+            {
+                work.DisposeAfterStage();
+                sessions.RemoveWorkWithoutSession(request.SessionId, work);
             }
         }
-        var session = RequireSession(principal, request, expiry, originalBudget);
-        if (originalBinding is not null)
-        {
-            session.Budget.RequireResourceLifetimeBinding(originalBinding);
-        }
-        using var stageCancellation = session.LinkStageCancellation(token);
-        using var stage = session.Budget.EnterStageCancellation(stageCancellation.Token);
+    }
+
+    private async Task<OnlineTextCapabilityResult> ExecuteStageAsync(NativeTextOnlineSession session, PrincipalRecord principal,
+        OnlineTextCapabilityRequest request, DateTimeOffset expiry)
+    {
         session.Require(request.SessionId, request.Request, principal.Id, expiry);
         if (request.Kind == OnlineTextCapabilityKind.SettleCheckpoint)
         {
@@ -99,34 +119,11 @@ internal sealed partial class NativeTextOnlineMaintenanceService : INativeOnline
         {
             lock (session.Gate)
             {
-                return NativeTextOnlineStageExecutor.Execute(database, root, resources, options, clock, RequireCurrentAuthority, principal, session, request);
+                return NativeTextOnlineStageExecutor.Execute(database, root, resources, options, clock,
+                    RequireCurrentAuthority, principal, session, request);
             }
         }
         return NativeTextOnlineCapabilityResult.Create(session);
-    }
-
-    private NativeTextOnlineSession RequireSession(PrincipalRecord principal,
-        OnlineTextCapabilityRequest request, DateTimeOffset expiry, ReadExecutionBudget? originalBudget)
-    {
-        if (request.Kind != OnlineTextCapabilityKind.ResolveOriginal)
-        {
-            return sessions.Require(request.SessionId);
-        }
-        var session = new NativeTextOnlineSession(request.SessionId, request.Request, principal.Id,
-            expiry, options, clock, shutdown.Token, originalBudget);
-        try
-        {
-            sessions.Add(session);
-        }
-        catch (Exception primary)
-        {
-            var failures = new List<Exception> { primary };
-            ServerFailureObserver.Observe(() => session.CloseCommandAdmissionAndJoinAsync().GetAwaiter().GetResult(), failures);
-            ServerFailureObserver.Observe(session.DisposeAfterJoinedNativeOwners, failures);
-            ServerFailureObserver.ThrowIfAny(failures);
-            throw;
-        }
-        return session;
     }
 
     private void RequireCurrentAuthority(NativeTextOnlineSession session)

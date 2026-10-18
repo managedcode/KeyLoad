@@ -1,5 +1,5 @@
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.AppHost.Features.BenchmarkComparisons;
+using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
@@ -21,20 +21,20 @@ internal sealed class IsolatedResourceTopologyKeyLoadTests
     [Test]
     [Arguments(1)]
     [Arguments(3)]
-    public async Task SelectedKeyLoadBuildsTheExpectedNativeSilosAndOneRunner(int count)
+    public async Task SelectedKeyLoadBuildsNativeSilosAndDiscoveredClientEndpoints(int count)
     {
         await using var fixture = new IsolatedResourceTopologyFixture(Target, count);
         IsolatedKeyLoadResources.Add(fixture.Context);
         var resources = fixture.Build();
-        var runner = resources.Single(item => item.Name == IsolatedResourceTopologyFixture.RunnerName);
-        var nodes = resources.Where(item => item != runner).ToArray();
-        await Assert.That(resources.Length).IsEqualTo(count + 1);
+        var runner = fixture.Context.Client;
+        var nodes = fixture.Projects;
+        await Assert.That(nodes.Length).IsEqualTo(count);
+        await Assert.That(resources.Select(resource => resource.Name)).IsEquivalentTo(new[] { "orleans-storage" });
         await Assert.That(nodes.Select(item => item.Name).ToArray())
             .IsEquivalentTo(Enumerable.Range(1, count).Select(index => "node" + index).ToArray());
         await IsolatedResourceTopologyFixture.VerifyWaitsAsync(runner, nodes);
         var runnerEnvironment = await IsolatedResourceTopologyFixture.EnvironmentAsync(runner);
-        await Assert.That(runnerEnvironment[IsolatedResourceTopologyFixture.NativePrefix + "Image"])
-            .IsEqualTo(IsolatedResourceTopologyFixture.ServerImage);
+        await Assert.That(runnerEnvironment.ContainsKey(IsolatedResourceTopologyFixture.NativePrefix + "Image")).IsFalse();
         await Assert.That(runnerEnvironment[AdminSetting]).IsEqualTo("{" + AdminParameter + ".value}");
         foreach (var node in nodes)
         {
@@ -50,11 +50,13 @@ internal sealed class IsolatedResourceTopologyKeyLoadTests
         }
     }
 
-    private static async Task VerifySiloAsync(IsolatedResourceTopologyFixture fixture, ContainerResource node, int count)
+    private static async Task VerifySiloAsync(IsolatedResourceTopologyFixture fixture, ProjectResource node, int count)
     {
-        await IsolatedResourceTopologyFixture.VerifyPrivateDataAsync(node, fixture.Context.Root, "keyload");
-        await IsolatedResourceTopologyFixture.VerifyUserAsync(node);
         var environment = await IsolatedResourceTopologyFixture.EnvironmentAsync(node);
+        var directory = Path.GetFullPath(Path.Combine(fixture.Context.Root, "native", "keyload", node.Name));
+        await Assert.That(environment["KeyLoad__DataDirectory"]).IsEqualTo(directory);
+        await Assert.That(Directory.Exists(directory)).IsTrue();
+        await Assert.That(node.GetProjectMetadata().ProjectPath).EndsWith("KeyLoad.Server.csproj");
         await Assert.That(environment[SiloNameSetting]).IsEqualTo(node.Name);
         await Assert.That(environment[SiloCountSetting]).IsEqualTo(count.ToString(System.Globalization.CultureInfo.InvariantCulture));
         await Assert.That(environment[CopyCountSetting]).IsEqualTo(count.ToString(System.Globalization.CultureInfo.InvariantCulture));
@@ -66,8 +68,6 @@ internal sealed class IsolatedResourceTopologyKeyLoadTests
         await Assert.That(environment[HttpPrefix + nameof(HttpAdmissionLimits.MaxTenantControlRequests)]).IsEqualTo(RequestCount);
         await Assert.That(environment[HttpPrefix + nameof(HttpAdmissionLimits.MaxPrincipalControlRequests)]).IsEqualTo(RequestCount);
         await Assert.That(environment[HttpPrefix + nameof(HttpAdmissionLimits.MaxReservedBytes)]).IsEqualTo(ReservedBytes);
-        var image = node.Annotations.OfType<ContainerImageAnnotation>().Single();
-        await Assert.That(image.SHA256).IsEqualTo(new string('a', 64));
-        await Assert.That(node.Annotations.OfType<ContainerNetworkAliasAnnotation>().Single().Alias).IsEqualTo(node.Name);
+        await Assert.That(node.Annotations.OfType<EndpointAnnotation>().Single(endpoint => endpoint.Name == HttpEndpoint).IsProxied).IsFalse();
     }
 }

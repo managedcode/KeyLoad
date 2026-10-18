@@ -86,9 +86,9 @@ internal sealed class ZoneTreePointCacheFillLifetimeTests
         {
             await entered.Task.WaitAsync(WaitLimit, TimeProvider.System);
             var before = await Task.Run(store.GetPointCacheDiagnostics).WaitAsync(WaitLimit, TimeProvider.System);
-            var fallback = store.Read(view => view.ReadOwnedValue(KeyB));
+            var nativeValue = store.Read(view => view.ReadOwnedValue(KeyB));
             var pressure = await Task.Run(store.GetPointCacheDiagnostics).WaitAsync(WaitLimit, TimeProvider.System);
-            await Assert.That(fallback).IsEquivalentTo(ValueB);
+            await Assert.That(nativeValue).IsEquivalentTo(ValueB);
             await Assert.That(pressure.RetiredPinnedEntries).IsEqualTo(1);
             await Assert.That(pressure.AdmissionBypasses).IsEqualTo(before.AdmissionBypasses + 1);
             await Assert.That(pressure.RetainedBytes).IsEqualTo(before.RetainedBytes);

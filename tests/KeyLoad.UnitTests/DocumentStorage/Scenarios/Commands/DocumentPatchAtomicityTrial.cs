@@ -21,12 +21,12 @@ internal static class DocumentPatchAtomicityTrial
         var before = DocumentPatchAtomicityState.Read(owner);
         var operation = Batch(owner, fault, secondRevision: 1);
         var failed = owner.Submit(operation);
-        var retained = owner.Entry(operation.Id);
+        var retained = owner.Entry(operation.CommandId);
         await DocumentPatchAtomicityAssertions.BytesAsync(NativeSerialization.Serialize(operation),
             NativeSerialization.Serialize(retained.PreparedCommand));
         await DocumentPatchAtomicityAssertions.FailureAsync(failed, fault);
         await before.RequireDomainAsync(DocumentPatchAtomicityState.Read(owner));
-        await Assert.That(retained.CanonicalSequence).IsEqualTo(before.LastIndex + 1L);
+        await Assert.That(retained.CanonicalSequence).IsEqualTo(before.Applied + 1L);
         await DocumentPatchAtomicityAssertions.ReplayAsync(owner, retained, failed);
         var failedState = DocumentPatchAtomicityState.Read(owner);
         await owner.ReopenAsync();
@@ -42,7 +42,7 @@ internal static class DocumentPatchAtomicityTrial
         await DocumentPatchAtomicityAssertions.ReplayAsync(owner, retained, failed);
         var fresh = Batch(owner, fault, secondRevision: 2);
         var healthy = owner.Submit(fresh);
-        var healthyEntry = owner.Entry(fresh.Id);
+        var healthyEntry = owner.Entry(fresh.CommandId);
         await DocumentPatchAtomicityAssertions.BytesAsync(NativeSerialization.Serialize(fresh),
             NativeSerialization.Serialize(healthyEntry.PreparedCommand));
         await DocumentPatchAtomicityAssertions.HealthyAsync(owner, fault, healthyEntry, healthy, originalTail + 3L);

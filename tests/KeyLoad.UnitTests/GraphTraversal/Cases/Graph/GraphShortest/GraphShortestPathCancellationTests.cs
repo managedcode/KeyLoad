@@ -54,7 +54,7 @@ internal sealed class GraphShortestPathCancellationTests
         var probeBudget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
         _ = database.Database.ShortestPath(GraphShortestPathTestSupport.RootPrincipal, probeRequest, probeBudget);
         var sourcePosition = database.Store.Position;
-        var image = GraphShortestPathFullStoreImage.Bytes(database.Store);
+        var image = CanonicalStoreImage.Bytes(database.Store);
         var before = database.Store.GetReadDiagnostics();
         using var cancellation = new CancellationTokenSource();
         var clock = new GraphShortestPathObservedWorkClock();
@@ -80,13 +80,13 @@ internal sealed class GraphShortestPathCancellationTests
         await Assert.That(budget.ReadBytes).IsGreaterThan(probeBudget.ReadBytes);
         await Assert.That(database.Store.GetReadDiagnostics().RangeExaminedBytes).IsGreaterThan(before.RangeExaminedBytes);
         await Assert.That(database.Store.Position).IsEqualTo(sourcePosition);
-        await Assert.That(GraphShortestPathFullStoreImage.Bytes(database.Store)).IsEquivalentTo(image, CollectionOrdering.Matching);
+        await Assert.That(CanonicalStoreImage.Bytes(database.Store)).IsEquivalentTo(image, CollectionOrdering.Matching);
         var healthy = database.Database.ShortestPath(GraphShortestPathTestSupport.RootPrincipal, request,
             cancellationToken: TestContext.Current!.Execution.CancellationToken);
         var expected = new GraphShortestPathResult(1, false, null, [], [], sourcePosition);
         await Assert.That(JsonDefaults.Serialize(healthy).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await Assert.That(database.Store.Position).IsEqualTo(sourcePosition);
-        await Assert.That(GraphShortestPathFullStoreImage.Bytes(database.Store)).IsEquivalentTo(image, CollectionOrdering.Matching);
+        await Assert.That(CanonicalStoreImage.Bytes(database.Store)).IsEquivalentTo(image, CollectionOrdering.Matching);
     }
 
     private static void PersistCandidates(TestDatabase database,

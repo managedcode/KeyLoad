@@ -66,7 +66,7 @@ internal sealed class SampleMetadataIntegrityFixture : IDisposable
     {
         var id = Guid.NewGuid();
         var command = new CommandRequest(id, Partition, [mutation]);
-        return new(id, OperationKind.Batch, SampleAggregateTestData.RootPrincipal,
+        return Owner.CreateCommand(OperationKind.Batch, id, SampleAggregateTestData.RootPrincipal,
             Owner.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(command, JsonDefaults.Options));
     }
 

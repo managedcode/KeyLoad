@@ -91,7 +91,6 @@ internal sealed class DocumentMutationImageTests
         await Assert.That(actual.Incarnation).IsEqualTo(expected.Incarnation);
         await Assert.That(actual.AtomicPartitionId).IsEqualTo(expected.AtomicPartitionId);
         await Assert.That(actual.Position).IsEqualTo(expected.Position);
-        await Assert.That(actual.OwnershipEpoch).IsEqualTo(expected.OwnershipEpoch);
     }
 
     private static async Task AssertMutationReceiptEqual(MutationReceipt actual, MutationReceipt expected)

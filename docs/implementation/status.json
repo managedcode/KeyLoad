@@ -1,7 +1,7 @@
 {
   "updated": "2026-10-18",
   "product": "KeyLoad development preview. Not production ready.",
-  "concept": "Orleans does all clustering and copies data through grain calls; every silo has its own ZoneTree that owns its files; API -> one grain per connected client -> grains call ZoneTree on own or other nodes -> gather -> return. See docs/ADR/ADR-136-native-orleans-partition-ownership.md.",
+  "concept": "Orleans owns all clustering and activation scaling. The API reaches one grain per connected client, logical database/partition grains, storage owners and bounded result aggregation. Shared volumes require one open owner per physical partition without copies; isolated volumes use typed Orleans calls between owners. Shared-volume ownership and distributed partition-query execution are not yet qualified.",
   "qualification": {
     "build": "Not recorded here. Run dotnet build KeyLoad.slnx --configuration Release -warnaserror.",
     "unitTests": "open",
@@ -10,7 +10,9 @@
     "coverage": "unmeasured",
     "performance": "No published claim without authenticated GitHub Benchmarks evidence.",
     "powerLossDurability": "Not proven; process-kill tests do not prove it.",
-    "endurance": "open"
+    "endurance": "open",
+    "sharedVolumeStorage": "open: lazy single-owner lifetime and actual filesystem locking/flush behavior are not implemented and qualified",
+    "distributedPartitionQueries": "open: current full-copy routing is not partition fan-out proof"
   },
   "evidence": "Qualification evidence lives only in GitHub Actions runs and their original artifacts for the exact delivered source.",
   "implementation": "Orleans-native runtime integration is in progress. Complete product qualification is open."

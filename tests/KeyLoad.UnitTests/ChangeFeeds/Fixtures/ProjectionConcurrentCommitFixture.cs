@@ -12,8 +12,8 @@ internal static class ProjectionConcurrentCommitFixture
     {
         var source = await ProjectionConsumerIdentityFixture.SeedAsync(database, token);
         await ProjectionConsumerIdentityAssertions.OriginalBatchAsync(database.Database, source);
-        var first = Complete(source, ProjectionConcurrentCommitAssertions.Effect);
-        var second = Complete(source, changed ? ProjectionConcurrentCommitAssertions.Alternative : ProjectionConcurrentCommitAssertions.Effect);
+        var first = Complete(database.Database, source, ProjectionConcurrentCommitAssertions.Effect);
+        var second = Complete(database.Database, source, changed ? ProjectionConcurrentCommitAssertions.Alternative : ProjectionConcurrentCommitAssertions.Effect);
         var outcomes = await ProjectionConcurrentCommitRace.RunAsync(database.Database, first, second, token);
         var winner = await ProjectionConcurrentCommitAssertions.OutcomesAsync(first, outcomes.First, second, outcomes.Second, changed);
         await ProjectionConcurrentCommitAssertions.DocumentsAsync(database.Database, source, winner, changed, token);
@@ -21,7 +21,7 @@ internal static class ProjectionConcurrentCommitFixture
         await ProjectionConsumerIdentityAssertions.ExactAsync(batch,
             new ProjectionBatch(new(source.Consumer, source.Definition, 2L, false), [], 3L, batch.Token, false));
         var id = Guid.NewGuid();
-        var filtered = ProjectionConsumerIdentityFixture.Operation(OperationKind.CommitProjectionBatch, id,
+        var filtered = ProjectionConsumerIdentityFixture.Operation(database.Database, OperationKind.CommitProjectionBatch, id,
             new CommitProjectionBatchRequest(id, source.Consumer, batch.Token, []));
         var advanced = database.Database.ApplyEmbedded(filtered, token);
         var result = advanced.Get<ProjectionBatchResult>();
@@ -32,10 +32,10 @@ internal static class ProjectionConcurrentCommitFixture
             ProjectionConsumerIdentityAssertions.Image(database.Store), database.Store.Position);
     }
 
-    private static Command<DatabaseCommand> Complete(ProjectionConsumerIdentityState source, string id)
+    private static Command<DatabaseCommand> Complete(DatabaseEngine owner, ProjectionConsumerIdentityState source, string id)
     {
         var command = Guid.NewGuid();
-        return ProjectionConsumerIdentityFixture.Operation(OperationKind.CommitProjectionBatch, command,
+        return ProjectionConsumerIdentityFixture.Operation(owner, OperationKind.CommitProjectionBatch, command,
             new CommitProjectionBatchRequest(command, source.Consumer, source.Batch.Token,
                 [new PutDocument(ProjectionConsumerIdentityFixture.Target, id, ProjectionConcurrentCommitAssertions.Json, 0L)]));
     }

@@ -17,7 +17,7 @@ internal sealed class AtomicTriadStagedClusterColdEvidence
         var repository = ClusterFixtureDiagnostics.FindRepositoryRoot().FullName;
         foreach (var node in QueueProducerClusterProtocol.Nodes)
         {
-            var path = ContainerRuntimeOwnedReceipt.PathFor(repository, scenario, node);
+            var path = ProcessRuntimeOwnedReceipt.PathFor(repository, scenario, node);
             await ReadAsync(path, originals.Add, failures, token);
         }
         ServerFailureObserver.ThrowIfAny(failures);

@@ -24,7 +24,7 @@ internal static class ExclusiveOwnerContentionProfile
             return false;
         }
         if (selected != Enabled || nested || !options.Ephemeral || options.FunctionalNodeCount != RequiredFunctionalSilos
-            || !options.FunctionalColdReopen || !options.ContainerFaults || options.Tests is not null
+            || !options.FunctionalColdReopen || !options.ProcessFaults
             || options.BenchmarksEnabled || options.TargetSelected
             || options.ComparisonSelectorsPresent
             || options.LoggerModelControl)

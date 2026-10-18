@@ -1,6 +1,6 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.AppHost.Features.BenchmarkComparisons;
+using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 using KeyLoad.Comparisons;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -12,12 +12,9 @@ internal sealed class IsolatedResourceTopologyFixture : IAsyncDisposable
     internal const string RunnerName = "comparisons";
     internal const string DataMount = "/data";
     internal const string NativePrefix = "Benchmarks__Native__";
-    internal const string User = "1001:1001";
-    internal const string ServerImage = "ghcr.io/managedcode/keyload-server:model@sha256:"
-        + "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
     private const string TemporaryPrefix = "keyload-isolated-model-";
     private const string SolutionFile = "KeyLoad.slnx";
-    private const string AppHostDirectory = "build/KeyLoad.AppHost";
+    private const string AppHostDirectory = "build/KeyLoad.LoadTests.AppHost";
     private DistributedApplication? application;
 
     internal IsolatedResourceTopologyFixture(string target, int nodes, string? projectDirectory = null)
@@ -27,12 +24,10 @@ internal sealed class IsolatedResourceTopologyFixture : IAsyncDisposable
         var builder = DistributedApplication.CreateBuilder(new DistributedApplicationOptions
         {
             DisableDashboard = true,
-            ProjectDirectory = projectDirectory ?? Path.Combine(RepositoryRoot(), AppHostDirectory),
-            Args = [$"--KeyLoad:ContainerUser={User}", $"--KeyLoad:ContainerImages:Server={ServerImage}"]
+            ProjectDirectory = projectDirectory ?? Path.Combine(RepositoryRoot(), AppHostDirectory)
         });
         var selection = new BenchmarkSessionSelection(target, nodes);
-        var runner = builder.AddContainer(RunnerName, "model-runner", "model");
-        Context = new(builder, selection, runner, root);
+        Context = new(builder, selection, new LoadTestClientSettings(), root);
     }
 
     internal IsolatedResourceContext Context
@@ -42,15 +37,23 @@ internal sealed class IsolatedResourceTopologyFixture : IAsyncDisposable
 
     internal ContainerResource[] Build()
     {
+        LoadTestResourceLifetime.Apply(Context.Builder);
         application = Context.Builder.Build();
         return application.Services.GetRequiredService<DistributedApplicationModel>().Resources
             .OfType<ContainerResource>().ToArray();
     }
 
-    internal static async Task<Dictionary<string, string>> EnvironmentAsync(ContainerResource resource)
+    internal ProjectResource[] Projects => application!.Services.GetRequiredService<DistributedApplicationModel>()
+        .Resources.OfType<ProjectResource>().ToArray();
+
+    internal static Task<Dictionary<string, string>> EnvironmentAsync(LoadTestClientSettings client)
+        => Task.FromResult(client.Values.ToDictionary(pair => pair.Key, pair => pair.Value is IManifestExpressionProvider expression
+            ? expression.ValueExpression : (string)pair.Value, StringComparer.Ordinal));
+
+    internal static async Task<Dictionary<string, string>> EnvironmentAsync(IResource resource)
         => (await ConfigurationAsync(resource)).EnvironmentVariables.ToDictionary();
 
-    internal static async Task<IExecutionConfigurationResult> ConfigurationAsync(ContainerResource resource)
+    internal static async Task<IExecutionConfigurationResult> ConfigurationAsync(IResource resource)
     {
         var result = await ExecutionConfigurationBuilder.Create(resource).WithEnvironmentVariablesConfig()
             .WithArgumentsConfig().BuildAsync(new DistributedApplicationExecutionContext(DistributedApplicationOperation.Publish),
@@ -59,22 +62,14 @@ internal sealed class IsolatedResourceTopologyFixture : IAsyncDisposable
         return result;
     }
 
-    internal static async Task VerifyPrivateDataAsync(ContainerResource resource, string root, string? parent = null)
+    internal static async Task VerifyPrivateDataAsync(ContainerResource resource)
     {
         var mount = resource.Annotations.OfType<ContainerMountAnnotation>().Single(item => item.Target == DataMount);
+        await Assert.That(mount.Type).IsEqualTo(ContainerMountType.Volume);
         await Assert.That(mount.IsReadOnly).IsFalse();
-        await Assert.That(mount.Source).IsNotNull();
-        var expected = parent is null ? Path.Combine(root, "native", resource.Name)
-            : Path.Combine(root, "native", parent, resource.Name);
-        await Assert.That(mount.Source).IsEqualTo(expected);
-        await Assert.That(Path.GetFullPath(mount.Source!).StartsWith(root + Path.DirectorySeparatorChar,
-            StringComparison.Ordinal)).IsTrue();
-        await Assert.That(Directory.Exists(mount.Source)).IsTrue();
-        if (!OperatingSystem.IsWindows())
-        {
-            await Assert.That(File.GetUnixFileMode(mount.Source!)).IsEqualTo(
-                UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
-        }
+        await Assert.That(mount.Source).IsNull();
+        await Assert.That(resource.Annotations.OfType<ContainerLifetimeAnnotation>().Single().Lifetime)
+            .IsEqualTo(ContainerLifetime.Session);
     }
 
     internal static async Task VerifyUserAsync(ContainerResource resource)
@@ -85,14 +80,14 @@ internal sealed class IsolatedResourceTopologyFixture : IAsyncDisposable
         {
             await annotation.Callback(context);
         }
-        await Assert.That(arguments.Select(argument => (string)argument)).IsEquivalentTo(new[] { "--user", User });
+        await Assert.That(arguments.Select(argument => (string)argument)).DoesNotContain("--user");
     }
 
-    internal static async Task VerifyWaitsAsync(ContainerResource runner, ContainerResource[] nodes)
+    internal static async Task VerifyWaitsAsync(LoadTestClientSettings client, IEnumerable<IResource> nodes)
     {
-        var waits = runner.Annotations.OfType<WaitAnnotation>().Select(item => item.Resource.Name).ToArray();
-        await Assert.That(waits.Length).IsEqualTo(nodes.Length);
-        await Assert.That(nodes.All(node => waits.Contains(node.Name, StringComparer.Ordinal))).IsTrue();
+        var names = nodes.Select(node => node.Name).ToArray();
+        await Assert.That(client.Resources.Count).IsEqualTo(names.Length);
+        await Assert.That(names.All(name => client.Resources.Contains(name))).IsTrue();
     }
 
     public async ValueTask DisposeAsync()

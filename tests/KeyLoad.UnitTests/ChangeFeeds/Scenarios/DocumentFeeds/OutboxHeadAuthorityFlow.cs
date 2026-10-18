@@ -71,7 +71,7 @@ internal static class OutboxHeadAuthorityFlow
         await Assert.That(cold.Read(view => view.ReadOwnedValue(KeySpace.Partition(OutboxHeadAuthorityFixture.EntrySpace, state.Partition, 2L)))).IsNull();
         await OutboxHeadAuthorityAssertions.ReplayAsync(owner, cold, state.QuotaWrite, state.QuotaFailure, token);
         await OutboxHeadAuthorityAssertions.ReplayAsync(owner, cold, state.Purge, purged, token);
-        var healthy = OutboxHeadAuthorityFixture.Write(state.Partition, "c");
+        var healthy = OutboxHeadAuthorityFixture.Write(owner, state.Partition, "c");
         var result = owner.ApplyEmbedded(healthy, token);
         var receipt = result.Get<CommitReceipt>();
         await OutboxHeadAuthorityAssertions.ReceiptAsync(healthy, receipt, new MutationReceipt("putDocument", OutboxHeadAuthorityFixture.Collection, "c", 1L));

@@ -17,10 +17,9 @@ internal sealed class IsolatedQuorumResourceRabbitTests
         var nodes = model.BuildNodes();
         await IsolatedQuorumResourceAssertions.VerifyGroupAsync(model, nodes, count, T.RabbitPrefix,
             T.RabbitStorage, T.Management, BenchmarkResources.RabbitDigest);
-        var runner = await IsolatedQuorumResourceModel.ReadAsync(model.Runner.Resource);
-        var values = runner.EnvironmentVariables.ToDictionary();
+        var values = await IsolatedResourceTopologyFixture.EnvironmentAsync(model.Client);
+        var bindings = model.Client.Values;
         await Assert.That(values[T.Image]).IsEqualTo(T.RabbitImage + BenchmarkResources.RabbitDigest);
-        var bindings = runner.EnvironmentVariablesWithUnprocessed.ToDictionary(pair => pair.Key, pair => pair.Value.Unprocessed);
         var user = await IsolatedQuorumResourceAssertions.VerifySecretAsync(bindings[T.User]);
         var password = await IsolatedQuorumResourceAssertions.VerifySecretAsync(bindings[T.Password]);
         var cookie = await SharedCookieAsync(nodes);

@@ -6,7 +6,7 @@ using ModelContextProtocol.Protocol;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>Owns concrete native headers and serialized wire data for transport-boundary regressions.</summary>
+/// <summary>Owns concrete native headers and serialized wire data for transport-boundary checks.</summary>
 internal static class McpTransportGuardTestData
 {
     internal const string RevisionHeader = "MCP-Protocol-Version";

@@ -2,8 +2,9 @@ using System.Runtime.ExceptionServices;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
-using KeyLoad.AppHost.Features.BenchmarkComparisons;
+using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 using KeyLoad.AppHost.Hosting;
+using KeyLoad.AppHost.Features.ClusterReplication;
 using KeyLoad.Comparisons;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,7 +21,6 @@ internal static class BenchmarkSessionAspireFixture
     private const string RootArgument = "--Benchmarks:DataRoot=";
     private const string OutputArgument = "--Benchmarks:Output=";
     private const string IdentityArgument = "--Benchmarks:SessionId=";
-    private const string Runner = "comparisons";
     private const string RuntimeDirectory = "runtime";
     private const string Solution = "KeyLoad.slnx";
 
@@ -37,9 +37,14 @@ internal static class BenchmarkSessionAspireFixture
         var execution = AppHostOptionsRegistration.BindTestExecution(configuration);
         using var deadline = new CancellationTokenSource(execution.Value.NativeScaledTimeout, TimeProvider.System);
         using var lifetime = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadline.Token);
-        var arguments = new[] { Enabled, Session, Profile, RootArgument + root, OutputArgument + evidence,
+        var arguments = new List<string> { Enabled, Session, Profile, RootArgument + root, OutputArgument + evidence,
             IdentityArgument + selected.SessionId };
-        await using var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(arguments, lifetime.Token);
+        if (selected.Target == "KeyLoad")
+        {
+            arguments.Add("--KeyLoad:Ephemeral=true");
+            arguments.Add(ProcessFaultCommandProtocol.EnabledArgument);
+        }
+        await using var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_LoadTests_AppHost>([.. arguments], lifetime.Token);
         builder.Services.AddLogging(logging => logging.ClearProviders().AddConsole().SetMinimumLevel(LogLevel.Warning));
         var application = await builder.BuildAsync(lifetime.Token);
         await RunOwnedAsync(application, selection, selected, evidence, root, lifetime.Token);
@@ -55,11 +60,13 @@ internal static class BenchmarkSessionAspireFixture
         Exception? primary = null;
         try
         {
-            await IsolatedNativeReportAssertions.VerifyModelAsync(containers, selection, token);
-            work.BeginCapture(application, containers.Select(container => container.Name),
+            await IsolatedNativeReportAssertions.VerifyModelAsync(
+                application.Services.GetRequiredService<DistributedApplicationModel>().Resources, selection, token);
+            work.BeginCapture(application, application.Services.GetRequiredService<DistributedApplicationModel>().Resources
+                .Where(resource => resource is ContainerResource or ProjectResource).Select(resource => resource.Name),
                 ComparisonProgressLine.PathForEvidenceDirectory(evidence));
             work.Collector = application.Services.GetService<ScaleServerResourceEvidenceCollector>();
-            if (work.Collector is not null && !BenchmarkSessionContract.UnsupportedTopologies.Any(item =>
+            if (work.Collector is not null && selection.Target != "KeyLoad" && !BenchmarkSessionContract.UnsupportedTopologies.Any(item =>
                 item.Target == selected.Target && item.NodeCounts.Contains(selected.NodeCount)))
             {
                 work.Observation = work.Collector.StartAsync(containers,
@@ -69,7 +76,7 @@ internal static class BenchmarkSessionAspireFixture
             {
                 work.Collector = null;
             }
-            var exit = await work.RunAsync(application, Runner, token);
+            var exit = await work.RunAsync(lifetime => BenchmarkSessionClientRuntime.RunAsync(application, selection, evidence, lifetime), token);
             if (work.Collector is not null)
             {
                 await work.StartSettlement();

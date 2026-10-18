@@ -21,24 +21,21 @@ internal static class ProjectionCheckpointRetentionSettlement
         await ProjectionConsumerIdentityAssertions.ExactAsync(batch,
             new ProjectionBatch(new(source.Consumer, source.Definition, 2L, false), [], 3L, batch.Token, false));
         var id = Guid.NewGuid();
-        var filtered = ProjectionConsumerIdentityFixture.Operation(OperationKind.CommitProjectionBatch, id,
+        var filtered = ProjectionConsumerIdentityFixture.Operation(owner, OperationKind.CommitProjectionBatch, id,
             new CommitProjectionBatchRequest(id, source.Consumer, batch.Token, []));
         var advanced = owner.ApplyEmbedded(filtered, token);
         var advance = advanced.Get<ProjectionBatchResult>();
         await ProjectionConsumerIdentityAssertions.ReceiptAsync(filtered, advance.Receipt);
         await ProjectionConsumerIdentityAssertions.ExactAsync(advance, new ProjectionBatchResult(advance.Receipt, false, 3L));
-        var purge = ProjectionCheckpointRetentionFixture.Purge(source.Partition, 3L, 3);
+        var purge = ProjectionCheckpointRetentionFixture.Purge(owner, source.Partition, 3L, 3);
         var purged = owner.ApplyEmbedded(purge, token);
         await ProjectionConsumerIdentityAssertions.ExactAsync(purged.Get<OutboxHead>(), new OutboxHead(3L, 4L, 0L, 0L));
         await ProjectionCheckpointRetentionAssertions.ReclaimedAsync(owner, source);
         var healthyId = Guid.NewGuid();
         var mutation = new PutDocument(ProjectionConsumerIdentityFixture.Source, ProjectionCheckpointRetentionAssertions.HealthySource,
             ProjectionCheckpointRetentionAssertions.HealthyJson, 0L);
-        var healthy = ProjectionConsumerIdentityFixture.Operation(OperationKind.Batch, healthyId,
-            new CommandRequest(healthyId, source.Partition, [mutation])) with
-        {
-            EvaluatedAt = source.Time
-        };
+        var healthy = ProjectionConsumerIdentityFixture.Operation(owner, OperationKind.Batch, healthyId,
+            new CommandRequest(healthyId, source.Partition, [mutation]), source.Time);
         token.ThrowIfCancellationRequested();
         var produced = FeedNativeHealthyAdmission.Submit(owner, healthy, explicitTime: true, token);
         await ProjectionConsumerIdentityAssertions.ReceiptAsync(healthy, produced.Get<CommitReceipt>(),

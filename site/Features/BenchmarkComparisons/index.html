@@ -249,7 +249,7 @@
         <ol class="stack" aria-label="Request path through the engine">
           <li class="layer"><span class="layer-tag">Callers</span><span class="layer-body"><span class="pill">MCP server</span><span class="pill">.NET SDK</span><span class="pill">SQL</span></span></li>
           <li class="layer"><span class="layer-tag">Connection grain</span><span class="layer-body">One Orleans grain per connection, with bounded parallel operations</span></li>
-          <li class="layer"><span class="layer-tag">Partition grains</span><span class="layer-body">Atomic partitions, placed and moved by Orleans</span></li>
+          <li class="layer"><span class="layer-tag">Partition grains</span><span class="layer-body">Orleans moves partition grain activations; each silo keeps its files</span></li>
           <li class="layer layer--hosts"><span class="layer-tag">ZoneTree on every node</span><span class="hosts"><span class="host"><b>Node A</b>ZoneTree · WAL<small>apply gate</small></span><span class="host"><b>Node B</b>ZoneTree · WAL<small>apply gate</small></span><span class="host"><b>Node C</b>ZoneTree · WAL<small>apply gate</small></span></span></li>
         </ol>
       </div>

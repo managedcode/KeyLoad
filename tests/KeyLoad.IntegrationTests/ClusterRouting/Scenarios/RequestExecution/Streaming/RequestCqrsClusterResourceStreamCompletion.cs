@@ -5,7 +5,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
 internal static class RequestCqrsClusterResourceStreamCompletion
 {
     internal static void Complete(RequestCqrsResourceCompletionEvidence evidence, ResourceLoggerService logger,
-        ContainerResource[] resources, Func<string, TaskStatus?> statusFor, List<Exception> failures,
+        ProjectResource[] resources, Func<string, TaskStatus?> statusFor, List<Exception> failures,
         Action<RequestCqrsLifecycleStage>? failureObserver)
     {
         foreach (var resource in resources)

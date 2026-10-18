@@ -70,12 +70,12 @@ evidence contracts.
 
 - Harness/adapters: `benchmarks/KeyLoad.Comparisons/`.
 - Embedded scenario library: `benchmarks/KeyLoad.BenchmarkScenarios/`; `KeyLoad.Benchmarks` retains only its typed executable runner under [ADR-047](../ADR/ADR-047-embedded-benchmark-host.md).
-- Aspire engine resources: `build/KeyLoad.AppHost/BenchmarkComparisons/`.
+- Aspire engine resources: `build/KeyLoad.LoadTests.AppHost/`.
 - Tests: `tests/KeyLoad.ComparisonTests/BenchmarkComparisons/`, including the sole benchmark-contract owner `UnitContracts/`; only helpers with actual functional consumers remain shared.
 - Evidence/chart tooling: `scripts/Features/BenchmarkComparisons/`.
 - Site: `site/Features/BenchmarkComparisons/`.
 - Docs: this spec, ADR-034, `implementation/comparative-benchmarks.md` and the README presentation.
-- Time-series profile: Aspire resource in `build/KeyLoad.AppHost/BenchmarkComparisons/`; profile/targets under `benchmarks/KeyLoad.Comparisons/TimeSeries/`; isolated composition in `benchmarks/KeyLoad.ComparisonHost/`; real tests under `tests/KeyLoad.ComparisonTests/BenchmarkComparisons/TimeSeries/`; [ADR-050](../ADR/ADR-050-timeseries-timescale-comparison.md).
+- Time-series profile: Aspire resource in `build/KeyLoad.LoadTests.AppHost/`; profile/targets under `benchmarks/KeyLoad.Comparisons/TimeSeries/`; isolated composition in `benchmarks/KeyLoad.ComparisonHost/`; real tests under `tests/KeyLoad.ComparisonTests/BenchmarkComparisons/TimeSeries/`; [ADR-050](../ADR/ADR-050-timeseries-timescale-comparison.md).
 - Product persisted schema/public API changes: N/A; engines use isolated per-run benchmark databases/collections/streams.
 
 ## Digest-backed Docker execution

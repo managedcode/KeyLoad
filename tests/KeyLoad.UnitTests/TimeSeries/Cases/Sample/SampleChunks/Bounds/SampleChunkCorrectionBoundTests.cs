@@ -42,8 +42,8 @@ internal sealed class SampleChunkCorrectionBoundTests
             var raw = fixture.Raw();
             var originalId = Guid.NewGuid();
             var rejected = fixture.Commit(originalId, overflow);
-            await Assert.That(rejected.Error).IsEqualTo(ErrorCode.ResourceExhausted);
-            await Assert.That(rejected.Json).IsNull();
+            await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+            await Assert.That(rejected.Value).IsNull();
             await Assert.That(fixture.Raw()).IsEqualTo(raw);
             await LiteralAsync(fixture, revision, SealedGeneration, rows);
             await SampleChunkCanonicalAssertions.Replay(fixture, originalId, overflow, rejected);

@@ -26,7 +26,7 @@ internal static class AuthorizationTelemetryTestProtocol
     internal const string BaggageCanary = "baggage-canary";
     internal const string FailureTemplate = "Native catalog denied {Payload}";
     internal const string HealthyTemplate = "Native catalog returned {Payload}";
-    internal const string LoggerCategory = "KeyLoad.Authorization.TelemetryRegression";
+    internal const string LoggerCategory = "KeyLoad.Authorization.TelemetryOperations";
     internal const string CanaryTag = "tenant";
     internal const string BaggageKey = "private";
     internal const string HttpServerSource = "Microsoft.AspNetCore";

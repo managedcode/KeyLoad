@@ -76,7 +76,7 @@ internal static class NativeSourceManifestChildSettlement
         }
         if (joined is null)
         {
-            NativeCoverageImageNodeSettlement.ThrowFailures(failures);
+            global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
             throw new InvalidOperationException(StartFailure);
         }
         return joined with
@@ -143,7 +143,7 @@ internal static class NativeSourceManifestChildSettlement
         {
             throw new InvalidDataException(OutputFailure);
         }
-        var remainder = await NativeCoverageImageNodeOutput.ReadBoundedAsync(reader, maximumCharacters - prefix.Length)
+        var remainder = await NativeSourceProcessOutput.ReadBoundedAsync(reader, maximumCharacters - prefix.Length)
             .ConfigureAwait(false);
         return prefix + remainder;
     }

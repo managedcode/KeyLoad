@@ -2,6 +2,8 @@ namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
 internal static class FunctionalGateColdMutations
 {
+    private const string AppendSamplesKind = "appendSamples";
+
     internal static CommandRequest Command(FunctionalGateContext context, int index, BlobRef blob)
     {
         var reference = context.Bind(new(context.Partition, FunctionalGateColdProtocol.Resource("docs", index), FunctionalGateColdProtocol.Id));
@@ -44,7 +46,7 @@ internal static class FunctionalGateColdMutations
             new("enqueue", FunctionalGateColdProtocol.Resource("queue", index), FunctionalGateColdProtocol.Id, 1),
             new("publishTopic", FunctionalGateColdProtocol.Resource("topic", index), FunctionalGateColdProtocol.Id, 1),
             new("upsertEdge", FunctionalGateColdProtocol.Resource("graph", index), FunctionalGateColdProtocol.Edge, 1),
-            new("appendSamples", FunctionalGateColdProtocol.Resource("series", index), FunctionalGateColdProtocol.Series, 2)
+            new(AppendSamplesKind, FunctionalGateColdProtocol.Resource("series", index), FunctionalGateColdProtocol.Series, 2)
         ]);
         await FunctionalGateRelationalAssertions.ReceiptAsync(context, receipt, command.CommandId, context.Partition, [.. expected]);
     }

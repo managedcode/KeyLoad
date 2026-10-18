@@ -25,7 +25,7 @@ internal static class EventingRequiredClaimFlow
                 await fixture.PolicyAsync(RequiredProcessingPolicyFixture.After, token);
                 await EventingRequiredClaimState.ReadyAsync(fixture, true, token);
                 var request = new ReceiveRequest(Guid.NewGuid(), fixture.Lane);
-                var operation = RequiredProcessingPolicyFixture.Operation(OperationKind.Receive, request, request.RequestId);
+                var operation = fixture.Operation(OperationKind.Receive, request, request.RequestId);
                 var original = await RequiredProcessingPolicyRefusal.FreshAsync(fixture, operation,
                     ErrorCode.PermissionDenied, RequiredProcessingPolicyFixture.Denied, token);
                 await EventingRequiredClaimState.ReadyAsync(fixture, true, token);
@@ -44,7 +44,7 @@ internal static class EventingRequiredClaimFlow
                 {
                     Token = delivery.Token + ".forged"
                 };
-                await RequiredProcessingPolicyRefusal.FreshAsync(fixture, RequiredProcessingPolicyFixture.Operation(OperationKind.Processing, forged, forged.CommandId),
+                await RequiredProcessingPolicyRefusal.FreshAsync(fixture, fixture.Operation(OperationKind.Processing, forged, forged.CommandId),
                     ErrorCode.TokenInvalidated, "The signed token is invalid.", token);
                 await RequiredProcessingPolicyReads.LeasedAsync(fixture, delivery, false, token);
                 var healthy = await RequiredProcessingPolicyProcessing.CompleteAsync(fixture,

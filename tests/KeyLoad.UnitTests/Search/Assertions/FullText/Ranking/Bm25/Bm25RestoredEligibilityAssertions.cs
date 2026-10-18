@@ -65,7 +65,7 @@ internal static class Bm25RestoredEligibilityAssertions
         var actual = fixture.SubmitIssued(database, operation, cancellationToken: token).Get<CommitReceipt>();
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(receipt))).IsTrue();
         var stored = OutcomeStoreOracle.ReadPartition(store, fixture.Source.Partition,
-            Bm25PortableFamilyBackupSeed.Root, operation.CommandId)!.Get<CommitReceipt>();
+            Bm25PortableFamilyBackupSeed.Root, operation.CommandId)!.Value.Get<CommitReceipt>();
         await Assert.That(JsonDefaults.Serialize(stored).AsSpan().SequenceEqual(JsonDefaults.Serialize(receipt))).IsTrue();
         await SameAsync(before, Cut(store, database,
             source ? fixture.Source.ReadCanonicalCut() : fixture.ReadTargetCut(), token));

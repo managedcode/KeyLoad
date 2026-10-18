@@ -10,7 +10,7 @@ internal static class FeedVertexAuthorityAssertions
     internal const string HistoricalCorruptionDetail = "The committed document change does not match its canonical identity.";
 
     internal static string[] Image(ZoneTreeStore store)
-        => global::KeyLoad.UnitTests.Features.GraphTraversal.GraphShortestPathFullStoreImage.Bytes(store);
+        => global::KeyLoad.UnitTests.CanonicalStoreImage.Bytes(store);
 
     internal static async Task SameImageAsync(ZoneTreeStore store, string[] image, long position)
     {

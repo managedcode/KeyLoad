@@ -1,3 +1,4 @@
+using KeyLoad.UnitTests.Features.ResourceExecution;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 namespace KeyLoad.UnitTests.Features.Search;
@@ -9,7 +10,7 @@ internal static class Bm25OriginalPhaseRecoveryTrial
         var original = flow.Capture(null);
         var originalResult = flow.Publish(original);
         await flow.RequireHealthyAsync(original, originalResult);
-        var originalEntry = NativeSerialization.Serialize(flow.Owner.Entry(original.Id));
+        var originalEntry = NativeSerialization.Serialize(flow.Owner.Entry(original.CommandId));
         await RequireColdReplayAsync(flow, original, originalResult, originalEntry);
         flow.RevokeAdministrator();
         await Assert.That(flow.Administrator.PolicyEpoch).IsEqualTo(2L);
@@ -17,7 +18,7 @@ internal static class Bm25OriginalPhaseRecoveryTrial
         flow.RepairAdministrator();
         await Assert.That(flow.Administrator.PolicyEpoch).IsEqualTo(3L);
         await flow.RequireDeniedAsync(original, issuerMustDeny: false);
-        var repairedAdmin = flow.Capture(original.Id);
+        var repairedAdmin = flow.Capture(original.CommandId);
         var repairedResult = flow.Publish(repairedAdmin);
         await flow.RequireHealthyAsync(repairedAdmin, repairedResult);
         flow.RevokeSubject();
@@ -26,13 +27,13 @@ internal static class Bm25OriginalPhaseRecoveryTrial
         flow.RepairSubject();
         await Assert.That(flow.Reader.PolicyEpoch).IsEqualTo(3L);
         await flow.RequireDeniedAsync(repairedAdmin, issuerMustDeny: true);
-        var repairedSubject = flow.Capture(repairedAdmin.Id);
+        var repairedSubject = flow.Capture(repairedAdmin.CommandId);
         var subjectResult = flow.Publish(repairedSubject);
         await flow.RequireHealthyAsync(repairedSubject, subjectResult);
-        var subjectEntry = NativeSerialization.Serialize(flow.Owner.Entry(repairedSubject.Id));
+        var subjectEntry = NativeSerialization.Serialize(flow.Owner.Entry(repairedSubject.CommandId));
         await RequireColdReplayAsync(flow, repairedSubject, subjectResult, subjectEntry);
         await Bm25OriginalPhaseRecoveryState.RequireRetainedAsync(flow.Owner, original, originalEntry);
-        var healthy = flow.Capture(repairedSubject.Id);
+        var healthy = flow.Capture(repairedSubject.CommandId);
         await flow.RequireHealthyAsync(healthy, flow.Publish(healthy));
     }
 
@@ -44,8 +45,8 @@ internal static class Bm25OriginalPhaseRecoveryTrial
         await before.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(flow.Owner));
         await Bm25OriginalPhaseRecoveryState.RequireRetainedAsync(flow.Owner, original, entry);
         var replay = flow.Publish(flow.Reissue(original));
-        await ReplicaSubmissionOutcomeFlow.RequireResultAsync(expected, replay);
-        await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(NativeSerialization.Serialize(expected.Get<CommitReceipt>()),
+        await NativeReplayResultAssertions.SameAsync(expected, replay);
+        await NativeReplayResultAssertions.BytesAsync(NativeSerialization.Serialize(expected.Get<CommitReceipt>()),
             NativeSerialization.Serialize(replay.Get<CommitReceipt>()));
         await before.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(flow.Owner));
         await Bm25OriginalPhaseRecoveryState.RequireRetainedAsync(flow.Owner, original, entry);

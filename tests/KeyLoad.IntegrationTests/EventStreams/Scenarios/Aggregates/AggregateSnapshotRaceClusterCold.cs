@@ -28,15 +28,15 @@ internal sealed class AggregateSnapshotRaceClusterCold
         await ServerFailureObserver.ObserveAsync(() => RequireAsync(token), failures);
         foreach (var node in Nodes)
         {
-            await ServerFailureObserver.ObserveAsync(() => fixture.KillContainerAsync(node, scenario, token), failures);
+            await ServerFailureObserver.ObserveAsync(() => fixture.KillServerAsync(node, scenario, token), failures);
         }
         foreach (var node in Nodes)
         {
-            await ServerFailureObserver.ObserveAsync(async () => await fixture.BeginContainerRestartAsync(node, token), failures);
+            await ServerFailureObserver.ObserveAsync(async () => await fixture.BeginProcessRestartAsync(node, token), failures);
         }
         foreach (var node in Nodes)
         {
-            await ServerFailureObserver.ObserveAsync(() => fixture.RestartContainerAsync(node, token), failures);
+            await ServerFailureObserver.ObserveAsync(() => fixture.RestartServerAsync(node, token), failures);
         }
         foreach (var node in Nodes)
         {
@@ -66,7 +66,7 @@ internal sealed class AggregateSnapshotRaceClusterCold
         ServerFailureObserver.ThrowIfAny(failures);
     }
     private static string PathFor(string scenario, string node)
-        => ContainerRuntimeOwnedReceipt.PathFor(ClusterFixtureDiagnostics.FindRepositoryRoot().FullName, scenario, node);
+        => ProcessRuntimeOwnedReceipt.PathFor(ClusterFixtureDiagnostics.FindRepositoryRoot().FullName, scenario, node);
     private static async Task ReadAsync(string path, Action<Evidence> accept, CancellationToken token)
     {
         var failures = new List<Exception>();

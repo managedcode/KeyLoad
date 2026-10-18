@@ -18,7 +18,7 @@ internal static class GraphTraversalRowAssertions
     internal static async Task ReadAsync(DatabaseEngine engine, ZoneTreeStore store, PartitionRef partition,
         bool visible, CancellationToken token)
     {
-        var image = GraphShortestPathFullStoreImage.Bytes(store);
+        var image = CanonicalStoreImage.Bytes(store);
         var cut = store.Position;
         EntityRef Ref(string id) => new(partition, Collection, id);
         var actual = engine.Traverse(Reader, partition, Graph, Ref(A), cancellationToken: token);
@@ -28,19 +28,19 @@ internal static class GraphTraversalRowAssertions
             new("ca", Ref(C), Ref(A), Label, EmptyJson, EdgeRevision)] : [];
         await Assert.That(JsonDefaults.Serialize(actual.Vertices).AsSpan().SequenceEqual(JsonDefaults.Serialize(vertices))).IsTrue();
         await Assert.That(JsonDefaults.Serialize(actual.Edges).AsSpan().SequenceEqual(JsonDefaults.Serialize(edges))).IsTrue();
-        await Assert.That(GraphShortestPathFullStoreImage.Bytes(store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
+        await Assert.That(CanonicalStoreImage.Bytes(store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
         await Assert.That(store.Position).IsEqualTo(cut);
     }
 
     internal static async Task RefusedAsync(DatabaseEngine engine, ZoneTreeStore store, PartitionRef partition,
         ErrorCode code, CancellationToken token)
     {
-        var image = GraphShortestPathFullStoreImage.Bytes(store);
+        var image = CanonicalStoreImage.Bytes(store);
         var cut = store.Position;
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => engine.Traverse(Reader, partition, Graph,
             new(partition, Collection, A), cancellationToken: token));
         await Assert.That(failure.Code).IsEqualTo(code);
-        await Assert.That(GraphShortestPathFullStoreImage.Bytes(store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
+        await Assert.That(CanonicalStoreImage.Bytes(store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
         await Assert.That(store.Position).IsEqualTo(cut);
     }
 }

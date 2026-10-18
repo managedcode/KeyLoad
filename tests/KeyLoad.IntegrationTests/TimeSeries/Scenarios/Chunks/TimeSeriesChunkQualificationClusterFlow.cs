@@ -16,8 +16,6 @@ internal static class TimeSeriesChunkQualificationClusterFlow
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 await fixture.InitializeAsync();
-                fixture.RegisterNativeCoverageCase<TimeSeriesChunkQualificationClusterTests>(
-                    nameof(TimeSeriesChunkQualificationClusterTests.SameChunkIdentityAcrossAtomicPartitionsKeepsExactValuesOnRetentionDropReplayAndTwoCold));
                 TimeSeriesChunkQualificationClusterState state;
                 using (var deadline = McpCallerDeadline.Create())
                 {

@@ -5,7 +5,7 @@ export const SESSION = Object.freeze({
   records: 1_000_000, operations: 100_000, concurrency: 16, warmup: 0,
   caseIds: Object.freeze(['load-million', 'index', 'sequential-read', 'random-read', 'search', 'mixed', 'verify-final']),
   nodes: Object.freeze([1, 3]), artifactPrefix: 'comparison-session-', aggregateArtifact: 'comparison-session-suite',
-  aggregateJob: 'Combine benchmark results', prepareJob: 'Build Docker images',
+  aggregateJob: 'Combine benchmark results', prepareJob: 'Prepare comparison runtime',
   workerSteps: Object.freeze(['Run database workload', 'Save benchmark results']),
   reportBytes: 268_435_456, nativeBytes: 16_777_216, sessionBytes: 4_194_304,
   aggregateBytes: 33_554_432, archiveBytes: 536_870_912, allArchiveBytes: 11_811_160_064,

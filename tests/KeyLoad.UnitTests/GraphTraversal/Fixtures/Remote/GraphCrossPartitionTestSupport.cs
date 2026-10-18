@@ -10,9 +10,6 @@ internal static class GraphCrossPartitionTestSupport
     internal const string Collection = "vertices";
     internal const string Root = "root";
     internal const string EmptyJson = "{}";
-    private static readonly Guid ShardId = new("274fa47e-69b8-45de-9a78-3e5a7dc37b11");
-    private static readonly Guid Incarnation = new("ec738bb7-a2e7-42a8-a3b8-027512aa4f18");
-    private static readonly ImmutableArray<string> Voters = ["unit-voter-1", "unit-voter-2", "unit-voter-3"];
 
     internal static PartitionRef Partition(string key)
         => new("tenant", "database", "orders", key);
@@ -23,7 +20,6 @@ internal static class GraphCrossPartitionTestSupport
         var database = new TestDatabase(limits);
         database.Configure(Collection, ResourceKind.Collection);
         database.Configure(Graph, ResourceKind.Graph, fields: graphFields);
-        BootstrapOwner(database);
         return database;
     }
 
@@ -91,13 +87,4 @@ internal static class GraphCrossPartitionTestSupport
             new ConfigurePrincipalRequest(principal)).Get<PrincipalRecord>();
     }
 
-    private static void BootstrapOwner(TestDatabase database)
-    {
-        var request = new BootstrapPhysicalShardCatalogRequest(1, 0, ShardId, Incarnation, Voters);
-        var id = PhysicalShardCatalogIdentity.CreateBootstrapCommandId(ShardId);
-        if (!database.Submit(OperationKind.BootstrapPhysicalShardCatalog, request, id: id).Get<bool>())
-        {
-            throw new InvalidOperationException("The graph fixture did not bootstrap its physical owner.");
-        }
-    }
 }

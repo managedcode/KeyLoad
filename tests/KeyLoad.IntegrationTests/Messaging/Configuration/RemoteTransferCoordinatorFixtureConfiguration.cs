@@ -33,7 +33,7 @@ internal static class RemoteTransferCoordinatorFixtureConfiguration
         }
         foreach (var number in Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount))
         {
-            var node = builder.CreateResourceBuilder(builder.Resources.OfType<ContainerResource>()
+            var node = builder.CreateResourceBuilder(builder.Resources.OfType<ProjectResource>()
                 .Single(resource => resource.Name == ClusterFixtureProtocol.NodeName(number)));
             node.WithEnvironment(Setting, selection.PrincipalId);
             if (selection.AcceptAttemptCeiling is { } ceiling)

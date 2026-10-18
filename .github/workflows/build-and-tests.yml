@@ -124,7 +124,7 @@ jobs:
       - name: Build KeyLoad
         id: build
         run: dotnet build KeyLoad.slnx --no-restore --configuration Release -warnaserror
-      - name: Prepare native source and test-image identity receipts
+      - name: Prepare native source and native test assembly identity receipts
         id: native-source-identity
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         shell: pwsh
@@ -188,7 +188,7 @@ jobs:
       - name: Test recovery after process crashes
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=recovery --KeyLoadTests:ReportTrx=true
-      - name: Verify native source and test-image identity receipts
+      - name: Verify native source and native test assembly identity receipts
         if: ${{ !cancelled() && steps.build.outcome == 'success' && steps.native-source-identity.outcome == 'success' }}
         shell: pwsh
         run: |
@@ -213,7 +213,7 @@ jobs:
           name: code-quality-${{ matrix.os }}
           path: artifacts/code-quality/**
           if-no-files-found: error
-  docker-cluster:
+  aspire-cluster:
     name: ${{ inputs.mode == 'functional-gates' && 'Test functional database gates (one then three nodes)' || 'Test three-node database' }}
     if: ${{ github.event_name != 'workflow_dispatch' || inputs.mode == 'all' || inputs.mode == 'functional-gates' }}
     runs-on: ubuntu-24.04
@@ -225,18 +225,8 @@ jobs:
         uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           global-json-file: global.json
-      - name: Check Docker
+      - name: Check Docker for Azurite
         run: docker version
-      - name: Build KeyLoad server Docker image
-        id: images
-        run: node scripts/Features/BenchmarkComparisons/prepare-images.mjs --server-only
-      - name: Configure Docker image references
-        shell: bash
-        env:
-          KEYLOAD_SERVER_IMAGE: ${{ steps.images.outputs.server-image }}
-        run: |
-          test -n "$KEYLOAD_SERVER_IMAGE"
-          printf 'KeyLoad__ContainerImages__Server=%s\nKEYLOAD_IMAGE_RECEIPT=%s\n' "$KEYLOAD_SERVER_IMAGE" "$RUNNER_TEMP/keyload-images/image-receipt.json" >> "$GITHUB_ENV"
       - name: Find Chrome for admin tests
         shell: bash
         run: |
@@ -248,7 +238,7 @@ jobs:
         run: dotnet restore KeyLoad.slnx
       - name: Build the complete native coverage cohort
         run: dotnet build KeyLoad.slnx --no-restore --configuration Release -warnaserror
-      - name: Prepare original source and test-image receipts
+      - name: Prepare original source and native test assembly receipts
         id: coverage-source
         shell: pwsh
         run: |
@@ -307,6 +297,10 @@ jobs:
           $valid = $valid -and $results[0].outcome -ceq 'Passed' -and $results[0].testName -ceq $method -and
             $results[0].testId -ceq $definitions[0].id -and $definitions[0].TestMethod.name -ceq $method -and
             $definitions[0].TestMethod.className -ceq 'KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalDatabaseGateTests'
+          $nativeProcessEvidence = & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.process-lifecycle.ps1 `
+            -Repository $env:GITHUB_WORKSPACE -ResultsDirectory $directory `
+            -SourceManifestPath $env:KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0) { throw 'Original native process lifecycle verification failed.' }
           [ordered]@{
             sourceRevision = $env:GITHUB_SHA; runId = $env:GITHUB_RUN_ID; runAttempt = $env:GITHUB_RUN_ATTEMPT
             method = $method; nodes = 1; maximumParallelTests = 50; nativeOutcome = $env:NATIVE_OUTCOME; nativeExitCode = $nativeExit; accepted = $valid
@@ -314,8 +308,8 @@ jobs:
             stderrSha256 = (Get-FileHash -LiteralPath (Join-Path $directory 'native.stderr.original.txt') -Algorithm SHA256).Hash.ToLowerInvariant()
             trxSha256 = (Get-FileHash -LiteralPath $reports[0].FullName -Algorithm SHA256).Hash.ToLowerInvariant()
             sourceManifestSha256 = (Get-FileHash -LiteralPath $env:KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST -Algorithm SHA256).Hash.ToLowerInvariant()
-            imageReceiptSha256 = (Get-FileHash -LiteralPath $env:KEYLOAD_IMAGE_RECEIPT -Algorithm SHA256).Hash.ToLowerInvariant()
-          } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $directory 'functional-gate-receipt.json') -Encoding utf8NoBOM
+            nativeProcessEvidence = $nativeProcessEvidence
+          } | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $directory 'functional-gate-receipt.json') -Encoding utf8NoBOM
           if (-not $valid) { throw 'The exact original functional case must execute once and pass without skips.' }
       - name: Test functional database gate with 3 node(s)
         id: functional-three
@@ -366,6 +360,10 @@ jobs:
           $valid = $valid -and $results[0].outcome -ceq 'Passed' -and $results[0].testName -ceq $method -and
             $results[0].testId -ceq $definitions[0].id -and $definitions[0].TestMethod.name -ceq $method -and
             $definitions[0].TestMethod.className -ceq 'KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalDatabaseGateTests'
+          $nativeProcessEvidence = & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.process-lifecycle.ps1 `
+            -Repository $env:GITHUB_WORKSPACE -ResultsDirectory $directory `
+            -SourceManifestPath $env:KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0) { throw 'Original native process lifecycle verification failed.' }
           [ordered]@{
             sourceRevision = $env:GITHUB_SHA; runId = $env:GITHUB_RUN_ID; runAttempt = $env:GITHUB_RUN_ATTEMPT
             method = $method; nodes = 3; maximumParallelTests = 50; nativeOutcome = $env:NATIVE_OUTCOME; nativeExitCode = $nativeExit; accepted = $valid
@@ -373,8 +371,8 @@ jobs:
             stderrSha256 = (Get-FileHash -LiteralPath (Join-Path $directory 'native.stderr.original.txt') -Algorithm SHA256).Hash.ToLowerInvariant()
             trxSha256 = (Get-FileHash -LiteralPath $reports[0].FullName -Algorithm SHA256).Hash.ToLowerInvariant()
             sourceManifestSha256 = (Get-FileHash -LiteralPath $env:KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST -Algorithm SHA256).Hash.ToLowerInvariant()
-            imageReceiptSha256 = (Get-FileHash -LiteralPath $env:KEYLOAD_IMAGE_RECEIPT -Algorithm SHA256).Hash.ToLowerInvariant()
-          } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $directory 'functional-gate-receipt.json') -Encoding utf8NoBOM
+            nativeProcessEvidence = $nativeProcessEvidence
+          } | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $directory 'functional-gate-receipt.json') -Encoding utf8NoBOM
           if (-not $valid) { throw 'The exact original functional case must execute once and pass without skips.' }
       - name: Test native cold profile and selector preconditions
         id: functional-cold-preconditions
@@ -454,7 +452,6 @@ jobs:
             stderrSha256 = (Get-FileHash -LiteralPath (Join-Path $directory 'native.stderr.original.txt') -Algorithm SHA256).Hash.ToLowerInvariant()
             trxSha256 = (Get-FileHash -LiteralPath $reports[0].FullName -Algorithm SHA256).Hash.ToLowerInvariant()
             sourceManifestSha256 = (Get-FileHash -LiteralPath $env:KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST -Algorithm SHA256).Hash.ToLowerInvariant()
-            imageReceiptSha256 = (Get-FileHash -LiteralPath $env:KEYLOAD_IMAGE_RECEIPT -Algorithm SHA256).Hash.ToLowerInvariant()
           } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $directory 'functional-gate-receipt.json') -Encoding utf8NoBOM
           if (-not $valid) { throw 'Every original cold profile and selector precondition must execute exactly once and pass without skips.' }
       - name: Test cold functional database gate with 1 node(s)
@@ -506,6 +503,10 @@ jobs:
           $valid = $valid -and $results[0].outcome -ceq 'Passed' -and $results[0].testName -ceq $method -and
             $results[0].testId -ceq $definitions[0].id -and $definitions[0].TestMethod.name -ceq $method -and
             $definitions[0].TestMethod.className -ceq 'KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalDatabaseColdReopenTests'
+          $nativeProcessEvidence = & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.process-lifecycle.ps1 `
+            -Repository $env:GITHUB_WORKSPACE -ResultsDirectory $directory `
+            -SourceManifestPath $env:KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0) { throw 'Original native process lifecycle verification failed.' }
           [ordered]@{
             sourceRevision = $env:GITHUB_SHA; runId = $env:GITHUB_RUN_ID; runAttempt = $env:GITHUB_RUN_ATTEMPT
             method = $method; nodes = 1; maximumParallelTests = 50; nativeOutcome = $env:NATIVE_OUTCOME; nativeExitCode = $nativeExit; accepted = $valid
@@ -513,8 +514,8 @@ jobs:
             stderrSha256 = (Get-FileHash -LiteralPath (Join-Path $directory 'native.stderr.original.txt') -Algorithm SHA256).Hash.ToLowerInvariant()
             trxSha256 = (Get-FileHash -LiteralPath $reports[0].FullName -Algorithm SHA256).Hash.ToLowerInvariant()
             sourceManifestSha256 = (Get-FileHash -LiteralPath $env:KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST -Algorithm SHA256).Hash.ToLowerInvariant()
-            imageReceiptSha256 = (Get-FileHash -LiteralPath $env:KEYLOAD_IMAGE_RECEIPT -Algorithm SHA256).Hash.ToLowerInvariant()
-          } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $directory 'functional-gate-receipt.json') -Encoding utf8NoBOM
+            nativeProcessEvidence = $nativeProcessEvidence
+          } | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $directory 'functional-gate-receipt.json') -Encoding utf8NoBOM
           if (-not $valid) { throw 'The exact original functional case must execute once and pass without skips.' }
       - name: Test cold functional database gate with 3 node(s)
         id: functional-cold-three
@@ -565,6 +566,10 @@ jobs:
           $valid = $valid -and $results[0].outcome -ceq 'Passed' -and $results[0].testName -ceq $method -and
             $results[0].testId -ceq $definitions[0].id -and $definitions[0].TestMethod.name -ceq $method -and
             $definitions[0].TestMethod.className -ceq 'KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalDatabaseColdReopenTests'
+          $nativeProcessEvidence = & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.process-lifecycle.ps1 `
+            -Repository $env:GITHUB_WORKSPACE -ResultsDirectory $directory `
+            -SourceManifestPath $env:KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0) { throw 'Original native process lifecycle verification failed.' }
           [ordered]@{
             sourceRevision = $env:GITHUB_SHA; runId = $env:GITHUB_RUN_ID; runAttempt = $env:GITHUB_RUN_ATTEMPT
             method = $method; nodes = 3; maximumParallelTests = 50; nativeOutcome = $env:NATIVE_OUTCOME; nativeExitCode = $nativeExit; accepted = $valid
@@ -572,8 +577,8 @@ jobs:
             stderrSha256 = (Get-FileHash -LiteralPath (Join-Path $directory 'native.stderr.original.txt') -Algorithm SHA256).Hash.ToLowerInvariant()
             trxSha256 = (Get-FileHash -LiteralPath $reports[0].FullName -Algorithm SHA256).Hash.ToLowerInvariant()
             sourceManifestSha256 = (Get-FileHash -LiteralPath $env:KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST -Algorithm SHA256).Hash.ToLowerInvariant()
-            imageReceiptSha256 = (Get-FileHash -LiteralPath $env:KEYLOAD_IMAGE_RECEIPT -Algorithm SHA256).Hash.ToLowerInvariant()
-          } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $directory 'functional-gate-receipt.json') -Encoding utf8NoBOM
+            nativeProcessEvidence = $nativeProcessEvidence
+          } | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $directory 'functional-gate-receipt.json') -Encoding utf8NoBOM
           if (-not $valid) { throw 'The exact original functional case must execute once and pass without skips.' }
       - name: Test distinct native files and exclusive-owner refusal with 3 nodes
         id: functional-file-ownership-three
@@ -624,6 +629,10 @@ jobs:
           $valid = $valid -and $results[0].outcome -ceq 'Passed' -and $results[0].testName -ceq $method -and
             $results[0].testId -ceq $definitions[0].id -and $definitions[0].TestMethod.name -ceq $method -and
             $definitions[0].TestMethod.className -ceq 'KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalFileOwnershipClusterTests'
+          $nativeProcessEvidence = & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.process-lifecycle.ps1 `
+            -Repository $env:GITHUB_WORKSPACE -ResultsDirectory $directory `
+            -SourceManifestPath $env:KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0) { throw 'Original native process lifecycle verification failed.' }
           [ordered]@{
             sourceRevision = $env:GITHUB_SHA; runId = $env:GITHUB_RUN_ID; runAttempt = $env:GITHUB_RUN_ATTEMPT
             method = $method; nodes = 3; maximumParallelTests = 50; nativeOutcome = $env:NATIVE_OUTCOME; nativeExitCode = $nativeExit; accepted = $valid
@@ -631,8 +640,8 @@ jobs:
             stderrSha256 = (Get-FileHash -LiteralPath (Join-Path $directory 'native.stderr.original.txt') -Algorithm SHA256).Hash.ToLowerInvariant()
             trxSha256 = (Get-FileHash -LiteralPath $reports[0].FullName -Algorithm SHA256).Hash.ToLowerInvariant()
             sourceManifestSha256 = (Get-FileHash -LiteralPath $env:KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST -Algorithm SHA256).Hash.ToLowerInvariant()
-            imageReceiptSha256 = (Get-FileHash -LiteralPath $env:KEYLOAD_IMAGE_RECEIPT -Algorithm SHA256).Hash.ToLowerInvariant()
-          } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $directory 'functional-gate-receipt.json') -Encoding utf8NoBOM
+            nativeProcessEvidence = $nativeProcessEvidence
+          } | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $directory 'functional-gate-receipt.json') -Encoding utf8NoBOM
           if (-not $valid) { throw 'The exact original functional case must execute once and pass without skips.' }
       - name: Test three-node database with .NET and MCP clients
         id: cluster-required
@@ -651,7 +660,7 @@ jobs:
         if: ${{ inputs.mode != 'functional-gates' && !cancelled() && steps.cluster-original-reports.outcome == 'success' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: docker-cluster-original-diagnostics
+          name: aspire-cluster-original-diagnostics
           path: |
             TestResults/cluster-required/**
             TestResults/functional-coverage/cluster/**
@@ -675,7 +684,7 @@ jobs:
             -EvidenceRoot (Join-Path $env:GITHUB_WORKSPACE 'TestResults/functional-coverage/cluster') `
             -SourceManifestPath $env:KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Verify original coverage source and test-image receipts after all children settle
+      - name: Verify original coverage source and native test assembly receipts after all children settle
         id: coverage-source-after
         if: ${{ !cancelled() && steps.coverage-source.outcome == 'success' }}
         shell: pwsh
@@ -755,17 +764,16 @@ jobs:
             -ToolPackageRoot $descriptor.tool.packageRoot -ToolVersion $descriptor.tool.version `
             -NativeOptionsJson $nativeOptions
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Clean up Docker registry
-        id: registry-cleanup
-        if: ${{ always() && (steps.images.outcome == 'success' || steps.images.outcome == 'failure') }}
-        run: node scripts/Features/BenchmarkComparisons/cleanup-images.mjs
-      - name: Save three-node Docker image logs
-        if: ${{ always() && (steps.images.outcome == 'success' || steps.images.outcome == 'failure') }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: docker-cluster-image-evidence
-          path: ${{ runner.temp }}/keyload-images/**
-          if-no-files-found: error
+      - name: Verify original native process teardown evidence
+        id: native-cleanup
+        if: ${{ always() && steps.coverage-source.outcome == 'success' }}
+        shell: pwsh
+        run: |
+          & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.process-lifecycle.ps1 `
+            -Repository $env:GITHUB_WORKSPACE `
+            -ResultsDirectory (Join-Path $env:GITHUB_WORKSPACE 'TestResults') `
+            -SourceManifestPath $env:KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Retain focused functional gate outcomes after cleanup
         if: ${{ always() && inputs.mode == 'functional-gates' }}
         shell: pwsh
@@ -783,7 +791,7 @@ jobs:
           COLD_THREE_OUTCOME: ${{ steps.functional-cold-three.outcome }}
           COLD_THREE_RECEIPT: ${{ steps.functional-cold-three-receipt.outcome }}
           SOURCE_VERIFY: ${{ steps.coverage-source-after.outcome }}
-          IMAGE_CLEANUP: ${{ steps.registry-cleanup.outcome }}
+          NATIVE_CLEANUP: ${{ steps.native-cleanup.outcome }}
         run: |
           $directory = Join-Path $env:GITHUB_WORKSPACE 'TestResults/functional-gates'
           New-Item -ItemType Directory -Path $directory -Force | Out-Null
@@ -795,17 +803,17 @@ jobs:
             coldPreconditions = $env:COLD_PRECONDITIONS_OUTCOME; coldPreconditionsReceipt = $env:COLD_PRECONDITIONS_RECEIPT
             coldSingle = $env:COLD_SINGLE_OUTCOME; coldSingleReceipt = $env:COLD_SINGLE_RECEIPT
             coldThree = $env:COLD_THREE_OUTCOME; coldThreeReceipt = $env:COLD_THREE_RECEIPT
-            sourceVerify = $env:SOURCE_VERIFY; imageCleanup = $env:IMAGE_CLEANUP
+            sourceVerify = $env:SOURCE_VERIFY; nativeCleanup = $env:NATIVE_CLEANUP
           }
           $outcomes | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $directory 'functional-gates-outcomes.json') -Encoding utf8NoBOM
-          foreach ($name in @('single','singleReceipt','three','threeReceipt','fileOwnershipThree','fileOwnershipThreeReceipt','coldPreconditions','coldPreconditionsReceipt','coldSingle','coldSingleReceipt','coldThree','coldThreeReceipt','sourceVerify','imageCleanup')) {
+          foreach ($name in @('single','singleReceipt','three','threeReceipt','fileOwnershipThree','fileOwnershipThreeReceipt','coldPreconditions','coldPreconditionsReceipt','coldSingle','coldSingleReceipt','coldThree','coldThreeReceipt','sourceVerify','nativeCleanup')) {
             if ($outcomes[$name] -cne 'success') { throw 'Both original normal gates, native file-ownership gate and receipt, cold preconditions, both cold gates and joined identity/cleanup checks must pass.' }
           }
       - name: Save three-node database test results
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
-          name: ${{ inputs.mode == 'functional-gates' && 'functional-gates-qualification' || 'docker-cluster-qualification' }}
+          name: ${{ inputs.mode == 'functional-gates' && 'functional-gates-qualification' || 'aspire-cluster-qualification' }}
           path: |
             TestResults/**
             ${{ runner.temp }}/functional-gates/**/native-resource-logs/**
@@ -816,6 +824,6 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
-          name: code-quality-docker-cluster
+          name: code-quality-aspire-cluster
           path: artifacts/code-quality/**
           if-no-files-found: error

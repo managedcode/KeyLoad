@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.AppHost.Features.BenchmarkComparisons;
+using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.Comparisons;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,7 +17,6 @@ internal static class ScaleServerCancellationProbe
     private const string EvidenceFile = "session-resource-evidence.json";
     private const string SamplingMissing = "serverCpuRss";
     private const string KeyLoad = "KeyLoad";
-    private const string SessionIdentityEnvironment = "KEYLOAD_BENCHMARK_SESSION_ID";
     private const string ObservationsField = "observations";
     private const string QualifiedField = "qualified";
     private const string MissingEvidenceField = "missingEvidence";
@@ -26,9 +25,9 @@ internal static class ScaleServerCancellationProbe
     private const int AdditionalSampleCount = 1;
 
     internal static async Task VerifyAsync(DistributedApplication app, ContainerResource[] containers,
-        BenchmarkSessionSelection selection, string root, string evidenceDirectory, CancellationToken token)
+        BenchmarkSessionSelection selection, string root, string evidenceDirectory, string sessionId, CancellationToken token)
     {
-        if (!OperatingSystem.IsLinux() || selection.Target != KeyLoad || selection.NodeCount != 1)
+        if (!OperatingSystem.IsLinux() || selection.Target == KeyLoad || selection.NodeCount != 1)
         {
             return;
         }
@@ -41,7 +40,7 @@ internal static class ScaleServerCancellationProbe
         var collector = new ScaleServerResourceEvidenceCollector(selection, output, applicationStopping: lifetime.ApplicationStopping,
             executionOptions: app.Services.GetRequiredService<IOptions<ScaleServerResourceOptions>>(),
             provenanceOptions: app.Services.GetRequiredService<IOptions<BenchmarkProvenanceOptions>>(),
-            sessionId: ComparisonImageProtocol.RequiredEnvironment(SessionIdentityEnvironment),
+            sessionId: sessionId,
             provider: app.Services.GetRequiredService<TimeProvider>());
         var failures = new List<Exception>();
         try
@@ -63,7 +62,7 @@ internal static class ScaleServerCancellationProbe
         await Assert.That(recorded.Length).IsEqualTo(selection.NodeCount);
         await Assert.That(recorded.All(item => item.GetProperty(SampleCountField).GetInt32()
             >= ScaleServerResourceBounds.MinimumSamples)).IsTrue();
-        await ScaleServerFailedWriteMemoizationProbe.VerifyAsync(app, containers, selection, root, evidenceDirectory, token);
+        await ScaleServerFailedWriteMemoizationProbe.VerifyAsync(app, containers, selection, root, evidenceDirectory, sessionId, token);
     }
 
     private static void ThrowFailures(List<Exception> failures)

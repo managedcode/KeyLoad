@@ -10,7 +10,7 @@ internal static class FunctionalColdReopenProfile
 {
     internal const string Setting = "KeyLoadTests:FunctionalColdReopen";
     internal const string EnabledArgument = "--KeyLoadTests:FunctionalColdReopen=true";
-    internal const string Invalid = "The functional cold-reopen selection requires explicit one or three voter native faults.";
+    internal const string Invalid = "The functional cold-reopen selection requires explicit one or three silo native process faults.";
     private const string FunctionalNodes = "KeyLoadTests:FunctionalNodeCount";
     private const string Enabled = "true";
     private const string Single = "1";
@@ -25,8 +25,8 @@ internal static class FunctionalColdReopenProfile
         {
             return false;
         }
-        if (value != Enabled || nested || !options.ContainerFaults
-            || configuration[ContainerFaultCommandProtocol.EnabledSetting] != Enabled
+        if (value != Enabled || nested || !options.ProcessFaults
+            || configuration[ProcessFaultCommandProtocol.EnabledSetting] != Enabled
             || configuration[FunctionalNodes] is not (Single or Three))
         {
             throw new InvalidOperationException(Invalid);

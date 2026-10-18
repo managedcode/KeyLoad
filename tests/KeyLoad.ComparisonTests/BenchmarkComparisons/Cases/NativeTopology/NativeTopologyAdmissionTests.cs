@@ -7,7 +7,7 @@ internal sealed class NativeTopologyAdmissionTests
     private const string NativeDirectory = "native";
     private const int RemovedNodeCount = 2;
     private const int ReplicatedNodeCount = 3;
-    private const int ExpectedResourceCount = 4;
+    private const int ExpectedResourceCount = 3;
 
     [Test]
     public async Task TwoMembersRejectBeforeResourcesAndThreeMembersContinueHealthy()
@@ -23,10 +23,9 @@ internal sealed class NativeTopologyAdmissionTests
 
         var resources = await model.BuildAsync(KeyLoadTarget, ReplicatedNodeCount);
         await Assert.That(resources.Length).IsEqualTo(ExpectedResourceCount);
-        var runner = resources.Single(resource => resource.Name == IsolatedResourceTopologyFixture.RunnerName);
-        var nodes = resources.Where(resource => resource != runner).ToArray();
+        var nodes = resources;
         await Assert.That(nodes.Length).IsEqualTo(ReplicatedNodeCount);
-        await IsolatedResourceTopologyFixture.VerifyWaitsAsync(runner, nodes);
+        await IsolatedResourceTopologyFixture.VerifyWaitsAsync(model.Client, nodes);
         await Assert.That(Directory.Exists(model.ProductionRoot)).IsFalse();
     }
 }

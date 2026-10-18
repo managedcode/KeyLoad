@@ -5,7 +5,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
 
 /// <summary>Owns native stream completion and the memoized join for one diagnostics test scope.</summary>
 internal sealed class RequestCqrsClusterDiagnosticsScopeStreamOwner(ResourceLoggerService logger,
-    ContainerResource[] resources, RequestCqrsLifecycleEvidence lifecycle)
+    ProjectResource[] resources, RequestCqrsLifecycleEvidence lifecycle)
 {
     private readonly HashSet<string> completedResourceNames = new(StringComparer.Ordinal);
     private RequestCqrsClusterDiagnostics? diagnostics;
@@ -40,7 +40,7 @@ internal sealed class RequestCqrsClusterDiagnosticsScopeStreamOwner(ResourceLogg
         }
     }
 
-    private void CompleteResource(ContainerResource resource, RequestCqrsScopeCompletionOwner owner,
+    private void CompleteResource(ProjectResource resource, RequestCqrsScopeCompletionOwner owner,
         List<Exception> failures)
     {
         var stage = CompletionStage(resource.Name);

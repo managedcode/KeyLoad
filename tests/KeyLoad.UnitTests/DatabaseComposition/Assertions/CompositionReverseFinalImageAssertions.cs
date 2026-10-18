@@ -23,7 +23,7 @@ internal static class CompositionReverseFinalImageAssertions
     internal static async Task StateAsync(SafeProjectorOperationDatabase owner, CompositionReverseFinalImageState state)
     {
         await OutcomeAsync(owner, state.Original, state.Receipt, state.Bound);
-        var retained = owner.Entry(state.Original).PreparedCommand!;
+        var retained = owner.ReadOutcome(state.Original).PreparedCommand!;
         await Assert.That(NativeSerialization.Serialize(retained).SequenceEqual(NativeSerialization.Serialize(state.Original))).IsTrue();
         await Assert.That(retained.CommandId).IsEqualTo(state.Request.CommandId);
         await Assert.That(retained.Value!.Kind).IsEqualTo(OperationKind.Batch);

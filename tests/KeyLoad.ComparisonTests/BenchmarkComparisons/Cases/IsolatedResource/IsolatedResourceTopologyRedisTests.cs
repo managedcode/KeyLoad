@@ -1,5 +1,5 @@
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.AppHost.Features.BenchmarkComparisons;
+using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
@@ -24,9 +24,9 @@ internal sealed class IsolatedResourceTopologyRedisTests
         await using var fixture = new IsolatedResourceTopologyFixture(Target, count);
         IsolatedRedisResources.Add(fixture.Context);
         var resources = fixture.Build();
-        var runner = resources.Single(item => item.Name == IsolatedResourceTopologyFixture.RunnerName);
+        var runner = fixture.Context.Client;
         var nodes = resources.OfType<RedisResource>().ToArray();
-        await Assert.That(resources.Length).IsEqualTo(count + 1);
+        await Assert.That(resources.Length).IsEqualTo(count);
         await Assert.That(nodes.Length).IsEqualTo(count);
         await IsolatedResourceTopologyFixture.VerifyWaitsAsync(runner, nodes);
         var primary = nodes.Single(item => item.Name == Primary);
@@ -40,7 +40,7 @@ internal sealed class IsolatedResourceTopologyRedisTests
             IsolatedResourceTopologyFixture.NativePrefix + "Endpoints__", StringComparison.Ordinal))).IsEqualTo(count);
         foreach (var node in nodes)
         {
-            await VerifyNodeAsync(fixture, node, primary);
+            await VerifyNodeAsync(node, primary);
         }
         for (var index = 0; index < count; index++)
         {
@@ -57,10 +57,10 @@ internal sealed class IsolatedResourceTopologyRedisTests
             .IsEqualTo("docker.io/library/redis:8.4.0@" + BenchmarkResources.RedisDigest);
     }
 
-    private static async Task VerifyNodeAsync(IsolatedResourceTopologyFixture fixture, RedisResource node, RedisResource primary)
+    private static async Task VerifyNodeAsync(RedisResource node, RedisResource primary)
     {
         await VerifyNativeTransportAsync(node);
-        await IsolatedResourceTopologyFixture.VerifyPrivateDataAsync(node, fixture.Context.Root);
+        await IsolatedResourceTopologyFixture.VerifyPrivateDataAsync(node);
         await IsolatedResourceTopologyFixture.VerifyUserAsync(node);
         await Assert.That(node.PasswordParameter).IsSameReferenceAs(primary.PasswordParameter);
         var secret = await node.PasswordParameter!.GetValueAsync(TestContext.Current!.Execution.CancellationToken);

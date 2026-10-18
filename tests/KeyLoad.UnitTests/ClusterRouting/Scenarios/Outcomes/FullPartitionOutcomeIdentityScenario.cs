@@ -33,8 +33,8 @@ internal static class FullPartitionOutcomeIdentityScenario
         ConfigureCollection(database, secondPartition, SecondResource);
         var commandId = Guid.NewGuid();
         var operationTime = database.Database.EvaluationClock.GetUtcNow();
-        var firstOperation = CreateOperation(commandId, firstPartition, FirstResource, FirstJson, operationTime);
-        var secondOperation = CreateOperation(commandId, secondPartition, SecondResource, SecondJson, operationTime);
+        var firstOperation = CreateOperation(database.Database, commandId, firstPartition, FirstResource, FirstJson, operationTime);
+        var secondOperation = CreateOperation(database.Database, commandId, secondPartition, SecondResource, SecondJson, operationTime);
         var committed = await CommitReplayAndCheckConflictsAsync(database, firstOperation, secondOperation,
             firstPartition, secondPartition);
 
@@ -48,11 +48,11 @@ internal static class FullPartitionOutcomeIdentityScenario
         _ = database.Submit(OperationKind.ConfigureResource, request).Get<ResourceDefinition>();
     }
 
-    private static Command<DatabaseCommand> CreateOperation(Guid commandId, PartitionRef partition, string resource,
+    private static Command<DatabaseCommand> CreateOperation(DatabaseEngine owner, Guid commandId, PartitionRef partition, string resource,
         string json, DateTimeOffset operationTime)
     {
         var request = new CommandRequest(commandId, partition, [new PutDocument(resource, DocumentId, json)]);
-        return new(commandId, OperationKind.Batch, Administrator, operationTime,
+        return owner.CreateCommand(OperationKind.Batch, commandId, Administrator, operationTime,
             JsonSerializer.Serialize(request, JsonDefaults.Options));
     }
 
@@ -124,15 +124,14 @@ internal static class FullPartitionOutcomeIdentityScenario
         database.Store.Dispose();
         using var reopenedStore = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         var reopened = new DatabaseEngine(reopenedStore, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
-        PhysicalShardTestBootstrap.RequireExisting(reopened);
         await FullPartitionOutcomeIdentityAssertions.AssertReceiptAsync(reopened.ResolveOutcome(committed.First),
             committed.FirstReceipt);
         await FullPartitionOutcomeIdentityAssertions.AssertReceiptAsync(reopened.ResolveOutcome(committed.Second),
             committed.SecondReceipt);
         await FullPartitionOutcomeIdentityAssertions.AssertStoredOutcomeAsync(reopenedStore, firstPartition,
-            committed.First.Id, committed.FirstReceipt);
+            committed.First.CommandId, committed.FirstReceipt);
         await FullPartitionOutcomeIdentityAssertions.AssertStoredOutcomeAsync(reopenedStore, secondPartition,
-            committed.Second.Id, committed.SecondReceipt);
+            committed.Second.CommandId, committed.SecondReceipt);
         await VerifyReopenedDocumentsAsync(reopened, firstPartition, secondPartition, committed);
         await FullPartitionOutcomeIdentityAssertions.AssertOutboxTailsAsync(reopened, firstPartition, secondPartition,
             committed.FirstTail, committed.SecondTail);
@@ -146,7 +145,7 @@ internal static class FullPartitionOutcomeIdentityScenario
             DocumentId, FirstJson);
         await FullPartitionOutcomeIdentityAssertions.AssertDocumentAsync(reopened, secondPartition, SecondResource,
             DocumentId, SecondJson);
-        await Assert.That(committed.First.Id).IsEqualTo(committed.Second.Id);
-        await Assert.That(committed.First.PrincipalId).IsEqualTo(committed.Second.PrincipalId);
+        await Assert.That(committed.First.CommandId).IsEqualTo(committed.Second.CommandId);
+        await Assert.That(committed.First.UserId).IsEqualTo(committed.Second.UserId);
     }
 }

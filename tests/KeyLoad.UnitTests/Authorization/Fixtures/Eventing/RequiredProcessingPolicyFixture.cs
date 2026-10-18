@@ -24,8 +24,9 @@ internal sealed class RequiredProcessingPolicyFixture(bool header) : IDisposable
     internal static string EffectJson(string id) => id == "first" ? "{\"processed\":1}" : "{\"processed\":2}";
     internal ProcessingRequest Processing(Guid id, Delivery delivery, string document)
         => new(id, Lane, delivery.Token, "required-handler", 1L, [new PutDocument(Derived, document, EffectJson(document), 0L)]);
-    internal static Command<DatabaseCommand> Operation(OperationKind kind, object request, Guid id, string principal = Worker)
-        => new(id, kind, principal, default, JsonSerializer.Serialize(request, request.GetType(), JsonDefaults.Options));
+    internal Command<DatabaseCommand> Operation(OperationKind kind, object request, Guid id, string principal = Worker)
+        => Harness.Database.CreateCommand(kind, id, principal, Harness.Database.EvaluationClock.GetUtcNow(),
+            JsonSerializer.Serialize(request, request.GetType(), JsonDefaults.Options));
     internal Result<object> Apply(OperationKind kind, object request, Guid id, string principal = Worker, CancellationToken token = default)
         => Harness.Database.ApplyEmbedded(Operation(kind, request, id, principal), token);
     internal async Task InitializeAsync(CancellationToken token)

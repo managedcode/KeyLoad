@@ -17,10 +17,10 @@ internal sealed class IsolatedQuorumResourceQdrantTests
         var nodes = model.BuildNodes();
         await IsolatedQuorumResourceAssertions.VerifyGroupAsync(model, nodes, count, T.QdrantPrefix,
             T.QdrantStorage, T.Http, BenchmarkResources.QdrantDigest);
-        var runner = await IsolatedQuorumResourceModel.ReadAsync(model.Runner.Resource);
-        await Assert.That(runner.EnvironmentVariables.ToDictionary()[T.Image])
+        var values = await IsolatedResourceTopologyFixture.EnvironmentAsync(model.Client);
+        var bindings = model.Client.Values;
+        await Assert.That(values[T.Image])
             .IsEqualTo(T.QdrantImage + BenchmarkResources.QdrantDigest);
-        var bindings = runner.EnvironmentVariablesWithUnprocessed.ToDictionary(pair => pair.Key, pair => pair.Value.Unprocessed);
         var key = await IsolatedQuorumResourceAssertions.VerifySecretAsync(bindings[T.ApiKey]);
         foreach (var node in nodes)
         {

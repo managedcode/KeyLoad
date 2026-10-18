@@ -1,6 +1,6 @@
 using KeyLoad.AppHost.Hosting;
 
-internal sealed record AppHostConfiguration(bool BenchmarkMode, string DataRoot, bool Ephemeral)
+internal sealed record AppHostConfiguration(string DataRoot, bool Ephemeral)
 {
     private const string DefaultDataRoot = "../../data/cluster";
     internal const string AdminParameter = "admin-key";
@@ -9,6 +9,6 @@ internal sealed record AppHostConfiguration(bool BenchmarkMode, string DataRoot,
     {
         var options = AppHostOptionsRegistration.Get(builder).Startup.Value;
         var dataRoot = Path.GetFullPath(options.DataRoot ?? Path.Combine(builder.AppHostDirectory, DefaultDataRoot));
-        return new(options.BenchmarkMode, dataRoot, options.Ephemeral ?? options.BenchmarkMode);
+        return new(dataRoot, options.Ephemeral ?? false);
     }
 }

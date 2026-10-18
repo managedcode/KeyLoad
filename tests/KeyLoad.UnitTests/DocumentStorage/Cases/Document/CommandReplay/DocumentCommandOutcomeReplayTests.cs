@@ -23,7 +23,9 @@ internal sealed class DocumentCommandOutcomeReplayTests
         await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(ErrorCode.RevisionConflict);
         await Assert.That(failed.Problem?.Detail).IsEqualTo(RevisionConflictDetail);
         var failedOutcomeBytes = DocumentCommandOutcomeTestSupport.OutcomeBytes(database, Writer, failedId);
-        await Assert.That(OutcomeStoreOracle.ReadPartition(database.Store, database.Partition, Writer, failedId)!.SafeDetail).IsEqualTo(RevisionConflictDetail);
+        var stored = OutcomeStoreOracle.ReadPartition(database.Store, database.Partition, Writer, failedId)
+            ?? throw new InvalidOperationException("The failed scoped command outcome is missing.");
+        await Assert.That(stored.Problem?.Detail).IsEqualTo(RevisionConflictDetail);
         await Assert.That(DocumentCommandOutcomeTestSupport.OutboxEqual(initialOutbox,
             DocumentCommandOutcomeTestSupport.CaptureOutbox(database))).IsTrue();
         await Assert.That(database.Database.GetDocument("root", new(database.Partition, Collection, DocumentId))).IsNull();

@@ -4,6 +4,8 @@ using KeyLoad.Storage;
 using KeyLoad.UnitTests.Features.ResourceExecution;
 using static KeyLoad.UnitTests.Features.Search.VectorReferenceLifetimeNativeProtocol;
 
+using KeyLoad.UnitTests.Features.Messaging;
+
 namespace KeyLoad.UnitTests.Features.Search;
 
 /// <summary>Retires and recreates the actual source table before refusing an original typed reference without effects.</summary>
@@ -57,25 +59,25 @@ internal static class VectorReferenceLifetimeNativeFlow
 
     private static async Task RefuseSearchAsync(NativeDropRuntimeProfile profile, CancellationToken token)
     {
-        var image = ControlledPartitionMovementRawImage.Bytes(profile.Source.Store);
+        var image = QueueWholeFlowStorage.Bytes(profile.Source.Store);
         var position = profile.Source.Store.Position;
         var error = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => VectorReferenceLifetimeNativeCalls.SearchAsync(profile, token));
         ArgumentNullException.ThrowIfNull(error);
         await Assert.That(error.Code).IsEqualTo(ErrorCode.OwnershipLost);
         await Assert.That(profile.Source.Store.Position).IsEqualTo(position);
-        await Assert.That(ControlledPartitionMovementRawImage.Bytes(profile.Source.Store).SequenceEqual(image)).IsTrue();
+        await Assert.That(QueueWholeFlowStorage.Bytes(profile.Source.Store).SequenceEqual(image)).IsTrue();
     }
 
     private static async Task RefuseWriteAsync(NativeDropRuntimeProfile profile, ApplyVectorProjection request, CancellationToken token)
     {
-        var image = ControlledPartitionMovementRawImage.Bytes(profile.Source.Store);
+        var image = QueueWholeFlowStorage.Bytes(profile.Source.Store);
         var position = profile.Source.Store.Position;
         var command = new CommandRequest(Guid.NewGuid(), NativeDropRuntimeProtocol.Partition, [request]);
-        var denied = await profile.Source.SubmitAsync(OperationKind.Batch, command.CommandId,
+        var denied = await NativeDropPublicSubmission.SubmitAsync(profile, OperationKind.Batch, command.CommandId,
             PartitionStoreProtocol.AdministratorId, NativeSerialization.Serialize(command), token);
-        await Assert.That(Errors.Code(denied.Problem)).IsEqualTo((ErrorCode?)ErrorCode.OwnershipLost);
+        await Assert.That(denied.Error).IsEqualTo((ErrorCode?)ErrorCode.OwnershipLost);
         await Assert.That(denied.Payload.IsEmpty).IsTrue();
         await Assert.That(profile.Source.Store.Position).IsEqualTo(position);
-        await Assert.That(ControlledPartitionMovementRawImage.Bytes(profile.Source.Store).SequenceEqual(image)).IsTrue();
+        await Assert.That(QueueWholeFlowStorage.Bytes(profile.Source.Store).SequenceEqual(image)).IsTrue();
     }
 }

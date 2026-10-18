@@ -9,8 +9,6 @@ internal sealed class ChunkMultiblockPublicClusterTests(ClusterFixture fixture)
     [Test]
     public async Task IndependentlyAuthored257RowsCrossNativeBlocksThenPagedExpiryPolicyRepairReplayAndTwoCold()
     {
-        fixture.RegisterNativeCoverageCase<ChunkMultiblockPublicClusterTests>(nameof(
-            IndependentlyAuthored257RowsCrossNativeBlocksThenPagedExpiryPolicyRepairReplayAndTwoCold));
         var failures = new List<Exception>();
         McpCallerDeadline? deadline = null;
         try

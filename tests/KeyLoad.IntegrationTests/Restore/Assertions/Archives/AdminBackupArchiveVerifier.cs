@@ -27,7 +27,7 @@ internal static class AdminBackupArchiveVerifier
     private const string MissingSiloIdentity = "The dashboard did not report the executing physical silo.";
     private const string SiloDirectoryOutsideFixture = "The actual silo name did not resolve to one fixture-owned node directory.";
     private const int EmptyInventoryCount = 0;
-    private const string DataMountTarget = "/data";
+    private const string DataEnvironment = "KeyLoad__DataDirectory";
     private static readonly string[] Nodes =
         [McpCallerProtocol.Node1, McpCallerProtocol.Node2, McpCallerProtocol.Node3];
 
@@ -189,11 +189,15 @@ internal static class AdminBackupArchiveVerifier
             throw new InvalidDataException(SiloDirectoryOutsideFixture);
         }
         var resource = fixture.App.Services.GetRequiredService<DistributedApplicationModel>().Resources
-            .OfType<ContainerResource>().Single(item => item.Name == silo);
-        var mount = resource.Annotations.OfType<ContainerMountAnnotation>()
-            .Single(item => item.Target == DataMountTarget);
-        if (mount.Type != ContainerMountType.BindMount || mount.IsReadOnly
-            || mount.Source is not { } source)
+            .OfType<ProjectResource>().Single(item => item.Name == silo);
+        if (!fixture.App.ResourceNotifications.TryGetCurrentState(silo, out var current)
+            || current.Resource != resource
+            || current.Snapshot.EnvironmentVariables.Single(value => value.Name == DataEnvironment).Value is not { } source)
+        {
+            throw new InvalidDataException(SiloDirectoryOutsideFixture);
+        }
+        var expected = Path.GetFullPath(Path.Combine(fixture.Root, silo));
+        if (!string.Equals(Path.GetFullPath(source), expected, StringComparison.Ordinal))
         {
             throw new InvalidDataException(SiloDirectoryOutsideFixture);
         }

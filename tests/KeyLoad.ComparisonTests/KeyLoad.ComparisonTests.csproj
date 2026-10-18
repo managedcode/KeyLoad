@@ -17,6 +17,7 @@
     <ProjectReference Include="../../src/KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Client/KeyLoad.Client.csproj" />
     <ProjectReference Include="../../build/KeyLoad.AppHost/KeyLoad.AppHost.csproj" />
+    <ProjectReference Include="../../build/KeyLoad.LoadTests.AppHost/KeyLoad.LoadTests.AppHost.csproj" />
     <ProjectReference Include="../../benchmarks/KeyLoad.Comparisons/KeyLoad.Comparisons.csproj" />
     <PackageReference Include="Aspire.Hosting.Testing" />
     <PackageReference Include="TUnit" />

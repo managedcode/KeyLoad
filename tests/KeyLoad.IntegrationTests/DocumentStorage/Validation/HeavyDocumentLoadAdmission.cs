@@ -1,4 +1,3 @@
-using KeyLoad.IntegrationTests.Features.CodeQuality;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
@@ -12,8 +11,6 @@ internal static class HeavyDocumentLoadAdmission
     internal const string ExactFilter = "/*/*/HeavyDocumentLoadClusterTests/*";
     internal const string ParallelismArgument = "--maximum-parallel-tests";
     internal const string ExclusiveParallelism = "1";
-    internal const string CoveragePreparationEnvironment = "KEYLOAD_TUNIT_NATIVE_COVERAGE_ARGUMENTS";
-    internal const string CoverageSection = "KeyLoadTests:NativeCoverage";
     private const string CoverageArgumentPrefix = "--coverage";
     private const string ArgumentEquals = "=";
 
@@ -32,10 +29,7 @@ internal static class HeavyDocumentLoadAdmission
         _ = options.Value;
         if (!ExactlyOne(arguments, FilterArgument, ExactFilter)
             || !ExactlyOne(arguments, ParallelismArgument, ExclusiveParallelism)
-            || arguments.Any(argument => argument.StartsWith(CoverageArgumentPrefix, StringComparison.Ordinal))
-            || configuration[CoveragePreparationEnvironment] is not null
-            || configuration[NativeCoverageClusterFixtureProtocol.ModeEnvironment] is not null
-            || configuration.GetSection(CoverageSection).GetChildren().Any())
+            || arguments.Any(argument => argument.StartsWith(CoverageArgumentPrefix, StringComparison.Ordinal)))
         {
             throw new InvalidOperationException(HeavyDocumentLoadExecutionOptions.ValidationMessage);
         }

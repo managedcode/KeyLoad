@@ -16,7 +16,7 @@ internal static class GraphReferenceLifetimeNativeCalls
             new(FreshGraph, ResourceKind.Graph, NativeDropRuntimeProtocol.Domain)
         })
         {
-            var configured = await profile.Source.SubmitAsync(OperationKind.ConfigureResource, Guid.NewGuid(),
+            var configured = await NativeDropPublicSubmission.SubmitAsync(profile, OperationKind.ConfigureResource, Guid.NewGuid(),
                 PartitionStoreProtocol.AdministratorId, NativeSerialization.Serialize(new ConfigureResourceRequest(
                     NativeDropRuntimeProtocol.Tenant, NativeDropRuntimeProtocol.Database, definition)), token);
             await NativeDropRuntimeAssertions.SameAsync(definition, NativeDropRuntimeAssertions.Value<ResourceDefinition>(configured));
@@ -27,7 +27,7 @@ internal static class GraphReferenceLifetimeNativeCalls
 
     internal static async Task<CommitReceipt> CommitAsync(NativeDropRuntimeProfile profile,
         CommandRequest command, CancellationToken token)
-        => NativeDropRuntimeAssertions.Value<CommitReceipt>(await profile.Source.SubmitAsync(OperationKind.Batch,
+        => NativeDropRuntimeAssertions.Value<CommitReceipt>(await NativeDropPublicSubmission.SubmitAsync(profile, OperationKind.Batch,
             command.CommandId, PartitionStoreProtocol.AdministratorId, NativeSerialization.Serialize(command), token));
 
     internal static EntityRef Reference(NativeDropRuntimeProfile profile, string collection, string id)

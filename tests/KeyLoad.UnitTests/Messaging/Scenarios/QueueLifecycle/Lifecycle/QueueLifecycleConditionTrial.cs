@@ -9,7 +9,7 @@ internal static class QueueLifecycleConditionTrial
         using var fixture = new TestDatabase();
         var state = QueueLifecycleConditionOperations.Seed(fixture);
         await QueueLifecycleConditionAssertions.Ready(fixture.Database, fixture.Store, state);
-        var cancel = QueueLifecycleConditionOperations.Cancel(state);
+        var cancel = QueueLifecycleConditionOperations.Cancel(fixture.Database, state);
         var originalCut = QueueLifecycleConditionAssertions.Capture(fixture.Store);
         var original = QueueLifecycleConditionOperations.Damage(fixture.Store, state, fault);
         await QueueLifecycleConditionAssertions.Corrupt(fixture.Database, fixture.Store, state, cancel);
@@ -45,17 +45,17 @@ internal static class QueueLifecycleConditionTrial
         await QueueLifecycleConditionAssertions.Ready(fixture.Database, fixture.Store, state);
         if (kind == QueueLifecycleConditionRefusal.Cancelled)
         {
-            var initial = QueueLifecycleConditionOperations.Cancel(state);
+            var initial = QueueLifecycleConditionOperations.Cancel(fixture.Database, state);
             var cancelled = fixture.Database.Apply(initial);
             cancelled.Get<CommitReceipt>();
             state.Successes.Add((initial, cancelled));
         }
         var bad = kind switch
         {
-            QueueLifecycleConditionRefusal.Version => QueueLifecycleConditionOperations.Cancel(state, version: 0),
-            QueueLifecycleConditionRefusal.Generation => QueueLifecycleConditionOperations.Cancel(state, generation: 0),
-            QueueLifecycleConditionRefusal.Missing => QueueLifecycleConditionOperations.Cancel(state, id: "condition-missing"),
-            QueueLifecycleConditionRefusal.Cancelled => QueueLifecycleConditionOperations.Cancel(state, version: 2, generation: 2),
+            QueueLifecycleConditionRefusal.Version => QueueLifecycleConditionOperations.Cancel(fixture.Database, state, version: 0),
+            QueueLifecycleConditionRefusal.Generation => QueueLifecycleConditionOperations.Cancel(fixture.Database, state, generation: 0),
+            QueueLifecycleConditionRefusal.Missing => QueueLifecycleConditionOperations.Cancel(fixture.Database, state, id: "condition-missing"),
+            QueueLifecycleConditionRefusal.Cancelled => QueueLifecycleConditionOperations.Cancel(fixture.Database, state, version: 2, generation: 2),
             _ => throw new ArgumentOutOfRangeException(nameof(kind))
         };
         var expected = kind is QueueLifecycleConditionRefusal.Version or QueueLifecycleConditionRefusal.Generation
@@ -78,7 +78,7 @@ internal static class QueueLifecycleConditionTrial
             await QueueLifecycleConditionAssertions.Replay(owner, cold, bad, failed);
             if (kind != QueueLifecycleConditionRefusal.Cancelled)
             {
-                var cancel = QueueLifecycleConditionOperations.Cancel(state);
+                var cancel = QueueLifecycleConditionOperations.Cancel(owner, state);
                 var result = owner.Apply(cancel);
                 result.Get<CommitReceipt>();
                 state.Successes.Add((cancel, result));

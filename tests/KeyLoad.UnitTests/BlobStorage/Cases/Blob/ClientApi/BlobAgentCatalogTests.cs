@@ -12,8 +12,8 @@ internal sealed class BlobAgentCatalogTests
     private const int PublicCount = McpCatalogExpectations.Count;
     private const string AggregateReplayTool = "keyload_streams_replay";
     private const string AggregateReplayRoute = "/v1/streams/replay";
-    private const string SampleRetentionTool = "keyload_series_retention";
-    private const string SampleRetentionRoute = "/v1/series/retention";
+    private const string SeriesRetentionTool = "keyload_series_retention";
+    private const string SeriesRetentionRoute = "/v1/series/retention";
     private const string Request = "request";
     private const string Stream = "stream";
     private const string ReducerVersion = "reducerVersion";
@@ -81,7 +81,7 @@ internal sealed class BlobAgentCatalogTests
         {
             (AggregateReplayTool, AggregateReplayRoute, GrainReadKind.AggregateReplay,
                 new[] { Stream, ReducerVersion, StateSchemaVersion, FromBeginning, MaximumEvents }),
-            (SampleRetentionTool, SampleRetentionRoute, GrainReadKind.SampleRetention,
+            (SeriesRetentionTool, SeriesRetentionRoute, GrainReadKind.SampleRetention,
                 new[] { Partition, Set, SeriesId })
         };
         foreach (var item in cases)

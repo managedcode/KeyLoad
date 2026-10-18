@@ -1,24 +1,20 @@
 using KeyLoad.Clustering.Features.Search;
-using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
 using ManagedCode.Communication.Commands;
-using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Orleans.Serialization;
 
 namespace KeyLoad.Clustering;
 
-internal sealed class OnlineTextChildCalls(DecodedGrainRequest parent, Func<string, CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> executeChild,
-    IServiceProvider services, GrainRequestCodec codec, TimeProvider clock,
-    Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
-    IOptions<GrainRoutingOptions> routing, ILogger diagnostics, OnlineTextFrameAccounting frames, global::Orleans.Runtime.IGrainContext context, IResourceLifetimeWorkBinding binding)
+internal sealed class OnlineTextChildCalls(DecodedGrainRequest parent, string signedParent,
+    Func<string, CancellationToken, Task<GrainOperationReply>> executeChild, Func<Guid, Task> abort,
+    IServiceProvider services, GrainRequestCodec codec, ILogger diagnostics,
+    OnlineTextFrameAccounting frames, IGrainContext context, IResourceLifetimeWorkBinding binding)
 {
-    private readonly Func<INativeOnlineTextMaintenance> borrowNative = services.GetRequiredService<Func<INativeOnlineTextMaintenance>>();
     internal Guid ParentRequestId => parent.Envelope.RequestId;
     internal Guid SessionId { get; } = Guid.NewGuid();
-    internal DatabaseEngine Database => services.GetRequiredService<DatabaseEngine>();
+    internal DatabaseLimits Limits => services.GetRequiredService<IOptions<DatabaseLimits>>().Value;
 
     internal Task<OnlineTextCapabilityResult> CapabilityAsync(OnlineTextIndexMaintenanceRequest request,
         OnlineTextCapabilityKind kind, CancellationToken token, ProjectionBatch? page = null,
@@ -39,7 +35,7 @@ internal sealed class OnlineTextChildCalls(DecodedGrainRequest parent, Func<stri
         => DispatchAsync<OnlineTextIndexMaintenanceResult>((actor, _) => codec.CreateOnlineTextPublication(actor,
             original, parent.Envelope.ExpiresAt), original.CommandId, token);
 
-    internal Task AbortAsync() => borrowNative().AbortAsync(SessionId);
+    internal Task AbortAsync() => abort(SessionId);
 
     internal async Task ObserveCapturedAsync(CancellationToken token)
     {
@@ -59,7 +55,12 @@ internal sealed class OnlineTextChildCalls(DecodedGrainRequest parent, Func<stri
         token.ThrowIfCancellationRequested();
         codec.ValidateScope(parent.Envelope);
         GrainIdentityContext.Validate(parent.Envelope, parent.Envelope.RequestId);
-        GrainRequestAuthority.RequireAdministrator(GrainRequestAuthority.ReloadForRequest(Database, parent.Envelope, clock));
+        frames.AdmitChildExchange();
+        var verified = await executeChild(signedParent, token).ConfigureAwait(true);
+        if (verified.Error is { } failure)
+        {
+            throw Errors.Fail(failure, verified.SafeDetail ?? GrainRoutingProtocol.InvalidRequest);
+        }
     }
 
     private async Task<TResult> DispatchAsync<TResult>(Func<Guid, string, string> sign,
@@ -68,10 +69,8 @@ internal sealed class OnlineTextChildCalls(DecodedGrainRequest parent, Func<stri
         token.ThrowIfCancellationRequested();
         codec.ValidateScope(parent.Envelope);
         GrainIdentityContext.Validate(parent.Envelope, parent.Envelope.RequestId);
-        var principal = GrainRequestAuthority.ReloadForRequest(Database, parent.Envelope, clock);
-        GrainRequestAuthority.RequireAdministrator(principal);
         var actorId = Guid.NewGuid();
-        var signed = sign(actorId, principal.Id);
+        var signed = sign(actorId, parent.Envelope.PrincipalId!);
         var invoked = false;
         GrainOperationReply reply;
         try
@@ -79,9 +78,10 @@ internal sealed class OnlineTextChildCalls(DecodedGrainRequest parent, Func<stri
             reply = await MaintenanceChildDispatch.ExecuteAsync(parent, signed, actorId, commandId,
                 (value, cancellation) =>
                 {
+                    frames.AdmitChildExchange();
                     invoked = true;
-                    return frames.ObserveChild(executeChild(value, cancellation), cancellation);
-                }, services, codec, clock, serializer, routing, binding, null, token).ConfigureAwait(true);
+                    return executeChild(value, cancellation);
+                }, services, codec, binding, null, token).ConfigureAwait(true);
         }
         catch (KeyLoadException error) when (invoked && commandId != Guid.Empty)
         {

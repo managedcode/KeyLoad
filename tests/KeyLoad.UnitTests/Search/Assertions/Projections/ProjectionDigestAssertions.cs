@@ -29,15 +29,16 @@ internal static class ProjectionDigestAssertions
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            result = fixture.Harness.Submit(OperationKind.Batch, command, EventProjectionFixture.WorkerId, command.CommandId);
-            await EqualAsync(result, Result<object>.Fail(Errors.Problem(ErrorCode.Validation, "The mutation resource and canonical owner differ.")));
+            var actual = fixture.Harness.Submit(OperationKind.Batch, command, EventProjectionFixture.WorkerId, command.CommandId);
+            result = actual;
+            await EqualAsync(actual, Result<object>.Fail(Errors.Problem(ErrorCode.Validation, "The mutation resource and canonical owner differ.")));
             await Assert.That(fixture.Harness.Store.Position).IsEqualTo(before + 1L);
             var outcome = fixture.Harness.Store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(
                 fixture.Partition, EventProjectionFixture.WorkerId, command.CommandId)));
             await Assert.That(outcome).IsNotNull();
             await Assert.That(outcome!.PolicyEpoch).IsEqualTo(1L);
             await Assert.That(outcome.Incarnation).IsEqualTo(fixture.Harness.Store.Identity.Incarnation);
-            await EqualAsync(outcome.Result, result);
+            await EqualAsync(outcome.Result, actual);
         }, failures);
         await ServerFailureObserver.ObserveAsync(() => EqualAsync(ProjectionDigestImage.Domain(fixture), domain), failures);
         ServerFailureObserver.ThrowIfAny(failures);

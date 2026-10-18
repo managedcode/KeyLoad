@@ -6,7 +6,7 @@ using ModelContextProtocol.Protocol;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>Owns actual public SDK encoding, metadata and bounded reply objects for native-boundary regressions.</summary>
+/// <summary>Owns actual public SDK encoding, metadata and bounded reply objects for native boundary checks.</summary>
 internal static class McpNativeBoundaryTestData
 {
     internal const string Marker = "private-native-boundary-marker";

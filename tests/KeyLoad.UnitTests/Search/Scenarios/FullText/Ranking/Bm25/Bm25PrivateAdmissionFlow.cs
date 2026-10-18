@@ -1,3 +1,4 @@
+using KeyLoad.UnitTests.Features.ResourceExecution;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Query.Features.Search;
 using ManagedCode.Communication;
@@ -50,16 +51,16 @@ internal static class Bm25PrivateAdmissionFlow
         await Bm25PrivateAdmissionAssertions.RequirePublicationAsync(database, phase, result, subject, 1);
         await RequireReplayAsync(database, original, phase, result, token);
         database.Commit(new PutDocument(Collection, Document, ChangedJson, 1, ExplicitReplacement: true));
-        var changed = Capture(database, original.Id, original.Id, token);
-        var before = ReplicaSubmissionOutcomeState.Read(database);
+        var changed = Capture(database, original.CommandId, original.CommandId, token);
+        var before = CanonicalStoreCut.Read(database);
         var conflict = await SubmitAsync(database, changed, token);
         await Assert.That(Errors.Code(conflict.Problem)).IsEqualTo(ErrorCode.Conflict);
 
         await Assert.That(conflict.Value).IsNull();
         await Assert.That(conflict.Problem?.Detail).IsEqualTo("The command ID was already used with different content.");
-        await before.RequireAsync(ReplicaSubmissionOutcomeState.Read(database));
-        await ReplicaSubmissionOutcomeFlow.RequireResultAsync(result, database.Database.ResolveSubmissionOutcome(original));
-        var healthy = Capture(database, Guid.NewGuid(), original.Id, token);
+        await before.RequireAsync(CanonicalStoreCut.Read(database));
+        await NativeReplayResultAssertions.SameAsync(result, database.Database.ResolveSubmissionOutcome(original));
+        var healthy = Capture(database, Guid.NewGuid(), original.CommandId, token);
         var healthyResult = await SubmitAsync(database, healthy, token);
         await Bm25PrivateAdmissionAssertions.RequirePublicationAsync(database,
             NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((healthy).Value!.Input.Span), healthyResult, subject, 2);
@@ -79,16 +80,16 @@ internal static class Bm25PrivateAdmissionFlow
     private static async Task RequireReplayAsync(TestDatabase database, Command<DatabaseCommand> original,
         Bm25CorpusPublicationPhaseCommand phase, Result<object> result, CancellationToken token)
     {
-        var before = ReplicaSubmissionOutcomeState.Read(database);
+        var before = CanonicalStoreCut.Read(database);
         var retained = NativeSerialization.Serialize(database.ReadStoredOutcome(original.CommandId));
         var refreshed = database.Database.CreateVerifiedBm25CorpusPublication(Root, phase, database.CreateReadWork(token));
         var replay = await SubmitAsync(database, refreshed, token);
-        await ReplicaSubmissionOutcomeFlow.RequireResultAsync(result, replay);
-        await ReplicaSubmissionOutcomeFlow.RequireResultAsync(result, database.Database.ResolveSubmissionOutcome(original));
-        await before.RequireAsync(ReplicaSubmissionOutcomeState.Read(database));
-        await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(retained,
+        await NativeReplayResultAssertions.SameAsync(result, replay);
+        await NativeReplayResultAssertions.SameAsync(result, database.Database.ResolveSubmissionOutcome(original));
+        await before.RequireAsync(CanonicalStoreCut.Read(database));
+        await NativeReplayResultAssertions.BytesAsync(retained,
             NativeSerialization.Serialize(database.ReadStoredOutcome(original.CommandId)));
-        await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(NativeSerialization.Serialize(phase),
+        await NativeReplayResultAssertions.BytesAsync(NativeSerialization.Serialize(phase),
             NativeSerialization.Serialize(NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((database.ReadStoredOutcome(original.CommandId).PreparedCommand!).Value!.Input.Span)));
     }
 
@@ -111,6 +112,6 @@ internal static class Bm25PrivateAdmissionFlow
         var principal = database.Store.Read(view =>
             database.Database.Principal(view, Root, database.Database.EvaluationClock.GetUtcNow()));
         return await KeyLoad.Clustering.GrainBm25CorpusPublicationCommand.SubmitAsync(database.Database,
-            new KeyLoad.UnitTests.Features.ClusterRouting.RequestCqrsNativeCommitCoordinator(database), decoded, principal, token);
+            new global::KeyLoad.Core.EmbeddedCoordinator(database.Database), decoded, principal, token);
     }
 }

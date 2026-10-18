@@ -20,8 +20,6 @@ internal static class GraphSearchPathPolicyClusterFlow
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 await fixture.InitializeAsync();
-                fixture.RegisterNativeCoverageCase<GraphSearchPathPolicyClusterTests>(nameof(
-                    GraphSearchPathPolicyClusterTests.HiddenIntermediateStopsAllOperatorsUntilPersistedPolicyAndOwnerRepairSurviveReplayAndTwoCold));
                 GraphSearchPathPolicyClusterState state;
                 using (var deadline = McpCallerDeadline.Create())
                 {

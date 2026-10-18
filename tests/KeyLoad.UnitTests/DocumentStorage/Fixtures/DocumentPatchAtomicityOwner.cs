@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using KeyLoad.Core;
+using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Server;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -23,7 +24,8 @@ internal sealed class DocumentPatchAtomicityOwner
 
     private DocumentPatchAtomicityOwner()
     {
-        var directory = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString("N"));
+        var directory = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(Path.GetTempPath())),
+            DirectoryPrefix + Guid.NewGuid().ToString("N"));
         Source = new(directory: directory);
         originalIdentity = Source.Store.Identity;
     }
@@ -35,7 +37,8 @@ internal sealed class DocumentPatchAtomicityOwner
     internal DatabaseEngine Database
     {
         get => originalJoined
-        ? field ?? throw new InvalidOperationException(MissingOwner) : Source.Database; private set;
+            ? field ?? throw new InvalidOperationException(MissingOwner) : Source.Database;
+        private set;
     }
 
     internal static async Task RunAsync(Func<DocumentPatchAtomicityOwner, Task> operation)
@@ -58,9 +61,7 @@ internal sealed class DocumentPatchAtomicityOwner
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    internal Result<object> Submit(Command<DatabaseCommand> operation) => originalJoined
-        ? Database.Apply(operation)
-        : Source.SubmitIssued(operation);
+    internal Result<object> Submit(Command<DatabaseCommand> operation) => Database.Apply(operation);
 
     internal StoredOutcome Entry(Guid id) => originalJoined
         ? OutcomeStoreOracle.ReadStored(Database, id, CancellationToken.None)

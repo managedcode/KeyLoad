@@ -10,9 +10,11 @@ internal sealed class NativeTextIncrementalSession
     private readonly byte[] immutableRequest;
 
     internal NativeTextIncrementalSession(Guid id, TextIndexMaintenanceRequest request,
-        NativeTextSeedCapture admitted, long replayUpperSequence, ReadExecutionBudget budget,
+        NativeTextSeedCapture admitted, long replayUpperSequence, NativeMaintenanceSessionWork work,
         TextProjectionScope? retainedScope = null)
     {
+        var budget = work.Budget;
+        Work = work;
         if (id == Guid.Empty || request.CommandId == Guid.Empty
             || replayUpperSequence < admitted.Checkpoint || replayUpperSequence > admitted.UpperSequence)
         {
@@ -59,10 +61,8 @@ internal sealed class NativeTextIncrementalSession
     {
         get;
     }
-    internal ReadExecutionBudget Budget
-    {
-        get;
-    }
+    internal NativeMaintenanceSessionWork Work { get; }
+    internal ReadExecutionBudget Budget { get; }
     internal long ReplayUpperSequence
     {
         get;

@@ -1,4 +1,3 @@
-using KeyLoad.AppHost.Features.CodeQuality;
 using KeyLoad.Server;
 using TUnit.Core.Interfaces;
 

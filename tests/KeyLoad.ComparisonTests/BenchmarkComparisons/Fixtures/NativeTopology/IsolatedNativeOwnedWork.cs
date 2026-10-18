@@ -1,6 +1,6 @@
 using System.Runtime.ExceptionServices;
 using Aspire.Hosting;
-using KeyLoad.AppHost.Features.BenchmarkComparisons;
+using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.Comparisons;
 using Microsoft.Extensions.Options;
@@ -112,7 +112,10 @@ internal sealed class IsolatedNativeOwnedWork : IAsyncDisposable
         }
     }
 
-    internal async Task<int> RunAsync(DistributedApplication app, string resourceName, CancellationToken token)
+    internal Task<int> RunAsync(DistributedApplication app, string resourceName, CancellationToken token)
+        => RunAsync(lifetime => AspireResourceCompletion.RunToExitAsync(app, resourceName, lifetime), token);
+
+    internal async Task<int> RunAsync(Func<CancellationToken, Task<int>> operation, CancellationToken token)
     {
         Task<int> original;
         lock (stopGate)
@@ -122,7 +125,7 @@ internal sealed class IsolatedNativeOwnedWork : IAsyncDisposable
                 throw new InvalidOperationException(IncompleteRunnerOwnership);
             }
             runnerLifetime = CancellationTokenSource.CreateLinkedTokenSource(token);
-            original = AspireResourceCompletion.RunToExitAsync(app, resourceName, runnerLifetime.Token);
+            original = operation(runnerLifetime.Token);
             runnerCompletion = original;
         }
         return await original;

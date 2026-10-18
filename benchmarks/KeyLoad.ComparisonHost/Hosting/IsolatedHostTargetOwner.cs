@@ -48,7 +48,7 @@ internal sealed class IsolatedHostTargetOwner(IOptions<NativeComparisonExecution
         target = settings.Selection.Target switch
         {
             IsolatedHostConstants.KeyLoad => CreateKeyLoad(settings, native),
-            IsolatedHostConstants.SurrealDb => new SurrealDbTarget(CreateClient(native, PrimaryEndpointIndex), settings.RunId, native.Image, executionOptions, provider: Clock),
+            IsolatedHostConstants.SurrealDb => new SurrealDbTarget(CreateClient(native, PrimaryEndpointIndex), settings.RunId, native.Image!, executionOptions, provider: Clock),
             IsolatedHostConstants.HelixDb => new HelixDbTarget(CreateClient(native, PrimaryEndpointIndex), settings.RunId, native.Image, executionOptions, provider: Clock),
             IsolatedHostConstants.Postgres => new PostgresTarget(native.Connection!, settings.RunId, native.Image, executionOptions, lifecycleOptions, topology, provider: Clock),
             IsolatedHostConstants.Qdrant => CreateQdrant(settings, native),

@@ -10,8 +10,6 @@ internal sealed class SampleChunkSubnormalClusterTests(ClusterFixture fixture)
     [Test]
     public async Task AcSeriesPublicSubnormal001004SealMergeReplayAndTwoColdKeepExactPublicSamples()
     {
-        fixture.RegisterNativeCoverageCase<SampleChunkSubnormalClusterTests>(nameof(
-            AcSeriesPublicSubnormal001004SealMergeReplayAndTwoColdKeepExactPublicSamples));
         var failures = new List<Exception>();
         McpCallerDeadline? deadline = null;
         try

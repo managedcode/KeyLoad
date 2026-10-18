@@ -7,12 +7,12 @@ namespace KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 
 /// <summary>Reads only the selected engine's native connections and credentials before allocation.</summary>
 [KeyLoad.ConfigurationBinding]
-internal sealed record IsolatedHostNativeSettings(string Image, string? Connection, ImmutableArray<Uri> Endpoints,
+internal sealed record IsolatedHostNativeSettings(string? Image, string? Connection, ImmutableArray<Uri> Endpoints,
     ImmutableArray<string> Replicas, string? User, string? Password, string? ApiKey, string? AdminKey)
 {
     private const char CarriageReturnCharacter = '\r';
     private const char LineFeedCharacter = '\n';
-    internal static IsolatedHostNativeSettings Read(IConfiguration configuration, BenchmarkSessionSelection selection, string image)
+    internal static IsolatedHostNativeSettings Read(IConfiguration configuration, BenchmarkSessionSelection selection, string? image)
     {
         const int PrimaryReplicaCount = 1;
 

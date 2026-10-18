@@ -17,7 +17,7 @@ internal sealed class QueueDeadlineSiloClusterOwnership(QueueDeadlineSiloCluster
             captured.Add(await ReadAsync(fixture, name, token));
         }
         await Assert.That(captured.Select(node => node.Status.NodeId).Distinct(StringComparer.Ordinal).Count())
-            .IsEqualTo(QueueLeaseClusterProtocol.Nodes.Length);
+            .IsEqualTo(QueueLeaseClusterProtocol.Nodes.Count);
         var selected = captured[^1];
         var remaining = captured.Where(node => node.ResourceName != selected.ResourceName)
             .Select(node => node.ResourceName).ToArray();
@@ -63,8 +63,8 @@ internal sealed class QueueDeadlineSiloClusterOwnership(QueueDeadlineSiloCluster
             var snapshot = (await McpCallerAssertions.SuccessAsync<AdminNodeSnapshot>(
                 await admin.Mcp.CallWithoutBodyAsync(AdminDashboardProtocol.SnapshotTool, token))).Value;
             await Assert.That(status.RoutingReady).IsTrue();
-            await Assert.That(status.SiloCount).IsEqualTo(QueueLeaseClusterProtocol.Nodes.Length);
-            await Assert.That(status.ReplicaCount).IsEqualTo(QueueLeaseClusterProtocol.Nodes.Length);
+            await Assert.That(status.SiloCount).IsEqualTo(QueueLeaseClusterProtocol.Nodes.Count);
+            await Assert.That(status.ReplicaCount).IsEqualTo(QueueLeaseClusterProtocol.Nodes.Count);
             await Assert.That(snapshot.Node.NodeId).IsEqualTo(status.NodeId);
             await Assert.That(snapshot.Node.Incarnation).IsEqualTo(status.Incarnation);
             await Assert.That(snapshot.SiloName).IsEqualTo(node);

@@ -19,7 +19,7 @@ internal sealed class EventProjectionClusterSiloRestart(ClusterFixture fixture)
         {
             var selectedIndex = await SelectSiloIndexAsync(nodes, clients.Administrators, cancellationToken);
             stoppedNode = nodes[selectedIndex];
-            await fixture.KillContainerAsync(stoppedNode, EventProjectionClusterScenario.FailureScenario,
+            await fixture.KillServerAsync(stoppedNode, EventProjectionClusterScenario.FailureScenario,
                 cancellationToken);
             var survivor = Enumerable.Range(0, nodes.Length).First(index => index != selectedIndex);
             await WaitReadyAsync(clients.Administrators[survivor], cancellationToken);
@@ -62,7 +62,7 @@ internal sealed class EventProjectionClusterSiloRestart(ClusterFixture fixture)
     private async Task RestartAndCheckClusterAsync(string stoppedNode, string[] nodes,
         KeyLoadClient[] administrators, CancellationToken cancellationToken)
     {
-        await fixture.RestartContainerAsync(stoppedNode, cancellationToken);
+        await fixture.RestartServerAsync(stoppedNode, cancellationToken);
         await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(stoppedNode,
             WaitBehavior.WaitOnResourceUnavailable, cancellationToken);
         await WaitForClusterAsync(nodes, administrators, cancellationToken);
@@ -123,7 +123,7 @@ internal sealed class EventProjectionClusterSiloRestart(ClusterFixture fixture)
         try
         {
             using var recovery = new CancellationTokenSource(TimeSpan.FromSeconds(RestartDeadlineSeconds), TimeProvider.System);
-            await fixture.RestartContainerAsync(stoppedNode, recovery.Token);
+            await fixture.RestartServerAsync(stoppedNode, recovery.Token);
             await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(stoppedNode,
                 WaitBehavior.WaitOnResourceUnavailable, recovery.Token);
             await WaitForClusterAsync(nodes, administrators, recovery.Token);

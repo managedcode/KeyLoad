@@ -2,13 +2,15 @@
 
 ## Purpose, entry points and ownership
 
-- Owns Aspire application composition for KeyLoad services and infrastructure resources.
-- Entry point: `Program.cs`; benchmark resource composition: `BenchmarkComparisons/Resources/SessionTopology/BenchmarkResources.cs`.
+- Owns the primary native KeyLoad development and functional-test Aspire host: AddProject<KeyLoad.Server> services plus required Azurite Orleans membership storage only.
+- Entry point: `Program.cs`. Selected comparison database infrastructure belongs to `../KeyLoad.LoadTests.AppHost`; its workload runs in the separate native client process, outside the resource graph.
 - Keep host wiring and genuinely shared infrastructure composition here. Feature-specific deployment behavior belongs under `<SliceName>/` and the matching `docs/Features/<SliceName>.md`.
 - Aspire owns resource orchestration, not database storage state. Each silo's ZoneTree owner (node-local `PartitionHost`) owns its storage, journals, file locks and the apply gate; Microsoft Orleans does all clustering and Orleans grains route commands (ADR-136).
-- ClusterResources composes real Aspire container resources. Every configured silo owns ZoneTree storage; data copy count is independent of silo count. Native Orleans owns membership and communication. Do not retain a second peer protocol or coordination-only database nodes.
+- ClusterResources composes real native project services. Each silo retains its own ZoneTree storage lifetime under the current storage-mode contract; copy count is independent of silo count. Native Orleans owns membership and communication. Do not retain a second peer protocol or coordination-only database nodes.
+- Ordinary build, development, tests and load execution never publish or start a KeyLoad server image. Keep native SDK PublishContainer at explicit release/publication only. AppHost-owned abrupt faults validate real PID plus Aspire/OS starts, kill the selected owned process tree and join its actual exit.
+- Use session lifetime for required Azurite and dispose only resources owned by the run. Capture actual native source/DLL/PDB/process identities; do not substitute Docker image/PID fields. Runtime, process recovery, matched-resource qualification and public measurements remain separate gates.
 - Apply the installed Orleans and Aspire skills within their actual ownership boundaries.
-- Owner correction2026-10-03 explicitly permits local development through the same Aspire-owned entry. Preserve secret boundaries, resource health dependencies, scoped fault injection, complete resource shutdown and the required Orleans cluster topology; local results do not qualify delivered-source Linux or public performance gates.
+- Preserve write-only secrets, native endpoint discovery, resource health dependencies, scoped fault injection, joined shutdown and the configured Orleans topology. Local results do not qualify delivered-source Linux or public performance gates.
 
 ## Boundaries and protected risks
 

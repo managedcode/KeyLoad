@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using KeyLoad.AppHost.Features.CodeQuality;
 using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.CodeQuality;
@@ -38,7 +37,7 @@ internal static class NativeCoverageCliCollector
         string reportPath, List<Exception> failures, CancellationToken cancellationToken)
     {
         var limits = options.Coverage;
-        var source = NativeCoverageImageFixture.CliOutput;
+        var source = NativeCoverageCliDeployment.CliOutput;
         NativeCoverageMergeChildProcess.Result? processResult = null;
         try
         {
@@ -87,7 +86,7 @@ internal static class NativeCoverageCliCollector
             return null;
         }
         string? copied = null;
-        ServerFailureObserver.Observe(() => copied = NativeCoverageImageFixture.CopyCliClosure(
+        ServerFailureObserver.Observe(() => copied = NativeCoverageCliDeployment.CopyCliClosure(
             ownedRoot, imageName, limits), failures);
         if (copied is null || failures.Count != 0)
         {

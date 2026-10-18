@@ -20,13 +20,13 @@ internal static class ClusterFixtureDatabaseLimits
         ArgumentNullException.ThrowIfNull(limits);
         foreach (var number in Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount))
         {
-            var node = builder.CreateResourceBuilder(builder.Resources.OfType<ContainerResource>()
+            var node = builder.CreateResourceBuilder(builder.Resources.OfType<ProjectResource>()
                 .Single(resource => resource.Name == ClusterFixtureProtocol.NodeName(number)));
             ConfigureNode(node, limits);
         }
     }
 
-    private static void ConfigureNode(IResourceBuilder<ContainerResource> node, DatabaseLimits limits)
+    private static void ConfigureNode(IResourceBuilder<ProjectResource> node, DatabaseLimits limits)
     {
         Set(node, nameof(DatabaseLimits.MaxDocumentBytes), limits.MaxDocumentBytes);
         Set(node, nameof(DatabaseLimits.MaxJsonDepth), limits.MaxJsonDepth);
@@ -50,7 +50,7 @@ internal static class ClusterFixtureDatabaseLimits
         Set(node, nameof(DatabaseLimits.MaxProjectionBatchBytes), limits.MaxProjectionBatchBytes);
     }
 
-    private static void Set<T>(IResourceBuilder<ContainerResource> node, string property, T value)
+    private static void Set<T>(IResourceBuilder<ProjectResource> node, string property, T value)
         where T : struct, IFormattable
         => node.WithEnvironment(ClusterFixtureProtocol.DatabaseLimitsSettingPrefix + property,
             value.ToString(null, System.Globalization.CultureInfo.InvariantCulture));

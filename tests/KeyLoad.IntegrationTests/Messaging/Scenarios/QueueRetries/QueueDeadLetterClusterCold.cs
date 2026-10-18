@@ -10,9 +10,9 @@ internal static class QueueDeadLetterClusterCold
     internal static async Task RunAsync(ClusterFixture fixture, QueueDeadLetterClusterState state, NodeStatus before, CancellationToken token)
     {
         var killed = await Task.WhenAll(QueueDeadLetterClusterProtocol.Nodes.Select(node => ObserveAsync(
-            () => fixture.KillContainerAsync(node, QueueDeadLetterClusterProtocol.ColdScenario, token))));
+            () => fixture.KillServerAsync(node, QueueDeadLetterClusterProtocol.ColdScenario, token))));
         var restarted = await Task.WhenAll(QueueDeadLetterClusterProtocol.Nodes.Select(node => ObserveAsync(
-            () => fixture.RestartContainerAsync(node, token))));
+            () => fixture.RestartServerAsync(node, token))));
         ServerFailureObserver.ThrowIfAny([.. killed.SelectMany(row => row), .. restarted.SelectMany(row => row)]);
         foreach (var node in QueueDeadLetterClusterProtocol.Nodes)
         {

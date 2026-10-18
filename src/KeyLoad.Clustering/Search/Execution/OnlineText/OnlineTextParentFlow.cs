@@ -34,7 +34,7 @@ internal static class OnlineTextParentFlow
         var result = await children.PublishAsync(issued, token).ConfigureAwait(true);
         var reconciled = await children.CapabilityAsync(request, OnlineTextCapabilityKind.ReconcileCommitted, token)
             .ConfigureAwait(true);
-        RequireOriginal(result, reconciled.OriginalResult, children.Database.Limits.MaxQueryReadBytes);
+        RequireOriginal(result, reconciled.OriginalResult, children.Limits.MaxQueryReadBytes);
         await OnlineTextProgress.WriteAsync(writer, frames, children.ParentRequestId, OnlineTextPhase.Published).ConfigureAwait(true);
         await OnlineTextProgress.WriteAsync(writer, frames, children.ParentRequestId, OnlineTextPhase.RetirementMarked).ConfigureAwait(true);
         return result;

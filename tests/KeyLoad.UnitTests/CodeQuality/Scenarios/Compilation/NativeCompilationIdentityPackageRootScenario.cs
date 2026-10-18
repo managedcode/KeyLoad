@@ -16,7 +16,7 @@ internal static class NativeCompilationIdentityPackageRootScenario
             await ServerFailureObserver.ObserveAsync(() => RunOwnedAsync(fixture, failures, cancellationToken), failures);
             await ServerFailureObserver.ObserveAsync(() => fixture.DisposeAsync().AsTask(), failures);
         }
-        NativeCoverageImageNodeSettlement.ThrowFailures(failures);
+        global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 
     private static async Task RunOwnedAsync(NativeCompilationIdentityPackageRootFixture fixture,

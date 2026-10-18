@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using System.Text.Json;
+using KeyLoad.Core;
 using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
@@ -33,11 +34,11 @@ internal static class AtomicTriadOutboxFixture
         return new(Guid.NewGuid(), partition, [.. mutations.Skip(rotation), .. mutations.Take(rotation)]);
     }
 
-    internal static Command<DatabaseCommand> Operation<T>(OperationKind kind, Guid id, T payload)
-        => new(id, kind, Root, default, JsonSerializer.Serialize(payload, JsonDefaults.Options));
+    internal static Command<DatabaseCommand> Operation<T>(DatabaseEngine database, OperationKind kind, Guid id, T payload)
+        => database.CreateCommand(kind, id, Root, default, JsonSerializer.Serialize(payload, JsonDefaults.Options));
 
-    internal static Command<DatabaseCommand> Operation(CommandRequest command)
-        => Operation(OperationKind.Batch, command.CommandId, command);
+    internal static Command<DatabaseCommand> Operation(DatabaseEngine database, CommandRequest command)
+        => Operation(database, OperationKind.Batch, command.CommandId, command);
 
     internal static ImmutableArray<MutationReceipt> Receipts(CommandRequest command)
         => [.. command.Mutations.Select(mutation => mutation switch

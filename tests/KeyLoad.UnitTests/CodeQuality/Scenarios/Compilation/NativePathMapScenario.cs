@@ -34,7 +34,7 @@ internal static class NativePathMapScenario
             }, failures).ConfigureAwait(false);
             ServerFailureObserver.Observe(fixture.Dispose, failures);
         }
-        global::KeyLoad.UnitTests.Features.CodeQuality.NativeCoverageImageNodeSettlement.ThrowFailures(failures);
+        global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 
     private static async Task VerifyTamperAndFollowupAsync(NativePathMapFixture fixture,
@@ -56,7 +56,7 @@ internal static class NativePathMapScenario
         }, failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(() => File.WriteAllBytesAsync(fixture.SourcePath,
             NativePathMapFixture.OriginalSourceBytes, CancellationToken.None), failures).ConfigureAwait(false);
-        global::KeyLoad.UnitTests.Features.CodeQuality.NativeCoverageImageNodeSettlement.ThrowFailures(failures);
+        global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
         var restored = await NativePathMapIdentityReader.ReadAsync(fixture, cancellationToken);
         await NativePathMapAssertions.CanonicalBindingAsync(fixture, restored, cancellationToken);
         await NativePathMapAssertions.ImagesUnchangedAsync(fixture, originalDll, originalPdb, cancellationToken);

@@ -8,44 +8,16 @@ internal static class NativeTextOnlineSessionWork
 {
     private const int SuccessfulCleanupFailureCount = 0;
 
-    internal static (CancellationTokenSource Deadline, CancellationTokenSource Lifetime, ReadExecutionBudget Budget, byte[] Fingerprint)
-        Open(Guid id, OnlineTextIndexMaintenanceRequest request, DateTimeOffset originalExpiry, ServerRuntimeOptions options, TimeProvider clock, CancellationToken shutdown, ReadExecutionBudget? originalBudget = null)
+    internal static byte[] Open(Guid id, OnlineTextIndexMaintenanceRequest request, NativeMaintenanceSessionWork work)
     {
-        var remaining = originalExpiry - clock.GetUtcNow();
-        if (id == Guid.Empty || request.CommandId == Guid.Empty || remaining <= TimeSpan.Zero)
+        if (id == Guid.Empty || request.CommandId == Guid.Empty)
         {
             throw NativeTextErrors.Ownership();
         }
-        CancellationTokenSource? openedDeadline = null;
-        CancellationTokenSource? openedLifetime = null;
-        ReadExecutionBudget admitted;
-        byte[] fingerprint;
-        try
-        {
-            var originalBound = TimeSpan.FromSeconds(options.Core.DatabaseLimits.Value.QueryDeadlineSeconds);
-            openedDeadline = new(remaining < originalBound ? remaining : originalBound, clock);
-            openedLifetime = CancellationTokenSource.CreateLinkedTokenSource(shutdown, openedDeadline.Token);
-            admitted = originalBudget ?? new(options.Core.DatabaseLimits, clock, openedLifetime.Token);
-            admitted.ConstrainLifetime(originalExpiry);
-            admitted.ChargeBytes(NativeSerialization.Measure(request));
-            admitted.ChargeBytes(SHA256.HashSizeInBytes);
-            fingerprint = SHA256.HashData(NativeSerialization.Serialize(request));
-        }
-        catch (Exception primary)
-        {
-            var failures = new List<Exception> { primary };
-            if (openedLifetime is not null)
-            {
-                ServerFailureObserver.Observe(openedLifetime.Dispose, failures);
-            }
-            if (openedDeadline is not null)
-            {
-                ServerFailureObserver.Observe(openedDeadline.Dispose, failures);
-            }
-            ServerFailureObserver.ThrowIfAny(failures);
-            throw;
-        }
-        return (openedDeadline, openedLifetime, admitted, fingerprint);
+        var budget = work.Budget;
+        budget.ChargeBytes(NativeSerialization.Measure(request));
+        budget.ChargeBytes(SHA256.HashSizeInBytes);
+        return SHA256.HashData(NativeSerialization.Serialize(request));
     }
 
     internal static void Require(NativeTextOnlineSession session, bool disposed, byte[] immutableRequest, Guid id,
@@ -78,7 +50,7 @@ internal static class NativeTextOnlineSessionWork
         }
     }
 
-    internal static void Cleanup(NativeTextOnlineSession session, CancellationTokenSource lifetime, CancellationTokenSource deadline, Action? cleanup)
+    internal static void Cleanup(NativeTextOnlineSession session, Action? cleanup)
     {
         var failures = new List<Exception>();
         if (session.SourcePin is { } pin)
@@ -95,12 +67,11 @@ internal static class NativeTextOnlineSessionWork
         }
         if (failures.Count == SuccessfulCleanupFailureCount)
         {
-            ServerFailureObserver.Observe(lifetime.Dispose, failures);
-            ServerFailureObserver.Observe(deadline.Dispose, failures);
+            ServerFailureObserver.Observe(() => session.OperationReservation?.CompleteAfterJoinedCleanup(), failures);
         }
         if (failures.Count == SuccessfulCleanupFailureCount)
         {
-            ServerFailureObserver.Observe(() => session.OperationReservation?.CompleteAfterJoinedCleanup(), failures);
+            ServerFailureObserver.Observe(session.Work.DisposeAfterStage, failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }

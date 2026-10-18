@@ -29,8 +29,8 @@ internal static class SdkPolicySnapshotFlow
     internal static async Task RunAsync(List<Exception> failures, CancellationToken token)
     {
         var calls = 0;
-        var healthy = new NodeStatus(NodeId, Guid.Empty, 1L, NodeId, 3,
-            DurabilityProfile.ProcessDurable, true, Environment.ProcessId);
+        var healthy = new NodeStatus(NodeId, Guid.Empty, 1L, 3, 2,
+            DurabilityProfile.ProcessDurable, true, Environment.ProcessId, 1L);
         await using var server = await KeyLoadClientKestrelServer.StartAsync(async context =>
         {
             var count = Interlocked.Increment(ref calls);

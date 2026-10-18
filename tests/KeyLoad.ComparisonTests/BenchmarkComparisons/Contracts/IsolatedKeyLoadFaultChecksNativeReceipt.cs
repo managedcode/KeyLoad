@@ -1,3 +1,5 @@
+using KeyLoad.AppHost.Features.ClusterReplication;
+
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Only inspected safe native facts are retained, including partial failure stages.</summary>
@@ -11,6 +13,7 @@ internal sealed class IsolatedKeyLoadFaultChecksNativeReceipt(int node,
     {
         get; internal set;
     }
+    public ProcessFaultCommandProtocol.Result? Killed { get; internal set; }
     public IsolatedKeyLoadFaultChecksNativeIdentity? Exited
     {
         get; internal set;

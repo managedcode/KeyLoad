@@ -71,13 +71,13 @@ internal static class GraphTraversalRowContinuation
     internal static async Task ReplayAsync(DatabaseEngine engine, ZoneTreeStore store,
         CommandRequest command, CommitReceipt receipt, byte[] outcome, CancellationToken token)
     {
-        var image = GraphShortestPathFullStoreImage.Bytes(store);
+        var image = CanonicalStoreImage.Bytes(store);
         var cut = store.Position;
         var operation = engine.CreateCommand(OperationKind.Batch, command.CommandId, Root, default, JsonSerializer.Serialize(command, JsonDefaults.Options));
         var replay = engine.ApplyEmbedded(operation, cancellationToken: token).Get<CommitReceipt>();
         await Assert.That(JsonDefaults.Serialize(replay).AsSpan().SequenceEqual(JsonDefaults.Serialize(receipt))).IsTrue();
         await Assert.That(Outcome(store, command).AsSpan().SequenceEqual(outcome)).IsTrue();
-        await Assert.That(GraphShortestPathFullStoreImage.Bytes(store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
+        await Assert.That(CanonicalStoreImage.Bytes(store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
         await Assert.That(store.Position).IsEqualTo(cut);
     }
 

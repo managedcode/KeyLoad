@@ -29,7 +29,7 @@ internal static class DocumentSessionReadClusterFlow
                 Capability.DocumentsRead, deadline.Token);
             var selected = McpCallerProtocol.Node3;
             stopped.Add(selected);
-            await fixture.KillContainerAsync(selected, KillScenario, deadline.Token);
+            await fixture.KillServerAsync(selected, KillScenario, deadline.Token);
             var survivors = new[] { McpCallerProtocol.Node1, McpCallerProtocol.Node2, McpCallerProtocol.Node3 }
                 .Where(node => node != selected).ToArray();
             await VerifySurvivorsAsync(fixture, survivors, partition, command, receipt, identity, stopped, deadline.Token);
@@ -37,7 +37,7 @@ internal static class DocumentSessionReadClusterFlow
         using var cleanup = new CancellationTokenSource(RequestCqrsClusterProtocol.CleanupDeadline, TimeProvider.System);
         foreach (var node in stopped)
         {
-            await ServerFailureObserver.ObserveAsync(() => fixture.RestartContainerAsync(node, cleanup.Token), failures)
+            await ServerFailureObserver.ObserveAsync(() => fixture.RestartServerAsync(node, cleanup.Token), failures)
                 .ConfigureAwait(false);
         }
         ServerFailureObserver.ThrowIfAny(failures);
@@ -64,7 +64,7 @@ internal static class DocumentSessionReadClusterFlow
         await DocumentSessionReadClusterAssertions.RejectedAsync(sdk, mcp, reference, receipt.Token, identity.Secret, token);
         foreach (var node in stopped.ToArray())
         {
-            await fixture.RestartContainerAsync(node, token);
+            await fixture.RestartServerAsync(node, token);
             await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(node, token);
             stopped.Remove(node);
         }
@@ -78,9 +78,9 @@ internal static class DocumentSessionReadClusterFlow
         await Assert.That(next.Token.AtomicPartitionId).IsEqualTo(receipt.Token.AtomicPartitionId);
         await DocumentSessionReadClusterAssertions.HealthyAsync(sdk, mcp, reference, receipt.Token, SecondJson, Second, token);
         stopped.Add(survivors[First]);
-        await fixture.KillContainerAsync(survivors[First], KillScenario, token);
+        await fixture.KillServerAsync(survivors[First], KillScenario, token);
         stopped.Add(McpCallerProtocol.Node3);
-        await fixture.KillContainerAsync(McpCallerProtocol.Node3, KillScenario, token);
+        await fixture.KillServerAsync(McpCallerProtocol.Node3, KillScenario, token);
         await DocumentSessionReadClusterAssertions.HealthyAsync(sdk, mcp, reference, next.Token, SecondJson, Second, token);
         var unavailableReplay = await admin.CommitAsync(nextCommand, token);
         await Assert.That(unavailableReplay.IsFailed).IsTrue();
@@ -89,7 +89,7 @@ internal static class DocumentSessionReadClusterFlow
             or nameof(ErrorCode.UnknownWriteOutcome)).IsTrue();
         foreach (var node in stopped.ToArray())
         {
-            await fixture.RestartContainerAsync(node, token);
+            await fixture.RestartServerAsync(node, token);
             stopped.Remove(node);
         }
         await using var restoredAdminMcp = await McpOfficialClient.ConnectAsync(fixture, survivors[Zero], fixture.AdminKey, token);

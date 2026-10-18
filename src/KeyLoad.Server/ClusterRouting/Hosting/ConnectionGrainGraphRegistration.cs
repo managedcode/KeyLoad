@@ -14,8 +14,8 @@ internal static class ConnectionGrainGraphRegistration
                 .AllowClientCallGrain<IRecurringDueWorkerGrain>()
                 .AllowClientCallGrain<ISampleChunkWorkerGrain>()
                 .AllowClientCallGrain<IAnnProjectionWorkerGrain>()
-                .AddGrainServiceTransition<PartitionStorageGrainService, IRequestWorkerGrain>(
-                    nameof(IRequestWorkerGrain.ExecuteStreamAsync), nameof(IRequestWorkerGrain.ExecuteCommandAsync));
+                .AddGrainServiceTransition<PartitionStorageGrainService, IDatabaseCommitGrain>(
+                    nameof(IDatabaseCommitGrain.ReadCutAsync), nameof(IDatabaseCommitGrain.ApplyAsync));
         });
     }
 }

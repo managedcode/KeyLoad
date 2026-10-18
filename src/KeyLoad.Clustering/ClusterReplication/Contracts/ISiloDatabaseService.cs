@@ -1,5 +1,4 @@
 using ManagedCode.Communication.Commands;
-using ManagedCode.Communication.CQRS;
 using Orleans.CodeGeneration;
 using Orleans.Services;
 
@@ -17,10 +16,11 @@ public interface ISiloDatabaseService : IGrainService
     Task<Command<DatabaseCommand>> PrepareAsync(Command<DatabaseCommand> operation, CancellationToken cancellationToken);
     /// <summary>Applies exactly the prepared operation through ZoneTree's atomic commit gate.</summary>
     Task<StorageOperationResult> ApplyAsync(Command<DatabaseCommand> operation, long sequence, CancellationToken cancellationToken);
-    /// <summary>Runs native CQRS execution on this store's local stateless-worker pool.</summary>
-    IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> ExecuteStreamAsync(
-        string signedRequest, CancellationToken cancellationToken);
-    /// <summary>Executes the original partition-ordered command on this silo's command-worker pool.</summary>
+    /// <summary>Awaits a self-contained request on the native stateless-worker pool.</summary>
+    Task<GrainOperationReply> ExecuteAsync(string signedRequest, CancellationToken cancellationToken);
+    /// <summary>Joins a server-owned maintenance session's actual cleanup after cancellation or revocation.</summary>
+    Task AbortMaintenanceAsync(GrainReadKind kind, Guid sessionId);
+    /// <summary>Executes the original partition-ordered command through this silo's native worker pool.</summary>
     Task<GrainOperationReply> ExecuteCommandAsync(string signedRequest, string actorKey,
         CancellationToken cancellationToken);
     /// <summary>Observes the exact addressed silo after the caller verified current administrator authority.</summary>

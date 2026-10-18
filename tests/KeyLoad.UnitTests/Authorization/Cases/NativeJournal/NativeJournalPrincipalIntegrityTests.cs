@@ -76,10 +76,9 @@ internal sealed class NativeJournalPrincipalIntegrityTests
     {
         var request = new ConfigureResourceRequest(database.Partition.TenantId, database.Partition.DatabaseId,
             new ResourceDefinition(AppliedCutResourceName, ResourceKind.Collection, database.Partition.TransactionDomainId));
-        Apply(database.Database, OperationKind.ConfigureResource, request, RootPrincipalId, 1).Get<ResourceDefinition>();
+        Apply(database.Database, OperationKind.ConfigureResource, request, RootPrincipalId).Get<ResourceDefinition>();
     }
 
-    private static Result<object> Apply(DatabaseEngine database, OperationKind kind, object payload, string principalId,
-        long replicationIndex = 0)
-        => database.Apply(database.CreateCommand(kind, Guid.NewGuid(), principalId, OperationTime, JsonSerializer.Serialize(payload, payload.GetType(), JsonDefaults.Options)), replicationIndex);
+    private static Result<object> Apply(DatabaseEngine database, OperationKind kind, object payload, string principalId)
+        => database.Apply(database.CreateCommand(kind, Guid.NewGuid(), principalId, OperationTime, JsonSerializer.Serialize(payload, payload.GetType(), JsonDefaults.Options)));
 }

@@ -87,7 +87,7 @@ internal static class SafeProjectorOperationReplay
         {
             await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(Errors.Code(expected.Problem));
             await Assert.That(StringComparer.Ordinal.Equals(actual.Problem?.Detail, expected.Problem?.Detail)).IsTrue();
-            await Assert.That(StringComparer.Ordinal.Equals(actual.Json, expected.Json)).IsTrue();
+            await Assert.That(NativeSerialization.Serialize(actual).AsSpan().SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
             await Assert.That(actual.Value is null).IsTrue();
             return;
         }
@@ -109,7 +109,7 @@ internal static class SafeProjectorOperationReplay
 
     private static async Task SuccessAsync<T>(Result<object> actual, Result<object> expected) where T : class
     {
-        await Assert.That(StringComparer.Ordinal.Equals(actual.Json, expected.Json)).IsTrue();
+        await Assert.That(NativeSerialization.Serialize(actual).AsSpan().SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();
         await Assert.That(Errors.Code(actual.Problem) == Errors.Code(expected.Problem)).IsTrue();
         await Assert.That(StringComparer.Ordinal.Equals(actual.Problem?.Detail, expected.Problem?.Detail)).IsTrue();
         await Assert.That(actual.Value?.GetType() == typeof(T)).IsTrue();

@@ -47,8 +47,8 @@ internal sealed class ClusterFixtureStartupEvidence : IDisposable
         listener = new ActivityListener
         {
             ShouldListenTo = static source => source.Name == ClusterFixtureStartupProfile.ActivitySource,
-            Sample = static (ref ActivityCreationOptions<ActivityContext> options) => Sample(options.Name),
-            SampleUsingParentId = static (ref ActivityCreationOptions<string> options) => Sample(options.Name),
+            Sample = static (ref ActivityCreationOptions<ActivityContext> options) => SelectActivityData(options.Name),
+            SampleUsingParentId = static (ref ActivityCreationOptions<string> options) => SelectActivityData(options.Name),
             ActivityStopped = Record
         };
         try
@@ -89,7 +89,7 @@ internal sealed class ClusterFixtureStartupEvidence : IDisposable
         listener.Dispose();
     }
 
-    private static ActivitySamplingResult Sample(string name)
+    private static ActivitySamplingResult SelectActivityData(string name)
         => name is ClusterFixtureStartupProfile.EnsureOperation or ClusterFixtureStartupProfile.ApiOperation
             ? ActivitySamplingResult.AllData : ActivitySamplingResult.None;
 

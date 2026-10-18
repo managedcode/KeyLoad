@@ -16,13 +16,13 @@ internal static class QueueViewLeaseIsolationOperations
     {
         state.Token.ThrowIfCancellationRequested();
         var owner = state.Owner;
-        var index = checked(owner.ReadCut().AppliedPosition + QueueViewLeaseIsolationProtocol.One);
+        var index = checked(owner.ReadCanonicalCut().AppliedPosition + QueueViewLeaseIsolationProtocol.One);
         var operation = owner.Database.CreateCommand(kind, id, QueueViewLeaseIsolationProtocol.Root,
             owner.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
         operation = owner.Database.OwnCommand(operation);
         var predicted = expected(operation);
         var result = owner.Submit(operation);
-        var entry = owner.Entry(operation);
+        var entry = owner.ReadOutcome(operation);
         await Assert.That(entry.CanonicalSequence).IsEqualTo(index);
         await QueueViewLeaseIsolationResults.SameAsync(result, Result<object>.Succeed(predicted));
         var global = kind is OperationKind.ConfigureResource or OperationKind.ConfigurePrincipal;

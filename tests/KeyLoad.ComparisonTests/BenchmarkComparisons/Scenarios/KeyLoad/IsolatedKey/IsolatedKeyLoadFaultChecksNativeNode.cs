@@ -1,26 +1,44 @@
+using System.Globalization;
+using System.Security.Cryptography;
+using System.Text;
+using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
+using KeyLoad.AppHost.Features.ClusterReplication;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-/// <summary>The closed selected resource resolves to its genuine container name and node-owned bind authority.</summary>
-internal sealed record IsolatedKeyLoadFaultChecksNativeNode(int Index, string Resource, string ContainerName,
-    string Image, string DataSource)
+/// <summary>Observes one actual native server and its configured, retained storage directory.</summary>
+internal sealed record IsolatedKeyLoadFaultChecksNativeNode(ProjectResource Model)
 {
-    internal static IsolatedKeyLoadFaultChecksNativeNode Read(ContainerResource resource, int index)
+    private const string DataDirectorySetting = "KeyLoad__DataDirectory";
+    internal string Resource => Model.Name;
+
+    internal static IsolatedKeyLoadFaultChecksNativeNode Read(ProjectResource resource, int index)
     {
-        var name = resource.Annotations.OfType<ContainerNameAnnotation>().Single().Name;
-        var mount = resource.Annotations.OfType<ContainerMountAnnotation>()
-            .Single(item => item.Target == IsolatedKeyLoadFaultChecksProtocol.DataMount);
         IsolatedKeyLoadFaultChecksProtocol.Require(resource.Name == IsolatedKeyLoadFaultChecksProtocol.Resource(index)
-            && name.StartsWith("keyload-", StringComparison.Ordinal) && name.Length <= 100
-            && name.All(static item => char.IsAsciiLetterOrDigit(item) || item == '-')
-            && mount.Type == ContainerMountType.BindMount && !mount.IsReadOnly && mount.Source is not null);
-        IsolatedKeyLoadFaultChecksProtocol.Require(resource.TryGetContainerImageName(out var image)
-            && image!.Contains(ComparisonImageProtocol.ImageDigestPrefix, StringComparison.Ordinal));
-        return new(index, resource.Name, name, image!, Path.GetFullPath(mount.Source!));
+            && Path.GetFileName(resource.GetProjectMetadata().ProjectPath) == "KeyLoad.Server.csproj");
+        return new(resource);
     }
 
-    internal async Task<IsolatedKeyLoadFaultChecksNativeIdentity> InspectAsync(CancellationToken token)
-        => IsolatedKeyLoadFaultChecksNativeIdentity.Parse(await IsolatedKeyLoadFaultChecksDocker.RunAsync(
-            ["inspect", "--format", IsolatedKeyLoadFaultChecksNativeIdentity.InspectFormat, ContainerName], token), Image, DataSource);
+    internal async Task<IsolatedKeyLoadFaultChecksNativeIdentity> InspectAsync(DistributedApplication app, CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        var environment = await IsolatedResourceTopologyFixture.EnvironmentAsync(Model);
+        var directory = environment[DataDirectorySetting];
+        IsolatedKeyLoadFaultChecksProtocol.Require(Path.IsPathFullyQualified(directory) && Directory.Exists(directory));
+        if (!app.ResourceNotifications.TryGetCurrentState(Resource, out var current)
+            || current.Resource is not ProjectResource || current.Snapshot.State?.Text is not { } state)
+        {
+            throw new InvalidOperationException(IsolatedKeyLoadFaultChecksProtocol.Failure);
+        }
+        var value = current.Snapshot.Properties.Where(property =>
+            property.Name == ProcessFaultCommandProtocol.ProcessIdProperty).Select(property => property.Value).SingleOrDefault();
+        var pid = int.TryParse(Convert.ToString(value, CultureInfo.InvariantCulture), NumberStyles.None,
+            CultureInfo.InvariantCulture, out var parsed) && parsed > 0 ? (int?)parsed : null;
+        var process = state == KnownResourceStates.Running
+            ? ProjectProcessEvidence.Read(app.ResourceNotifications, Resource) : null;
+        var authority = Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(Path.GetFullPath(directory))));
+        return new(Resource, pid, current.Snapshot.StartTimeStamp?.ToUniversalTime(), state,
+            current.Snapshot.ExitCode, authority, process);
+    }
 }

@@ -1,5 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Storage;
+using KeyLoad.UnitTests.Features.Messaging;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
@@ -35,12 +36,18 @@ internal sealed class ResourceProtocolFailureTests
     {
         using var database = new TestDatabase();
         var operation = database.Database.CreateCommand(OperationKind.ConfigureResource, Guid.NewGuid(), RootPrincipal, TimeProvider.System.GetUtcNow(), NullDefinition);
-        var original = database.Database.Apply(operation, replicationIndex: 7);
-        var replay = database.Database.Apply(operation, replicationIndex: 8);
+        var applied = database.Database.LastApplied;
+        var original = database.Database.Apply(operation);
+        var image = QueueWholeFlowStorage.Bytes(database.Store);
+        var position = database.Store.Position;
+        var replay = database.Database.Apply(operation);
 
-        await Assert.That(replay).IsEqualTo(original);
+        await Assert.That(NativeSerialization.Serialize(replay).SequenceEqual(NativeSerialization.Serialize(original))).IsTrue();
         await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(ErrorCode.Validation);
-        await Assert.That(database.Database.LastApplied).IsEqualTo(8);
-        await Assert.That(database.Database.ResolveOutcome(operation)).IsEqualTo(original);
+        await Assert.That(database.Database.LastApplied).IsEqualTo(applied + 1);
+        await Assert.That(database.Store.Position).IsEqualTo(position);
+        await Assert.That(QueueWholeFlowStorage.Bytes(database.Store).SequenceEqual(image)).IsTrue();
+        await Assert.That(NativeSerialization.Serialize(database.Database.ResolveOutcome(operation))
+            .SequenceEqual(NativeSerialization.Serialize(original))).IsTrue();
     }
 }

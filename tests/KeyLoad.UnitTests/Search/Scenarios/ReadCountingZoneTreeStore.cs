@@ -28,7 +28,6 @@ internal sealed class ReadCountingZoneTreeStore : IAtomicStore
         {
             ClusterAdministrator = true
         }, DatabaseEngine.Credential(RootPrincipal, RootPrincipal, RootCredential));
-        PhysicalShardTestBootstrap.Bootstrap(Database, RootPrincipal);
         Configure(GraphSearchTestSupport.Documents, ResourceKind.Collection);
         Configure(GraphSearchTestSupport.Projects, ResourceKind.Collection);
         Configure(GraphSearchTestSupport.Graph, ResourceKind.Graph);

@@ -16,8 +16,6 @@ internal static class GraphSearchLineageClusterFlow
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 await fixture.InitializeAsync();
-                fixture.RegisterNativeCoverageCase<GraphSearchLineageClusterTests>(
-                    nameof(GraphSearchLineageClusterTests.AllRequestedGraphLabelsUseFreshAuthorityBeforeEarlierLookupAndRecoverExactResultsAcrossTwoCold));
                 GraphSearchLineageClusterState state;
                 using (var deadline = McpCallerDeadline.Create())
                 {

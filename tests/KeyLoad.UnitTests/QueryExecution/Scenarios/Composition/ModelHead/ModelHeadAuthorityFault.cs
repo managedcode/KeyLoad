@@ -14,7 +14,7 @@ internal static class ModelHeadAuthorityFault
         var original = store.Read(view => view.ReadOwnedValue(key))!;
         await ModelHeadAuthorityOperations.EqualAsync(NativeSerialization.Deserialize<StreamHead>(original), new(2L, 1L, 1L));
         var damaged = NativeSerialization.Serialize(ModelHeadAuthorityRequests.Fault(fault));
-        var image = GraphShortestPathFullStoreImage.Bytes(store);
+        var image = CanonicalStoreImage.Bytes(store);
         var identity = NativeSerialization.Serialize(store.Identity);
         var cut = store.Position;
         var prefix = Convert.ToHexString(key) + ":";

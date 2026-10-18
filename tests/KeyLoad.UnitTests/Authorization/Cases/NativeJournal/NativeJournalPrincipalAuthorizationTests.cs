@@ -91,11 +91,11 @@ internal sealed class NativeJournalPrincipalAuthorizationTests
             {
                 Revoked = true,
                 PolicyEpoch = root.PolicyEpoch + 1
-            }), RootPrincipalId, 1);
+            }), RootPrincipalId);
         await Assert.That(Errors.Code(revokeResult.Problem)).IsNull();
 
         var journalResult = Apply(database.Database, OperationKind.RuntimeJournal,
-            NativeJournalAuthorityTestBootstrap.CreateMutation(), RuntimeJournalIdentity.ProtectedPrincipalId, 2);
+            NativeJournalAuthorityTestBootstrap.CreateMutation(), RuntimeJournalIdentity.ProtectedPrincipalId);
         await Assert.That(Errors.Code(journalResult.Problem)).IsNull();
         await Assert.That(journalResult.Get<RuntimeJournalMutationResult>().Applied).IsTrue();
 
@@ -108,7 +108,6 @@ internal sealed class NativeJournalPrincipalAuthorizationTests
         await Assert.That(revokedRoot!.Revoked).IsTrue();
     }
 
-    private static Result<object> Apply(DatabaseEngine database, OperationKind kind, object payload, string principalId,
-        long replicationIndex = 0)
-        => database.Apply(database.CreateCommand(kind, Guid.NewGuid(), principalId, OperationTime, JsonSerializer.Serialize(payload, payload.GetType(), JsonDefaults.Options)), replicationIndex);
+    private static Result<object> Apply(DatabaseEngine database, OperationKind kind, object payload, string principalId)
+        => database.Apply(database.CreateCommand(kind, Guid.NewGuid(), principalId, OperationTime, JsonSerializer.Serialize(payload, payload.GetType(), JsonDefaults.Options)));
 }

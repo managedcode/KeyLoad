@@ -1,34 +1,24 @@
-using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Orleans.Serialization;
 
 namespace KeyLoad.Clustering;
 
 internal static class OnlineTextExecution
 {
-    private const long UnallocatedConsumerGeneration = 0;
-    internal static async Task<OnlineTextIndexMaintenanceResult> ExecuteAsync(DecodedGrainRequest parent,
-        Func<string, CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> executeChild, IServiceProvider services, GrainRequestCodec codec, TimeProvider clock,
-        Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
+    internal static async Task<OnlineTextIndexMaintenanceResult> ExecuteAsync(DecodedGrainRequest parent, string signedParent,
+        Func<string, CancellationToken, Task<GrainOperationReply>> executeChild, Func<Guid, Task> abort,
+        IServiceProvider services, GrainRequestCodec codec,
         IOptions<GrainRoutingOptions> routing, ILogger diagnostics, global::Orleans.Runtime.IGrainContext context,
         ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, IResourceLifetimeWorkBinding binding)
     {
         ArgumentNullException.ThrowIfNull(binding);
         var request = GrainNativePayload.ReadCommand<OnlineTextIndexMaintenanceRequest>(parent.Payload);
-        var database = services.GetRequiredService<DatabaseEngine>();
-        var principal = GrainRequestAuthority.ReloadForRequest(database, parent.Envelope, clock);
-        GrainRequestAuthority.RequireAdministrator(principal);
-        if (request.CommandId != parent.Envelope.CommandId || request.CommandId == Guid.Empty
-            || request.NodeId != database.Store.Identity.NodeId || request.ConsumerGeneration <= UnallocatedConsumerGeneration)
-        {
-            throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
-        }
         var frames = new OnlineTextFrameAccounting(routing);
-        var children = new OnlineTextChildCalls(parent, executeChild, services, codec, clock, serializer, routing, diagnostics, frames, context, binding);
+        var children = new OnlineTextChildCalls(parent, signedParent, executeChild, abort,
+            services, codec, diagnostics, frames, context, binding);
         OnlineTextIndexMaintenanceResult result;
         try
         {

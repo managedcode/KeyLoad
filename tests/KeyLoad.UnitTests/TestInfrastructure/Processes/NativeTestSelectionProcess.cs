@@ -11,7 +11,7 @@ internal static class NativeTestSelectionProcess
         {
             directory = directory.Parent;
         }
-        var root = directory?.FullName ?? throw new DirectoryNotFoundException("Native selection regression requires the checkout.");
+        var root = directory?.FullName ?? throw new DirectoryNotFoundException("Native selection requires the checkout.");
         var start = new ProcessStartInfo("node") { RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false };
         foreach (var argument in new[] { "--input-type=module", "--eval", NativeTestSelectionProgram.Source,
             Path.Combine(root, "scripts", "Features", "TestInfrastructure", "run-tests.mjs"), suite })

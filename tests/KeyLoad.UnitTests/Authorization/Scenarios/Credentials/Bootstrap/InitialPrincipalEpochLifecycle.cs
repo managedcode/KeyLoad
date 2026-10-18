@@ -12,7 +12,7 @@ internal static class InitialPrincipalEpochLifecycle
         var database = fixture.Harness.Database;
         var store = fixture.Harness.Store;
         await UpdateConflictAsync(fixture, token);
-        var original = InitialPrincipalEpochFixture.Operation(OperationKind.ConfigureApiKey,
+        var original = fixture.Operation(OperationKind.ConfigureApiKey,
             new ConfigureApiKeyRequest(InitialPrincipalEpochFixture.Credential()));
         await KeyAsync(database, original, token);
         await InitialPrincipalEpochAssertions.ObserveAsync(store, async () =>
@@ -30,11 +30,11 @@ internal static class InitialPrincipalEpochLifecycle
             database.Authenticate(InitialPrincipalEpochFixture.OriginalSecret, database.EvaluationClock.GetUtcNow()), ErrorCode.Unauthenticated));
         await PrincipalAsync(fixture, 4L, true, false, token);
         await KeyRevocationAsync(fixture, token);
-        await KeyAsync(database, InitialPrincipalEpochFixture.Operation(OperationKind.ConfigureApiKey,
+        await KeyAsync(database, fixture.Operation(OperationKind.ConfigureApiKey,
             new ConfigureApiKeyRequest(InitialPrincipalEpochFixture.Credential(expired: true))), token);
         await InitialPrincipalEpochAssertions.ObserveAsync(store, () => InitialPrincipalEpochAssertions.RefuseAsync(() =>
             database.Authenticate(InitialPrincipalEpochFixture.OriginalSecret, database.EvaluationClock.GetUtcNow()), ErrorCode.Unauthenticated));
-        await KeyAsync(database, InitialPrincipalEpochFixture.Operation(OperationKind.ConfigureApiKey,
+        await KeyAsync(database, fixture.Operation(OperationKind.ConfigureApiKey,
             new ConfigureApiKeyRequest(InitialPrincipalEpochFixture.Credential(replacement: true))), token);
         await InitialPrincipalEpochAssertions.ObserveAsync(store, async () =>
         {
@@ -49,7 +49,7 @@ internal static class InitialPrincipalEpochLifecycle
     private static async Task PrincipalAsync(InitialPrincipalEpochFixture fixture, long epoch, bool grant, bool revoked, CancellationToken token)
     {
         var expected = fixture.Principal(epoch, grant, revoked);
-        var operation = InitialPrincipalEpochFixture.Operation(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(expected));
+        var operation = fixture.Operation(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(expected));
         await InitialPrincipalEpochAssertions.EqualAsync(fixture.Harness.Database.ApplyEmbedded(operation, token).Get<PrincipalRecord>(), expected);
     }
     private static async Task UpdateConflictAsync(InitialPrincipalEpochFixture fixture, CancellationToken token)
@@ -66,14 +66,14 @@ internal static class InitialPrincipalEpochLifecycle
     private static async Task KeyRevocationAsync(InitialPrincipalEpochFixture fixture, CancellationToken token)
     {
         var database = fixture.Harness.Database;
-        await KeyAsync(database, InitialPrincipalEpochFixture.Operation(OperationKind.ConfigureApiKey,
+        await KeyAsync(database, fixture.Operation(OperationKind.ConfigureApiKey,
             new ConfigureApiKeyRequest(InitialPrincipalEpochFixture.Credential() with
             {
                 Revoked = true
             })), token);
         await InitialPrincipalEpochAssertions.ObserveAsync(fixture.Harness.Store, () => InitialPrincipalEpochAssertions.RefuseAsync(() =>
             database.Authenticate(InitialPrincipalEpochFixture.OriginalSecret, database.EvaluationClock.GetUtcNow()), ErrorCode.Unauthenticated));
-        await KeyAsync(database, InitialPrincipalEpochFixture.Operation(OperationKind.ConfigureApiKey,
+        await KeyAsync(database, fixture.Operation(OperationKind.ConfigureApiKey,
             new ConfigureApiKeyRequest(InitialPrincipalEpochFixture.Credential())), token);
         await InitialPrincipalEpochAssertions.ObserveAsync(fixture.Harness.Store, async () =>
             await Assert.That(database.Authenticate(InitialPrincipalEpochFixture.OriginalSecret, database.EvaluationClock.GetUtcNow()))

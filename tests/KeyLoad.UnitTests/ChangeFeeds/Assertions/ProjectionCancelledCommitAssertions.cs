@@ -31,7 +31,7 @@ internal static class ProjectionCancelledCommitAssertions
     {
         var id = Guid.NewGuid();
         var mutation = new PutDocument(ProjectionConsumerIdentityFixture.Source, "c", "{\"n\":3}", 0L);
-        var source = ProjectionConsumerIdentityFixture.Operation(OperationKind.Batch, id,
+        var source = ProjectionConsumerIdentityFixture.Operation(owner, OperationKind.Batch, id,
             new CommandRequest(id, state.Partition, [mutation]));
         var original = FeedNativeHealthyAdmission.Submit(owner, source, explicitTime: false, token);
         var receipt = original.Get<CommitReceipt>();
@@ -47,7 +47,7 @@ internal static class ProjectionCancelledCommitAssertions
         await ProjectionConsumerIdentityAssertions.ExactAsync(batch,
             new ProjectionBatch(new(state.Consumer, state.Definition, 3L, false), [entry], 4L, batch.Token, false));
         var advanceId = Guid.NewGuid();
-        var advance = ProjectionConsumerIdentityFixture.Operation(OperationKind.CommitProjectionBatch, advanceId,
+        var advance = ProjectionConsumerIdentityFixture.Operation(owner, OperationKind.CommitProjectionBatch, advanceId,
             new CommitProjectionBatchRequest(advanceId, state.Consumer, batch.Token, []));
         var advanced = owner.ApplyEmbedded(advance, token);
         var result = advanced.Get<ProjectionBatchResult>();

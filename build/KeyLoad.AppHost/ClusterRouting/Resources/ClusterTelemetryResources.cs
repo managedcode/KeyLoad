@@ -7,7 +7,7 @@ internal static class ClusterTelemetryResources
     private const string DisabledContent = "false";
     private const string DisabledExemplars = "always_off";
 
-    internal static void Apply(IResourceBuilder<ContainerResource> resource)
+    internal static void Apply(IResourceBuilder<ProjectResource> resource)
     {
         ArgumentNullException.ThrowIfNull(resource);
         resource.WithOtlpExporterIfEndpointAvailable(OtlpProtocol.Grpc)

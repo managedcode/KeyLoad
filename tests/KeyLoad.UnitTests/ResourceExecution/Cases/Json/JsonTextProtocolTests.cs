@@ -61,17 +61,17 @@ internal sealed class JsonTextProtocolTests
     }
 
     [Test]
-    public async Task AcMp006StoredErrorPrecedesMalformedJsonAndAbsentResultRemainsCorruption()
+    public async Task AcMp006StoredErrorPrecedesWrongNativeValueAndAbsentResultRemainsCorruption()
     {
         var stored = Result<object>.Fail(Errors.Problem(ErrorCode.PermissionDenied, StoredErrorDetail));
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => stored.Get<ResourceDefinition>());
-        var malformed = Assert.ThrowsExactly<KeyLoadException>(() => new Result<object>(MalformedJson).Get<ResourceDefinition>());
-        var absent = Assert.ThrowsExactly<KeyLoadException>(() => new Result<object>(null).Get<string>());
+        var wrongType = Assert.ThrowsExactly<KeyLoadException>(() => Result<object>.Succeed(MalformedJson).Get<ResourceDefinition>());
+        var absent = Assert.ThrowsExactly<KeyLoadException>(() => Result<object>.Succeed(null!).Get<string>());
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(failure.Message).IsEqualTo(StoredErrorDetail);
         await Assert.That(absent.Code).IsEqualTo(ErrorCode.Corruption);
-        await Assert.That(malformed.Code).IsEqualTo(ErrorCode.Corruption);
+        await Assert.That(wrongType.Code).IsEqualTo(ErrorCode.Corruption);
     }
 
     [Test]

@@ -32,7 +32,7 @@ $script:FcNativeProductDescriptor = [ordered]@{
     OutputDirectory = 'native-merge'
     RegistryPath = 'scripts/Features/CodeQuality/functional-coverage.product-contributors.json'
     SettingsPath = 'scripts/Features/CodeQuality/functional-coverage.production.settings.xml'
-    AppHostProject = 'build/KeyLoad.AppHost/KeyLoad.AppHost.csproj'
+    ToolProject = 'tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj'
     GlobalPackagesPrefix = 'global-packages: '
     ToolPackageId = 'dotnet-coverage'
     ToolRelativePath = 'tools/net8.0/any/dotnet-coverage.dll'
@@ -55,7 +55,7 @@ $script:FcNativeProductDescriptor = [ordered]@{
     MinimumContentBytes = 1
     ExitSuccess = 0
     TimeSpanFormat = 'c'
-    InvalidTool = 'The pinned native coverage tool could not be resolved from the built AppHost.'
+    InvalidTool = 'The pinned native coverage tool could not be resolved from the built native test assembly.'
 }
 function Assert-DescriptorInputs {
     if (-not [IO.Path]::IsPathFullyQualified($Repository) -or
@@ -192,8 +192,8 @@ function Assert-CompleteContributorModules([object[]] $Rows, [object] $Manifest)
     }
 }
 
-function Read-AppHostProperty([string] $Root, [string] $Property, [object] $Bounds) {
-    $project = Join-Path $Root $script:FcNativeProductDescriptor.AppHostProject
+function Read-ToolProperty([string] $Root, [string] $Property, [object] $Bounds) {
+    $project = Join-Path $Root $script:FcNativeProductDescriptor.ToolProject
     $arguments = [string[]] @('msbuild', $project, ('-getProperty:' + $Property), '-nologo')
     $result = Invoke-FcCoverageProcess 'dotnet' $arguments ([int]$Bounds.applicationCleanupTimeoutSeconds) `
         ([int]$Bounds.maximumManifestBytes)
@@ -209,9 +209,9 @@ function Read-AppHostProperty([string] $Root, [string] $Property, [object] $Boun
     $value
 }
 
-function Get-AppHostToolMetadata([string] $Root, [object] $Bounds) {
-    $version = Read-AppHostProperty $Root $script:FcNativeProductDescriptor.ToolVersionProperty $Bounds
-    $packageRootValue = Read-AppHostProperty $Root $script:FcNativeProductDescriptor.PackagesRootProperty $Bounds
+function Get-ToolMetadata([string] $Root, [object] $Bounds) {
+    $version = Read-ToolProperty $Root $script:FcNativeProductDescriptor.ToolVersionProperty $Bounds
+    $packageRootValue = Read-ToolProperty $Root $script:FcNativeProductDescriptor.PackagesRootProperty $Bounds
     $packageRoot = [IO.Path]::GetFullPath((Join-Path $packageRootValue `
         (Join-Path $script:FcNativeProductDescriptor.ToolPackageId $version)))
     $toolBinary = Join-Path $packageRoot $script:FcNativeProductDescriptor.ToolRelativePath
@@ -337,7 +337,7 @@ function New-ProductRunEvidence([string] $Root, [string] $Results, [object] $Bou
     }
     $clusterRun = @($runs.ToArray() | Where-Object suite -CEQ 'cluster')[0]
     $fixture = Get-ClusterFixture $results $clusterRun $source $bounds
-    $tool = Get-AppHostToolMetadata $root $bounds
+    $tool = Get-ToolMetadata $root $bounds
     $statusReference = New-EvidenceReference $statusPath $script:FcNativeContributors.UnitRunStatusMaximumBytes
     if ($statusReference.length -ne $statusRead.length -or $statusReference.sha256 -cne $statusRead.sha256) {
         throw $script:FcNativeProductDescriptor.Invalid

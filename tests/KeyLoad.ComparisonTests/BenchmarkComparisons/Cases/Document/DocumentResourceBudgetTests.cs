@@ -1,4 +1,4 @@
-using KeyLoad.AppHost.Features.BenchmarkComparisons;
+using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 using KeyLoad.Comparisons;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
@@ -34,12 +34,12 @@ internal sealed class DocumentResourceBudgetTests
         await using var fixture = new IsolatedResourceTopologyFixture(PostgresTarget, nodes);
         IsolatedPostgresResources.Add(fixture.Context);
         var resources = fixture.Build();
-        foreach (var node in resources.Where(resource => resource != fixture.Context.Runner.Resource))
+        foreach (var node in resources)
         {
             var configuration = await IsolatedResourceTopologyFixture.ConfigurationAsync(node);
             await Assert.That(configuration.Arguments.Any(argument => argument.Value == MaximumConnections)).IsTrue();
         }
-        var evidence = await IsolatedResourceTopologyFixture.EnvironmentAsync(fixture.Context.Runner.Resource);
+        var evidence = await IsolatedResourceTopologyFixture.EnvironmentAsync(fixture.Context.Client);
         await Assert.That(evidence[ConnectionsEvidence]).IsEqualTo(ExpectedConnections);
     }
 
@@ -50,8 +50,8 @@ internal sealed class DocumentResourceBudgetTests
     {
         await using var fixture = new IsolatedResourceTopologyFixture(KeyLoadTarget, nodes);
         IsolatedKeyLoadResources.Add(fixture.Context);
-        var resources = fixture.Build();
-        foreach (var node in resources.Where(resource => resource != fixture.Context.Runner.Resource))
+        fixture.Build();
+        foreach (var node in fixture.Projects)
         {
             var environment = await IsolatedResourceTopologyFixture.EnvironmentAsync(node);
             await Assert.That(environment[AdmissionPrefix + nameof(HttpAdmissionLimits.MaxRequests)]).IsEqualTo(Requests);
@@ -60,7 +60,7 @@ internal sealed class DocumentResourceBudgetTests
             await Assert.That(environment[ScanRecords]).IsEqualTo(ExpectedScans);
             await Assert.That(environment[QueryReadBytes]).IsEqualTo(ExpectedBytes);
         }
-        var evidence = await IsolatedResourceTopologyFixture.EnvironmentAsync(fixture.Context.Runner.Resource);
+        var evidence = await IsolatedResourceTopologyFixture.EnvironmentAsync(fixture.Context.Client);
         await Assert.That(evidence[AdmissionRequests]).IsEqualTo(Requests);
         await Assert.That(evidence[AdmissionMode]).IsEqualTo(bool.TrueString);
         await Assert.That(evidence[ScanEvidence]).IsEqualTo(ExpectedScans);
@@ -101,7 +101,7 @@ internal sealed class DocumentResourceBudgetTests
             _ => throw new ArgumentOutOfRangeException(nameof(option))
         };
         IsolatedKeyLoadResources.Add(fixture.Context);
-        var resources = fixture.Build();
-        await Assert.That(resources.Where(resource => resource != fixture.Context.Runner.Resource).Count()).IsEqualTo(3);
+        fixture.Build();
+        await Assert.That(fixture.Projects.Length).IsEqualTo(3);
     }
 }

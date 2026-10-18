@@ -1,3 +1,4 @@
+using KeyLoad.UnitTests.Features.ResourceExecution;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Storage;
@@ -19,7 +20,7 @@ internal static class Bm25ColdInvalidationTrial
         var original = flow.Capture(null);
         var result = flow.Publish(original);
         await flow.RequireHealthyAsync(original, result);
-        var entry = NativeSerialization.Serialize(flow.Owner.Entry(original.Id));
+        var entry = NativeSerialization.Serialize(flow.Owner.Entry(original.CommandId));
         var head = NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((original).Value!.Input.Span).Current;
         var rawHead = Bm25ColdInvalidationAssertions.HeadBytes(flow.Owner, head);
         var tail = Tail(flow);
@@ -30,9 +31,9 @@ internal static class Bm25ColdInvalidationTrial
             new RowAccess(OwnerId: Bm25OriginalPhaseRecoveryFlow.Subject), ExplicitReplacement: true), tail + 2);
         mutations[2] = await MutationAsync(flow, new DeleteDocument(Collection, "first", 3), tail + 3);
         mutations[3] = await MutationAsync(flow, new PutDocument(Collection, "first", Json), tail + 4);
-        await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(rawHead, Bm25ColdInvalidationAssertions.HeadBytes(flow.Owner, head));
+        await NativeReplayResultAssertions.BytesAsync(rawHead, Bm25ColdInvalidationAssertions.HeadBytes(flow.Owner, head));
         await Bm25ColdInvalidationAssertions.ColdAsync(flow, original, entry);
-        await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(rawHead, Bm25ColdInvalidationAssertions.HeadBytes(flow.Owner, head));
+        await NativeReplayResultAssertions.BytesAsync(rawHead, Bm25ColdInvalidationAssertions.HeadBytes(flow.Owner, head));
         await Bm25ColdInvalidationAssertions.MutationReplayAsync(flow, mutations);
         await Bm25ColdInvalidationAssertions.SearchAsync(flow, expectedCurrent: false);
         await Bm25ColdInvalidationAssertions.ReplayAsync(flow, original, result, entry);
@@ -50,9 +51,9 @@ internal static class Bm25ColdInvalidationTrial
         await Assert.That(result.Get<CommitReceipt>().CommandId).IsEqualTo(id);
         var entry = NativeSerialization.Serialize(owner.Entry(id));
         var before = Bm25OriginalPhaseRecoveryState.Read(owner);
-        await ReplicaSubmissionOutcomeFlow.RequireResultAsync(result, owner.Submit(operation));
+        await NativeReplayResultAssertions.SameAsync(result, owner.Submit(operation));
         await before.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(owner));
-        await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(entry, NativeSerialization.Serialize(owner.Entry(id)));
+        await NativeReplayResultAssertions.BytesAsync(entry, NativeSerialization.Serialize(owner.Entry(id)));
         await Assert.That(Tail(flow)).IsEqualTo(tail);
         return (operation, result, entry);
     }
@@ -101,8 +102,8 @@ internal static class Bm25ColdInvalidationTrial
         await Bm25ColdInvalidationAssertions.PhaseDeniedAsync(flow, original);
         var fresh = flow.Capture(original.CommandId);
         var result = flow.Publish(fresh);
-        await Assert.That(result.Error).IsNull();
-        await Assert.That(result.Get<CommitReceipt>().CommandId).IsEqualTo(fresh.Id);
+        await Assert.That(Errors.Code(result.Problem)).IsNull();
+        await Assert.That(result.Get<CommitReceipt>().CommandId).IsEqualTo(fresh.CommandId);
         var phase = NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((fresh).Value!.Input.Span);
         await Assert.That(phase.Current.PolicyEpoch).IsEqualTo(4L);
         await Assert.That(phase.Current.Statistics.DocumentCount).IsEqualTo(1);
@@ -113,7 +114,7 @@ internal static class Bm25ColdInvalidationTrial
         await Assert.That(phase.Current.SourceOutboxTail).IsEqualTo(tail);
         await Bm25ColdInvalidationAssertions.SearchAsync(flow, expectedCurrent: true);
         await Bm25ColdInvalidationAssertions.ReplayAsync(flow, fresh, result,
-            NativeSerialization.Serialize(owner.Entry(fresh.Id)));
+            NativeSerialization.Serialize(owner.Entry(fresh.CommandId)));
     }
 
     private static Command<DatabaseCommand> Issue<T>(Bm25OriginalPhaseRecoveryFlow flow, OperationKind kind, Guid id, T payload)

@@ -1,4 +1,4 @@
-using KeyLoad.AppHost.Features.BenchmarkComparisons;
+using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonTests;

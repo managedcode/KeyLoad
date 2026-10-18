@@ -13,7 +13,7 @@ internal static class ImplementationTestOwnership
     {
         var owners = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
         var pending = new Queue<INamedTypeSymbol>();
-        var nativeAspire = compilation.AssemblyName == "KeyLoad.AppHost" && NativeAspireEntry(compilation, token);
+        var nativeAspire = AspirePath(compilation) is not null && NativeAspireEntry(compilation, token);
         AddProcessEntry(compilation, pending, token);
         foreach (var tree in compilation.SyntaxTrees.Where(tree => ExecutionPath(tree.FilePath)))
         {
@@ -45,7 +45,8 @@ internal static class ImplementationTestOwnership
     private static bool ExecutionPath(string path) =>
         ImplementationTermSymbols.PathContains(path, ImplementationTermCatalog.TestPath) ||
         ImplementationTermSymbols.PathContains(path, ImplementationTermCatalog.BenchmarkPath) ||
-        ImplementationTermSymbols.PathContains(path, ImplementationTermCatalog.AspireHostPath);
+        ImplementationTermSymbols.PathContains(path, ImplementationTermCatalog.AspireHostPath) ||
+        ImplementationTermSymbols.PathContains(path, ImplementationTermCatalog.LoadTestsHostPath);
 
     private static bool NativeExecution(INamedTypeSymbol type) => type.GetMembers().Any(member =>
         member.GetAttributes().Any(static attribute => NativeExecutionAttribute(attribute.AttributeClass))) ||
@@ -61,7 +62,8 @@ internal static class ImplementationTestOwnership
          type.ContainingNamespace.ToDisplayString() == "BenchmarkDotNet.Attributes");
 
     private static bool NativeAspireCallback(INamedTypeSymbol type) =>
-        ImplementationTermSymbols.HasPath(type, ImplementationTermCatalog.AspireHostPath) &&
+        (ImplementationTermSymbols.HasPath(type, ImplementationTermCatalog.AspireHostPath) ||
+         ImplementationTermSymbols.HasPath(type, ImplementationTermCatalog.LoadTestsHostPath)) &&
         type.GetMembers().OfType<IMethodSymbol>().Any(static method => NativeAspireBuilder(method.ReturnType) ||
             method.Parameters.Any(static parameter => NativeAspireBuilder(parameter.Type)));
 
@@ -81,6 +83,7 @@ internal static class ImplementationTestOwnership
         {
             "KeyLoad.RecoveryTests" => ImplementationTermCatalog.TestPath,
             "KeyLoad.AppHost" when NativeAspireEntry(compilation, token) => ImplementationTermCatalog.AspireHostPath,
+            "KeyLoad.LoadTests.AppHost" when NativeAspireEntry(compilation, token) => ImplementationTermCatalog.LoadTestsHostPath,
             _ => null
         };
         if (path is null || compilation.GetEntryPoint(token) is not { } entry)
@@ -105,10 +108,22 @@ internal static class ImplementationTestOwnership
         }
     }
 
+    private static string? AspirePath(Compilation compilation) => compilation.AssemblyName switch
+    {
+        "KeyLoad.AppHost" => ImplementationTermCatalog.AspireHostPath,
+        "KeyLoad.LoadTests.AppHost" => ImplementationTermCatalog.LoadTestsHostPath,
+        _ => null
+    };
+
     private static bool NativeAspireEntry(Compilation compilation, CancellationToken token)
     {
+        var path = AspirePath(compilation);
+        if (path is null)
+        {
+            return false;
+        }
         foreach (var tree in compilation.SyntaxTrees.Where(tree =>
-            ImplementationTermSymbols.PathContains(tree.FilePath, ImplementationTermCatalog.AspireHostPath)))
+            ImplementationTermSymbols.PathContains(tree.FilePath, path)))
         {
             var model = compilation.GetSemanticModel(tree);
             var calls = tree.GetRoot(token).ChildNodes().OfType<GlobalStatementSyntax>()

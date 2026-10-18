@@ -44,7 +44,7 @@ internal sealed record QueueGraphIdentityState(
     internal const string SecondJson = "{\"name\":\"second\"}";
     internal const string MarkerJson = "{\"state\":\"healthy\"}";
     internal const string AttributesJson = "{\"weight\":7}";
-    internal const string HeadersJson = "{\"origin\":\"identity-regression\"}";
+    internal const string HeadersJson = "{\"origin\":\"identity-operation\"}";
     internal const string Root = "root";
     internal const string ForeignPartition = "foreign";
 }

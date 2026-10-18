@@ -20,13 +20,12 @@ internal static class SdkPolicySnapshotAssertions
     {
         await Assert.That(actual.NodeId).IsEqualTo(expected.NodeId);
         await Assert.That(actual.Incarnation).IsEqualTo(expected.Incarnation);
-        await Assert.That(actual.Applied).IsEqualTo(expected.Applied);
-        await Assert.That(actual.Leader).IsEqualTo(expected.Leader);
-        await Assert.That(actual.Voters).IsEqualTo(expected.Voters);
+        await Assert.That(actual.Position).IsEqualTo(expected.Position);
+        await Assert.That(actual.SiloCount).IsEqualTo(expected.SiloCount);
+        await Assert.That(actual.ReplicaCount).IsEqualTo(expected.ReplicaCount);
         await Assert.That(actual.Durability).IsEqualTo(expected.Durability);
         await Assert.That(actual.RoutingReady).IsEqualTo(expected.RoutingReady);
         await Assert.That(actual.ProcessId).IsEqualTo(expected.ProcessId);
         await Assert.That(actual.ReadGeneration).IsEqualTo(expected.ReadGeneration);
-        await Assert.That(actual.ConsensusTerm).IsEqualTo(expected.ConsensusTerm);
     }
 }

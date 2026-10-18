@@ -113,26 +113,26 @@ internal sealed class CacheReadPermitConcurrencyTests
     }
 
     private static void AddUnobservedFailures(Task<bool[]> aggregate, ExceptionDispatchInfo? primaryFailure,
-        List<Exception> cleanupFailures, Exception? fallback = null)
+        List<Exception> cleanupFailures, Exception? unobservedCause = null)
     {
         var failures = aggregate.Exception?.Flatten().InnerExceptions;
         if (failures is null && aggregate.IsCanceled)
         {
             if (primaryFailure?.SourceException is not OperationCanceledException)
             {
-                cleanupFailures.Add(fallback ?? new TaskCanceledException(aggregate));
+                cleanupFailures.Add(unobservedCause ?? new TaskCanceledException(aggregate));
             }
-            else if (fallback is not null and not OperationCanceledException)
+            else if (unobservedCause is not null and not OperationCanceledException)
             {
-                cleanupFailures.Add(fallback);
+                cleanupFailures.Add(unobservedCause);
             }
             return;
         }
         if (failures is null)
         {
-            if (fallback is not null)
+            if (unobservedCause is not null)
             {
-                cleanupFailures.Add(fallback);
+                cleanupFailures.Add(unobservedCause);
             }
             return;
         }
@@ -144,10 +144,10 @@ internal sealed class CacheReadPermitConcurrencyTests
                 cleanupFailures.Add(failure);
             }
         }
-        if (fallback is not null && !ReferenceEquals(fallback, primaryFailure?.SourceException)
-            && !failures.Any(failure => ReferenceEquals(failure, fallback)))
+        if (unobservedCause is not null && !ReferenceEquals(unobservedCause, primaryFailure?.SourceException)
+            && !failures.Any(failure => ReferenceEquals(failure, unobservedCause)))
         {
-            cleanupFailures.Add(fallback);
+            cleanupFailures.Add(unobservedCause);
         }
     }
 

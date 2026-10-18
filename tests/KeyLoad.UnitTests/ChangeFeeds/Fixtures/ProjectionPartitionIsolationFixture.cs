@@ -29,18 +29,15 @@ internal static class ProjectionPartitionIsolationFixture
             Partition = partition
         };
         var id = Guid.NewGuid();
-        var configure = ProjectionConsumerIdentityFixture.Operation(OperationKind.ConfigureProjectionConsumer, id,
+        var configure = ProjectionConsumerIdentityFixture.Operation(database.Database, OperationKind.ConfigureProjectionConsumer, id,
             new ConfigureProjectionConsumerRequest(id, consumer, first.Definition));
         var configured = database.Database.ApplyEmbedded(configure, token);
         await ProjectionConsumerIdentityAssertions.ExactAsync(configured.Get<ProjectionConsumerInfo>(),
             new ProjectionConsumerInfo(consumer, first.Definition, 0L, false));
         var seedId = Guid.NewGuid();
-        var seed = ProjectionConsumerIdentityFixture.Operation(OperationKind.Batch, seedId,
+        var seed = ProjectionConsumerIdentityFixture.Operation(database.Database, OperationKind.Batch, seedId,
             new CommandRequest(seedId, partition, [new PutDocument(ProjectionConsumerIdentityFixture.Source, "a", "{\"n\":1}", 0L),
-                new PutDocument(ProjectionConsumerIdentityFixture.Source, "b", "{\"n\":2}", 0L)])) with
-        {
-            EvaluatedAt = first.Time
-        };
+                new PutDocument(ProjectionConsumerIdentityFixture.Source, "b", "{\"n\":2}", 0L)]), first.Time);
         token.ThrowIfCancellationRequested();
         var seeded = database.Database.Apply(seed);
         var receipt = seeded.Get<CommitReceipt>();
@@ -49,11 +46,11 @@ internal static class ProjectionPartitionIsolationFixture
             new(PutKind, ProjectionConsumerIdentityFixture.Source, "b", 1L));
         var batch = database.Database.ReadProjectionBatch(ProjectionConsumerIdentityFixture.Root, new(consumer));
         var completeId = Guid.NewGuid();
-        var complete = ProjectionConsumerIdentityFixture.Operation(OperationKind.CommitProjectionBatch, completeId,
+        var complete = ProjectionConsumerIdentityFixture.Operation(database.Database, OperationKind.CommitProjectionBatch, completeId,
             new CommitProjectionBatchRequest(completeId, consumer, batch.Token,
                 [new PutDocument(ProjectionConsumerIdentityFixture.Target, "effect", "{\"sourceCount\":2}", 0L)]));
         var againId = Guid.NewGuid();
-        var again = ProjectionConsumerIdentityFixture.Operation(OperationKind.ConfigureProjectionConsumer, againId,
+        var again = ProjectionConsumerIdentityFixture.Operation(database.Database, OperationKind.ConfigureProjectionConsumer, againId,
             new ConfigureProjectionConsumerRequest(againId, consumer, first.Definition));
         var key = KeySpace.Partition(ProjectionConsumerIdentityFixture.ConsumerSpace, partition, consumer.Name);
         var original = database.Store.Read(view => view.ReadOwnedValue(key))
@@ -74,9 +71,9 @@ internal static class ProjectionPartitionIsolationFixture
         => store.Read(view => keys.Select(key => Convert.ToHexString(key) + ":" +
             Convert.ToHexString(view.ReadOwnedValue(key) ?? throw new InvalidOperationException(ProjectionConsumerIdentityFixture.MissingRow))).ToArray());
 
-    internal static Command<DatabaseCommand> Purge(PartitionRef partition, long through)
+    internal static Command<DatabaseCommand> Purge(DatabaseEngine owner, PartitionRef partition, long through)
     {
         var id = Guid.NewGuid();
-        return ProjectionConsumerIdentityFixture.Operation(OperationKind.PurgeOutbox, id, new PurgeOutboxRequest(id, partition, through));
+        return ProjectionConsumerIdentityFixture.Operation(owner, OperationKind.PurgeOutbox, id, new PurgeOutboxRequest(id, partition, through));
     }
 }

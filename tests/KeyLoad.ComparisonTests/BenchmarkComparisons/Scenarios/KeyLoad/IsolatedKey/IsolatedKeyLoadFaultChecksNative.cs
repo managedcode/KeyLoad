@@ -14,15 +14,15 @@ internal sealed class IsolatedKeyLoadFaultChecksNative(DistributedApplication ap
     internal async Task<IsolatedKeyLoadFaultChecksNativeReceipt> KillAsync(int index, CancellationToken token)
     {
         var node = nodes[index - 1];
-        var before = await node.InspectAsync(token);
+        var before = await node.InspectAsync(app, token);
         IsolatedKeyLoadFaultChecksProtocol.Require(before.State == IsolatedKeyLoadFaultChecksProtocol.Running
-            && before.StartedAt > DateTimeOffset.UnixEpoch);
+            && before.Process is not null);
         var receipt = new IsolatedKeyLoadFaultChecksNativeReceipt(index, before, TimeProvider.System.GetUtcNow());
         Receipts.Add(receipt);
-        var killed = await IsolatedKeyLoadFaultChecksDocker.RunAsync(["kill", "--signal", "KILL", before.Id], token);
-        IsolatedKeyLoadFaultChecksProtocol.Require(killed == before.Id);
+        receipt.Killed = await IsolatedKeyLoadFaultChecksProcessCommand.KillAsync(app,
+            before.Process ?? throw new InvalidOperationException(IsolatedKeyLoadFaultChecksProtocol.Failure), token);
         receipt.KillCompletedAt = TimeProvider.System.GetUtcNow();
-        receipt.Exited = await WaitExitedAsync(node, before, token);
+        receipt.Exited = await WaitExitedAsync(node, receipt, token);
         return receipt;
     }
 
@@ -64,11 +64,11 @@ internal sealed class IsolatedKeyLoadFaultChecksNative(DistributedApplication ap
     private async Task RestoreOneAsync(IsolatedKeyLoadFaultChecksNativeReceipt receipt, CancellationToken token)
     {
         var node = nodes[receipt.Node - 1];
-        var current = await node.InspectAsync(token);
-        if (current.State != IsolatedKeyLoadFaultChecksProtocol.Exited)
+        var current = await node.InspectAsync(app, token);
+        if (current.ExitCode is null)
         {
             if (current.State == IsolatedKeyLoadFaultChecksProtocol.Running
-                && current.StartedAt == receipt.Before.StartedAt && current.Id == receipt.Before.Id)
+                && current.Process == receipt.Before.Process)
             {
                 return;
             }
@@ -76,7 +76,7 @@ internal sealed class IsolatedKeyLoadFaultChecksNative(DistributedApplication ap
             await FinishRestartAsync(node, receipt, token);
             return;
         }
-        ValidateExited(receipt.Before, current);
+        ValidateExited(receipt, current);
         receipt.Exited = current;
         await RestartAsync(receipt, token);
     }
@@ -90,49 +90,52 @@ internal sealed class IsolatedKeyLoadFaultChecksNative(DistributedApplication ap
         receipt.RestoredAt = TimeProvider.System.GetUtcNow();
     }
 
-    private static async Task<IsolatedKeyLoadFaultChecksNativeIdentity> WaitRunningAsync(
+    private async Task<IsolatedKeyLoadFaultChecksNativeIdentity> WaitRunningAsync(
         IsolatedKeyLoadFaultChecksNativeNode node, IsolatedKeyLoadFaultChecksNativeIdentity before, CancellationToken token)
     {
         while (true)
         {
             token.ThrowIfCancellationRequested();
-            var current = await node.InspectAsync(token);
-            IsolatedKeyLoadFaultChecksProtocol.Require(current.Image == before.Image
-                && current.ImageId == before.ImageId && current.MountSha256 == before.MountSha256);
-            if (current.State == IsolatedKeyLoadFaultChecksProtocol.Running && current.StartedAt > before.StartedAt)
+            var current = await node.InspectAsync(app, token);
+            IsolatedKeyLoadFaultChecksProtocol.Require(current.DataDirectorySha256 == before.DataDirectorySha256);
+            if (current.State == IsolatedKeyLoadFaultChecksProtocol.Running && current.Process is { } process
+                && process.StartedAtUtc > before.Process!.StartedAtUtc
+                && process.AspireStartedAtUtc > before.Process.AspireStartedAtUtc)
             {
+                IsolatedKeyLoadFaultChecksProtocol.Require(process.Binary == before.Process.Binary);
                 return current;
             }
             await Task.Delay(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultPollInterval, TimeProvider.System, token);
         }
     }
 
-    private static async Task<IsolatedKeyLoadFaultChecksNativeIdentity> WaitExitedAsync(
-        IsolatedKeyLoadFaultChecksNativeNode node, IsolatedKeyLoadFaultChecksNativeIdentity before, CancellationToken token)
+    private async Task<IsolatedKeyLoadFaultChecksNativeIdentity> WaitExitedAsync(
+        IsolatedKeyLoadFaultChecksNativeNode node, IsolatedKeyLoadFaultChecksNativeReceipt receipt, CancellationToken token)
     {
         using var deadline = IsolatedKeyLoadFaultChecksProtocol.Deadline(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultExitedTimeout, token);
         while (true)
         {
-            var current = await node.InspectAsync(deadline.Token);
-            IsolatedKeyLoadFaultChecksProtocol.Require(current.Id == before.Id);
-            if (current.State == IsolatedKeyLoadFaultChecksProtocol.Exited)
+            var current = await node.InspectAsync(app, deadline.Token);
+            if (current.ExitCode is not null)
             {
-                ValidateExited(before, current);
+                ValidateExited(receipt, current);
                 return current;
             }
             await Task.Delay(NativeExecutionPolicyFixture.Harness().Value.KeyLoadFaultPollInterval, TimeProvider.System, deadline.Token);
         }
     }
 
-    private static void ValidateExited(IsolatedKeyLoadFaultChecksNativeIdentity before, IsolatedKeyLoadFaultChecksNativeIdentity current)
-        => IsolatedKeyLoadFaultChecksProtocol.Require(current.State == IsolatedKeyLoadFaultChecksProtocol.Exited
-            && current.Id == before.Id && current.Image == before.Image && current.ImageId == before.ImageId
-            && current.MountSha256 == before.MountSha256);
+    private static void ValidateExited(IsolatedKeyLoadFaultChecksNativeReceipt receipt, IsolatedKeyLoadFaultChecksNativeIdentity current)
+        => IsolatedKeyLoadFaultChecksProtocol.Require(receipt.Killed is { } killed && current.Process is null
+            && current.ExitCode == killed.ExitCode && current.Resource == receipt.Before.Resource
+            && (current.ProcessId is null || current.ProcessId == killed.ProcessId)
+            && (current.AspireStartedAtUtc is null || current.AspireStartedAtUtc == receipt.Before.AspireStartedAtUtc)
+            && current.DataDirectorySha256 == receipt.Before.DataDirectorySha256);
 
     private static IsolatedKeyLoadFaultChecksNativeNode[] ReadNodes(DistributedApplication app, int count)
     {
         var model = app.Services.GetRequiredService<DistributedApplicationModel>();
-        var selected = model.Resources.OfType<ContainerResource>().Where(item => item.Name.StartsWith("node", StringComparison.Ordinal)).ToArray();
+        var selected = model.Resources.OfType<ProjectResource>().Where(item => item.Name.StartsWith("node", StringComparison.Ordinal)).ToArray();
         IsolatedKeyLoadFaultChecksProtocol.Require(selected.Length == count);
         return Enumerable.Range(1, count).Select(index => IsolatedKeyLoadFaultChecksNativeNode.Read(
             selected.Single(item => item.Name == IsolatedKeyLoadFaultChecksProtocol.Resource(index)), index)).ToArray();

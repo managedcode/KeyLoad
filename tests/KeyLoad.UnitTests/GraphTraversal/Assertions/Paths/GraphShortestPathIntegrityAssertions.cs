@@ -11,7 +11,7 @@ internal static class GraphShortestPathIntegrityAssertions
     internal static async Task Refuse(DatabaseEngine owner, ZoneTreeStore store, GraphTraversalIntegrityState state,
         bool filtered, CancellationToken token)
     {
-        var image = GraphShortestPathFullStoreImage.Bytes(store);
+        var image = CanonicalStoreImage.Bytes(store);
         var position = store.Position;
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => owner.ShortestPath(GraphTraversalIntegrityFixture.Root,
             Request(state.DamagedEdge, filtered), cancellationToken: token));
@@ -32,7 +32,7 @@ internal static class GraphShortestPathIntegrityAssertions
     private static async Task Path(DatabaseEngine owner, ZoneTreeStore store, EdgeRecord edge,
         bool filtered, CancellationToken token)
     {
-        var image = GraphShortestPathFullStoreImage.Bytes(store);
+        var image = CanonicalStoreImage.Bytes(store);
         var position = store.Position;
         var actual = owner.ShortestPath(GraphTraversalIntegrityFixture.Root, Request(edge, filtered), cancellationToken: token);
         await Assert.That(actual.Version).IsEqualTo(Version);

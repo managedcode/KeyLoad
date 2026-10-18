@@ -113,7 +113,6 @@ internal sealed class NativeJournalPrincipalPolicyTests
         => database.Database.Store.Read(view => view.GetRecord<PrincipalRecord>(
             KeySpace.Principal(RuntimeJournalIdentity.ProtectedPrincipalId)));
 
-    private static Result<object> Apply(DatabaseEngine database, OperationKind kind, object payload, string principalId,
-        long replicationIndex = 0)
-        => database.Apply(database.CreateCommand(kind, Guid.NewGuid(), principalId, OperationTime, JsonSerializer.Serialize(payload, payload.GetType(), JsonDefaults.Options)), replicationIndex);
+    private static Result<object> Apply(DatabaseEngine database, OperationKind kind, object payload, string principalId)
+        => database.Apply(database.CreateCommand(kind, Guid.NewGuid(), principalId, OperationTime, JsonSerializer.Serialize(payload, payload.GetType(), JsonDefaults.Options)));
 }

@@ -11,16 +11,16 @@ internal static class QueryOnlyEpochR46Cold
         var failures = new List<Exception>();
         foreach (var node in PolicyEpochPublicProtocol.Nodes)
         {
-            await ServerFailureObserver.ObserveAsync(() => fixture.KillContainerAsync(node,
+            await ServerFailureObserver.ObserveAsync(() => fixture.KillServerAsync(node,
                 QueryOnlyEpochR46Protocol.ColdScenario, token), failures);
         }
         foreach (var node in PolicyEpochPublicProtocol.Nodes)
         {
-            await ServerFailureObserver.ObserveAsync(() => fixture.BeginContainerRestartAsync(node, token), failures);
+            await ServerFailureObserver.ObserveAsync(() => fixture.BeginProcessRestartAsync(node, token), failures);
         }
         foreach (var node in PolicyEpochPublicProtocol.Nodes)
         {
-            await ServerFailureObserver.ObserveAsync(() => fixture.RestartContainerAsync(node, token), failures);
+            await ServerFailureObserver.ObserveAsync(() => fixture.RestartServerAsync(node, token), failures);
         }
         foreach (var node in PolicyEpochPublicProtocol.Nodes)
         {

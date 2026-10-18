@@ -13,7 +13,7 @@ internal static class PartitionRecordCancellationRunner
     {
         using var cancellation = new CancellationTokenSource();
         var token = cancellation.Token;
-        var page = new PartitionRecordPageResult();
+        PartitionRecordPage? page = null;
         var readerFailures = new List<Exception>();
         var observerFailures = new List<Exception>();
         long examinedBytes = 0;
@@ -29,12 +29,12 @@ internal static class PartitionRecordCancellationRunner
             }, observerFailures);
             ServerFailureObserver.ThrowIfAny(observerFailures);
         }
-        ServerFailureObserver.Observe(() => page.Value = store.Read(view => PartitionRecordPageReader.Read(view,
+        ServerFailureObserver.Observe(() => page = store.Read(view => PartitionRecordPageReader.Read(view,
             partition, family, maxRecords, maxRetainedBytes, maxExaminedBytes, ObserveNativeWork,
             cancellationToken: token)), readerFailures);
         PartitionRecordCancellationFailures.ThrowUnexpected(readerFailures, observerFailures,
             [], [], token);
-        return new(page.Value, PartitionRecordCancellationFailures.Single(readerFailures),
+        return new(page, PartitionRecordCancellationFailures.Single(readerFailures),
             PartitionRecordCancellationFailures.Single(observerFailures), examinedBytes, token);
     }
 

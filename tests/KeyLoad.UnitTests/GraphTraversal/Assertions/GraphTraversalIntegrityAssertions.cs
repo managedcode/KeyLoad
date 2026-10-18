@@ -9,7 +9,7 @@ internal static class GraphTraversalIntegrityAssertions
     internal static async Task Refuse(DatabaseEngine owner, ZoneTreeStore store, GraphTraversalIntegrityState state,
         bool filtered, CancellationToken cancellationToken)
     {
-        var image = GraphShortestPathFullStoreImage.Bytes(store);
+        var image = CanonicalStoreImage.Bytes(store);
         var position = store.Position;
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => Read(owner, state, filtered, cancellationToken));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
@@ -19,7 +19,7 @@ internal static class GraphTraversalIntegrityAssertions
     internal static async Task Healthy(DatabaseEngine owner, ZoneTreeStore store, GraphTraversalIntegrityState state,
         GraphTraversalIntegrityContinuation? continuation, bool filtered, CancellationToken cancellationToken)
     {
-        var image = GraphShortestPathFullStoreImage.Bytes(store);
+        var image = CanonicalStoreImage.Bytes(store);
         var position = store.Position;
         var actual = Read(owner, state, filtered, cancellationToken);
         EdgeRecord[] allEdges = continuation is null ? [state.HealthyEdge, state.DamagedEdge]
@@ -35,7 +35,7 @@ internal static class GraphTraversalIntegrityAssertions
 
     internal static async Task Replay(DatabaseEngine owner, ZoneTreeStore store, CommandRequest command, CommitReceipt receipt)
     {
-        var image = GraphShortestPathFullStoreImage.Bytes(store);
+        var image = CanonicalStoreImage.Bytes(store);
         var position = store.Position;
         var replay = GraphStorageReferenceFixture.Submit(owner, command).Get<CommitReceipt>();
         await Assert.That(JsonSerializer.Serialize(replay, JsonDefaults.Options))
@@ -46,7 +46,7 @@ internal static class GraphTraversalIntegrityAssertions
     internal static async Task Image(ZoneTreeStore store, string[] image, long position)
     {
         await Assert.That(store.Position).IsEqualTo(position);
-        await Assert.That(GraphShortestPathFullStoreImage.Bytes(store).SequenceEqual(image)).IsTrue();
+        await Assert.That(CanonicalStoreImage.Bytes(store).SequenceEqual(image)).IsTrue();
     }
 
     private static global::KeyLoad.GraphTraversal Read(DatabaseEngine owner, GraphTraversalIntegrityState state,

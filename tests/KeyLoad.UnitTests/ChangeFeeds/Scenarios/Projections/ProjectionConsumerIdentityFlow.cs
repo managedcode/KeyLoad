@@ -70,7 +70,7 @@ internal static class ProjectionConsumerIdentityFlow
         await ProjectionConsumerIdentityAssertions.ExactAsync(filteredBatch,
             new ProjectionBatch(new(state.Consumer, state.Definition, 2L, false), [], 3L, filteredBatch.Token, false));
         var id = Guid.NewGuid();
-        var filtered = ProjectionConsumerIdentityFixture.Operation(OperationKind.CommitProjectionBatch, id,
+        var filtered = ProjectionConsumerIdentityFixture.Operation(owner, OperationKind.CommitProjectionBatch, id,
             new CommitProjectionBatchRequest(id, state.Consumer, filteredBatch.Token, []));
         var advanced = owner.ApplyEmbedded(filtered, token);
         var settled = advanced.Get<ProjectionBatchResult>();

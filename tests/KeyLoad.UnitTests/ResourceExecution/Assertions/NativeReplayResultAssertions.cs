@@ -7,6 +7,12 @@ namespace KeyLoad.UnitTests.Features.ResourceExecution;
 // assuming ImmutableArray backing identity or equal native reference graphs.
 internal static class NativeReplayResultAssertions
 {
+    internal static async Task BytesAsync(byte[] expected, byte[] actual)
+        => await Assert.That(actual.AsSpan().SequenceEqual(expected)).IsTrue();
+
+    internal static Task SameAsync(Result<object> expected, Result<object> actual)
+        => BytesAsync(NativeSerialization.Serialize(expected), NativeSerialization.Serialize(actual));
+
     internal static async Task Same<T>(Result<object> actual, Result<object> expected) where T : class
     {
         await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(Errors.Code(expected.Problem));

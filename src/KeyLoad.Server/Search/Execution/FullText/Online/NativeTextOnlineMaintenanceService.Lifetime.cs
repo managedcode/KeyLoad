@@ -4,15 +4,22 @@ internal sealed partial class NativeTextOnlineMaintenanceService
 {
     public async Task AbortAsync(Guid sessionId)
     {
-        var original = sessions.FindForCleanup(sessionId);
-        if (original is null)
+        if (sessions.FindWork(sessionId) is { } work)
         {
-            return;
+            await work.CancelAndJoinStagesAsync().ConfigureAwait(false);
         }
-        _ = await worker.RunAsync(async () =>
+        _ = await worker.RunCleanupAsync(async () =>
         {
-            await CleanupSessionAsync(original).ConfigureAwait(false);
-            return original.Id;
+            var original = sessions.FindForCleanup(sessionId);
+            if (original is not null)
+            {
+                await CleanupSessionAsync(original).ConfigureAwait(false);
+            }
+            else
+            {
+                sessions.RetireWork(sessionId);
+            }
+            return sessionId;
         }).ConfigureAwait(false);
     }
 
@@ -27,5 +34,6 @@ internal sealed partial class NativeTextOnlineMaintenanceService
         await ServerFailureObserver.ObserveAsync(shutdown.CancelAsync, failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(() => worker.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         await NativeTextOnlineOwnerShutdown.CompleteAsync(originals, originalReaders, catalog, shutdown, CleanupSessionAsync, failures).ConfigureAwait(false);
+        sessions.DisposeUncapturedWorkAfterWorkerJoin();
     }
 }

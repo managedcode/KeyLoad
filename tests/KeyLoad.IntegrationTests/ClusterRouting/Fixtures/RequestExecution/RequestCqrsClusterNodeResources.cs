@@ -5,13 +5,13 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting.Helpers;
 
 internal static class RequestCqrsClusterNodeResources
 {
-    internal static ContainerResource[] Select(IDistributedApplicationTestingBuilder builder)
+    internal static ProjectResource[] Select(IDistributedApplicationTestingBuilder builder)
     {
-        var selected = builder.Resources.OfType<ContainerResource>().Where(resource => IsNode(resource.Name))
+        var selected = builder.Resources.OfType<ProjectResource>().Where(resource => IsNode(resource.Name))
             .OrderBy(resource => resource.Name, StringComparer.Ordinal).ToArray();
         if (selected.Length != RequestCqrsClusterProtocol.NodeCount)
         {
-            throw new InvalidOperationException("The actual Aspire model did not contain three C1 node containers.");
+            throw new InvalidOperationException("The actual Aspire model did not contain three native project node resources.");
         }
         return selected;
     }

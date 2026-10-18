@@ -70,7 +70,7 @@ internal static class AnalyticsNativeMapColdReads
         var decoded = NativeSerialization.Deserialize<GrainValue>(payload).Value;
         await Assert.That(decoded).IsTypeOf<T>();
         await O.EqualAsync(expected, (T)decoded!);
-        // The public gateway serializes the runtime typed value, never a flattened map or native fallback.
+        // The public gateway serializes the complete runtime typed value.
         var json = JsonSerializer.SerializeToUtf8Bytes(decoded, decoded!.GetType(), JsonDefaults.Options);
         await O.EqualAsync(expected, JsonDefaults.Deserialize<T>(json));
     }

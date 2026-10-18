@@ -1,7 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 using ManagedCode.Communication.Commands;
-using ManagedCode.Communication.CQRS;
 using OpenTelemetry;
 
 namespace KeyLoad.Server;
@@ -11,12 +10,14 @@ namespace KeyLoad.Server;
 /// <param name="silo">The actual owning silo, independent of logical partition activation placement.</param>
 /// <param name="loggerFactory">The borrowed native logger factory.</param>
 /// <param name="owner">The same silo-local owner retained through opening and eventual joined physical close.</param>
-/// <param name="grains"></param>
 /// <param name="services"></param>
 internal sealed class PartitionStorageGrainService(GrainId grainId, Silo silo, ILoggerFactory loggerFactory,
-    PartitionHostApplicationOwner owner, IGrainFactory grains, IServiceProvider services) : GrainService(grainId, silo, loggerFactory), ISiloDatabaseService
+    PartitionHostApplicationOwner owner, IServiceProvider services) : GrainService(grainId, silo, loggerFactory), ISiloDatabaseService
 {
     private readonly PartitionHostApplicationOwner owner = owner;
+    private PartitionStorageRequestExecution? requests;
+    private PartitionStorageRequestExecution Requests => requests
+        ?? throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
 
     public Task<SiloStorageCut> ReadCutAsync(CancellationToken cancellationToken)
     {
@@ -36,15 +37,14 @@ internal sealed class PartitionStorageGrainService(GrainId grainId, Silo silo, I
     public Task<StorageOperationResult> ApplyAsync(Command<DatabaseCommand> operation, long sequence, CancellationToken cancellationToken)
         => Task.FromResult(owner.Borrow().Database.ApplyStorageOperation(operation, sequence, cancellationToken));
 
-    public IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> ExecuteStreamAsync(
-        string signedRequest, CancellationToken cancellationToken)
-        => grains.GetGrain<IRequestWorkerGrain>(RequestWorkerIdentity.ForRequests())
-            .ExecuteStreamAsync(signedRequest, cancellationToken);
+    public Task<GrainOperationReply> ExecuteAsync(string signedRequest, CancellationToken cancellationToken)
+        => Requests.ExecuteAsync(signedRequest, null, cancellationToken);
+
+    public Task AbortMaintenanceAsync(GrainReadKind kind, Guid sessionId) => Requests.AbortAsync(kind, sessionId);
 
     public Task<GrainOperationReply> ExecuteCommandAsync(string signedRequest, string actorKey,
         CancellationToken cancellationToken)
-        => grains.GetGrain<IRequestWorkerGrain>(RequestWorkerIdentity.ForCommands())
-            .ExecuteCommandAsync(signedRequest, actorKey, cancellationToken);
+        => Requests.ExecuteAsync(signedRequest, actorKey, cancellationToken);
 
     public Task<NodeStatus> ReadStatusAsync(CancellationToken cancellationToken)
         => services.GetRequiredService<INodeAdministration>().StatusAsync(cancellationToken);
@@ -67,5 +67,9 @@ internal sealed class PartitionStorageGrainService(GrainId grainId, Silo silo, I
         serviceProvider.GetRequiredService<ITelemetryHostInitializer>().Initialize();
         await owner.OpenAsync().ConfigureAwait(true);
         await serviceProvider.GetRequiredService<OrleansNode>().InitializeLocalRuntimeAsync(CancellationToken.None).ConfigureAwait(true);
+        requests = new(owner.Borrow().Database, services.GetRequiredService<Func<NativeRequestWorkOwner>>()(),
+            services.GetRequiredService<GrainRequestCodec>(), services, services.GetRequiredService<TimeProvider>(),
+            services.GetRequiredService<Microsoft.Extensions.Options.IOptions<GrainRoutingOptions>>(),
+            services.GetRequiredService<ILogger<PartitionStorageGrainService>>(), (IGrainContext)this);
     }
 }

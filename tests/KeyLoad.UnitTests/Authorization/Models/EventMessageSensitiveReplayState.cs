@@ -15,19 +15,35 @@ internal sealed class EventMessageSensitiveReplayState(PartitionRef partition, R
     internal EventSourceRef Source => new(Partition, Resource.Name, EventSourceKind.Topic);
     internal SubscriptionRef OriginalGroup => new(Source, EventMessageSensitiveReplayProtocol.Group);
     internal CommandRequest Producer { get; set; } = null!;
-    internal Result<object> Produced { get; set; } = null!;
+    private Result<object>? produced;
+    internal Result<object> Produced
+    {
+        get => produced ?? throw new InvalidOperationException(MissingOutcome);
+        set => produced = value;
+    }
     internal Guid OriginalId
     {
         get; set;
     }
     internal object OriginalRequest { get; set; } = null!;
-    internal Result<object> Original { get; set; } = null!;
+    private Result<object>? original;
+    internal Result<object> Original
+    {
+        get => original ?? throw new InvalidOperationException(MissingOutcome);
+        set => original = value;
+    }
     internal byte[] OriginalOutcome { get; set; } = [];
     internal Guid HealthyId
     {
         get; set;
     }
     internal object HealthyRequest { get; set; } = null!;
-    internal Result<object> Healthy { get; set; } = null!;
+    private Result<object>? healthy;
+    internal Result<object> Healthy
+    {
+        get => healthy ?? throw new InvalidOperationException(MissingOutcome);
+        set => healthy = value;
+    }
+    private const string MissingOutcome = "The original sensitive replay operation has not produced its outcome.";
     internal OperationKind ReceiveKind => Subscription ? OperationKind.ReceiveSubscription : OperationKind.Receive;
 }

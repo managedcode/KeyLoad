@@ -9,8 +9,6 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 internal sealed record PostgresClusterSelection(int QueryDialect)
 {
     private const string Prefix = "KeyLoad__NativeSql__";
-    private const string MountedCertificate = "/native-sql/server.pfx";
-    private const string MountedDirectory = "/native-sql";
     private const string Tcp = "tcp";
     private const string True = "true";
 
@@ -24,13 +22,12 @@ internal sealed record PostgresClusterSelection(int QueryDialect)
     {
         foreach (var name in nodes)
         {
-            var node = builder.CreateResourceBuilder(builder.Resources.OfType<ContainerResource>()
+            var node = builder.CreateResourceBuilder(builder.Resources.OfType<ProjectResource>()
                 .Single(resource => resource.Name == name));
-            node.WithBindMount(certificates.Directory, MountedDirectory, isReadOnly: true)
-                .WithEndpoint(targetPort: PostgresClusterProtocol.Port, name: PostgresClusterProtocol.Endpoint,
+            node.WithEndpoint(name: PostgresClusterProtocol.Endpoint,
                     scheme: Tcp, isProxied: false)
-                .WithEnvironment(Prefix + Port, PostgresClusterProtocol.Port.ToString(CultureInfo.InvariantCulture))
-                .WithEnvironment(Prefix + CertificatePath, MountedCertificate)
+                .WithEnvironment(Prefix + Port, node.GetEndpoint(PostgresClusterProtocol.Endpoint).Property(EndpointProperty.TargetPort))
+                .WithEnvironment(Prefix + CertificatePath, certificates.ServerPath)
                 .WithEnvironment(Prefix + Dialect, QueryDialect.ToString(CultureInfo.InvariantCulture))
                 .WithEnvironment(Prefix + FullScan, True)
                 .WithEnvironment(Prefix + DatabasePrefix + Tenant, partition.TenantId)

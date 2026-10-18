@@ -45,10 +45,13 @@ membership, transport, placement or movement mechanism of its own.
   idempotent command outcome; clients never supply trusted roles.
 - **Partition grains.** A logical partition grain is an ordinary Orleans grain
   that serializes and routes the commands of one logical (atomic) partition.
-- **Silo-local ZoneTree owner.** A Grain Service is per silo and always local. It
-  maintains that node's own ZoneTree and owns its files: ZoneTree stores,
-  WAL/journals, file locks and ordered apply. Other code on the node gets ZoneTree
-  from it through dependency injection. Files never move with grain activations.
+- **Physical storage owner.** A silo-local Grain Service owns open ZoneTree
+  stores, WAL, file locks and ordered apply. Isolated volumes use each node's
+  local files and typed Orleans calls between owners. Shared volumes expose the
+  same paths to participating silos and require one open owner per mutable
+  physical partition, joined close before reopening and no data copying.
+  [ADR-136](../ADR/ADR-136-native-orleans-partition-ownership.md) defines these
+  contracts and their open implementation and qualification gates.
 - **Copies.** The writer finds the target silos through native Orleans membership
   (`IClusterMembershipService` / `IManagementGrain`) and sends the write through
   ordinary Orleans calls to the ZoneTree owner Grain Services on
@@ -63,8 +66,10 @@ membership, transport, placement or movement mechanism of its own.
   through Orleans -> results are gathered -> returned.
 - **Background work.** Queue deadlines, due and recurring work, remote transfers,
   ANN projection and time-series chunk workers never check leadership. Orleans
-  `[StatelessWorker]` grains (one or many activations, each with its own
-  identity) accept events, buffer them in memory and, on an Orleans timer whose
+  `[StatelessWorker]` grains share a helper-created logical pool key. Orleans
+  automatically creates and retires activations according to load; application
+  code does not address individual activations. Each activation accepts events,
+  buffers them in memory and, on an Orleans timer whose
   interval is a typed option (for example 5 seconds), write the batch through the
   normal grain -> ZoneTree owner path.
 - **Identifiers.** Every grain key and every identifier for objects, counters and
@@ -183,7 +188,7 @@ version + checkpoint               version + checkpoint
 
 `CatalogService` stores collection/event/message schemas, TransactionDomain bindings, queue/subscription configuration, index generations and format versions as canonical database records; they are copied to the ZoneTree owners by the same path as other data.
 
-Orleans `[StatelessWorker]` grains run background work (queue deadlines, due/recurring work, remote transfers, ANN projection, time-series chunks): one or more activations, each with its own identity, buffer events and on an Orleans timer write a batch through partition grain → ZoneTree owner. Nothing checks leadership.
+Orleans `[StatelessWorker]` grains run interchangeable leaf work and buffered pre-aggregation. Orleans creates and retires activations automatically for a logical pool key; individual activations are not addressable. Each activation may buffer events and flush on its typed native grain timer through the normal storage path. Multi-stage sessions and response streams belong to ordinary identities or actual storage owners. An in-memory buffer does not supply durable delivery. Nothing checks leadership.
 
 One shared helper per identity kind creates every grain key and every object, counter and storage-key identifier; keys are case-sensitive.
 
@@ -284,9 +289,17 @@ The profile is set per database/partition group. Silently weakening guarantees f
 
 ## 6. Replication and failover
 
-### Copies through Orleans
+### Storage access and copies through Orleans
 
-Only ordinary Orleans calls copy data. A partition grain applies its partition's commands in a defined order, finds the target silos through native Orleans membership (`IClusterMembershipService` / `IManagementGrain`) and sends every command to the ZoneTree owner Grain Services on `KeyLoad:ReplicaCount` silos. A write is acknowledged after durable local apply on every configured copy; for `ReplicaCount=3` all three must confirm, and `ReplicaCount=1` gives no copy fault tolerance ([ADR-143](../ADR/ADR-143-independent-silo-replica-topology.md)).
+Shared-volume operation uses one open owner for each mutable physical partition;
+other silos reach that owner through Orleans and do not copy the data. Isolated
+volumes keep physical ownership on their nodes. Cross-partition queries send
+bounded work through Orleans to each logical partition once, collect partial
+results and preserve their read cuts. These are approved contracts with open
+implementation and qualification gates, as recorded in
+[status.json](../implementation/status.json).
+
+Only ordinary Orleans calls copy isolated data. A partition grain applies its partition's commands in a defined order, finds the target silos through native Orleans membership (`IClusterMembershipService` / `IManagementGrain`) and sends every command to the ZoneTree owner Grain Services on `KeyLoad:ReplicaCount` silos. A write is acknowledged after durable local apply on every configured copy; for `ReplicaCount=3` all three must confirm, and `ReplicaCount=1` gives no copy fault tolerance ([ADR-143](../ADR/ADR-143-independent-silo-replica-topology.md)).
 
 A native `ManagedCode.Communication.Command<DatabaseCommand>` has one stable `CommandId`, server-bound `UserId`, UTC `Timestamp` and generated canonical input. State-dependent CAS and unique checks run deterministically in apply order, so every copy gets the same result. A business-operation rejection is a stored result of a committed command.
 
@@ -724,7 +737,7 @@ An Orleans activation runs one turn at a time. By default a request holds a non-
 
 The connection grain therefore runs independent operations in bounded call-local contexts, and native scheduling is chosen per method ([ADR-110](../ADR/ADR-110-native-orleans-execution-primitives.md)). One slow request must not delay all of that client's requests.
 
-StatelessWorker grains form a pool of local activations, each with its own identity. They handle buffered background work flushed on a timer; they read and write data only through the normal grain → ZoneTree owner path of the target node. [S20]
+StatelessWorker grains use one helper-created logical key per pool. Orleans automatically creates and retires local activations with load; individual activations are not addressable. They handle interchangeable work and activation-local buffered batches flushed on native timers. Storage access follows the typed grain → ZoneTree owner path. [S20]
 
 ### 24.4. Response and cursor
 
@@ -1579,7 +1592,7 @@ Orleans stream providers behave according to their backing queue; Microsoft expl
 
 Orleans separately documents delivery guarantees for grain calls. KeyLoad stores persisted application command identity and dedup independently of transport retry behavior. [S53]
 
-Background coordination of queues, subscription groups and the scheduler is done by Orleans `[StatelessWorker]` grains (one or more activations, each with its own identity). They accept events, buffer them in memory and, on an Orleans timer whose interval is a typed option (for example, 5 seconds), write a batch through the normal grain → ZoneTree owner path. No leadership, leader hints or singleton coordinators are used. They do not hold an open database transaction while a handler runs; storage remains the source of truth for claims/checkpoints.
+Background coordination of queues, subscription groups and the scheduler uses Orleans `[StatelessWorker]` pools with helper-created logical keys and automatically managed, non-addressable activations. They accept events, buffer them in memory and, on an Orleans timer whose interval is a typed option (for example, 5 seconds), write a batch through the normal grain → ZoneTree owner path. No leadership, leader hints or singleton coordinators are used. They do not hold an open database transaction while a handler runs; storage remains the source of truth for claims/checkpoints.
 
 ### 42.2. Consumer execution
 

@@ -103,7 +103,6 @@ internal static class SafeProjectorOperationMutations
     {
         await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(StringComparer.Ordinal.Equals(actual.Problem?.Detail, detail)).IsTrue();
-        await Assert.That(actual.Json is null).IsTrue();
         await Assert.That(actual.Value is null).IsTrue();
         await Assert.That(actual.Problem?.Detail?.Contains(SafeProjectorOperationProtocol.Canary, StringComparison.Ordinal) is true).IsFalse();
     }

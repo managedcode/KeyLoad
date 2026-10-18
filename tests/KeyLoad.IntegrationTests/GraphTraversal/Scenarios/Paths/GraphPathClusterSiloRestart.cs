@@ -23,11 +23,11 @@ internal static class GraphPathClusterSiloRestart
             var selectedIndex = await SelectSiloIndexAsync(clients.Administrators, cancellationToken).ConfigureAwait(false);
             await VerifyInitialPathAsync(seed, clients.Readers[selectedIndex], cancellationToken).ConfigureAwait(false);
             stoppedNode = GraphPathClusterNodeClients.Nodes[selectedIndex];
-            await fixture.KillContainerAsync(stoppedNode, FaultScenario, cancellationToken).ConfigureAwait(false);
+            await fixture.KillServerAsync(stoppedNode, FaultScenario, cancellationToken).ConfigureAwait(false);
             await WaitForSurvivorsAsync(clients.Administrators, selectedIndex, cancellationToken).ConfigureAwait(false);
             var survivor = (selectedIndex + 1) % GraphPathClusterNodeClients.Nodes.Length;
             await VerifyInitialPathAsync(seed, clients.Readers[survivor], cancellationToken).ConfigureAwait(false);
-            await fixture.RestartContainerAsync(stoppedNode, cancellationToken).ConfigureAwait(false);
+            await fixture.RestartServerAsync(stoppedNode, cancellationToken).ConfigureAwait(false);
             await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(stoppedNode,
                 WaitBehavior.WaitOnResourceUnavailable, cancellationToken).ConfigureAwait(false);
             var committedToken = await CommitAndVerifyAsync(fixture, seed, clients, survivor, cancellationToken)
@@ -158,7 +158,7 @@ internal static class GraphPathClusterSiloRestart
         KeyLoadClient[] administrators, List<Exception> failures)
     {
         using var recovery = new CancellationTokenSource(TimeSpan.FromSeconds(45), TimeProvider.System);
-        await ServerFailureObserver.ObserveAsync(() => fixture.RestartContainerAsync(node, recovery.Token), failures)
+        await ServerFailureObserver.ObserveAsync(() => fixture.RestartServerAsync(node, recovery.Token), failures)
             .ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(() => fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(node,
             WaitBehavior.WaitOnResourceUnavailable, recovery.Token), failures).ConfigureAwait(false);

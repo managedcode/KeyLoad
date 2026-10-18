@@ -117,7 +117,7 @@ internal sealed class AdminBrowserProcess : IAsyncDisposable
         var joined = process is null;
         if (process is { } original)
         {
-            var cleanup = LocalImageOwnedProcessLifetime.TerminateAndJoinAsync(original, OriginalExit, OriginalOutput, OriginalError, failures);
+            var cleanup = OwnedProcessLifetime.TerminateAndJoinAsync(original, OriginalExit, OriginalOutput, OriginalError, failures);
             var failure = await OwnedProcessFailureObserver.CaptureAsync(cleanup).ConfigureAwait(false);
             if (failure is not null)
             {

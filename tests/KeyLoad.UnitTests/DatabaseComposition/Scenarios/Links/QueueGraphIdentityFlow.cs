@@ -92,7 +92,7 @@ internal static class QueueGraphIdentityFlow
                     payload, HeadersJson: QueueGraphIdentityState.HeadersJson)]);
         var operation = await CompileAsync(db.Database, seed, at);
         var receipt = db.Database.Apply(operation).Get<CommitReceipt>();
-        var expectedReceipt = new CommitReceipt(operation.Id, new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId,
+        var expectedReceipt = new CommitReceipt(operation.CommandId, new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId,
                 db.Store.Position), [new("putDocument", QueueGraphIdentityState.Collection, first.Id, 1),
                 new("putDocument", QueueGraphIdentityState.Collection, second.Id, 1),
                 new("enqueue", QueueGraphIdentityState.Queue, QueueGraphIdentityState.Message, 1)], receipt.Durability, (receipt.Durability == DurabilityProfile.Buffered ? 0 : 1));

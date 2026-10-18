@@ -31,7 +31,7 @@ internal static class CompositionPrefixPrepareCommands
             await Assert.That(admission.Bindings.ToHashSet().SetEquals(new[] { D.From, D.To, D.Queue, D.Graph }
                 .Select(name => owner.Lifetimes[name]))).IsTrue();
         }
-        var expected = new CommitReceipt(issued.Original.Id, owner.NextToken(), receipts, DurabilityProfile.ProcessDurable, 1);
+        var expected = new CommitReceipt(issued.Original.CommandId, owner.NextToken(), receipts, DurabilityProfile.ProcessDurable, 1);
         issued = issued with
         {
             Receipt = expected

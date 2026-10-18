@@ -12,7 +12,7 @@ internal static class InitialPrincipalEpochHealthy
         var id = Guid.NewGuid();
         var command = new CommandRequest(id, fixture.Harness.Partition,
             [new PutDocument(InitialPrincipalEpochFixture.Collection, "record", "{\"value\":7}", 1L)]);
-        var operation = InitialPrincipalEpochFixture.Operation(OperationKind.Batch, command, InitialPrincipalEpochFixture.Reader, id);
+        var operation = fixture.Operation(OperationKind.Batch, command, InitialPrincipalEpochFixture.Reader, id);
         var before = fixture.Harness.Store.Position;
         var actual = fixture.Harness.Database.ApplyEmbedded(operation, token).Get<CommitReceipt>();
         var expected = new CommitReceipt(id, new(fixture.Harness.Store.Identity.Incarnation,
@@ -33,7 +33,7 @@ internal static class InitialPrincipalEpochHealthy
             await InitialPrincipalEpochAssertions.EqualAsync(seedReplay, fixture.SeedReceipt);
             await Assert.That(seedReplay.Mutations.Single().CompositionReferences).IsEmpty();
             await Assert.That(store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(fixture.Harness.Partition,
-                "root", fixture.Seed.Id)))!.AsSpan().SequenceEqual(fixture.SeedOutcome)).IsTrue();
+                "root", fixture.Seed.CommandId)))!.AsSpan().SequenceEqual(fixture.SeedOutcome)).IsTrue();
             await InitialPrincipalEpochAssertions.RefuseAsync(() => database.Authenticate(InitialPrincipalEpochFixture.OriginalSecret,
                 database.EvaluationClock.GetUtcNow()), ErrorCode.Unauthenticated);
             await Assert.That(database.Authenticate(InitialPrincipalEpochFixture.ReplacementSecret, database.EvaluationClock.GetUtcNow()))

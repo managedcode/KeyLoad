@@ -39,10 +39,10 @@ internal sealed class NativeSourceManifestChildOriginals
         ServerFailureObserver.Observe(() => Ready ??= process.StandardOutput.ReadLineAsync(CancellationToken.None)
             .AsTask(), failures);
         ServerFailureObserver.Observe(() => Output ??= Ready is null
-            ? NativeCoverageImageNodeOutput.ReadBoundedAsync(process.StandardOutput, options.CleanupOutputCharacters)
+            ? NativeSourceProcessOutput.ReadBoundedAsync(process.StandardOutput, options.CleanupOutputCharacters)
             : NativeSourceManifestChildSettlement.CaptureOutputAsync(Ready, process.StandardOutput,
                 options.CleanupOutputCharacters), failures);
-        ServerFailureObserver.Observe(() => Error ??= NativeCoverageImageNodeOutput.ReadBoundedAsync(
+        ServerFailureObserver.Observe(() => Error ??= NativeSourceProcessOutput.ReadBoundedAsync(
             process.StandardError, options.CleanupOutputCharacters), failures);
         Original ??= Task.WhenAll(ActualStages());
     }

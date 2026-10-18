@@ -23,7 +23,7 @@ internal static class TeamRowPolicyAssertions
     private const long AbsentRevision = 0;
     private const int FirstMembershipIndex = 0;
 
-    internal static string[] Image(ZoneTreeStore store) => GraphShortestPathFullStoreImage.Bytes(store);
+    internal static string[] Image(ZoneTreeStore store) => CanonicalStoreImage.Bytes(store);
 
     internal static async Task VisibleAsync(TestDatabase db, DatabaseEngine database, QueryEngine queries, ZoneTreeStore store,
         long revision, string json, CancellationToken token)
@@ -130,12 +130,12 @@ internal static class TeamRowPolicyAssertions
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(store.Identity.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(command.Partition.AtomicPartitionId);
-        await Assert.That(receipt.Token.Position).IsEqualTo(store.Position);
+        var outcome = store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(command.Partition, TeamRowPolicyFlow.Reader, command.CommandId)))!;
+        await Assert.That(receipt.Token.Position).IsEqualTo(outcome.CanonicalSequence);
 
         await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
         MutationReceipt[] mutations = [new(PutKind, TeamRowPolicyFlow.Collection, TeamRowPolicyFlow.Row, revision)];
         await Assert.That(JsonDefaults.Serialize(receipt.Mutations).AsSpan().SequenceEqual(JsonDefaults.Serialize(mutations))).IsTrue();
-        var outcome = store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(command.Partition, TeamRowPolicyFlow.Reader, command.CommandId)))!;
         await Assert.That(outcome.PolicyEpoch).IsEqualTo(epoch);
         await Assert.That(outcome.Incarnation).IsEqualTo(store.Identity.Incarnation);
     }
@@ -145,7 +145,7 @@ internal static class TeamRowPolicyAssertions
     {
         var image = Image(store);
         var cut = store.Position;
-        var refusal = engine.ApplyEmbedded(TeamRowPolicyFlow.Operation(original), cancellationToken: token);
+        var refusal = engine.ApplyEmbedded(TeamRowPolicyFlow.Operation(store, original), cancellationToken: token);
         await Assert.That(Errors.Code(refusal.Problem)).IsEqualTo(error);
         await Assert.That(TeamRowPolicyFlow.Outcome(store, original).AsSpan().SequenceEqual(outcome)).IsTrue();
         await UnchangedAsync(store, image, cut);

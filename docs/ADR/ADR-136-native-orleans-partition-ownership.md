@@ -1,61 +1,86 @@
-# ADR-136: Orleans is the cluster; every silo owns its own ZoneTree
+# ADR-136: Orleans execution and physical storage ownership
 
-Status: Accepted. Implementation and exact-source runtime qualification are in progress.
+Status: Accepted design. Shared-volume lifetime and distributed partition-query
+execution remain open implementation and qualification gates.
 
 ## Decision
 
-KeyLoad is an Orleans application. Orleans does all of the clustering; KeyLoad writes clear Orleans code that uses it.
+Microsoft Orleans owns membership, discovery, failure detection, the distributed
+grain directory, placement, activation movement, scheduling, communication and
+scaling. KeyLoad uses the native distributed directory and activation
+repartitioner. It implements database operations and file ownership through
+ordinary grains and silo-local Grain Services.
 
-| Concern | Owner |
-|---|---|
-| Membership, silo discovery, failure detection | Native Orleans clustering provider (Azure Table storage through Aspire, or localhost clustering for local development) |
-| Grain directory, placement, activation migration and repartitioning | Native Orleans distributed grain directory, placement and activation repartitioner |
-| Internal communication between silos | Ordinary Orleans grain calls, Grain Service calls and Orleans streams |
-| Scaling | Adding silos to the Orleans cluster |
-| Client connection | One Orleans connection grain per connected client ([ADR-125](ADR-125-connection-owned-execution.md)) |
-| Logical partition | An ordinary Orleans grain that serializes commands for one logical partition and calls the storage owners |
-| Files on a node | One silo-local ZoneTree owner (Orleans Grain Service) per silo: ZoneTree stores, WAL/journals, file locks, ordered apply |
-| Copies of data | The partition grain sends the write through Orleans calls to the ZoneTree owners on `KeyLoad:ReplicaCount` silos ([ADR-143](ADR-143-independent-silo-replica-topology.md)) |
+The request path is public API -> one connection grain per connected client ->
+logical database/partition grains -> storage owners -> bounded aggregation ->
+caller. Logical atomic partition identity is independent of activation placement
+and physical copy identity. A connection owns its response stream and independent
+request lifetimes; storage services expose self-contained typed Task calls.
 
-Request flow: public API (HTTP, .NET SDK, MCP, SQL) → connection grain → partition grains → ZoneTree owner on the same node or on other nodes through Orleans → results are gathered → returned to the caller.
+## Storage modes
 
-```mermaid
-flowchart LR
-    Client[SDK / MCP / SQL caller] --> Api[Public API]
-    Api --> Connection[Connection grain, one per client]
-    Connection --> Partition[Partition grain]
-    Connection --> Reads[Reads gathered from several partitions]
-    Partition -->|Orleans call| OwnerA[ZoneTree owner on silo A]
-    Partition -->|Orleans call| OwnerB[ZoneTree owner on silo B]
-    Partition -->|Orleans call| OwnerC[ZoneTree owner on silo C]
-    Reads -->|Orleans calls| OwnerA
-    Reads -->|Orleans calls| OwnerB
-    OwnerA --> FilesA[(Local ZoneTree files)]
-    OwnerB --> FilesB[(Local ZoneTree files)]
-    OwnerC --> FilesC[(Local ZoneTree files)]
-```
+| Mode | Physical files | Execution and copies |
+|---|---|---|
+| Shared volume | The same configured volume and physical partition paths are visible to the participating silos. Exactly one open storage owner holds each mutable ZoneTree and its file locks. | An ordinary logical owner grain routes work to that open owner through Orleans. Moving ownership drains borrowers and joins the original close before reopening the same files on another silo. Shared access creates no extra persisted copies and requires no data copying. |
+| Isolated volumes | Each silo-local Grain Service owns its configured local files, WAL, locks and ordered apply gate. | Logical partition grains call the required storage owners through Orleans. Optional copies are actual independent persisted stores. A cross-partition query calls each logical partition once and merges bounded partial results. |
 
-## Rules
+A shared mount makes files reachable; it does not make ZoneTree a concurrent
+multi-process writable database. The pinned ZoneTree WAL uses exclusive file
+sharing. Its mutable engine state and KeyLoad's apply gates are process-local.
+The native directory coordinates the logical grain and the real filesystem lock
+protects the files. A membership transition cannot release a still-open operating
+system handle. An unavailable original owner causes an explicit failure until
+the original file ownership has actually ended. Filesystem lock and flush
+semantics must be qualified on the deployed volume.
 
-1. Native Orleans APIs own every cluster responsibility in the table above. KeyLoad code uses their membership snapshots, grain addresses and lifecycle directly.
-2. Storage files never move. The ZoneTree owner opens the node's files once in its Grain Service initialization through the native silo lifecycle and closes them once at silo shutdown, after the grains that use them have drained. Grain activations may migrate; a migrated grain simply calls the ZoneTree owners again through Orleans.
-3. Writes: the database grain sends one prepared native command in canonical order to its ReplicaCount ZoneTree owners through Orleans and returns success after every configured copy confirms persisted apply (ADR-003). Receipts report the actual persisted copy count separately from durability. An unavailable required copy prevents a successful write.
-4. Reads: grains read from the ZoneTree owner of the relevant node through Orleans; a read that spans partitions is fanned out by the connection grain and merged within the operation's bounds.
-5. Grains that need locality use the native `[Immovable]` attribute; all other grains keep native migration.
-6. Every operation still checks fresh persisted authorization, runs within bounded admission and cancellation, keeps idempotent command outcomes and emits OpenTelemetry through the native integrations.
+For isolated volumes, grain calls provide the distributed execution path.
+Orleans finds activations and transports requests; KeyLoad defines partition
+selection, read cuts, query operators and resource limits. Physical replicas of
+one partition must not be counted as separate query partitions. A result spans a
+vector of partition cuts, rather than an invented global snapshot. Every write
+retains its stable command identity and original prepared facts. An
+acknowledgement reports the actual persisted copies and qualified durability.
 
-## Verification
+## Workers and lifetime
 
-Verify native provider, directory and repartitioner configuration; silo-local
-ZoneTree ownership; and connection-grain calls through the real .NET SDK and
-MCP clients against the Aspire-owned topology. Writes, reads, cancellation,
-silo restart, duplicate commands and joined shutdown must preserve their
-observable contracts. Build, TUnit, process recovery and exact-source Linux
-cluster qualification are separate gates. Process-kill tests do not prove
-power-loss durability.
+`[StatelessWorker]` marks interchangeable leaf work or activation-local buffered
+pre-aggregation. Orleans creates and retires activations with load. One logical
+pool key comes from its identity helper; application code never addresses
+individual activations or assumes consecutive calls reach the same one. A
+multi-stage session or native response-stream enumerator therefore belongs to an
+ordinary identity or its actual storage owner, not to a worker-pool reference.
 
-## Consequences
+Grain Services own per-silo resources. Their typed clients address actual native
+silo generations obtained from Orleans membership. Local code borrows the owner
+through DI. A timer flushes an activation-local buffer at its typed interval;
+that buffer is disposable and does not itself prove durable delivery. Work,
+cancellation, native pins and buffers remain owned until their actual operations
+and cleanup join. A canceled caller Task is not remote completion evidence.
 
-The design is small enough to read in one sitting. Availability and placement of activations follow Orleans behaviour. Physical file rebalancing, split and merge are outside this design.
+All operations enforce fresh persisted authorization, bounded fan-out and
+retained results, cancellation, idempotent command effects and native telemetry.
 
-The current implementation reads native active membership, orders native silo names and selects ReplicaCount addresses. Equal-cut reads prefer their executing silo. This is not a file-rebalancing or general empty-copy recovery mechanism; those runtime guarantees remain unqualified. See [ClusterReplication](../Features/ClusterReplication.md) for the actual retry and recovery limits.
+## Current implementation and verification
+
+The current database commit grain selects actual native silo addresses and sends
+one prepared command to its configured storage copies. Reads select an available
+canonical copy. This is full-copy routing; it is not distributed partition-query
+execution. The current physical host opens one store per silo eagerly. It does
+not implement lazy, single-owner shared-volume opening. These limits remain
+explicit in [status.json](../implementation/status.json).
+
+Qualify both storage modes with real SDK/MCP operations, actual file identities,
+concurrent requests, duplicate commands, fresh authorization, cancellation,
+owner loss, reopening and joined shutdown. Shared-volume tests must use the
+actual volume's locking behavior; isolated-volume tests must demonstrate genuine
+partition fan-out without counting copies twice. Full build, TUnit, process
+recovery, actual Aspire cluster operations and exact-source Linux qualification
+are separate gates. Process-kill recovery does not prove power-loss durability.
+
+## Native references
+
+- [Grain directory](https://learn.microsoft.com/en-us/dotnet/orleans/host/grain-directory)
+- [Grain placement and activation repartitioning](https://learn.microsoft.com/en-us/dotnet/orleans/grains/grain-placement)
+- [Stateless worker grains](https://learn.microsoft.com/en-us/dotnet/orleans/grains/stateless-worker-grains)
+- [Grain Services](https://learn.microsoft.com/en-us/dotnet/orleans/grains/grainservices)
+- [Pinned ZoneTree WAL opening](https://github.com/ZoneTree/ZoneTree/blob/ec774af2223bd87457a0aa985908f0b4e508e4c8/src/ZoneTree/WAL/Sync/SyncFileSystemWriteAheadLog.cs#L55-L63)

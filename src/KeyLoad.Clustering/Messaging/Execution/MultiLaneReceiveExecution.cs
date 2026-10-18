@@ -2,11 +2,9 @@ using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
-using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Orleans.Serialization;
 
 namespace KeyLoad.Clustering;
 
@@ -14,18 +12,17 @@ internal static class MultiLaneReceiveExecution
 {
     private const int NoPrecedingOutcomes = 0;
     internal static async Task<MultiLaneReceiveResult> ExecuteAsync(DecodedGrainRequest parent,
-        Func<string, CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> executeChild,
+        Func<string, CancellationToken, Task<GrainOperationReply>> executeChild,
         IServiceProvider services, GrainRequestCodec codec, TimeProvider clock,
-        Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
-        IOptions<GrainRoutingOptions> routing, ILogger diagnostics, IResourceLifetimeWorkBinding binding,
+        ILogger diagnostics, IResourceLifetimeWorkBinding binding,
         CancellationToken token)
     {
         var request = GrainNativePayload.ReadCommand<MultiLaneReceiveRequest>(parent.Payload);
         ArgumentNullException.ThrowIfNull(binding);
-        var database = services.GetRequiredService<DatabaseEngine>();
+        var limits = services.GetRequiredService<IOptions<DatabaseLimits>>().Value;
+        var incarnation = codec.LifetimeReadContext.Database.Store.Identity.Incarnation;
         MultiLaneReceiveAdmission.Validate(request, parent.Envelope.CommandId,
-            services.GetRequiredService<IOptions<MessagingExecutionOptions>>().Value, database.Limits, token);
-        var principal = GrainRequestAuthority.Reload(database, parent.Envelope.PrincipalId!, clock);
+            services.GetRequiredService<IOptions<MessagingExecutionOptions>>().Value, limits, token);
         var outcomes = ImmutableArray.CreateBuilder<QueueLaneReceiveOutcome>(request.Requests.Length);
         var halted = false;
         KeyLoadException? stopped = null;
@@ -34,36 +31,35 @@ internal static class MultiLaneReceiveExecution
             token.ThrowIfCancellationRequested();
             if (!halted)
             {
-                stopped = ValidateNext(parent, database, codec, clock, outcomes.Count, diagnostics);
+                stopped = ValidateNext(parent, incarnation, codec, clock, outcomes.Count, diagnostics);
                 halted = stopped is not null;
             }
             if (halted)
             {
                 AcceptOutcome(request.RequestId, outcomes,
                     new(leaf.RequestId, leaf.Lane, QueueLaneReceiveStatus.NotAttempted), stopped,
-                    binding, database.Limits.MaxBatchBytes, token);
+                    binding, limits.MaxBatchBytes, token);
                 continue;
             }
-            var dispatched = await DispatchAsync(principal, leaf, executeChild, services, codec, clock,
-                serializer, routing, diagnostics, parent, binding, outcomes.Count, token).ConfigureAwait(true);
+            var dispatched = await DispatchAsync(leaf, executeChild, services, codec, clock,
+                diagnostics, parent, binding, incarnation, outcomes.Count, token).ConfigureAwait(true);
             stopped = dispatched.Stopped;
             var outcome = stopped is null ? Outcome(leaf, dispatched.Reply!, diagnostics, parent.Envelope.RequestId)
                 : new QueueLaneReceiveOutcome(leaf.RequestId, leaf.Lane, QueueLaneReceiveStatus.NotAttempted);
-            AcceptOutcome(request.RequestId, outcomes, outcome, stopped, binding, database.Limits.MaxBatchBytes, token);
+            AcceptOutcome(request.RequestId, outcomes, outcome, stopped, binding, limits.MaxBatchBytes, token);
             halted = stopped is not null || outcome.Status == QueueLaneReceiveStatus.Unknown;
         }
         token.ThrowIfCancellationRequested();
         var result = new MultiLaneReceiveResult(request.RequestId, outcomes.MoveToImmutable(), stopped?.Code, stopped?.Message);
-        CheckResult(result, binding, database.Limits.MaxBatchBytes, token);
+        CheckResult(result, binding, limits.MaxBatchBytes, token);
         return result;
     }
 
-    private static async Task<MultiLaneReceiveDispatchResult> DispatchAsync(PrincipalRecord principal, ReceiveRequest leaf,
-        Func<string, CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> executeChild,
+    private static async Task<MultiLaneReceiveDispatchResult> DispatchAsync(ReceiveRequest leaf,
+        Func<string, CancellationToken, Task<GrainOperationReply>> executeChild,
         IServiceProvider services, GrainRequestCodec codec,
-        TimeProvider clock, Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
-        IOptions<GrainRoutingOptions> routing, ILogger diagnostics, DecodedGrainRequest parent,
-        IResourceLifetimeWorkBinding binding, int precedingOutcomes, CancellationToken token)
+        TimeProvider clock, ILogger diagnostics, DecodedGrainRequest parent,
+        IResourceLifetimeWorkBinding binding, Guid incarnation, int precedingOutcomes, CancellationToken token)
     {
         var actorId = Guid.NewGuid();
         var payload = NativeSerialization.Serialize(leaf);
@@ -71,7 +67,7 @@ internal static class MultiLaneReceiveExecution
         var transferred = false;
         try
         {
-            var signed = codec.CreateMultiLaneReceiveChild(actorId, principal.Id, leaf.RequestId,
+            var signed = codec.CreateMultiLaneReceiveChild(actorId, parent.Envelope.PrincipalId!, leaf.RequestId,
                 payload, parent.Envelope.ExpiresAt);
             transferred = true;
             var reply = await MaintenanceChildDispatch.ExecuteAsync(parent, signed, actorId, leaf.RequestId,
@@ -79,7 +75,7 @@ internal static class MultiLaneReceiveExecution
                 {
                     invoked = true;
                     return executeChild(request, cancellation);
-                }, services, codec, clock, serializer, routing, binding, payload, token).ConfigureAwait(true);
+                }, services, codec, binding, payload, token).ConfigureAwait(true);
             return new(reply, null);
         }
         catch (KeyLoadException error) when (invoked)
@@ -94,7 +90,7 @@ internal static class MultiLaneReceiveExecution
         }
         catch (KeyLoadException error) when (!invoked && error.Code == ErrorCode.TokenInvalidated)
         {
-            var stopped = ValidateNext(parent, services.GetRequiredService<DatabaseEngine>(), codec, clock,
+            var stopped = ValidateNext(parent, incarnation, codec, clock,
                 precedingOutcomes, diagnostics);
             if (stopped is null)
             {
@@ -160,7 +156,7 @@ internal static class MultiLaneReceiveExecution
         }
     }
 
-    private static KeyLoadException? ValidateNext(DecodedGrainRequest parent, DatabaseEngine database,
+    private static KeyLoadException? ValidateNext(DecodedGrainRequest parent, Guid incarnation,
         GrainRequestCodec codec, TimeProvider clock, int precedingOutcomes, ILogger diagnostics)
     {
         var identityValidated = false;
@@ -176,7 +172,7 @@ internal static class MultiLaneReceiveExecution
             GrainFailureDiagnostics.Log(diagnostics, error, parent.Envelope.RequestId,
                 GrainFailureStage.EnvelopeVerification, error.Code);
             if (identityValidated && error.Code == ErrorCode.TokenInvalidated
-                && parent.Envelope.Incarnation == database.Store.Identity.Incarnation
+                && parent.Envelope.Incarnation == incarnation
                 && parent.Envelope.ExpiresAt <= clock.GetUtcNow())
             {
                 // Only the verified expired parent stopped this undispatched suffix.

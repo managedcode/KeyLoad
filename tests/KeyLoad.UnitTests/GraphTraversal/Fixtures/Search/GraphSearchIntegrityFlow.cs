@@ -40,11 +40,11 @@ internal sealed class GraphSearchIntegrityFlow : IDisposable
         await GraphSearchIntegrityAssertions.ReceiptAsync(receipt, state.SeedReceipt);
         var outcome = GraphSearchIntegrityAssertions.Outcome(database.Store, state.SeedCommand);
         await GraphSearchIntegrityAssertions.ReadAsync(database.Database, database.Store, state, null, selected, filtered, token);
-        var healthyImage = GraphShortestPathFullStoreImage.Bytes(database.Store);
+        var healthyImage = CanonicalStoreImage.Bytes(database.Store);
         var owned = GraphTraversalIntegrityFaultRows.Install(database.Store, state, fault);
         await GraphSearchIntegrityAssertions.RefuseAsync(database.Database, database.Store, state, selected, filtered, fault, token);
         await GraphSearchIntegrityAssertions.RefuseAsync(database.Database, database.Store, state, selected, filtered, fault, token);
-        var dirtyImage = GraphShortestPathFullStoreImage.Bytes(database.Store);
+        var dirtyImage = CanonicalStoreImage.Bytes(database.Store);
         var dirtyCut = database.Store.Position;
         safeToDelete = false;
         database.JoinOwnedResources();
@@ -69,7 +69,7 @@ internal sealed class GraphSearchIntegrityFlow : IDisposable
             continuedOutcome = GraphSearchIntegrityAssertions.Outcome(store, continuation.Command);
             await GraphSearchIntegrityAssertions.ReadAsync(owner, store, state, continuation, selected, filtered, token);
             await GraphSearchIntegrityAssertions.ReplayAsync(owner, store, continuation.Command, continuation.Receipt, continuedOutcome);
-            finalImage = GraphShortestPathFullStoreImage.Bytes(store);
+            finalImage = CanonicalStoreImage.Bytes(store);
             finalCut = store.Position;
         }, () => safeToDelete = true, failures);
         if (failures.Count != NoFailures)

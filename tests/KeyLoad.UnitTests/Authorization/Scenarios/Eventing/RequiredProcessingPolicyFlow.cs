@@ -17,7 +17,7 @@ internal static class RequiredProcessingPolicyFlow
                 await fixture.PolicyAsync(RequiredProcessingPolicyFixture.After, token);
                 await RequiredProcessingPolicyReads.LeasedAsync(fixture, first, true, token);
                 var refused = fixture.Processing(Guid.NewGuid(), first, "first");
-                var operation = RequiredProcessingPolicyFixture.Operation(OperationKind.Processing, refused, refused.CommandId);
+                var operation = fixture.Operation(OperationKind.Processing, refused, refused.CommandId);
                 var failureBytes = await RequiredProcessingPolicyRefusal.FreshAsync(fixture, operation, ErrorCode.PermissionDenied,
                     RequiredProcessingPolicyFixture.Denied, token);
                 await RequiredProcessingPolicyReads.LeasedAsync(fixture, first, true, token);
@@ -34,7 +34,7 @@ internal static class RequiredProcessingPolicyFlow
                     successful.Receipt, successful.Outcome, fixture.Harness.Partition, token);
                 await fixture.PrincipalAsync(2L, true, token);
                 var revoked = fixture.Processing(Guid.NewGuid(), first, "first");
-                await RequiredProcessingPolicyRefusal.FreshAsync(fixture, RequiredProcessingPolicyFixture.Operation(OperationKind.Processing, revoked, revoked.CommandId),
+                await RequiredProcessingPolicyRefusal.FreshAsync(fixture, fixture.Operation(OperationKind.Processing, revoked, revoked.CommandId),
                     ErrorCode.Unauthenticated, RequiredProcessingPolicyFixture.Unavailable, token);
                 await fixture.PrincipalAsync(3L, false, token);
                 await RequiredProcessingPolicyRefusal.ExistingAsync(fixture.Harness.Database, fixture.Harness.Store, fixture.Harness.Partition,

@@ -1,21 +1,18 @@
-using System.Globalization;
-
 namespace KeyLoad.AppHost.Features.ClientApi;
 
-/// <summary>Publishes the native multiplexed listener alongside each node's original HTTP endpoint.</summary>
+/// <summary>Publishes an allocated native HTTP/2 listener for each server process.</summary>
 internal static class ClusterConnectionEndpointResources
 {
     private const string Http2Endpoint = "http2";
     private const string EnableEnvironment = "KeyLoad__ServerExecution__EnableHttp2";
     private const string PortEnvironment = "KeyLoad__ServerExecution__Http2Port";
     private const string Enabled = "true";
-    private const int Http2Port = 8081;
 
-    internal static void Apply(IResourceBuilder<ContainerResource> resource)
+    internal static void Apply(IResourceBuilder<ProjectResource> resource)
     {
         ArgumentNullException.ThrowIfNull(resource);
-        resource.WithHttpEndpoint(targetPort: Http2Port, name: Http2Endpoint, isProxied: false)
+        resource.WithHttpEndpoint(name: Http2Endpoint, isProxied: false)
             .WithEnvironment(EnableEnvironment, Enabled)
-            .WithEnvironment(PortEnvironment, Http2Port.ToString(CultureInfo.InvariantCulture));
+            .WithEnvironment(PortEnvironment, resource.GetEndpoint(Http2Endpoint).Property(EndpointProperty.TargetPort));
     }
 }

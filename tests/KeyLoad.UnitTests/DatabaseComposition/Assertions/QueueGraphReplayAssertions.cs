@@ -67,7 +67,7 @@ internal static class QueueGraphReplayAssertions
     internal static async Task ContinueAsync(QueueGraphReplayState state, DatabaseEngine engine, ZoneTreeStore store)
     {
         var receipt = engine.Apply(state.Next).Get<CommitReceipt>();
-        var expected = new CommitReceipt(state.Next.Id, new(store.Identity.Incarnation, state.Source.Fixture.Partition.AtomicPartitionId,
+        var expected = new CommitReceipt(state.Next.CommandId, new(store.Identity.Incarnation, state.Source.Fixture.Partition.AtomicPartitionId,
                 store.Position), [new("putDocument", QueueGraphIdentityState.Collection, QueueGraphReplayState.Continuation, 1),
                 new("enqueue", QueueGraphIdentityState.Queue, QueueGraphReplayState.NextPrefix +
                     QueueGraphIdentityState.Prefix + QueueGraphIdentityState.Message, 1)], state.Source.SeedReceipt.Durability, (state.Source.SeedReceipt.Durability == DurabilityProfile.Buffered ? 0 : 1));
@@ -111,7 +111,7 @@ internal static class QueueGraphReplayAssertions
             .AsSpan().SequenceEqual(JsonDefaults.Serialize(next))).IsTrue();
         var reference = state.ContinuationReference;
         var expected = continued ? new DocumentRecord(reference, 1, QueueGraphReplayState.ContinuationJson,
-            new(), state.Next.EvaluatedAt) : null;
+            new(), new DateTimeOffset(state.Next.Timestamp)) : null;
         await Assert.That(JsonDefaults.Serialize(store.Read(view => view.GetRecord<DocumentRecord>(
             global::KeyLoad.Core.Features.DocumentStorage.DocumentStorageKeys.RecordKey(reference))))
             .AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();

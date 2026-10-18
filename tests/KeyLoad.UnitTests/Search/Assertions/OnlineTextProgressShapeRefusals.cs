@@ -12,7 +12,6 @@ internal static class OnlineTextProgressShapeRefusals
     private const string WrongEvent = "unexpected-online-progress";
     private const string WrongEventId = "unexpected-online-event-id";
     private const int InvalidPhase = int.MaxValue;
-    private const int Version = 1;
 
     internal static async Task ThenCompleteAsync(Guid requestId, Chunk[] original, int next, Chunk rejected)
     {
@@ -108,11 +107,6 @@ internal static class OnlineTextProgressShapeRefusals
         yield return Payload(frame, progress with
         {
             TextPhase = TextIndexMaintenancePhase.Configure
-        });
-        // Alien union values are rejected by presence without inspecting or trusting their nested contents.
-        yield return Payload(frame, progress with
-        {
-            EventFeedTail = new(Version, null!)
         });
     }
 

@@ -25,7 +25,6 @@ internal static class SlowBodyAdmissionReturnFlow
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 await fixture.InitializeAsync();
-                fixture.RegisterNativeCoverageCase<SlowBodyAdmissionReturnTests>(nameof(SlowBodyAdmissionReturnTests.CanceledAndDisconnectedSlowBodiesReturnCapacityThenBothCallersAndTwoCold));
                 EarlyAdmissionQualificationState state;
                 using (var phase = McpCallerDeadline.Create())
                 {

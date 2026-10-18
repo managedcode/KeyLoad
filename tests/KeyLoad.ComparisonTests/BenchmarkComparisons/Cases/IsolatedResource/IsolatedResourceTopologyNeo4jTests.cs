@@ -1,5 +1,5 @@
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.AppHost.Features.BenchmarkComparisons;
+using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
@@ -16,16 +16,16 @@ internal sealed class IsolatedResourceTopologyNeo4jTests
 
     /// <summary>AC-ISO-003/005: Community node uses native basic auth, independent data and immutable image.</summary>
     [Test]
-    public async Task SelectedCommunityNeo4jAllocatesOnlyOneNativeNodeAndRunner()
+    public async Task SelectedCommunityNeo4jAllocatesOneNativeNodeAndClientEndpoints()
     {
         await using var fixture = new IsolatedResourceTopologyFixture(Target, 1);
         IsolatedNeo4jResources.Add(fixture.Context);
         var resources = fixture.Build();
-        await Assert.That(resources.Length).IsEqualTo(2);
+        await Assert.That(resources.Length).IsEqualTo(1);
         var neo4j = resources.Single(item => item.Name == User);
-        var runner = resources.Single(item => item.Name == IsolatedResourceTopologyFixture.RunnerName);
+        var runner = fixture.Context.Client;
         await IsolatedResourceTopologyFixture.VerifyWaitsAsync(runner, [neo4j]);
-        await IsolatedResourceTopologyFixture.VerifyPrivateDataAsync(neo4j, fixture.Context.Root);
+        await IsolatedResourceTopologyFixture.VerifyPrivateDataAsync(neo4j);
         await IsolatedResourceTopologyFixture.VerifyUserAsync(neo4j);
         var native = await IsolatedResourceTopologyFixture.EnvironmentAsync(neo4j);
         var bindings = await IsolatedResourceTopologyFixture.EnvironmentAsync(runner);
@@ -55,8 +55,7 @@ internal sealed class IsolatedResourceTopologyNeo4jTests
         await using var fixture = new IsolatedResourceTopologyFixture(Target, count);
         await Assert.That(() => IsolatedNeo4jResources.Add(fixture.Context)).Throws<InvalidOperationException>();
         var resources = fixture.Build();
-        await Assert.That(resources.Length).IsEqualTo(1);
-        await Assert.That(resources[0].Name).IsEqualTo(IsolatedResourceTopologyFixture.RunnerName);
+        await Assert.That(resources.Length).IsEqualTo(0);
         await Assert.That(fixture.Context.Builder.Resources.OfType<ParameterResource>().Any()).IsFalse();
         await Assert.That(Directory.Exists(fixture.Context.Root)).IsFalse();
     }

@@ -52,8 +52,8 @@ internal static class FeedDeleteClassificationFlow
                 FeedDeleteClassificationFixture.RestoredJson, 3L, ExplicitReplacement: true)]);
         token.ThrowIfCancellationRequested();
         var result = FeedNativeHealthyAdmission.Submit(owner,
-            new(command.CommandId, OperationKind.Batch, FeedVertexAuthorityFixture.Root,
-                state.Source.CommittedAt, global::System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options)),
+            owner.CreateCommand(OperationKind.Batch, command.CommandId, FeedVertexAuthorityFixture.Root,
+                state.Source.CommittedAt, NativeSerialization.Serialize(command)),
             explicitTime: true, token);
         var receipt = result.Get<CommitReceipt>();
         await FeedVertexAuthorityAssertions.ReceiptAsync(command, receipt,

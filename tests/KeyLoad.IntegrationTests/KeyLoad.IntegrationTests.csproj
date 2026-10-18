@@ -6,6 +6,9 @@
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
   <ItemGroup>
+    <Using Include="KeyLoad.Client.ChangeFeedClientExtensions" Static="true" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="../../build/KeyLoad.AppHost/KeyLoad.AppHost.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Client/KeyLoad.Client.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" />

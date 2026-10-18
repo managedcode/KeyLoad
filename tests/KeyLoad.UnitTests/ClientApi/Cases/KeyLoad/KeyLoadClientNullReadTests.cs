@@ -50,8 +50,8 @@ internal sealed class KeyLoadClientNullReadTests
     {
         var paths = new List<string>();
         var statusCalls = 0;
-        var expected = new NodeStatus(Node, Guid.NewGuid(), 1, Node, 3,
-            DurabilityProfile.ProcessDurable, true, Environment.ProcessId);
+        var expected = new NodeStatus(Node, Guid.NewGuid(), 1, 3, 2,
+            DurabilityProfile.ProcessDurable, true, Environment.ProcessId, 1L);
         await using var server = await KeyLoadClientKestrelServer.StartAsync(async context =>
         {
             context.Response.ContentType = JsonContentType;

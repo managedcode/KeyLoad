@@ -1,6 +1,6 @@
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.AppHost.Features.BenchmarkComparisons;
+using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 using KeyLoad.Comparisons;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -17,22 +17,14 @@ internal sealed class IsolatedQuorumResourceModel : IDisposable
         get;
     } = DistributedApplication.CreateBuilder(
         new DistributedApplicationOptions { DisableDashboard = true });
-    internal IResourceBuilder<ContainerResource> Runner
-    {
-        get;
-    }
-
-    internal IsolatedQuorumResourceModel()
-    {
-        Runner = Builder.AddContainer(T.Runner, T.ModelImage);
-    }
+    internal LoadTestClientSettings Client { get; } = new();
 
     internal void Add(string engine, int nodes)
         => Add(engine, new BenchmarkSessionSelection(engine, nodes));
 
     internal void Add(string helper, BenchmarkSessionSelection selection)
     {
-        var context = new IsolatedResourceContext(Builder, selection, Runner, Root);
+        var context = new IsolatedResourceContext(Builder, selection, Client, Root);
         if (helper == T.Qdrant)
         {
             IsolatedQdrantResources.Add(context);
@@ -43,9 +35,10 @@ internal sealed class IsolatedQuorumResourceModel : IDisposable
 
     internal ContainerResource[] BuildNodes()
     {
+        LoadTestResourceLifetime.Apply(Builder);
         application = Builder.Build();
         return application.Services.GetRequiredService<DistributedApplicationModel>().Resources
-            .OfType<ContainerResource>().Where(resource => resource.Name != T.Runner).ToArray();
+            .OfType<ContainerResource>().ToArray();
     }
 
     internal static async Task<IExecutionConfigurationResult> ReadAsync(IResource resource)

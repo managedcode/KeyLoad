@@ -23,7 +23,7 @@ internal sealed class McpOwnedDiagnosticWholeFlowTests
         var id = Guid.NewGuid();
         var command = new CommandRequest(id, database.Partition,
             [new PutDocument(Collection, Document, Json, ExpectedRevision: Absent)]);
-        var receipt = database.Database.Apply(database.Database.CreateCommand(OperationKind.Batch, id, Root, database.Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(command, JsonDefaults.Options)), First).Get<CommitReceipt>();
+        var receipt = database.Database.ApplyEmbedded(database.Database.CreateCommand(OperationKind.Batch, id, Root, database.Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(command, JsonDefaults.Options)), TestContext.Current!.Execution.CancellationToken).Get<CommitReceipt>();
         var reference = new EntityRef(database.Partition, Collection, Document);
         var before = QueueWholeFlowStorage.Bytes(database.Store);
         var position = database.Store.Position;

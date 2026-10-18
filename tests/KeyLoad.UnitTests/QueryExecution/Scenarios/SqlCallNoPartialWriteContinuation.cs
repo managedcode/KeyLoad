@@ -110,7 +110,7 @@ internal static class SqlCallNoPartialWriteContinuation
         var conflict = QueueWholeFlowStorage.Apply(database, OperationKind.Batch,
             Decode(SqlOperationTestData.Compile(Request(changed))), original.CommandId, issued);
         await Assert.That(Errors.Code(conflict.Problem)).IsEqualTo(ErrorCode.Conflict);
-        await Assert.That(conflict.Json).IsNull();
+        await Assert.That(conflict.Value).IsNull();
         await SqlCallNoPartialWriteAssertions.UnchangedAsync(store, image, cut);
         await SqlCallNoPartialWriteAssertions.OriginalAsync(database, original.Partition, receipt, original.CommandId);
     }

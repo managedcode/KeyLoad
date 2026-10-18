@@ -6,7 +6,7 @@ using ModelContextProtocol.Protocol;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>AC-MCP-003/005/007: a fresh native fallback retains injected metadata and exact message identity.</summary>
+/// <summary>AC-MCP-003/005/007: a fresh native result retains injected metadata and exact message identity.</summary>
 internal sealed class McpResponseReplacementTests
 {
     /// <summary>Replacement moves the original metadata node without copying old business payload or changing native identity.</summary>

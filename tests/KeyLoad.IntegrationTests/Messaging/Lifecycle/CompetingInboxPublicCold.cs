@@ -32,9 +32,9 @@ internal sealed class CompetingInboxPublicCold(ClusterFixture fixture)
         await ServerFailureObserver.ObserveAsync(() => RequireAsync(token), failures);
         var scenario = Claim(CompetingInboxPublicProtocol.Nodes);
         var stopped = await Task.WhenAll(CompetingInboxPublicProtocol.Nodes.Select(node => ObserveAsync(
-            () => fixture.KillContainerAsync(node, scenario, token))));
+            () => fixture.KillServerAsync(node, scenario, token))));
         var started = await Task.WhenAll(CompetingInboxPublicProtocol.Nodes.Select(node => ObserveAsync(
-            () => fixture.RestartContainerAsync(node, token))));
+            () => fixture.RestartServerAsync(node, token))));
         failures.AddRange(stopped.SelectMany(value => value));
         failures.AddRange(started.SelectMany(value => value));
         foreach (var node in CompetingInboxPublicProtocol.Nodes)
@@ -99,7 +99,7 @@ internal sealed class CompetingInboxPublicCold(ClusterFixture fixture)
         }
         return SHA256.HashData(bytes);
     }
-    private static string PathFor(string scenario, string node) => ContainerRuntimeOwnedReceipt.PathFor(
+    private static string PathFor(string scenario, string node) => ProcessRuntimeOwnedReceipt.PathFor(
         ClusterFixtureDiagnostics.FindRepositoryRoot().FullName, scenario, node);
     private static async Task<Exception[]> ObserveAsync(Func<Task> operation)
     {

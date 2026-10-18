@@ -13,7 +13,7 @@ internal static class GraphIncomingVertexAuthorityFlow
         var fault = GraphVertexAuthorityFault.Install(database.Store, state, source);
         await GraphIncomingVertexAuthorityAssertions.Refuse(database.Database, database.Store, state, token);
         await GraphIncomingVertexAuthorityAssertions.Refuse(database.Database, database.Store, state, token);
-        var dirtyImage = GraphShortestPathFullStoreImage.Bytes(database.Store);
+        var dirtyImage = CanonicalStoreImage.Bytes(database.Store);
         var dirtyCut = database.Store.Position;
         database.Store.Dispose();
         var next = state.DamagedEdge with
@@ -39,7 +39,7 @@ internal static class GraphIncomingVertexAuthorityFlow
             await GraphIncomingVertexAuthorityAssertions.Continuation(owner, command, receipt, next);
             await GraphIncomingVertexAuthorityAssertions.Healthy(owner, cold, state, next, token);
             await GraphTraversalIntegrityAssertions.Replay(owner, cold, command, receipt);
-            finalImage = GraphShortestPathFullStoreImage.Bytes(cold);
+            finalImage = CanonicalStoreImage.Bytes(cold);
             finalCut = cold.Position;
         }
         using var secondCold = new ZoneTreeStore(new(database.Directory), database.StorageExecution, UnitExecutionOptions.PointCacheExecution());

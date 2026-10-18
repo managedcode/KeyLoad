@@ -11,16 +11,16 @@ internal static class QueueLeaseClusterCold
         var failures = new List<Exception>();
         foreach (var node in QueueLeaseClusterProtocol.Nodes)
         {
-            await ServerFailureObserver.ObserveAsync(() => fixture.KillContainerAsync(node,
+            await ServerFailureObserver.ObserveAsync(() => fixture.KillServerAsync(node,
                 QueueLeaseClusterProtocol.ColdScenario, token), failures).ConfigureAwait(false);
         }
         foreach (var node in QueueLeaseClusterProtocol.Nodes)
         {
-            await ServerFailureObserver.ObserveAsync(() => fixture.BeginContainerRestartAsync(node, token), failures).ConfigureAwait(false);
+            await ServerFailureObserver.ObserveAsync(() => fixture.BeginProcessRestartAsync(node, token), failures).ConfigureAwait(false);
         }
         foreach (var node in QueueLeaseClusterProtocol.Nodes)
         {
-            await ServerFailureObserver.ObserveAsync(() => fixture.RestartContainerAsync(node, token), failures).ConfigureAwait(false);
+            await ServerFailureObserver.ObserveAsync(() => fixture.RestartServerAsync(node, token), failures).ConfigureAwait(false);
         }
         foreach (var node in QueueLeaseClusterProtocol.Nodes)
         {

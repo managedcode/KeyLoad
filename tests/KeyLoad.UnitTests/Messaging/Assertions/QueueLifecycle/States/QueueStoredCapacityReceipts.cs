@@ -14,7 +14,8 @@ internal static class QueueStoredCapacityReceipts
     {
         var placement = owner.ReadAtomicPartitionPlacement(QueueEnqueueColdProtocol.Root, partition);
         await Assert.That(placement.Partition).IsEqualTo(partition);
-        return new(placement.Incarnation, partition.AtomicPartitionId, checked(store.Position + QueueEnqueueAuthorityProtocol.First));
+        await Assert.That(placement.Incarnation).IsEqualTo(store.Identity.Incarnation);
+        return new(placement.Incarnation, partition.AtomicPartitionId, checked(owner.LastApplied + QueueEnqueueAuthorityProtocol.First));
     }
 
     internal static async Task ReceiptAsync(Result<object> actual, Guid id, CommitToken token, ImmutableArray<MutationReceipt> mutations)
@@ -25,11 +26,12 @@ internal static class QueueStoredCapacityReceipts
     {
         var delivery = await Assert.That(actual.Get<ReceiveResult>().Deliveries).HasSingleItem();
         var lane = new QueueLaneRef(partition, QueueEnqueueColdProtocol.Queue);
-        var request = JsonDefaults.Deserialize<ReceiveRequest>(state.Receive.PayloadJson);
+        var request = NativeSerialization.Deserialize<ReceiveRequest>(state.Receive.Value!.Input.Span,
+            NativeValidationProfile.PublicInputElements);
         var expected = new Delivery(QueueEnqueueColdProtocol.Ready, QueueEnqueueColdProtocol.ReadyJson,
             QueueEnqueueColdProtocol.Headers, delivery.Token, QueueEnqueueAuthorityProtocol.First,
-            state.Receive.EvaluatedAt.AddSeconds(request.LeaseSeconds), QueueEnqueueAuthorityProtocol.First, QueueEnqueueAuthorityProtocol.First);
-        await NativeReplayResultAssertions.Same<ReceiveResult>(actual, Result<object>.Succeed(new ReceiveResult(state.Receive.Id, [expected], token)));
+            new DateTimeOffset(state.Receive.Timestamp).AddSeconds(request.LeaseSeconds), QueueEnqueueAuthorityProtocol.First, QueueEnqueueAuthorityProtocol.First);
+        await NativeReplayResultAssertions.Same<ReceiveResult>(actual, Result<object>.Succeed(new ReceiveResult(state.Receive.CommandId, [expected], token)));
         await Assert.That(delivery.Token).IsNotEqualTo(string.Empty);
         await Assert.That(owner.Verify<DeliveryClaims>(delivery.Token)).IsEqualTo(
             new DeliveryClaims(lane, QueueEnqueueColdProtocol.Ready, QueueEnqueueColdProtocol.Root, QueueEnqueueAuthorityProtocol.First, QueueEnqueueAuthorityProtocol.First, token.Incarnation));

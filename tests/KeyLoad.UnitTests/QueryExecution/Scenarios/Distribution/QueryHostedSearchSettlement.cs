@@ -6,7 +6,7 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 internal static class QueryHostedSearchSettlement
 {
     internal static async Task JoinAsync(Task<GrainOperationReply> operation, CancellationTokenSource caller,
-        QueryHostedReadObservation observation, CancellationToken cleanup, List<Exception> failures)
+        QueryHostedReadObservation observation, List<Exception> failures, CancellationToken cleanup)
     {
         await ServerFailureObserver.ObserveAsync(async () =>
         {

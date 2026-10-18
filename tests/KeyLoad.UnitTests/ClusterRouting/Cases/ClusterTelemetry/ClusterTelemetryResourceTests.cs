@@ -10,8 +10,6 @@ internal sealed class ClusterTelemetryResourceTests
 {
     private const string Development = "Development";
     private const string Production = "Production";
-    private const string ContainerUserKey = "KeyLoad:ContainerUser";
-    private const string ContainerUser = "1000:1000";
     private const string RootPrefix = "keyload-otlp-model-";
     private const string GuidFormat = "N";
     private const string RootCredentialPrefix = "root.";
@@ -27,7 +25,6 @@ internal sealed class ClusterTelemetryResourceTests
     private const string ModelReceiver = "http://collector.example.invalid:4317";
     private const string ReceiverConfiguration = "ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL";
     private const string LegacyReceiverConfiguration = "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL";
-    private const string Image = "ghcr.io/managedcode/keyload:current@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
     [Test]
     [Arguments(Development, false)]
@@ -45,14 +42,12 @@ internal sealed class ClusterTelemetryResourceTests
         builder.Environment.EnvironmentName = environmentName;
         builder.Configuration[ReceiverConfiguration] = configuredReceiver ? ModelReceiver : null;
         builder.Configuration[LegacyReceiverConfiguration] = null;
-        builder.Configuration[ContainerImageOptions.ServerKey] = Image;
-        builder.Configuration[ContainerUserKey] = ContainerUser;
         var root = Path.Combine(Path.GetTempPath(), RootPrefix + Guid.NewGuid().ToString(GuidFormat));
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            var profile = new LocalProfile(ClusterProfileStore.CurrentVersion, Guid.NewGuid(), Guid.NewGuid(),
-                Secret(), Secret(), RootCredentialPrefix + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(SecretBytes)));
+            var profile = new LocalProfile(ClusterProfileStore.CurrentVersion, Guid.NewGuid(),
+                Secret(), RootCredentialPrefix + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(SecretBytes)));
             var nodes = ClusterResources.Add(builder, profile, root, ephemeral: true);
             await Assert.That(nodes.Select(node => node.Resource.Name).Order(StringComparer.Ordinal).ToArray())
                 .IsEquivalentTo(new[] { "node1", "node2", "node3" });
@@ -73,9 +68,9 @@ internal sealed class ClusterTelemetryResourceTests
     }
 
     private static async Task VerifyNodeAsync(IDistributedApplicationBuilder builder,
-        IResourceBuilder<ContainerResource> node, string root, bool configuredReceiver)
+        IResourceBuilder<ProjectResource> node, string root, bool configuredReceiver)
     {
-        var annotation = node.Resource.Annotations.OfType<OtlpExporterAnnotation>().Single();
+        var annotation = node.Resource.Annotations.OfType<OtlpExporterAnnotation>().Last();
         await Assert.That(annotation.RequiredProtocol).IsEqualTo(OtlpProtocol.Grpc);
         var environment = new Dictionary<string, object>(StringComparer.Ordinal);
         var context = new EnvironmentCallbackContext(builder.ExecutionContext, node.Resource, environment,
@@ -100,9 +95,12 @@ internal sealed class ClusterTelemetryResourceTests
             await Assert.That(environment.ContainsKey(ServiceName)).IsFalse();
             await Assert.That(environment.ContainsKey(ResourceAttributes)).IsFalse();
         }
-        await Assert.That(environment[DataDirectory]).IsEqualTo("/data");
+        await Assert.That(environment[DataDirectory]).IsEqualTo(Path.GetFullPath(Path.Combine(root, node.Resource.Name)));
         await Assert.That(node.Resource.Annotations.OfType<EndpointAnnotation>()
-            .Single(endpoint => endpoint.Name == HttpEndpoint).TargetPort).IsEqualTo(8080);
+            .Single(endpoint => endpoint.Name == HttpEndpoint).IsProxied).IsFalse();
+        await Assert.That(node.Resource.GetProjectMetadata().ProjectPath).EndsWith("KeyLoad.Server.csproj");
+        await Assert.That(builder.Resources.OfType<ContainerResource>().Select(resource => resource.Name).ToArray())
+            .IsEquivalentTo(new[] { "orleans-storage" });
         await Assert.That(Directory.Exists(Path.Combine(root, node.Resource.Name))).IsTrue();
     }
 

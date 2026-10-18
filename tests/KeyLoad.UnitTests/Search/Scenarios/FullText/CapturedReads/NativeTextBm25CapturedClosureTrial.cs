@@ -20,7 +20,7 @@ internal static class NativeTextBm25CapturedClosureTrial
         var original = flow.Capture(null);
         var receipt = flow.Publish(original);
         await flow.RequireHealthyAsync(original, receipt);
-        var entry = NativeSerialization.Serialize(owner.Entry(original.Id));
+        var entry = NativeSerialization.Serialize(owner.Entry(original.CommandId));
         var present = await ReadAsync(flow);
         await Assert.That(NativeSerialization.Serialize(present).SequenceEqual(
             NativeSerialization.Serialize(absent))).IsTrue();

@@ -18,7 +18,7 @@ internal sealed class SiloOwnerPurposeRegistrationTests
         await using var node = new OrleansNode(applicationServices, runtime.Node, NullLoggerFactory.Instance, runtime);
         var builder = WebApplication.CreateBuilder([]);
         builder.Services.AddSingleton(node);
-        OrleansNativePeerServices.RegisterSiloOwners(builder, null);
+        OrleansApplicationServices.RegisterSiloOwners(builder, null);
         NativeRequestWorkOwner original;
         Func<NativeRequestWorkOwner> borrow;
         await using (var services = builder.Services.BuildServiceProvider())

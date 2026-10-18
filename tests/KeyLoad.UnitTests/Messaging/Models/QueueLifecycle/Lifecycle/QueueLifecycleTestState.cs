@@ -34,7 +34,7 @@ internal sealed record QueueLifecycleTestState(PartitionRef Partition, DateTimeO
     {
         var operation = database.CreateCommand(kind, id, principal, Time, JsonSerializer.Serialize(payload, JsonDefaults.Options));
         var result = SubmitOriginal(database, operation);
-        if (result.Error is null)
+        if (Errors.Code(result.Problem) is null)
         {
             Successes.Add((operation, result));
         }

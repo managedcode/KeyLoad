@@ -13,15 +13,15 @@ internal static class SampleChunkRetentionClusterCold
     {
         foreach (var node in Nodes)
         {
-            await fixture.KillContainerAsync(node, SampleChunkRetentionClusterProtocol.ColdScenario, token).ConfigureAwait(false);
+            await fixture.KillServerAsync(node, SampleChunkRetentionClusterProtocol.ColdScenario, token).ConfigureAwait(false);
         }
         foreach (var node in Nodes)
         {
-            await fixture.BeginContainerRestartAsync(node, token).ConfigureAwait(false);
+            await fixture.BeginProcessRestartAsync(node, token).ConfigureAwait(false);
         }
         foreach (var node in Nodes)
         {
-            await fixture.RestartContainerAsync(node, token).ConfigureAwait(false);
+            await fixture.RestartServerAsync(node, token).ConfigureAwait(false);
         }
         foreach (var node in Nodes)
         {

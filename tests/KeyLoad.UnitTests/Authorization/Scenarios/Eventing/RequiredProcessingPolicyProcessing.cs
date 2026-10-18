@@ -26,7 +26,7 @@ internal static class RequiredProcessingPolicyProcessing
     internal static async Task<(Command<DatabaseCommand> Operation, CommitReceipt Receipt, byte[] Outcome)> CompleteAsync(
         RequiredProcessingPolicyFixture fixture, ProcessingRequest request, string document, CancellationToken token)
     {
-        var operation = RequiredProcessingPolicyFixture.Operation(OperationKind.Processing, request, request.CommandId);
+        var operation = fixture.Operation(OperationKind.Processing, request, request.CommandId);
         var position = fixture.Harness.Store.Position + 1L;
         var actual = fixture.Harness.Database.ApplyEmbedded(operation, token).Get<CommitReceipt>();
         var expected = new CommitReceipt(request.CommandId, new(fixture.Harness.Store.Identity.Incarnation, fixture.Harness.Partition.AtomicPartitionId, position), [new("putDocument", RequiredProcessingPolicyFixture.Derived, document, 1L), new("Ack", RequiredProcessingPolicyFixture.Queue, document, 3L)], DurabilityProfile.ProcessDurable, 1);

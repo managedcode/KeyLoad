@@ -1,3 +1,4 @@
+using KeyLoad.UnitTests.Features.ResourceExecution;
 using KeyLoad.Core.Features.ClusterRouting.Execution;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
 using KeyLoad.Core.Features.Search;
@@ -22,10 +23,10 @@ internal static class Bm25ConfiguredCountTrial
         var first = flow.Capture(null);
         var firstResult = flow.Publish(first);
         await RequireStoredAsync(flow, first, firstResult);
-        var originalEntry = NativeSerialization.Serialize(owner.Entry(first.Id));
+        var originalEntry = NativeSerialization.Serialize(owner.Entry(first.CommandId));
         var next = CaptureSecond(flow);
-        var replacement = flow.Capture(first.Id);
-        var healthy = flow.Capture(replacement.Id);
+        var replacement = flow.Capture(first.CommandId);
+        var healthy = flow.Capture(replacement.CommandId);
         var before = Bm25OriginalPhaseRecoveryState.Read(owner);
         var familyBefore = Family(flow);
         var limits = owner.Source.Database.Limits with
@@ -106,16 +107,14 @@ internal static class Bm25ConfiguredCountTrial
         await Assert.That(result.Problem?.Detail).IsEqualTo(Bm25CorpusProtocol.Capacity);
 
         await Assert.That(result.Value).IsNull();
-        await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(NativeSerialization.Serialize(familyBefore),
+        await NativeReplayResultAssertions.BytesAsync(NativeSerialization.Serialize(familyBefore),
             NativeSerialization.Serialize(Family(flow)));
         var after = Bm25OriginalPhaseRecoveryState.Read(flow.Owner);
         await Assert.That(after.NodeId).IsEqualTo(before.NodeId);
         await Assert.That(after.Incarnation).IsEqualTo(before.Incarnation);
         await Assert.That(after.Position).IsGreaterThan(before.Position);
-        await Assert.That(after.LastIndex).IsEqualTo(before.LastIndex + 1);
-        await Assert.That(after.CommittedIndex).IsEqualTo(after.LastIndex);
-        await Assert.That(after.Applied).IsEqualTo(after.LastIndex);
-        await ReplicaSubmissionOutcomeFlow.RequireResultAsync(result, flow.Owner.Database.ResolveSubmissionOutcome(operation));
+        await Assert.That(after.Applied).IsEqualTo(before.Applied + 1);
+        await NativeReplayResultAssertions.SameAsync(result, flow.Owner.Database.ResolveSubmissionOutcome(operation));
         await Assert.That(Outcome(flow, operation).Length).IsGreaterThan(0);
     }
 
@@ -135,8 +134,8 @@ internal static class Bm25ConfiguredCountTrial
         var work = flow.Owner.Source.CreateReadWork(Bm25OriginalPhaseRecoveryFlow.Token);
         var actual = flow.Owner.Store.Read(view => work.CreateView(view).ReadOwnedValue(Bm25CorpusKeys.Current(phase.Current)))
             ?? throw new InvalidOperationException("The actual published corpus head is missing.");
-        await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(NativeSerialization.Serialize(phase.Current), actual);
-        await ReplicaSubmissionOutcomeFlow.RequireResultAsync(result, flow.Owner.Database.ResolveSubmissionOutcome(operation));
+        await NativeReplayResultAssertions.BytesAsync(NativeSerialization.Serialize(phase.Current), actual);
+        await NativeReplayResultAssertions.SameAsync(result, flow.Owner.Database.ResolveSubmissionOutcome(operation));
     }
 
     private static async Task RequireReplayAsync(Bm25OriginalPhaseRecoveryFlow flow,
@@ -145,9 +144,9 @@ internal static class Bm25ConfiguredCountTrial
         var before = Bm25OriginalPhaseRecoveryState.Read(flow.Owner);
         var raw = Outcome(flow, original);
         var entry = NativeSerialization.Serialize(flow.Owner.Entry(original.CommandId));
-        await ReplicaSubmissionOutcomeFlow.RequireResultAsync(expected, flow.Publish(flow.Reissue(original)));
+        await NativeReplayResultAssertions.SameAsync(expected, flow.Publish(flow.Reissue(original)));
         await before.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(flow.Owner));
-        await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(raw, Outcome(flow, original));
+        await NativeReplayResultAssertions.BytesAsync(raw, Outcome(flow, original));
         await Bm25OriginalPhaseRecoveryState.RequireRetainedAsync(flow.Owner, original, entry);
     }
 }

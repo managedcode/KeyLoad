@@ -6,6 +6,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <AssemblyMetadata Include="KeyLoadNativeCoverageToolVersion" Value="$(KeyLoadNativeCoverageToolVersion)" />
+    <AssemblyMetadata Include="KeyLoadNativeCoveragePackageRoot" Value="$([System.IO.Path]::Combine('$(NuGetPackageRoot)', 'dotnet-coverage', '$(KeyLoadNativeCoverageToolVersion)'))" />
+    <PackageDownload Include="dotnet-coverage" Version="[$(KeyLoadNativeCoverageToolVersion)]" />
     <Using Include="KeyLoad.Features.InternalSerialization" />
     <Using Include="KeyLoad.RecoveryTests.Features.ClusterRouting" />
   </ItemGroup>

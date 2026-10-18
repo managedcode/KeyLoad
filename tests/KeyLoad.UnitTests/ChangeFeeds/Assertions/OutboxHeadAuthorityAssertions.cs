@@ -8,7 +8,7 @@ namespace KeyLoad.UnitTests.Features.ChangeFeeds;
 internal static class OutboxHeadAuthorityAssertions
 {
     internal static string[] Image(ZoneTreeStore store)
-        => global::KeyLoad.UnitTests.Features.GraphTraversal.GraphShortestPathFullStoreImage.Bytes(store);
+        => global::KeyLoad.UnitTests.CanonicalStoreImage.Bytes(store);
 
     internal static async Task SameAsync(ZoneTreeStore store, string[] image, long position)
     {
@@ -27,7 +27,7 @@ internal static class OutboxHeadAuthorityAssertions
         await SameAsync(store, image, position);
         if (fault is not (4 or 5))
         {
-            var writer = OutboxHeadAuthorityFixture.Write(state.Partition, "d");
+            var writer = OutboxHeadAuthorityFixture.Write(owner, state.Partition, "d");
             var producer = Assert.ThrowsExactly<KeyLoadException>(() => owner.ApplyEmbedded(writer, token));
             await Assert.That(producer.Code).IsEqualTo(ErrorCode.Corruption);
             await Assert.That(producer.Message).IsEqualTo(OutboxHeadAuthorityFixture.HeadDetail);

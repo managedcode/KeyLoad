@@ -29,9 +29,9 @@ internal sealed class ConnectionPostSubmitFailureTests
             var original = scenario.CommandAsync(principal, requestId, command, token);
             await held.Arrived.Task.WaitAsync(token);
             var outcome = OutcomeStoreOracle.ReadPartition(scenario.Fixture.Database.Store,
-                command.Partition, principal.Id, command.CommandId);
-            await Assert.That(outcome).IsNotNull();
-            await Assert.That(outcome!.Error).IsNull();
+                command.Partition, principal.Id, command.CommandId)
+                ?? throw new InvalidOperationException(ConnectionNativeProtocol.MissingObservation);
+            await Assert.That(Errors.Code(outcome.Problem)).IsNull();
             var originalBytes = NativeSerialization.Serialize(outcome);
             await ConnectionNativeAssertions.StoredAsync(scenario, DocumentId, OriginalRevision, ConnectionNativeProtocol.FirstJson);
             held.Release.TrySetResult();
@@ -42,9 +42,9 @@ internal sealed class ConnectionPostSubmitFailureTests
             var replayRequestId = Guid.NewGuid();
             await Assert.That((await scenario.CommandAsync(principal, replayRequestId, command, token)).Error).IsNull();
             var replayed = OutcomeStoreOracle.ReadPartition(scenario.Fixture.Database.Store,
-                command.Partition, principal.Id, command.CommandId);
-            await Assert.That(replayed).IsNotNull();
-            await Assert.That(NativeSerialization.Serialize(replayed!).SequenceEqual(originalBytes)).IsTrue();
+                command.Partition, principal.Id, command.CommandId)
+                ?? throw new InvalidOperationException(ConnectionNativeProtocol.MissingObservation);
+            await Assert.That(NativeSerialization.Serialize(replayed).SequenceEqual(originalBytes)).IsTrue();
             await ConnectionNativeAssertions.StoredAsync(scenario, DocumentId, OriginalRevision, ConnectionNativeProtocol.FirstJson);
             await ConnectionNativeAssertions.SameOwnerAsync(scenario, requestId, replayRequestId, token);
             await RequirePersistedRefusalAsync(scenario, principal, token);
@@ -59,11 +59,11 @@ internal sealed class ConnectionPostSubmitFailureTests
         var reply = await scenario.CommandAsync(principal, Guid.NewGuid(), refused, token);
         await Assert.That(reply.Error).IsEqualTo(ErrorCode.RevisionConflict);
         var stored = OutcomeStoreOracle.ReadPartition(scenario.Fixture.Database.Store,
-            refused.Partition, principal.Id, refused.CommandId);
-        await Assert.That(stored).IsNotNull();
-        await Assert.That(stored!.Error).IsNotNull();
-        await Assert.That(reply.Error).IsEqualTo(stored.Error);
-        await Assert.That(reply.SafeDetail).IsEqualTo(stored.SafeDetail);
+            refused.Partition, principal.Id, refused.CommandId)
+            ?? throw new InvalidOperationException(ConnectionNativeProtocol.MissingObservation);
+        await Assert.That(Errors.Code(stored.Problem)).IsNotNull();
+        await Assert.That(reply.Error).IsEqualTo(Errors.Code(stored.Problem));
+        await Assert.That(reply.SafeDetail).IsEqualTo(stored.Problem?.Detail);
         await ConnectionNativeAssertions.StoredAsync(scenario, DocumentId, OriginalRevision, ConnectionNativeProtocol.FirstJson);
     }
 }

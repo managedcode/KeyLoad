@@ -13,54 +13,55 @@ internal static class QueueLifecycleNativeHistoryAssertions
     internal static async Task ReplayAsync(QueueLifecycleNativeRecorder recorder, QueueLaneRef lane, CancellationToken token)
     {
         var database = recorder.Database;
-        foreach (var sample in recorder.Samples)
+        foreach (var observation in recorder.Observations)
         {
             token.ThrowIfCancellationRequested();
             var store = (ZoneTreeStore)database.Store;
             var image = QueueWholeFlowStorage.Bytes(store);
             var position = store.Position;
             var identity = NativeSerialization.Serialize(store.Identity);
-            var actual = database.Apply(sample.Operation);
-            await ResultAsync(database, lane, sample, actual);
+            var actual = database.Apply(observation.Operation);
+            await ResultAsync(database, lane, observation, actual);
             await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
         }
     }
 
     private static async Task ResultAsync(DatabaseEngine database, QueueLaneRef lane,
-        QueueLifecycleNativeSample sample, Result<object> actual)
+        QueueLifecycleNativeObservation observation, Result<object> actual)
     {
-        if (sample.Result.Value is ReceiveResult received)
+        if (observation.Result.Value is ReceiveResult received)
         {
-            await ReceiveAsync(database, lane, sample, actual, received);
+            await ReceiveAsync(database, lane, observation, actual, received);
             return;
         }
-        if (Errors.Code(sample.Result.Problem) is not null)
+        if (Errors.Code(observation.Result.Problem) is not null)
         {
-            await Assert.That(actual).IsEqualTo(sample.Result);
+            await Assert.That(NativeSerialization.Serialize(actual).AsSpan()
+                .SequenceEqual(NativeSerialization.Serialize(observation.Result))).IsTrue();
 
             await Assert.That(actual.Value).IsNull();
             return;
         }
-        switch (sample.Operation.Value!.Kind)
+        switch (observation.Operation.Value!.Kind)
         {
             case OperationKind.ConfigurePrincipal:
-                await NativeReplayResultAssertions.Same<PrincipalRecord>(actual, sample.Result);
+                await NativeReplayResultAssertions.Same<PrincipalRecord>(actual, observation.Result);
                 break;
             case OperationKind.ConfigureResource:
-                await NativeReplayResultAssertions.Same<ResourceDefinition>(actual, sample.Result);
+                await NativeReplayResultAssertions.Same<ResourceDefinition>(actual, observation.Result);
                 break;
             default:
-                await NativeReplayResultAssertions.Same<CommitReceipt>(actual, sample.Result);
+                await NativeReplayResultAssertions.Same<CommitReceipt>(actual, observation.Result);
                 break;
         }
     }
 
     private static async Task ReceiveAsync(DatabaseEngine database, QueueLaneRef lane,
-        QueueLifecycleNativeSample sample, Result<object> actual, ReceiveResult received)
+        QueueLifecycleNativeObservation observation, Result<object> actual, ReceiveResult received)
     {
         if (received.Deliveries.IsEmpty)
         {
-            await NativeReplayResultAssertions.Same<ReceiveResult>(actual, sample.Result);
+            await NativeReplayResultAssertions.Same<ReceiveResult>(actual, observation.Result);
             return;
         }
         await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(ErrorCode.StaleLease);
@@ -68,7 +69,7 @@ internal static class QueueLifecycleNativeHistoryAssertions
 
         await Assert.That(actual.Value).IsNull();
         var saved = OutcomeStoreOracle.ReadPartition(database.Store, lane.Partition,
-            sample.Operation.UserId!, sample.Operation.CommandId) ?? throw new InvalidOperationException(MissingOriginal);
-        await NativeReplayResultAssertions.Same<ReceiveResult>(saved, sample.Result);
+            observation.Operation.UserId!, observation.Operation.CommandId) ?? throw new InvalidOperationException(MissingOriginal);
+        await NativeReplayResultAssertions.Same<ReceiveResult>(saved, observation.Result);
     }
 }

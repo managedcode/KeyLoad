@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
-using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.Runtime.Services;
 
@@ -13,24 +11,27 @@ public sealed class SiloDatabaseClient(IServiceProvider services) : GrainService
 
     /// <summary>Borrows the storage service on the exact native silo generation.</summary>
     public ISiloDatabaseService On(SiloAddress address) => GetGrainService(address);
-    /// <summary>Uses Orleans for owner addressing and native streaming for the complete operation lifetime.</summary>
-    public async IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> ExecuteStreamAsync(
-        Guid incarnation, string signedRequest, [EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-        var owner = await grains.GetGrain<IDatabaseCommitGrain>(DatabaseGrainIdentity.For(incarnation))
-            .GetReadOwnerAsync(local.SiloAddress, cancellationToken).ConfigureAwait(false);
-        await foreach (var frame in On(owner).ExecuteStreamAsync(signedRequest, cancellationToken)
-            .WithCancellation(cancellationToken).ConfigureAwait(false))
-        {
-            yield return frame;
-        }
-    }
+
+    /// <summary>Resolves the actual available canonical store through its ordinary database grain.</summary>
+    public Task<SiloAddress> ReadOwnerAsync(Guid incarnation, CancellationToken cancellationToken)
+        => grains.GetGrain<IDatabaseCommitGrain>(DatabaseGrainIdentity.For(incarnation))
+            .GetReadOwnerAsync(local.SiloAddress, cancellationToken);
+
+    /// <summary>Awaits one self-contained Task leaf at the selected storage owner.</summary>
+    public Task<GrainOperationReply> ExecuteAsync(SiloAddress owner, string signedRequest, CancellationToken cancellationToken)
+        => grains.GetGrain<IRequestWorkerGrain>(RequestWorkerIdentity.ForRequests())
+            .ExecuteAsync(owner, signedRequest, cancellationToken);
+
+    /// <summary>Joins the selected owner's original native maintenance cleanup after the parent stops.</summary>
+    public Task AbortMaintenanceAsync(SiloAddress owner, GrainReadKind kind, Guid sessionId)
+        => On(owner).AbortMaintenanceAsync(kind, sessionId);
+
     /// <summary>Resolves storage through Orleans, keeping partition activation placement separate from open files.</summary>
     public async Task<GrainOperationReply> ExecuteCommandAsync(Guid incarnation, string signedRequest,
         string actorKey, CancellationToken cancellationToken)
     {
-        var owner = await grains.GetGrain<IDatabaseCommitGrain>(DatabaseGrainIdentity.For(incarnation))
-            .GetReadOwnerAsync(local.SiloAddress, cancellationToken).ConfigureAwait(false);
-        return await On(owner).ExecuteCommandAsync(signedRequest, actorKey, cancellationToken).ConfigureAwait(false);
+        var owner = await ReadOwnerAsync(incarnation, cancellationToken).ConfigureAwait(false);
+        return await grains.GetGrain<IRequestWorkerGrain>(RequestWorkerIdentity.ForRequests())
+            .ExecuteCommandAsync(owner, signedRequest, actorKey, cancellationToken).ConfigureAwait(false);
     }
 }

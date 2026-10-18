@@ -21,7 +21,7 @@ internal static class ProjectRowAuthorityAssertions
     internal static async Task ReadAsync(TestDatabase db, QueryEngine engine, ZoneTreeStore store,
         bool projectVisible, CancellationToken token)
     {
-        var image = GraphShortestPathFullStoreImage.Bytes(store);
+        var image = CanonicalStoreImage.Bytes(store);
         var cut = store.Position;
         var request = new QueryRequest(db.Partition, Sql, AllowFullScan: true);
         var actual = engine.Execute(Reader, request, cancellationToken: token);
@@ -45,14 +45,14 @@ internal static class ProjectRowAuthorityAssertions
         QueryRow[] explanation = [new(ExplainId, ExplainRevision, plan)];
         await Assert.That(JsonDefaults.Serialize(explain.Rows).AsSpan().SequenceEqual(JsonDefaults.Serialize(explanation))).IsTrue();
         await PageAsync(explain, cut);
-        await Assert.That(GraphShortestPathFullStoreImage.Bytes(store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
+        await Assert.That(CanonicalStoreImage.Bytes(store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
         await Assert.That(store.Position).IsEqualTo(cut);
     }
 
     internal static async Task RefusedAsync(TestDatabase db, QueryEngine engine, ZoneTreeStore store,
         CancellationToken token)
     {
-        var image = GraphShortestPathFullStoreImage.Bytes(store);
+        var image = CanonicalStoreImage.Bytes(store);
         var cut = store.Position;
         foreach (var explain in new[] { false, true })
         {
@@ -70,7 +70,7 @@ internal static class ProjectRowAuthorityAssertions
             });
             await Assert.That(failure.Code).IsEqualTo(ErrorCode.Unauthenticated);
         }
-        await Assert.That(GraphShortestPathFullStoreImage.Bytes(store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
+        await Assert.That(CanonicalStoreImage.Bytes(store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
         await Assert.That(store.Position).IsEqualTo(cut);
     }
 

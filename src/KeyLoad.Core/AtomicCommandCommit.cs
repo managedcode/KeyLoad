@@ -47,6 +47,7 @@ public sealed partial class DatabaseEngine
         ArgumentNullException.ThrowIfNull(operation);
         operation = OwnCommand(operation);
         var siloLocal = IsSiloLocalOperation(operation);
+        cancellationToken.ThrowIfCancellationRequested();
         var committed = Store.Commit((transaction, position) =>
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -58,19 +59,21 @@ public sealed partial class DatabaseEngine
             }
             var sequence = siloLocal ? InitialCanonicalSequence
                 : canonicalSequence ?? SelectNextCanonicalSequence(transaction);
-            return ApplyCommittedCommand(transaction, admitted, position, sequence, siloLocal);
+            var result = ApplyCommittedCommand(transaction, admitted, position, sequence, siloLocal, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+            return result;
         });
         return committed;
     }
 
     private StorageOperationResult ApplyCommittedCommand(IAtomicTransaction transaction, Command<DatabaseCommand> operation,
-        long position, long replicationIndex, bool siloLocal)
+        long position, long replicationIndex, bool siloLocal, CancellationToken cancellationToken)
     {
         var rosterTransaction = new AtomicPartitionRosterTransaction(transaction, OperationLimitsOptions, position, replicationIndex);
         var partitionScope = CommandOutcomePartitionIdentity.Resolve(operation);
         var fingerprint = CommandFingerprint(operation);
         var outcome = ExecuteAndBuildOutcome(rosterTransaction, operation, position, replicationIndex, fingerprint,
-            partitionScope, siloLocal, out var replayed, out var selection, out var persistOutcome);
+            partitionScope, siloLocal, out var replayed, out var selection, out var persistOutcome, cancellationToken);
         if (replayed || !persistOutcome)
         {
             return new(outcome.CanonicalSequence, outcome.Result);
@@ -88,7 +91,8 @@ public sealed partial class DatabaseEngine
 
     private StoredOutcome ExecuteAndBuildOutcome(AtomicPartitionRosterTransaction transaction, Command<DatabaseCommand> operation,
         long position, long replicationIndex, string fingerprint, CommandOutcomePartitionScope partitionScope,
-        bool siloLocal, out bool replayed, out CommandOutcomeSelection selection, out bool persistOutcome)
+        bool siloLocal, out bool replayed, out CommandOutcomeSelection selection, out bool persistOutcome,
+        CancellationToken cancellationToken)
     {
         replayed = false;
         selection = CommandOutcomeKeyResolver.ForNew(operation.UserId!, operation.CommandId, partitionScope);
@@ -123,7 +127,7 @@ public sealed partial class DatabaseEngine
             blobAuthority = CaptureBlobOutcomeAuthority(transaction, principal, operation);
             transferFailure = CaptureRemoteTransferFailureAuthority(transaction, principal, operation);
             result = Execute(transaction, principal, operation, replicationIndex > AtomicCommandCommitInitialSequence ? replicationIndex : position,
-                placement);
+                placement, cancellationToken);
             compositionAuthority = CaptureCompositionOutcome(transaction, principal, operation, result);
         }
         catch (KeyLoadException exception) when (exception.Code is not (ErrorCode.Corruption or ErrorCode.FormatUnsupported

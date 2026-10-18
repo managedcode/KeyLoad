@@ -26,7 +26,7 @@ internal static class GraphSearchLineageFault
         }, failures);
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            var image = GraphShortestPathFullStoreImage.Bytes(state.Store);
+            var image = CanonicalStoreImage.Bytes(state.Store);
             var damagedRow = Convert.ToHexString(key) + ":" + Convert.ToHexString(damaged);
             var originalRow = Convert.ToHexString(key) + ":" + Convert.ToHexString(original);
             restored = image.Select(row => row == damagedRow ? originalRow : row).ToArray();

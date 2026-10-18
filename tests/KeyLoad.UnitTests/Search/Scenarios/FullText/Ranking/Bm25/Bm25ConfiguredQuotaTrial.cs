@@ -1,3 +1,4 @@
+using KeyLoad.UnitTests.Features.ResourceExecution;
 using KeyLoad.Core.Features.Search;
 using ManagedCode.Communication.Commands;
 
@@ -33,13 +34,13 @@ internal static class Bm25ConfiguredQuotaTrial
         }
         if (oneByteUnder)
         {
-            var before = ReplicaSubmissionOutcomeState.Read(flow.Database);
+            var before = CanonicalStoreCut.Read(flow.Database);
             var admitted = originals[..^1];
             var retained = Bm25ConfiguredQuotaRetainedEntries.Read(flow.Database, admitted);
             var error = Assert.ThrowsExactly<KeyLoadException>(() => flow.Capture(originals.Length - 1));
             await Assert.That(error.Code).IsEqualTo(ErrorCode.BudgetExceeded);
             await Assert.That(error.Message).IsEqualTo(Bm25CorpusProtocol.Capacity);
-            await before.RequireAsync(ReplicaSubmissionOutcomeState.Read(flow.Database));
+            await before.RequireAsync(CanonicalStoreCut.Read(flow.Database));
             await retained.RequireAsync(flow.Database, admitted);
             await RequireReplacementAsync(flow, originals[0], capacity, false);
             return;
@@ -57,18 +58,18 @@ internal static class Bm25ConfiguredQuotaTrial
         var reducing = flow.Capture(0, original.CommandId, "needle");
         await Bm25ConfiguredQuotaBytes.RequireStoredAsync(flow.Database, reducing, flow.Publish(reducing));
         await Assert.That(Bm25ConfiguredQuotaBytes.Retained(flow.Database) < beforeBytes).IsTrue();
-        var healthy = flow.Capture(0, reducing.Id);
+        var healthy = flow.Capture(0, reducing.CommandId);
         var result = flow.Publish(healthy);
         await Bm25ConfiguredQuotaBytes.RequireStoredAsync(flow.Database, healthy, result);
         if (wasFull)
         {
             await Assert.That(Bm25ConfiguredQuotaBytes.Retained(flow.Database)).IsEqualTo(capacity);
         }
-        var before = ReplicaSubmissionOutcomeState.Read(flow.Database);
-        var entry = NativeSerialization.Serialize(flow.Database.ReadStoredOutcome(healthy.Id));
+        var before = CanonicalStoreCut.Read(flow.Database);
+        var entry = NativeSerialization.Serialize(flow.Database.ReadStoredOutcome(healthy.CommandId));
         var replay = flow.Database.Database.CreateVerifiedBm25CorpusPublication("root", Bm25ConfiguredQuotaFlow.Phase(healthy), flow.Database.CreateReadWork(Bm25ConfiguredQuotaFlow.Token));
-        await ReplicaSubmissionOutcomeFlow.RequireResultAsync(result, flow.Publish(replay));
-        await before.RequireAsync(ReplicaSubmissionOutcomeState.Read(flow.Database));
-        await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(entry, NativeSerialization.Serialize(flow.Database.ReadStoredOutcome(healthy.Id)));
+        await NativeReplayResultAssertions.SameAsync(result, flow.Publish(replay));
+        await before.RequireAsync(CanonicalStoreCut.Read(flow.Database));
+        await NativeReplayResultAssertions.BytesAsync(entry, NativeSerialization.Serialize(flow.Database.ReadStoredOutcome(healthy.CommandId)));
     }
 }

@@ -30,8 +30,6 @@ internal static class EarlyAdmissionQualificationFlow
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 await fixture.InitializeAsync();
-                fixture.RegisterNativeCoverageCase<EarlyAdmissionQualificationTests>(
-                    nameof(EarlyAdmissionQualificationTests.HeldWireRefusesMalformedSqlBeforeParseThenFreshPolicyAndTwoCold));
                 EarlyAdmissionQualificationState state;
                 using (var phase = McpCallerDeadline.Create())
                 {

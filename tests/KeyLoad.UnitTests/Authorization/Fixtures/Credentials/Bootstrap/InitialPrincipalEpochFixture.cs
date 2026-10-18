@@ -41,9 +41,9 @@ internal sealed class InitialPrincipalEpochFixture : IDisposable
             expired ? DateTimeOffset.UnixEpoch : null);
     internal Command<DatabaseCommand> Configuration(long epoch)
         => Operation(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(Principal(epoch)));
-    internal static Command<DatabaseCommand> Operation<T>(OperationKind kind, T payload, string principal = "root", Guid? id = null)
-        => new(id ?? Guid.NewGuid(), kind, principal, default,
-            System.Text.Json.JsonSerializer.Serialize(payload, JsonDefaults.Options));
+    internal Command<DatabaseCommand> Operation<T>(OperationKind kind, T payload, string principal = "root", Guid? id = null)
+        => Harness.Database.CreateCommand(kind, id ?? Guid.NewGuid(), principal,
+            Harness.Database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(payload));
     internal EntityRef Reference => new(Harness.Partition, Collection, "record");
     internal static byte[] Outcome(Command<DatabaseCommand> operation)
         => KeySpace.GlobalOutcome(operation.UserId!, operation.CommandId);

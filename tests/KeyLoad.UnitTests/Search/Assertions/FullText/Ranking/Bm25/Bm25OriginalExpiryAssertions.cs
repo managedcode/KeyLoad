@@ -1,3 +1,4 @@
+using KeyLoad.UnitTests.Features.ResourceExecution;
 using KeyLoad.Core.Features.Search;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
@@ -7,7 +8,7 @@ namespace KeyLoad.UnitTests.Features.Search;
 internal static class Bm25OriginalExpiryAssertions
 {
     internal static async Task PhaseAsync(Command<DatabaseCommand> original, Command<DatabaseCommand> actual)
-        => await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(
+        => await NativeReplayResultAssertions.BytesAsync(
             NativeSerialization.Serialize(NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((original).Value!.Input.Span)),
             NativeSerialization.Serialize(NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((actual).Value!.Input.Span)));
 
@@ -35,18 +36,16 @@ internal static class Bm25OriginalExpiryAssertions
         await Assert.That(result.Problem?.Detail).IsEqualTo(Bm25CorpusProtocol.Changed);
 
         await Assert.That(result.Value).IsNull();
-        await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(NativeSerialization.Serialize(family),
+        await NativeReplayResultAssertions.BytesAsync(NativeSerialization.Serialize(family),
             NativeSerialization.Serialize(Family(flow)));
         var after = Bm25OriginalPhaseRecoveryState.Read(flow.Owner);
         await Assert.That(after.NodeId).IsEqualTo(before.NodeId);
         await Assert.That(after.Incarnation).IsEqualTo(before.Incarnation);
         await Assert.That(after.Position).IsGreaterThan(before.Position);
-        await Assert.That(after.LastIndex).IsEqualTo(before.LastIndex + 1);
-        await Assert.That(after.CommittedIndex).IsEqualTo(after.LastIndex);
-        await Assert.That(after.Applied).IsEqualTo(after.LastIndex);
-        await Assert.That(flow.Owner.Entry(operation.CommandId).CanonicalSequence).IsEqualTo(after.LastIndex);
+        await Assert.That(after.Applied).IsEqualTo(before.Applied + 1);
+        await Assert.That(flow.Owner.Entry(operation.CommandId).CanonicalSequence).IsEqualTo(after.Applied);
         await PhaseAsync(operation, flow.Owner.Entry(operation.CommandId).PreparedCommand!);
-        await ReplicaSubmissionOutcomeFlow.RequireResultAsync(result,
+        await NativeReplayResultAssertions.SameAsync(result,
             flow.Owner.Database.ResolveSubmissionOutcome(operation));
     }
 
@@ -55,10 +54,10 @@ internal static class Bm25OriginalExpiryAssertions
     {
         var before = Bm25OriginalPhaseRecoveryState.Read(flow.Owner);
         var reissued = flow.Reissue(original);
-        await Assert.That(reissued.EvaluatedAt >= expiry).IsTrue();
+        await Assert.That(new DateTimeOffset(reissued.Timestamp) >= expiry).IsTrue();
         await PhaseAsync(original, reissued);
-        await ReplicaSubmissionOutcomeFlow.RequireResultAsync(expected, flow.Publish(reissued));
-        await ReplicaSubmissionOutcomeFlow.RequireResultAsync(expected,
+        await NativeReplayResultAssertions.SameAsync(expected, flow.Publish(reissued));
+        await NativeReplayResultAssertions.SameAsync(expected,
             flow.Owner.Database.ResolveSubmissionOutcome(original));
         await before.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(flow.Owner));
         await Bm25OriginalPhaseRecoveryState.RequireRetainedAsync(flow.Owner, original, entry);

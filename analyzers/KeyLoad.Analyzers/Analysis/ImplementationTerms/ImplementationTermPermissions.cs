@@ -15,7 +15,8 @@ internal sealed class ImplementationTermPermissions(SemanticModel model,
     internal bool Allows(string term, string text, SyntaxNode node, CancellationToken cancellationToken)
     {
         var symbol = ImplementationTermSymbols.Resolve(model, node, cancellationToken);
-        if (ImplementationTermSymbols.Native(symbol) || IsVocabulary(symbol))
+        if (ImplementationTermSymbols.Native(symbol) || IsVocabulary(symbol) ||
+            term == ImplementationTermCatalog.DemonstrationWord && ImplementationTermSymbols.NativeLoggingProcessor(symbol))
         {
             return true;
         }

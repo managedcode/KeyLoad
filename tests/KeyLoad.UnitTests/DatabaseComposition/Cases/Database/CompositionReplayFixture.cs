@@ -43,9 +43,8 @@ internal static class CompositionReplayFixture
     internal static Command<DatabaseCommand> Forward(TestDatabase db, string principal = "root")
     {
         var id = Guid.NewGuid();
-        return new(id, OperationKind.Batch, principal, TimeProvider.System.GetUtcNow(),
-            JsonSerializer.Serialize(new CommandRequest(id, db.Partition, [new QueueToGraph(Graph, Queue, Prefix)]),
-                JsonDefaults.Options));
+        return db.Database.CreateCommand(OperationKind.Batch, id, principal, TimeProvider.System.GetUtcNow(),
+            NativeSerialization.Serialize(new CommandRequest(id, db.Partition, [new QueueToGraph(Graph, Queue, Prefix)])));
     }
 
     internal static void ConfigureReader(TestDatabase db, Capability? revoked = null)

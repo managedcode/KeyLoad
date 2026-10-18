@@ -42,6 +42,6 @@ internal static class NativeCompiledDocumentBudgetScenario
             }, failures).ConfigureAwait(false);
             ServerFailureObserver.Observe(fixture.Dispose, failures);
         }
-        global::KeyLoad.UnitTests.Features.CodeQuality.NativeCoverageImageNodeSettlement.ThrowFailures(failures);
+        global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 }

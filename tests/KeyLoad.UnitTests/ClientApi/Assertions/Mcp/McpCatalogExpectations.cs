@@ -112,7 +112,7 @@ internal static class McpCatalogExpectations
     internal const string OutboxPurge = "keyload_outbox_purge";
     private const string OutboxPurgeRoute = "/v1/admin/outbox/purge";
 
-    internal const int Count = 93;
+    internal const int Count = 81;
     internal static ImmutableArray<(string Name, string Route, GrainReadKind? ReadKind, OperationKind? CommandKind)> Entries
     {
         get;
@@ -121,7 +121,6 @@ internal static class McpCatalogExpectations
         ("keyload_analytics_read", "/v1/analytics/read", GrainReadKind.AnalyticsEvents, null),
         ("keyload_analytics_aggregate", "/v1/analytics/aggregate", GrainReadKind.AnalyticsAggregate, null),
         ("keyload_tables_drop", "/v1/admin/tables/drop", null, OperationKind.DropTable),
-        .. McpRemoteGraphCatalogExpectations.Entries,
         .. KeyLoad.UnitTests.Features.Search.SearchMcpCatalogEntries.All,
         (DocumentsGet, DocumentsGetRoute, GrainReadKind.Document, null),
         (StreamsRead, StreamsReadRoute, GrainReadKind.Stream, null),
@@ -152,7 +151,6 @@ internal static class McpCatalogExpectations
         (SearchExecute, SearchExecuteRoute, GrainReadKind.Search, null),
         (SearchGraph, SearchGraphRoute, GrainReadKind.GraphSearch, null),
         (WaitForIndexProtocol.Tool, WaitForIndexProtocol.Route, GrainReadKind.WaitForIndex, null),
-        (ClusterBackupProtocol.Tool, ClusterBackupProtocol.Route, GrainReadKind.ClusterBackupOwner, null),
         (WaitForAnnIndexProtocol.Tool, WaitForAnnIndexProtocol.Route, GrainReadKind.WaitForAnnIndex, null),
         (McpOnlineTextCatalogExpectations.OnlineTextMaintenance, McpOnlineTextCatalogExpectations.OnlineTextMaintenanceRoute, null, OperationKind.MaintainOnlineTextIndex),
         (AdminBackup, AdminBackupRoute, GrainReadKind.Backup, null),
@@ -169,7 +167,6 @@ internal static class McpCatalogExpectations
         (PrincipalsConfigure, PrincipalsConfigureRoute, null, OperationKind.ConfigurePrincipal),
         (CredentialsConfigure, CredentialsConfigureRoute, null, OperationKind.ConfigureApiKey),
         (AdminDispatch, AdminDispatchRoute, null, OperationKind.SetDispatch),
-        .. McpEventFeedCatalogEntries.All,
         (SubscriptionsConfigure, SubscriptionsConfigureRoute, null, OperationKind.ConfigureSubscription),
         (SubscriptionsSeek, SubscriptionsSeekRoute, null, OperationKind.SeekSubscription),
         (SubscriptionsReceive, SubscriptionsReceiveRoute, null, OperationKind.ReceiveSubscription),

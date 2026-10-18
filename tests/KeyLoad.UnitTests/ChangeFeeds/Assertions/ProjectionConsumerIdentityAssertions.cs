@@ -8,7 +8,7 @@ namespace KeyLoad.UnitTests.Features.ChangeFeeds;
 internal static class ProjectionConsumerIdentityAssertions
 {
     internal static string[] Image(ZoneTreeStore store)
-        => global::KeyLoad.UnitTests.Features.GraphTraversal.GraphShortestPathFullStoreImage.Bytes(store);
+        => global::KeyLoad.UnitTests.CanonicalStoreImage.Bytes(store);
 
     internal static async Task SameAsync(ZoneTreeStore store, string[] image, long position)
     {

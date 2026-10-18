@@ -28,7 +28,8 @@ internal sealed class McpBoundedJsonTests
 
         await Assert.That(actual.AsSpan().SequenceEqual(expected)).IsTrue();
         var decoded = JsonDefaults.Deserialize<CommandRequest>(actual);
-        await Assert.That(decoded.OwnershipEpoch).IsEqualTo(command.OwnershipEpoch);
+        await Assert.That(decoded.CommandId).IsEqualTo(command.CommandId);
+        await Assert.That(decoded.Partition).IsEqualTo(command.Partition);
         await Assert.That(decoded.Mutations.Length).IsEqualTo(command.Mutations.Length);
         await Assert.That(((PutDocument)decoded.Mutations[0]).ExpectedRevision).IsNull();
         await Assert.That(((PutDocument)decoded.Mutations[0]).Json).IsEqualTo(EscapedValue);

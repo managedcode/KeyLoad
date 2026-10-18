@@ -51,8 +51,7 @@ $recoveryExit = [int] $LASTEXITCODE
 "recovery_exit_code=$recoveryExit" | Add-Content $env:GITHUB_OUTPUT
 $clusterFilter = '/*/*/(PartitionQueryPublicClusterTests|McpDocumentCrudParityTests|RelationalSqlClusterJoinTests|RelationalSqlClusterJoinAuthorizationTests|RelationalSqlClusterJoinBudgetTests|RelationalSqlClusterJoinCancellationTests|RelationalSqlClusterJoinReadCutTests)/*'
 & node @common @coverage '--KeyLoadTests:Suite=cluster' ('--KeyLoadTests:Filter=' + $clusterFilter) `
-    ('--KeyLoadTests:ResultsDirectory=' + $EvidenceRoot) ('--KeyLoadTests:CoverageOutput=' + (Join-Path $EvidenceRoot 'coverage.coverage')) `
-    '--KeyLoadTests:NativeCoverage:ServerMode=cluster-original-node-v1' ('--KeyLoadTests:NativeCoverage:SourceManifest=' + $SourceManifestPath)
+    ('--KeyLoadTests:ResultsDirectory=' + $EvidenceRoot) ('--KeyLoadTests:CoverageOutput=' + (Join-Path $EvidenceRoot 'coverage.coverage'))
 $clusterExit = [int] $LASTEXITCODE
 "cluster_exit_code=$clusterExit" | Add-Content $env:GITHUB_OUTPUT
 if ($recoveryExit -ne 0 -or $clusterExit -ne 0 -or @($rows | Where-Object exitCode -NE 0).Count -ne 0) { exit 1 }

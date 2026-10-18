@@ -10,7 +10,7 @@ internal static class GraphLabelUseFault
         var key = KeySpace.Partition("document", db.Partition, GraphLabelUseFixture.Collection, "a");
         var original = db.Store.Read(view => view.ReadOwnedValue(key))
             ?? throw new InvalidOperationException("The original canonical graph vertex must exist.");
-        var image = GraphShortestPathFullStoreImage.Bytes(db.Store);
+        var image = CanonicalStoreImage.Bytes(db.Store);
         var position = db.Store.Position;
         var identity = NativeSerialization.Serialize(db.Store.Identity);
         var failures = new List<Exception>();

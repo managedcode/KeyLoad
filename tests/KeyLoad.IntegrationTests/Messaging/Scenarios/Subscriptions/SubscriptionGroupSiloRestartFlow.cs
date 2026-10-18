@@ -21,10 +21,10 @@ internal static class SubscriptionGroupSiloRestartFlow
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             stopped = true;
-            await fixture.KillContainerAsync(selected, RestartReason, token);
+            await fixture.KillServerAsync(selected, RestartReason, token);
             await WaitForSurvivorsAsync(fixture, survivors, token);
             await ReadCheckpointAsync(fixture, state, survivors[0], token);
-            await fixture.RestartContainerAsync(selected, token);
+            await fixture.RestartServerAsync(selected, token);
             stopped = false;
             await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(selected, token);
             await SubscriptionGroupSiloRestartCallers.RunAsync(fixture, state, survivors, token);
@@ -32,7 +32,7 @@ internal static class SubscriptionGroupSiloRestartFlow
         if (stopped)
         {
             using var cleanup = new CancellationTokenSource(DueRecurringClusterProtocol.ProgressWindow, TimeProvider.System);
-            await ServerFailureObserver.ObserveAsync(() => fixture.RestartContainerAsync(selected, cleanup.Token), failures);
+            await ServerFailureObserver.ObserveAsync(() => fixture.RestartServerAsync(selected, cleanup.Token), failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
         await SubscriptionIndependentCheckpointR52Callers.RunAsync(fixture, state, async (sdk, mcp, admin, official) =>

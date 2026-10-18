@@ -11,10 +11,10 @@ internal static class NativeClusteringResources
     internal static IResourceBuilder<AzureTableStorageResource> Add(IDistributedApplicationBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
-        return builder.AddAzureStorage(StorageName).RunAsEmulator().AddTables(TablesName);
+        return builder.AddAzureStorage(StorageName).RunAsEmulator(emulator => emulator.WithLifetime(ContainerLifetime.Session)).AddTables(TablesName);
     }
 
-    internal static void Apply(IResourceBuilder<ContainerResource> silo,
+    internal static void Apply(IResourceBuilder<ProjectResource> silo,
         IResourceBuilder<AzureTableStorageResource> tables)
     {
         silo.WithReference(tables, connectionName: OrleansHostingOptions.ConnectionName).WaitFor(tables);

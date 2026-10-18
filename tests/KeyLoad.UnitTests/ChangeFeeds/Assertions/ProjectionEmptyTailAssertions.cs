@@ -16,7 +16,7 @@ internal static class ProjectionEmptyTailAssertions
     internal const string EmptyDetail = "An empty projection batch cannot produce effects.";
 
     internal static string[] Image(ZoneTreeStore store)
-        => global::KeyLoad.UnitTests.Features.GraphTraversal.GraphShortestPathFullStoreImage.Bytes(store);
+        => global::KeyLoad.UnitTests.CanonicalStoreImage.Bytes(store);
 
     internal static async Task ReplayAsync(DatabaseEngine owner, ZoneTreeStore store, Command<DatabaseCommand> original,
         Result<object> expected, CancellationToken token)
@@ -50,7 +50,7 @@ internal static class ProjectionEmptyTailAssertions
             && !row.StartsWith(locatorPrefix, StringComparison.Ordinal)).ToArray())
             .IsEquivalentTo(image, global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(store.Position).IsEqualTo(position + 1L);
-        await ExactAsync(OutcomeStoreOracle.ReadPartition(store, partition, Root, rejected.CommandId), result);
+        await ExactAsync(OutcomeStoreOracle.ReadPartition(store, partition, Root, rejected.CommandId)!.Value, result);
         return result;
     }
 

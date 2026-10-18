@@ -1,3 +1,4 @@
+using KeyLoad.Storage;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Query;
@@ -94,8 +95,14 @@ internal static class TeamRowPolicyFlow
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }
 
-    internal static Command<DatabaseCommand> Operation(CommandRequest command)
-        => new(command.CommandId, OperationKind.Batch, Reader, default, JsonSerializer.Serialize(command, JsonDefaults.Options));
+    internal static Command<DatabaseCommand> Operation(ZoneTreeStore store, CommandRequest command,
+        string principalId = Reader)
+    {
+        var stored = store.Read(view => view.GetRecord<StoredOutcome>(
+            KeySpace.PartitionOutcome(command.Partition, principalId, command.CommandId)))
+            ?? throw new InvalidOperationException(MissingOutcome);
+        return stored.PreparedCommand;
+    }
 
     internal static byte[] Outcome(ZoneTreeStore store, CommandRequest command)
         => store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(command.Partition, Reader, command.CommandId)))
@@ -106,7 +113,7 @@ internal static class TeamRowPolicyFlow
     {
         var image = TeamRowPolicyAssertions.Image(store);
         var cut = store.Position;
-        var replay = engine.ApplyEmbedded(Operation(command), cancellationToken: token).Get<CommitReceipt>();
+        var replay = engine.ApplyEmbedded(Operation(store, command), cancellationToken: token).Get<CommitReceipt>();
         await Assert.That(JsonDefaults.Serialize(replay).AsSpan().SequenceEqual(JsonDefaults.Serialize(receipt))).IsTrue();
         await Assert.That(Outcome(store, command).AsSpan().SequenceEqual(outcome)).IsTrue();
         await TeamRowPolicyAssertions.UnchangedAsync(store, image, cut);

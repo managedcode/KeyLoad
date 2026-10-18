@@ -11,8 +11,6 @@ internal sealed class SampleChunkRetentionRollupClusterTests(ClusterFixture fixt
     [Test]
     public async Task AcChunk011012EnrolledChunkRetentionRollupWatermarksRefusalsAndReceiptsRemainExactAfterCold()
     {
-        fixture.RegisterNativeCoverageCase<SampleChunkRetentionRollupClusterTests>(nameof(
-            AcChunk011012EnrolledChunkRetentionRollupWatermarksRefusalsAndReceiptsRemainExactAfterCold));
         var failures = new List<Exception>();
         McpCallerDeadline? deadline = null;
         HttpClient? http = null;

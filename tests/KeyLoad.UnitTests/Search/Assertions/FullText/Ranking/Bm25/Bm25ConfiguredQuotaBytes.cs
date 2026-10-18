@@ -1,3 +1,4 @@
+using KeyLoad.UnitTests.Features.ResourceExecution;
 using KeyLoad.Core.Features.Search;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
@@ -35,8 +36,8 @@ internal static class Bm25ConfiguredQuotaBytes
         await Assert.That(receipt.Durability).IsEqualTo(database.Database.Durability);
         var actual = database.Store.Read(view => view.ReadOwnedValue(Bm25CorpusKeys.Current(phase.Current)))
             ?? throw new InvalidOperationException("The genuinely published corpus head is missing.");
-        await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(NativeSerialization.Serialize(phase.Current), actual);
-        await ReplicaSubmissionOutcomeFlow.RequireResultAsync(result, database.Database.ResolveSubmissionOutcome(
+        await NativeReplayResultAssertions.BytesAsync(NativeSerialization.Serialize(phase.Current), actual);
+        await NativeReplayResultAssertions.SameAsync(result, database.Database.ResolveSubmissionOutcome(
             database.ReadStoredOutcome(operation.CommandId).PreparedCommand!));
     }
 }

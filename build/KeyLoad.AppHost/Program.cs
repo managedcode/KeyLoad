@@ -1,36 +1,18 @@
 using KeyLoad;
-using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Hosting;
 
-const string MessageText = "An explicitly selected test suite must not be empty.";
-const int EmptyResult = 0;
-
+const int Completed = 0;
 _ = SerializationExecutionRegistration.Process.Value;
-var requested = TestSuiteSettings.Requested(args);
-var builder = DistributedApplication.CreateBuilder(new DistributedApplicationOptions
-{
-    Args = args,
-    DisableDashboard = requested
-});
-var runtimeOptions = AppHostOptionsRegistration.Get(builder);
-var tests = runtimeOptions.Control.Value.Tests;
-var loggerModelControl = runtimeOptions.Control.Value.LoggerModelControl;
-if (requested && tests is null)
-{
-    throw new InvalidOperationException(MessageText);
-}
+var builder = DistributedApplication.CreateBuilder(args);
+var runtime = AppHostOptionsRegistration.Get(builder);
 KeyLoadResources.AddKeyLoad(builder);
-var app = builder.Build();
-if (loggerModelControl)
+var application = builder.Build();
+if (runtime.Control.Value.LoggerModelControl)
 {
-    return EmptyResult;
+    return Completed;
 }
-if (tests is not null)
+await using (application)
 {
-    return await TestSuiteApplication.RunAsync(app, tests).ConfigureAwait(false);
+    await application.RunAsync();
 }
-await using (app.ConfigureAwait(false))
-{
-    await app.RunAsync().ConfigureAwait(false);
-}
-return EmptyResult;
+return Completed;

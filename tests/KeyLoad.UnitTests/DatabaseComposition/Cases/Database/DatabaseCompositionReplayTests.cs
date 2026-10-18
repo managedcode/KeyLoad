@@ -46,12 +46,10 @@ internal sealed class DatabaseCompositionReplayTests
         await Assert.That(SameEffects(retry, first)).IsTrue();
         await Assert.That(db.Store.Read(view => view.GetRecord<EdgeRecord>(
             KeySpace.Partition("edge", db.Partition, Graph, Prefix + "new-source")))).IsNull();
-        var changed = operation with
-        {
-            PayloadJson = JsonSerializer.Serialize(
-            new CommandRequest(operation.Id, db.Partition, [new QueueToGraph(Graph, Queue, "changed-")]),
-            JsonDefaults.Options)
-        };
+        var changed = db.Database.CreateCommand(operation.Value!.Kind, operation.CommandId, operation.UserId!,
+            new DateTimeOffset(operation.Timestamp), JsonSerializer.Serialize(
+            new CommandRequest(operation.CommandId, db.Partition, [new QueueToGraph(Graph, Queue, "changed-")]),
+            JsonDefaults.Options));
         var conflict = Assert.ThrowsExactly<KeyLoadException>(() => db.Database.Apply(changed).Get<CommitReceipt>());
         await Assert.That(conflict.Code).IsEqualTo(ErrorCode.Conflict);
     }

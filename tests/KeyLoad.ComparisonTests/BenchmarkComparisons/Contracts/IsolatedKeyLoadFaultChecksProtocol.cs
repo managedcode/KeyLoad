@@ -1,13 +1,12 @@
 using System.Globalization;
+using Aspire.Hosting.ApplicationModel;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal static class IsolatedKeyLoadFaultChecksProtocol
 {
     internal const string Admin = "admin-key";
-    internal const string DataMount = "/data";
-    internal const string Running = "running";
-    internal const string Exited = "exited";
+    internal const string Running = KnownResourceStates.Running;
     internal const string Failure = "IsolatedKeyLoadFaultChecksFailed";
     internal const string EvidenceFile = "keyload-fault.json";
 

@@ -1,77 +1,94 @@
+using System.Globalization;
 using System.Text.Json;
 using Aspire.Hosting.ApplicationModel;
+using KeyLoad.AppHost.Features.ClusterReplication;
 using KeyLoad.AppHost.Features.StorageRecovery;
-using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using Microsoft.Extensions.DependencyInjection;
 using P = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateFileOwnershipProtocol;
 
 namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
-/// <summary>Compares actual model and container mounts; no distinct directory is relabelled as shared files.</summary>
+/// <summary>Compares native configured paths and exact process launches for the live-file refusal operation.</summary>
 internal static class FunctionalGateFileOwnershipAssertions
 {
+    private const string DataEnvironment = "KeyLoad__DataDirectory";
+    private const string ProjectProperty = "project.path";
+    private const string ExecutableProperty = "executable.path";
+    private const string ArgumentsProperty = "executable.args";
+    private const string WorkDirectoryProperty = "executable.workdir";
+
     internal static async Task ModelAsync(FunctionalGateFixture fixture)
     {
         await Assert.That(fixture.NodeNames.Length).IsEqualTo(P.SiloCount);
         var paths = new HashSet<string>(StringComparer.Ordinal);
         foreach (var name in fixture.NodeNames)
         {
-            var path = Mount(fixture, name);
+            var path = Directory(fixture, name);
             await Assert.That(path).IsEqualTo(Path.GetFullPath(Path.Combine(fixture.Root, name)));
             await Assert.That(paths.Add(path)).IsTrue();
         }
-        var owner = Mount(fixture, ExclusiveOwnerContentionResources.OwnerName);
+        var owner = Directory(fixture, ExclusiveOwnerContentionResources.OwnerName);
         foreach (var name in ExclusiveOwnerContentionResources.ResourceNames)
         {
-            await Assert.That(Mount(fixture, name)).IsEqualTo(owner);
+            await Assert.That(Directory(fixture, name)).IsEqualTo(owner);
         }
     }
 
-    internal static string ContainerName(FunctionalGateFixture fixture, string name)
-        => Resource(fixture, name).Annotations.OfType<ContainerNameAnnotation>().Single().Name;
-
-    private static ContainerResource Resource(FunctionalGateFixture fixture, string name)
-        => fixture.App.Services.GetRequiredService<DistributedApplicationModel>().Resources.OfType<ContainerResource>().Single(resource => resource.Name == name);
-
-    private static string Mount(FunctionalGateFixture fixture, string name)
+    internal static string Directory(FunctionalGateFixture fixture, string name)
     {
-        var mount = Resource(fixture, name).Annotations.OfType<ContainerMountAnnotation>()
-            .Single(value => value.Target == P.DataDirectory);
-        if (mount.Type != ContainerMountType.BindMount || mount.IsReadOnly || mount.Source is null)
+        var path = Snapshot(fixture, name).Snapshot.EnvironmentVariables.Single(value => value.Name == DataEnvironment).Value;
+        if (path is null || !Path.IsPathFullyQualified(path) || path.Length > FunctionalGatePhysicalFileProtocol.MaximumPathCharacters)
         {
             throw new InvalidOperationException(P.Incomplete);
         }
-        return Path.GetFullPath(mount.Source);
+        return Path.GetFullPath(path);
     }
 
-    internal static async Task<(string Source, string Image, string Configured, string Id, string Inspection)> RuntimeAsync(
-        FunctionalGateFixture fixture, string name, bool refused, CancellationToken token)
+    private static ResourceEvent Snapshot(FunctionalGateFixture fixture, string name)
     {
-        var result = await ContainerRuntimeDocker.RunAsync([P.Inspect, P.Format, P.Inspection,
-            ContainerName(fixture, name)], token).ConfigureAwait(false);
-        ContainerRuntimeDocker.EnsureSuccessful(result, P.Inspect, name);
-        using var document = JsonDocument.Parse(result.StandardOutput);
-        var root = document.RootElement;
-        await Assert.That(root.GetProperty(P.StateProperty).GetString()).IsEqualTo(refused ? P.Exited : P.Running);
+        _ = fixture.App.Services.GetRequiredService<DistributedApplicationModel>().Resources.OfType<ProjectResource>()
+            .Single(resource => resource.Name == name);
+        if (!fixture.App.ResourceNotifications.TryGetCurrentState(name, out var actual)
+            || actual.Resource is not ProjectResource || actual.Resource.Name != name)
+        {
+            throw new InvalidOperationException(P.Incomplete);
+        }
+        return actual;
+    }
+
+    internal static async Task<(string Source, string Project, string Executable, int ProcessId,
+        string Launch, string Inspection)> RuntimeAsync(FunctionalGateFixture fixture, string name, bool refused,
+        CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        var actual = Snapshot(fixture, name);
+        var snapshot = actual.Snapshot;
         if (refused)
         {
-            await Assert.That(root.GetProperty(P.ExitProperty).GetInt32()).IsNotEqualTo(P.SuccessExit);
+            await Assert.That(snapshot.ExitCode).IsNotNull();
+            await Assert.That(snapshot.ExitCode!.Value).IsNotEqualTo(P.SuccessExit);
         }
-        var mount = root.GetProperty(P.MountsProperty).EnumerateArray()
-            .Single(value => value.GetProperty(P.DestinationProperty).GetString() == P.DataDirectory);
-        await Assert.That(mount.GetProperty(P.TypeProperty).GetString()).IsEqualTo(P.Bind);
-        await Assert.That(mount.GetProperty(P.WritableProperty).GetBoolean()).IsTrue();
-        var source = mount.GetProperty(P.SourceProperty).GetString();
-        var image = root.GetProperty(P.ImageProperty).GetString();
-        var configured = root.GetProperty(P.ConfiguredProperty).GetString();
-        var id = root.GetProperty(P.IdProperty).GetString();
-        if (string.IsNullOrWhiteSpace(source) || string.IsNullOrWhiteSpace(image)
-            || string.IsNullOrWhiteSpace(configured) || id is null
-            || id.Length != P.ContainerIdCharacters || !id.All(Uri.IsHexDigit))
+        else
+        {
+            await Assert.That(snapshot.State?.Text).IsEqualTo(KnownResourceStates.Running);
+        }
+        var project = (string)snapshot.Properties.Single(value => value.Name == ProjectProperty).Value!;
+        var executable = (string)snapshot.Properties.Single(value => value.Name == ExecutableProperty).Value!;
+        var args = (IEnumerable<string>)snapshot.Properties.Single(value => value.Name == ArgumentsProperty).Value!;
+        var directory = (string)snapshot.Properties.Single(value => value.Name == WorkDirectoryProperty).Value!;
+        var value = snapshot.Properties.Single(property => property.Name == ProcessFaultCommandProtocol.ProcessIdProperty).Value;
+        if (!int.TryParse(Convert.ToString(value, CultureInfo.InvariantCulture), NumberStyles.None,
+                CultureInfo.InvariantCulture, out var processId) || processId <= 0
+            || snapshot.StartTimeStamp is not { } started
+            || !Path.IsPathFullyQualified(project) || !Path.IsPathFullyQualified(executable)
+            || !string.Equals(Path.GetFullPath(project),
+                Path.GetFullPath(((ProjectResource)actual.Resource).GetProjectMetadata().ProjectPath), StringComparison.Ordinal))
         {
             throw new InvalidOperationException(P.Incomplete);
         }
-        return (source, image, configured, id, result.StandardOutput);
+        var launch = JsonSerializer.Serialize(new { project, executable, arguments = args.ToArray(), directory });
+        var inspection = JsonSerializer.Serialize(new { resource = name, processId, started, snapshot.ExitCode, launch });
+        return (Directory(fixture, name), project, executable, processId, launch, inspection);
     }
 
     internal static bool HasOriginalRefusal(string text)

@@ -20,7 +20,7 @@ internal static class QueueEnqueueSequenceRefusals
                 CommandId = Guid.NewGuid(),
                 Mutations = [original.Mutations.OfType<PutDocument>().Single(), message]
             };
-            var operation = QueueStoredCapacitySetup.Operation(OperationKind.Batch, command, command.CommandId, time);
+            var operation = QueueStoredCapacitySetup.Operation(owner, OperationKind.Batch, command, command.CommandId, time);
             var result = owner.Apply(operation);
             await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.Validation);
             await Assert.That(result.Problem?.Detail).IsEqualTo(string.IsNullOrEmpty(key)

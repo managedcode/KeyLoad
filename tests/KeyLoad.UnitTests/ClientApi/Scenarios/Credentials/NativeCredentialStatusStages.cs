@@ -12,7 +12,7 @@ internal static class NativeCredentialStatusStages
         var admin = new KeyLoadClient(http, P.CallerKey, UnitClientOptions.Execution());
         var ordinary = new KeyLoadClient(http, P.OriginalKey, UnitClientOptions.Execution());
         var before = NativeCredentialStatusAssertions.Capture(state);
-        var next = checked(before.Journal.LastIndex + P.First);
+        var next = checked(before.Cut.AppliedPosition + P.First);
         var unknown = await CompleteAsync(state, endpoint, admin.ConfigureApiKeyAsync(state.OriginalId, state.Original, token),
             NativeCredentialStatusStep.OriginalBoolean, token);
         await Assert.That(unknown.IsFailed).IsTrue();
@@ -33,7 +33,7 @@ internal static class NativeCredentialStatusStages
         NativeCredentialStatusEndpoint endpoint, KeyLoadClient admin, KeyLoadClient ordinary, CancellationToken token)
     {
         var before = NativeCredentialStatusAssertions.Capture(state);
-        var next = checked(before.Journal.LastIndex + P.First);
+        var next = checked(before.Cut.AppliedPosition + P.First);
         var denied = await CompleteAsync(state, endpoint, ordinary.ConfigureApiKeyAsync(state.DeniedId, state.Denied, token),
             NativeCredentialStatusStep.OrdinaryDenied, token);
         await Assert.That(denied.IsFailed).IsTrue();
@@ -42,7 +42,7 @@ internal static class NativeCredentialStatusStages
         await NativeCredentialStatusDelta.RequireAsync(state, before, state.DeniedId, state.Ordinary, state.Denied, expected, denied: true);
         await NativeCredentialStatusAssertions.CurrentAsync(state, original: true, healthy: false);
         before = NativeCredentialStatusAssertions.Capture(state);
-        next = checked(before.Journal.LastIndex + P.First);
+        next = checked(before.Cut.AppliedPosition + P.First);
         var healthy = await CompleteAsync(state, endpoint, admin.ConfigureApiKeyAsync(state.HealthyId, state.Healthy, token),
             NativeCredentialStatusStep.Healthy, token);
         await SuccessAsync(healthy);

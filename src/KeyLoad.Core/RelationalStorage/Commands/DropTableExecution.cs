@@ -12,8 +12,9 @@ public sealed partial class DatabaseEngine
     private const string TableRemovalKind = "The resource is not a canonical typed table.";
 
     private Result<object> ExecuteDropTable(IAtomicTransaction transaction, Command<DatabaseCommand> operation,
-        long position)
+        long position, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var request = Payload<DropTableRequest>(operation);
         JsonData.Identifier(request.TenantId);
         JsonData.Identifier(request.DatabaseId);
@@ -29,13 +30,16 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.Validation, TableRemovalKind);
         }
-        var work = new ReadExecutionBudget(OperationLimitsOptions, EvaluationClock);
+        var work = new ReadExecutionBudget(OperationLimitsOptions, EvaluationClock, cancellationToken);
         var plan = TableDataCleanup.Capture(transaction, lifetime, work, Limits);
         foreach (var retained in plan)
         {
+            work.Check();
             transaction.Delete(retained);
         }
+        work.Check();
         transaction.Delete(key);
+        work.Check();
         transaction.Delete(ResourceLifetimeCatalog.Key(request.TenantId, request.DatabaseId, request.ResourceName));
         var token = new CommitToken(Store.Identity.Incarnation, NativeCatalogRoute.PartitionId, position);
         return Result(new DropTableResult(request.TenantId, request.DatabaseId, request.ResourceName,

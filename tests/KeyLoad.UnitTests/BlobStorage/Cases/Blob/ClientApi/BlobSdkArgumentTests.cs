@@ -35,7 +35,7 @@ internal sealed class BlobSdkArgumentTests
     [Arguments(nameof(BlobClientExtensions.ReclaimBlobAsync))]
     public async Task AcAisql012MissingRequestIsRejectedBeforeHttp(string operation)
     {
-        // A genuine client without a base address cannot reach the network if a guard regresses.
+        // A client without a base address verifies argument rejection before network access.
         using var http = new HttpClient();
         var client = new KeyLoadClient(http, ApiKey, UnitClientOptions.Execution());
         var cancellationToken = TestContext.Current!.Execution.CancellationToken;

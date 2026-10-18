@@ -51,7 +51,7 @@ internal sealed class GrainNativeReplyTests
         var value = new BackupReceipt(Entity, CutPosition);
         var reply = GrainReplyFactory.Operation(Result<object>.Succeed(value), UnitRoutingOptions.Routing(), CancellationToken.None);
         await Assert.That(NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value).IsEqualTo(value);
-        var empty = GrainReplyFactory.Operation(new(null), UnitRoutingOptions.Routing(), CancellationToken.None);
+        var empty = GrainReplyFactory.Operation(Result<object>.Succeed(null!), UnitRoutingOptions.Routing(), CancellationToken.None);
         await Assert.That(NativeSerialization.Deserialize<GrainValue>(empty.Payload.Span).Value).IsNull();
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();

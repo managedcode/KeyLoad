@@ -15,7 +15,6 @@ internal sealed class NativeAnnReplay
     private readonly bool applyDeltas;
     private readonly AnnSeedOptions options;
     private readonly AnnSeedWork work;
-    private readonly ReadExecutionBudget originalBudget;
     private readonly Dictionary<string, VectorRecord> records = new(StringComparer.Ordinal);
     private readonly Dictionary<long, (long Through, byte[] Digest)> appliedPages = [];
     private long retained;
@@ -30,7 +29,6 @@ internal sealed class NativeAnnReplay
         this.owner = owner;
         this.applyDeltas = applyDeltas;
         this.options = options;
-        originalBudget = budget;
         work = new(budget, options.MaxWorkUnits);
         through = seed.ThroughSequence;
         retained = checked(seed.OwnedBytesUpperBound + AnnSeedAccounting.ArrayAllowance(DictionaryEntryBytes, seed.Records.Length));
@@ -44,7 +42,6 @@ internal sealed class NativeAnnReplay
     }
 
     internal long WorkUnits => work.Units;
-    internal IDisposable EnterStageCancellation(CancellationToken token) => originalBudget.EnterStageCancellation(token);
     internal long Through => through;
     internal long RetainedBytes => retained;
     internal long MaximumStagePeakBytes => options.MaxPeakBytes;

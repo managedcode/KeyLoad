@@ -23,7 +23,7 @@ internal sealed class ModelSqlClusterColdOwnership
         {
             throw new InvalidOperationException(Changed);
         }
-        return ContainerRuntimeOwnedReceipt.Scenario(incarnation, Interlocked.Increment(ref ordinal));
+        return ProcessRuntimeOwnedReceipt.Scenario(incarnation, Interlocked.Increment(ref ordinal));
     }
 
     internal async Task RequirePreviousAsync(CancellationToken token)
@@ -45,7 +45,7 @@ internal sealed class ModelSqlClusterColdOwnership
         var captures = new List<Evidence>();
         foreach (var node in TopicSqlClusterProtocol.Nodes)
         {
-            var path = ContainerRuntimeOwnedReceipt.PathFor(repository, scenario, node);
+            var path = ProcessRuntimeOwnedReceipt.PathFor(repository, scenario, node);
             captures.Add(await ReadEvidenceAsync(path, token));
         }
         previous = [.. captures];

@@ -50,7 +50,7 @@ internal static class QueueGraphIdentityAssertions
         }
         var marker = state.MarkerReference;
         var expectedMarker = healthy ? new DocumentRecord(marker, 1, QueueGraphIdentityState.MarkerJson,
-            new(), state.Healthy.EvaluatedAt) : null;
+            new(), new DateTimeOffset(state.Healthy.Timestamp)) : null;
         await Assert.That(JsonDefaults.Serialize(store.Read(view => view.GetRecord<DocumentRecord>(
             global::KeyLoad.Core.Features.DocumentStorage.DocumentStorageKeys.RecordKey(marker))))
             .AsSpan().SequenceEqual(JsonDefaults.Serialize(expectedMarker))).IsTrue();
@@ -70,7 +70,7 @@ internal static class QueueGraphIdentityAssertions
     internal static async Task HealthyAsync(QueueGraphIdentityState state, DatabaseEngine engine, ZoneTreeStore store)
     {
         var receipt = engine.Apply(state.Healthy).Get<CommitReceipt>();
-        var expected = new CommitReceipt(state.Healthy.Id, new(store.Identity.Incarnation, state.Fixture.Partition.AtomicPartitionId,
+        var expected = new CommitReceipt(state.Healthy.CommandId, new(store.Identity.Incarnation, state.Fixture.Partition.AtomicPartitionId,
                 store.Position), [new("putDocument", QueueGraphIdentityState.Collection, QueueGraphIdentityState.Marker, 1),
                 new("upsertEdge", QueueGraphIdentityState.Graph,
                     QueueGraphIdentityState.Prefix + QueueGraphIdentityState.Message, 1)], state.SeedReceipt.Durability, (state.SeedReceipt.Durability == DurabilityProfile.Buffered ? 0 : 1));

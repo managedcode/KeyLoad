@@ -32,7 +32,8 @@ internal sealed class IsolatedQuorumResourceRejectionTests
         {
             Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => model.Add(helper, selection));
         }
-        await Assert.That(model.Builder.Resources.Select(resource => resource.Name)).IsEquivalentTo(new[] { T.Runner });
+        await Assert.That(model.Builder.Resources).IsEmpty();
+        await Assert.That(model.Client.Values).IsEmpty();
         await Assert.That(Directory.EnumerateFileSystemEntries(model.Root)).IsEmpty();
     }
 

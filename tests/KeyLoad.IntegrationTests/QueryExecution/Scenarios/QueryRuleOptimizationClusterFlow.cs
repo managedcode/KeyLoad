@@ -19,8 +19,6 @@ internal static class QueryRuleOptimizationClusterFlow
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 await fixture.InitializeAsync();
-                fixture.RegisterNativeCoverageCase<QueryRuleOptimizationClusterTests>(
-                    nameof(QueryRuleOptimizationClusterTests.MetadataRevisionIndexPlansKeepPublicResultsFreshUseReplayAndTwoCold));
                 QueryRuleOptimizationClusterState state;
                 using (var deadline = McpCallerDeadline.Create())
                 {

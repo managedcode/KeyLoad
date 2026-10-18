@@ -12,7 +12,6 @@ internal static class PostgresClusterProtocol
     internal const string InvalidResult = "The native SQL result is incomplete.";
     internal const int OneColumn = 1;
     internal const int FirstColumn = 0;
-    internal const int Port = 6432;
     internal const string Tenant = "sql-native";
     internal const string Database = "interop";
     internal const string Domain = "atomic";

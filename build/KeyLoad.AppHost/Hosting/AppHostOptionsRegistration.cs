@@ -1,9 +1,6 @@
 using System.Runtime.CompilerServices;
-using KeyLoad.AppHost.Features.BenchmarkComparisons;
 using KeyLoad.AppHost.Features.ClusterReplication;
-using KeyLoad.AppHost.Features.CodeQuality;
 using KeyLoad.AppHost.Features.TestInfrastructure;
-using KeyLoad.AppHost.Features.TestInfrastructure.Validation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -20,34 +17,15 @@ internal static class AppHostOptionsRegistration
 
     private static AppHostRuntimeOptions Bind(IDistributedApplicationBuilder builder)
     {
-        var execution = Bind<TestExecutionOptions>(builder.Configuration.GetSection(TestExecutionOptions.SectionName),
-            options => options.IsValid(), TestExecutionOptions.ValidationMessage);
+        var execution = BindTestExecution(builder.Configuration);
         var startup = Bind<AppHostStartupOptions>(builder.Configuration, options => options.IsValid(),
             AppHostStartupOptions.ValidationMessage);
-        var resources = Bind<ScaleServerResourceOptions>(builder.Configuration.GetSection(ScaleServerResourceOptions.SectionName),
-            options => options.IsValid(), ScaleServerResourceOptions.ValidationMessage);
         var cluster = Bind<ClusterDeploymentOptions>(builder.Configuration, value => value.IsValid(), ClusterDeploymentOptions.ValidationMessage);
         var command = Bind<CommandAdmissionLimits>(builder.Configuration.GetSection(CommandAdmissionLimits.SectionName), value => Validate(value.Validate), CommandAdmissionLimits.ValidationMessage);
         var http = Bind<HttpAdmissionLimits>(builder.Configuration.GetSection(HttpAdmissionLimits.SectionName), value => Validate(value.Validate), HttpAdmissionLimits.ValidationMessage);
         var profile = BindProfileExecution(builder.Configuration);
-        var deployment = Bind<BenchmarkDeploymentOptions>(builder.Configuration.GetSection(BenchmarkDeploymentOptions.SectionName), value => value.IsValid(), BenchmarkDeploymentOptions.ValidationMessage);
-        var relay = Bind<BenchmarkRelayOptions>(builder.Configuration, _ => true, BenchmarkDeploymentOptions.ValidationMessage);
-        var coverage = BindNativeCoverage(builder.Configuration);
-        var coverageImage = Bind<NativeCoverageClusterImageOptions>(
-            builder.Configuration.GetSection(NativeCoverageExecutionOptions.SectionName),
-            options => options.IsValid(), NativeCoverageClusterImageOptions.ValidationMessage);
-        var control = AppHostControlOptionsRegistration.Bind(builder.Configuration, execution, coverage);
-        var localImage = Bind<LocalImageOptions>(builder.Configuration, _ => true, ContainerImageExecutionOptions.ValidationMessage);
-        var images = Bind<ContainerImageOptions>(builder.Configuration, _ => true, ContainerImageExecutionOptions.ValidationMessage);
-        var imageExecution = Bind<ContainerImageExecutionOptions>(builder.Configuration.GetSection(ContainerImageExecutionOptions.SectionName),
-            options => options.IsValid(), ContainerImageExecutionOptions.ValidationMessage);
-        var provenance = BenchmarkProvenanceRegistration.Bind();
-        var isolatedAdmission = Bind<KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions>(
-            builder.Configuration.GetSection(KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions.SectionName),
-            value => value.IsValid(), KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions.ValidationMessage);
-        var runtime = new AppHostRuntimeOptions(execution, startup, resources, provenance, control, images, imageExecution, localImage,
-            cluster, command, http, profile, deployment, relay,
-            isolatedAdmission, coverage, coverageImage);
+        var control = AppHostControlOptionsRegistration.Bind(builder.Configuration);
+        var runtime = new AppHostRuntimeOptions(execution, startup, control, cluster, command, http, profile);
         Register(builder.Services, runtime);
         return runtime;
     }
@@ -58,19 +36,9 @@ internal static class AppHostOptionsRegistration
         services.AddSingleton(runtime.CommandAdmission);
         services.AddSingleton(runtime.HttpAdmission);
         services.AddSingleton(runtime.Profile);
-        services.AddSingleton(runtime.Deployment);
-        services.AddSingleton(runtime.BenchmarkRelay);
-        services.AddSingleton(runtime.LocalImage);
-        services.AddSingleton(runtime.Images);
-        services.AddSingleton(runtime.ImageExecution);
         services.AddSingleton(runtime.Control);
-        services.AddSingleton(runtime.ServerResources);
-        services.AddSingleton(runtime.Provenance);
         services.AddSingleton(runtime.TestExecution);
         services.AddSingleton(runtime.Startup);
-        services.AddSingleton(runtime.IsolatedAdmission);
-        services.AddSingleton(runtime.NativeCoverage);
-        services.AddSingleton(runtime.NativeCoverageClusterImage);
     }
 
     internal static IOptions<ClusterProfileExecutionOptions> BindProfileExecution(IConfiguration configuration) =>
@@ -80,44 +48,6 @@ internal static class AppHostOptionsRegistration
     internal static IOptions<TestExecutionOptions> BindTestExecution(IConfiguration configuration) =>
         Bind<TestExecutionOptions>(configuration.GetSection(TestExecutionOptions.SectionName),
             options => options.IsValid(), TestExecutionOptions.ValidationMessage);
-
-    internal static IOptions<TestBootstrapOptions> BindTestBootstrap(IConfiguration configuration)
-    {
-        TestSuiteSelectionValidator.RejectRetiredBenchmarkSelection(configuration);
-        return Bind<TestBootstrapOptions>(configuration, _ => true, TestExecutionOptions.ValidationMessage);
-    }
-
-    internal static IOptions<NativeCoverageExecutionOptions> BindNativeCoverage(IConfiguration configuration) =>
-        Bind<NativeCoverageExecutionOptions>(configuration.GetSection(NativeCoverageExecutionOptions.SectionName),
-            options => options.IsValid(), NativeCoverageExecutionOptions.ValidationMessage);
-
-    internal static IOptions<KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions> BindDocumentAdmission(
-        IOptions<KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions> admission,
-        IOptions<BenchmarkDeploymentOptions> deployment)
-    {
-        ArgumentNullException.ThrowIfNull(admission);
-        ArgumentNullException.ThrowIfNull(deployment);
-        var policy = admission.Value;
-        policy.Validate();
-        var resourcePolicy = deployment.Value;
-        if (!resourcePolicy.IsValid())
-        {
-            throw new OptionsValidationException(BenchmarkDeploymentOptions.SectionName, typeof(BenchmarkDeploymentOptions),
-                [BenchmarkDeploymentOptions.ValidationMessage]);
-        }
-        var factory = new OptionsFactory<KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions>(
-            [new ConfigureOptions<KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions>(options =>
-            {
-                options.DocumentWorkload = true;
-                options.RequestsPerScope = resourcePolicy.DocumentKeyLoadRequestsPerScope;
-                options.ReservedBytes = policy.ReservedBytes;
-            })], [],
-            [new ValidateOptions<KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions>(Options.DefaultName,
-                options => options.IsValid(), KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions.ValidationMessage)]);
-        var bound = new OptionsManager<KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions>(factory);
-        _ = bound.Value;
-        return bound;
-    }
 
     private static bool Validate(Action validate)
     {
@@ -130,7 +60,7 @@ internal static class AppHostOptionsRegistration
         catch (InvalidOperationException) { return false; }
     }
 
-    private static OptionsManager<T> Bind<T>(IConfiguration configuration, Func<T, bool> predicate, string message) where T : class, new()
+    internal static OptionsManager<T> Bind<T>(IConfiguration configuration, Func<T, bool> predicate, string message) where T : class, new()
     {
         var factory = new OptionsFactory<T>([new ConfigureFromConfigurationOptions<T>(configuration)], [],
             [new ValidateOptions<T>(Options.DefaultName, predicate, message)]);

@@ -69,11 +69,12 @@ internal static class SampleChunkAtomicRollbackFlow
         Result<object>? rejected = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            rejected = fixture.Owner.Database.ApplyEmbedded(operation, cancellationToken: default);
-            originals.Add((operation, rejected));
+            var actual = fixture.Owner.Database.ApplyEmbedded(operation, cancellationToken: default);
+            rejected = actual;
+            originals.Add((operation, actual));
             var expected = Result<object>.Fail(Errors.Problem(ErrorCode.RevisionConflict, RevisionConflict));
-            await Assert.That(SampleRollupWholeFlow.Outcome(rejected)).IsEqualTo(SampleRollupWholeFlow.Outcome(expected));
-            await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.RevisionConflict);
+            await Assert.That(SampleRollupWholeFlow.Outcome(actual)).IsEqualTo(SampleRollupWholeFlow.Outcome(expected));
+            await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(ErrorCode.RevisionConflict);
 
         }, failures);
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -82,10 +83,10 @@ internal static class SampleChunkAtomicRollbackFlow
             await Assert.That(Convert.ToHexString(JsonDefaults.Serialize(fixture.Read().Records))).IsEqualTo(originalRows), failures);
         await ServerFailureObserver.ObserveAsync(() => SampleChunkAtomicRollbackCold.RowsAsync(
             fixture.Owner.Database, fixture.Owner.Store, fixture, healthy: false), failures);
-        if (rejected is not null)
+        if (rejected is { } retained)
         {
             await ServerFailureObserver.ObserveAsync(() => SampleChunkCorrectionBoundColdAssertions.ReplayAsync(
-                fixture.Owner.Database, fixture.Owner.Store, operation, rejected), failures);
+                fixture.Owner.Database, fixture.Owner.Store, operation, retained), failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }

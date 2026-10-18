@@ -17,12 +17,13 @@ internal static class QueueLifecycleConditionOperations
         state.Batch(fixture.Database, QueueLifecycleHealthy.Enqueue(Source)).Get<CommitReceipt>();
         return state;
     }
-    internal static Command<DatabaseCommand> Cancel(QueueLifecycleTestState state, string id = Source, long version = 1, long generation = 1)
+    internal static Command<DatabaseCommand> Cancel(DatabaseEngine database, QueueLifecycleTestState state,
+        string id = Source, long version = 1, long generation = 1)
     {
         var commandId = Guid.NewGuid();
         var command = new CommandRequest(commandId, state.Partition,
             [new CancelQueueMessage(state.Lane.Queue, id, version, generation)]);
-        return new(commandId, OperationKind.Batch, QueueLifecycleTestProtocol.Administrator, state.Time,
+        return database.CreateCommand(OperationKind.Batch, commandId, QueueLifecycleTestProtocol.Administrator, state.Time,
             JsonSerializer.Serialize(command, JsonDefaults.Options));
     }
     internal static byte[] Key(QueueLifecycleTestState state, QueueLifecycleConditionFault fault)

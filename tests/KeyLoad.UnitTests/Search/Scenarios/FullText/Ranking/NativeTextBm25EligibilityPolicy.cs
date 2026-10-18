@@ -44,7 +44,7 @@ internal static class NativeTextBm25EligibilityPolicy
         await Bm25ColdInvalidationAssertions.PhaseDeniedAsync(flow, original);
         var fresh = flow.Capture(original.CommandId);
         var result = flow.Publish(fresh);
-        await Assert.That(result.Error).IsNull();
+        await Assert.That(Errors.Code(result.Problem)).IsNull();
         var phase = NativeSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((fresh).Value!.Input.Span);
         await Assert.That(phase.Current.PolicyEpoch).IsEqualTo(3L);
         await Assert.That(phase.Current.Statistics.DocumentCount).IsEqualTo(2);
@@ -52,7 +52,7 @@ internal static class NativeTextBm25EligibilityPolicy
         await Assert.That(phase.Current.Statistics.DocumentFrequencies.Single()).IsEqualTo(2);
         await Assert.That(phase.Current.SourceOutboxTail).IsEqualTo(tail);
         await Assert.That(phase.Current.SchemaVersion).IsEqualTo(changed.SchemaVersion);
-        var entry = NativeSerialization.Serialize(owner.Entry(fresh.Id));
+        var entry = NativeSerialization.Serialize(owner.Entry(fresh.CommandId));
         await NativeTextBm25EligibilityPages.RequireAsync(flow, true, true, true);
         await Bm25ColdInvalidationAssertions.ReplayAsync(flow, fresh, result, entry);
         var before = Bm25OriginalPhaseRecoveryState.Read(owner);

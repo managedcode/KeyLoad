@@ -2,6 +2,9 @@ using System.Text.Json;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using KeyLoad.Comparisons;
+using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using ManagedCode.Communication.CQRS;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
@@ -30,13 +33,21 @@ internal static class BenchmarkSessionQualifications
         var failures = new List<Exception>();
         if (nativeExit == 0 && !unsupported)
         {
-            await InvokeAsync(Cancellation, selection.Target == "KeyLoad" && selection.NodeCount == 1,
-                () => ScaleServerCancellationProbe.VerifyAsync(application, containers, selection, root, evidence, token), steps, failures);
+            await InvokeAsync(Cancellation, OperatingSystem.IsLinux() && selection.Target != "KeyLoad" && selection.NodeCount == 1,
+                () => ScaleServerCancellationProbe.VerifyAsync(application, containers, selection, root, evidence, selected.SessionId, token), steps, failures);
             await InvokeAsync(Correctness, CorrectnessTargets.Contains(selection.Target, StringComparer.Ordinal),
                 () => IsolatedNativeCheckss.VerifyAsync(application, selection, evidence, token), steps, failures);
         }
+        if (selection.Target == "KeyLoad" && !unsupported)
+        {
+            steps.Add(new("matched-native-process-resources", NotExecuted, "MatchedProcessResourceQualificationOpen"));
+        }
+        if (!string.Equals(application.Services.GetRequiredService<IOptions<BenchmarkProvenanceOptions>>().Value.Actions, bool.TrueString, StringComparison.OrdinalIgnoreCase))
+        {
+            steps.Add(new("publication-source", NotApplicable, "LocalExecutionHasNoWorkflowPublicationProvenance"));
+        }
         var status = nativeExit != 0 ? NotExecuted : unsupported ? NotApplicable : failures.Count == 0 ? Passed : Failed;
-        var reason = nativeExit != 0 ? "NativeRunnerFailed" : unsupported ? "NativeTopologyUnavailable"
+        var reason = nativeExit != 0 ? "NativeClientFailed" : unsupported ? "NativeTopologyUnavailable"
             : failures.Count == 0 ? null : "NativeSessionQualificationFailed";
         var report = new Report(1, selected.SessionId, selection.Target, selection.NodeCount, nativeExit, status, reason, steps.ToArray());
         await WriteAsync(evidence, report);

@@ -131,8 +131,7 @@ internal static class NativeRequestDrainLifecycleOperation
         var cut = state.Database.ReadCanonicalCut();
         await Assert.That(entry.CanonicalSequence).IsEqualTo(position);
         await Assert.That(entry.PreparedCommand!.CommandId).IsEqualTo(commandId);
-        await Assert.That(cut.LastIndex).IsEqualTo(position);
-        await Assert.That(cut.CommittedIndex).IsEqualTo(position);
+        await Assert.That(cut.AppliedPosition).IsEqualTo(position);
         await Assert.That(state.Database.Database.LastApplied).IsEqualTo(position);
     }
 

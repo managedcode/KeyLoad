@@ -33,7 +33,7 @@ internal static class QueueEnqueueSequenceWholeFlow
         var message = new EnqueueMessage(lane.Queue, QueueEnqueueAuthorityProtocol.SequenceOriginal, QueueEnqueueColdProtocol.ReadyJson, QueueEnqueueColdProtocol.EmptyHeaders, NotBefore: due, OrderingKey: strict ? QueueEnqueueAuthorityProtocol.OrderingKey : null);
         var command = new CommandRequest(Guid.NewGuid(), lane.Partition,
             [new PutDocument(QueueEnqueueColdProtocol.Collection, QueueEnqueueColdProtocol.Document, QueueEnqueueColdProtocol.ReadyJson), message]);
-        var operation = QueueStoredCapacitySetup.Operation(OperationKind.Batch, command, command.CommandId, now);
+        var operation = QueueStoredCapacitySetup.Operation(fixture.Database, OperationKind.Batch, command, command.CommandId, now);
         var domain = QueueClaimVersionExhaustionAssertions.Domain(fixture.Store, lane);
         if (strict)
         {
@@ -86,7 +86,7 @@ internal static class QueueEnqueueSequenceWholeFlow
         var fresh = new CommandRequest(Guid.NewGuid(), lane.Partition,
             [new PutDocument(QueueEnqueueColdProtocol.Collection, QueueEnqueueColdProtocol.Healthy, QueueEnqueueAuthorityProtocol.SequenceHealthyJson), message]);
         var time = QueueWholeFlowStorage.Clock(store);
-        var operation = QueueStoredCapacitySetup.Operation(OperationKind.Batch, fresh, fresh.CommandId, time);
+        var operation = QueueStoredCapacitySetup.Operation(owner, OperationKind.Batch, fresh, fresh.CommandId, time);
         var expected = await QueueStoredCapacityReceipts.NextAsync(owner, store, lane.Partition);
         var produced = owner.Apply(operation);
         await QueueStoredCapacityReceipts.ReceiptAsync(produced, fresh.CommandId, expected,

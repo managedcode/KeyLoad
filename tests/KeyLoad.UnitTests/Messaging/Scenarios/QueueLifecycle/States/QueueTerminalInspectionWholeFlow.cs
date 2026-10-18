@@ -116,7 +116,7 @@ internal static class QueueTerminalInspectionWholeFlow
     {
         if (terminalState == MessageState.Cancelled)
         {
-            var operation = QueueLifecycleConditionOperations.Cancel(state);
+            var operation = QueueLifecycleConditionOperations.Cancel(owner, state);
             var result = owner.Apply(operation);
             result.Get<CommitReceipt>();
             state.Successes.Add((operation, result));

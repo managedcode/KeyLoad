@@ -64,7 +64,7 @@ internal static class Bm25InvalidationDependencyFlow
         var request = new CommandRequest(id, database.Partition, [mutation]);
         var original = database.Submit(OperationKind.Batch, request, id: id).Get<CommitReceipt>();
         var entry = database.ReadStoredOutcome(id);
-        var stored = OutcomeStoreOracle.ReadPartition(database.Store, database.Partition, Root, id)!.Get<CommitReceipt>();
+        var stored = OutcomeStoreOracle.ReadPartition(database.Store, database.Partition, Root, id)!.Value.Get<CommitReceipt>();
         var beforeReplay = Image(database);
         var journal = database.ReadCanonicalCut();
         var replay = database.Submit(OperationKind.Batch, request, id: id).Get<CommitReceipt>();

@@ -43,7 +43,7 @@ internal static class ChunkSelectedIntegrityDamage
         await Assert.That(apply.Code).IsEqualTo(ErrorCode.Corruption);
         await SampleRawIntegrityAssertions.UnchangedAsync(fixture.Store, before);
         await Assert.That(fixture.Store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(
-            fixture.Partition, SampleChunkCanonicalFixture.Principal, fixture.Merge.Id)))).IsNull();
+            fixture.Partition, SampleChunkCanonicalFixture.Principal, fixture.Merge.CommandId)))).IsNull();
         await ChunkSelectedIntegrityAssertions.Raw(fixture, final: false);
     }
 }

@@ -1,5 +1,5 @@
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.AppHost.Features.BenchmarkComparisons;
+using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 using T = KeyLoad.ComparisonTests.Features.BenchmarkComparisons.IsolatedDocumentResourceTokens;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
@@ -25,20 +25,20 @@ internal sealed class IsolatedDocumentResourceMongoTests
         var resources = fixture.Build();
         var nodes = resources.Where(node => node.Name.StartsWith(Prefix, StringComparison.Ordinal) && node.Name != Bootstrap).ToArray();
         await IsolatedDocumentResourceAssertions.VerifyNodesAsync(nodes, count, Prefix, BenchmarkResources.MongoDigest);
-        await Assert.That(resources.Length).IsEqualTo(count + 2);
+        await Assert.That(resources.Length).IsEqualTo(count + 1);
         var password = await IsolatedDocumentResourceAssertions.SecretAsync(nodes[0], Password);
         foreach (var node in nodes)
         {
-            await IsolatedDocumentResourceAssertions.VerifyDataAsync(node, T.MongoData, fixture.Context.Root);
+            await IsolatedDocumentResourceAssertions.VerifyDataAsync(node, T.MongoData);
             await Assert.That(await IsolatedDocumentResourceAssertions.SecretAsync(node, Password)).IsSameReferenceAs(password);
             await IsolatedDocumentResourceAssertions.VerifyScriptMountAsync(node, Script);
             var configuration = await IsolatedResourceTopologyFixture.ConfigurationAsync(node);
             await Assert.That(configuration.Arguments.Any(argument => argument.Value == T.ReplicaOption)).IsEqualTo(count > 1);
             await Assert.That(node.Annotations.OfType<WaitAnnotation>()).IsEmpty();
         }
-        await IsolatedDocumentResourceAssertions.VerifyEndpointsAsync(fixture.Context.Runner.Resource, nodes, T.Tcp);
+        await IsolatedDocumentResourceAssertions.VerifyEndpointsAsync(fixture.Context.Client, nodes, T.Tcp);
         await VerifyBootstrapAsync(fixture, resources.Single(node => node.Name == Bootstrap), nodes, password);
-        var environment = await IsolatedResourceTopologyFixture.EnvironmentAsync(fixture.Context.Runner.Resource);
+        var environment = await IsolatedResourceTopologyFixture.EnvironmentAsync(fixture.Context.Client);
         await Assert.That(environment[IsolatedDocumentResourceAssertions.Image]).IsEqualTo(
             "docker.io/library/mongo:8.3.9@" + BenchmarkResources.MongoDigest);
         await Assert.That(environment[IsolatedDocumentResourceAssertions.Connection].Contains("replicaSet=benchmark", StringComparison.Ordinal)).IsEqualTo(count > 1);
@@ -62,8 +62,7 @@ internal sealed class IsolatedDocumentResourceMongoTests
         await Assert.That(await IsolatedDocumentResourceAssertions.SecretAsync(bootstrap, Password)).IsSameReferenceAs(password);
         await Assert.That(bootstrap.Annotations.OfType<ContainerImageAnnotation>().Single().SHA256).IsEqualTo(BenchmarkResources.MongoDigest[7..]);
         await Assert.That(bootstrap.Annotations.OfType<WaitAnnotation>().Select(wait => wait.Resource.Name)).IsEquivalentTo(nodes.Select(node => node.Name));
-        await Assert.That(fixture.Context.Runner.Resource.Annotations.OfType<WaitAnnotation>().Any(wait =>
-            ReferenceEquals(wait.Resource, bootstrap) && wait.WaitType == WaitType.WaitForCompletion)).IsTrue();
+        await Assert.That(fixture.Context.Client.CompletionResources.Contains(bootstrap.Name)).IsTrue();
         await IsolatedDocumentResourceAssertions.VerifyScriptMountAsync(bootstrap, BootstrapScript);
         await IsolatedDocumentResourceAssertions.VerifyScriptMountAsync(bootstrap, ReadinessScript);
         var configuration = await IsolatedResourceTopologyFixture.ConfigurationAsync(bootstrap);

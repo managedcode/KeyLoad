@@ -35,7 +35,7 @@ internal static class QueueStoredCapacityWholeFlow
         await QueueStoredCapacityAssertions.ImageAsync(cold, position + QueueEnqueueAuthorityProtocol.Second, originalImage);
         await QueueEnqueueColdAssertions.RequireInitialAsync(owner, fixture.Partition, state.ScheduledAt);
         await NativeReplayResultAssertions.Same<CommitReceipt>(owner.Apply(QueueStoredCapacitySetup.Operation(
-            OperationKind.Batch, state.Producer, state.Producer.CommandId, state.Enqueue.EvaluatedAt)), state.Original);
+            owner, OperationKind.Batch, state.Producer, state.Producer.CommandId, new DateTimeOffset(state.Enqueue.Timestamp))), state.Original);
         await QueueStoredCapacityAssertions.ImageAsync(cold, position + QueueEnqueueAuthorityProtocol.Second, originalImage);
         await ContinueAsync(fixture, cold, owner, state, identity, token);
     }
@@ -62,15 +62,16 @@ internal static class QueueStoredCapacityWholeFlow
         var lane = new QueueLaneRef(fixture.Partition, QueueEnqueueColdProtocol.Queue);
         var ack = new DeliveryCommand(Guid.NewGuid(), lane, delivery.Token, DeliveryAction.Ack);
         var expectedAck = await QueueStoredCapacityReceipts.NextAsync(owner, cold, fixture.Partition);
-        var acknowledgement = owner.Apply(QueueStoredCapacitySetup.Operation(OperationKind.Delivery, ack,
-            ack.CommandId, state.Enqueue.EvaluatedAt));
+        var acknowledgement = owner.Apply(QueueStoredCapacitySetup.Operation(owner, OperationKind.Delivery, ack,
+            ack.CommandId, new DateTimeOffset(state.Enqueue.Timestamp)));
         await QueueStoredCapacityReceipts.ReceiptAsync(acknowledgement, ack.CommandId, expectedAck,
             [new(nameof(DeliveryAction.Ack), lane.Queue, QueueEnqueueColdProtocol.Ready, QueueEnqueueAuthorityProtocol.Settled)]);
         await QueueStoredCapacityStateAssertions.TerminalAsync(owner, cold, fixture.Partition);
         var healthy = new CommandRequest(Guid.NewGuid(), fixture.Partition,
             [new PutDocument(QueueEnqueueColdProtocol.Collection, QueueEnqueueColdProtocol.RefusedDocument, QueueEnqueueColdProtocol.HealthyJson),
                 new EnqueueMessage(QueueEnqueueColdProtocol.Queue, QueueEnqueueColdProtocol.Healthy, QueueEnqueueColdProtocol.HealthyJson)]);
-        var healthyOperation = QueueStoredCapacitySetup.Operation(OperationKind.Batch, healthy, healthy.CommandId, state.Enqueue.EvaluatedAt);
+        var healthyOperation = QueueStoredCapacitySetup.Operation(owner, OperationKind.Batch, healthy,
+            healthy.CommandId, new DateTimeOffset(state.Enqueue.Timestamp));
         var expectedHealthy = await QueueStoredCapacityReceipts.NextAsync(owner, cold, fixture.Partition);
         var healthyResult = owner.Apply(healthyOperation);
         await QueueStoredCapacityReceipts.ReceiptAsync(healthyResult, healthy.CommandId, expectedHealthy,
@@ -79,7 +80,8 @@ internal static class QueueStoredCapacityWholeFlow
         await QueueEnqueueColdAssertions.RequireHealthyAsync(owner, fixture.Partition, state.ScheduledAt);
         await Assert.That(owner.GetDocument(QueueEnqueueColdProtocol.Root, new(fixture.Partition, QueueEnqueueColdProtocol.Collection, QueueEnqueueColdProtocol.RefusedDocument), cancellationToken: token)!.Json)
             .IsEqualTo(QueueEnqueueColdProtocol.HealthyJson);
-        var ackOperation = QueueStoredCapacitySetup.Operation(OperationKind.Delivery, ack, ack.CommandId, state.Enqueue.EvaluatedAt);
+        var ackOperation = QueueStoredCapacitySetup.Operation(owner, OperationKind.Delivery, ack,
+            ack.CommandId, new DateTimeOffset(state.Enqueue.Timestamp));
         await SecondColdAsync(fixture, cold, state, identity, rejected, healthyOperation, healthyResult,
             ackOperation, acknowledgement, token);
     }

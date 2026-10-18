@@ -13,7 +13,7 @@ internal static class GraphVertexAuthorityAssertions
     internal static async Task<KeyLoadException> RefusedMutation(DatabaseEngine owner, ZoneTreeStore store,
         CommandRequest command)
     {
-        var image = GraphShortestPathFullStoreImage.Bytes(store);
+        var image = CanonicalStoreImage.Bytes(store);
         var position = store.Position;
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => GraphStorageReferenceFixture.Submit(owner, command));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
@@ -26,7 +26,7 @@ internal static class GraphVertexAuthorityAssertions
     internal static async Task ReplayFailure(DatabaseEngine owner, ZoneTreeStore store,
         CommandRequest command, KeyLoadException original)
     {
-        var image = GraphShortestPathFullStoreImage.Bytes(store);
+        var image = CanonicalStoreImage.Bytes(store);
         var position = store.Position;
         var replay = Assert.ThrowsExactly<KeyLoadException>(() => GraphStorageReferenceFixture.Submit(owner, command));
         await Assert.That(replay.Code).IsEqualTo(original.Code);

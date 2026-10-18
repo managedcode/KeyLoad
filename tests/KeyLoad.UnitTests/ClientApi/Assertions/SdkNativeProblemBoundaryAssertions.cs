@@ -27,7 +27,7 @@ internal static class SdkNativeProblemBoundaryAssertions
         MutationReceipt[] mutations = root
             ? [new(P.Put, state.Forbidden.Collection, P.Document, P.FirstRevision), new(P.Put, P.Allowed, P.Document, P.FirstRevision)]
             : [new(P.Put, P.Allowed, P.Document, P.HealthyRevision)];
-        var expected = new CommitReceipt(command.CommandId, new(placement.Incarnation, command.Partition.AtomicPartitionId, entry.CanonicalSequence), [.. mutations], DurabilityProfile.ProcessDurable, 1);
+        var expected = new CommitReceipt(command.CommandId, new(placement.Incarnation, command.Partition.AtomicPartitionId, entry.CanonicalSequence), [.. mutations], DurabilityProfile.ProcessDurable, 2);
         await EqualAsync(expected, receipt);
         await Assert.That(receipt.Mutations.All(item => item.CompositionReferences.IsEmpty)).IsTrue();
     }
@@ -47,11 +47,10 @@ internal static class SdkNativeProblemBoundaryAssertions
         await Assert.That(original.CommandId).IsEqualTo(state.Denied.CommandId);
         await Assert.That(original.UserId!).IsEqualTo(state.Principal.Id);
         await EqualAsync(state.Denied, NativeSerialization.Deserialize<CommandRequest>((original).Value!.Input.Span));
-        var result = OutcomeStoreOracle.ReadPartition(db.Store, db.Partition, state.Principal.Id, state.Denied.CommandId);
-        await Assert.That(result is not null).IsTrue();
-        await Assert.That(result!.Error).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(result.SafeDetail).IsEqualTo(P.Denied);
-        await Assert.That(result.Json).IsNull();
+        var result = OutcomeStoreOracle.ReadPartition(db.Store, db.Partition, state.Principal.Id, state.Denied.CommandId)
+            ?? throw new InvalidOperationException(P.Failure);
+        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(result.Problem?.Detail).IsEqualTo(P.Denied);
         await Assert.That(result.Value).IsNull();
     }
     internal static SdkNativeProblemBoundaryCut Capture(SdkNativeProblemBoundaryScenario state)
@@ -74,7 +73,7 @@ internal static class SdkNativeProblemBoundaryAssertions
         var actual = Capture(state);
         await Assert.That(actual.Rows.SequenceEqual(expected.Rows)).IsTrue();
         await Assert.That(actual.Position).IsEqualTo(expected.Position);
-        await Assert.That(actual.Journal).IsEqualTo(expected.Journal);
+        await Assert.That(actual.Cut).IsEqualTo(expected.Cut);
         await Assert.That(actual.Identity.SequenceEqual(expected.Identity)).IsTrue();
         await Assert.That(actual.FailedOutcome.SequenceEqual(expected.FailedOutcome)).IsTrue();
         await Assert.That(DocumentCommandOutcomeTestSupport.OutboxEqual(actual.Outbox, expected.Outbox)).IsTrue();

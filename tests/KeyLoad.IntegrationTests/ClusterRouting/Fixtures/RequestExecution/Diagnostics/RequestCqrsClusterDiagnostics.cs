@@ -36,7 +36,7 @@ internal sealed class RequestCqrsClusterDiagnostics : IAsyncDisposable
     private string? connectionCancellationArtifactPath;
 
     private RequestCqrsClusterDiagnostics(Guid waveId, RequestCqrsClusterMcpRejectionNodeCapture[] nodes,
-        ResourceLoggerService logger, ContainerResource[] resources,
+        ResourceLoggerService logger, ProjectResource[] resources,
         Action<RequestCqrsLifecycleStage>? failureObserver,
         RequestCqrsClusterSubscriberTransitionHooks? subscriberTransitions)
     {
@@ -45,7 +45,7 @@ internal sealed class RequestCqrsClusterDiagnostics : IAsyncDisposable
         cleanup = new(waveId, logger, resources, nodes, failureObserver, subscriberTransitions);
     }
 
-    internal static RequestCqrsClusterDiagnostics Start(Guid waveId, IEnumerable<ContainerResource> resources,
+    internal static RequestCqrsClusterDiagnostics Start(Guid waveId, IEnumerable<ProjectResource> resources,
         ResourceLoggerService logger, Action<RequestCqrsLifecycleStage>? failureObserver = null,
         RequestCqrsClusterSubscriberTransitionHooks? subscriberTransitions = null)
     {

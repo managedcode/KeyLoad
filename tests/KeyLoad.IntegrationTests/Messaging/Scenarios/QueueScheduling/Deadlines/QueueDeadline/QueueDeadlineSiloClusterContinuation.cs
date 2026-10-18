@@ -14,7 +14,7 @@ internal static class QueueDeadlineSiloClusterContinuation
             await QueueDeadlineSiloClusterCurrent.ObserveAsync(admin, state, token);
             await Assert.That(TimeProvider.System.GetUtcNow() < state.Due).IsTrue();
         }, token);
-        await fixture.KillContainerAsync(ownership.OriginalSiloNode, QueueDeadlineSiloClusterProtocol.Fault, token);
+        await fixture.KillServerAsync(ownership.OriginalSiloNode, QueueDeadlineSiloClusterProtocol.Fault, token);
         await Assert.That(TimeProvider.System.GetUtcNow() < state.Due).IsTrue();
         await ownership.RequireAvailableSilosAsync(fixture, token);
         await Assert.That(TimeProvider.System.GetUtcNow() < state.Due).IsTrue();
@@ -30,9 +30,9 @@ internal static class QueueDeadlineSiloClusterContinuation
     {
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
-            await fixture.BeginContainerRestartAsync(ownership.OriginalSiloNode, token), failures);
+            await fixture.BeginProcessRestartAsync(ownership.OriginalSiloNode, token), failures);
         await ServerFailureObserver.ObserveAsync(() =>
-            fixture.RestartContainerAsync(ownership.OriginalSiloNode, token), failures);
+            fixture.RestartServerAsync(ownership.OriginalSiloNode, token), failures);
         await ServerFailureObserver.ObserveAsync(() => ownership.RequireRejoinedAsync(fixture, token), failures);
         ServerFailureObserver.ThrowIfAny(failures);
         await WithAsync(fixture, state, ownership.OriginalSiloNode, async (admin, worker) =>

@@ -11,14 +11,14 @@ internal static class NativeAnnMaintenanceBeginning
 
     internal static async Task<AnnMaintenanceCapabilityResult> RunAsync(DatabaseEngine database,
         PrincipalRecord principal, AnnMaintenanceCapabilityRequest request, ServerRuntimeOptions configured,
-        TimeProvider clock, Lock originalGate, Func<NativeAnnGenerationOwner?> existingRoot,
+        Lock originalGate, Func<NativeAnnGenerationOwner?> existingRoot,
         Func<NativeAnnGenerationOwner> owningRoot, Action<NativeAnnMaintenanceSession> publishSession,
-        CancellationToken token, ReadExecutionBudget? originalBudget = null)
+        NativeMaintenanceSessionWork work)
     {
         NativeAnnMaintenanceMemoryLease? memory = null;
         try
         {
-            var read = originalBudget ?? new ReadExecutionBudget(configured.Core.DatabaseLimits, clock, token);
+            var read = work.Budget;
             long available;
             lock (originalGate)
             {
@@ -39,7 +39,7 @@ internal static class NativeAnnMaintenanceBeginning
             }
             var retainedMemory = memory ?? throw Errors.Fail(ErrorCode.Corruption, NativeAnnProtocol.Ownership);
             var completed = await actualOwner.RunAsync(stages => Create(stages, actualOwner,
-                retainedMemory, principal, request, captured, seeds, read, publishSession)).ConfigureAwait(false);
+                retainedMemory, principal, request, captured, seeds, work, publishSession)).ConfigureAwait(false);
             memory = null;
             return completed;
         }
@@ -56,18 +56,18 @@ internal static class NativeAnnMaintenanceBeginning
 
     private static AnnMaintenanceCapabilityResult Create(NativeAnnStageStore stages, NativeAnnGenerationOwner owner,
         NativeAnnMaintenanceMemoryLease memory, PrincipalRecord principal, AnnMaintenanceCapabilityRequest request,
-        AnnSeed captured, IOptions<AnnSeedOptions> seeds, ReadExecutionBudget read,
+        AnnSeed captured, IOptions<AnnSeedOptions> seeds, NativeMaintenanceSessionWork work,
         Action<NativeAnnMaintenanceSession> publishSession)
     {
         stages.StartOriginal(request.Maintenance);
         var original = request.Maintenance.Mode == AnnMaintenanceMode.Restore
             ? stages.Describe(request.Maintenance, captured) : null;
         var created = new NativeAnnMaintenanceSession(request.SessionId, request.Maintenance,
-            principal.Id, captured, original, memory);
+            principal.Id, captured, original, memory, work);
         if (request.Maintenance.Mode == AnnMaintenanceMode.Build)
         {
             _ = owner.MaintenanceMemory.Remaining(checked(captured.OwnedBytesUpperBound + seeds.Value.MaxPeakBytes));
-            NativeAnnSessionOperations.BeginBuild(created, seeds, read);
+            NativeAnnSessionOperations.BeginBuild(created, seeds, work.Budget);
         }
         owner.MaintenanceMemory.Retain(memory, created.RetainedBytes);
         var result = NativeAnnSessionOperations.Result(created, captured, original?.CheckpointIntent);

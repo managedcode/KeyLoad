@@ -11,6 +11,7 @@ internal sealed record PostgresClusterCertificate(string Directory, string RootC
     private const string DirectoryName = "native-sql";
     private const string RootName = "root.pem";
     private const string ServerName = "server.pfx";
+    internal string ServerPath => Path.Combine(Directory, ServerName);
     private const string RootSubject = "CN=KeyLoad Orleans native SQL test root";
     private const string ServerSubject = "CN=localhost";
     private const string ServerAuthentication = "1.3.6.1.5.5.7.3.1";

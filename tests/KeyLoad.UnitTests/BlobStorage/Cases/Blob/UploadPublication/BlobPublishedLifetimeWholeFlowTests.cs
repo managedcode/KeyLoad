@@ -16,7 +16,7 @@ internal sealed class BlobPublishedLifetimeWholeFlowTests
         var currentCleanup = new ReclaimBlobRequest(Guid.NewGuid(), fixture.Blob, fixture.UploadId, 2);
         var conflict = BlobPublishedLifetimeOperations.Send(database.Database, OperationKind.ReclaimBlob,
             currentCleanup.CommandId, currentCleanup);
-        await Assert.That(conflict.Original.Error).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(conflict.Original.Problem)).IsEqualTo(ErrorCode.Conflict);
         await BlobPublishedLifetimeAssertions.Replay(database.Database, database.Store, conflict);
         var deletion = new DeleteBlobRequest(Guid.NewGuid(), fixture.Blob, 1);
         var cleanup = new ReclaimBlobRequest(Guid.NewGuid(), fixture.Blob, fixture.UploadId, 2);

@@ -23,7 +23,6 @@ internal static class RequiredProcessingPolicyClusterRoutes
         await Assert.That(actual.RequestId).IsEqualTo(request.RequestId);
         await Assert.That(actual.Token.Incarnation).IsEqualTo(state.Producers[0].Receipt.Token.Incarnation);
         await Assert.That(actual.Token.AtomicPartitionId).IsEqualTo(state.Partition.AtomicPartitionId);
-        await Assert.That(actual.PersistedCopies).IsEqualTo(3);
         await Assert.That(actual.Token.Position).IsGreaterThan(0L);
         state.Deliveries.Add(delivery);
         return delivery;

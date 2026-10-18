@@ -61,7 +61,7 @@ internal static class NativeCredentialStatusAssertions
         var actual = Capture(state);
         await RequireRowsAsync(original.RowHashes, actual.RowHashes);
         await Assert.That(actual.Position).IsEqualTo(original.Position);
-        await Assert.That(actual.Journal).IsEqualTo(original.Journal);
+        await Assert.That(actual.Cut).IsEqualTo(original.Cut);
     }
 
     internal static async Task RequireRowsAsync(IReadOnlyDictionary<string, string> expected,

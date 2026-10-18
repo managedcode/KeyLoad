@@ -10,8 +10,8 @@ internal static class SampleChunkExplicitMinimumUnitReads
     private const long NegativePosition = -1;
     private const string OtherPartition = "foreign-chunk-minimum";
     private const string WrongIncarnation = "The document session token belongs to another incarnation.";
-    private const string WrongScope = "The document session token belongs to another atomic partition or placement.";
-    private const string FuturePosition = "The document session token is beyond the current quorum-applied cut.";
+    private const string WrongScope = "The document session token belongs to another atomic partition.";
+    private const string FuturePosition = "The document session token is beyond the current committed storage cut.";
     private const string InvalidPosition = "The document session token position must be positive.";
     internal const string ScopeDenied = "The principal cannot perform this operation in this scope.";
 
@@ -25,7 +25,6 @@ internal static class SampleChunkExplicitMinimumUnitReads
         {
             (minimum with { Incarnation = Guid.Empty }, WrongIncarnation),
             (minimum with { AtomicPartitionId = OtherPartition }, WrongScope),
-            (minimum with { OwnershipEpoch = NoPosition }, WrongScope),
             (minimum with { Position = long.MaxValue }, FuturePosition),
             (minimum with { Position = NoPosition }, InvalidPosition),
             (minimum with { Position = NegativePosition }, InvalidPosition)

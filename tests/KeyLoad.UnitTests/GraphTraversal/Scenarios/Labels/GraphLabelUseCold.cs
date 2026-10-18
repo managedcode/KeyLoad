@@ -7,7 +7,7 @@ internal static class GraphLabelUseCold
 {
     internal static async Task RunAsync(TestDatabase fixture, CommandRequest seed, CommitReceipt receipt, byte[] outcome, CancellationToken token)
     {
-        var image = GraphShortestPathFullStoreImage.Bytes(fixture.Store);
+        var image = CanonicalStoreImage.Bytes(fixture.Store);
         var position = fixture.Store.Position;
         var identity = fixture.Store.Identity;
         var bytes = NativeSerialization.Serialize(identity);

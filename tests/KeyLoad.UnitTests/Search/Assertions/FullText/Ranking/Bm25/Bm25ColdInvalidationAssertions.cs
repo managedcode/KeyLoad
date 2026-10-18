@@ -1,3 +1,4 @@
+using KeyLoad.UnitTests.Features.ResourceExecution;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Query;
 using KeyLoad.Query.Features.Search;
@@ -28,9 +29,9 @@ internal static class Bm25ColdInvalidationAssertions
         var before = Bm25OriginalPhaseRecoveryState.Read(flow.Owner);
         foreach (var original in originals)
         {
-            await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(original.Entry,
+            await NativeReplayResultAssertions.BytesAsync(original.Entry,
                 NativeSerialization.Serialize(flow.Owner.Entry(original.Operation.CommandId)));
-            await ReplicaSubmissionOutcomeFlow.RequireResultAsync(original.Result, flow.Owner.Submit(original.Operation));
+            await NativeReplayResultAssertions.SameAsync(original.Result, flow.Owner.Submit(original.Operation));
         }
         await before.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(flow.Owner));
     }
@@ -48,9 +49,9 @@ internal static class Bm25ColdInvalidationAssertions
     {
         var before = Bm25OriginalPhaseRecoveryState.Read(flow.Owner);
         var replay = flow.Publish(flow.Reissue(original));
-        await ReplicaSubmissionOutcomeFlow.RequireResultAsync(expected, replay);
-        await ReplicaSubmissionOutcomeFlow.RequireResultAsync(expected, flow.Owner.Database.ResolveOutcome(original));
-        await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(NativeSerialization.Serialize(expected.Get<CommitReceipt>()),
+        await NativeReplayResultAssertions.SameAsync(expected, replay);
+        await NativeReplayResultAssertions.SameAsync(expected, flow.Owner.Database.ResolveOutcome(original));
+        await NativeReplayResultAssertions.BytesAsync(NativeSerialization.Serialize(expected.Get<CommitReceipt>()),
             NativeSerialization.Serialize(replay.Get<CommitReceipt>()));
         await before.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(flow.Owner));
         await Bm25OriginalPhaseRecoveryState.RequireRetainedAsync(flow.Owner, original, entry);

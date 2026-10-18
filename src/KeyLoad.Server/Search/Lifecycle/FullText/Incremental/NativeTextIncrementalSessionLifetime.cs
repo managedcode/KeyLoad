@@ -10,6 +10,7 @@ internal static class NativeTextIncrementalSessionLifetime
         session.NativeOwner = null;
         session.OperationReservation?.CompleteAfterJoinedCleanup();
         session.OperationReservation = null;
+        session.Work.DisposeAfterStage();
     }
 
     internal static void DisposeAll(IEnumerable<NativeTextIncrementalSession> sessions)

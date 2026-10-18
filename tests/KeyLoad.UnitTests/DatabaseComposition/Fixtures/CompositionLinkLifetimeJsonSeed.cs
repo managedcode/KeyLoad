@@ -32,7 +32,7 @@ internal static class CompositionLinkLifetimeJsonSeed
         var to = Reference(owner, P.To, P.Second);
         var seed = Issue(owner, [new PutDocument(P.From, P.First, P.FirstJson, 0),
             new PutDocument(P.To, P.Second, P.SecondJson, 0)], token);
-        await A.ReceiptAsync(new(seed.Id, owner.NextToken(), [new("putDocument", P.From, P.First, 1), new("putDocument", P.To, P.Second, 1)], DurabilityProfile.ProcessDurable, 1),
+        await A.ReceiptAsync(new(seed.CommandId, owner.NextToken(), [new("putDocument", P.From, P.First, 1), new("putDocument", P.To, P.Second, 1)], DurabilityProfile.ProcessDurable, 1),
             owner.Submit(seed).Get<CommitReceipt>());
         return new(from, to, seed);
     }

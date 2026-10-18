@@ -1,0 +1,55 @@
+using KeyLoad.Clustering;
+using KeyLoad.Server;
+using ManagedCode.Communication.CQRS;
+using Microsoft.Extensions.DependencyInjection;
+using Orleans.Serialization;
+
+namespace KeyLoad.UnitTests.Features.ResourceExecution;
+
+internal static class NativeDropPublicSubmission
+{
+    internal static NativeDropPublicCall Start(NativeDropRuntimeProfile profile, DropTableRequest body,
+        Guid commandId, CancellationToken token)
+    {
+        var node = profile.Node;
+        var principal = profile.Source.Store.Read(view => profile.Source.Database.Principal(view,
+            PartitionStoreProtocol.AdministratorId, node.Clock.GetUtcNow()));
+        var requestId = Guid.NewGuid();
+        var signed = node.Codec.CreateCommand(requestId, principal.Id, OperationKind.DropTable, commandId,
+            NativeSerialization.Serialize(body));
+        var original = ExecuteAsync(node, principal, requestId, commandId, signed, token);
+        return new(requestId, commandId, profile.Track(original));
+    }
+
+    internal static Task<GrainOperationReply> SubmitAsync(NativeDropRuntimeProfile profile, OperationKind kind,
+        Guid commandId, string principalId, ReadOnlyMemory<byte> payload, CancellationToken token)
+    {
+        var node = profile.Node;
+        var principal = profile.Source.Store.Read(view => profile.Source.Database.Principal(view,
+            principalId, node.Clock.GetUtcNow()));
+        var requestId = Guid.NewGuid();
+        var signed = node.Codec.CreateCommand(requestId, principal.Id, kind, commandId, payload);
+        return profile.Track(ExecuteAsync(node, principal, requestId, commandId, signed, token));
+    }
+
+    private static async Task<GrainOperationReply> ExecuteAsync(RequestCqrsHostedRuntimeFixture node,
+        PrincipalRecord principal, Guid requestId, Guid commandId, string signed, CancellationToken token)
+    {
+        var failures = new List<Exception>();
+        GrainOperationReply? reply = null;
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            using var identity = new GrainRequestIdentityScope(node.Services, principal,
+                requestId, commandId, token, connectionId: node.ConnectionId);
+            await ServerFailureObserver.ObserveAsync(async () =>
+            {
+                reply = await GrainRequestStreamConsumer.DrainAsync(
+                    execution => node.Grains.GetGrain<IConnectionGrain>(node.ConnectionId).ExecuteStreamAsync(signed, execution),
+                    node.Services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
+                    requestId, node.Clock, node.RoutingOptions, token).ConfigureAwait(false);
+            }, failures).ConfigureAwait(false);
+        }, failures).ConfigureAwait(false);
+        ServerFailureObserver.ThrowIfAny(failures);
+        return reply ?? throw Errors.Fail(ErrorCode.RecoveryRequired, NativeDropRuntimeProtocol.MissingReply);
+    }
+}

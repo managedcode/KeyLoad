@@ -2,11 +2,11 @@ namespace KeyLoad.UnitTests.Features.GraphTraversal;
 
 internal static class GraphReferenceLifetimeNativeProtocol
 {
-    internal const string AnchorCollection = "d5_graph_anchor";
+    internal const string AnchorCollection = "lifetime_graph_anchor";
     internal const string AnchorId = "anchor";
     internal const string AnchorJson = "{\"anchor\":true}";
-    internal const string OriginalGraph = "d5_graph_original";
-    internal const string FreshGraph = "d5_graph_fresh";
+    internal const string OriginalGraph = "lifetime_graph_original";
+    internal const string FreshGraph = "lifetime_graph_fresh";
     internal const string EdgeId = "linked-row";
     internal const string DeniedEdge = "stale-link";
     internal const string Label = "references";

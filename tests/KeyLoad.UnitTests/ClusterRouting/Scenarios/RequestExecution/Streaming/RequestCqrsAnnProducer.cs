@@ -43,7 +43,7 @@ internal static class RequestCqrsAnnProducer
         {
             await writer.StartedAsync(new(id));
             observed.MarkStarted();
-            await FirstAsync(writer, id, reply, fault);
+            await FirstAsync(writer, id, fault);
             await AnnMaintenanceProgress.WriteAsync(writer, id, AnnMaintenancePhase.Capture);
             if (fault == RequestCqrsAnnFault.FrameBudget)
             {
@@ -74,20 +74,13 @@ internal static class RequestCqrsAnnProducer
     }
 
     private static ValueTask FirstAsync(ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer,
-        Guid id, GrainOperationReply reply, RequestCqrsAnnFault? fault)
+        Guid id, RequestCqrsAnnFault? fault)
     {
-        var checkpoint = ((AnnMaintenanceResult)NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value!).Checkpoint!;
         var progress = new GrainRequestProgress(fault == RequestCqrsAnnFault.WrongIdentity ? Guid.NewGuid() : id)
         {
             AnnPhase = fault == RequestCqrsAnnFault.UnexpectedPhase ? AnnMaintenancePhase.Release : AnnMaintenancePhase.Configure,
             TextPhase = fault == RequestCqrsAnnFault.MixedText ? TextIndexMaintenancePhase.Configure : null,
-            OnlineTextPhase = fault == RequestCqrsAnnFault.MixedOnline ? OnlineTextPhase.Captured : null,
-            EventFeedTail = fault == RequestCqrsAnnFault.MixedTail
-                ? new(RequestCqrsAnnTestData.Version, new()
-                {
-                    Version = RequestCqrsAnnTestData.Version,
-                    Receipt = checkpoint.Receipt
-                }) : null
+            OnlineTextPhase = fault == RequestCqrsAnnFault.MixedOnline ? OnlineTextPhase.Captured : null
         };
         return writer.ProgressAsync(progress, AnnMaintenanceProgress.PhaseCompleted);
     }

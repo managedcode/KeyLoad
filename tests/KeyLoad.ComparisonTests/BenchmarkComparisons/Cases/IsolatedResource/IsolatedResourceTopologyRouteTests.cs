@@ -1,4 +1,4 @@
-using Aspire.Hosting.ApplicationModel;
+using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 using KeyLoad.Comparisons;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
@@ -19,48 +19,52 @@ internal sealed class IsolatedResourceTopologyRouteTests
     private const string ScaleProfileEnvironment = "Benchmarks__ScaleProfile";
     private const string EvidenceProfileEnvironment = "Benchmarks__EvidenceProfile";
 
-    /// <summary>AC-ISO-001/003: actual AppHost entry selects exact native KRN nodes before legacy CLUSTER/TimeSeries.</summary>
+    /// <summary>AC-ISO-001/003: the load AppHost selects the exact native database group for the external client.</summary>
     [Test]
     [Arguments(KeyLoad, 1)]
     [Arguments(KeyLoad, 3)]
     [Arguments(Redis, 1)]
     [Arguments(Redis, 3)]
     [Arguments(Neo4j, 1)]
-    public async Task SelectedEntryBuildsOnlyTheRequestedNativeGroupAndSourceBoundRunner(string target, int count)
+    public async Task SelectedEntryBuildsOnlyTheRequestedNativeGroupAndClientBindings(string target, int count)
     {
         await using var model = new IsolatedResourceTopologyApplication();
         var resources = await model.BuildAsync(target, count);
-        var runner = resources.Single(resource => resource.Name == IsolatedResourceTopologyFixture.RunnerName);
-        var nodes = resources.Where(resource => resource != runner).ToArray();
-        await Assert.That(resources.Length).IsEqualTo(count + 1);
+        var nodes = resources;
+        await Assert.That(resources.Length).IsEqualTo(count);
         await Assert.That(nodes.Select(node => node.Name)).IsEquivalentTo(ExpectedNodes(target, count));
         await Assert.That(Directory.Exists(model.ProductionRoot)).IsFalse();
-        var bindings = await IsolatedResourceTopologyFixture.EnvironmentAsync(runner);
-        await Assert.That(bindings[SourceSetting]).IsEqualTo(IsolatedResourceTopologyApplication.Source);
+        var bindings = await IsolatedResourceTopologyFixture.EnvironmentAsync(model.Client);
+        var provenance = BenchmarkProvenanceRegistration.Bind().Value;
+        if (string.Equals(provenance.Actions, bool.TrueString, StringComparison.OrdinalIgnoreCase))
+        {
+            await Assert.That(bindings[SourceSetting]).IsEqualTo(provenance.SourceRevision!);
+        }
+        else
+        {
+            await Assert.That(bindings.ContainsKey(SourceSetting)).IsFalse();
+        }
         await Assert.That(bindings[TargetSetting]).IsEqualTo(target);
         await Assert.That(bindings[EvidenceProfileEnvironment]).IsEqualTo(BenchmarkSessionContract.Profile);
         await Assert.That(bindings.ContainsKey(ScaleProfileEnvironment)).IsFalse();
         await Assert.That(int.Parse(bindings[CountSetting], System.Globalization.CultureInfo.InvariantCulture)).IsEqualTo(count);
         await Assert.That(bindings.Keys.Count(key => key.StartsWith(EndpointsPrefix, StringComparison.Ordinal))).IsEqualTo(count);
-        await IsolatedResourceTopologyFixture.VerifyWaitsAsync(runner, nodes);
+        await IsolatedResourceTopologyFixture.VerifyWaitsAsync(model.Client, nodes);
     }
 
-    /// <summary>AC-ISO-003/006: actual unsupported route creates one reason worker and no database or credential.</summary>
+    /// <summary>AC-ISO-003/006: an unsupported route exposes its selected contract without allocating database infrastructure or credentials.</summary>
     [Test]
     [Arguments(3)]
-    public async Task UnsupportedCommunityReplicationEntryBuildsOnlyTheReasonWorker(int count)
+    public async Task UnsupportedCommunityReplicationEntryAllocatesNoDatabaseResources(int count)
     {
         await using var model = new IsolatedResourceTopologyApplication();
         var resources = await model.BuildAsync(Neo4j, count);
-        await Assert.That(resources.Length).IsEqualTo(1);
-        var runner = resources[0];
-        await Assert.That(runner.Name).IsEqualTo(IsolatedResourceTopologyFixture.RunnerName);
-        await Assert.That(runner.Annotations.OfType<WaitAnnotation>().Any()).IsFalse();
-        var bindings = await IsolatedResourceTopologyFixture.EnvironmentAsync(runner);
+        await Assert.That(resources).IsEmpty();
+        await Assert.That(model.Client.Resources).IsEmpty();
+        await Assert.That(model.Client.CompletionResources).IsEmpty();
+        var bindings = await IsolatedResourceTopologyFixture.EnvironmentAsync(model.Client);
         await Assert.That(bindings.Keys.Count(key => key.StartsWith(IsolatedResourceTopologyFixture.NativePrefix,
-            StringComparison.Ordinal))).IsEqualTo(1);
-        await Assert.That(bindings[IsolatedResourceTopologyFixture.NativePrefix + "Image"])
-            .IsEqualTo("docker.io/library/neo4j:2026.09.0@" + BenchmarkResources.Neo4jDigest);
+            StringComparison.Ordinal))).IsEqualTo(0);
         await Assert.That(Directory.Exists(model.ProductionRoot)).IsFalse();
         await Assert.That(Directory.Exists(Path.Combine(model.Root, "native"))).IsFalse();
     }
@@ -72,7 +76,7 @@ internal sealed class IsolatedResourceTopologyRouteTests
     [Arguments(BenchmarkSessionSelection.NodeCountSetting, "2")]
     [Arguments(BenchmarkSessionSelection.NodeCountSetting, "4")]
     [Arguments("Benchmarks:Scenario", "0")]
-    [Arguments("Benchmarks:Profile", "legacy")]
+    [Arguments("Benchmarks:Profile", "unsupported")]
     [Arguments("Benchmarks:ScaleProfile", "scaled-7m-c16")]
     [Arguments("Benchmarks:ScaleProfile", "Scaled-100k-c16")]
     public async Task InvalidSelectedEntryRejectsBeforeAllocatingACluster(string setting, string value)
@@ -84,7 +88,7 @@ internal sealed class IsolatedResourceTopologyRouteTests
         await Assert.That(Directory.Exists(model.Output)).IsFalse();
     }
 
-    /// <summary>AC-SCALE-014: explicit legacy workload knobs cannot partially override a closed scale profile.</summary>
+    /// <summary>AC-SCALE-014: caller workload knobs cannot partially override the declared scenario contract.</summary>
     [Test]
     [Arguments("Benchmarks:Documents", "100000")]
     [Arguments("Benchmarks:Operations", "100000")]

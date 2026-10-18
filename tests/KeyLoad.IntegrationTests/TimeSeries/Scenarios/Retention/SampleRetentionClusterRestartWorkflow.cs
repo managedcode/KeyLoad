@@ -40,11 +40,11 @@ internal static class SampleRetentionClusterRestartWorkflow
         {
             await ApplyFirstPageAsync(fixture, context, cancellationToken);
             stoppedNode = context.SelectedSiloNode;
-            await fixture.KillContainerAsync(stoppedNode, FailureScenario, cancellationToken);
+            await fixture.KillServerAsync(stoppedNode, FailureScenario, cancellationToken);
             var command = ExpireCommand(context, 2);
             await ClusterReplicationTestSupport.MissingCopiesAsync(await context.Clients[context.Writer]
                 .CommitAsync(command, cancellationToken));
-            await fixture.RestartContainerAsync(stoppedNode, cancellationToken);
+            await fixture.RestartServerAsync(stoppedNode, cancellationToken);
             restarted = true;
             await WaitForNodeAsync(fixture, context, cancellationToken);
             await ApplyCopiedPageAsync(context, command, cancellationToken);
@@ -158,7 +158,7 @@ internal static class SampleRetentionClusterRestartWorkflow
         using var recovery = new CancellationTokenSource(TimeSpan.FromSeconds(45), TimeProvider.System);
         try
         {
-            await fixture.RestartContainerAsync(node, recovery.Token);
+            await fixture.RestartServerAsync(node, recovery.Token);
             await WaitForNodeAsync(fixture, context, recovery.Token);
         }
         catch (Exception cleanupFailure) when (ClusterReplicationTestSupport.IsNonFatalCleanupFailure(cleanupFailure))

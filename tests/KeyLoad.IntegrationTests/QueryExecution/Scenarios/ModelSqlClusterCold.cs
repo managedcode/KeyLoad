@@ -11,9 +11,9 @@ internal static class ModelSqlClusterCold
         await owner.RequirePreviousAsync(token);
         var scenario = owner.Claim(fixture);
         var stopped = await Task.WhenAll(TopicSqlClusterProtocol.Nodes.Select(node => ObserveAsync(
-            () => fixture.KillContainerAsync(node, scenario, token))));
+            () => fixture.KillServerAsync(node, scenario, token))));
         var started = await Task.WhenAll(TopicSqlClusterProtocol.Nodes.Select(node => ObserveAsync(
-            () => fixture.RestartContainerAsync(node, token))));
+            () => fixture.RestartServerAsync(node, token))));
         ServerFailureObserver.ThrowIfAny([.. stopped.SelectMany(value => value), .. started.SelectMany(value => value)]);
         foreach (var node in TopicSqlClusterProtocol.Nodes)
         {

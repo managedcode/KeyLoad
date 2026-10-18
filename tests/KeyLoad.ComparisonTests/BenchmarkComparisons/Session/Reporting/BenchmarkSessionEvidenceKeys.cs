@@ -33,8 +33,6 @@ internal static class BenchmarkSessionEvidenceKeys
     internal const string SessionEnvironment = "Benchmarks__SessionId";
     internal const string ProfileEnvironment = "Benchmarks__EvidenceProfile";
     internal const string SourceEnvironment = "Benchmarks__SourceRevision";
-    internal const string KeyLoadImageEnvironment = "Benchmarks__Images__KeyLoad";
-    internal const string RunnerImageEnvironment = "Benchmarks__LoadGeneratorImage";
     internal const string AdminEnvironment = "Benchmarks__AdminKey";
     internal const string OutputEnvironment = "Benchmarks__Output";
     internal const string StorageEnvironment = "Benchmarks__Storage";

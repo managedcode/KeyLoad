@@ -114,7 +114,7 @@ internal sealed class RequestCqrsClusterSubscriberTransitionObservation
         {
             MarkLimitReached();
         }
-        MarkSample(afterOriginalJoin);
+        RecordJoinBoundary(afterOriginalJoin);
     }
 
     internal void RecordCompletion(string name, bool active)
@@ -152,7 +152,7 @@ internal sealed class RequestCqrsClusterSubscriberTransitionObservation
 
     internal void MarkLimitReached() => eventLimitReached = true;
 
-    internal void MarkSample(bool afterOriginalJoin)
+    internal void RecordJoinBoundary(bool afterOriginalJoin)
     {
         if (afterOriginalJoin)
         {

@@ -21,10 +21,10 @@ internal static class NativeAnnSessionOperations
 
     internal static AnnMaintenanceCapabilityResult Execute(DatabaseEngine database, NativeAnnGenerationOwner owner,
         NativeAnnStageStore stages, NativeAnnMaintenanceSession session, PrincipalRecord principal,
-        AnnMaintenanceCapabilityRequest request, ServerRuntimeOptions configured, TimeProvider clock, CancellationToken token, ReadExecutionBudget? originalBudget = null)
+        AnnMaintenanceCapabilityRequest request, ServerRuntimeOptions configured, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        var read = originalBudget ?? new ReadExecutionBudget(configured.Core.DatabaseLimits, clock, token);
+        var read = session.Work.Budget;
         owner.MaintenanceMemory.Expand(session.Memory);
         var available = owner.MaintenanceMemory.Remaining(checked(session.RetainedBytes
             + (session.Replay?.MaximumStagePeakBytes ?? Empty)));
@@ -33,7 +33,6 @@ internal static class NativeAnnSessionOperations
         session.ObserveStage(request.Kind, indexBudget);
         var current = AnnSeedCollector.CapturePinned(database, principal.Id, request.Maintenance, seeds, read);
         session.RequireUpper(current);
-        using var currentStage = session.Replay?.EnterStageCancellation(token);
         switch (request.Kind)
         {
             case AnnMaintenanceCapabilityKind.Load:

@@ -12,6 +12,19 @@
 - Owner correction 2026-10-13: batch all known confirmed defects in the same owned library/repository within the authorized task before releasing. Inspect the affected scope, collect and fix the defects together, add their focused regressions, self-review the complete change, and run the required checks against the combined batch. One defect may produce one release; several defects in that repository MUST share one release, not a version/release per fix.
 - Increment the version once through the canonical mechanism only when the complete repair batch is ready. Push release-triggering changes and publish once per owning repository for that batch; do not trigger intermediate releases while other known fixes are pending. Verify successful GitHub publication and actual NuGet availability, then update each affected consumer once to that published version and run its focused regressions. Preserve unrelated work and all existing correctness, delivery and repository-protection gates.
 
+## Storage access modes
+
+Follow [ADR-136](../../docs/ADR/ADR-136-native-orleans-partition-ownership.md).
+Isolated volumes have silo-local file owners reached through Orleans. A shared
+volume requires one open owner for each mutable physical partition, lazy opening
+and joined close before another silo reopens the same files; no data copies are
+created by a shared mount. Never open the same mutable ZoneTree eagerly on every
+silo. Cross-partition queries address logical partitions once and aggregate
+bounded partial results without counting replicas twice. These lifetime and
+query paths remain open implementation and qualification gates; a configuration
+flag alone does not implement them. StatelessWorker activations are automatically
+managed by Orleans and are not individually addressable.
+
 ## Boundaries and protected risks
 
 Follow the [root policy](../../AGENTS.md) and the owning feature specification. Keep changes in their actual owner, preserve unrelated work, and remove replaced code together with exclusive callers and fixtures. Use native Orleans calls for distributed execution and silo-local ZoneTree owners for files. Preserve persisted authorization, operation correctness, resource bounds, cancellation and joined shutdown. Never turn a static check or focused test into a claim of complete runtime qualification.

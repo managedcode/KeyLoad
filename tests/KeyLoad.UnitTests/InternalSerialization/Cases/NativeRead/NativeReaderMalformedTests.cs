@@ -29,16 +29,6 @@ internal sealed class NativeReaderMalformedTests
     }
 
     [Test]
-    public async Task AcIs002CurrentReplicaPrefixWithNoBodyIsCodedCorruption()
-    {
-        var expected = new VoteRequest("voter", 2, 0, 0);
-        var bytes = ReplicaProtocolCodec.Serialize(expected);
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => ReplicaProtocolCodec.Deserialize<VoteRequest>(bytes.AsSpan(0, ReplicaProtocol.PayloadPrefixBytes)));
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
-        await Assert.That(ReplicaProtocolCodec.Deserialize<VoteRequest>(bytes)).IsEqualTo(expected);
-    }
-
-    [Test]
     public async Task AcIs002InvalidUtf8RemainsRejectedBeforeSuccessfulReaderReuse()
     {
         const string value = "Київ🌍";

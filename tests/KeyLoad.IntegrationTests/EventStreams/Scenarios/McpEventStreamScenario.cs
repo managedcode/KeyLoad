@@ -50,7 +50,7 @@ internal sealed record McpEventStreamScenario(PartitionRef Partition)
         McpEventStreamTokens.StreamId, McpEventStreamTokens.StreamGeneration);
 
     /// <summary>Creates the resource using the public SDK against the initialized Orleans cluster.</summary>
-    /// <param name="fixture">The actual Docker/Aspire Orleans application.</param>
+    /// <param name="fixture">The actual native Aspire Orleans application.</param>
     /// <param name="cancellationToken">The bounded external caller lifetime.</param>
     /// <returns>The configured real stream scenario.</returns>
     internal static async Task<McpEventStreamScenario> CreateAsync(ClusterFixture fixture,

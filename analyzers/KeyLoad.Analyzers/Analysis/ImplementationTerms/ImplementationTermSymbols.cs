@@ -31,6 +31,11 @@ internal static class ImplementationTermSymbols
         symbol.Locations.All(static location => !location.IsInSource) &&
         ImplementationTermCatalog.NativeNamespace(symbol.ContainingNamespace?.ToDisplayString() ?? string.Empty);
 
+    internal static bool NativeLoggingProcessor(ISymbol? symbol) => symbol is not null &&
+        symbol.Locations.All(static location => !location.IsInSource) &&
+        symbol.ContainingAssembly?.Name == ImplementationTermCatalog.NativeLoggingProcessorAssembly &&
+        (symbol as INamedTypeSymbol ?? symbol.ContainingType)?.ToDisplayString() == ImplementationTermCatalog.NativeLoggingProcessorType;
+
     internal static bool HasPath(ISymbol? symbol, string segment) => symbol is not null &&
         (symbol is INamedTypeSymbol { DeclaringSyntaxReferences.Length: > 0 } type
             ? type.DeclaringSyntaxReferences.All(reference => PathContains(reference.SyntaxTree.FilePath, segment))
@@ -69,7 +74,8 @@ internal static class ImplementationTermSymbols
 
     internal static bool TimeSeries(ISymbol? symbol, Compilation compilation)
     {
-        if (symbol is IFieldSymbol or IPropertySymbol && symbol.ContainingAssembly.Name == "KeyLoad.BenchmarkScenarios" &&
+        if (symbol is IFieldSymbol or IPropertySymbol &&
+            (symbol.ContainingAssembly.Name is "KeyLoad.BenchmarkScenarios" or "KeyLoad.IntegrationTests") &&
             Array.Exists(ImplementationTermCatalog.DataControlMembers, member => member == symbol.ToDisplayString()) ||
             symbol is IFieldSymbol { Name: "SeriesRead" or "SeriesAppend", ContainingType: { } capability } &&
             capability.ToDisplayString() == "KeyLoad.Capability" &&
@@ -104,7 +110,7 @@ internal static class ImplementationTermSymbols
     }
 
     internal static bool Measurement(ISymbol? symbol) =>
-        symbol is IFieldSymbol or IPropertySymbol or IMethodSymbol && symbol.ContainingAssembly.Name is "KeyLoad.Comparisons" or "KeyLoad.AppHost" or "KeyLoad.ComparisonTests" &&
+        symbol is IFieldSymbol or IPropertySymbol or IMethodSymbol && symbol.ContainingAssembly.Name is "KeyLoad.Comparisons" or "KeyLoad.AppHost" or "KeyLoad.LoadTests.AppHost" or "KeyLoad.ComparisonTests" &&
         Array.Exists(ImplementationTermCatalog.MeasurementMembers, member => member == symbol.ToDisplayString()) ||
         symbol is IFieldSymbol { Name: "Samples", ContainingType: { } owner } &&
         owner.ToDisplayString() == "KeyLoad.SiteTests.Features.BenchmarkComparisons.SiteIsolatedFields" ||

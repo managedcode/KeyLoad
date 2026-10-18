@@ -1,5 +1,7 @@
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.Server;
+using KeyLoad.Diagnostics.Features.ResourceExecution;
+using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -21,18 +23,13 @@ internal sealed partial class FunctionalGateFixture
         await Task.Yield();
         var failures = new List<Exception>();
         var stopped = App is null;
-        using var cleanup = imageSession?.CreateApplicationCleanupCancellation()
-            ?? new CancellationTokenSource(App is null ? TimeSpan.FromSeconds(30)
+        using var cleanup = new CancellationTokenSource(App is null ? TimeSpan.FromSeconds(30)
                 : App.Services.GetRequiredService<IOptions<TestExecutionOptions>>().Value.ApplicationCleanupTimeout,
                 TimeProvider.System);
         var contendersReleased = await fileContenders.JoinAsync(failures, cleanup.Token).ConfigureAwait(false);
-        if (contendersReleased && App is { } application)
+        if (contendersReleased)
         {
-            await ServerFailureObserver.ObserveAsync(async () =>
-            {
-                await application.StopAsync(cleanup.Token).ConfigureAwait(false);
-                stopped = true;
-            }, failures).ConfigureAwait(false);
+            stopped = await StopApplicationAsync(failures, cleanup.Token).ConfigureAwait(false);
         }
         await FunctionalGateResourceLogs.JoinAsync(diagnostics, NodeNames, diagnosticSecrets,
             Root, saveStartupEvidence!, failures).ConfigureAwait(false);
@@ -48,11 +45,6 @@ internal sealed partial class FunctionalGateFixture
                 ServerFailureObserver.Observe(() => FunctionalGatePhysicalFileAssertions.RequireStopped(this, physicalFiles), failures);
             }
         }
-        if (imageSession is { } ownedImage)
-        {
-            await ServerFailureObserver.ObserveAsync(() => ownedImage.DisposeAsync(
-                removeImage: stopped && failures.Count == 0 && !PreserveEvidence).AsTask(), failures).ConfigureAwait(false);
-        }
         if (stopped && failures.Count == 0 && !PreserveEvidence)
         {
             ServerFailureObserver.Observe(() =>
@@ -65,6 +57,34 @@ internal sealed partial class FunctionalGateFixture
         }
         ReportRetainedRoot(failures);
         ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+    private async Task<bool> StopApplicationAsync(List<Exception> failures, CancellationToken token)
+    {
+        if (App is not { } application)
+        {
+            return true;
+        }
+        NativeProcessEvidence[] observed = [];
+        var stopped = false;
+        if (processEvidenceDirectory is { } evidenceOutput)
+        {
+            await ServerFailureObserver.ObserveAsync(async () =>
+                observed = await ClusterFixtureApplicationStartup.CaptureAsync(application, NodeNames, evidenceOutput,
+                    "native-process-before-shutdown.json", token).ConfigureAwait(false), failures).ConfigureAwait(false);
+        }
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            await application.StopAsync(token).ConfigureAwait(false);
+            stopped = true;
+        }, failures).ConfigureAwait(false);
+        if (stopped && observed.Length == NodeNames.Length && processEvidenceDirectory is { } output)
+        {
+            await ServerFailureObserver.ObserveAsync(
+                () => ClusterFixtureApplicationShutdown.WriteJoinedAsync(application, observed, output, token),
+                failures).ConfigureAwait(false);
+        }
+        return stopped;
     }
 
     private void ReportRetainedRoot(List<Exception> failures)

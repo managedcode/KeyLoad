@@ -12,6 +12,9 @@ internal sealed class QueryNativeFixture(DocumentPatchAtomicityOwner source, Doc
     internal const string Root = "root";
     internal const string Reader = "query-native-reader";
     internal const string Tenant = "query-native-tenant";
+    private const string DatabaseId = "query-native-db";
+    private const string TransactionDomainId = "query-native-domain";
+    private const string PartitionKey = "one";
     internal const string Collection = "query-native-documents";
     internal const string DocumentId = "one";
     internal const string Title = "/title";
@@ -24,7 +27,7 @@ internal sealed class QueryNativeFixture(DocumentPatchAtomicityOwner source, Doc
     internal const long First = 1;
     internal const long Second = 2;
     private const string ChangedCreation = "The native resource differs from its original creation operation.";
-    internal static readonly PartitionRef Partition = new(Tenant, "query-native-db", "query-native-domain", "one");
+    internal static readonly PartitionRef Partition = new(Tenant, DatabaseId, TransactionDomainId, PartitionKey);
     internal static readonly EntityRef Reference = new(Partition, Collection, DocumentId);
     internal static readonly Guid WriteId = Guid.Parse("102b95e5-2657-40bb-9d1a-efc39b18877d");
     internal DocumentPatchAtomicityOwner Source => source;

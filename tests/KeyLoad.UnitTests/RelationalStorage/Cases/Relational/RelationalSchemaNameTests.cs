@@ -28,7 +28,7 @@ internal sealed class RelationalSchemaNameTests
         {
             RelationalSchema = new(RelationalTestData.Key, [.. RelationalTestData.Columns, new(name, RelationalColumnType.Text, Nullable: true)])
         };
-        await Assert.That(RelationalTestData.ConfigureResult(database, definition).Error).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(Errors.Code(RelationalTestData.ConfigureResult(database, definition).Problem)).IsEqualTo(ErrorCode.Validation);
         var missing = Assert.ThrowsExactly<KeyLoadException>(() => database.Store.Read(view =>
             database.Database.Resource(view, database.Partition, RelationalTestData.Table)));
         await Assert.That(missing.Code).IsEqualTo(ErrorCode.NotFound);

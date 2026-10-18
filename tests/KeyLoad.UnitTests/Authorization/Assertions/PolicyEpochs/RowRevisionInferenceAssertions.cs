@@ -23,7 +23,7 @@ internal static class RowRevisionInferenceAssertions
         var before = TeamRowPolicyAssertions.Image(store);
         var beforeClock = store.Read(view => view.ReadOwnedValue(KeySpace.ClockBytes))!;
         var outbox = JsonDefaults.Serialize(database.GetOutboxStatus(P.Root, command.Partition));
-        var operation = RowRevisionInferenceRequests.Operation(command);
+        var operation = RowRevisionInferenceRequests.Operation(database, command);
         var result = database.ApplyEmbedded(operation, token);
         await ResultAsync(result, code, detail);
         var outcomeKey = KeySpace.PartitionOutcome(command.Partition, P.Reader, command.CommandId);
@@ -71,7 +71,7 @@ internal static class RowRevisionInferenceAssertions
     internal static async Task<(Command<DatabaseCommand> Operation, Result<object> Result, byte[] Outcome)> HealthyAsync(TestDatabase db, string kind, CancellationToken token)
     {
         var command = RowRevisionInferenceRequests.Create(db.Partition, kind, P.Hidden, P.RepairRevision);
-        var operation = RowRevisionInferenceRequests.Operation(command);
+        var operation = RowRevisionInferenceRequests.Operation(db.Database, command);
         var actual = db.Database.ApplyEmbedded(operation, token);
         var receipt = actual.Get<CommitReceipt>();
         CommitReceipt expected = new(command.CommandId, new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId, db.Store.Position), [new(RowRevisionInferenceRequests.ReceiptKind(kind), P.Collection, P.Hidden, P.HealthyRevision)], DurabilityProfile.ProcessDurable, 1);

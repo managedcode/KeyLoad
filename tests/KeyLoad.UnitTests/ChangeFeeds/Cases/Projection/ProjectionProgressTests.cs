@@ -25,7 +25,7 @@ internal sealed class ProjectionProgressTests
         var status = db.Database.GetOutboxStatus("root", db.Partition);
         await Assert.That(status.Head.StoredRecords).IsEqualTo(2);
         await Assert.That(status.Consumers.Single().LastProgressReservationCut).IsEqualTo(1);
-        await Assert.That(ProjectionProgressOperations.Write(db, new PutDocument("orders", "blocked", "{}")).Error).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(ProjectionProgressOperations.Write(db, new PutDocument("orders", "blocked", "{}")).Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(db.Database.GetDocument("root", new(db.Partition, "orders", "blocked"))).IsNull();
         await Assert.That(ProjectionProgressOperations.Complete(db, consumer, batch, new PutDocument("derived", "effect", "{}", 0)).Get<ProjectionBatchResult>().AlreadyProcessed).IsTrue();
         await Assert.That(db.Database.GetOutboxStatus("root", db.Partition).Head.Tail).IsEqualTo(2);
@@ -84,7 +84,7 @@ internal sealed class ProjectionProgressTests
         var consumer = ProjectionProgressOperations.Configure(db);
         ProjectionProgressOperations.Complete(db, consumer, db.Database.ReadProjectionBatch("root", new(consumer, Limit: 1)), new PutDocument("derived", "a", "{}")).Get<ProjectionBatchResult>();
         var second = db.Database.ReadProjectionBatch("root", new(consumer, Limit: 1));
-        await Assert.That(ProjectionProgressOperations.Complete(db, consumer, second, new PutDocument("derived", "b", "{}")).Error).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(ProjectionProgressOperations.Complete(db, consumer, second, new PutDocument("derived", "b", "{}")).Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
         var status = db.Database.GetOutboxStatus("root", db.Partition);
         await Assert.That(status.Consumers.Single().Checkpoint).IsEqualTo(1);
         await Assert.That(status.Head.Tail).IsEqualTo(3);
@@ -107,8 +107,8 @@ internal sealed class ProjectionProgressTests
         db.Commit(new PutDocument("orders", "input", "{}"));
         var consumer = ProjectionProgressOperations.Configure(db);
         var batch = db.Database.ReadProjectionBatch("root", new(consumer));
-        await Assert.That(ProjectionProgressOperations.Complete(db, consumer, batch,
-            new PutDocument("derived", "a", "{}"), new PutDocument("derived", "b", "{}")).Error).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(ProjectionProgressOperations.Complete(db, consumer, batch,
+            new PutDocument("derived", "a", "{}"), new PutDocument("derived", "b", "{}")).Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
         var status = db.Database.GetOutboxStatus("root", db.Partition);
         await Assert.That(status.Head.Tail).IsEqualTo(1);
         await Assert.That(status.Consumers.Single().Checkpoint).IsEqualTo(0);
@@ -136,9 +136,9 @@ internal sealed class ProjectionProgressTests
         await Assert.That(db.Database.GetOutboxStatus("root", db.Partition).Head.StoredBytes).IsEqualTo(bytes.Input);
         var consumer = ProjectionProgressOperations.Configure(db);
         var batch = db.Database.ReadProjectionBatch("root", new(consumer));
-        await Assert.That(ProjectionProgressOperations.Write(db, new PutDocument("orders", "blocked", "{}")).Error).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(ProjectionProgressOperations.Write(db, new PutDocument("orders", "blocked", "{}")).Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(db.Database.GetDocument("root", new(db.Partition, "orders", "blocked"))).IsNull();
-        await Assert.That(ProjectionProgressOperations.Complete(db, consumer, batch, large).Error).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(ProjectionProgressOperations.Complete(db, consumer, batch, large).Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
         var failed = db.Database.GetOutboxStatus("root", db.Partition);
         await Assert.That(failed.Head.StoredBytes).IsEqualTo(bytes.Input);
         await Assert.That(failed.Head.Tail).IsEqualTo(1);
@@ -169,7 +169,7 @@ internal sealed class ProjectionProgressTests
         db.Commit(new PutDocument("orders", "input", "{}"));
         var consumer = ProjectionProgressOperations.Configure(db);
         var batch = db.Database.ReadProjectionBatch("root", new(consumer));
-        await Assert.That(ProjectionProgressOperations.Complete(db, consumer, batch, small).Error).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(ProjectionProgressOperations.Complete(db, consumer, batch, small).Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
         var status = db.Database.GetOutboxStatus("root", db.Partition);
         await Assert.That(status.Head.StoredBytes).IsEqualTo(bytes.Input);
         await Assert.That(status.Head.Tail).IsEqualTo(1);

@@ -20,9 +20,9 @@ internal static class StrongReadSessionFailover
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             stopped = true;
-            await fixture.KillContainerAsync(selected, KillScenario, token);
+            await fixture.KillServerAsync(selected, KillScenario, token);
             await ReadWhileUnavailableAsync(fixture, survivor, state, token);
-            await fixture.RestartContainerAsync(selected, token);
+            await fixture.RestartServerAsync(selected, token);
             stopped = false;
             await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(selected, token);
             result = await operation(survivor);
@@ -30,7 +30,7 @@ internal static class StrongReadSessionFailover
         using var cleanup = new CancellationTokenSource(RequestCqrsClusterProtocol.CleanupDeadline, TimeProvider.System);
         if (stopped)
         {
-            await ServerFailureObserver.ObserveAsync(() => fixture.RestartContainerAsync(selected, cleanup.Token), failures);
+            await ServerFailureObserver.ObserveAsync(() => fixture.RestartServerAsync(selected, cleanup.Token), failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
         return result ?? throw new InvalidOperationException(MissingState);

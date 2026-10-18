@@ -25,4 +25,4 @@ flowchart TD
   Cold --> Healthy[Exact two retained results then fresh healthy publication]
 ```
 
-Scope limits: full canonical image plus native journal CUT and two selected typed entries, not all raw replica journal rows, elected cluster, process-kill, power-loss, SDK/MCP or performance evidence. Current source freeze prevents integration; fresh new-type NotFound and native creation previews are recorded separately. No reload/status/global scan or SDK run is authorized. Timing is genuine expiry crossing, not a scheduling assumption that ordinary execution must be slow. Caller cancellation aborts the original wait and is joined by the existing owner.
+Scope limits: complete bounded canonical rows, native applied/store-position observations and the two selected original typed outcomes do not qualify a concurrent cross-store snapshot, process-kill, power-loss, SDK/MCP or performance behavior. Native execution and delivered-source qualification remain separate. Timing must cross the actual expiry boundary; it cannot assume ordinary execution is slow. Caller cancellation aborts the original wait and is joined by the existing owner.

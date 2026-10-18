@@ -11,7 +11,7 @@ internal sealed class ComparisonExecutionIdentityReferenceTests
         var result = await RunAsync("registry.invalid:badport/keyload/server:tag@" + Digest);
 
         await ComparisonExecutionIdentitySupport.AssertSafeFailureAsync(result,
-            ComparisonExecutionIdentitySupport.InvalidCode);
+            "session-v1");
     }
 
     [Test]
@@ -20,7 +20,7 @@ internal sealed class ComparisonExecutionIdentityReferenceTests
         var result = await RunAsync("registry.invalid:70000/keyload/server:tag@" + Digest);
 
         await ComparisonExecutionIdentitySupport.AssertSafeFailureAsync(result,
-            ComparisonExecutionIdentitySupport.InvalidCode);
+            "session-v1");
     }
 
     [Test]
@@ -29,7 +29,7 @@ internal sealed class ComparisonExecutionIdentityReferenceTests
         var result = await RunAsync("registry.invalid//keyload/server:tag@" + Digest);
 
         await ComparisonExecutionIdentitySupport.AssertSafeFailureAsync(result,
-            ComparisonExecutionIdentitySupport.InvalidCode);
+            "session-v1");
     }
 
     [Test]
@@ -38,7 +38,7 @@ internal sealed class ComparisonExecutionIdentityReferenceTests
         var result = await RunAsync("registry.invalid:5000:6000/keyload/server:tag@" + Digest);
 
         await ComparisonExecutionIdentitySupport.AssertSafeFailureAsync(result,
-            ComparisonExecutionIdentitySupport.InvalidCode);
+            "session-v1");
     }
 
     [Test]
@@ -48,13 +48,14 @@ internal sealed class ComparisonExecutionIdentityReferenceTests
         var result = await RunAsync(oversizedRegistry + "/keyload/server:tag@" + Digest);
 
         await ComparisonExecutionIdentitySupport.AssertSafeFailureAsync(result,
-            ComparisonExecutionIdentitySupport.InvalidCode);
+            "session-v1");
     }
 
     private static Task<ComparisonHostExit> RunAsync(string image)
     {
         var settings = ComparisonExecutionIdentitySupport.ValidSettings();
-        settings[ComparisonExecutionIdentitySupport.KeyLoadImage] = image;
+        settings[SessionHostStartupSupport.Target] = "RabbitMQ";
+        settings[SessionHostStartupSupport.Image] = image;
         return ComparisonExecutionIdentitySupport.RunAsync(settings);
     }
 }

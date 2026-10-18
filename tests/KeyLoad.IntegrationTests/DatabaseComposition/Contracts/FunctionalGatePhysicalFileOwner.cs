@@ -1,6 +1,6 @@
-using KeyLoad.IntegrationTests.Features.ClusterReplication;
+using KeyLoad.Diagnostics.Features.ResourceExecution;
 
 namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
-internal sealed record FunctionalGatePhysicalFileOwner(string Resource, string Container, string Directory,
-    Guid NodeId, Guid Incarnation, ContainerRuntimeInspection Runtime);
+internal sealed record FunctionalGatePhysicalFileOwner(string Resource, string Directory,
+    Guid NodeId, Guid Incarnation, NativeProcessEvidence Runtime);

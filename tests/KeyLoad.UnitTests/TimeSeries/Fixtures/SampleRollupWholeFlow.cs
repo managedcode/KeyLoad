@@ -62,9 +62,9 @@ internal static class SampleRollupWholeFlow
         var rollups = Rollups(db);
         var id = Guid.NewGuid();
         var first = Commit(db, id, mutation, principal);
-        await Assert.That(first.Error).IsEqualTo(code);
-        await Assert.That(first.SafeDetail).IsEqualTo(detail);
-        await Assert.That(first.Json).IsNull();
+        await Assert.That(Errors.Code(first.Problem)).IsEqualTo(code);
+        await Assert.That(first.Problem?.Detail).IsEqualTo(detail);
+        await Assert.That(first.Value).IsNull();
         await Assert.That(Raw(db)).IsEqualTo(raw);
         await Assert.That(Rollups(db)).IsEqualTo(rollups);
         var image = Image(db);

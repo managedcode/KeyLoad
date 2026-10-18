@@ -10,7 +10,7 @@ internal static class FunctionalGateColdReopen
         var native = fixture.ColdRuntime
             ?? throw new InvalidOperationException("The original functional runtime is unavailable.");
         var profile = ClusterFixtureProfile.ReadProfile(fixture.Root);
-        var scenario = ContainerRuntimeOwnedReceipt.Scenario(profile.Incarnation, 1);
+        var scenario = ProcessRuntimeOwnedReceipt.Scenario(profile.Incarnation, 1);
         var stopped = await Task.WhenAll(fixture.NodeNames.Select(node => ObserveAsync(
             () => native.KillAsync(node, scenario, token)))).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny([.. stopped.SelectMany(item => item)]);

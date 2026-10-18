@@ -64,8 +64,8 @@ internal static class ScopedCommandIdentityClusterWorkflow
     {
         foreach (var node in Nodes)
         {
-            await fixture.KillContainerAsync(node, RestartScenario, cancellationToken);
-            await fixture.RestartContainerAsync(node, cancellationToken);
+            await fixture.KillServerAsync(node, RestartScenario, cancellationToken);
+            await fixture.RestartServerAsync(node, cancellationToken);
             await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(node, cancellationToken);
         }
     }

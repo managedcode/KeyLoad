@@ -2,7 +2,7 @@ using System.Text.Json;
 
 namespace KeyLoad.UnitTests.Features.ClientApi;
 
-/// <summary>Builds owned SDK argument dictionaries from exact JSON samples.</summary>
+/// <summary>Builds owned SDK argument dictionaries from exact JSON inputs.</summary>
 internal static class McpGatewayProtocolInputs
 {
     internal static Dictionary<string, JsonElement> Read(string json)

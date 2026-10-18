@@ -8,11 +8,10 @@ namespace KeyLoad.UnitTests.Features.TestInfrastructure;
 
 internal static class FunctionalFileOwnershipProfileRefusals
 {
-    private const int Voters = 3;
+    private const int Silos = 3;
     private const string InvalidOption = "invalid";
-    private const string SingleVoter = "1";
-    private const string InvalidVoters = "2";
-    private const string UnitSuite = "unit";
+    private const string SingleSilo = "1";
+    private const string InvalidSilos = "2";
 
     internal static async Task RunAsync()
     {
@@ -24,7 +23,7 @@ internal static class FunctionalFileOwnershipProfileRefusals
                 new(ExclusiveOwnerContentionProfile.Setting, P.True)
             };
             values.AddRange(changes);
-            var builder = P.Create(root, Voters, true, true, [.. values]);
+            var builder = P.Create(root, Silos, true, true, [.. values]);
             var original = builder.Resources.Count;
             _ = Assert.ThrowsExactly<InvalidOperationException>(() => KeyLoadResources.AddKeyLoad(builder));
             await Assert.That(builder.Resources.Count).IsEqualTo(original);
@@ -41,13 +40,12 @@ internal static class FunctionalFileOwnershipProfileRefusals
         yield return [new(ExclusiveOwnerContentionProfile.Setting + P.Nested, P.True)];
         yield return [new(P.Ephemeral, P.False)];
         yield return [new(FunctionalColdReopenProfile.Setting, null)];
-        yield return [new(ContainerFaultCommandProtocol.EnabledSetting, null)];
+        yield return [new(ProcessFaultCommandProtocol.EnabledSetting, null)];
         yield return [new(P.Nodes, null)];
-        yield return [new(P.Nodes, SingleVoter)];
-        yield return [new(P.Nodes, InvalidVoters)];
+        yield return [new(P.Nodes, SingleSilo)];
+        yield return [new(P.Nodes, InvalidSilos)];
         yield return [new(P.Nodes + P.Nested, P.True)];
         yield return [new(P.Benchmark, P.True)];
-        yield return [new(P.Suite, UnitSuite)];
         yield return [new(P.LoggerControl, P.True)];
     }
 }

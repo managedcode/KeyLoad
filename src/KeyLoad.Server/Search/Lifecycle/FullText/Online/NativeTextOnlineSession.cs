@@ -9,17 +9,16 @@ namespace KeyLoad.Server.Features.Search;
 internal sealed partial class NativeTextOnlineSession
 {
     private readonly byte[] immutableRequest;
-    private readonly CancellationTokenSource deadline;
-    private readonly CancellationTokenSource lifetime;
     private bool disposed;
     private bool commandsJoined;
     private byte[]? expectedPublication;
 
     internal NativeTextOnlineSession(Guid id, OnlineTextIndexMaintenanceRequest request,
-        string principalId, DateTimeOffset originalExpiry, ServerRuntimeOptions options,
-        TimeProvider clock, CancellationToken shutdown, ReadExecutionBudget? originalBudget = null)
+        string principalId, DateTimeOffset originalExpiry, NativeMaintenanceSessionWork work)
     {
-        (deadline, lifetime, Budget, immutableRequest) = NativeTextOnlineSessionWork.Open(id, request, originalExpiry, options, clock, shutdown, originalBudget);
+        Work = work;
+        Budget = work.Budget;
+        immutableRequest = NativeTextOnlineSessionWork.Open(id, request, work);
         Id = id;
         Request = request;
         PrincipalId = principalId;
@@ -44,6 +43,7 @@ internal sealed partial class NativeTextOnlineSession
     {
         get;
     }
+    internal NativeMaintenanceSessionWork Work { get; }
     internal ReadExecutionBudget Budget
     {
         get;
@@ -129,9 +129,6 @@ internal sealed partial class NativeTextOnlineSession
         get; private set;
     }
 
-    internal CancellationTokenSource LinkStageCancellation(CancellationToken token)
-        => CancellationTokenSource.CreateLinkedTokenSource(lifetime.Token, token);
-
     internal void Require(Guid id, OnlineTextIndexMaintenanceRequest request, string principalId, DateTimeOffset expiry)
         => NativeTextOnlineSessionWork.Require(this, disposed, immutableRequest, id, request, principalId, expiry);
 
@@ -147,7 +144,7 @@ internal sealed partial class NativeTextOnlineSession
         {
             throw NativeTextErrors.Ownership();
         }
-        NativeTextOnlineSessionWork.Cleanup(this, lifetime, deadline, cleanup);
+        NativeTextOnlineSessionWork.Cleanup(this, cleanup);
         disposed = true;
     }
 }

@@ -56,9 +56,9 @@ internal static class TypedQueueGraphPrimaryIdentityFlow
                 var reverse = await QueueGraphIdentityFlow.CompileAsync(engine, new(Guid.NewGuid(), source.Fixture.Partition,
                     [new GraphToQueueMutation(QueueGraphIdentityState.Queue, QueueGraphIdentityState.Graph,
                         source.From, QueueGraphReplayState.ReversePrefix)]),
-                    source.Healthy.EvaluatedAt.AddSeconds(NextOffsetSeconds));
+                    new DateTimeOffset(source.Healthy.Timestamp).AddSeconds(NextOffsetSeconds));
                 var receipt = engine.Apply(reverse).Get<CommitReceipt>();
-                await QueueGraphReplayAssertions.ReverseReceiptAsync(source, store, reverse.Id, receipt);
+                await QueueGraphReplayAssertions.ReverseReceiptAsync(source, store, reverse.CommandId, receipt);
                 var continuation = store.Read(view => DatabaseCompositionExpectedReferences.Capture(view,
                     new(source.Fixture.Partition, QueueGraphIdentityState.Collection, QueueGraphReplayState.Continuation)));
                 var next = await QueueGraphIdentityFlow.CompileAsync(engine, new(Guid.NewGuid(), source.Fixture.Partition,
@@ -66,7 +66,7 @@ internal static class TypedQueueGraphPrimaryIdentityFlow
                         QueueGraphReplayState.ContinuationJson),
                      new GraphToQueueMutation(QueueGraphIdentityState.Queue, QueueGraphIdentityState.Graph,
                         source.From, QueueGraphReplayState.NextPrefix)]),
-                    reverse.EvaluatedAt.AddSeconds(NextOffsetSeconds));
+                    new DateTimeOffset(reverse.Timestamp).AddSeconds(NextOffsetSeconds));
                 replay = new(source, reverse, NativeSerialization.Serialize(receipt), next, continuation);
                 await QueueGraphReplayAssertions.ContinueAsync(replay, engine, store);
                 source.ColdImage = global::KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Bytes(store);

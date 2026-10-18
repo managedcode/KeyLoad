@@ -55,7 +55,7 @@ internal sealed class TransactionTests
             var id = Guid.NewGuid();
             return db.Submit(OperationKind.Batch, new CommandRequest(id, db.Partition, [new PutDocument("orders", "o1", $"{{\"winner\":{number}}}", 1)]), id: id);
         })));
-        await Assert.That(results).HasSingleItem(r => r.Error is null);
+        await Assert.That(results).HasSingleItem(r => Errors.Code(r.Problem) is null);
         await Assert.That(db.Database.GetDocument("root", new(db.Partition, "orders", "o1"))!.Revision).IsEqualTo(2);
     }
     [Test]

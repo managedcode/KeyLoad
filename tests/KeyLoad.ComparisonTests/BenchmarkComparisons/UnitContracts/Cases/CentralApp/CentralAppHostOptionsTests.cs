@@ -1,48 +1,18 @@
 using Aspire.Hosting;
-using KeyLoad.AppHost.Features.BenchmarkComparisons;
-using KeyLoad.AppHost.Features.TestInfrastructure;
-using KeyLoad.AppHost.Hosting;
+using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 using KeyLoad.Comparisons;
 using KeyLoad.Core;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonTests.Features.TestInfrastructure;
 
 internal sealed class CentralAppHostOptionsTests
 {
-    private const string OrdinaryTimeoutSetting = TestExecutionOptions.SectionName + ":" + nameof(TestExecutionOptions.OrdinaryTimeout);
-    private const string MaximumFilterCharactersSetting = TestExecutionOptions.SectionName + ":" + nameof(TestExecutionOptions.MaximumFilterCharacters);
     private const string MaxSampleMetadataBytesSetting = ScaleServerResourceOptions.SectionName + ":" + nameof(ScaleServerResourceOptions.MaxSampleMetadataBytes);
     private const string MaxHardwareBytesSetting = ScaleServerResourceOptions.SectionName + ":" + nameof(ScaleServerResourceOptions.MaxHardwareBytes);
     private const string CadenceSetting = ScaleServerResourceOptions.SectionName + ":" + nameof(ScaleServerResourceOptions.Cadence);
     private const string NativeReadBufferBytesSetting = ScaleServerResourceOptions.SectionName + ":" + nameof(ScaleServerResourceOptions.NativeReadBufferBytes);
     private const string RequestsPerScopeSetting = IsolatedKeyLoadAdmissionOptions.SectionName + ":" + nameof(IsolatedKeyLoadAdmissionOptions.RequestsPerScope);
-
-    [Test]
-    public async Task ConfiguredExecutionChangesTimeoutAndFilterAdmission()
-    {
-        using var configuration = new ConfigurationManager();
-        configuration[TestSuiteSettings.SuiteSetting] = "unit";
-        configuration[TestSuiteSettings.FilterSetting] = "abcd";
-        configuration[OrdinaryTimeoutSetting] = "00:02:00";
-        configuration[MaximumFilterCharactersSetting] = "4";
-        var accepted = TestSuiteSettings.Read(configuration)!;
-        await Assert.That(accepted.Timeout).IsEqualTo(TimeSpan.FromMinutes(2));
-        configuration[MaximumFilterCharactersSetting] = "3";
-        Assert.ThrowsExactly<InvalidOperationException>(() => TestSuiteSettings.Read(configuration));
-    }
-
-    [Test]
-    public async Task BootstrapSelectorsUseNativeOptionsBeforeDashboardComposition()
-    {
-        using var configuration = new ConfigurationManager();
-        configuration[TestSuiteSettings.SuiteSetting] = "unit";
-        var options = AppHostOptionsRegistration.BindTestBootstrap(configuration);
-        configuration[TestSuiteSettings.SuiteSetting] = null;
-        await Assert.That(TestSuiteSettings.Requested([], options)).IsTrue();
-        await Assert.That(TestSuiteSettings.Requested([], AppHostOptionsRegistration.BindTestBootstrap(configuration))).IsFalse();
-    }
 
     [Test]
     public async Task BoundResourcePolicyControlsChargingAndKeepsActualEvidence()
@@ -51,7 +21,7 @@ internal sealed class CentralAppHostOptionsTests
         builder.Configuration[MaxSampleMetadataBytesSetting] = "128";
         builder.Configuration[MaxHardwareBytesSetting] = "64";
         builder.Configuration[CadenceSetting] = "00:00:00.100";
-        var runtime = AppHostOptionsRegistration.Get(builder);
+        var runtime = LoadTestsOptionsRegistration.Get(builder);
         var budget = new ScaleServerResourceSampleBudget(runtime.ServerResources, runtime.Provenance);
         budget.Charge(128);
         await Assert.That(budget.Remaining).IsEqualTo(0);

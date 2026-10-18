@@ -14,7 +14,7 @@ internal static class ProjectionPartitionIsolationWarm
         { new(first.Seed, first.Seeded), new(second.Configure, second.Configured), new(second.Seed, second.Seeded) };
         await RefusalsAsync(database, first, second, outcomes, token);
         var releaseId = Guid.NewGuid();
-        var release = ProjectionConsumerIdentityFixture.Operation(OperationKind.ReleaseProjectionConsumer, releaseId,
+        var release = ProjectionConsumerIdentityFixture.Operation(database.Database, OperationKind.ReleaseProjectionConsumer, releaseId,
             new ReleaseProjectionConsumerRequest(releaseId, first.Consumer, 1L));
         var keys = ProjectionPartitionIsolationFixture.OriginalKeys(second);
         var before = ProjectionPartitionIsolationFixture.SelectedBytes(database.Store, keys);
@@ -22,7 +22,7 @@ internal static class ProjectionPartitionIsolationWarm
         await ProjectionConsumerIdentityAssertions.ExactAsync(released.Get<ProjectionConsumerInfo>(),
             new ProjectionConsumerInfo(first.Consumer, first.Definition, 0L, true));
         outcomes.Add(new(release, released));
-        var purge = ProjectionPartitionIsolationFixture.Purge(first.Partition, 2L);
+        var purge = ProjectionPartitionIsolationFixture.Purge(database.Database, first.Partition, 2L);
         var purged = database.Database.ApplyEmbedded(purge, token);
         await ProjectionConsumerIdentityAssertions.ExactAsync(purged.Get<OutboxHead>(), new OutboxHead(2L, 3L, 0L, 0L));
         outcomes.Add(new(purge, purged));
@@ -45,14 +45,14 @@ internal static class ProjectionPartitionIsolationWarm
         var keys = ProjectionPartitionIsolationFixture.OriginalKeys(first).Concat(ProjectionPartitionIsolationFixture.OriginalKeys(second)).ToArray();
         var before = ProjectionPartitionIsolationFixture.SelectedBytes(database.Store, keys);
         var id = Guid.NewGuid();
-        var wrong = ProjectionConsumerIdentityFixture.Operation(OperationKind.CommitProjectionBatch, id,
+        var wrong = ProjectionConsumerIdentityFixture.Operation(database.Database, OperationKind.CommitProjectionBatch, id,
             new CommitProjectionBatchRequest(id, second.Consumer, first.Batch.Token,
                 [new PutDocument(ProjectionConsumerIdentityFixture.Target, "effect", "{\"sourceCount\":2}", 0L)]));
         var refused = database.Database.ApplyEmbedded(wrong, token);
         await ProjectionPartitionIsolationAssertions.FailureAsync(refused, ErrorCode.TokenInvalidated, ProjectionPartitionIsolationFixture.ScopeDetail);
         await ProjectionPartitionIsolationAssertions.OriginalBytesAsync(database.Store, keys, before);
         outcomes.Add(new(wrong, refused));
-        var pinned = ProjectionPartitionIsolationFixture.Purge(second.Partition, 2L);
+        var pinned = ProjectionPartitionIsolationFixture.Purge(database.Database, second.Partition, 2L);
         var pinFailure = database.Database.ApplyEmbedded(pinned, token);
         await ProjectionPartitionIsolationAssertions.FailureAsync(pinFailure, ErrorCode.Conflict, ProjectionPartitionIsolationFixture.PinDetail);
         await ProjectionPartitionIsolationAssertions.OriginalBytesAsync(database.Store, keys, before);

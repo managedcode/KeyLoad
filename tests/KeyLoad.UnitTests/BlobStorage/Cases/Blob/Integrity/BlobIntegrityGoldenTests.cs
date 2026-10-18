@@ -17,9 +17,9 @@ internal sealed class BlobIntegrityGoldenTests
         + "5061737365742d310000506666656564646363626261613939383837373636353534343333323231313030000030800000000001"
         + "1170308000000000010000";
     private const string ExpectedInitialHash = "0b452da9f0a71b219675dc8b153f8b51ec5e827c8665ae2c3362eab673650462";
-    private const string PartText = "sample-part";
-    private const string ExpectedPartHash = "eb7861c49e25caf6ff9e32bac3b26c8ac49e00247a2c05363682eb5f1d32221e";
-    private const string ExpectedNextHash = "229317a51ec51b5824366dd0db8d35d3a184783567317b41d1604554dc22ca55";
+    private const string PartText = "known-part";
+    private const string ExpectedPartHash = "96c66fb354240380c5e522f167f2153dce17d8befadff6834f52499b20d2fed0";
+    private const string ExpectedNextHash = "cee55868b081101e53b4e08a56c102bd09ba4979442e1d1aabd0436101591bbc";
 
     [Test]
     public async Task AcBlob007IntegrityGoldenVectorBindsScopeLayoutAndOrderedParts()

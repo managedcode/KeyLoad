@@ -1,8 +1,9 @@
+using KeyLoad.UnitTests.Features.ResourceExecution;
 using ManagedCode.Communication.Commands;
 namespace KeyLoad.UnitTests.Features.Search;
 
 internal sealed record Bm25OriginalPhaseRecoveryState(Guid NodeId, Guid Incarnation, long Position,
-    long Applied, long LastIndex, long CommittedIndex, long Term, byte[] Rows)
+    long Applied, byte[] Rows)
 {
     internal static Bm25OriginalPhaseRecoveryState Read(Bm25OriginalPhaseRecoveryOwner owner)
     {
@@ -22,9 +23,8 @@ internal sealed record Bm25OriginalPhaseRecoveryState(Guid NodeId, Guid Incarnat
             }
             return (Position: owner.Store.Position, Rows: NativeSerialization.Serialize(rows.ToArray()));
         });
-        var journal = owner.JournalCut();
         return new(owner.Store.Identity.NodeId, owner.Store.Identity.Incarnation, image.Position,
-            owner.Database.LastApplied, journal.LastIndex, journal.CommittedIndex, journal.Term, image.Rows);
+            owner.Database.LastApplied, image.Rows);
     }
 
     internal async Task RequireAsync(Bm25OriginalPhaseRecoveryState actual)
@@ -33,10 +33,7 @@ internal sealed record Bm25OriginalPhaseRecoveryState(Guid NodeId, Guid Incarnat
         await Assert.That(actual.Incarnation).IsEqualTo(Incarnation);
         await Assert.That(actual.Position).IsEqualTo(Position);
         await Assert.That(actual.Applied).IsEqualTo(Applied);
-        await Assert.That(actual.LastIndex).IsEqualTo(LastIndex);
-        await Assert.That(actual.CommittedIndex).IsEqualTo(CommittedIndex);
-        await Assert.That(actual.Term).IsEqualTo(Term);
-        await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(Rows, actual.Rows);
+        await NativeReplayResultAssertions.BytesAsync(Rows, actual.Rows);
     }
 
     internal static async Task RequireRetainedAsync(Bm25OriginalPhaseRecoveryOwner owner,
@@ -46,8 +43,8 @@ internal sealed record Bm25OriginalPhaseRecoveryState(Guid NodeId, Guid Incarnat
         await Assert.That(actual.PreparedCommand).IsNotNull();
         await Assert.That(actual.PreparedCommand!.Value!.Kind).IsEqualTo(OperationKind.Bm25CorpusPublicationPhase);
         await Assert.That(actual.PreparedCommand.CommandId).IsEqualTo(original.CommandId);
-        await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(original.Value!.Input.ToArray(),
+        await NativeReplayResultAssertions.BytesAsync(original.Value!.Input.ToArray(),
             actual.PreparedCommand.Value!.Input.ToArray());
-        await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(originalEntry, NativeSerialization.Serialize(actual));
+        await NativeReplayResultAssertions.BytesAsync(originalEntry, NativeSerialization.Serialize(actual));
     }
 }

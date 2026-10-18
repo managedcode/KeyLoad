@@ -22,7 +22,7 @@ internal sealed class DeniedCommandReplayClockTests
     [Test]
     [Arguments(false)]
     [Arguments(true)]
-    public async Task AcAuthReplay001DeniedSameIdRetainsOneClockCutAndPositiveReplicaApplyRemainsOrdered(bool laterTime)
+    public async Task AcAuthReplay001DeniedSameIdRetainsOneClockCutThroughCanonicalReplay(bool laterTime)
     {
         using var fixture = new TestDatabase();
         fixture.Configure(Collection, ResourceKind.Collection);
@@ -74,7 +74,9 @@ internal sealed class DeniedCommandReplayClockTests
         var position = fixture.Store.Position;
         var retained = Bytes(fixture.Store);
         var outcome = fixture.Store.Read(view => view.ReadOwnedValue(OutcomeStoreOracle.PartitionKey(fixture.Partition, Reader, id)))!;
-        var failure = fixture.Database.Apply(fixture.Database.OwnCommand(new Command<DatabaseCommand> { CommandId = original.CommandId, UserId = original.UserId, Timestamp = (new DateTimeOffset(original.Timestamp).AddSeconds(1)).UtcDateTime, Value = original.Value }));
+        var changedTime = fixture.Database.OwnCommand(original);
+        changedTime.Timestamp = original.Timestamp.AddSeconds(1);
+        var failure = fixture.Database.Apply(changedTime);
         await Assert.That(Errors.Code(failure.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(failure.Problem?.Detail).IsEqualTo(ScopeDenied);
         await Assert.That(fixture.Store.Position).IsEqualTo(position);
@@ -93,31 +95,26 @@ internal sealed class DeniedCommandReplayClockTests
     private static async Task<DateTimeOffset> VerifyReplicaApplyAsync(TestDatabase fixture, Result<object> expected,
         Command<DatabaseCommand> original, byte[] stored)
     {
-        var operation = fixture.Database.OwnCommand(new Command<DatabaseCommand> { CommandId = original.CommandId, UserId = original.UserId, Timestamp = (new DateTimeOffset(original.Timestamp).AddSeconds(1)).UtcDateTime, Value = original.Value });
+        var operation = fixture.Database.OwnCommand(original);
+        operation.Timestamp = original.Timestamp.AddSeconds(1);
         var position = fixture.Store.Position;
-        await SameResultAsync(expected, fixture.Database.Apply(operation, replicationIndex: 1));
-        await Assert.That(fixture.Store.Position).IsEqualTo(position + 1);
-        await AssertReplicaMetadataAsync(fixture, 1, new DateTimeOffset(operation.Timestamp));
+        var sequence = fixture.Database.LastApplied;
         var bytes = Bytes(fixture.Store);
-        await SameResultAsync(expected, fixture.Database.Apply(operation, replicationIndex: 1));
-        await Assert.That(fixture.Store.Position).IsEqualTo(position + 1);
-        await Assert.That(Bytes(fixture.Store)).IsEquivalentTo(bytes, CollectionOrdering.Matching);
-        operation = fixture.Database.OwnCommand(new Command<DatabaseCommand> { CommandId = operation.CommandId, UserId = operation.UserId, Timestamp = (new DateTimeOffset(operation.Timestamp).AddSeconds(1)).UtcDateTime, Value = operation.Value });
-        await SameResultAsync(expected, fixture.Database.Apply(operation, replicationIndex: 2));
-        await Assert.That(fixture.Store.Position).IsEqualTo(position + 2);
-        await AssertReplicaMetadataAsync(fixture, 2, new DateTimeOffset(operation.Timestamp));
+        var token = TestContext.Current!.Execution.CancellationToken;
+        foreach (var requested in new[] { sequence, checked(sequence + 1) })
+        {
+            var replay = fixture.Database.ApplyStorageOperation(operation, requested, token);
+            await SameResultAsync(expected, replay.Result);
+            await Assert.That(replay.Sequence).IsEqualTo(sequence);
+            await Assert.That(fixture.Database.LastApplied).IsEqualTo(sequence);
+            await Assert.That(fixture.Store.Position).IsEqualTo(position);
+            await Assert.That(Bytes(fixture.Store)).IsEquivalentTo(bytes, CollectionOrdering.Matching);
+        }
         await Assert.That(fixture.Store.Read(view => view.ReadOwnedValue(OutcomeStoreOracle.GlobalKey(Reader, original.CommandId))))
             .IsEquivalentTo(stored, CollectionOrdering.Matching);
         return new DateTimeOffset(operation.Timestamp);
     }
 
-    private static async Task AssertReplicaMetadataAsync(TestDatabase fixture, long index, DateTimeOffset time)
-    {
-        await Assert.That(fixture.Store.Read(view => NativeSerialization.Deserialize<long>(view.ReadOwnedValue(KeySpace.AppliedBytes)!)))
-            .IsEqualTo(index);
-        await Assert.That(fixture.Store.Read(view => NativeSerialization.Deserialize<DateTimeOffset>(view.ReadOwnedValue(KeySpace.ClockBytes)!)))
-            .IsEqualTo(time);
-    }
     private static async Task SameResultAsync(Result<object> expected, Result<object> actual)
         => await Assert.That(Convert.ToHexString(NativeSerialization.Serialize(actual)))
             .IsEqualTo(Convert.ToHexString(NativeSerialization.Serialize(expected)));

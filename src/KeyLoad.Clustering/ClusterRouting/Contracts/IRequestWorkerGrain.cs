@@ -1,4 +1,3 @@
-using ManagedCode.Communication.CQRS;
 using Orleans.CodeGeneration;
 
 namespace KeyLoad.Clustering;
@@ -7,8 +6,7 @@ namespace KeyLoad.Clustering;
 [Version(BackgroundWorkerIdentity.InterfaceVersion)]
 internal interface IRequestWorkerGrain : IGrainWithStringKey
 {
-    IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> ExecuteStreamAsync(
-        string signedRequest, CancellationToken cancellationToken);
-    Task<GrainOperationReply> ExecuteCommandAsync(string signedRequest, string actorKey,
+    Task<GrainOperationReply> ExecuteAsync(SiloAddress owner, string signedRequest, CancellationToken cancellationToken);
+    Task<GrainOperationReply> ExecuteCommandAsync(SiloAddress owner, string signedRequest, string actorKey,
         CancellationToken cancellationToken);
 }

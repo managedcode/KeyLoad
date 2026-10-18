@@ -7,14 +7,14 @@ internal static class NativeAnnMaintenanceStage
 {
     internal static AnnMaintenanceCapabilityResult Execute(DatabaseEngine database, NativeAnnGenerationOwner owner,
         NativeAnnStageStore stages, NativeAnnMaintenanceSession session, PrincipalRecord principal,
-        AnnMaintenanceCapabilityRequest request, ServerRuntimeOptions configured, TimeProvider clock, CancellationToken token, ReadExecutionBudget? originalBudget = null)
+        AnnMaintenanceCapabilityRequest request, ServerRuntimeOptions configured, CancellationToken token)
     {
         var failures = new List<Exception>();
         AnnMaintenanceCapabilityResult? result = null;
         try
         {
             ServerFailureObserver.Observe(() => result = NativeAnnSessionOperations.Execute(database, owner,
-                stages, session, principal, request, configured, clock, token, originalBudget), failures);
+                stages, session, principal, request, configured, token), failures);
         }
         finally
         {

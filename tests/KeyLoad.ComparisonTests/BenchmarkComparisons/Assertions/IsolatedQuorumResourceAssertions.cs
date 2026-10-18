@@ -10,22 +10,20 @@ internal static class IsolatedQuorumResourceAssertions
         int count, string prefix, string storage, string endpoint, string digest)
     {
         await Assert.That(nodes.Length).IsEqualTo(count);
-        var runner = await IsolatedQuorumResourceModel.ReadAsync(model.Runner.Resource);
-        var environment = runner.EnvironmentVariablesWithUnprocessed.ToDictionary(pair => pair.Key, pair => pair.Value.Unprocessed);
+        var environment = model.Client.Values;
         await Assert.That(environment.Keys.Count(key => key.StartsWith(T.Endpoints, StringComparison.Ordinal))).IsEqualTo(count);
-        var waits = model.Runner.Resource.Annotations.OfType<WaitAnnotation>().ToArray();
-        await Assert.That(waits.Length).IsEqualTo(count);
+        await Assert.That(model.Client.Resources.Count).IsEqualTo(count);
         for (var index = 0; index < count; index++)
         {
-            await VerifyNodeAsync(model, nodes[index], prefix, storage, digest, index);
+            await VerifyNodeAsync(nodes[index], prefix, storage, digest, index);
             var reference = (EndpointReference)environment[T.Endpoints + index.ToString(CultureInfo.InvariantCulture)];
             await Assert.That(ReferenceEquals(reference.Resource, nodes[index])).IsTrue();
             await Assert.That(reference.EndpointName).IsEqualTo(endpoint);
-            await Assert.That(waits.Any(wait => ReferenceEquals(wait.Resource, nodes[index]))).IsTrue();
+            await Assert.That(model.Client.Resources.Contains(nodes[index].Name)).IsTrue();
         }
     }
 
-    private static async Task VerifyNodeAsync(IsolatedQuorumResourceModel model, ContainerResource node,
+    private static async Task VerifyNodeAsync(ContainerResource node,
         string prefix, string storage, string digest, int index)
     {
         var name = prefix + (index + 1).ToString(CultureInfo.InvariantCulture);
@@ -33,10 +31,11 @@ internal static class IsolatedQuorumResourceAssertions
         await Assert.That(node.Annotations.OfType<ContainerNetworkAliasAnnotation>().Select(alias => alias.Alias))
             .IsEquivalentTo(new[] { name });
         var mount = node.Annotations.OfType<ContainerMountAnnotation>().Single(mount => mount.Target == storage);
-        await Assert.That(mount.Source).IsEqualTo(Path.Combine(model.Root, T.NativeDirectory, name));
-        await Assert.That(mount.Type).IsEqualTo(ContainerMountType.BindMount);
+        await Assert.That(mount.Source).IsNull();
+        await Assert.That(mount.Type).IsEqualTo(ContainerMountType.Volume);
         await Assert.That(mount.IsReadOnly).IsFalse();
-        await Assert.That(Directory.Exists(mount.Source)).IsTrue();
+        await Assert.That(node.Annotations.OfType<ContainerLifetimeAnnotation>().Single().Lifetime)
+            .IsEqualTo(ContainerLifetime.Session);
         var image = node.Annotations.OfType<ContainerImageAnnotation>().Single();
         await Assert.That(image.SHA256).IsEqualTo(digest[7..]);
         await Assert.That(image.Tag).IsNull();

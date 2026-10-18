@@ -78,8 +78,8 @@ internal sealed class NativeAnnMaintenanceState(Func<NativeAnnGenerationOwner> c
     }
 
     internal async Task<AnnMaintenanceCapabilityResult> BeginAsync(DatabaseEngine database, PrincipalRecord principal,
-        AnnMaintenanceCapabilityRequest request, ServerRuntimeOptions configured, TimeProvider clock,
-        ReadExecutionBudget? originalBudget, CancellationToken token)
+        AnnMaintenanceCapabilityRequest request, ServerRuntimeOptions configured,
+        NativeMaintenanceSessionWork work)
     {
         lock (gate)
         {
@@ -93,7 +93,7 @@ internal sealed class NativeAnnMaintenanceState(Func<NativeAnnGenerationOwner> c
         try
         {
             return await NativeAnnMaintenanceBeginning.RunAsync(database, principal, request, configured,
-                clock, gate, () => owner, EnsureOwner, PublishSession, token, originalBudget).ConfigureAwait(false);
+                gate, () => owner, EnsureOwner, PublishSession, work).ConfigureAwait(false);
         }
         finally
         {
@@ -178,6 +178,7 @@ internal sealed class NativeAnnMaintenanceState(Func<NativeAnnGenerationOwner> c
     {
         lock (gate)
         {
+            session?.Memory.Dispose();
             session = null;
         }
     }

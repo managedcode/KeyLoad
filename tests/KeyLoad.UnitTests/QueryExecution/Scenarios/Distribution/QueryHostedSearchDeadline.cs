@@ -53,7 +53,7 @@ internal static class QueryHostedSearchDeadline
         await caller.CancelAsync().ConfigureAwait(false);
         observer.ReleaseAll();
         using var cleanup = new CancellationTokenSource(node.Timing.ShutdownTimeout, TimeProvider.System);
-        await QueryHostedSearchSettlement.JoinAsync(operation, caller, read, cleanup.Token, failures).ConfigureAwait(false);
+        await QueryHostedSearchSettlement.JoinAsync(operation, caller, read, failures, cleanup.Token).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

@@ -10,13 +10,13 @@ internal static class AtomicPartitionScopeLifecycleReplay
         foreach (var (request, original) in state.Originals)
         {
             var replay = AtomicPartitionScopeLifecycleCommands.Apply(database, request, token);
-            if (original.Error is null)
+            if (Errors.Code(original.Problem) is null)
             {
                 await NativeReplayResultAssertions.Same<CommitReceipt>(replay, original);
             }
             else
             {
-                await AtomicPartitionScopeLifecycleReplies.FailureAsync(replay, original.SafeDetail!);
+                await AtomicPartitionScopeLifecycleReplies.FailureAsync(replay, original.Problem!.Detail!);
             }
             await AtomicPartitionScopeLifecycleModels.CurrentAsync(database, state, null, token);
         }

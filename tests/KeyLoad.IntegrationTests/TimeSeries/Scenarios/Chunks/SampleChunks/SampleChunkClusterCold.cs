@@ -16,15 +16,15 @@ internal static class SampleChunkClusterCold
         // Each kill/restart remains in the actual Aspire-owned runtime; all original volumes stay owned by this fixture.
         foreach (var node in Nodes)
         {
-            await fixture.KillContainerAsync(node, SampleChunkClusterProtocol.ColdScenario, token).ConfigureAwait(false);
+            await fixture.KillServerAsync(node, SampleChunkClusterProtocol.ColdScenario, token).ConfigureAwait(false);
         }
         foreach (var node in Nodes)
         {
-            await fixture.BeginContainerRestartAsync(node, token).ConfigureAwait(false);
+            await fixture.BeginProcessRestartAsync(node, token).ConfigureAwait(false);
         }
         foreach (var node in Nodes)
         {
-            await fixture.RestartContainerAsync(node, token).ConfigureAwait(false);
+            await fixture.RestartServerAsync(node, token).ConfigureAwait(false);
         }
         foreach (var node in Nodes)
         {

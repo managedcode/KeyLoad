@@ -11,22 +11,16 @@ namespace KeyLoad.UnitTests.Features.TestInfrastructure;
 
 internal static class FunctionalFileOwnershipProfileModel
 {
-    private const int Voters = 3;
+    private const int Silos = 3;
     private const int OwnersAndContenders = 6;
-    private const int OneAnnotation = 1;
     private const string NodePrefix = "node";
-    private const string DataDirectory = "/data";
     private const string SiloAddress = "KeyLoad__SiloAddress";
     private const string DataEnvironment = "KeyLoad__DataDirectory";
-    private const string FirstVoter = "node1";
-    private const string SecondVoter = "node2";
-    private const string ThirdVoter = "node3";
-    private const string ExpectedImageReference = "ghcr.io/managedcode/keyload@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
     internal static async Task VerifyAsync()
     {
         var root = P.NewRoot();
-        var builder = P.Create(root, Voters, true, true,
+        var builder = P.Create(root, Silos, true, true,
             [new(ExclusiveOwnerContentionProfile.Setting, P.True)]);
         DistributedApplication? app = null;
         var failures = new List<Exception>();
@@ -37,11 +31,12 @@ internal static class FunctionalFileOwnershipProfileModel
             app = builder.Build();
             var model = app.Services.GetRequiredService<DistributedApplicationModel>();
             var names = ExclusiveOwnerContentionResources.ResourceNames;
-            var resources = model.Resources.OfType<ContainerResource>()
+            var resources = model.Resources.OfType<ProjectResource>()
                 .Where(value => value.Name.StartsWith(NodePrefix, StringComparison.Ordinal)
                     || names.Contains(value.Name, StringComparer.Ordinal)).ToArray();
             await Assert.That(resources.Length).IsEqualTo(OwnersAndContenders);
-            await Assert.That(model.Resources.OfType<ExecutableResource>()).IsEmpty();
+            await Assert.That(model.Resources.OfType<ContainerResource>().Select(resource => resource.Name))
+                .IsEquivalentTo(new[] { "orleans-storage" });
             await VerifyResourcesAsync(builder, resources, root, names);
         }, failures);
         if (app is not null)
@@ -57,48 +52,37 @@ internal static class FunctionalFileOwnershipProfileModel
     }
 
     private static async Task VerifyResourcesAsync(IDistributedApplicationBuilder builder,
-        ContainerResource[] resources, string root, string[] contenders)
+        ProjectResource[] resources, string root, string[] contenders)
     {
         var owner = resources.Single(value => value.Name == ExclusiveOwnerContentionResources.OwnerName);
-        var aliases = new HashSet<string>(StringComparer.Ordinal);
-        var containers = new HashSet<string>(StringComparer.Ordinal);
-        var voters = resources.Where(value => !contenders.Contains(value.Name, StringComparer.Ordinal)).ToArray();
-        await Assert.That(voters.Select(value => value.Name).ToArray()).IsEquivalentTo(
-            new[] { FirstVoter, SecondVoter, ThirdVoter });
-        var image = owner.Annotations.OfType<ContainerImageAnnotation>().Single();
+        var names = new HashSet<string>(StringComparer.Ordinal);
+        var endpoints = new HashSet<EndpointAnnotation>(ReferenceEqualityComparer.Instance);
+        var silos = resources.Where(value => !contenders.Contains(value.Name, StringComparer.Ordinal)).ToArray();
+        await Assert.That(silos.Select(value => value.Name)).IsEquivalentTo(new[] { "node1", "node2", "node3" });
         foreach (var resource in resources)
         {
             var contender = contenders.Contains(resource.Name, StringComparer.Ordinal);
-            var mount = resource.Annotations.OfType<ContainerMountAnnotation>().Single();
-            await Assert.That(mount.Source).IsEqualTo(Path.Combine(root, contender ? owner.Name : resource.Name));
-            await Assert.That(mount.Target).IsEqualTo(DataDirectory);
-            await Assert.That(mount.Type).IsEqualTo(ContainerMountType.BindMount);
-            await Assert.That(mount.IsReadOnly).IsFalse();
-            await Assert.That(Directory.Exists(mount.Source)).IsTrue();
-            await Assert.That(resource.Annotations.OfType<ExplicitStartupAnnotation>().Count()).IsEqualTo(contender ? OneAnnotation : 0);
+            var directory = Path.GetFullPath(Path.Combine(root, contender ? owner.Name : resource.Name));
+            await Assert.That(Directory.Exists(directory)).IsTrue();
+            await Assert.That(names.Add(resource.Name)).IsTrue();
+            await Assert.That(resource.GetProjectMetadata().ProjectPath).IsEqualTo(owner.GetProjectMetadata().ProjectPath);
+            await Assert.That(resource.Annotations.OfType<ExplicitStartupAnnotation>().Count()).IsEqualTo(contender ? 1 : 0);
             if (contender)
             {
                 var wait = resource.Annotations.OfType<WaitAnnotation>().Single(value => ReferenceEquals(value.Resource, owner));
                 await Assert.That(wait.WaitType).IsEqualTo(WaitType.WaitUntilHealthy);
             }
-            var alias = resource.Annotations.OfType<ContainerNetworkAliasAnnotation>().Single().Alias;
-            await Assert.That(alias).IsEqualTo(resource.Name);
-            await Assert.That(aliases.Add(alias)).IsTrue();
-            await Assert.That(containers.Add(resource.Annotations.OfType<ContainerNameAnnotation>().Single().Name)).IsTrue();
-            await Assert.That(resource.TryGetContainerImageName(out var reference)).IsTrue();
-            // Native digest-pinned image names omit the configured tag.
-            await Assert.That(reference).IsEqualTo(ExpectedImageReference);
-            var actual = resource.Annotations.OfType<ContainerImageAnnotation>().Single();
-            await Assert.That(actual.Registry).IsEqualTo(image.Registry);
-            await Assert.That(actual.Image).IsEqualTo(image.Image);
-            await Assert.That(actual.Tag).IsEqualTo(image.Tag);
-            await Assert.That(actual.SHA256).IsEqualTo(image.SHA256);
-            await VerifyEnvironmentAsync(builder, resource);
+            foreach (var endpoint in resource.Annotations.OfType<EndpointAnnotation>())
+            {
+                await Assert.That(endpoints.Add(endpoint)).IsTrue();
+                await Assert.That(endpoint.IsProxied).IsFalse();
+            }
+            await VerifyEnvironmentAsync(builder, resource, directory);
             await VerifyFaultAsync(resource);
         }
     }
 
-    private static async Task VerifyEnvironmentAsync(IDistributedApplicationBuilder builder, ContainerResource resource)
+    private static async Task VerifyEnvironmentAsync(IDistributedApplicationBuilder builder, ProjectResource resource, string directory)
     {
         var environment = new Dictionary<string, object>(StringComparer.Ordinal);
         var context = new EnvironmentCallbackContext(builder.ExecutionContext, resource, environment);
@@ -106,18 +90,21 @@ internal static class FunctionalFileOwnershipProfileModel
         {
             await callback.Callback(context);
         }
-        await Assert.That(environment[SiloAddress]).IsEqualTo(resource.Name);
-        await Assert.That(environment[DataEnvironment]).IsEqualTo(DataDirectory);
+        await Assert.That(environment[SiloAddress]).IsEqualTo("127.0.0.1");
+        await Assert.That(environment[DataEnvironment]).IsEqualTo(directory);
     }
 
-    private static async Task VerifyFaultAsync(ContainerResource resource)
+    private static async Task VerifyFaultAsync(ProjectResource resource)
     {
         var command = resource.Annotations.OfType<ResourceCommandAnnotation>()
-            .Single(value => value.Name == ContainerFaultCommandProtocol.CommandName);
-        var argument = command.Arguments.Single();
+            .Single(value => value.Name == ProcessFaultCommandProtocol.CommandName);
         await Assert.That(command.Visibility).IsEqualTo(ResourceCommandVisibility.Api);
-        await Assert.That(argument.Name).IsEqualTo(ContainerFaultCommandProtocol.ExpectedIdArgument);
-        await Assert.That(argument.Required).IsTrue();
-        await Assert.That(argument.MaxLength).IsEqualTo(ContainerFaultCommandProtocol.FullIdCharacters);
+        await Assert.That(command.Arguments.Select(argument => argument.Name)).IsEquivalentTo(new[]
+        {
+            ProcessFaultCommandProtocol.ExpectedProcessIdArgument, ProcessFaultCommandProtocol.ExpectedAspireStartArgument,
+            ProcessFaultCommandProtocol.ExpectedProcessStartArgument
+        });
+        await Assert.That(command.Arguments.All(argument => argument.Required
+            && argument.MaxLength == ProcessFaultCommandProtocol.MaximumIdentityCharacters)).IsTrue();
     }
 }

@@ -1,19 +1,11 @@
 using System.Text.Json;
-using Aspire.Hosting;
-using KeyLoad.AppHost.Features.TestInfrastructure;
-using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class ComparisonParallelismSelectionTests
 {
-    private const string ParallelismSetting = TestExecutionOptions.SectionName + ":" + nameof(TestExecutionOptions.MaximumParallelTests);
-    private const string ComparisonSuite = "comparison";
-    private const string BenchmarkSection = "Benchmarks";
     private const string ComparisonProject = "tests/KeyLoad.ComparisonTests";
-    private const string TypedComparisonProject = "KeyLoad.ComparisonTests";
     private const string SelectedFilter = "/*/*/ActualComparison/*";
-    private const string IsolationMessage = "Comparison measurements require exactly one native test at a time.";
     private const string NodeIsolationMessage = "Comparison measurements and heavy load require exactly one native test at a time.";
     private const string ModuleArgument = "--input-type=module";
     private const string EvaluationArgument = "-e";
@@ -32,7 +24,6 @@ internal sealed class ComparisonParallelismSelectionTests
     private const string KeyLoadTarget = "KeyLoad";
     private const string RevisionEnvironment = "GITHUB_SHA";
     private const string OriginalRevision = "original-revision";
-    private const int IsolatedParallelism = 1;
     private const int RejectedSelections = 8;
     private const int RetiredSelections = 30;
 
@@ -72,54 +63,4 @@ internal sealed class ComparisonParallelismSelectionTests
         await Assert.That(document.RootElement.GetProperty(RetiredProperty).GetArrayLength()).IsEqualTo(RetiredSelections);
     }
 
-    [Test]
-    [Arguments(null)]
-    [Arguments("1")]
-    public async Task AcTunitEntry013TypedComparisonSelectsSingleTestBeforeResourceComposition(string? requested)
-    {
-        var builder = DistributedApplication.CreateBuilder(new DistributedApplicationOptions { DisableDashboard = true, Args = [] });
-        ConfigureSelection(builder.Configuration);
-        if (requested is not null)
-        {
-            builder.Configuration[ParallelismSetting] = requested;
-        }
-        var original = builder.Configuration.AsEnumerable().ToArray();
-        var selected = TestSuiteSettings.Read(builder.Configuration)!;
-        await Assert.That(selected.MaximumParallelTests).IsEqualTo(IsolatedParallelism);
-        await Assert.That(selected.Project).IsEqualTo(TypedComparisonProject);
-        await Assert.That(selected.Filter).IsEqualTo(SelectedFilter);
-        await Assert.That(builder.Configuration.GetSection(BenchmarkSection).Exists()).IsFalse();
-        await Assert.That(selected.Timeout).IsEqualTo(TimeSpan.FromMinutes(60));
-        await Assert.That(builder.Resources.Count).IsEqualTo(0);
-        await Assert.That(builder.Configuration.AsEnumerable().ToArray()).IsEquivalentTo(original);
-    }
-
-    [Test]
-    [Arguments("2")]
-    [Arguments("20")]
-    [Arguments("50")]
-    public async Task AcTunitEntry013TypedComparisonRejectsOverlapWithoutResourcesThenHealthySelectionContinues(string requested)
-    {
-        var builder = DistributedApplication.CreateBuilder(new DistributedApplicationOptions { DisableDashboard = true, Args = [] });
-        ConfigureSelection(builder.Configuration);
-        builder.Configuration[ParallelismSetting] = requested;
-        var original = builder.Configuration.AsEnumerable().ToArray();
-        var failure = Assert.ThrowsExactly<InvalidOperationException>(() => TestSuiteSettings.Read(builder.Configuration));
-        await Assert.That(failure.Message).IsEqualTo(IsolationMessage);
-        await Assert.That(builder.Resources.Count).IsEqualTo(0);
-        await Assert.That(builder.Configuration.AsEnumerable().ToArray()).IsEquivalentTo(original);
-        builder.Configuration[ParallelismSetting] = "1";
-        var healthy = TestSuiteSettings.Read(builder.Configuration)!;
-        await Assert.That(healthy.MaximumParallelTests).IsEqualTo(IsolatedParallelism);
-        await Assert.That(healthy.Filter).IsEqualTo(SelectedFilter);
-        await Assert.That(healthy.Timeout).IsEqualTo(TimeSpan.FromMinutes(60));
-        await Assert.That(builder.Configuration.GetSection(BenchmarkSection).Exists()).IsFalse();
-        await Assert.That(builder.Resources.Count).IsEqualTo(0);
-    }
-
-    private static void ConfigureSelection(ConfigurationManager configuration)
-    {
-        configuration[TestSuiteSettings.SuiteSetting] = ComparisonSuite;
-        configuration[TestSuiteSettings.FilterSetting] = SelectedFilter;
-    }
 }

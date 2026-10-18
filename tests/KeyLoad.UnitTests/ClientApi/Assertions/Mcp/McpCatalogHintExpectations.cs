@@ -8,23 +8,16 @@ internal static class McpCatalogHintExpectations
 {
     internal static async Task RequireAsync(McpOperationDescriptor actual, GrainReadKind? read, OperationKind? command)
     {
-        var readOnly = read.HasValue && read is not (GrainReadKind.Backup or GrainReadKind.ClusterBackupOwner);
+        var readOnly = read.HasValue && read != GrainReadKind.Backup;
         var idempotent = read != GrainReadKind.Backup && (read.HasValue || command.HasValue);
         var destructive = !read.HasValue;
-        if (command is OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex or OperationKind.ReceiveAcrossLanes
-            or OperationKind.EventFeedControl)
+        if (command is OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex or OperationKind.ReceiveAcrossLanes)
         {
             idempotent = false;
         }
         if (command is OperationKind.ConfigureResource
             or OperationKind.BeginBlobUpload or OperationKind.WriteBlobPart or OperationKind.AbortBlobUpload)
         {
-            destructive = false;
-        }
-        if (actual.Name == "keyload_tail_event_feed")
-        {
-            readOnly = true;
-            idempotent = true;
             destructive = false;
         }
         await Assert.That(actual.ReadOnly).IsEqualTo(readOnly);

@@ -2,44 +2,25 @@ using Aspire.Hosting.ApplicationModel;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
+/// <summary>Releases only this workload's host directory after Aspire has joined its session resources.</summary>
 internal static class IsolatedNativeDataCleanup
 {
-    private const string Runner = "comparisons";
-    private const string VolumePrefix = "keyload-isolated-";
-    private const string Shell = "/bin/sh";
-    private const string OwnedMount = "/owned";
-    private const string RemoveOwnedData = "rm -rf /owned/native /owned/reports";
-    private const string Failure = "IsolatedNativeDataCleanupFailed";
+    private const string OwnershipFailure = "The selected database retained a named volume or writable host bind mount.";
 
-    internal static async Task DeleteAsync(string root, ContainerResource[] containers)
+    internal static Task DeleteAsync(string root, ContainerResource[] containers)
     {
-        var volumes = containers.SelectMany(item => item.Annotations.OfType<ContainerMountAnnotation>())
-            .Where(item => item.Type == ContainerMountType.Volume).Select(item => item.Source).Distinct().ToArray();
-        foreach (var volume in volumes)
+        foreach (var resource in containers)
         {
-            if (volume is null || !volume.StartsWith(VolumePrefix, StringComparison.Ordinal))
+            if (resource.Annotations.OfType<ContainerMountAnnotation>()
+                .Any(mount => !mount.IsReadOnly && (mount.Type != ContainerMountType.Volume || mount.Source is not null)))
             {
-                throw new IOException(Failure);
+                throw new IOException(OwnershipFailure);
             }
-            await DockerAsync(["volume", "rm", "--", volume]);
         }
-        if (!Directory.Exists(root))
+        if (Directory.Exists(root))
         {
-            return;
+            Directory.Delete(root, recursive: true);
         }
-        var runner = containers.Single(item => item.Name == Runner);
-        if (!runner.TryGetContainerImageName(out var image))
-        {
-            throw new IOException(Failure);
-        }
-        await DockerAsync(["run", "--rm", "--pull", "never", "--network", "none", "--read-only", "--user", "0:0",
-            "--cap-drop", "ALL", "--cap-add", "DAC_OVERRIDE", "--entrypoint", Shell,
-            "--mount", $"type=bind,source={root},target={OwnedMount}", image!, "-c", RemoveOwnedData]);
-        Directory.Delete(root, recursive: true);
-    }
-
-    private static async Task DockerAsync(string[] arguments)
-    {
-        _ = await IsolatedKeyLoadFaultChecksDocker.RunAsync(arguments, CancellationToken.None);
+        return Task.CompletedTask;
     }
 }

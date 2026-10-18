@@ -17,6 +17,10 @@ internal static class GrainOnlineTextCheckpointCommand
         var work = maintenance.TryRequireCheckpointWork(checkpoint, principal.Id, request.Envelope.ExpiresAt);
         if (work is null)
         {
+            if (request.Envelope.Purpose == OnlineTextRequestScope.Purpose)
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
+            }
             return null;
         }
         if (request.Envelope.CommandId != checkpoint.CommandId)

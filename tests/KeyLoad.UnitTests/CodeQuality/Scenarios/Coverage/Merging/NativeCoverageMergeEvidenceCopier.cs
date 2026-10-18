@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using KeyLoad.AppHost.Features.CodeQuality;
 using TUnit.Core.Interfaces;
 
 namespace KeyLoad.UnitTests.Features.CodeQuality;

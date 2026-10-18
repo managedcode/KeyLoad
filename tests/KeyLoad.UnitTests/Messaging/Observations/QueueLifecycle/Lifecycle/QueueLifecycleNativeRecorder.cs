@@ -15,7 +15,7 @@ internal sealed class QueueLifecycleNativeRecorder(DatabaseEngine database, Queu
     private const string CounterFamily = "queue-counters";
     private const string IncompleteFixture = "The native lifecycle recorder fixture exceeds its fixed metadata bound.";
     internal DatabaseEngine Database { get; set; } = database;
-    internal List<QueueLifecycleNativeSample> Samples { get; } = [];
+    internal List<QueueLifecycleNativeObservation> Observations { get; } = [];
 
     private readonly Dictionary<(string Subject, Guid Id), QueueLifecycleNativeExpectation> expectations = [];
 
@@ -37,7 +37,7 @@ internal sealed class QueueLifecycleNativeRecorder(DatabaseEngine database, Queu
         var store = owner.Store;
         var placement = owner.ReadAtomicPartitionPlacement(Subject, lane.Partition);
         var token = new CommitToken(placement.Incarnation, lane.Partition.AtomicPartitionId,
-            checked(store.Position + NextCommitPosition));
+            checked(owner.LastApplied + NextCommitPosition));
         var before = store.Read(view =>
         {
             var page = view.Scan(KeySpace.Partition(MetadataFamily, lane.Partition, lane.Queue), MetadataReadBound);
@@ -54,7 +54,7 @@ internal sealed class QueueLifecycleNativeRecorder(DatabaseEngine database, Queu
 
     internal void Capture(IEnumerable<(Command<DatabaseCommand> Operation, Result<object> Result)> outcomes)
     {
-        Samples.Clear();
+        Observations.Clear();
         foreach (var outcome in outcomes)
         {
             Record(outcome.Operation, outcome.Result);
@@ -64,15 +64,15 @@ internal sealed class QueueLifecycleNativeRecorder(DatabaseEngine database, Queu
     private void Record(Command<DatabaseCommand> operation, Result<object> result)
     {
         var expected = expectations[(operation.UserId!, operation.CommandId)];
-        Samples.Add(new(operation, result, expected.Token, expected.Before, expected.Counters));
+        Observations.Add(new(operation, result, expected.Token, expected.Before, expected.Counters));
     }
 
     internal async Task AssertAsync(CancellationToken token)
     {
-        foreach (var sample in Samples)
+        foreach (var observation in Observations)
         {
             token.ThrowIfCancellationRequested();
-            await QueueLifecycleNativeReceiptAssertions.ResultAsync(Database, lane, literal, sample);
+            await QueueLifecycleNativeReceiptAssertions.ResultAsync(Database, lane, literal, observation);
         }
     }
 }
