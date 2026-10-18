@@ -1,6 +1,6 @@
 using System.Text.Json;
-using static KeyLoad.RecoveryTests.Features.EventStreams.SharedDomainProtocol;
 using static KeyLoad.IntegrationTests.Features.EventStreams.SharedDomainPublicProtocol;
+using static KeyLoad.RecoveryTests.Features.EventStreams.SharedDomainProtocol;
 
 namespace KeyLoad.IntegrationTests.Features.EventStreams;
 

@@ -1,6 +1,7 @@
 using KeyLoad.Comparisons.Targets;
+using KeyLoad.UnitTests;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>AC-ISO-003/004: declared benchmark contracts never imply an observed cluster.</summary>
 internal sealed class BenchmarkTopologyTargetTests

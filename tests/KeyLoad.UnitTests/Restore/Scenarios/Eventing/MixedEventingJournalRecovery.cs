@@ -1,7 +1,7 @@
-using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.Messaging;
+using ManagedCode.Communication.Commands;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.BackupRestore;
@@ -86,14 +86,14 @@ internal static class MixedEventingJournalRecovery
         var expected = source.Database.ResolveOutcome(operation);
         await Assert.That(Errors.Code(expected.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(expected.Problem?.Detail).IsEqualTo(FullDetail);
-        
+
         await Assert.That(expected.Value).IsNull();
         var exact = source.Store.Read(view => view.ReadOwnedValue(outcomeKey))!;
         var cut = source.Store.Position;
         var replay = source.SubmitIssued(operation);
         await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(Errors.Code(expected.Problem));
         await Assert.That(replay.Problem?.Detail).IsEqualTo(FullDetail);
-        
+
         await Assert.That(replay.Value).IsNull();
         await Assert.That(source.Store.Position).IsEqualTo(cut);
         await Assert.That(source.ReadStoredOutcome(operation.CommandId).CanonicalSequence).IsEqualTo(index);
@@ -112,7 +112,7 @@ internal static class MixedEventingJournalRecovery
             QueueLifecycleTestProtocol.Pending, QueueLifecycleTestProtocol.Two, QueueLifecycleTestProtocol.One)]);
         var refused = source.SubmitIssued(source.Database.CreateCommand(original.Value!.Kind, original.CommandId, original.UserId!, new DateTimeOffset(original.Timestamp), JsonSerializer.Serialize(changed, JsonDefaults.Options)));
         await Assert.That(Errors.Code(refused.Problem)).IsEqualTo(ErrorCode.Conflict);
-        
+
         await Assert.That(refused.Value).IsNull();
         await Assert.That(source.Store.Position).IsEqualTo(cut);
         await Assert.That(source.ReadCanonicalCut()).IsEqualTo(journal);

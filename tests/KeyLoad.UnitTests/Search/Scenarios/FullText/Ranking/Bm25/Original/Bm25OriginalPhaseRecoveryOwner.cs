@@ -1,9 +1,10 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
+using System.Diagnostics.CodeAnalysis;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
@@ -14,7 +15,7 @@ internal sealed class Bm25OriginalPhaseRecoveryOwner
     private readonly StoreIdentity originalIdentity;
     private bool originalJoined;
     private ZoneTreeStore? coldStore;
-    private DatabaseEngine? coldDatabase;
+
     internal TestDatabase Source
     {
         get;
@@ -29,8 +30,13 @@ internal sealed class Bm25OriginalPhaseRecoveryOwner
 
     internal ZoneTreeStore Store => originalJoined
         ? coldStore ?? throw new InvalidOperationException(MissingOwner) : Source.Store;
-    internal DatabaseEngine Database => originalJoined
-        ? coldDatabase ?? throw new InvalidOperationException(MissingOwner) : Source.Database;
+
+    [AllowNull]
+    internal DatabaseEngine Database
+    {
+        get => originalJoined
+        ? field ?? throw new InvalidOperationException(MissingOwner) : Source.Database; private set;
+    }
 
     internal static async Task RunAsync(Func<Bm25OriginalPhaseRecoveryFlow, Task> operation)
     {
@@ -64,7 +70,8 @@ internal sealed class Bm25OriginalPhaseRecoveryOwner
         : Source.ReadStoredOutcome(commandId);
 
     internal (long AppliedPosition, long StorePosition) ReadCut()
-        => Store.Read(_ => (Database.LastApplied, Store.Position));
+        => Store.Read(view => (view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
+            ? NativeSerialization.Deserialize<long>(bytes) : default(long), Store.Position));
 
     internal void Reopen(DatabaseLimits? configuredLimits = null)
     {
@@ -86,7 +93,7 @@ internal sealed class Bm25OriginalPhaseRecoveryOwner
         {
             Incarnation = originalIdentity.Incarnation
         }, originalIdentity.NodeId, Source.StorageExecution);
-        coldDatabase = CreateColdDatabase(coldStore, configuredLimits);
+        Database = CreateColdDatabase(coldStore, configuredLimits);
     }
 
     private DatabaseEngine CreateColdDatabase(ZoneTreeStore store, DatabaseLimits? configuredLimits)
@@ -110,7 +117,7 @@ internal sealed class Bm25OriginalPhaseRecoveryOwner
         }
         var store = coldStore;
         coldStore = null;
-        coldDatabase = null;
+        Database = null;
         var failures = new List<Exception>();
         if (store is not null)
         {

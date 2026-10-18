@@ -157,7 +157,7 @@ internal sealed class StoragePublicationRecoveryTests
     [Test]
     public async Task VerifiedBackupRestoresDataWithNewIdentityAndPausedDispatch()
     {
-        var temporaryDirectory = ResolveExistingDirectory(new(Path.GetTempPath()));
+        var temporaryDirectory = StorageTrialDirectory.ResolveExistingDirectory(new(Path.GetTempPath()));
         var root = Path.Combine(temporaryDirectory, "keyload-backup-" + Guid.NewGuid().ToString("N"));
         var backup = root + "-backup";
         var restored = root + "-restored";
@@ -201,16 +201,6 @@ internal sealed class StoragePublicationRecoveryTests
     private static void OpenCorruptStore(string root)
     {
         using var rejected = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
-    }
-
-    private static string ResolveExistingDirectory(DirectoryInfo directory)
-    {
-        if (directory.Parent is null)
-        {
-            return directory.FullName;
-        }
-        var entry = new DirectoryInfo(Path.Combine(ResolveExistingDirectory(directory.Parent), directory.Name));
-        return entry.ResolveLinkTarget(returnFinalTarget: true)?.FullName ?? entry.FullName;
     }
 
 }

@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Settles both borrowed-stream pumps before returning ownership to the caller.</summary>
 internal static class NativeSerializationBenchmarkCaptures

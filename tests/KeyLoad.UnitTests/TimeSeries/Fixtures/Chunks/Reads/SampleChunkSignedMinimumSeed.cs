@@ -6,7 +6,6 @@ internal static class SampleChunkSignedMinimumSeed
 {
     private const string ReaderId = "native-signed-chunk-minimum-reader";
     private const long NextPosition = 1;
-    private const long InitialEpoch = 1;
     private const int AppendIndex = 1;
     private const string AppendKind = "appendSamples";
 

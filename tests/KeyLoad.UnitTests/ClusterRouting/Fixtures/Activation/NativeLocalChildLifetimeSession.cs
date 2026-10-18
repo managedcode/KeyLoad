@@ -1,7 +1,7 @@
-using Microsoft.Extensions.DependencyInjection;
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 

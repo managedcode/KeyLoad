@@ -83,7 +83,7 @@ internal static class CliBackupOwnerExclusionTrial
         var created = await CliBackupRestoreProcess.RunAsync(options,
             ["backup", fixture.Source, backup], token);
         await CliBackupRestoreAssertions.SuccessfulProcessAsync(created);
-        var verified = ZoneTreeStore.VerifyBackup(backup, UnitExecutionOptions.StorageExecution());
+        var verified = ZoneTreeStore.VerifyBackup(backup, UnitExecutionOptions.StorageExecution(), token);
         await Assert.That(verified.Position).IsEqualTo(fixture.Position);
         await Assert.That(NativeSerialization.Serialize(verified.Identity)
             .SequenceEqual(NativeSerialization.Serialize(fixture.Identity))).IsTrue();

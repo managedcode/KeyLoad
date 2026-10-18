@@ -1,6 +1,6 @@
 using System.Text.Json.Nodes;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>AC-METH-004: native original TRX and ZIP evidence bind the exclusive CLUSTER functional gate.</summary>
 internal sealed class DocumentFunctionalGateTests

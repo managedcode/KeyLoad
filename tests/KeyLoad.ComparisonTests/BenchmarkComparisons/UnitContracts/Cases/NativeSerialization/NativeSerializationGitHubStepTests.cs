@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>R15-AC001: classify preceding step visibility without relaxing completed-success admission.</summary>
 internal sealed class NativeSerializationGitHubStepTests

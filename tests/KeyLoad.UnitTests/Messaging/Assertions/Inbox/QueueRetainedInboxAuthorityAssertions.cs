@@ -1,8 +1,8 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -64,7 +64,7 @@ internal static class QueueRetainedInboxAuthorityAssertions
         var failed = owner.Apply(operation);
         await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(ErrorCode.StaleLease);
         await Assert.That(failed.Problem?.Detail).IsEqualTo(StaleDelivery);
-        
+
         await Assert.That(failed.Value).IsNull();
         await Assert.That(store.Position).IsEqualTo(before + 1);
         await QueueLifecycleImage.SameAsync(store, state.Flow.Lane, lane);

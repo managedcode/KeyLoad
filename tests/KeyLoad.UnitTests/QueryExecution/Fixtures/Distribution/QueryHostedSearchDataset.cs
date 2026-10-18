@@ -1,5 +1,4 @@
 using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.UnitTests.Features.ClusterRouting;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 

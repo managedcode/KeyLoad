@@ -1,9 +1,9 @@
-using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.UnitTests.Features.Messaging;
 using KeyLoad.UnitTests.Features.ResourceExecution;
 using KeyLoad.UnitTests.Features.StorageRecovery.Assertions;
+using ManagedCode.Communication;
 using TUnit.Assertions.Enums;
 using static KeyLoad.UnitTests.Features.EventStreams.EventQueueStateEnvelopeCommands;
 using static KeyLoad.UnitTests.Features.EventStreams.EventQueueStateEnvelopeProtocol;
@@ -60,7 +60,7 @@ internal static class EventQueueStateEnvelopeHistoryAssertions
         {
             await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(ErrorCode.StaleLease);
             await Assert.That(actual.Problem?.Detail).IsEqualTo(expected.Operation.Value!.Kind == OperationKind.Receive ? QueueStale : SubscriptionStale);
-            
+
             await Assert.That(actual.Value).IsNull();
             return;
         }

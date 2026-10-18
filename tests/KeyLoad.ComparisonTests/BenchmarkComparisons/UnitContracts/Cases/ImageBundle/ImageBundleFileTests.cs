@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>AC-ISO-006/007: genuine Node/file validation of portable image evidence; no Docker proof is inferred.</summary>
 internal sealed class ImageBundleFileTests

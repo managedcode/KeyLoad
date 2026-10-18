@@ -1,7 +1,7 @@
-using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -61,7 +61,7 @@ internal static class QueueLifecycleCeilingFailureAssertions
     {
         await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(actual.Problem?.Detail).IsEqualTo(Exhausted);
-        
+
         await Assert.That(actual.Value).IsNull();
     }
 

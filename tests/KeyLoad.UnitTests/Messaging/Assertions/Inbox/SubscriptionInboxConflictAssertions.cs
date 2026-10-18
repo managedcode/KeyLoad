@@ -1,9 +1,9 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.ResourceExecution;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -137,7 +137,7 @@ internal static class SubscriptionInboxConflictAssertions
         var replay = db.Apply(original.Operation);
         await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
         await Assert.That(replay.Problem?.Detail).IsEqualTo("The subscription token scope or generation is invalid.");
-        
+
         await Assert.That(replay.Value).IsNull();
         var retained = SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, original.Operation.CommandId);
         await Assert.That(retained.AsSpan().SequenceEqual(original.Saved)).IsTrue();
@@ -150,7 +150,7 @@ internal static class SubscriptionInboxConflictAssertions
     {
         await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(result.Problem?.Detail).IsEqualTo("The subscription input was completed with different effects.");
-        
+
         await Assert.That(result.Value).IsNull();
     }
 }

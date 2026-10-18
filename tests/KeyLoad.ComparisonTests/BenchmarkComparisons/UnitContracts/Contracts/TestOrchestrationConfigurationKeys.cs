@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.TestInfrastructure;
+namespace KeyLoad.ComparisonTests.Features.TestInfrastructure;
 
 /// <summary>Explicit configuration keys for native AppHost composition checks inputs.</summary>
 internal static class TestOrchestrationConfigurationKeys

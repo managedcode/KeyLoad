@@ -34,7 +34,7 @@ internal sealed class ConfiguredVectorProfileNullArrayTests
         var rejected = database.Submit(OperationKind.ConfigureResource, document.RootElement, id: id);
         await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.Validation);
         await Assert.That(rejected.Problem?.Detail).IsEqualTo(InvalidPayload);
-        
+
         await Assert.That(database.Store.Position).IsEqualTo(position + CommitAdvance);
         var resourceKey = KeySpace.Resource(database.Partition.TenantId, database.Partition.DatabaseId, definition.Name);
         await Assert.That(database.Store.Read(view => view.GetRecord<ResourceDefinition>(resourceKey))).IsNull();

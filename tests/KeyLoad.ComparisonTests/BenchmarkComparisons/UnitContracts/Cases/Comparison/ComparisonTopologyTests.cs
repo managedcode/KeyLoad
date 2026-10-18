@@ -4,7 +4,7 @@ using KeyLoad.Comparisons;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class ComparisonTopologyTests
 {

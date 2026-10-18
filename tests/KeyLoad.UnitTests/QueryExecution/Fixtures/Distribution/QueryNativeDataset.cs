@@ -28,6 +28,7 @@ internal sealed class QueryNativeDataset(QueryNativeFixture fixture)
 
     private static PrincipalRecord Principal(long epoch, bool granted) => new(QueryNativeFixture.Reader,
         QueryNativeFixture.Tenant, granted ? [new(Local.DatabaseId, QueryNativeFixture.Collection,
-            Capability.Query | Capability.DocumentsRead)] : [], []) { PolicyEpoch = epoch };
+            Capability.Query | Capability.DocumentsRead)] : [], [])
+    { PolicyEpoch = epoch };
 
 }

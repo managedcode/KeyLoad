@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.ClusterRouting;
+namespace KeyLoad.ComparisonTests.Features.ClusterRouting;
 
 internal static class RequestCqrsImageJournalNodeProgram
 {

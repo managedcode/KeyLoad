@@ -117,8 +117,6 @@ internal static class ZoneTreeBackupRestoreRestore
             restored.Commit((tx, _) =>
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                tx.Delete(KeyCodec.Encode(SystemNamespace, LastAppliedKey));
-                tx.Delete(KeyCodec.Encode(SystemNamespace, ClockKey));
                 tx.PutRecord(KeyCodec.Encode(SystemNamespace, DispatchPausedKey), true);
                 return true;
             });

@@ -1,5 +1,5 @@
-using ManagedCode.Communication.Commands;
 using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 namespace KeyLoad.UnitTests.Features.EventStreams;
 
 internal sealed record EventQueueStateEnvelopeHistory(Command<DatabaseCommand> Operation, Result<object> Result,

@@ -29,7 +29,7 @@ internal static class AtomicPartitionScopeLifecycleReplies
     {
         await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(result.Problem?.Detail).IsEqualTo(detail);
-        
+
         await Assert.That(result.Value).IsNull();
     }
 }

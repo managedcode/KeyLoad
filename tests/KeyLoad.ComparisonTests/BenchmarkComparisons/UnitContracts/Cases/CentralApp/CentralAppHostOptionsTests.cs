@@ -7,7 +7,7 @@ using KeyLoad.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.TestInfrastructure;
+namespace KeyLoad.ComparisonTests.Features.TestInfrastructure;
 
 internal sealed class CentralAppHostOptionsTests
 {

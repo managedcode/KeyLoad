@@ -9,7 +9,6 @@ internal static class GraphSearchIntegrityRecipe
     private const int SeedDepth = 0;
     private const int Fusion = 60;
     private const int FirstRank = 1;
-    private const long PlacementEpoch = 1L;
     private const string PutKind = "putDocument";
     private const string EdgeKind = "upsertEdge";
 

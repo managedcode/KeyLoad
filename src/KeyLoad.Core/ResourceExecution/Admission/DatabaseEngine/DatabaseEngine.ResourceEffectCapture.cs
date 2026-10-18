@@ -1,8 +1,8 @@
-using ManagedCode.Communication.Commands;
 using System.Collections.Immutable;
 using KeyLoad.Core.Features.DatabaseComposition;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.Core;
 
@@ -40,7 +40,7 @@ public sealed partial class DatabaseEngine
             ? new ResourceEffectPreparationTransaction(
                 new KeyLoad.Core.Features.BackupRestore.Execution.AtomicPartitionRosterTransaction(
                     (IAtomicTransaction)raw, OperationLimitsOptions, position,
-                    KeyLoad.Core.Features.BackupRestore.Serialization.AtomicPartitionRosterProtocol.NoReplicatedAppliedIndex), scope,
+                    KeyLoad.Core.Features.BackupRestore.Serialization.AtomicPartitionRosterProtocol.NoCanonicalSequence), scope,
                 preparationWork ?? new ReadExecutionBudget(OperationLimitsOptions, CompositionTimeProvider.Instance))
             : null;
         var view = preparation is null

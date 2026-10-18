@@ -1,5 +1,5 @@
-using ManagedCode.Communication;
 using System.Globalization;
+using ManagedCode.Communication;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 

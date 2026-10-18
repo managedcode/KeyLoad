@@ -1,8 +1,8 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 
@@ -143,7 +143,7 @@ internal static class QueueDeliveryVersionExhaustionContinuation
         var stale = database.Apply(state.Claim);
         await Assert.That(Errors.Code(stale.Problem)).IsEqualTo(ErrorCode.StaleLease);
         await Assert.That(stale.Value).IsNull();
-        
+
         var original = store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(
             state.Data.Lane.Partition, QueueClaimVersionExhaustionProtocol.Root, state.Claim.Id)))!;
         await QueueClaimVersionExhaustionAssertions.EqualAsync(original.Result, state.Claimed);

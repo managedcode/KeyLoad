@@ -1,5 +1,3 @@
-using KeyLoad.Core.Features.InternalSerialization;
-
 namespace KeyLoad.UnitTests.Features.InternalSerialization;
 
 internal sealed class NativePublicNormalizationTests

@@ -1,6 +1,6 @@
-using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Query;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.ChangeFeeds;
 

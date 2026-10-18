@@ -1,6 +1,6 @@
 using KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Locks ZoneTree's retained-corpus capacity model and qualification headroom.</summary>
 internal sealed class ScaledRawStorageSettingsTests

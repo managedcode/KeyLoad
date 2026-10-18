@@ -3,7 +3,7 @@ using System.Text.Json;
 using KeyLoad.Comparisons;
 using KeyLoad.Comparisons.Targets;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>AC-ISO-003/005 uses native response payloads without an HTTP double.</summary>
 internal sealed class NativeDocumentTopologyOpenSearchTests

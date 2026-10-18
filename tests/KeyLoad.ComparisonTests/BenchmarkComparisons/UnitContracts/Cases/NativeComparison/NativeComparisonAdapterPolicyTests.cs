@@ -1,7 +1,7 @@
 using KeyLoad.Comparisons;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>AC-CQ-034: adapter limits retain their qualified ceilings and accept configured lower bounds.</summary>
 internal sealed class NativeComparisonAdapterPolicyTests

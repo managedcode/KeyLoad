@@ -23,13 +23,12 @@ internal static class NativeBackupJournalRepairTrial
         var source = NativeBackupJournalRepairAssertions.Read(fixture.Source, token);
         await RefuseAndRepairAsync(fixture, archive, token);
         await NativeBackupJournalRepairAssertions.SameArchiveAsync(archive, fixture.Backup, token);
-        var verified = ZoneTreeStore.VerifyBackup(fixture.Backup, UnitExecutionOptions.StorageExecution());
+        var verified = ZoneTreeStore.VerifyBackup(fixture.Backup, UnitExecutionOptions.StorageExecution(), token);
         await Assert.That(verified.Position).IsEqualTo(fixture.Position);
         await Assert.That(NativeSerialization.Serialize(verified.Identity)
             .SequenceEqual(NativeSerialization.Serialize(fixture.Identity))).IsTrue();
         token.ThrowIfCancellationRequested();
-        var identity = ZoneTreeStore.Restore(fixture.Backup, fixture.Destination,
-            UnitExecutionOptions.StorageExecution());
+        var identity = ZoneTreeStore.Restore(fixture.Backup, fixture.Destination, UnitExecutionOptions.StorageExecution(), cancellationToken: token);
         var restored = NativeBackupJournalRepairAssertions.Read(fixture.Destination, token);
         await NativeBackupJournalRepairAssertions.RestoredAsync(fixture, identity, restored);
         await NativeBackupJournalRepairAssertions.SameCutAsync(restored,

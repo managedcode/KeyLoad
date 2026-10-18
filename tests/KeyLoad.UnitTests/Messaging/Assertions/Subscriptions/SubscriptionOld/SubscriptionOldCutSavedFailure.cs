@@ -1,10 +1,10 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.StorageRecovery.Assertions;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 
@@ -61,7 +61,7 @@ internal static class SubscriptionOldCutSavedFailure
     {
         await Assert.That(Errors.Code(result.Problem)).IsEqualTo(code);
         await Assert.That(result.Problem?.Detail).IsEqualTo(detail);
-        
+
         await Assert.That(result.Value).IsNull();
     }
     private static async Task OutcomeAsync(StoredOutcome actual, StoredOutcome expected)

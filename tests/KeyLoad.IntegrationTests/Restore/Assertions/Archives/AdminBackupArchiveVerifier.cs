@@ -40,7 +40,7 @@ internal static class AdminBackupArchiveVerifier
         ArgumentNullException.ThrowIfNull(reference);
         var archiveDirectory = await LocateArchiveAsync(fixture, receipt, cancellationToken).ConfigureAwait(false);
         var policy = IntegrationExecutionOptions.StorageExecution();
-        var (originalIdentity, verifiedPosition) = ZoneTreeStore.VerifyBackup(archiveDirectory, policy);
+        var (originalIdentity, verifiedPosition) = ZoneTreeStore.VerifyBackup(archiveDirectory, policy, cancellationToken);
         var originalManifestDigest = await AdminBackupArchiveIntegrity.CaptureManifestDigestAsync(
             archiveDirectory, policy.Value, cancellationToken).ConfigureAwait(false);
         await Assert.That(verifiedPosition).IsEqualTo(receipt.Position);

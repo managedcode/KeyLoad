@@ -1,10 +1,9 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using KeyLoad.Core.Features.ClusterRouting.Execution;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
-using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Query.Features.Search;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
@@ -105,7 +104,7 @@ internal static class Bm25ConfiguredCountTrial
     {
         await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(result.Problem?.Detail).IsEqualTo(Bm25CorpusProtocol.Capacity);
-        
+
         await Assert.That(result.Value).IsNull();
         await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(NativeSerialization.Serialize(familyBefore),
             NativeSerialization.Serialize(Family(flow)));

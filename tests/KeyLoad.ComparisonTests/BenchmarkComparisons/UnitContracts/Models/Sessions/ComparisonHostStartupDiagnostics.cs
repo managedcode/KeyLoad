@@ -4,7 +4,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Projects startup timeout observations into a closed, privacy-safe receipt.</summary>
 internal sealed record ComparisonHostStartupDiagnostics(ComparisonHostStartupStage Stage,

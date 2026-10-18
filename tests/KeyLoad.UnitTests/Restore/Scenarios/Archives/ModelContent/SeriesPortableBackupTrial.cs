@@ -1,8 +1,8 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.BackupRestore;
@@ -31,7 +31,7 @@ internal static class SeriesPortableBackupTrial
         await SeriesPortableBackupAssertions.ReplayAsync(fixture.Source.Database, originals, token);
         await Assert.That(fixture.CreateBackup()).IsEqualTo(source.Position);
         var archive = await NativeBackupJournalRepairAssertions.ArchiveAsync(fixture.BackupDirectory, token);
-        var verified = ZoneTreeStore.VerifyBackup(fixture.BackupDirectory, UnitExecutionOptions.StorageExecution());
+        var verified = ZoneTreeStore.VerifyBackup(fixture.BackupDirectory, UnitExecutionOptions.StorageExecution(), token);
         await BackupPersistedPolicyAssertions.SameAsync(fixture.Source.Store.Identity, verified.Identity);
         await Assert.That(verified.Position).IsEqualTo(source.Position);
         var restore = await CliBackupRestoreProcess.RunAsync(CliBackupRestoreProcess.CaptureExecutionOptions(),

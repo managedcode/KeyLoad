@@ -1,8 +1,9 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
+using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests;
@@ -33,7 +34,8 @@ internal sealed class TestDatabase : IDisposable
         BlobExecutionOptions? blobExecution = null, NativeClaimsExecutionOptions? claimsExecution = null,
         TimeProvider? timeProvider = null, TimeSeriesExecutionOptions? timeSeriesExecution = null)
     {
-        Directory = directory ?? Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
+        Directory = directory ?? Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(Path.GetTempPath())),
+            DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
         if (System.IO.Directory.Exists(Directory))
         {
             throw new ArgumentException(FreshDirectoryRequired, nameof(directory));
@@ -92,7 +94,8 @@ internal sealed class TestDatabase : IDisposable
 
     internal DatabaseEngine CreateConfiguredDatabase(ZoneTreeStore ownedStore) => createDatabase(ownedStore);
     internal (long AppliedPosition, long StorePosition) ReadCanonicalCut()
-        => Store.Read(_ => (Database.LastApplied, Store.Position));
+        => Store.Read(view => (view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
+            ? NativeSerialization.Deserialize<long>(bytes) : default(long), Store.Position));
     internal ReadExecutionBudget CreateReadWork(CancellationToken cancellationToken)
         => new(limits, Database.EvaluationClock, cancellationToken);
 

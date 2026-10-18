@@ -18,16 +18,13 @@ internal static class VerifiedBackupMixedCutFlow
             var sourceRows = EventingArtifactState.FullBytes(fixture.Source.Store);
             var target = Path.Combine(fixture.Root, Target);
             var failures = new List<Exception>();
-            await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
-            {
-                using var authority = new RestorePublicationRaceAuthority(fixture, selected.Capture);
-                await CompleteAsync(fixture, authority, selected, donor, target, sourcePosition, sourceRows, token);
-            }, failures);
+            await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() =>
+                CompleteAsync(fixture, selected, donor, target, sourcePosition, sourceRows, token), failures);
             global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
         });
     }
 
-    private static async Task CompleteAsync(EventingArtifactFixture fixture, RestorePublicationRaceAuthority authority,
+    private static async Task CompleteAsync(EventingArtifactFixture fixture,
         VerifiedBackupCutSnapshot selected, VerifiedBackupCutSnapshot donor, string target,
         long sourcePosition, string[] sourceRows, CancellationToken token)
     {
@@ -36,7 +33,7 @@ internal static class VerifiedBackupMixedCutFlow
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
             mixed = await VerifiedBackupMixedCutTransfer.MixAsync(selected, donor, token);
-            await VerifiedBackupMixedCutRefusal.RunAsync(fixture, authority, selected, target, token);
+            await VerifiedBackupMixedCutRefusal.RunAsync(fixture, selected, target, token);
         }, failures);
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() =>
             VerifiedBackupMixedCutConservation.RunAsync(fixture, sourcePosition, sourceRows, selected, donor, mixed ?? selected.Archive), failures);
@@ -47,14 +44,14 @@ internal static class VerifiedBackupMixedCutFlow
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
-            var identity = authority.Restore(fixture, selected.Path, target, null, token);
-            await authority.RequireIdentityAsync(identity, fixture.Source.Store.Identity);
+            var position = await MixedEventingBackupRestore.RestoreAsync(fixture.Source,
+                selected.Capture, selected.Path, target, token);
             fixture.OpenTarget(target);
-            await Assert.That(fixture.Target!.Position).IsEqualTo(authority.ExpectedPosition);
+            await Assert.That(fixture.Target!.Position).IsEqualTo(position);
             await Assert.That(EventingArtifactState.Bytes(fixture.Target, fixture.Source.Partition))
                 .IsEquivalentTo(selected.PartitionRows, CollectionOrdering.Matching);
             await VerifiedBackupMixedCutState.StateAsync(fixture, fixture.Database, selected.SecondOperation is not null);
-            await VerifiedBackupMixedCutCold.RunAsync(fixture, selected, target, authority.ExpectedPosition, token);
+            await VerifiedBackupMixedCutCold.RunAsync(fixture, selected, target, position, token);
         }, failures);
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() =>
             VerifiedBackupMixedCutConservation.RunAsync(fixture, sourcePosition, sourceRows, selected, donor, selected.Archive), failures);

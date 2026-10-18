@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Names used only by controlled production step-classification inputs and responses.</summary>
 internal static class NativeSerializationGitHubStepFields

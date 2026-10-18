@@ -1,7 +1,6 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
-using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Search;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
@@ -34,7 +33,7 @@ internal static class Bm25OriginalExpiryAssertions
     {
         await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(result.Problem?.Detail).IsEqualTo(Bm25CorpusProtocol.Changed);
-        
+
         await Assert.That(result.Value).IsNull();
         await ReplicaSubmissionOutcomeFlow.RequireBytesAsync(NativeSerialization.Serialize(family),
             NativeSerialization.Serialize(Family(flow)));

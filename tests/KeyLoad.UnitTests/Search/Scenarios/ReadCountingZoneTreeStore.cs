@@ -1,10 +1,9 @@
-using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.UnitTests.Features.ClusterRouting;
+using ManagedCode.Communication;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
@@ -56,7 +55,8 @@ internal sealed class ReadCountingZoneTreeStore : IAtomicStore
 
     public T Commit<T>(Func<IAtomicTransaction, long, T> compile) => inner.Commit(compile);
     public void SetDispatchPaused(bool paused) => inner.SetDispatchPaused(paused);
-    public long CreateBackup(string path) => inner.CreateBackup(path);
+    public long CreateBackup(string path, CancellationToken cancellationToken = default)
+        => inner.CreateBackup(path, cancellationToken);
     public StorageSnapshot CreateSnapshot(string path, long? expectedAppliedPosition = null)
         => inner.CreateSnapshot(path, expectedAppliedPosition);
     public StorageSnapshot VerifySnapshot(string path) => inner.VerifySnapshot(path);

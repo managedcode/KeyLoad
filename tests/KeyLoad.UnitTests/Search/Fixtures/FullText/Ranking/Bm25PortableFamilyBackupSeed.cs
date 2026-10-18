@@ -58,8 +58,8 @@ internal static class Bm25PortableFamilyBackupSeed
             source.Database.EvaluationClock.GetUtcNow() + TimeSpan.FromSeconds(UnitExecutionOptions.DatabaseLimits().Value.QueryDeadlineSeconds),
             source.CreateReadWork(token), UnitExecutionOptions.QueryExecution());
         var receipt = source.SubmitIssued(operation).Get<CommitReceipt>();
-        await Assert.That(receipt.CommandId).IsEqualTo(operation.Id);
-        await Assert.That(source.ReadStoredOutcome(operation.Id).PreparedCommand!.Value!.Kind)
+        await Assert.That(receipt.CommandId).IsEqualTo(operation.CommandId);
+        await Assert.That(source.ReadStoredOutcome(operation.CommandId).PreparedCommand.Value!.Kind)
             .IsEqualTo(OperationKind.Bm25CorpusPublicationPhase);
         var bytes = source.Store.Read(view => view.ReadOwnedValue(KeySpace.Partition(
             Bm25CorpusProtocol.CurrentFamily, source.Partition, Collection, Field,

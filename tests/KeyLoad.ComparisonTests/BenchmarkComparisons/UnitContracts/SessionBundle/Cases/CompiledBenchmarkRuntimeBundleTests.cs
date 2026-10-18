@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Exercises confined runtime extraction and exact compiled-image identity admission.</summary>
 internal sealed class CompiledBenchmarkRuntimeBundleTests

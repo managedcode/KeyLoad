@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Records termination diagnostics while the capture owner retains the original exit task.</summary>
 internal static class NativeSerializationBenchmarkProcessExit

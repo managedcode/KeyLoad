@@ -1,7 +1,7 @@
-using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.ResourceExecution;
+using ManagedCode.Communication;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 
@@ -37,7 +37,7 @@ internal static class QueueLifecycleNativeHistoryAssertions
         if (Errors.Code(sample.Result.Problem) is not null)
         {
             await Assert.That(actual).IsEqualTo(sample.Result);
-            
+
             await Assert.That(actual.Value).IsNull();
             return;
         }
@@ -65,7 +65,7 @@ internal static class QueueLifecycleNativeHistoryAssertions
         }
         await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(ErrorCode.StaleLease);
         await Assert.That(actual.Problem?.Detail).IsEqualTo(Stale);
-        
+
         await Assert.That(actual.Value).IsNull();
         var saved = OutcomeStoreOracle.ReadPartition(database.Store, lane.Partition,
             sample.Operation.UserId!, sample.Operation.CommandId) ?? throw new InvalidOperationException(MissingOriginal);

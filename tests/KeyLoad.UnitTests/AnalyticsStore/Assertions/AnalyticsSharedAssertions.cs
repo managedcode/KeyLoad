@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Core.Features.AnalyticsStore;
 using KeyLoad.Core.Features.ResourceExecution;
 using P = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsSharedProtocol;

@@ -50,10 +50,10 @@ internal static class BackupUnsafeDestinationTrial
         await Assert.That(Capture(fixture.Backup)).IsEquivalentTo(archive, CollectionOrdering.Matching);
         Directory.Delete(link);
         token.ThrowIfCancellationRequested();
-        await Assert.That(source.CreateBackup(destination)).IsEqualTo(fixture.Position);
+        await Assert.That(source.CreateBackup(destination, token)).IsEqualTo(fixture.Position);
         await RequireSourceAsync(source, position, identity, before);
         var repaired = Capture(destination);
-        var restored = ZoneTreeStore.Restore(destination, fixture.Destination, UnitExecutionOptions.StorageExecution());
+        var restored = ZoneTreeStore.Restore(destination, fixture.Destination, UnitExecutionOptions.StorageExecution(), cancellationToken: token);
         await RestoreUnsafeDestinationCold.RunAsync(fixture, fixture.Destination, restored, token);
         await RequireSourceAsync(source, position, identity, before);
         await Assert.That(Capture(destination)).IsEquivalentTo(repaired, CollectionOrdering.Matching);

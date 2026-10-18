@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
 using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.UnitTests.Features.ClusterRouting;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;

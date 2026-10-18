@@ -1,5 +1,3 @@
-using KeyLoad.RecoveryTests.Features.ClusterRouting;
-
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 /// <summary>Borrows the real Server silo's factory and serializers; it owns no replacement cluster.</summary>

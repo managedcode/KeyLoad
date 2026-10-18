@@ -1,7 +1,7 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.ResourceExecution;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using P = KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCanonicalFixture;
 
 namespace KeyLoad.UnitTests.Features.TimeSeries;

@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using System.Text;
+using KeyLoad.IntegrationTests.Features.ClusterReplication.Processes;
 using KeyLoad.RecoveryTests;
 using KeyLoad.RecoveryTests.Features.Messaging;
-using KeyLoad.IntegrationTests.Features.ClusterReplication.Processes;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;

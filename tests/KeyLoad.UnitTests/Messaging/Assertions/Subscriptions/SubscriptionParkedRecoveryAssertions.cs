@@ -1,9 +1,9 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.ResourceExecution;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 
@@ -32,7 +32,7 @@ internal static class SubscriptionParkedRecoveryAssertions
         var failure = db.Apply(operation);
         await Assert.That(Errors.Code(failure.Problem)).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(failure.Problem?.Detail).IsEqualTo("A parked subscription requires an explicit seek or new group before resuming.");
-        
+
         await Assert.That(failure.Value).IsNull();
         await SubscriptionProcessingAtomicAssertions.OwnOutcomeOnlyAsync(store, group, operation, before, position + 1);
         var saved = SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, operation.CommandId);
@@ -59,7 +59,7 @@ internal static class SubscriptionParkedRecoveryAssertions
         {
             await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(Errors.Code(original.Problem));
             await Assert.That(replay.Problem?.Detail).IsEqualTo(original.Problem?.Detail);
-            
+
             await Assert.That(replay.Value).IsNull();
         }
         else if (original.Value is CommitReceipt)
@@ -101,7 +101,7 @@ internal static class SubscriptionParkedRecoveryAssertions
         var failure = db.Apply(operation);
         await Assert.That(Errors.Code(failure.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
         await Assert.That(failure.Problem?.Detail).IsEqualTo("The subscription token scope or generation is invalid.");
-        
+
         await Assert.That(failure.Value).IsNull();
         await SubscriptionProcessingAtomicAssertions.OwnOutcomeOnlyAsync(store, group, operation, before, position + 1);
     }
@@ -115,7 +115,7 @@ internal static class SubscriptionParkedRecoveryAssertions
         var result = db.Apply(operation);
         await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
         await Assert.That(result.Problem?.Detail).IsEqualTo("The cached receive belongs to an earlier subscription generation.");
-        
+
         await Assert.That(result.Value).IsNull();
         var retained = SubscriptionProcessingAtomicAssertions.OutcomeBytes(store, group, operation.CommandId);
         await Assert.That(retained.AsSpan().SequenceEqual(saved)).IsTrue();

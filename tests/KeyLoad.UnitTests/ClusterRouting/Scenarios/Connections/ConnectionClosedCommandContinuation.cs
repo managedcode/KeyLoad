@@ -6,7 +6,6 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 internal static class ConnectionClosedCommandContinuation
 {
     private const long InitialRevision = 1;
-    private const long InitialOwnershipEpoch = 1;
     private const long NextCommit = 1;
     private const string OriginalDocument = "closed-original";
 

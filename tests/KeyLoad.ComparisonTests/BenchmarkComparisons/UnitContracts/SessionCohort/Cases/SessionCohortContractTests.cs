@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>AC-BSESSION-001/007: parser fixtures never become published measurements.</summary>
 internal sealed class SessionCohortContractTests

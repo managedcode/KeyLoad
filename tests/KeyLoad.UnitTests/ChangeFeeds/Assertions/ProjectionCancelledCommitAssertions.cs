@@ -1,6 +1,6 @@
-using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
 
 namespace KeyLoad.UnitTests.Features.ChangeFeeds;
 
@@ -27,13 +27,13 @@ internal static class ProjectionCancelledCommitAssertions
     }
 
     internal static async Task HealthyAsync(DatabaseEngine owner, ZoneTreeStore store,
-        string directory, ProjectionConsumerIdentityState state, CancellationToken token)
+        ProjectionConsumerIdentityState state, CancellationToken token)
     {
         var id = Guid.NewGuid();
         var mutation = new PutDocument(ProjectionConsumerIdentityFixture.Source, "c", "{\"n\":3}", 0L);
         var source = ProjectionConsumerIdentityFixture.Operation(OperationKind.Batch, id,
             new CommandRequest(id, state.Partition, [mutation]));
-        var original = FeedNativeHealthyAdmission.Submit(owner, store, directory, source, explicitTime: false, token);
+        var original = FeedNativeHealthyAdmission.Submit(owner, source, explicitTime: false, token);
         var receipt = original.Get<CommitReceipt>();
         await ProjectionConsumerIdentityAssertions.ReceiptAsync(source, receipt,
             new MutationReceipt("putDocument", ProjectionConsumerIdentityFixture.Source, "c", 1L));

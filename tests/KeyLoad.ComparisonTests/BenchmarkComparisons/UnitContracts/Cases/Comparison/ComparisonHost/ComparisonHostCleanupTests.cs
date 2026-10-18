@@ -1,10 +1,9 @@
 using System.Text.Json.Nodes;
 using KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 using KeyLoad.Comparisons;
-using KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 using SessionFields = KeyLoad.ComparisonTests.Features.BenchmarkComparisons.BenchmarkSessionEvidenceKeys;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>An unavailable real native endpoint keeps failed measured accounting and original safe disposal evidence.</summary>
 internal sealed class ComparisonHostCleanupTests

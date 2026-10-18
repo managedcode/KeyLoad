@@ -1,7 +1,7 @@
-using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Storage;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
@@ -30,7 +30,7 @@ internal static class NativeDropPageFailureImages
                 await Assert.That(Errors.Code(outcome!.Result.Problem)).IsEqualTo(expected);
                 await Assert.That(outcome.Fingerprint).IsEqualTo(DatabaseCommandFingerprint.Compute(original));
                 await Assert.That(outcome.Result.Value).IsNull();
-                
+
                 await Assert.That(after[index].LastIndex).IsEqualTo(before[index].LastIndex + NativeDropRuntimeProtocol.FirstPage);
                 await Assert.That(after[index].CommittedIndex).IsEqualTo(after[index].LastIndex);
             }

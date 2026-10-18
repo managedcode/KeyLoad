@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>AC-ISO-002/006: strict selection, native configuration and trusted identity precede allocation.</summary>
 internal sealed class BenchmarkSessionConfigurationTests

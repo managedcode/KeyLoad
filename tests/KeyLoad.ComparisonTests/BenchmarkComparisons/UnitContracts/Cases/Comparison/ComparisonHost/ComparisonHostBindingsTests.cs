@@ -1,6 +1,5 @@
-using KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Rejects invalid native session cohorts before any measured request.</summary>
 internal sealed class ComparisonHostBindingsTests

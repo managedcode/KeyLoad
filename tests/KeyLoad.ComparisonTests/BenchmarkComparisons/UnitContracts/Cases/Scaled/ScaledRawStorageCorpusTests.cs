@@ -1,7 +1,7 @@
 using KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Checks compact scale-v1 keys and complete binary value headers against literals.</summary>
 internal sealed class ScaledRawStorageCorpusTests

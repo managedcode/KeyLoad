@@ -1,6 +1,6 @@
 using System.Text.Json.Nodes;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Controlled states exercise classification and cannot authenticate a benchmark run.</summary>
 internal static class NativeSerializationGitHubStepData

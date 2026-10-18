@@ -25,10 +25,10 @@ internal static class NativeIdentityDomainRepairCold
             store.CreateBackup(backup);
         }, token);
         var archive = await NativeBackupJournalRepairAssertions.ArchiveAsync(backup, token);
-        var verified = ZoneTreeStore.VerifyBackup(backup, UnitExecutionOptions.StorageExecution());
+        var verified = ZoneTreeStore.VerifyBackup(backup, UnitExecutionOptions.StorageExecution(), token);
         await Assert.That(verified.Position).IsEqualTo(original.Position + 1L);
         await SameIdentityAsync(original.Identity, verified.Identity);
-        var restored = ZoneTreeStore.Restore(backup, target, UnitExecutionOptions.StorageExecution());
+        var restored = ZoneTreeStore.Restore(backup, target, UnitExecutionOptions.StorageExecution(), cancellationToken: token);
         await Assert.That(restored.NodeId != original.Identity.NodeId).IsTrue();
         await Assert.That(restored.Incarnation != original.Identity.Incarnation).IsTrue();
         await Assert.That(restored.SigningKey.Span.SequenceEqual(original.Identity.SigningKey.Span)).IsFalse();

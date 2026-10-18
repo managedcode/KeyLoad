@@ -29,7 +29,7 @@ internal static class RemoteTransferRepairColdTrial
             fixture.DestinationPartition, [new AcceptQueueTransfer(fixture.DestinationQueue, original.IntentToken)]);
         var denied = RemoteTransferRepairColdNative.Apply(fixture, accept);
         await Assert.That(Errors.Code(denied.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
-        
+
         await Assert.That(denied.Value).IsNull();
         var bytes = RemoteTransferRepairColdNative.Outcome(fixture, accept.CommandId, fixture.DestinationPartition);
         await RemoteTransferRepairColdAdvance.DeniedWithoutWitnessAsync(fixture, hint, original.IntentToken,

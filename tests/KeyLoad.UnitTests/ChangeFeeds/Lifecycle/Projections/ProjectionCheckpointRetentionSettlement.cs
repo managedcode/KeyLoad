@@ -6,7 +6,7 @@ namespace KeyLoad.UnitTests.Features.ChangeFeeds;
 internal static class ProjectionCheckpointRetentionSettlement
 {
     internal static async Task<ProjectionCheckpointRetentionContinuation> RunAsync(DatabaseEngine owner,
-        ZoneTreeStore store, string directory, ProjectionCheckpointRetentionState original, CancellationToken token)
+        ZoneTreeStore store, ProjectionCheckpointRetentionState original, CancellationToken token)
     {
         var source = original.Source;
         var refused = owner.ApplyEmbedded(original.Probe, token);
@@ -40,7 +40,7 @@ internal static class ProjectionCheckpointRetentionSettlement
             EvaluatedAt = source.Time
         };
         token.ThrowIfCancellationRequested();
-        var produced = FeedNativeHealthyAdmission.Submit(owner, store, directory, healthy, explicitTime: true, token);
+        var produced = FeedNativeHealthyAdmission.Submit(owner, healthy, explicitTime: true, token);
         await ProjectionConsumerIdentityAssertions.ReceiptAsync(healthy, produced.Get<CommitReceipt>(),
             new MutationReceipt(PutKind, ProjectionConsumerIdentityFixture.Source, ProjectionCheckpointRetentionAssertions.HealthySource, 1L));
         var provisional = new ProjectionCheckpointRetentionContinuation(original, refused, completed, filtered, advanced,

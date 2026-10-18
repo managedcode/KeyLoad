@@ -36,7 +36,6 @@ internal static class McpCanonicalTestData
     private const int ContractVersion = 1;
     private const long Generation = 1;
     private const long WaitMinimumPosition = 1;
-    private const long WaitPlacementEpoch = 1;
     private const long Position = 0;
     private const int Limit = 10;
     internal static readonly Guid StableId = Guid.Parse(StableIdText);

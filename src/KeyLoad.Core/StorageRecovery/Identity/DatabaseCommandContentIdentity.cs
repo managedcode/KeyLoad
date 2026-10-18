@@ -1,5 +1,5 @@
-using ManagedCode.Communication.Commands;
 using KeyLoad.Features.InternalSerialization;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.Core;
 

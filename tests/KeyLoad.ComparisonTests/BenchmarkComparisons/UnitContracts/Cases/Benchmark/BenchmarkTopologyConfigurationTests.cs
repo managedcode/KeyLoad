@@ -2,7 +2,7 @@ using KeyLoad.Clustering;
 using KeyLoad.Server;
 using Microsoft.Extensions.Configuration;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Startup keeps native silo count separate from the required number of persisted copies.</summary>
 internal sealed class BenchmarkTopologyConfigurationTests

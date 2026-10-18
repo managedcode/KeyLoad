@@ -1,7 +1,7 @@
-using ManagedCode.Communication;
 using KeyLoad.Core;
-using KeyLoad.Storage.ZoneTree;
 using KeyLoad.Server;
+using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
 
 namespace KeyLoad.RecoveryTests.Features.ClusterRouting;
 
@@ -17,7 +17,8 @@ internal sealed class RequestCqrsHostedDatabase(PartitionHost owner)
         RequestCqrsHostedProtocol.Domain, RequestCqrsHostedProtocol.Partition);
     internal ICommitCoordinator Coordinator => owner.Coordinator;
     internal (long AppliedPosition, long StorePosition) ReadCanonicalCut()
-        => Store.Read(_ => (Database.LastApplied, Store.Position));
+        => Store.Read(view => (view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
+            ? NativeSerialization.Deserialize<long>(bytes) : default(long), Store.Position));
 
     internal Result<object> Submit<T>(OperationKind kind, T payload, string principal = RequestCqrsHostedProfile.Root,
         Guid? id = null, DateTimeOffset? time = null, CancellationToken cancellationToken = default)

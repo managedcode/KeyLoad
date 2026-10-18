@@ -1,4 +1,5 @@
 using KeyLoad.Clustering;
+using KeyLoad.Core;
 using ManagedCode.Communication.Commands;
 using ManagedCode.Communication.CQRS;
 using OpenTelemetry;
@@ -21,7 +22,9 @@ internal sealed class PartitionStorageGrainService(GrainId grainId, Silo silo, I
     {
         cancellationToken.ThrowIfCancellationRequested();
         var database = owner.Borrow().Database;
-        return Task.FromResult(database.Store.Read(_ => new SiloStorageCut(database.Store.Identity.Incarnation, database.LastApplied)));
+        return Task.FromResult(database.Store.Read(view => new SiloStorageCut(database.Store.Identity.Incarnation,
+            view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
+                ? NativeSerialization.Deserialize<long>(bytes) : default(long))));
     }
 
     public Task<Command<DatabaseCommand>> PrepareAsync(Command<DatabaseCommand> operation, CancellationToken cancellationToken)

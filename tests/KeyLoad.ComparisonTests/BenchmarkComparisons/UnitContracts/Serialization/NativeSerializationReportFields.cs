@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Retains exact JSON property names used by native serialization diagnostic fixtures.</summary>
 internal static class NativeSerializationReportFields

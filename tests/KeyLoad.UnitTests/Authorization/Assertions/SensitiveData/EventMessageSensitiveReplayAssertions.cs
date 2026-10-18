@@ -1,6 +1,6 @@
-using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
 
 namespace KeyLoad.UnitTests.Features.Authorization;
 
@@ -10,7 +10,7 @@ internal static class EventMessageSensitiveReplayAssertions
     {
         await Assert.That(Errors.Code(result.Problem)).IsEqualTo(code);
         await Assert.That(result.Value).IsNull();
-        
+
         await Assert.That(result.Problem?.Detail).DoesNotContain("SENSITIVE_BODY_NATIVE_CANARY");
         await Assert.That(result.Problem?.Detail).DoesNotContain("SENSITIVE_HEADER_NATIVE_CANARY");
     }

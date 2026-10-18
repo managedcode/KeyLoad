@@ -1,30 +1,30 @@
-using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Query;
 using KeyLoad.Query.Features.QueryExecution;
 using KeyLoad.Query.Features.Search;
 using KeyLoad.Storage;
 using KeyLoad.UnitTests.Features.BackupRestore;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
 internal static class Bm25RestoredEligibilityAssertions
 {
     internal static (byte[] Identity, long Position, long Applied,
-        (long LastIndex, long CommittedIndex, long Term) Journal, string[] Rows) Cut(
+        (long AppliedPosition, long StorePosition) CanonicalCut, string[] Rows) Cut(
         IAtomicStore store, DatabaseEngine database,
-        (long LastIndex, long CommittedIndex, long Term) journal, CancellationToken token)
-        => (NativeSerialization.Serialize(store.Identity), store.Position, database.LastApplied, journal,
+        (long AppliedPosition, long StorePosition) canonicalCut, CancellationToken token)
+        => (NativeSerialization.Serialize(store.Identity), store.Position, database.LastApplied, canonicalCut,
             Bm25PortableFamilyBytes.Complete(store, database.EvaluationClock, token));
 
     internal static async Task SameAsync(
-        (byte[] Identity, long Position, long Applied, (long, long, long) Journal, string[] Rows) expected,
-        (byte[] Identity, long Position, long Applied, (long, long, long) Journal, string[] Rows) actual)
+        (byte[] Identity, long Position, long Applied, (long, long) CanonicalCut, string[] Rows) expected,
+        (byte[] Identity, long Position, long Applied, (long, long) CanonicalCut, string[] Rows) actual)
     {
         await Assert.That(actual.Identity.AsSpan().SequenceEqual(expected.Identity)).IsTrue();
         await Assert.That(actual.Position).IsEqualTo(expected.Position);
         await Assert.That(actual.Applied).IsEqualTo(expected.Applied);
-        await Assert.That(actual.Journal).IsEqualTo(expected.Journal);
+        await Assert.That(actual.CanonicalCut).IsEqualTo(expected.CanonicalCut);
         await Bm25PortableFamilyBytes.SameAsync(expected.Rows, actual.Rows);
     }
 
@@ -55,11 +55,10 @@ internal static class Bm25RestoredEligibilityAssertions
     {
         var store = source ? fixture.Source.Store : fixture.Target!;
         var database = source ? fixture.Source.Database : fixture.Database;
-        var before = Cut(store, database, source ? fixture.Source.ReadCanonicalCut() : fixture.ReadTargetJournalCut(), token);
+        var before = Cut(store, database, source ? fixture.Source.ReadCanonicalCut() : fixture.ReadTargetCut(), token);
         var retained = source ? fixture.Source.ReadStoredOutcome(operation.CommandId).PreparedCommand!
             : fixture.ReadTargetIssuedOperation(operation.CommandId);
-        await Assert.That(retained.NativePayload.Span.SequenceEqual(operation.Value!.Input.Span)).IsTrue();
-        await Assert.That(retained.PayloadJson).IsEqualTo(operation.PayloadJson);
+        await Assert.That(retained.Value!.Input.Span.SequenceEqual(operation.Value!.Input.Span)).IsTrue();
         await Assert.That(operation.Value!.Input.IsEmpty).IsFalse();
         await Assert.That(NativeSerialization.Serialize(retained).AsSpan()
             .SequenceEqual(NativeSerialization.Serialize(operation))).IsTrue();
@@ -69,6 +68,6 @@ internal static class Bm25RestoredEligibilityAssertions
             Bm25PortableFamilyBackupSeed.Root, operation.CommandId)!.Get<CommitReceipt>();
         await Assert.That(JsonDefaults.Serialize(stored).AsSpan().SequenceEqual(JsonDefaults.Serialize(receipt))).IsTrue();
         await SameAsync(before, Cut(store, database,
-            source ? fixture.Source.ReadCanonicalCut() : fixture.ReadTargetJournalCut(), token));
+            source ? fixture.Source.ReadCanonicalCut() : fixture.ReadTargetCut(), token));
     }
 }

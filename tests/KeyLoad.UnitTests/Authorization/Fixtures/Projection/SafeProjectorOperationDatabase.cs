@@ -1,9 +1,10 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
+using System.Diagnostics.CodeAnalysis;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.Authorization;
 
@@ -13,11 +14,13 @@ internal sealed class SafeProjectorOperationDatabase
     private readonly StoreIdentity canonicalIdentity;
     private bool originalJoined;
     private ZoneTreeStore? coldStore;
-    private DatabaseEngine? coldDatabase;
+
     internal CancellationToken CallerToken { get; }
     internal TestDatabase Source { get; }
     internal ZoneTreeStore Store => originalJoined ? coldStore ?? throw new InvalidOperationException(MissingOwner) : Source.Store;
-    internal DatabaseEngine Database => originalJoined ? coldDatabase ?? throw new InvalidOperationException(MissingOwner) : Source.Database;
+
+    [AllowNull]
+    internal DatabaseEngine Database { get => originalJoined ? field ?? throw new InvalidOperationException(MissingOwner) : Source.Database; private set; }
 
     private SafeProjectorOperationDatabase(string directory, CancellationToken callerToken)
     {
@@ -59,7 +62,8 @@ internal sealed class SafeProjectorOperationDatabase
         => OutcomeStoreOracle.ReadStored(Store, operation) ?? throw new InvalidOperationException(MissingOwner);
 
     internal (long AppliedPosition, long StorePosition) ReadCanonicalCut()
-        => Store.Read(_ => (Database.LastApplied, Store.Position));
+        => Store.Read(view => (view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
+            ? NativeSerialization.Deserialize<long>(bytes) : default(long), Store.Position));
 
     internal CommitToken NextToken()
         => new(Store.Identity.Incarnation, Source.Partition.AtomicPartitionId,
@@ -75,7 +79,7 @@ internal sealed class SafeProjectorOperationDatabase
         }, canonicalIdentity.NodeId, Source.StorageExecution);
         await Assert.That(NativeSerialization.Serialize(coldStore.Identity).AsSpan()
             .SequenceEqual(NativeSerialization.Serialize(canonicalIdentity))).IsTrue();
-        coldDatabase = Source.CreateConfiguredDatabase(coldStore);
+        Database = Source.CreateConfiguredDatabase(coldStore);
     }
 
     private void Join()
@@ -88,7 +92,7 @@ internal sealed class SafeProjectorOperationDatabase
         }
         var store = coldStore;
         coldStore = null;
-        coldDatabase = null;
+        Database = null;
         store?.Dispose();
     }
 }

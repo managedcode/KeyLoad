@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Clustering;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.Messaging;

@@ -1,3 +1,4 @@
+using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Server;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -26,7 +27,8 @@ internal sealed class CliBackupRestoreFixture
     private bool rootOwned;
     private bool storeClosed;
 
-    internal string Root { get; } = Path.Combine(Path.GetTempPath(), RootPrefix + Guid.NewGuid().ToString("N"));
+    internal string Root { get; } = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(Path.GetTempPath())),
+        RootPrefix + Guid.NewGuid().ToString("N"));
     internal string SourceDirectory => Path.Combine(Root, "source");
     internal string BackupDirectory => Path.Combine(Root, BackupDirectoryName);
     internal string ArtifactPath => Path.Combine(Root, ArtifactFileName);

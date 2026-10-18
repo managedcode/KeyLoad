@@ -1,9 +1,8 @@
-using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.ResourceExecution;
-
+using ManagedCode.Communication;
 using static KeyLoad.UnitTests.Features.Messaging.SubscriptionContinuationProtocol;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -35,7 +34,7 @@ internal static class SubscriptionWindowBudgetAssertions
                 request, request.RequestId, token);
             await Assert.That(Errors.Code(denied.Problem)).IsEqualTo(ErrorCode.BudgetExceeded);
             await Assert.That(denied.Problem?.Detail).IsEqualTo(Exceeded);
-            
+
             await Assert.That(denied.Value).IsNull();
             await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
             var retained = OutcomeStoreOracle.ReadPartition(store, group.Source.Partition, Subject, request.RequestId)

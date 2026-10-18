@@ -1,8 +1,9 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
+using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.BackupRestore;
 
@@ -26,7 +27,8 @@ internal sealed class EventingArtifactFixture
     private const string SourceDirectory = "source";
     internal const string Handler = "backup-handler";
     internal const string Json = "{\"retained\":true}";
-    internal string Root { get; } = Path.Combine(Path.GetTempPath(), Prefix + Guid.NewGuid().ToString("N"));
+    internal string Root { get; } = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(Path.GetTempPath())),
+        Prefix + Guid.NewGuid().ToString("N"));
     internal TestDatabase Source { get; private set; } = null!;
     internal ZoneTreeStore? Target
     {
@@ -64,7 +66,8 @@ internal sealed class EventingArtifactFixture
         Database = Source.CreateConfiguredDatabase(Target);
     }
     internal (long AppliedPosition, long StorePosition) ReadTargetCut()
-        => Database.Store.Read(_ => (Database.LastApplied, Database.Store.Position));
+        => Database.Store.Read(view => (view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
+            ? NativeSerialization.Deserialize<long>(bytes) : default(long), Database.Store.Position));
 
     internal Command<DatabaseCommand> ReadTargetIssuedOperation(Guid originalId)
         => OutcomeStoreOracle.ReadStored(Database, originalId, CancellationToken.None).PreparedCommand;

@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons.TimeSeries.Intensive;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons.TimeSeries.Intensive;
 
 internal static class TimeSeriesIntensiveReferencePhases
 {

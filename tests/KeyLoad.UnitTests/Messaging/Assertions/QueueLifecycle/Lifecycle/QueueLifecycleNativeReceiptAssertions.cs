@@ -18,7 +18,7 @@ internal static class QueueLifecycleNativeReceiptAssertions
     {
         if (Errors.Code(sample.Result.Problem) is not null)
         {
-            
+
             await Assert.That(sample.Result.Value).IsNull();
             return;
         }

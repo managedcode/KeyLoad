@@ -4,7 +4,7 @@ using KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>AC-CQ-034: observes configured mutable capacity on a genuine native ZoneTree owner.</summary>
 [NotInParallel]

@@ -1,6 +1,6 @@
-using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -38,7 +38,7 @@ internal static class TargetInboxCapacityAuthorityContinuationFlow
         var failed = TargetInboxNativeSetup.Apply(database, quota, token);
         await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(failed.Problem?.Detail).IsEqualTo(QuotaDetail);
-        
+
         await Assert.That(failed.Value).IsNull();
         await Assert.That(TargetInboxNativeAssertions.Image(store, state.Original.Source.Partition, state.Original.Target.Partition))
             .IsEquivalentTo(before, CollectionOrdering.Matching);

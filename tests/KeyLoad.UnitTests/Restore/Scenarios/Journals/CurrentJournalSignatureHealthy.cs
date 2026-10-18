@@ -11,7 +11,7 @@ internal static class CurrentJournalSignatureHealthy
     internal static async Task RunAsync(NativeBackupCutFixture fixture, CurrentJournalSignatureAuthority authority,
         string cliTarget, CancellationToken token)
     {
-        var verified = ZoneTreeStore.VerifyBackup(fixture.Backup, UnitExecutionOptions.StorageExecution());
+        var verified = ZoneTreeStore.VerifyBackup(fixture.Backup, UnitExecutionOptions.StorageExecution(), token);
         await Assert.That(verified.Position).IsEqualTo(CapturedPosition);
         await Assert.That(JsonSerializer.Serialize(verified.Identity, JsonDefaults.Options))
             .IsEqualTo(JsonSerializer.Serialize(fixture.Identity, JsonDefaults.Options));

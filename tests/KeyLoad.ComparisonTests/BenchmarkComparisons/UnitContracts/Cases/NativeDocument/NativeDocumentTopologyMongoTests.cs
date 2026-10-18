@@ -3,7 +3,7 @@ using KeyLoad.Comparisons.Targets;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>AC-ISO-003/005 checks real BSON receipts and native driver result objects.</summary>
 internal sealed class NativeDocumentTopologyMongoTests

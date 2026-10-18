@@ -8,7 +8,6 @@ internal static class GenerationVisibilityOwnerProjectAssertions
 {
     private const string Sql = "SELECT * FROM \"visibility-owner-project\" ORDER BY id";
     private const string Scan = "bounded-full-scan";
-    private const long InitialOwnershipEpoch = 1;
 
     internal static async Task ReadAsync(DatabaseEngine database, QueryEngine queries, ZoneTreeStore store,
         PartitionRef partition, string[] visible, long ownRevision, long sharedRevision, CancellationToken token)

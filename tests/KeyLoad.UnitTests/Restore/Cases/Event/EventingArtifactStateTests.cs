@@ -7,42 +7,14 @@ namespace KeyLoad.UnitTests.Features.BackupRestore;
 internal sealed class EventingArtifactStateTests
 {
     [Test]
-    [Arguments(false)]
-    [Arguments(true)]
-    public async Task OriginalCatalogReusedOwnerIdentityRefusesThenSameTupleRepairAndTwoColdOwners(bool reuseIncarnation)
-        => await CatalogRestoreOwnerIdentityFlow.RunAsync(reuseIncarnation,
-            TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
-
-    [Test]
-    public async Task OriginalCatalogWrongOperatorCredentialRefusesThenSameTupleRepairAndTwoColdOwners()
-        => await CatalogRestoreCredentialFlow.RunAsync(
-            TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
-
-    [Test]
-    public async Task OriginalCatalogCanonicalDigestRefusesThenExactArchiveRepairAndTwoColdOwners()
-        => await CatalogRestoreCanonicalCutFlow.RunAsync(
-            TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
-
-    [Test]
-    public async Task RetainedOriginalCatalogArchiveRetriesAfterSourceAdvanceThenExactRepairRestoresOriginalCutAndTwoColdOwners()
-        => await CatalogArchiveRetryFlow.RunAsync(TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
-
-    [Test]
     public async Task OldCursorAndLeasesStayFencedAfterAuthorizedResumeTwoColdAndHealthyDelivery()
         => await RestoreResumedTokenFlow.RunAsync(TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
 
     [Test]
     [Arguments(false)]
     [Arguments(true)]
-    public async Task OriginalCatalogPreCancellationPreservesArchiveThenSamePathRepairAndTwoColdOwners(bool existingEmpty)
-        => await CatalogRestoreCancellationFlow.RunAsync(existingEmpty,
-            TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
-
-    [Test]
-    [Arguments(false)]
-    [Arguments(true)]
-    public async Task OriginalCatalogVerificationCancellationRollsBackThenSameIdentityRepairAndTwoColdOwners(bool existingEmpty)
-        => await CatalogRestoreCancellationFlow.RunAsync(existingEmpty, afterReconcile: true,
+    public async Task NativeRestorePreCancellationPreservesArchiveThenSamePathRepairAndTwoColdOwners(bool existingEmpty)
+        => await NativeRestoreCancellationFlow.RunAsync(existingEmpty,
             TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
 
     private const int PieceBytes = 1_024;
@@ -62,7 +34,7 @@ internal sealed class EventingArtifactStateTests
             var domains = EventingArtifactState.Bytes(source, fixture.Source.Partition);
             var identity = source.Identity;
             var outcome = BackupIndexedDocumentDedupFixture.ReadOutcomeBytes(source, fixture.Source.Partition,
-                EventingArtifactFixture.Principal, fixture.Original.Id);
+                EventingArtifactFixture.Principal, fixture.Original.CommandId);
             var cut = source.CreateBackup(Path.Combine(fixture.Root, Backup));
             var manifest = await MetadataTestFiles.ReadManifestAsync(Path.Combine(fixture.Root, Backup));
             await Assert.That(manifest.Position).IsEqualTo(cut);
@@ -81,7 +53,7 @@ internal sealed class EventingArtifactStateTests
             await EventingArtifactState.SameAsync(domains, fixture.Target, fixture.Source.Partition);
             await EventingArtifactFences.VerifyAsync(fixture);
             await Assert.That(BackupIndexedDocumentDedupFixture.ReadOutcomeBytes(fixture.Target, fixture.Source.Partition,
-                EventingArtifactFixture.Principal, fixture.Original.Id)).IsEquivalentTo(outcome, CollectionOrdering.Matching);
+                EventingArtifactFixture.Principal, fixture.Original.CommandId)).IsEquivalentTo(outcome, CollectionOrdering.Matching);
             await EventingArtifactContinuation.RunAsync(fixture);
             var finalPosition = fixture.Target.Position;
             var finalBytes = EventingArtifactState.Bytes(fixture.Target, fixture.Source.Partition);

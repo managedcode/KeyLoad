@@ -1,9 +1,9 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Storage;
 using KeyLoad.UnitTests.Features.ResourceExecution;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using static KeyLoad.RecoveryTests.Features.EventStreams.SharedDomainProtocol;
 
 namespace KeyLoad.UnitTests.Features.EventStreams;

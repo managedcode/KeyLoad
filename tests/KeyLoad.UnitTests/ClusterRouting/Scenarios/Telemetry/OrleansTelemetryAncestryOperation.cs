@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.Clustering;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;

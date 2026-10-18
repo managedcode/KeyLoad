@@ -10,7 +10,6 @@ namespace KeyLoad.IntegrationTests.Features.Search;
 [NotInParallel]
 internal sealed class NativeTextClusterSiloRestartTests(ClusterFixture fixture)
 {
-    private const int ReplicaCount = 3;
     private const string RestartFailureKey = "nativeTextRestartFailure";
     private const string DiagnosticsFailureKey = "nativeTextDiagnosticsFailure";
 

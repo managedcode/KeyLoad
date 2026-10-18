@@ -1,7 +1,7 @@
-using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.TimeSeries;
+using ManagedCode.Communication;
 
 namespace KeyLoad.UnitTests.Features.TimeSeries;
 

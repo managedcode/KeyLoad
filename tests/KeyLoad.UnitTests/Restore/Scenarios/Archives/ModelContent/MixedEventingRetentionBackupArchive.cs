@@ -11,16 +11,17 @@ internal static class MixedEventingRetentionBackupArchive
         var backup = Path.Combine(fixture.Root, MixedEventingRetentionBackupProtocol.Backup);
         var archive = Path.Combine(fixture.Root, MixedEventingRetentionBackupProtocol.Archive);
         var unpacked = Path.Combine(fixture.Root, MixedEventingRetentionBackupProtocol.Unpacked);
-        var capture = MixedEventingCatalogRestore.Capture(fixture.Source, backup, token);
+        var capture = MixedEventingBackupRestore.Capture(fixture.Source, backup, token);
         state.Cut = capture.Position;
         var manifest = await MetadataTestFiles.ReadManifestAsync(backup);
         await Assert.That(manifest.Position).IsEqualTo(state.Cut);
-        BackupArtifact.PackCatalogBackup(backup, archive, MixedEventingRetentionBackupProtocol.PieceBytes,
-            capture.ManifestDigest, fixture.Source.StorageExecution, fixture.Source.Database.EvaluationClock, token);
+        BackupArtifact.Pack(backup, archive, MixedEventingRetentionBackupProtocol.PieceBytes,
+            fixture.Source.Database.EvaluationClock);
         state.ArchiveBytes = await File.ReadAllBytesAsync(archive, token);
-        BackupArtifact.UnpackCatalogBackup(archive, unpacked, capture.ManifestDigest, fixture.Source.StorageExecution, token);
+        token.ThrowIfCancellationRequested();
+        BackupArtifact.Unpack(archive, unpacked);
         var target = Path.Combine(fixture.Root, MixedEventingRetentionBackupProtocol.Target);
-        var expectedPosition = await MixedEventingCatalogRestore.RestoreAsync(fixture.Source, capture, unpacked, target, token);
+        var expectedPosition = await MixedEventingBackupRestore.RestoreAsync(fixture.Source, capture, unpacked, target, token);
         fixture.OpenTarget(target);
         await Assert.That(fixture.Target!.Position).IsEqualTo(expectedPosition);
         await MixedEventingRetentionBackupOracle.SameAsync(state.CutRows, fixture.Target, state);

@@ -63,7 +63,7 @@ internal static class QueueLifecycleConditionTrial
         var queue = QueueLifecycleImage.Capture(fixture.Store, state.Lane);
         var failed = fixture.Database.Apply(bad);
         await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(expected);
-        
+
         await Assert.That(failed.Value).IsNull();
         state.Failures.Add((bad, failed));
         await QueueLifecycleImage.SameAsync(fixture.Store, state.Lane, queue);

@@ -1,5 +1,6 @@
 using System.Net;
 using KeyLoad.Clustering;
+using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.Search;
 using Microsoft.AspNetCore.Builder;
@@ -22,7 +23,8 @@ internal sealed class RequestCqrsHostedRuntimeFixture : IAsyncInitializer, IAsyn
     private readonly Lock lifecycle = new();
     private readonly RequestCqrsHostedProfile profile;
     private readonly TestClusterPortAllocator ports = new();
-    private readonly string directory = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
+    private readonly string directory = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(Path.GetTempPath())),
+        DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
     private WebApplication? application;
     private string[]? arguments;
     private int? reservedSiloPort;

@@ -1,7 +1,7 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Server;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.BackupRestore;
 
@@ -30,7 +30,7 @@ internal static class BackupPersistedPolicyTrial
         var backupCut = fixture.CreateBackup();
         await Assert.That(backupCut).IsEqualTo(source.Position);
         var archive = await NativeBackupJournalRepairAssertions.ArchiveAsync(fixture.BackupDirectory, token);
-        var verified = KeyLoad.Storage.ZoneTree.ZoneTreeStore.VerifyBackup(fixture.BackupDirectory, UnitExecutionOptions.StorageExecution());
+        var verified = KeyLoad.Storage.ZoneTree.ZoneTreeStore.VerifyBackup(fixture.BackupDirectory, UnitExecutionOptions.StorageExecution(), token);
         await Assert.That(verified.Position).IsEqualTo(source.Position);
         await BackupPersistedPolicyAssertions.SameAsync(sourceIdentity, verified.Identity);
         var restore = await CliBackupRestoreProcess.RunAsync(CliBackupRestoreProcess.CaptureExecutionOptions(),

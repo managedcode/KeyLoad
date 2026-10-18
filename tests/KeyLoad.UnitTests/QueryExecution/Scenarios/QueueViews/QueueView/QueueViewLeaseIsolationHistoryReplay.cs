@@ -1,6 +1,5 @@
-using ManagedCode.Communication;
 using KeyLoad.Core;
-using static KeyLoad.UnitTests.Features.QueryExecution.QueueViewLeaseIsolationProtocol;
+using ManagedCode.Communication;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 

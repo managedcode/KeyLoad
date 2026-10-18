@@ -1,7 +1,7 @@
-using ManagedCode.Communication;
 using System.Collections.Immutable;
 using System.Globalization;
 using System.Text;
+using ManagedCode.Communication;
 
 namespace KeyLoad.UnitTests.Features.RelationalStorage;
 

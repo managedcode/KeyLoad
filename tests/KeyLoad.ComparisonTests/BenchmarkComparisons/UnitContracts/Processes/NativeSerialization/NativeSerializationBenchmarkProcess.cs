@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>
 /// Owns the real child and both output pumps until settlement. The 15-minute execution deadline

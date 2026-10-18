@@ -1,8 +1,8 @@
-using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -17,7 +17,7 @@ internal static class QueueEnqueueSequenceAssertions
         {
             await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
             await Assert.That(result.Problem?.Detail).IsEqualTo(QueueEnqueueAuthorityProtocol.ExpectedSequenceDetail);
-            
+
             await Assert.That(result.Value).IsNull();
             await QueueClaimVersionExhaustionAssertions.DomainAsync(store, lane, domain);
             await Assert.That(owner.GetDocument(QueueEnqueueColdProtocol.Root, new(lane.Partition, QueueEnqueueColdProtocol.Collection, QueueEnqueueColdProtocol.Document))).IsNull();

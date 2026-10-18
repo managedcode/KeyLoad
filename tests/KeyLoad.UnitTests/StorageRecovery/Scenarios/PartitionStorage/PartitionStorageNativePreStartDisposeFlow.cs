@@ -1,7 +1,7 @@
 using System.Net;
+using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Server;
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.Features.ClusterRouting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.TestingHost;
@@ -22,7 +22,8 @@ internal static class PartitionStorageNativePreStartDisposeFlow
     internal static async Task RunAsync(CancellationToken token)
     {
         var failures = new List<Exception>();
-        var root = Path.Combine(Path.GetTempPath(), RootPrefix + Guid.NewGuid().ToString(GuidFormat));
+        var root = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(Path.GetTempPath())),
+            RootPrefix + Guid.NewGuid().ToString(GuidFormat));
         var directory = Path.Combine(root, DirectoryName);
         var ports = new TestClusterPortAllocator();
         await ServerFailureObserver.ObserveAsync(async () =>

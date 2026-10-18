@@ -1,5 +1,5 @@
-using ManagedCode.Communication.Commands;
 using System.Text;
+using ManagedCode.Communication.Commands;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;

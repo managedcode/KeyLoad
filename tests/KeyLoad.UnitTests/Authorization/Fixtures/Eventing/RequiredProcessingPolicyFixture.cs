@@ -1,6 +1,6 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using System.Text.Json;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.Authorization;
 

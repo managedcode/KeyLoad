@@ -52,7 +52,7 @@ internal static class QueueLeaseAuthorityHealthy
         await NativeReplayResultAssertions.Same<CommitReceipt>(database.Apply(healthy.Ack), healthy.Acked);
         var stale = database.Apply(healthy.Claim);
         await Assert.That(Errors.Code(stale.Problem)).IsEqualTo(ErrorCode.StaleLease);
-        
+
         await Assert.That(stale.Value).IsNull();
         var retained = store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(
             state.Lane.Partition, QueueLeaseAuthorityProtocol.Root, healthy.Claim.Id)))!;

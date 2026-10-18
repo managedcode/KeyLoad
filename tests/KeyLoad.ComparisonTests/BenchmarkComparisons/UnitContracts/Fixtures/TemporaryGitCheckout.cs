@@ -2,7 +2,7 @@ using System.Runtime.ExceptionServices;
 using System.Security.Cryptography;
 using System.Text.Json;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class TemporaryGitCheckout : IAsyncDisposable
 {

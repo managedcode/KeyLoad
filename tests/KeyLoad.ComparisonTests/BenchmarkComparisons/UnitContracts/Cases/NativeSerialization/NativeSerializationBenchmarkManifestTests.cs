@@ -2,7 +2,7 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 [NotInParallel]
 internal sealed class NativeSerializationBenchmarkManifestTests

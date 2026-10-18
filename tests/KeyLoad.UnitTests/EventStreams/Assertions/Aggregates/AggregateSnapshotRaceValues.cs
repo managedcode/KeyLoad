@@ -1,9 +1,9 @@
-using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Storage;
 using KeyLoad.UnitTests.Features.ResourceExecution;
 using KeyLoad.UnitTests.Features.StorageRecovery.Assertions;
+using ManagedCode.Communication;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.EventStreams;
@@ -66,7 +66,7 @@ internal static class AggregateSnapshotRaceValues
                 {
                     await EqualAsync(Errors.Code(actual.Problem), ErrorCode.PermissionDenied);
                     await Assert.That(actual.Problem?.Detail).IsEqualTo(rawInputDenied ? CompleteReplayInputDenied : ChangedPrincipalPolicyDenied);
-                    
+
                     await Assert.That(actual.Value).IsNull();
                 }
                 else if (Errors.Code(original.Result.Problem) is null)

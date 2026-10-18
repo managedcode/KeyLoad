@@ -56,6 +56,7 @@ internal static class PartitionStorageNativeReplay
     internal static (long AppliedPosition, long StorePosition) ReadCut(IServiceProvider source)
     {
         var database = source.GetRequiredService<PartitionHostApplicationOwner>().Borrow().Database;
-        return database.Store.Read(_ => (database.LastApplied, database.Store.Position));
+        return database.Store.Read(view => (view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
+            ? NativeSerialization.Deserialize<long>(bytes) : default(long), database.Store.Position));
     }
 }

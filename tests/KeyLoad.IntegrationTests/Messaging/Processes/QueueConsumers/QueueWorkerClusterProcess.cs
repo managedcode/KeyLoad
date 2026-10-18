@@ -1,6 +1,6 @@
 using KeyLoad.Client;
-using KeyLoad.RecoveryTests.Features.Messaging;
 using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.RecoveryTests.Features.Messaging;
 using KeyLoad.Server;
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;

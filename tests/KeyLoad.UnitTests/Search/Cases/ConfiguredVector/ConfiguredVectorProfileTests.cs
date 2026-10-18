@@ -103,7 +103,7 @@ internal sealed class ConfiguredVectorProfileTests
         var error = database.Submit(OperationKind.Batch, command, principal: Reader, id: command.CommandId);
         await Assert.That(Errors.Code(error.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(error.Problem?.Detail).IsEqualTo(Denied);
-        
+
         await Assert.That(ConfiguredVectorProfileFlow.ModelBytes(database, command, Reader)).IsEquivalentTo(model, CollectionOrdering.Matching);
         var healthy = ConfiguredVectorProfileFlow.Command(database, projection: false, wrongModel: false);
         database.Submit(OperationKind.Batch, healthy, id: healthy.CommandId).Get<CommitReceipt>();

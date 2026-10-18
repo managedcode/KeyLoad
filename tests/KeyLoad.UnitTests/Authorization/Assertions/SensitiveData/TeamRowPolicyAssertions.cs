@@ -20,7 +20,6 @@ internal static class TeamRowPolicyAssertions
     private const string ProjectPrefix = "project-";
     private const int OriginalMembershipSlots = 256;
     private const long ForgedPolicyEpoch = 2;
-    private const long InitialOwnershipEpoch = 1;
     private const long AbsentRevision = 0;
     private const int FirstMembershipIndex = 0;
 

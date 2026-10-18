@@ -1,8 +1,8 @@
-using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.ResourceExecution;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.BackupRestore;
 
@@ -116,8 +116,12 @@ internal sealed class BackupIndexedDocumentDedupCases
         await Assert.That(restored.DispatchPaused).IsTrue();
         await Assert.That(manifestPosition).IsEqualTo(sourceCut);
         await Assert.That(fixture.TargetStore.Position).IsEqualTo(sourceCut + AuthorityResetCommits);
-        await Assert.That(ReadSystem(fixture.TargetStore, ZoneTreePersistenceFormat.LastAppliedKey)).IsNull();
-        await Assert.That(ReadSystem(fixture.TargetStore, ZoneTreePersistenceFormat.ClockKey)).IsNull();
+        foreach (var key in new[] { ZoneTreePersistenceFormat.LastAppliedKey, ZoneTreePersistenceFormat.ClockKey })
+        {
+            await Assert.That(ReadSystem(fixture.TargetStore, key)).IsNotNull();
+            await Assert.That(ReadSystem(fixture.TargetStore, key)!.AsSpan()
+                .SequenceEqual(ReadSystem(fixture.Source.Store, key))).IsTrue();
+        }
         var metadata = fixture.TargetStore.Read(view => view.GetRecord<ResourceDefinition>(KeySpace.Resource(
             fixture.Partition.TenantId, fixture.Partition.DatabaseId, BackupIndexedDocumentDedupFixture.AuthorityResource)));
         await Assert.That(System.Text.Json.JsonSerializer.Serialize(metadata, JsonDefaults.Options)).IsEqualTo(

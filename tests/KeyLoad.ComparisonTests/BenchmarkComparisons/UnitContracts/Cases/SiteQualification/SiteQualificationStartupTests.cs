@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>AC-BC-FAIL-011: actual qualification Bash startup and filesystem collision behavior.</summary>
 internal sealed class SiteQualificationStartupTests

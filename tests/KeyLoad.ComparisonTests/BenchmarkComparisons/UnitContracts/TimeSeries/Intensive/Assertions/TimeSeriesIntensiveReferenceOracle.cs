@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons.TimeSeries.Intensive;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons.TimeSeries.Intensive;
 
 internal static class TimeSeriesIntensiveReferenceOracle
 {

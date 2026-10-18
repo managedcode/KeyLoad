@@ -1,7 +1,7 @@
-using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
 using KeyLoad.Storage;
+using ManagedCode.Communication;
 using static KeyLoad.UnitTests.Features.Messaging.RemoteTransferCapacityAuthorityProtocol;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -35,7 +35,7 @@ internal static class RemoteTransferCapacityAuthorityCeiling
         var failed = fixture.Apply(OperationKind.Batch, request, time: time);
         await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(failed.Problem?.Detail).IsEqualTo(CapacityFailure);
-        
+
         await Assert.That(failed.Value).IsNull();
         await Assert.That(fixture.Store.Position).IsEqualTo(position + First);
         await Assert.That(Domain(fixture, request.CommandId)).IsEquivalentTo(before, TUnit.Assertions.Enums.CollectionOrdering.Matching);

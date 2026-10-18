@@ -1,5 +1,5 @@
-using ManagedCode.Communication.Commands;
 using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
 internal sealed record AtomicTriadOutboxContinuation(CommandRequest Command, Command<DatabaseCommand> Healthy,

@@ -1,6 +1,6 @@
-using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.InternalSerialization;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.TimeSeries;
 

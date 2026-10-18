@@ -1,7 +1,7 @@
-using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 
@@ -13,7 +13,7 @@ internal static class QueueDeliveryVersionExhaustionAssertions
     {
         await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(result.Problem?.Detail).IsEqualTo(Detail);
-        
+
         await Assert.That(result.Value).IsNull();
     }
 

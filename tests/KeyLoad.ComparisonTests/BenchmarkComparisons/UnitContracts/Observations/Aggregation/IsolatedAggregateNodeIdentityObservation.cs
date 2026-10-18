@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Runtime.ExceptionServices;
 using ManagedCode.Communication.CQRS;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Observes whether the process still matches an already captured process identity.</summary>
 internal static class IsolatedAggregateNodeIdentityObservation

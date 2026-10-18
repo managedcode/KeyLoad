@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Controlled admission inputs prove rejection policy, never provider publication authority.</summary>
 internal static class CompiledBenchmarkRuntimeNodeProgram

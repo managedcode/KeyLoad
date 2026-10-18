@@ -1,5 +1,3 @@
-using ManagedCode.Communication;
-using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core.Features.BackupRestore.Execution;
 using KeyLoad.Core.Features.BlobStorage;
@@ -8,6 +6,8 @@ using KeyLoad.Core.Features.ClusterRouting.Execution;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Storage;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.Core;
 
@@ -82,7 +82,7 @@ public sealed partial class DatabaseEngine
         outcome = outcome with { CanonicalSequence = replicationIndex };
         PersistCommandOutcome(rosterTransaction, operation, selection.Key, outcome, replicationIndex, persistOutcome);
         var result = ValidateCompiledCommand(rosterTransaction, operation, selection.Key, outcome, replicationIndex,
-            persistOutcome, Store.Identity.Incarnation);
+            persistOutcome);
         return new(outcome.CanonicalSequence, result);
     }
 
@@ -228,11 +228,11 @@ public sealed partial class DatabaseEngine
     }
 
     private static Result<object> ValidateCompiledCommand(AtomicPartitionRosterTransaction transaction, Command<DatabaseCommand> operation,
-        byte[] resultKey, StoredOutcome outcome, long replicationIndex, bool persistOutcome, Guid currentIncarnation)
+        byte[] resultKey, StoredOutcome outcome, long replicationIndex, bool persistOutcome)
     {
         try
         {
-            transaction.PersistCandidates(currentIncarnation);
+            transaction.PersistCandidates();
             transaction.ValidateCommit();
             return outcome.Result;
         }
@@ -250,7 +250,7 @@ public sealed partial class DatabaseEngine
                 RemoteTransferFailureAuthority = null
             };
             PersistCommandOutcome(transaction, operation, resultKey, actualFailure, replicationIndex, persistOutcome);
-            transaction.PersistCandidates(currentIncarnation);
+            transaction.PersistCandidates();
             transaction.ValidateCommit();
             return failure;
         }

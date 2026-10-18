@@ -1,10 +1,10 @@
-using ManagedCode.Communication.Commands;
 using System.Collections.Immutable;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Query;
 using KeyLoad.Query.Features.Search;
 using KeyLoad.Server;
 using KeyLoad.UnitTests.Features.BackupRestore;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
@@ -21,7 +21,7 @@ internal static class Bm25RestoredEligibilityPolicy
             Grants = original.Grants.Select(grant => grant with { Capabilities = grant.Capabilities & ~Capability.Query }).ToImmutableArray()
         });
         var before = Bm25RestoredEligibilityAssertions.Cut(fixture.Target!, fixture.Database,
-            fixture.ReadTargetJournalCut(), token);
+            fixture.ReadTargetCut(), token);
         var source = Bm25RestoredEligibilityAssertions.Cut(fixture.Source.Store, fixture.Source.Database,
             fixture.Source.ReadCanonicalCut(), token);
         var failures = new List<Exception>();
@@ -33,7 +33,7 @@ internal static class Bm25RestoredEligibilityPolicy
                     Bm25PortableFamilyBackupSeed.Field, "needle"), token));
             await Assert.That(error!.Code).IsEqualTo(ErrorCode.PermissionDenied);
             await Bm25RestoredEligibilityAssertions.SameAsync(before,
-                Bm25RestoredEligibilityAssertions.Cut(fixture.Target!, fixture.Database, fixture.ReadTargetJournalCut(), token));
+                Bm25RestoredEligibilityAssertions.Cut(fixture.Target!, fixture.Database, fixture.ReadTargetCut(), token));
             await Bm25RestoredEligibilityAssertions.SameAsync(source,
                 Bm25RestoredEligibilityAssertions.Cut(fixture.Source.Store, fixture.Source.Database, fixture.Source.ReadCanonicalCut(), token));
         }, failures);
@@ -55,7 +55,7 @@ internal static class Bm25RestoredEligibilityPolicy
         var head = NativeSerialization.Deserialize<Bm25CorpusCurrentV1>(bytes);
         await Assert.That(head.PolicyEpoch).IsEqualTo(restored.PolicyEpoch);
         await Assert.That(head.Incarnation).IsEqualTo(fixture.Target.Identity.Incarnation);
-        await Assert.That(head.Generation).IsEqualTo(operation.Id);
+        await Assert.That(head.Generation).IsEqualTo(operation.CommandId);
         return (operation, receipt, head, bytes);
     }
 

@@ -1,11 +1,11 @@
 using System.Globalization;
 using System.Text;
 using KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive;
-using KeyLoad.UnitTests.Features.BenchmarkComparisons.TimeSeries.Intensive;
+using KeyLoad.ComparisonTests.Features.BenchmarkComparisons.TimeSeries.Intensive;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class ComparisonSerializationBufferPolicyTests
 {

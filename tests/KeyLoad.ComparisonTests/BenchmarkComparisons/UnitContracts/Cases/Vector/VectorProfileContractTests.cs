@@ -1,7 +1,7 @@
 using System.Text.Json;
 using KeyLoad.Comparisons;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class VectorProfileContractTests
 {

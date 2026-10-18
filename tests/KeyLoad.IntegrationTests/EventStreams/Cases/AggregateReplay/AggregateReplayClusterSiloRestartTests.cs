@@ -27,11 +27,11 @@ internal sealed class AggregateReplayClusterSiloRestartTests(ClusterFixture fixt
         using var clients = new AggregateReplayClusterWorkerClients(fixture, scenario.WorkerSecret, nodes);
         var append = await scenario.AppendInitialAsync(clients.Items[0], Guid.NewGuid(), deadline.Token);
         await Assert.That(append.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
-            await Assert.That(append.PersistedCopies).IsEqualTo(3);
+        await Assert.That(append.PersistedCopies).IsEqualTo(3);
         var snapshot = await McpCallerAssertions.SdkSuccessAsync(await clients.Items[0].CommitAsync(
             scenario.InitialSnapshotCommand(Guid.NewGuid()), deadline.Token));
         await Assert.That(snapshot.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
-            await Assert.That(snapshot.PersistedCopies).IsEqualTo(3);
+        await Assert.That(snapshot.PersistedCopies).IsEqualTo(3);
         await RunSiloRestartAsync(scenario, nodes, clients.Items, clients.AdminItems, interruptAcceptedRestart, deadline.Token);
     }
 

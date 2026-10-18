@@ -23,7 +23,7 @@ internal sealed class EventProjectionClusterSiloRestart(ClusterFixture fixture)
                 cancellationToken);
             var survivor = Enumerable.Range(0, nodes.Length).First(index => index != selectedIndex);
             await WaitReadyAsync(clients.Administrators[survivor], cancellationToken);
-            await ReplayAndCheckSurvivorAsync(scenario, clients, original, survivor, nodes[survivor],
+            await ReplayAndCheckSurvivorAsync(scenario, clients, survivor, nodes[survivor],
                 cancellationToken);
             await RestartAndCheckClusterAsync(stoppedNode, nodes, clients.Administrators, cancellationToken);
             restarted = true;
@@ -48,7 +48,7 @@ internal sealed class EventProjectionClusterSiloRestart(ClusterFixture fixture)
     }
 
     private async Task ReplayAndCheckSurvivorAsync(EventProjectionClusterScenario scenario,
-        EventProjectionClusterClients clients, CommitReceipt original, int survivor, string node,
+        EventProjectionClusterClients clients, int survivor, string node,
         CancellationToken cancellationToken)
     {
         var replay = await clients.Callers[survivor].CommitAsync(scenario.ApplyCommand(), cancellationToken);

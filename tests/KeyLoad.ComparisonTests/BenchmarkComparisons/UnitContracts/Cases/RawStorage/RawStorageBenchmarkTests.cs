@@ -5,7 +5,7 @@ using KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 using TUnit.Assertions.Enums;
 using Arguments = TUnit.Core.ArgumentsAttribute;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Verifies generated metadata and invokes every timed operation on real fixtures.</summary>
 [NotInParallel]

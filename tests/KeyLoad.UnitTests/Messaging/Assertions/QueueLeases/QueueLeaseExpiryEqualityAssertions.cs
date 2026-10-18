@@ -1,5 +1,5 @@
-using ManagedCode.Communication;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -9,7 +9,7 @@ internal static class QueueLeaseExpiryEqualityAssertions
     internal static async Task RefusalAsync(Result<object> result, ErrorCode code)
     {
         await Assert.That(Errors.Code(result.Problem)).IsEqualTo(code);
-        
+
         await Assert.That(result.Value).IsNull();
     }
 

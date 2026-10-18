@@ -1,7 +1,7 @@
 using System.Text.Json.Nodes;
-using T = KeyLoad.UnitTests.Features.BenchmarkComparisons.NativeQuorumTopologyTokens;
+using T = KeyLoad.ComparisonTests.Features.BenchmarkComparisons.NativeQuorumTopologyTokens;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>AC-ISO-003: exact native running disc brokers must equal durable quorum members and online members.</summary>
 internal sealed class NativeQuorumTopologyRabbitTests

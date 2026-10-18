@@ -1,4 +1,5 @@
 using System.Buffers.Binary;
+using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using TUnit.Assertions.Enums;
@@ -9,7 +10,8 @@ internal sealed class NativeBackupCutFixture : IDisposable
 {
     private const string RootPrefix = "keyload-native-backup-cut-";
     private const string AllFiles = "*";
-    private readonly string root = Path.Combine(Path.GetTempPath(), RootPrefix + Guid.NewGuid().ToString("N"));
+    private readonly string root = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(Path.GetTempPath())),
+        RootPrefix + Guid.NewGuid().ToString("N"));
 
     internal string Source => Path.Combine(root, MetadataTestContract.SourceDirectoryName);
     internal string Backup => Path.Combine(root, MetadataTestContract.BackupDirectoryName);

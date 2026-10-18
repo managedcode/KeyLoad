@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Independent value-digest and native-residency assertions for real scaled fixture cases.</summary>
 internal static class ScaledRawStorageFixtureOracleTests

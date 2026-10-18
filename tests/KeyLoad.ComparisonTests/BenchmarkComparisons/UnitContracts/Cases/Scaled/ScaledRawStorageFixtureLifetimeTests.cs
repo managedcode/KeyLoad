@@ -1,6 +1,6 @@
 using KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Verifies real fixture cancellation, invalid-input and repeat-close boundaries.</summary>
 [NotInParallel]

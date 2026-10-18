@@ -1,16 +1,15 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.Messaging;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.Authorization;
 
 internal static class DeniedCommandRepairContinuation
 {
-    private const long InitialOwnershipEpoch = 1;
     private const long NextPosition = 1;
     private const long RepairEpochAdvance = 2;
     private const long RepairedRevision = 3;
@@ -126,7 +125,7 @@ internal static class DeniedCommandRepairContinuation
         var denied = database.Apply(database.OwnCommand(new Command<DatabaseCommand> { CommandId = original.CommandId, UserId = original.UserId, Timestamp = (database.EvaluationClock.GetUtcNow()).UtcDateTime, Value = original.Value }));
         await Assert.That(Errors.Code(denied.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(denied.Problem?.Detail).IsEqualTo(ChangedPolicy);
-        
+
         await Assert.That(denied.Value).IsNull();
         await UnchangedAsync(store, position, bytes);
         var retained = store.Read(view => view.ReadOwnedValue(

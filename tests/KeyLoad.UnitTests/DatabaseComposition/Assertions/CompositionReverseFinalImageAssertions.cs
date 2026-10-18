@@ -1,11 +1,11 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.DocumentStorage;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Storage;
 using KeyLoad.UnitTests.Features.Authorization;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using A = KeyLoad.UnitTests.Features.DatabaseComposition.CompositionBoundReferenceNativeAssertions;
 using D = KeyLoad.UnitTests.Features.DatabaseComposition.CompositionReverseFinalImageData;
 
@@ -17,7 +17,7 @@ internal static class CompositionReverseFinalImageAssertions
     {
         await A.EqualAsync(Result<object>.Fail(Errors.Problem(ErrorCode.NotFound, D.Unavailable)), actual);
         await Assert.That(actual.Value).IsNull();
-        
+
     }
 
     internal static async Task StateAsync(SafeProjectorOperationDatabase owner, CompositionReverseFinalImageState state)
@@ -49,7 +49,7 @@ internal static class CompositionReverseFinalImageAssertions
         await Assert.That(actual.Partition).IsEqualTo(owner.Source.Partition);
         await Assert.That(actual.BlobAuthority).IsNull();
         await Assert.That(actual.OnlineTextAuthority).IsNull();
-        
+
         await Assert.That(Errors.Code(actual.Result.Problem)).IsNull();
         await Assert.That(actual.Result.Problem?.Detail).IsNull();
         await Assert.That(actual.Result.Value).IsTypeOf<CommitReceipt>();

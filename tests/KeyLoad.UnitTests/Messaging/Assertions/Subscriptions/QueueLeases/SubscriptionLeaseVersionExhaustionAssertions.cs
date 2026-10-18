@@ -1,6 +1,6 @@
-using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -19,7 +19,7 @@ internal static class SubscriptionLeaseVersionExhaustionAssertions
         var result = QueueWholeFlowStorage.Apply(db, OperationKind.ReceiveSubscription, request, request.RequestId, due);
         await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(result.Problem?.Detail).IsEqualTo(detail);
-        
+
         await Assert.That(result.Value).IsNull();
         await Assert.That(store.Position).IsEqualTo(position + NextPosition);
         await RequireLocatorAsync(store, request);

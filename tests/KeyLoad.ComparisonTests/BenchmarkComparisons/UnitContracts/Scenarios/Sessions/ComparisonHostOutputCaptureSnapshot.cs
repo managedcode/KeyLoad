@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed record ComparisonHostOutputCaptureSnapshot(ComparisonHostCaptureState State, int Length,
     bool MissingKeyLoadSetting, bool MissingQdrantSetting, bool InvalidDimensions)

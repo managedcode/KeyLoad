@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests;

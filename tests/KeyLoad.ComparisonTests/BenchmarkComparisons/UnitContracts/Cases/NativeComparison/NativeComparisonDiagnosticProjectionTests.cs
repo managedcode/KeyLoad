@@ -7,7 +7,7 @@ using KeyLoad.Comparisons.Targets;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class NativeComparisonDiagnosticProjectionTests
 {

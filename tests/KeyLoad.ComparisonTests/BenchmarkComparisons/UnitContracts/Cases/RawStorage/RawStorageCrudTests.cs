@@ -1,7 +1,7 @@
 using System.Buffers.Binary;
 using KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Verifies byte-exact ZoneTree operations against the immutable fixture corpus.</summary>
 [NotInParallel]

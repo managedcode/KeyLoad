@@ -1,4 +1,3 @@
-using KeyLoad.Features.InternalSerialization;
 using KeyLoad.UnitTests.Features.InternalSerialization;
 
 namespace KeyLoad.UnitTests.Features.TimeSeries;

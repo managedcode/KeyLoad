@@ -1,9 +1,10 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
+using System.Diagnostics.CodeAnalysis;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using D = KeyLoad.UnitTests.Features.DatabaseComposition.CompositionPrefixPrepareData;
 
 namespace KeyLoad.UnitTests.Features.DatabaseComposition;
@@ -14,7 +15,7 @@ internal sealed class CompositionPrefixPrepareOwner
     private readonly StoreIdentity identity;
     private bool originalJoined;
     private ZoneTreeStore? coldStore;
-    private DatabaseEngine? coldDatabase;
+
     internal TestDatabase Source
     {
         get;
@@ -24,7 +25,9 @@ internal sealed class CompositionPrefixPrepareOwner
         get;
     }
     internal ZoneTreeStore Store => originalJoined ? coldStore! : Source.Store;
-    internal DatabaseEngine Database => originalJoined ? coldDatabase! : Source.Database;
+
+    [AllowNull]
+    internal DatabaseEngine Database { get => originalJoined ? field! : Source.Database; private set; }
     internal Dictionary<string, ResourceLifetimeV1> Lifetimes { get; } = new(StringComparer.Ordinal);
     internal List<CompositionPrefixPrepareCommand> Commands { get; } = [];
 
@@ -67,7 +70,8 @@ internal sealed class CompositionPrefixPrepareOwner
     }
 
     internal (long AppliedPosition, long StorePosition) Cut()
-        => Store.Read(_ => (Database.LastApplied, Store.Position));
+        => Store.Read(view => (view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
+            ? NativeSerialization.Deserialize<long>(bytes) : default(long), Store.Position));
 
     internal Command<DatabaseCommand> Retained(Command<DatabaseCommand> original) => (originalJoined
         ? OutcomeStoreOracle.ReadStored(Store, original) ?? throw new InvalidOperationException("The exact stored command is missing.") : Source.ReadStoredOutcome(original)).PreparedCommand;
@@ -88,7 +92,7 @@ internal sealed class CompositionPrefixPrepareOwner
         },
             identity.NodeId, Source.StorageExecution);
         await CompositionPrefixPrepareAssertions.EqualAsync(identity, coldStore.Identity);
-        coldDatabase = Source.CreateConfiguredDatabase(coldStore);
+        Database = Source.CreateConfiguredDatabase(coldStore);
     }
 
     private void Join()
@@ -101,7 +105,7 @@ internal sealed class CompositionPrefixPrepareOwner
         }
         var store = coldStore;
         coldStore = null;
-        coldDatabase = null;
+        Database = null;
         var failures = new List<Exception>();
         if (store is not null)
         {

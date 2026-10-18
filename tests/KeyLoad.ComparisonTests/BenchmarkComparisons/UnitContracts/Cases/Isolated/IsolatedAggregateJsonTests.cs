@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>AC-ISO-007 raw parsing rejects ambiguous or malformed input before publication.</summary>
 internal sealed class IsolatedAggregateJsonTests

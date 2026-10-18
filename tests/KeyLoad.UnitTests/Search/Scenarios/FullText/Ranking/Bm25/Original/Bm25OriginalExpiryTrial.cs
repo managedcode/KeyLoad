@@ -1,4 +1,3 @@
-using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Search;
 
 namespace KeyLoad.UnitTests.Features.Search;

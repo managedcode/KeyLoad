@@ -2,6 +2,8 @@
 
 A provider-owned, runtime-only native snapshot lease ([ADR-097](../../ADR/ADR-097-native-read-cut-leases.md)). The existing synchronous `IAtomicStore.Read` view and borrowed bytes still cannot escape their callback. This primitive supplies capture and lifetime only; online index delta retention, catalog publication and restart recovery are outside it.
 
+The silo-local Grain Service reads the canonical sequence directly from the supplied read view. An absent sequence record denotes the initial zero cut; malformed bytes retain their native rejection. It captures the store identity and any local storage position under that same gate. A callback must not call `DatabaseEngine.LastApplied` or enter another `Store.Read`, because those operations acquire the store gate again.
+
 The native index builder scans while the canonical read gate is held, and copying an entire database would add unbounded retained memory. ZoneTree 1.9.8 supports a native snapshot iterator which excludes later writes and pins its segments, but the runtime shutdown does not track escaped iterators. The chosen design is one finite provider-owned lease with copied callback bytes and explicit shutdown joining. It introduces no other database and does not move storage ownership.
 
 ## Concurrent document and index scan

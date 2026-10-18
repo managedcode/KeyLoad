@@ -1,7 +1,7 @@
 using KeyLoad.Comparisons;
 using KeyLoad.Comparisons.Targets;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>AC-ISO-003/005/006: pure member inputs preserve exact pinned build identity; native HTTP proof remains a separate GitHub gate.</summary>
 internal sealed class KurrentGossipVersionTests

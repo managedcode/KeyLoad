@@ -1,8 +1,8 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core.Features.TimeSeries;
 using KeyLoad.Server;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.TimeSeries;
 
@@ -86,7 +86,7 @@ internal static class SampleChunkEnrollmentBoundaryFlow
             originals.Add((operation, original));
             await Assert.That(SampleRollupWholeFlow.Outcome(original)).IsEqualTo(
                 SampleRollupWholeFlow.Outcome(Result<object>.Fail(Errors.Problem(ErrorCode.Conflict, ConflictDetail))));
-            
+
         }, failures);
         await ServerFailureObserver.ObserveAsync(async () => await Assert.That(fixture.Raw()).IsEqualTo(raw), failures);
         await ServerFailureObserver.ObserveAsync(current, failures);

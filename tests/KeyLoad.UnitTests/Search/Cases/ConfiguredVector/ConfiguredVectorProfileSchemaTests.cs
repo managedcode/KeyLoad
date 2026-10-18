@@ -45,7 +45,7 @@ internal sealed class ConfiguredVectorProfileSchemaTests
         var state = ConfiguredVectorProfileFlow.StateBytes(database, id, global: true);
         var original = database.Submit(OperationKind.ConfigureResource, request, id: id);
         await Assert.That(Errors.Code(original.Problem)).IsEqualTo(expected);
-        
+
         await Assert.That(original.Problem?.Detail).IsEqualTo(ExpectedDetail(failure));
         await Assert.That(ConfiguredVectorProfileFlow.StateBytes(database, id, global: true)).IsEquivalentTo(state, CollectionOrdering.Matching);
         var key = KeySpace.Resource(database.Partition.TenantId, database.Partition.DatabaseId, Collection);

@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal static class NativeSerializationBenchmarkStartInfo
 {

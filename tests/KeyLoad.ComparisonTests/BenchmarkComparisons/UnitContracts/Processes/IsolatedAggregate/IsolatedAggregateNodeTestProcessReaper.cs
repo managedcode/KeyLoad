@@ -2,7 +2,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using KeyLoad.UnitTests.Features.TestInfrastructure;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal static class IsolatedAggregateNodeTestProcessReaper
 {

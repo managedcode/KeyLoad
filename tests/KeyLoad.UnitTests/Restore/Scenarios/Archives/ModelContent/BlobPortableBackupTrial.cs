@@ -1,9 +1,9 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.BackupRestore;
 
@@ -61,7 +61,7 @@ internal static class BlobPortableBackupTrial
         var sourceCut = BackupPersistedPolicyAssertions.Capture(source.Store);
         await Assert.That(fixture.CreateBackup()).IsEqualTo(sourceCut.Position);
         var archive = await NativeBackupJournalRepairAssertions.ArchiveAsync(fixture.BackupDirectory, token);
-        var verified = ZoneTreeStore.VerifyBackup(fixture.BackupDirectory, UnitExecutionOptions.StorageExecution());
+        var verified = ZoneTreeStore.VerifyBackup(fixture.BackupDirectory, UnitExecutionOptions.StorageExecution(), token);
         await Assert.That(verified.Position).IsEqualTo(sourceCut.Position);
         await BackupPersistedPolicyAssertions.SameAsync(source.Store.Identity, verified.Identity);
         var restored = await RestoreAsync(fixture, token);

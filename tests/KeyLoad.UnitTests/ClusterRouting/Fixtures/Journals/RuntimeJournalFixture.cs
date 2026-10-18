@@ -1,6 +1,6 @@
-using ManagedCode.Communication;
 using System.Collections.Immutable;
 using KeyLoad.Core;
+using ManagedCode.Communication;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;

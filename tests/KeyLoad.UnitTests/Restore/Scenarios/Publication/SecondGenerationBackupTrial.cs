@@ -26,7 +26,7 @@ internal static class SecondGenerationBackupTrial
     {
         var source = NativeBackupJournalRepairAssertions.Read(fixture.Source, token);
         var original = await NativeBackupJournalRepairAssertions.ArchiveAsync(fixture.Backup, token);
-        var restored = ZoneTreeStore.Restore(fixture.Backup, fixture.Destination, UnitExecutionOptions.StorageExecution());
+        var restored = ZoneTreeStore.Restore(fixture.Backup, fixture.Destination, UnitExecutionOptions.StorageExecution(), cancellationToken: token);
         await NativeBackupJournalRepairAssertions.RestoredAsync(fixture, restored,
             NativeBackupJournalRepairAssertions.Read(fixture.Destination, token));
         var parent = Path.GetDirectoryName(fixture.Destination)!;
@@ -37,7 +37,7 @@ internal static class SecondGenerationBackupTrial
         await SecondGenerationBackupAssertions.LiteralAsync(current);
         var captured = await NativeBackupJournalRepairAssertions.ArchiveAsync(archive, token);
         await SecondGenerationBackupAssertions.CheckpointAsync(original, captured, source.Identity, current.Identity);
-        var verified = ZoneTreeStore.VerifyBackup(archive, UnitExecutionOptions.StorageExecution());
+        var verified = ZoneTreeStore.VerifyBackup(archive, UnitExecutionOptions.StorageExecution(), token);
         await BackupPersistedPolicyAssertions.SameAsync(current.Identity, verified.Identity);
         await Assert.That(verified.Position).IsEqualTo(current.Position);
         await SecondGenerationBackupAssertions.ConflictAsync(archive, fixture.Destination, current, captured, token);

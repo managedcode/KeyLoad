@@ -1,8 +1,8 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Query;
 using KeyLoad.Query.Features.Search;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.Search;
 

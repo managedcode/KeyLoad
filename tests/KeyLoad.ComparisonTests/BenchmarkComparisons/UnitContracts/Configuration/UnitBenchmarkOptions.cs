@@ -3,7 +3,7 @@ using KeyLoad.Comparisons;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests;
+namespace KeyLoad.ComparisonTests;
 
 internal static class UnitBenchmarkOptions
 {

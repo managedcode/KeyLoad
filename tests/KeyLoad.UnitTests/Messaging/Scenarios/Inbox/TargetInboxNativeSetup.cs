@@ -1,5 +1,5 @@
-using ManagedCode.Communication;
 using KeyLoad.Core;
+using ManagedCode.Communication;
 namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal static class TargetInboxNativeSetup

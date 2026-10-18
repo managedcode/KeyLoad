@@ -51,7 +51,7 @@ internal static class QueueLeaseAuthorityTrial
         else
         {
             await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(ErrorCode.StaleLease);
-            
+
             await Assert.That(replay.Value).IsNull();
         }
         var retained = store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(

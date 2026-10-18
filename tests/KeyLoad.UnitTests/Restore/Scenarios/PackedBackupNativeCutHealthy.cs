@@ -9,7 +9,7 @@ internal static class PackedBackupNativeCutHealthy
     internal static async Task RunAsync(CliBackupRestoreFixture fixture, string unpacked, string target,
         string cliTarget, Guid incarnation, byte[] key, long position, bool containsSecond, CancellationToken token)
     {
-        var identity = ZoneTreeStore.Restore(unpacked, target, UnitExecutionOptions.StorageExecution(), incarnation, key);
+        var identity = ZoneTreeStore.Restore(unpacked, target, UnitExecutionOptions.StorageExecution(), incarnation, key, token);
         await Assert.That(identity.NodeId).IsNotEqualTo(fixture.OriginalIdentity.NodeId);
         await Assert.That(identity.Incarnation).IsEqualTo(incarnation);
         await Assert.That(identity.SigningKey.Span.SequenceEqual(key)).IsTrue();

@@ -1,10 +1,10 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.ResourceExecution;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using TUnit.Assertions.Enums;
 namespace KeyLoad.UnitTests.Features.Messaging;
 
@@ -93,7 +93,7 @@ internal static class SubscriptionLeaseAuthorityAssertions
         var replay = db.Apply(claim);
         await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(ErrorCode.StaleLease);
         await Assert.That(replay.Problem?.Detail).IsEqualTo("The subscription delivery lease is stale.");
-        
+
         await Assert.That(replay.Value).IsNull();
         await Assert.That(store.Read(view => view.ReadOwnedValue(key))!.AsSpan().SequenceEqual(saved)).IsTrue();
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, bytes, position, identity);

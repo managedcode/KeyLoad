@@ -1,5 +1,5 @@
-using ManagedCode.Communication.Commands;
 using System.Collections.Immutable;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.DatabaseComposition;
 

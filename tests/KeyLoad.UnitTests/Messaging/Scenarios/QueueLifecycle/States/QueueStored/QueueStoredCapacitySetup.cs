@@ -1,5 +1,5 @@
-using ManagedCode.Communication.Commands;
 using System.Text.Json;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 

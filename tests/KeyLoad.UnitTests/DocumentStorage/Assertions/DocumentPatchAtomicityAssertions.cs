@@ -1,6 +1,6 @@
 using KeyLoad.Core;
-using ManagedCode.Communication;
 using KeyLoad.Query;
+using ManagedCode.Communication;
 using static KeyLoad.UnitTests.Features.DocumentStorage.DocumentPatchAtomicityContract;
 
 namespace KeyLoad.UnitTests.Features.DocumentStorage;
@@ -14,7 +14,7 @@ internal static class DocumentPatchAtomicityAssertions
     {
         await Assert.That(Errors.Code(result.Problem)).IsEqualTo(fault == 0 ? ErrorCode.Validation : ErrorCode.UnsupportedCapability);
         await Assert.That(result.Problem?.Detail).IsEqualTo(fault == 0 ? MissingDetail : ArrayDetail);
-        
+
         await Assert.That(result.Value).IsNull();
     }
 

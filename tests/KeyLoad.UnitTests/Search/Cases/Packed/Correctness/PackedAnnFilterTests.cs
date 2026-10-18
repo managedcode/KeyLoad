@@ -1,4 +1,3 @@
-using KeyLoad.Query;
 using KeyLoad.Query.Features.Search;
 using TUnit.Assertions.Enums;
 

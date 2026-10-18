@@ -1,8 +1,7 @@
 using System.Globalization;
-using KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 using SessionFields = KeyLoad.ComparisonTests.Features.BenchmarkComparisons.BenchmarkSessionEvidenceKeys;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Runs real shared-session admission with exclusively owned native configuration evidence.</summary>
 internal sealed class BenchmarkSessionStartupFixture : IDisposable

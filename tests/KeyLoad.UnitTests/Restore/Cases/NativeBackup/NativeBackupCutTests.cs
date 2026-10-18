@@ -160,10 +160,10 @@ internal sealed class NativeBackupCutTests
         await Assert.That(restored.Position).IsEqualTo(fixture.Position + 1);
         await Assert.That(restored.Read(view => NativeSerialization.Deserialize<string>(
             view.ReadOwnedValue(MetadataBackupFixture.StoredKeyBytes)!))).IsEqualTo(MetadataBackupFixture.ExpectedValue);
-        await Assert.That(restored.Read(view => view.ReadOwnedValue(KeyCodec.Encode(
-            ZoneTreePersistenceFormat.SystemNamespace, ZoneTreePersistenceFormat.LastAppliedKey)))).IsNull();
-        await Assert.That(restored.Read(view => view.ReadOwnedValue(KeyCodec.Encode(
-            ZoneTreePersistenceFormat.SystemNamespace, ZoneTreePersistenceFormat.ClockKey)))).IsNull();
+        await Assert.That(restored.Read(view => NativeSerialization.Deserialize<long>(view.ReadOwnedValue(KeyCodec.Encode(
+            ZoneTreePersistenceFormat.SystemNamespace, ZoneTreePersistenceFormat.LastAppliedKey))!))).IsEqualTo(1L);
+        await Assert.That(restored.Read(view => NativeSerialization.Deserialize<long>(view.ReadOwnedValue(KeyCodec.Encode(
+            ZoneTreePersistenceFormat.SystemNamespace, ZoneTreePersistenceFormat.ClockKey))!))).IsEqualTo(1L);
         await Assert.That(restored.Identity.SigningKey.Span.SequenceEqual(restoredIdentity.SigningKey.Span)).IsTrue();
     }
 }

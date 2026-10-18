@@ -2,9 +2,9 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using KeyLoad.Client;
-using KeyLoad.RecoveryTests.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.DocumentStorage;
+using KeyLoad.RecoveryTests.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.Authorization;
 

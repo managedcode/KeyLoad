@@ -5,7 +5,6 @@ namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
 internal static class AtomicTriadOutboxCommitted
 {
-    private const long InitialOwnershipEpoch = 1L;
     private const long FirstSequence = 2L;
     private const long FinalSequence = 4L;
 

@@ -1,7 +1,6 @@
-using KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 using SessionFields = KeyLoad.ComparisonTests.Features.BenchmarkComparisons.BenchmarkSessionEvidenceKeys;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>The native entry discovers shared-session cases and refuses invalid startup cohorts.</summary>
 internal sealed class ComparisonHostStartupTests

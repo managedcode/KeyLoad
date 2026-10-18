@@ -1,7 +1,8 @@
 using KeyLoad.Comparisons;
 using KeyLoad.Comparisons.Targets;
+using KeyLoad.UnitTests;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class HttpTargetArgumentTests
 {

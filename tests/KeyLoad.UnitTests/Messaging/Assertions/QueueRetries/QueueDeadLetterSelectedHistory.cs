@@ -22,7 +22,7 @@ internal static class QueueDeadLetterSelectedHistory
                 await NativeReplayResultAssertions.Same<ReceiveResult>(retained.Result, saved.Result);
                 var stale = database.Apply(saved.Operation);
                 await Assert.That(Errors.Code(stale.Problem)).IsEqualTo(ErrorCode.StaleLease);
-                
+
                 await Assert.That(stale.Value).IsNull();
             }
             else

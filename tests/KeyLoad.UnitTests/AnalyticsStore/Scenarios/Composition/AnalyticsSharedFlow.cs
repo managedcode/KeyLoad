@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.Messaging;
 using P = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsSharedProtocol;
 
@@ -43,7 +42,7 @@ internal static class AnalyticsSharedFlow
         var result = fixture.Submit(OperationKind.Batch, failed, id: failed.CommandId);
         await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.RevisionConflict);
         await Assert.That(result.Problem?.Detail).IsEqualTo("The expected revision does not match.");
-        
+
         await Assert.That(result.Value).IsNull();
         await AnalyticsSharedAssertions.PageAsync(fixture, upsert.Events.Single(), token);
         var seedTime = new DateTimeOffset(fixture.ReadStoredOutcome(anchor.CommandId).PreparedCommand!.Timestamp);

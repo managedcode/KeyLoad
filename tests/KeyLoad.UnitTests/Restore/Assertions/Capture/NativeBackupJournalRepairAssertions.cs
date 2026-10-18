@@ -98,7 +98,13 @@ internal static class NativeBackupJournalRepairAssertions
                 Convert.ToHexString(NativeSerialization.Serialize(MetadataBackupFixture.ExpectedValue)),
             Convert.ToHexString(KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace,
                 ZoneTreePersistenceFormat.DispatchPausedKey)) + ":" +
-                Convert.ToHexString(NativeSerialization.Serialize(true))
+                Convert.ToHexString(NativeSerialization.Serialize(true)),
+            Convert.ToHexString(KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace,
+                ZoneTreePersistenceFormat.LastAppliedKey)) + ":" +
+                Convert.ToHexString(NativeSerialization.Serialize(1L)),
+            Convert.ToHexString(KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace,
+                ZoneTreePersistenceFormat.ClockKey)) + ":" +
+                Convert.ToHexString(NativeSerialization.Serialize(1L))
         ];
         await Assert.That(actual.Rows).IsEquivalentTo(expected.Order(StringComparer.Ordinal),
             CollectionOrdering.Matching);

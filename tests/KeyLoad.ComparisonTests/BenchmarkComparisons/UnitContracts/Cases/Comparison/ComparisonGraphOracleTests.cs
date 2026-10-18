@@ -1,7 +1,7 @@
 using KeyLoad.Comparisons;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class ComparisonGraphOracleTests
 {

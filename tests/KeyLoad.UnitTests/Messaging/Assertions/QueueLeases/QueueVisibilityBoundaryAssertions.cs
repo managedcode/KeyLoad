@@ -1,9 +1,9 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.ResourceExecution;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -32,7 +32,7 @@ internal static class QueueVisibilityBoundaryAssertions
             var result = QueueVisibilityBoundaryWholeFlow.Submit(owner, OperationKind.Delivery, command, id, time, outcomes);
             await Assert.That(Errors.Code(result.Problem)).IsEqualTo(expected);
             await Assert.That(result.Problem?.Detail).IsEqualTo(detail);
-            
+
             await Assert.That(result.Value).IsNull();
             await QueueLifecycleImage.SameAsync(store, lane, before);
             await ReplayAsync(owner, store, outcomes, activeToken);

@@ -1,7 +1,7 @@
-using ManagedCode.Communication;
 using System.Collections.Immutable;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Search;
+using ManagedCode.Communication;
 
 namespace KeyLoad.UnitTests.Features.Search;
 

@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal static class BenchmarkTopologyConfigurationFixture
 {

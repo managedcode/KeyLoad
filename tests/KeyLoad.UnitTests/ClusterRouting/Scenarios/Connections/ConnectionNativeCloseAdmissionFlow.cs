@@ -20,7 +20,7 @@ internal static class ConnectionNativeCloseAdmissionFlow
         try
         {
             await callback.Arrived.Task.WaitAsync(token);
-            await ConnectionAwaitedSettlementAssertions.ChargedAsync(scenario.Fixture.RequestWork, requestId);
+            await ConnectionAwaitedSettlementAssertions.ChargedAsync(scenario.Observation.Read(requestId).WorkOwner, requestId);
             await Assert.That(original.IsCompleted).IsFalse();
             await RefusalsAsync(scenario, second, token);
             await Assert.That(callback.AdmissionClosed.Task.IsCompleted).IsFalse();
@@ -30,7 +30,7 @@ internal static class ConnectionNativeCloseAdmissionFlow
             await ClosedAdmissionAsync(scenario, second, token);
             await Assert.That(original.IsCompleted).IsFalse();
             await Assert.That(close.IsCompleted).IsFalse();
-            await ConnectionAwaitedSettlementAssertions.ChargedAsync(scenario.Fixture.RequestWork, requestId);
+            await ConnectionAwaitedSettlementAssertions.ChargedAsync(scenario.Observation.Read(requestId).WorkOwner, requestId);
             callback.Release.TrySetResult();
             var receipt = await original;
             await Assert.That(receipt.Error).IsNull();

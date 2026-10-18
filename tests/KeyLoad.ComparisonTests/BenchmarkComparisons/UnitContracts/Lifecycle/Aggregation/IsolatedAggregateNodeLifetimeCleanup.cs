@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal static class IsolatedAggregateNodeLifetimeCleanup
 {

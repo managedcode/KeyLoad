@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using KeyLoad.Comparisons;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Controlled development contract flows; these callbacks are not database performance evidence.</summary>
 internal sealed class BenchmarkSessionProgressTests

@@ -1,6 +1,5 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.RecoveryTests.Features.ClusterRouting;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication.CQRS;

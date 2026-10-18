@@ -25,7 +25,7 @@ internal static class VerifiedArchiveCancellationTrial
     {
         var source = NativeBackupJournalRepairAssertions.Read(fixture.Source, token);
         var archive = await NativeBackupJournalRepairAssertions.ArchiveAsync(fixture.Backup, token);
-        var verified = ZoneTreeStore.VerifyBackup(fixture.Backup, UnitExecutionOptions.StorageExecution());
+        var verified = ZoneTreeStore.VerifyBackup(fixture.Backup, UnitExecutionOptions.StorageExecution(), token);
         await BackupPersistedPolicyAssertions.SameAsync(source.Identity, verified.Identity);
         await Assert.That(verified.Position).IsEqualTo(source.Position);
         if (existingEmpty)
@@ -61,8 +61,8 @@ internal static class VerifiedArchiveCancellationTrial
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 await cancelled.CancelAsync();
-                var original = Assert.ThrowsExactly<OperationCanceledException>(() => ZoneTreeBackupRestoreRestore.Restore(
-                    fixture.Backup, fixture.Destination, UnitExecutionOptions.StorageExecution(), null, null,
+                var original = Assert.ThrowsExactly<OperationCanceledException>(() => ZoneTreeStore.Restore(
+                    fixture.Backup, fixture.Destination, UnitExecutionOptions.StorageExecution(),
                     cancellationToken: cancelled.Token));
                 await Assert.That(original.CancellationToken).IsEqualTo(cancelled.Token);
             }, failures);

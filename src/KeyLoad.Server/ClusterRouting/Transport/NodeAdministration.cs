@@ -39,7 +39,8 @@ internal sealed class NodeAdministration(PartitionHost partition, CommandAdmissi
     {
         cancellationToken.ThrowIfCancellationRequested();
         var id = Guid.NewGuid().ToString(OrleansNodeProtocol.GuidFormat);
-        var position = partition.Database.Store.CreateBackup(Path.Combine(partition.DirectoryPath, BackupDirectory, id));
+        var position = partition.Database.Store.CreateBackup(Path.Combine(partition.DirectoryPath, BackupDirectory, id),
+            cancellationToken);
         return new(id, position);
     }
 

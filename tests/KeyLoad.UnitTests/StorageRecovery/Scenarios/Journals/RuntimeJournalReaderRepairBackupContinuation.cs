@@ -24,14 +24,13 @@ internal static class RuntimeJournalReaderRepairBackupContinuation
         };
         await RequireIdentityAsync(paused, source.Identity);
         await Assert.That(source.Position).IsEqualTo(position);
-        await Assert.That(source.CreateBackup(fixture.BackupPath)).IsEqualTo(position);
+        await Assert.That(source.CreateBackup(fixture.BackupPath, token)).IsEqualTo(position);
         var backup = await RuntimeJournalReaderFixture.ReadInventoryAsync(fixture.BackupPath);
-        var verified = ZoneTreeStore.VerifyBackup(fixture.BackupPath, UnitExecutionOptions.StorageExecution());
+        var verified = ZoneTreeStore.VerifyBackup(fixture.BackupPath, UnitExecutionOptions.StorageExecution(), token);
         await Assert.That(verified.Position).IsEqualTo(position);
         await RequireIdentityAsync(paused, verified.Identity);
         var incarnation = Guid.NewGuid();
-        var restored = ZoneTreeStore.Restore(fixture.BackupPath, fixture.RestorePath,
-            UnitExecutionOptions.StorageExecution(), incarnation);
+        var restored = ZoneTreeStore.Restore(fixture.BackupPath, fixture.RestorePath, UnitExecutionOptions.StorageExecution(), incarnation, cancellationToken: token);
         await Assert.That(restored.NodeId).IsNotEqualTo(original.NodeId);
         await Assert.That(restored.Incarnation).IsEqualTo(incarnation);
         await Assert.That(restored.SigningKey.Span.SequenceEqual(original.SigningKey.Span)).IsFalse();

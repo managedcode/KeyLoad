@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-using KeyLoad.Features.InternalSerialization;
 
 namespace KeyLoad.UnitTests.Features.InternalSerialization;
 

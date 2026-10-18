@@ -1,7 +1,7 @@
-using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.DocumentStorage;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
@@ -11,7 +11,7 @@ internal static class TestDatabaseConcurrentCloseAssertions
     {
         await Assert.That(Errors.Code(actual.Problem)).IsNull();
         await Assert.That(actual.Problem?.Detail).IsNull();
-        
+
         await Assert.That(actual.Value?.GetType()).IsEqualTo(typeof(CommitReceipt));
         await Assert.That(NativeSerialization.Serialize(actual.Get<CommitReceipt>())
             .SequenceEqual(NativeSerialization.Serialize(expected))).IsTrue();

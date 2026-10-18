@@ -46,8 +46,7 @@ internal static class CurrentCheckpointRepairContinuation
         var backupPosition = await ColdBackupAsync(files, destinations, originalIdentity, originalPosition);
         var backup = await CaptureAsync(destinations.Backup, token);
         var incarnation = Guid.NewGuid();
-        var restoredIdentity = ZoneTreeStore.Restore(destinations.Backup, destinations.Restored,
-            UnitExecutionOptions.StorageExecution(), incarnation);
+        var restoredIdentity = ZoneTreeStore.Restore(destinations.Backup, destinations.Restored, UnitExecutionOptions.StorageExecution(), incarnation, cancellationToken: token);
         await Assert.That(restoredIdentity.NodeId).IsNotEqualTo(originalIdentity.NodeId);
         await Assert.That(restoredIdentity.Incarnation).IsEqualTo(incarnation);
         await Assert.That(restoredIdentity.SigningKey.Span.SequenceEqual(originalIdentity.SigningKey.Span)).IsFalse();

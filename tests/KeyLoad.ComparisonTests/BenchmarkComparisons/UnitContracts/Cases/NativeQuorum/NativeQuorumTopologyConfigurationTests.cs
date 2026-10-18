@@ -1,9 +1,9 @@
 using System.Text.Json;
 using KeyLoad.Comparisons;
 using KeyLoad.Comparisons.Targets;
-using T = KeyLoad.UnitTests.Features.BenchmarkComparisons.NativeQuorumTopologyTokens;
+using T = KeyLoad.ComparisonTests.Features.BenchmarkComparisons.NativeQuorumTopologyTokens;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>AC-ISO-003: actual native request configuration uses the selected member count and majority.</summary>
 internal sealed class NativeQuorumTopologyConfigurationTests

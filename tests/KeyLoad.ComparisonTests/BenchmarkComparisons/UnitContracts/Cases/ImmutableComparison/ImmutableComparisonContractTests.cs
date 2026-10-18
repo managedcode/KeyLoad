@@ -5,7 +5,7 @@ using System.Text.Json;
 using KeyLoad.Comparisons;
 using ComparisonOperationResult = KeyLoad.Comparisons.OperationResult;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class ImmutableComparisonContractTests
 {

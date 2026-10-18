@@ -42,7 +42,7 @@ internal static class ProjectionCancelledCommitFlow
             await ProjectionConsumerIdentityAssertions.ReplayAsync(owner, cold, state.Configure, state.Configured, token);
             await ProjectionConsumerIdentityAssertions.ReplayAsync(owner, cold, state.Complete, continued.Completed, token);
             await ProjectionConsumerIdentityAssertions.ReplayAsync(owner, cold, continued.Filtered, continued.Advanced, token);
-            await ProjectionCancelledCommitAssertions.HealthyAsync(owner, cold, database.Directory, state, token);
+            await ProjectionCancelledCommitAssertions.HealthyAsync(owner, cold, state, token);
             return continued;
         });
     }

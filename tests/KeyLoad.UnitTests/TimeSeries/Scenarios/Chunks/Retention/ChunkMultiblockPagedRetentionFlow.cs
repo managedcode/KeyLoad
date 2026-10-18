@@ -5,7 +5,6 @@ namespace KeyLoad.UnitTests.Features.TimeSeries;
 internal static class ChunkMultiblockPagedRetentionFlow
 {
     private const int ColdOwners = 2;
-    private const long OwnershipEpoch = 1;
     private const long CommitIncrement = 1;
     private const string ExpireKind = "expireSamples";
 

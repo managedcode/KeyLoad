@@ -1,7 +1,7 @@
 using KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive;
 using ManagedCode.Communication;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons.TimeSeries.Intensive;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons.TimeSeries.Intensive;
 
 internal sealed class KeyLoadTimeSeriesIntensiveResultTests
 {

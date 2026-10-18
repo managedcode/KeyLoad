@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Exercises direct lookup and fresh revalidation policy using retained original provider metadata.</summary>
 internal sealed class IsolatedKnownCurrentJobTests

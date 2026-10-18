@@ -1,6 +1,6 @@
 using KeyLoad.Comparisons;
 
-namespace KeyLoad.UnitTests;
+namespace KeyLoad.ComparisonTests;
 
 internal sealed class StreamCorpusTests
 {

@@ -3,7 +3,7 @@ using System.Security.Cryptography;
 using KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Verifies the complete deterministic scale-v1 shuffle independently of its implementation.</summary>
 internal sealed class ScaledRawStorageReadOrderTests

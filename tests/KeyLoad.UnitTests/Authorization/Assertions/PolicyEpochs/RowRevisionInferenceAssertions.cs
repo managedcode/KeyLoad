@@ -1,7 +1,7 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using P = KeyLoad.UnitTests.Features.Authorization.RowRevisionInferenceProtocol;
 
 namespace KeyLoad.UnitTests.Features.Authorization;
@@ -10,7 +10,7 @@ internal static class RowRevisionInferenceAssertions
 {
     internal static async Task ResultAsync(Result<object> actual, ErrorCode code, string detail)
     {
-        
+
         await Assert.That(actual.Value).IsNull();
         await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(code);
         await Assert.That(actual.Problem?.Detail).IsEqualTo(detail);

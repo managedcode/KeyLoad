@@ -3,7 +3,7 @@ using System.Security.Cryptography;
 using System.Text;
 using KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons.TimeSeries.Intensive;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons.TimeSeries.Intensive;
 
 internal sealed class TimeSeriesIntensiveWriterTests
 {

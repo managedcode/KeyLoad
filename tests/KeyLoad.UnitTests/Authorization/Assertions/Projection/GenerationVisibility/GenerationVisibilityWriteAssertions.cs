@@ -13,7 +13,6 @@ internal static class GenerationVisibilityWriteAssertions
     private const string ExplainId = "explain";
     private const long NoRevision = 0;
     private const long OriginalRootEpoch = 1;
-    private const long InitialOwnership = 1;
     private const string TombstoneJson = "{}";
 
     internal static async Task RowsAsync(TestDatabase db, DatabaseEngine database, QueryEngine queries, ZoneTreeStore store,

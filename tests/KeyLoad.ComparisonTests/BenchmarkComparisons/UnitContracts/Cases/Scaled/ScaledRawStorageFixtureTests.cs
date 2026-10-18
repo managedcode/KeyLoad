@@ -1,7 +1,7 @@
 using KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Exercises genuine resident ZoneTree fixtures and independent all-record value verification.</summary>
 [NotInParallel]

@@ -38,7 +38,7 @@ internal sealed class McpCommandConflictDiagnosticWholeFlowTests
         var rejected = database.Submit(OperationKind.Batch, changed, id: command.CommandId);
         await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(rejected.Problem?.Detail).IsEqualTo(Conflict);
-        
+
         await McpOwnedDiagnosticAssertions.ReplyAsync(ErrorCode.Conflict, rejected.Problem?.Detail!, Conflict);
         await McpOwnedDiagnosticAssertions.ReplyAsync(ErrorCode.Conflict,
             Conflict + McpOwnedDiagnosticAssertions.PrivateCanary, McpOwnedDiagnosticAssertions.Generic);

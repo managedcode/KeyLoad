@@ -15,7 +15,6 @@ internal static class CursorExpiryBoundaryAssertions
     private const int Limit = 1;
     private const long Revision = 1;
     private const long Tick = 1;
-    private const long OwnershipEpoch = 1;
     private const string PutKind = "putDocument";
     private const string ExpiredDetail = "The query cursor no longer has a valid authorized read cut.";
 

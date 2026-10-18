@@ -1,5 +1,5 @@
-using ManagedCode.Communication;
 using KeyLoad.Server;
+using ManagedCode.Communication;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 

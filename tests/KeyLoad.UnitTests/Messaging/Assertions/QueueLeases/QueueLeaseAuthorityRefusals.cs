@@ -24,7 +24,7 @@ internal static class QueueLeaseAuthorityRefusals
         var resolved = database.ResolveOutcome(state.Claim);
         await Assert.That(Errors.Code(resolved.Problem)).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(resolved.Problem?.Detail).IsEqualTo(detail);
-        
+
         await Assert.That(resolved.Value).IsNull();
         await UnchangedAsync(store, position, image);
         var outcome = store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(

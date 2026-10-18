@@ -1,7 +1,7 @@
 using KeyLoad.AppHost.Features.BenchmarkComparisons;
 using Microsoft.Extensions.Options;
 
-namespace KeyLoad.UnitTests;
+namespace KeyLoad.ComparisonTests;
 
 internal static class UnitAppHostResourceOptions
 {

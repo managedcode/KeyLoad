@@ -1,7 +1,6 @@
 using System.Collections.Immutable;
 using System.Reflection;
 using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 using P = KeyLoad.IntegrationTests.Features.ClusterRouting.CatalogBootstrapAuthorityProtocol;
 

@@ -1,6 +1,6 @@
 using KeyLoad.Comparisons;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>AC-METH-004: failed native admission joins owned cleanup and retains its original failure.</summary>
 internal sealed class DocumentNativeAcquisitionTests

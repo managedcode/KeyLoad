@@ -1,7 +1,7 @@
-using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
 using static KeyLoad.UnitTests.Features.Messaging.SubscriptionContinuationProtocol;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -92,7 +92,7 @@ internal static class SubscriptionPendingCounterAuthorityFlow
             originalRequest, originalRequest.RequestId, due);
         await Assert.That(Errors.Code(stale.Problem)).IsEqualTo(ErrorCode.StaleLease);
         await Assert.That(stale.Problem?.Detail).IsEqualTo(StaleDetail);
-        
+
         await Assert.That(stale.Value).IsNull();
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, stable, stablePosition, identity);
         await SubscriptionPendingCounterAuthorityContinuation.RunAsync(db, cold, fixture.Directory,

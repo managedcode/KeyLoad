@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 using KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class NativeSerializationBenchmarkOwnershipTests
 {

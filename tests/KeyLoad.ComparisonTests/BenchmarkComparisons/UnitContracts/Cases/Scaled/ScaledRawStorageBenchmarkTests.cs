@@ -6,7 +6,7 @@ using BenchmarkDotNet.Running;
 using KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Checks genuine generated metadata and both real one-million-read methods.</summary>
 [NotInParallel]

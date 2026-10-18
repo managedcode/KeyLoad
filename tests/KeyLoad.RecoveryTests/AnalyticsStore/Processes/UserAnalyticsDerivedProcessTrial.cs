@@ -18,7 +18,8 @@ internal static class UserAnalyticsDerivedProcessTrial
     internal static async Task RunAsync(CancellationToken callerToken)
     {
         using var admission = await StorageTrialLease.AcquireAsync(callerToken);
-        var root = Path.Combine(Path.GetTempPath(), Prefix + Guid.NewGuid().ToString(GuidFormat));
+        var temporaryRoot = StorageTrialDirectory.ResolveExistingDirectory(new DirectoryInfo(Path.GetTempPath()));
+        var root = Path.Combine(temporaryRoot, Prefix + Guid.NewGuid().ToString(GuidFormat));
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(
             CommandIdempotencyProcessRecoveryTests.RunTimeoutSeconds), TimeProvider.System);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(callerToken, deadline.Token);

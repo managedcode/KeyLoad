@@ -1,7 +1,6 @@
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Server;
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.Features.ClusterRouting;
 using KeyLoad.UnitTests.Features.ResourceExecution;
 using static KeyLoad.UnitTests.Features.Search.VectorReferenceLifetimeNativeProtocol;
 

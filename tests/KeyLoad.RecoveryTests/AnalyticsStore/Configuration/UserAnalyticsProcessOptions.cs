@@ -11,12 +11,13 @@ internal static class UserAnalyticsProcessOptions
     private const string Identity = "analytics-process";
     private const string PublicUrls = "--urls=http://127.0.0.1:0";
     private const string WarningLogLevel = "--Logging:LogLevel:Default=Warning";
+    private const string DiagnosticOutput = "--Logging:Console:LogToStandardErrorThreshold=Trace";
     private const int TestSecretBytes = 32;
     private const byte TestKeyByte = 42;
     private const int OneSilo = 1;
     private const string IncarnationText = "b48b95ce-971b-4de0-bbca-4823deec6db3";
 
-    internal static string[] Arguments(string root, int siloPort) => [PublicUrls, WarningLogLevel,
+    internal static string[] Arguments(string root, int siloPort) => [PublicUrls, WarningLogLevel, DiagnosticOutput,
         Setting(nameof(NodeOptions.DataDirectory), Path.Combine(root, UserAnalyticsProcessProtocol.PhysicalDirectory)),
         Setting(nameof(NodeOptions.SiloName), Identity), Setting(nameof(NodeOptions.ClusterId), Identity),
         Setting(nameof(NodeOptions.SiloPort), siloPort.ToString(CultureInfo.InvariantCulture)),

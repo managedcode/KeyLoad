@@ -1,3 +1,4 @@
+using KeyLoad.Core.Features.BackupRestore.Serialization;
 using KeyLoad.Storage;
 using static KeyLoad.RecoveryTests.Features.EventStreams.SharedDomainProtocol;
 
@@ -35,7 +36,6 @@ internal static class SharedDomainStoredImage
         return (values.Length >= ScopeComponentCount && Equals(values[TenantComponent], partition.TenantId)
             && Equals(values[DatabaseComponent], partition.DatabaseId) && Equals(values[DomainComponent], partition.TransactionDomainId)
             && Equals(values[PartitionKeyComponent], partition.PartitionKey))
-            || key.SequenceEqual(AtomicPartitionRosterRestoreOriginSerialization.EntryKey(partition))
-            || key.SequenceEqual(AtomicPartitionRosterRestoreOriginSerialization.OriginKey(partition));
+            || key.SequenceEqual(AtomicPartitionRosterKeys.Partition(partition));
     }
 }

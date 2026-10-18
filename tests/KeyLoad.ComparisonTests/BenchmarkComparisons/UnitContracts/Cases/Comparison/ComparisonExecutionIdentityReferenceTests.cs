@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Exercises invalid immutable image references through the normal real CLI process.</summary>
 internal sealed class ComparisonExecutionIdentityReferenceTests

@@ -19,7 +19,7 @@ internal static class RemoteTransferRepairColdContinuation
             fixture.SourcePartition, [new CompleteQueueTransfer(fixture.SourceQueue, transfer.TransferId, proof.ReceiptToken)]);
         var failed = RemoteTransferRepairColdNative.Apply(fixture, complete);
         await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
-        
+
         await Assert.That(failed.Value).IsNull();
         var completeBytes = RemoteTransferRepairColdNative.Outcome(fixture, complete.CommandId, fixture.SourcePartition);
         await RemoteTransferRepairColdAdvance.DeniedWithoutWitnessAsync(fixture, hint, original.IntentToken,
@@ -32,7 +32,7 @@ internal static class RemoteTransferRepairColdContinuation
         {
             await Assert.That(Errors.Code(advance.Result.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
             await Assert.That(advance.Result.Problem?.Detail).IsEqualTo(RemoteTransferRepairProtocol.Capacity);
-            
+
             await Assert.That(advance.Result.Value).IsNull();
             refused = new(advance.Command, advance.Result,
                 RemoteTransferRepairColdNative.Outcome(fixture, advance.Command.CommandId, fixture.SourcePartition));

@@ -7,7 +7,7 @@ namespace KeyLoad.Storage;
 /// ReadGeneration or change the incarnation or node identity before another read. Uncertain or failed live journal/tree
 /// publication or live replacement must reject subsequent reads until recovery.
 /// Pure validation, compile or snapshot verification rejection before publication preserves the unchanged healthy cut.
-/// Node-local replica term observations depend on these provider guarantees.
+/// Canonical read cuts and persisted copy acknowledgements depend on these provider guarantees.
 /// </remarks>
 public interface IAtomicStore : IDisposable
 {
@@ -43,8 +43,9 @@ public interface IAtomicStore : IDisposable
     void SetDispatchPaused(bool paused);
     /// <summary>Creates the provider's verified backup in the destination directory.</summary>
     /// <param name="directory">Destination directory owned by the backup caller.</param>
+    /// <param name="cancellationToken">Cancellation checked during native copying and verification.</param>
     /// <returns>The captured local storage position.</returns>
-    long CreateBackup(string directory);
+    long CreateBackup(string directory, CancellationToken cancellationToken = default);
     /// <summary>Publishes a snapshot of a verified committed store cut.</summary>
     /// <param name="path">Destination snapshot path.</param>
     /// <param name="expectedAppliedPosition">Optional exact replicated cut required by the caller.</param>

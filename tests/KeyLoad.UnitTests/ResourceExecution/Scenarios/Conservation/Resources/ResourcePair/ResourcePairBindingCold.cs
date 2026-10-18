@@ -41,7 +41,8 @@ internal static class ResourcePairBindingCold
                 state.Remember(original, result, store);
                 await ResourcePairBindingAssertions.PairsAsync(state, store);
                 image = QueueWholeFlowStorage.Bytes(store);
-                cut = store.Read(_ => (database.LastApplied, store.Position));
+                cut = store.Read(view => (view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
+                    ? NativeSerialization.Deserialize<long>(bytes) : default(long), store.Position));
             });
         }
     }

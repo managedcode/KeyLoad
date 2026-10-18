@@ -3,7 +3,7 @@ using KeyLoad.Comparisons.Targets;
 using Npgsql;
 using NpgsqlTypes;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>AC-ISO-003/005 native SQL, member and affected-row contracts without a database double.</summary>
 internal sealed class NativeDocumentTopologyPostgresTests

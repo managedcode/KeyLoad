@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Runs actual session contracts through the shared bounded owned Node process.</summary>
 internal static class SessionCohortNodeProcess

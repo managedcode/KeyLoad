@@ -34,7 +34,7 @@ internal static class ManifestCutRepairTrial
         var source = NativeBackupJournalRepairAssertions.Read(fixture.Source, token);
         await RefuseAndRepairAsync(options, fixture, archive, source, declaredCutMismatch, token);
         await NativeBackupJournalRepairAssertions.SameArchiveAsync(archive, fixture.Backup, token);
-        var verified = ZoneTreeStore.VerifyBackup(fixture.Backup, UnitExecutionOptions.StorageExecution());
+        var verified = ZoneTreeStore.VerifyBackup(fixture.Backup, UnitExecutionOptions.StorageExecution(), token);
         await Assert.That(verified.Position).IsEqualTo(fixture.Position);
         await Assert.That(NativeSerialization.Serialize(verified.Identity)
             .SequenceEqual(NativeSerialization.Serialize(fixture.Identity))).IsTrue();

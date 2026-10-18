@@ -2,9 +2,9 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using KeyLoad.Comparisons;
 using KeyLoad.Comparisons.Targets;
-using T = KeyLoad.UnitTests.Features.BenchmarkComparisons.NativeQuorumTopologyTokens;
+using T = KeyLoad.ComparisonTests.Features.BenchmarkComparisons.NativeQuorumTopologyTokens;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>AC-ISO-003: native Qdrant proof requires exact identities, policy and a full active local shard.</summary>
 internal sealed class NativeQuorumTopologyQdrantTests

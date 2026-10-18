@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Server;
 using Microsoft.Extensions.Logging;
 
@@ -24,7 +25,8 @@ internal sealed class PartitionHostRecoveryFixture : IDisposable
 
     internal PartitionHostRecoveryFixture()
     {
-        directory = Path.Combine(Resolve(new(Path.GetTempPath())), Prefix + Guid.NewGuid().ToString(GuidFormat));
+        directory = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(Path.GetTempPath())),
+            Prefix + Guid.NewGuid().ToString(GuidFormat));
         Options = new()
         {
             DataDirectory = Path.Combine(directory, TargetDirectory),
@@ -96,16 +98,6 @@ internal sealed class PartitionHostRecoveryFixture : IDisposable
 
     internal FileStream AcquireHostOwnership() => new(Path.Combine(Options.DataDirectory, OwnershipFile),
         FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
-
-    private static string Resolve(DirectoryInfo directory)
-    {
-        if (directory.Parent is null)
-        {
-            return directory.FullName;
-        }
-        var entry = new DirectoryInfo(Path.Combine(Resolve(directory.Parent), directory.Name));
-        return entry.ResolveLinkTarget(returnFinalTarget: true)?.FullName ?? entry.FullName;
-    }
 
     public void Dispose()
     {

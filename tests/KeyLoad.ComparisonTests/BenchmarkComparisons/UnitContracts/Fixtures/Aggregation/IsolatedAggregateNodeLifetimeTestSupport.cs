@@ -4,7 +4,7 @@ using System.Runtime.ExceptionServices;
 using System.Text.Json;
 using KeyLoad.UnitTests.Features.TestInfrastructure;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal static class IsolatedAggregateNodeLifetimeTestSupport
 {

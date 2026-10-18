@@ -1,6 +1,6 @@
 using KeyLoad.AppHost.Features.BenchmarkComparisons;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal static class ScaleServerResourceCancellationFlow
 {

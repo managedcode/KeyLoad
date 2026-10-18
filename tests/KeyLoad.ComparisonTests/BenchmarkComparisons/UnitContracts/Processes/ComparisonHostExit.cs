@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Captures a bounded real comparison-host startup result.</summary>
 /// <param name="ExitCode">Child-process exit code.</param>

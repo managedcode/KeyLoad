@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-using KeyLoad.UnitTests.Features.ClusterRouting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 

@@ -1,4 +1,3 @@
-using KeyLoad.UnitTests.Features.ClusterRouting;
 using KeyLoad.UnitTests.Features.ResourceExecution;
 using static KeyLoad.UnitTests.Features.Search.VectorReferenceLifetimeNativeProtocol;
 

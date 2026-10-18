@@ -1,7 +1,7 @@
-using Microsoft.Extensions.DependencyInjection;
 using KeyLoad.Clustering;
 using KeyLoad.Query;
 using KeyLoad.Query.Features.QueryExecution;
+using Microsoft.Extensions.DependencyInjection;
 using K = KeyLoad.UnitTests.Features.ClusterRouting.NativeLocalChildLifetimeProtocol;
 using P = KeyLoad.UnitTests.Features.ClusterRouting.NativeLocalChildLifetimeProtocol;
 

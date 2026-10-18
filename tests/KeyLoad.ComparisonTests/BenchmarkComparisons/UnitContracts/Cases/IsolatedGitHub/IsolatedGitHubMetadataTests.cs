@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>AC-ISO-006/007: controlled parser inputs, never authenticated provider evidence.</summary>
 internal sealed class IsolatedGitHubMetadataTests

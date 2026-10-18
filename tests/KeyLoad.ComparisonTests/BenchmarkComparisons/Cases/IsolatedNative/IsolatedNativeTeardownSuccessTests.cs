@@ -1,4 +1,3 @@
-using KeyLoad.UnitTests.Features.BenchmarkComparisons;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 

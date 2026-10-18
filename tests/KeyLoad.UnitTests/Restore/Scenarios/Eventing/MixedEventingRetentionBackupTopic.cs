@@ -24,7 +24,7 @@ internal static class MixedEventingRetentionBackupTopic
         var before = MixedEventingRetentionBackupOracle.Rows(owner.Store, owner.Partition, includeOutcomes: false);
         var result = owner.Submit(OperationKind.Batch, refused, id: refused.CommandId);
         await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
-        
+
         await Assert.That(result.Value).IsNull();
         await Assert.That(MixedEventingRetentionBackupOracle.Rows(owner.Store, owner.Partition, includeOutcomes: false))
             .IsEquivalentTo(before, CollectionOrdering.Matching);

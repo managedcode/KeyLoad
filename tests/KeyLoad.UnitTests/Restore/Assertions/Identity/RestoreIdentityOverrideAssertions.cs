@@ -1,9 +1,9 @@
-using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.Messaging;
 using KeyLoad.UnitTests.Features.ResourceExecution;
+using ManagedCode.Communication;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.BackupRestore;
@@ -31,7 +31,7 @@ internal static class RestoreIdentityOverrideAssertions
         var refused = database.Apply(state.Seed);
         await Assert.That(Errors.Code(refused.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
         await Assert.That(refused.Value).IsNull();
-        
+
         await Assert.That(refused.Problem?.Detail).IsNotNull();
         await Assert.That(store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(store))

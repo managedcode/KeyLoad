@@ -1,6 +1,6 @@
-using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.Messaging;
+using ManagedCode.Communication;
 
 namespace KeyLoad.UnitTests.Features.EventStreams;
 

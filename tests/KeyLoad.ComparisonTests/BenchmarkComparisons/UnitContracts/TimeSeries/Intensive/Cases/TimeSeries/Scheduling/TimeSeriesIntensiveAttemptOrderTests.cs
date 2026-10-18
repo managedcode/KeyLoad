@@ -1,7 +1,7 @@
 using KeyLoad.Comparisons;
 using KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons.TimeSeries.Intensive;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons.TimeSeries.Intensive;
 
 /// <summary>Retains caller-supplied ledger facts without a warmup, repetition schedule or report schema.</summary>
 internal sealed class TimeSeriesIntensiveAttemptOrderTests

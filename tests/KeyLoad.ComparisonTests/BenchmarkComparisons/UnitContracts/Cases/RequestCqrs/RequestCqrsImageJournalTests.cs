@@ -1,7 +1,7 @@
 using System.Text.Json;
-using KeyLoad.UnitTests.Features.BenchmarkComparisons;
+using KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-namespace KeyLoad.UnitTests.Features.ClusterRouting;
+namespace KeyLoad.ComparisonTests.Features.ClusterRouting;
 
 internal sealed class RequestCqrsImageJournalTests
 {

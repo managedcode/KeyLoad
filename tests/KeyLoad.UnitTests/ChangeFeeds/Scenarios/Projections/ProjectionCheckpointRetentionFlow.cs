@@ -26,7 +26,7 @@ internal static class ProjectionCheckpointRetentionFlow
         {
             var owner = database.CreateConfiguredDatabase(cold);
             await ProjectionCheckpointRetentionFixture.RepairAsync(owner, cold, state, token);
-            return await ProjectionCheckpointRetentionSettlement.RunAsync(owner, cold, database.Directory, state, token);
+            return await ProjectionCheckpointRetentionSettlement.RunAsync(owner, cold, state, token);
         });
         await ColdAsync(database, async cold =>
         {

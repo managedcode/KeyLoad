@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.RepositoryGovernance;
+namespace KeyLoad.ComparisonTests.Features.RepositoryGovernance;
 
 /// <summary>The owner-selected database groups, independent of production planner output.</summary>
 internal static class WorkflowDatabaseGroups

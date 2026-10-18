@@ -1,8 +1,7 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Storage;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using A = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsEntityLinkLifetimeAssertions;
 using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestData;
 using F = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsEntityLinkLifetimeFixture;

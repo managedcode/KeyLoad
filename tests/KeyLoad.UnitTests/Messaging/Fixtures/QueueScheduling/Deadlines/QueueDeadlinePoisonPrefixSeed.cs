@@ -1,9 +1,9 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using System.Collections.Immutable;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.ResourceExecution;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 
@@ -40,7 +40,7 @@ internal static class QueueDeadlinePoisonPrefixSeed
         var operation = database.PrepareQueueRetryOperation(database.OwnCommand(database.CreateCommand(OperationKind.Batch, command.CommandId, QueueDeadlinePoisonPrefixProtocol.Root, time, System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options))));
         var result = database.Apply(operation);
         await Assert.That(Errors.Code(result.Problem)).IsNull();
-        
+
         await NativeReplayResultAssertions.Same<CommitReceipt>(result, Result<object>.Succeed(expected));
         return (operation, result);
     }

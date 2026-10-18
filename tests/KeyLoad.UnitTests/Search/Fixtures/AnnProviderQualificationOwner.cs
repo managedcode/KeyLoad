@@ -1,8 +1,8 @@
-using ManagedCode.Communication;
-using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using static KeyLoad.UnitTests.Features.Search.AnnProviderQualificationProtocol;
 
 namespace KeyLoad.UnitTests.Features.Search;
@@ -35,7 +35,8 @@ internal sealed class AnnProviderQualificationOwner : IDisposable
         => OutcomeStoreOracle.ReadStored(Store, command) ?? throw new InvalidOperationException(MissingOriginal);
 
     internal (long AppliedPosition, long StorePosition) ReadCanonicalCut()
-        => Store.Read(_ => (Database.LastApplied, Store.Position));
+        => Store.Read(view => (view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
+            ? NativeSerialization.Deserialize<long>(bytes) : default(long), Store.Position));
 
     internal void Reopen()
     {

@@ -4,7 +4,7 @@ using System.Text.Json;
 using KeyLoad.Comparisons;
 using KeyLoad.Comparisons.Targets;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class PostgresVectorPayloadContractTests
 {

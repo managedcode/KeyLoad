@@ -1,6 +1,6 @@
-using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.Authorization;
+using ManagedCode.Communication.Commands;
 using A = KeyLoad.UnitTests.Features.InternalSerialization.AnalyticsCommandIdentityAssertions;
 using D = KeyLoad.UnitTests.Features.InternalSerialization.AnalyticsCommandIdentityData;
 using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestOperations;
@@ -61,7 +61,7 @@ internal static class AnalyticsCommandIdentityFlow
             var refused = owner.Submit(changed);
             await Assert.That(Errors.Code(refused.Problem)).IsEqualTo(ErrorCode.Conflict);
             await Assert.That(refused.Problem?.Detail).IsEqualTo("The command ID was already used with different content.");
-            
+
             await Assert.That(refused.Value).IsNull();
             await A.RowsAsync(owner, delete, expectedReference, token);
         });

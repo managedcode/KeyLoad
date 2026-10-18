@@ -27,7 +27,7 @@ internal static class ProjectionPartitionIsolationFlow
             var owner = database.CreateConfiguredDatabase(cold);
             await ProjectionConsumerIdentityAssertions.SameAsync(cold, state.Image, state.Position);
             await ProjectionPartitionIsolationAssertions.VerifyAsync(owner, cold, state, token);
-            return await ProjectionPartitionIsolationHealthy.RunAsync(owner, cold, database.Directory, state, token);
+            return await ProjectionPartitionIsolationHealthy.RunAsync(owner, cold, state, token);
         });
         await ColdAsync(database, async cold =>
         {

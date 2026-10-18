@@ -22,7 +22,7 @@ internal static class SqlCreateTableHot
         var duplicateAt = fixture.Database.EvaluationClock.GetUtcNow();
         var failed = SqlCreateTableLiteral.Apply(fixture.Database, duplicate, duplicateAt, principal.Id);
         await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(ErrorCode.Conflict);
-        
+
         await Assert.That(failed.Value).IsNull();
         image = QueueWholeFlowStorage.Bytes(fixture.Store);
         cut = fixture.Store.Position;

@@ -1,7 +1,7 @@
-using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.ResourceExecution;
+using ManagedCode.Communication;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -125,7 +125,7 @@ internal static class SubscriptionCheckpointAuthorityAssertions
     {
         await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.StaleLease);
         await Assert.That(result.Problem?.Detail).IsEqualTo("The subscription delivery lease is stale.");
-        
+
         await Assert.That(result.Value).IsNull();
     }
 }

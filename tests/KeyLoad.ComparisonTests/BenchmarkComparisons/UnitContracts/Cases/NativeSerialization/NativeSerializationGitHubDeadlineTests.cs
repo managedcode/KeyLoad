@@ -1,6 +1,6 @@
 using System.Text.Json.Nodes;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>R15-AC001: pure monotonic deadline arithmetic never extends the accepted visibility budget.</summary>
 internal sealed class NativeSerializationGitHubDeadlineTests

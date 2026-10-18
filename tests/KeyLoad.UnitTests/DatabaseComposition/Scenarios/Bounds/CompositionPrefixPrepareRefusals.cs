@@ -15,7 +15,7 @@ internal static class CompositionPrefixPrepareRefusals
         await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.RevisionConflict);
         await Assert.That(result.Problem?.Detail).IsEqualTo("The expected revision does not match.");
         await Assert.That(result.Value).IsNull();
-        
+
         command = command with
         {
             Error = ErrorCode.RevisionConflict,

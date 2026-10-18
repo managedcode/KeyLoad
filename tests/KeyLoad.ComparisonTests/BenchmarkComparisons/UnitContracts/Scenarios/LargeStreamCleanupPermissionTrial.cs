@@ -1,7 +1,7 @@
 using System.Runtime.Versioning;
 using KeyLoad.Server;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 [SupportedOSPlatform("linux")]
 internal sealed class LargeStreamCleanupPermissionTrial

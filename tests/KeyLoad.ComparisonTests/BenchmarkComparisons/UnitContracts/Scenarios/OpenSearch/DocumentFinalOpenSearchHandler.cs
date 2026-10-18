@@ -5,7 +5,7 @@ using System.Text.Json.Nodes;
 using KeyLoad.Comparisons;
 using KeyLoad.Comparisons.Targets;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Controlled original HTTP responses exercise final native wire proof; these are not benchmark measurements.</summary>
 internal sealed class DocumentFinalOpenSearchHandler(DocumentComparisonSchedule schedule, string corruption) : HttpMessageHandler

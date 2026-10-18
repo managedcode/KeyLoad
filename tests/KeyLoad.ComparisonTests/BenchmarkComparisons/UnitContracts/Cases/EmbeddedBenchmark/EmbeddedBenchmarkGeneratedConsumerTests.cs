@@ -2,7 +2,7 @@ using System.Text.Json;
 using KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Verifies reports and ownership from the real generated benchmark consumer process.</summary>
 [NotInParallel]

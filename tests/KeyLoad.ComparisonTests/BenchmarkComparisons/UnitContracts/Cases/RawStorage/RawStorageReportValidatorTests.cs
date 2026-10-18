@@ -1,7 +1,7 @@
 using System.Text.Json.Nodes;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Exercises the actual pure validator with bounded controlled schema inputs.</summary>
 [NotInParallel]

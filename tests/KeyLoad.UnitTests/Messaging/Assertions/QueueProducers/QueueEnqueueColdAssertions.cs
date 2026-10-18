@@ -81,7 +81,7 @@ internal static class QueueEnqueueColdAssertions
         var outcome = database.Store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(command.Partition, principal, command.CommandId)));
         await Assert.That(outcome).IsNotNull();
         await Assert.That(Errors.Code(outcome!.Result.Problem)).IsEqualTo(code);
-        
+
     }
 
     private static async Task RequireMessageAsync(DatabaseEngine database, PartitionRef partition, string id,

@@ -1,5 +1,5 @@
-using ManagedCode.Communication;
 using System.Collections.Immutable;
+using ManagedCode.Communication;
 
 namespace KeyLoad.UnitTests.Features.TimeSeries;
 

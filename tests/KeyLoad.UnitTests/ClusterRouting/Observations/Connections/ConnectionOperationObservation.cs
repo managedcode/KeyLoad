@@ -1,12 +1,25 @@
 using System.Collections.Concurrent;
 using KeyLoad.Clustering;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
-internal sealed class ConnectionOperationObservation : IGrainRequestPhaseObserver, IGrainRequestNativePhaseObserver
+internal sealed class ConnectionOperationObservation : IGrainRequestPhaseObserver, IGrainRequestNativePhaseObserver,
+    IIncomingGrainCallFilter
 {
     private readonly ConcurrentDictionary<Guid, ConnectionObservedOperation> operations = new();
     private readonly ConcurrentDictionary<Guid, ConnectionOperationGate> gates = new();
+    private readonly ConcurrentDictionary<Guid, IGrainContext> connections = new();
+
+    public async Task Invoke(IIncomingGrainCallContext context)
+    {
+        if (context.Grain is ConnectionGrain connection
+            && context.MethodName == nameof(IConnectionGrain.ExecuteStreamAsync))
+        {
+            connections[connection.GetPrimaryKey()] = context.TargetContext;
+        }
+        await context.Invoke().ConfigureAwait(true);
+    }
 
     internal ConnectionOperationGate Hold(Guid requestId, GrainRequestPhase phase = GrainRequestPhase.RequestStarted,
         bool fail = false)
@@ -24,7 +37,16 @@ internal sealed class ConnectionOperationObservation : IGrainRequestPhaseObserve
     {
         if (phase == GrainRequestPhase.RequestStarted)
         {
-            var observed = new ConnectionObservedOperation(identity, context.GrainId, context.ActivationId);
+            if (context.GrainInstance is not RequestWorkerGrain
+                || RequestContext.Get(GrainRequestStreamProtocol.ContextKey) is not GrainRequestContextState state
+                || state.RequestId != identity.RequestId || state.CommandId != identity.CommandId
+                || !connections.TryGetValue(state.ConnectionId, out var connection)
+                || connection.GrainInstance is not ConnectionGrain owner || owner.GetPrimaryKey() != state.ConnectionId)
+            {
+                throw new InvalidOperationException(ConnectionNativeProtocol.IdentityChanged);
+            }
+            var workOwner = context.ActivationServices.GetRequiredService<Func<NativeRequestWorkOwner>>()();
+            var observed = new ConnectionObservedOperation(identity, connection, context, state, workOwner);
             if (!operations.TryAdd(identity.RequestId, observed))
             {
                 throw new InvalidOperationException(ConnectionNativeProtocol.DuplicateObservation);
@@ -64,8 +86,8 @@ internal sealed class ConnectionOperationObservation : IGrainRequestPhaseObserve
     {
         if (operations.TryGetValue(identity.RequestId, out var observed))
         {
-            if (observed.Identity != identity || observed.GrainId != context.GrainId
-                || observed.ActivationId != context.ActivationId)
+            if (observed.Identity != identity || observed.WorkerContext.GrainId != context.GrainId
+                || observed.WorkerContext.ActivationId != context.ActivationId)
             {
                 throw new InvalidOperationException(ConnectionNativeProtocol.IdentityChanged);
             }
@@ -94,7 +116,7 @@ internal sealed class ConnectionOperationObservation : IGrainRequestPhaseObserve
         foreach (var observed in operations.OrderBy(static pair => pair.Key))
         {
             Console.WriteLine(FormattableString.Invariant(
-                $"ConnectionNative phase={phase} request={observed.Key:D} grain={observed.Value.GrainId} activation={observed.Value.ActivationId} producerDisposed={observed.Value.Disposed.Task.Status}"));
+                $"ConnectionNative phase={phase} request={observed.Key:D} connection={observed.Value.GrainId} activation={observed.Value.ActivationId} worker={observed.Value.WorkerContext.GrainId} workerActivation={observed.Value.WorkerContext.ActivationId} producerDisposed={observed.Value.Disposed.Task.Status}"));
         }
     }
 

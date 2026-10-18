@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Builds real child-process settings for the container execution identity boundary.</summary>
 internal static class ComparisonExecutionIdentitySupport

@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>AC-IS-PERF-003: complete pinned exporter schemas admit; incomplete or tampered inputs reject.</summary>
 internal sealed class NativeSerializationReportValidatorTests

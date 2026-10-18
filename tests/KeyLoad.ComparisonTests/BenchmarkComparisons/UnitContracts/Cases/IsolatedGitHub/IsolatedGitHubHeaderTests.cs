@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Controlled native-output parser bytes only; no HTTP client, server or provider authentication is simulated.</summary>
 internal sealed class IsolatedGitHubHeaderTests

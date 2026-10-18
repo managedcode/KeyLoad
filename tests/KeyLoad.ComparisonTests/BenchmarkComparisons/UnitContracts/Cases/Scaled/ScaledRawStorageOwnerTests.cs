@@ -1,7 +1,7 @@
 using System.Runtime.ExceptionServices;
 using KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 [NotInParallel]
 internal sealed class ScaledRawStorageOwnerTests

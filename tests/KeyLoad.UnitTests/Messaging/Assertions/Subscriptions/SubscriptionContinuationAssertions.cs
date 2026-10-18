@@ -1,7 +1,7 @@
-using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.ResourceExecution;
+using ManagedCode.Communication;
 using TUnit.Assertions.Enums;
 using static KeyLoad.UnitTests.Features.Messaging.SubscriptionContinuationProtocol;
 
@@ -55,7 +55,7 @@ internal static class SubscriptionContinuationAssertions
         if (Errors.Code(entry.Result.Problem) is not null)
         {
             await Assert.That(actual).IsEqualTo(entry.Result);
-            
+
             await Assert.That(actual.Value).IsNull();
         }
         else if (entry.Result.Value is CommitReceipt)
@@ -160,7 +160,7 @@ internal static class SubscriptionContinuationAssertions
         var refused = QueueWholeFlowStorage.Apply(db, entry.Kind, entry.Request, entry.Id, time);
         await Assert.That(Errors.Code(refused.Problem)).IsEqualTo(ErrorCode.StaleLease);
         await Assert.That(refused.Problem?.Detail).IsEqualTo(StaleDetail);
-        
+
         await Assert.That(refused.Value).IsNull();
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);
     }

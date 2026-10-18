@@ -1,7 +1,7 @@
 using KeyLoad.Comparisons;
 using KeyLoad.Comparisons.Targets;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>AC-ISO-003 requires real-count gossip role, identity and copy contracts.</summary>
 internal sealed class NativeDocumentTopologyKurrentTests

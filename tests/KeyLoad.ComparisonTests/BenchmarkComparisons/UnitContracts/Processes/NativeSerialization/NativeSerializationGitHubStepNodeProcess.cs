@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Calls real production pure functions in Node without GitHub API or benchmark substitution.</summary>
 internal static class NativeSerializationGitHubStepNodeProcess

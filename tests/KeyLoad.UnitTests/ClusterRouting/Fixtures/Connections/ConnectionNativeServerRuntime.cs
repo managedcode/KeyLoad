@@ -1,6 +1,6 @@
 using KeyLoad.Clustering;
-using KeyLoad.RecoveryTests.Features.ClusterRouting;
 using KeyLoad.Server;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
@@ -13,6 +13,7 @@ internal sealed class ConnectionNativeServerRuntime : IAsyncDisposable
     private const string FailureRoot = "KeyLoad.ConnectionNative.ServerRoot";
     private readonly IGrainRequestPhaseObserver observer;
     private readonly IGrainRequestPurposeObserver? purposeObserver;
+    private readonly ConnectionOperationObservation connectionObserver;
     private RequestCqrsHostedCluster? hosts;
     private string[] directories = [];
     private CancellationToken originalToken;
@@ -41,11 +42,12 @@ internal sealed class ConnectionNativeServerRuntime : IAsyncDisposable
     internal RequestCqrsHostedRuntimeFixture Source => Hosts.Nodes[SourceIndex];
 
     internal ConnectionNativeServerRuntime(GrainRoutingOptions? routing, IGrainRequestPhaseObserver observer,
-        IGrainRequestPurposeObserver? purposeObserver = null)
+        IGrainRequestPurposeObserver? purposeObserver, ConnectionOperationObservation connectionObserver)
     {
         RoutingOptions = UnitRoutingOptions.Routing(routing);
         this.observer = observer;
         this.purposeObserver = purposeObserver;
+        this.connectionObserver = connectionObserver;
         Cluster = new(() => Source);
         Database = new(() => Source, () => originalToken);
     }
@@ -57,7 +59,11 @@ internal sealed class ConnectionNativeServerRuntime : IAsyncDisposable
         using var startup = CancellationTokenSource.CreateLinkedTokenSource(token, deadline.Token);
         hosts = await RequestCqrsHostedCluster.CreateAsync(startup.Token, observer: observer,
             routing: RoutingOptions.Value, purposeObserver: purposeObserver,
-            configureServices: Evidence.Configure).ConfigureAwait(false);
+            configureServices: (index, services, options) =>
+            {
+                Evidence.Configure(index, services, options);
+                services.AddSingleton<IIncomingGrainCallFilter>(connectionObserver);
+            }).ConfigureAwait(false);
         directories = hosts.Nodes.Select(node => node.Database.Directory).ToArray();
         inventory = new(hosts, Cluster.Client, ConnectionId);
     }

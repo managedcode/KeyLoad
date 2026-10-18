@@ -14,14 +14,14 @@ internal static class VerifiedBackupMixedCutRefusal
     private const int FailedOperationExit = 1;
     private const int CorruptionStatus = (int)System.Net.HttpStatusCode.BadRequest;
 
-    internal static async Task RunAsync(EventingArtifactFixture fixture, RestorePublicationRaceAuthority authority,
+    internal static async Task RunAsync(EventingArtifactFixture fixture,
         VerifiedBackupCutSnapshot selected, string target, CancellationToken token)
     {
         var verified = Assert.ThrowsExactly<KeyLoadException>(() =>
-            ZoneTreeBackupVerification.Verify(selected.Path, fixture.Source.StorageExecution));
+            ZoneTreeStore.VerifyBackup(selected.Path, fixture.Source.StorageExecution, token));
         await RequireFailureAsync(verified);
         var restored = Assert.ThrowsExactly<KeyLoadException>(() =>
-            authority.Restore(fixture, selected.Path, target, null, token));
+            ZoneTreeStore.Restore(selected.Path, target, fixture.Source.StorageExecution, cancellationToken: token));
         await RequireFailureAsync(restored);
         await RequireNoPublicationAsync(fixture.Root, target);
         var options = CliBackupRestoreProcess.CaptureExecutionOptions();

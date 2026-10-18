@@ -1,12 +1,11 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using System.Text.Json;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.TimeSeries;
 
 internal static class SampleChunkCorrectionBoundReceipts
 {
-    private const long OwnershipEpoch = 1;
     private const long CommitIncrement = 1;
 
     internal static async Task CommitAsync(SampleChunkCanonicalFixture fixture, Mutation mutation,

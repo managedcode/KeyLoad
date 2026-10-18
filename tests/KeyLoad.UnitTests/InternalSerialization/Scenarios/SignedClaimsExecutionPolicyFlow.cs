@@ -1,7 +1,7 @@
-using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage;
+using ManagedCode.Communication;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.InternalSerialization;

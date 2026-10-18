@@ -24,7 +24,7 @@ internal sealed class ConnectionNativeScenario : IAsyncDisposable
     internal ConnectionNativeScenario(GrainRoutingOptions? routing = null,
         IGrainRequestPurposeObserver? purposeObserver = null,
         Func<ConnectionOperationObservation, IGrainRequestPhaseObserver>? phaseObserver = null)
-        => Fixture = new(routing, phaseObserver?.Invoke(Observation) ?? Observation, purposeObserver);
+        => Fixture = new(routing, phaseObserver?.Invoke(Observation) ?? Observation, purposeObserver, Observation);
 
     internal static async Task RunAsync(Func<ConnectionNativeScenario, Task> execute,
         GrainRoutingOptions? routing = null, IGrainRequestPurposeObserver? purposeObserver = null,

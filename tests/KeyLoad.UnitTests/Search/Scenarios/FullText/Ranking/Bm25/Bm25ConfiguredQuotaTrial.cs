@@ -1,6 +1,5 @@
-using KeyLoad.Core;
-using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.Search;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.Search;
 

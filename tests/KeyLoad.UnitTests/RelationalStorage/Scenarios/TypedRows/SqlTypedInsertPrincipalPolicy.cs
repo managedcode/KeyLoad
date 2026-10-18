@@ -1,5 +1,5 @@
-using ManagedCode.Communication;
 using KeyLoad.UnitTests.Features.Messaging;
+using ManagedCode.Communication;
 namespace KeyLoad.UnitTests.Features.RelationalStorage;
 
 internal static class SqlTypedInsertPrincipalPolicy

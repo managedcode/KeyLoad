@@ -1,7 +1,7 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
@@ -14,7 +14,7 @@ internal static class TenantAdmissionCold
         using var store = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution,
             UnitExecutionOptions.PointCacheExecution());
         var database = fixture.CreateConfiguredDatabase(store);
-        await ReplayAsync(database, store, operation => database.Apply(operation),
+        await ReplayAsync(database, store, database.Apply,
             operations, results, fixture.Partition, token);
         var id = Guid.NewGuid();
         var request = new CommandRequest(id, fixture.Partition,

@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>AC-NGR-001 policy cases from the retained original provider job record; these do not authenticate GitHub.</summary>
 internal sealed class IsolatedCurrentJobTests

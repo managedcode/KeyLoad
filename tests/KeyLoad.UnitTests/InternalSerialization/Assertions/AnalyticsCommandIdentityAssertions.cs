@@ -1,4 +1,3 @@
-using ManagedCode.Communication.Commands;
 using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.Core;
@@ -6,6 +5,7 @@ using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 using KeyLoad.UnitTests.Features.Authorization;
+using ManagedCode.Communication.Commands;
 using D = KeyLoad.UnitTests.Features.InternalSerialization.AnalyticsCommandIdentityData;
 using O = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestOperations;
 

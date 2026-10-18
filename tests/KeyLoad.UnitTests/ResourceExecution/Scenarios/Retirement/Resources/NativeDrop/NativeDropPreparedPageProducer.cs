@@ -1,6 +1,5 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;

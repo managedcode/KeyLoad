@@ -2,13 +2,13 @@ using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Hosting;
-using KeyLoad.UnitTests.Features.BenchmarkComparisons;
+using KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.TestInfrastructure;
+namespace KeyLoad.ComparisonTests.Features.TestInfrastructure;
 
 internal sealed class RetiredBenchmarkSelectionTests
 {

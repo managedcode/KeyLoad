@@ -1,6 +1,5 @@
-using KeyLoad.Core;
-using ManagedCode.Communication;
 using KeyLoad.Core.Features.Search;
+using ManagedCode.Communication;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Search;

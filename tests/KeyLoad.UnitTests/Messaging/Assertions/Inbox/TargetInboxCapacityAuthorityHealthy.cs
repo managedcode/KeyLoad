@@ -8,7 +8,6 @@ namespace KeyLoad.UnitTests.Features.Messaging;
 
 internal static class TargetInboxCapacityAuthorityHealthy
 {
-    private const long InitialEpoch = 1L;
     private const long HealthyEventOutboxSequence = 5L;
     private const int AppendOrdinal = 1;
     private const long HealthyStreamRevision = 1L;

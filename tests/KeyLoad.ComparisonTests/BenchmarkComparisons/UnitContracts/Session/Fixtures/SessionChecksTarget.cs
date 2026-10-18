@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using KeyLoad.Comparisons;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 // Small deterministic contract oracle only; this target never produces native performance evidence.
 internal class SessionChecksTarget : IDocumentComparisonTarget

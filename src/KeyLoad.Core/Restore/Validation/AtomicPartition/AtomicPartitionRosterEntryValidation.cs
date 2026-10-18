@@ -17,12 +17,12 @@ internal static class AtomicPartitionRosterEntryValidation
     private static bool HasValidFirstSeenPosition(AtomicPartitionCatalogEntryV1 entry,
         long currentStorePosition, long currentAppliedIndex)
     {
-        var localPosition = entry.FirstSeenAppliedIndex == AtomicPartitionRosterProtocol.NoReplicatedAppliedIndex
-            && entry.FirstSeenStorePosition > AtomicPartitionRosterProtocol.NoReplicatedStorePosition
+        var localPosition = entry.FirstSeenAppliedIndex == AtomicPartitionRosterProtocol.NoCanonicalSequence
+            && entry.FirstSeenStorePosition > AtomicPartitionRosterProtocol.NoStorePosition
             && entry.FirstSeenStorePosition <= currentStorePosition;
-        var replicatedPosition = entry.FirstSeenAppliedIndex > AtomicPartitionRosterProtocol.NoReplicatedAppliedIndex
-            && entry.FirstSeenStorePosition == AtomicPartitionRosterProtocol.NoReplicatedStorePosition
+        var canonicalPosition = entry.FirstSeenAppliedIndex > AtomicPartitionRosterProtocol.NoCanonicalSequence
+            && entry.FirstSeenStorePosition == AtomicPartitionRosterProtocol.NoStorePosition
             && entry.FirstSeenAppliedIndex <= currentAppliedIndex;
-        return localPosition || replicatedPosition;
+        return localPosition || canonicalPosition;
     }
 }

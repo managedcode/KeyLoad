@@ -1,6 +1,6 @@
 using System.Text.Json.Nodes;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Builds controlled exporter-schema inputs; these are never benchmark measurements.</summary>
 internal static class NativeSerializationReportData

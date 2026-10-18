@@ -168,19 +168,22 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
 
     /// <summary>Copies the canonical journal and identity into a private verified backup directory.</summary>
     /// <param name="directory">Destination directory that must be empty.</param>
+    /// <param name="cancellationToken">Cancellation checked during native copying and verification.</param>
     /// <returns>The captured local journal position.</returns>
-    public long CreateBackup(string directory) => runtime.Backups.CreateBackup(directory);
+    public long CreateBackup(string directory, CancellationToken cancellationToken = default)
+        => runtime.Backups.CreateBackup(directory, cancellationToken);
 
     /// <summary>Validates the original identity, checksums, native journal and committed cut of a backup.</summary>
     /// <param name="directory">The private immutable backup directory.</param>
     /// <param name="executionOptions">Validated native storage verification policy.</param>
+    /// <param name="cancellationToken">Cancellation checked while reading and validating the original cut.</param>
     /// <returns>The original persisted identity and verified local journal position.</returns>
     public static (StoreIdentity Identity, long Position) VerifyBackup(string directory,
-        IOptions<ZoneTreeStorageExecutionOptions> executionOptions)
+        IOptions<ZoneTreeStorageExecutionOptions> executionOptions, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(directory);
         ArgumentNullException.ThrowIfNull(executionOptions);
-        return ZoneTreeBackupVerification.Verify(directory, executionOptions);
+        return ZoneTreeBackupVerification.Verify(directory, executionOptions, cancellationToken);
     }
 
     /// <summary>Restores a verified backup under a new node identity with dispatch paused.</summary>
@@ -189,10 +192,13 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
     /// <param name="executionOptions">Centrally validated policy frozen before restore begins.</param>
     /// <param name="newIncarnation">Optional replacement authority incarnation.</param>
     /// <param name="newSigningKey">Optional caller-owned signing key copied into the restored identity.</param>
+    /// <param name="cancellationToken">Cancellation checked before publishing the verified restored directory.</param>
     /// <returns>The restored persisted identity.</returns>
     public static StoreIdentity Restore(string backup, string destination,
-        IOptions<ZoneTreeStorageExecutionOptions> executionOptions, Guid? newIncarnation = null, byte[]? newSigningKey = null)
-        => ZoneTreeBackupRestore.Restore(backup, destination, executionOptions, newIncarnation, newSigningKey);
+        IOptions<ZoneTreeStorageExecutionOptions> executionOptions, Guid? newIncarnation = null,
+        byte[]? newSigningKey = null, CancellationToken cancellationToken = default)
+        => ZoneTreeBackupRestore.Restore(backup, destination, executionOptions, newIncarnation, newSigningKey,
+            cancellationToken);
 
     /// <summary>Returns cumulative logical read work for this store's nonpersisted diagnostics session.</summary>
     /// <remarks>

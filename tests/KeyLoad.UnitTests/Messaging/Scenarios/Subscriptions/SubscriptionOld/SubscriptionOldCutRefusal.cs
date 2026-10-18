@@ -1,8 +1,8 @@
-using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.StorageRecovery.Assertions;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 
@@ -19,7 +19,7 @@ internal static class SubscriptionOldCutRefusal
         {
             var result = database.Apply(operation);
             await Assert.That(Errors.Code(result.Problem)).IsEqualTo(code);
-            
+
             await Assert.That(result.Value).IsNull();
             if (detail is not null)
             {

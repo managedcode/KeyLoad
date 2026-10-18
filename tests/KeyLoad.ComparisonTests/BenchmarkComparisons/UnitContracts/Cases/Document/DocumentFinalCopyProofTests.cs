@@ -1,7 +1,7 @@
 using KeyLoad.Comparisons;
 using KeyLoad.Comparisons.Targets;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>AC-METH-004: final native CLUSTER copy proof rejects stale membership and incomplete final durability/readback.</summary>
 internal sealed class DocumentFinalCopyProofTests

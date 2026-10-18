@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Text;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Launches and owns the real embedded BenchmarkDotNet executable.</summary>
 internal static class EmbeddedBenchmarkProcess

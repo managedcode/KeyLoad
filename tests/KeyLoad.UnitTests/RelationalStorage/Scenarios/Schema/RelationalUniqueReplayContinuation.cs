@@ -1,8 +1,8 @@
-using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Query;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.Messaging;
+using ManagedCode.Communication;
 
 namespace KeyLoad.UnitTests.Features.RelationalStorage;
 
@@ -38,7 +38,7 @@ internal static class RelationalUniqueReplayContinuation
         var failed = Request(db, id, ConflictingThird);
         var failure = db.Submit(OperationKind.Batch, failed, id: id, time: issued);
         await Assert.That(Errors.Code(failure.Problem)).IsEqualTo(ErrorCode.Conflict);
-        
+
         await Assert.That(failure.Value).IsNull();
         await RowsAsync(db, db.Store, db.Database, InitialSecond, InitialRevision, false);
         await SameAsync(before, db.Database.GetOutboxStatus(Root, db.Partition));

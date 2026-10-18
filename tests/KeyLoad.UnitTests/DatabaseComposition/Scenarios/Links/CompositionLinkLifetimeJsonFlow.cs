@@ -1,6 +1,6 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using KeyLoad.UnitTests.Features.Authorization;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using A = KeyLoad.UnitTests.Features.DatabaseComposition.CompositionLinkLifetimeJsonAssertions;
 using P = KeyLoad.UnitTests.Features.DatabaseComposition.CompositionLinkLifetimeJsonProtocol;
 using S = KeyLoad.UnitTests.Features.DatabaseComposition.CompositionLinkLifetimeJsonSeed;
@@ -40,7 +40,7 @@ internal static class CompositionLinkLifetimeJsonFlow
         var failed = owner.Submit(operation);
         await A.EqualAsync(Result<object>.Fail(Errors.Problem(ErrorCode.Validation, detail)), failed);
         await Assert.That(failed.Value).IsNull();
-        
+
     }
 
     private static Task ReplayFailureAsync(SafeProjectorOperationDatabase owner, Command<DatabaseCommand> operation, string detail)

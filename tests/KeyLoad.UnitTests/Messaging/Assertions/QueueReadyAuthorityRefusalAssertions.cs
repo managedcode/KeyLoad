@@ -1,6 +1,6 @@
-using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Storage;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
 
@@ -23,7 +23,7 @@ internal static class QueueReadyAuthorityRefusalAssertions
         await Assert.That(NativeSerialization.Serialize(fixture.Store.Identity)).IsEquivalentTo(identity, TUnit.Assertions.Enums.CollectionOrdering.Matching);
         var result = fixture.Database.ResolveOutcome(original);
         await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.RecoveryRequired);
-        
+
         await Assert.That(result.Value).IsNull();
         var outcome = fixture.Store.Read(view => view.GetRecord<StoredOutcome>(
             KeySpace.PartitionOutcome(fixture.Partition, "worker", original.CommandId)));

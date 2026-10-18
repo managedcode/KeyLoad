@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using KeyLoad.UnitTests.Features.ClusterRouting;
 using KeyLoad.UnitTests.Features.DocumentStorage;
 using D = KeyLoad.UnitTests.Features.ClientApi.DeclaredResponseEofProtocol;

@@ -1,9 +1,9 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.Features.Messaging;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
@@ -87,7 +87,7 @@ internal static class AppliedOutcomeDefinitiveRefusalAssertions
     {
         await Assert.That(Errors.Code(result.Problem)).IsEqualTo(code);
         await Assert.That(result.Problem?.Detail).IsEqualTo(detail);
-        
+
         await Assert.That(result.Value).IsNull();
     }
 

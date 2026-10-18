@@ -1,8 +1,8 @@
-using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.UnitTests.Features.ResourceExecution;
+using ManagedCode.Communication.Commands;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -106,7 +106,7 @@ internal static class QueueOrderedRetryRestoreAuthority
         var result = database.Apply(operation);
         await Assert.That(Errors.Code(result.Problem)).IsEqualTo(expected);
         await Assert.That(result.Value).IsNull();
-        
+
         await QueueOrderedRetryImage.SameAsync(database.Store, state.Lane, image);
         if (prior is null)
         {

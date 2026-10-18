@@ -3,7 +3,7 @@ using KeyLoad.ComparisonHost.Features.BenchmarkComparisons;
 using KeyLoad.Comparisons;
 using Microsoft.Extensions.Configuration;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Owns actual buffered-writer/configuration lifetimes for disposal-policy tests, without database or provenance simulation.</summary>
 internal sealed class SessionDisposalNativeFixture : IAsyncDisposable

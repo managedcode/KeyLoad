@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
-using KeyLoad.RecoveryTests.Features.EventStreams;
 using KeyLoad.IntegrationTests.Features.Messaging;
+using KeyLoad.RecoveryTests.Features.EventStreams;
 
 namespace KeyLoad.IntegrationTests.Features.EventStreams;
 

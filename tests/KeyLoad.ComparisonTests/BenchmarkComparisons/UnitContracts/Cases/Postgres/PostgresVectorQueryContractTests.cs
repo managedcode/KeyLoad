@@ -2,7 +2,7 @@ using KeyLoad.Comparisons;
 using KeyLoad.Comparisons.Targets;
 using Npgsql;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Checks actual Npgsql command contracts; native execution remains a separate Aspire gate.</summary>
 internal sealed class PostgresVectorQueryContractTests

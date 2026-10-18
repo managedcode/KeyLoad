@@ -76,7 +76,7 @@ internal static class IdentityVersionRepairTrial
         CancellationToken token)
     {
         await NativeBackupJournalRepairAssertions.SameArchiveAsync(original, fixture.Backup, token);
-        var verified = ZoneTreeStore.VerifyBackup(fixture.Backup, UnitExecutionOptions.StorageExecution());
+        var verified = ZoneTreeStore.VerifyBackup(fixture.Backup, UnitExecutionOptions.StorageExecution(), token);
         await Assert.That(verified.Position).IsEqualTo(source.Position);
         await Assert.That(NativeSerialization.Serialize(verified.Identity).AsSpan()
             .SequenceEqual(NativeSerialization.Serialize(source.Identity))).IsTrue();

@@ -1,6 +1,6 @@
-using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Storage;
+using ManagedCode.Communication;
 using static KeyLoad.RecoveryTests.Features.EventStreams.SharedDomainProtocol;
 
 namespace KeyLoad.UnitTests.Features.EventStreams;
@@ -18,7 +18,7 @@ internal static class SharedDomainValueAssertions
     {
         await Assert.That(Errors.Code(result.Problem)).IsNull();
         await Assert.That(result.Problem?.Detail).IsNull();
-        
+
         var mutations = request.Mutations.Select(effect => effect switch
         {
             PutDocument document => new MutationReceipt(PutKind, document.Collection, document.Id, FirstRevision),
@@ -36,7 +36,7 @@ internal static class SharedDomainValueAssertions
     {
         await Assert.That(Errors.Code(result.Problem)).IsNull();
         await Assert.That(result.Problem?.Detail).IsNull();
-        
+
         var scope = request.Lane;
         var put = request.Effects.OfType<PutDocument>().Single();
         var append = request.Effects.OfType<AppendEvents>().Single();
@@ -58,7 +58,7 @@ internal static class SharedDomainValueAssertions
     {
         await Assert.That(Errors.Code(result.Problem)).IsEqualTo(code);
         await Assert.That(result.Problem?.Detail).IsEqualTo(detail);
-        
+
         await Assert.That(result.Value).IsNull();
     }
 }

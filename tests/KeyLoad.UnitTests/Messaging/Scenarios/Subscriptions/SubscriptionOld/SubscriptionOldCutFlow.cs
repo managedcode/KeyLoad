@@ -32,7 +32,7 @@ internal static class SubscriptionOldCutFlow
         var root = Path.Combine(fixture.Directory, "old-cut-backup");
         var target = Path.Combine(fixture.Directory, "restored-owner");
         await Assert.That(fixture.Database.LastApplied).IsGreaterThan(MissingAppliedIndex);
-        var capture = MixedEventingCatalogRestore.Capture(fixture, root, token);
+        var capture = MixedEventingBackupRestore.Capture(fixture, root, token);
         var backupPosition = capture.Position;
         await SubscriptionOldCutAssertions.StatusAsync(fixture.Database, state, 1, 0, 3, 3);
         var first = new SubscriptionDeliveryCommand(Guid.NewGuid(), state.Group,
@@ -62,9 +62,9 @@ internal static class SubscriptionOldCutFlow
         ServerFailureObserver.ThrowIfAny(failures);
     }
     private static async Task RestoreAsync(TestDatabase fixture, SubscriptionOldCutState state,
-        NativeCatalogBackupCapture capture, string backup, string target, CancellationToken token)
+        (StoreIdentity Identity, long Position) capture, string backup, string target, CancellationToken token)
     {
-        var restoredPosition = await MixedEventingCatalogRestore.RestoreAsync(fixture, capture, backup, target, token);
+        var restoredPosition = await MixedEventingBackupRestore.RestoreAsync(fixture, capture, backup, target, token);
         ZoneTreeStore? store = null;
         var failures = new List<Exception>();
         string[] bytes = [];

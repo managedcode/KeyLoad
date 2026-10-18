@@ -1,6 +1,5 @@
 using System.Text.Json;
 using Aspire.Hosting.ApplicationModel;
-using KeyLoad.UnitTests.Features.BenchmarkComparisons;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 

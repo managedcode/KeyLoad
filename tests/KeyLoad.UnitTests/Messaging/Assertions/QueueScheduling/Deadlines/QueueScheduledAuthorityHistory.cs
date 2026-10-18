@@ -44,7 +44,7 @@ internal static class QueueScheduledAuthorityHistory
             if (operation.Kind == OperationKind.Receive)
             {
                 await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(ErrorCode.StaleLease);
-                
+
                 await Assert.That(replay.Value).IsNull();
             }
             else

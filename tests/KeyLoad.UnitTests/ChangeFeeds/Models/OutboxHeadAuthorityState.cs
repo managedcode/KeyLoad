@@ -1,5 +1,5 @@
-using ManagedCode.Communication.Commands;
 using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 namespace KeyLoad.UnitTests.Features.ChangeFeeds;
 
 internal sealed record OutboxHeadAuthorityState(PartitionRef Partition, Command<DatabaseCommand> Seed, CommitReceipt Receipt, Result<object> SeedResult,

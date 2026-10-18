@@ -19,8 +19,7 @@ internal static class RestoreIdentityOverrideRefusals
             KeyLoadException? failure = null;
             try
             {
-                ZoneTreeStore.Restore(fixture.BackupDirectory, fixture.TargetDirectory,
-                    UnitExecutionOptions.StorageExecution(), identity.Item1, identity.Item2);
+                ZoneTreeStore.Restore(fixture.BackupDirectory, fixture.TargetDirectory, UnitExecutionOptions.StorageExecution(), identity.Item1, identity.Item2, token);
             }
             catch (KeyLoadException original)
             {

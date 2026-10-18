@@ -1,6 +1,6 @@
-using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Search;
+using ManagedCode.Communication.Commands;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Query.Features.Search;

@@ -1,6 +1,6 @@
-using ManagedCode.Communication.Commands;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Search;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.Core;
 

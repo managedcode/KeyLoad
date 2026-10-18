@@ -1,6 +1,5 @@
-using KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Supplies current native session startup and reusable metadata-parser settings.</summary>
 internal static class ComparisonHostBindingsSupport

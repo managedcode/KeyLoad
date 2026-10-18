@@ -1,9 +1,7 @@
-using KeyLoad.Core;
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
-using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Query.Features.Search;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
@@ -56,7 +54,7 @@ internal static class Bm25PrivateAdmissionFlow
         var before = ReplicaSubmissionOutcomeState.Read(database);
         var conflict = await SubmitAsync(database, changed, token);
         await Assert.That(Errors.Code(conflict.Problem)).IsEqualTo(ErrorCode.Conflict);
-        
+
         await Assert.That(conflict.Value).IsNull();
         await Assert.That(conflict.Problem?.Detail).IsEqualTo("The command ID was already used with different content.");
         await before.RequireAsync(ReplicaSubmissionOutcomeState.Read(database));

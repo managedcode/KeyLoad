@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Owns both capture files from pre-spawn acquisition through settled pump disposal.</summary>
 internal sealed class NativeSerializationBenchmarkCaptureFiles : IAsyncDisposable

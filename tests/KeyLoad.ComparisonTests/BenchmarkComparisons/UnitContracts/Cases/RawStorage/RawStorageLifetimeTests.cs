@@ -1,6 +1,6 @@
 using KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Verifies fixture validation, bounded writes, input ownership and close behavior.</summary>
 [NotInParallel]

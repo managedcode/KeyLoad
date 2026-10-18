@@ -1,5 +1,5 @@
 using SessionFields = KeyLoad.ComparisonTests.Features.BenchmarkComparisons.BenchmarkSessionEvidenceKeys;
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Verifies digest-backed normal-host provenance failures through the real CLI process.</summary>
 internal sealed class ComparisonExecutionIdentityTests

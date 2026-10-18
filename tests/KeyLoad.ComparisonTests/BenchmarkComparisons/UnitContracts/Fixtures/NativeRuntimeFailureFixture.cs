@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Retains an actual CLR admission failure without allocating the impossible payload.</summary>
 internal static class NativeRuntimeFailureFixture

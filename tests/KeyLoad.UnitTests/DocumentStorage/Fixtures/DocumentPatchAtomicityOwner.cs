@@ -1,9 +1,10 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
+using System.Diagnostics.CodeAnalysis;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.UnitTests.Features.DocumentStorage;
 
@@ -14,7 +15,7 @@ internal sealed class DocumentPatchAtomicityOwner
     private readonly StoreIdentity originalIdentity;
     private bool originalJoined;
     private ZoneTreeStore? coldStore;
-    private DatabaseEngine? coldDatabase;
+
     internal TestDatabase Source
     {
         get;
@@ -29,8 +30,13 @@ internal sealed class DocumentPatchAtomicityOwner
 
     internal ZoneTreeStore Store => originalJoined
         ? coldStore ?? throw new InvalidOperationException(MissingOwner) : Source.Store;
-    internal DatabaseEngine Database => originalJoined
-        ? coldDatabase ?? throw new InvalidOperationException(MissingOwner) : Source.Database;
+
+    [AllowNull]
+    internal DatabaseEngine Database
+    {
+        get => originalJoined
+        ? field ?? throw new InvalidOperationException(MissingOwner) : Source.Database; private set;
+    }
 
     internal static async Task RunAsync(Func<DocumentPatchAtomicityOwner, Task> operation)
     {
@@ -65,7 +71,8 @@ internal sealed class DocumentPatchAtomicityOwner
         : Source.ReadStoredOutcome(original);
 
     internal (long AppliedPosition, long StorePosition) ReadCut()
-        => Store.Read(_ => (Database.LastApplied, Store.Position));
+        => Store.Read(view => (view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
+            ? NativeSerialization.Deserialize<long>(bytes) : default(long), Store.Position));
 
     internal async Task ReopenAsync()
     {
@@ -76,7 +83,7 @@ internal sealed class DocumentPatchAtomicityOwner
         }, originalIdentity.NodeId, Source.StorageExecution);
         await DocumentPatchAtomicityAssertions.BytesAsync(NativeSerialization.Serialize(originalIdentity),
             NativeSerialization.Serialize(coldStore.Identity));
-        coldDatabase = Source.CreateConfiguredDatabase(coldStore);
+        Database = Source.CreateConfiguredDatabase(coldStore);
     }
 
     private void Join()
@@ -89,7 +96,7 @@ internal sealed class DocumentPatchAtomicityOwner
         }
         var store = coldStore;
         coldStore = null;
-        coldDatabase = null;
+        Database = null;
         var failures = new List<Exception>();
         if (store is not null)
         {

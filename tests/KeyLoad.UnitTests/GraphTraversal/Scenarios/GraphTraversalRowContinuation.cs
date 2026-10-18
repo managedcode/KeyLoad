@@ -1,4 +1,3 @@
-using ManagedCode.Communication.Commands;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
@@ -18,7 +17,6 @@ internal static class GraphTraversalRowContinuation
     private const string MissingOutcome = "The acknowledged original traversal row repair outcome is absent.";
     private const long OriginalRevision = 1;
     private const long UpdatedRevision = 2;
-    private const long OriginalOwnershipEpoch = 1;
     private const long ReducedEpoch = 2;
     private const long RevokedEpoch = 3;
     private const long RepairedEpoch = 4;

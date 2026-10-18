@@ -1,6 +1,5 @@
-using KeyLoad.Core;
-using ManagedCode.Communication.Commands;
 using KeyLoad.UnitTests.Features.Messaging;
+using ManagedCode.Communication.Commands;
 using P = KeyLoad.UnitTests.Features.TimeSeries.SampleChunkCanonicalFixture;
 
 namespace KeyLoad.UnitTests.Features.TimeSeries;
@@ -53,7 +52,7 @@ internal static class SampleSequenceIntegrityRecovery
         var outcome = fixture.Database.ResolveOutcome(original);
         await Assert.That(Errors.Code(outcome.Problem)).IsEqualTo(ErrorCode.RecoveryRequired);
         await Assert.That(outcome.Problem?.Detail).IsEqualTo(MissingOutcome);
-        
+
         await Assert.That(outcome.Value).IsNull();
         await Assert.That(SampleChunkCorrectionBoundColdAssertions.Image(fixture.Store)).IsEqualTo(image);
         await Assert.That(fixture.Store.Position).IsEqualTo(position);

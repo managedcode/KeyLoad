@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Exercises original filesystem link policy using isolated repository-owned control files.</summary>
 internal static class CompiledBenchmarkRuntimeInventoryProgram

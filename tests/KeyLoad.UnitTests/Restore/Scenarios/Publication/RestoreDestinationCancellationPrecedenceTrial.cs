@@ -24,7 +24,7 @@ internal static class RestoreDestinationCancellationPrecedenceTrial
     {
         var source = NativeBackupJournalRepairAssertions.Read(fixture.Source, token);
         var archive = await NativeBackupJournalRepairAssertions.ArchiveAsync(fixture.Backup, token);
-        var verified = ZoneTreeStore.VerifyBackup(fixture.Backup, UnitExecutionOptions.StorageExecution());
+        var verified = ZoneTreeStore.VerifyBackup(fixture.Backup, UnitExecutionOptions.StorageExecution(), token);
         await BackupPersistedPolicyAssertions.SameAsync(source.Identity, verified.Identity);
         await Assert.That(verified.Position).IsEqualTo(source.Position);
         Directory.CreateDirectory(fixture.Destination);
@@ -52,8 +52,8 @@ internal static class RestoreDestinationCancellationPrecedenceTrial
                 await canceled.CancelAsync();
                 for (var attempt = 0; attempt < 2; attempt++)
                 {
-                    var failure = Assert.ThrowsExactly<KeyLoadException>(() => ZoneTreeBackupRestoreRestore.Restore(
-                        fixture.Backup, fixture.Destination, UnitExecutionOptions.StorageExecution(), null, null,
+                    var failure = Assert.ThrowsExactly<KeyLoadException>(() => ZoneTreeStore.Restore(
+                        fixture.Backup, fixture.Destination, UnitExecutionOptions.StorageExecution(),
                         cancellationToken: canceled.Token));
                     await Assert.That(failure.Code).IsEqualTo(ErrorCode.Conflict);
                     await Assert.That(failure.Message).IsEqualTo(MetadataTestContract.RestoreDestinationNotEmptyDetail);
@@ -61,8 +61,8 @@ internal static class RestoreDestinationCancellationPrecedenceTrial
                         parent, entries, nonempty: true, token);
                 }
                 File.Delete(Path.Combine(fixture.Destination, SentinelName));
-                var original = Assert.ThrowsExactly<OperationCanceledException>(() => ZoneTreeBackupRestoreRestore.Restore(
-                    fixture.Backup, fixture.Destination, UnitExecutionOptions.StorageExecution(), null, null,
+                var original = Assert.ThrowsExactly<OperationCanceledException>(() => ZoneTreeStore.Restore(
+                    fixture.Backup, fixture.Destination, UnitExecutionOptions.StorageExecution(),
                     cancellationToken: canceled.Token));
                 await Assert.That(original.CancellationToken).IsEqualTo(canceled.Token);
                 await RestoreDestinationCancellationPrecedenceAssertions.PreservedAsync(fixture, source, archive,

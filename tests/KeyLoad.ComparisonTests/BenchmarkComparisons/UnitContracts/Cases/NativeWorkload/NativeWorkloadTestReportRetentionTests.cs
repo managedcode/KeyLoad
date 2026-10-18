@@ -1,6 +1,5 @@
-using KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class NativeWorkloadTestReportRetentionTests
 {

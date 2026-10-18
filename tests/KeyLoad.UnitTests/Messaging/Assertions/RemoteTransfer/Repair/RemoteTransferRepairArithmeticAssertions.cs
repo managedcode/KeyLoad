@@ -109,7 +109,7 @@ internal static class RemoteTransferRepairArithmeticAssertions
         var replay = RemoteTransferRepairColdNative.Apply(fixture, original.Denied);
         await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(replay.Problem?.Detail).IsEqualTo("The principal policy changed since this command was evaluated.");
-        
+
         await Assert.That(replay.Value).IsNull();
     }
 }

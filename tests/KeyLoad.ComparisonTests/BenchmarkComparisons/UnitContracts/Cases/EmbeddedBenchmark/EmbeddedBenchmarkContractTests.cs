@@ -6,7 +6,7 @@ using KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 using KeyLoad.Storage;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Proves the embedded benchmark fixture contract and its generated consumer.</summary>
 [NotInParallel]

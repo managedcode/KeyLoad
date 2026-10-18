@@ -29,8 +29,8 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
         this.limits = limits ?? throw new ArgumentNullException(nameof(limits));
         EffectAdmission = new(limits);
         this.storePosition = storePosition;
-        this.appliedIndex = appliedIndex > AtomicPartitionRosterProtocol.NoReplicatedAppliedIndex
-            ? appliedIndex : AtomicPartitionRosterProtocol.NoReplicatedAppliedIndex;
+        this.appliedIndex = appliedIndex > AtomicPartitionRosterProtocol.NoCanonicalSequence
+            ? appliedIndex : AtomicPartitionRosterProtocol.NoCanonicalSequence;
     }
 
     public int MaximumRangeRecords => inner.MaximumRangeRecords;
@@ -83,7 +83,7 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
     void IResourceEffectObservation.ObserveResource(PartitionRef partition, ResourceLifetimeV1 lifetime)
         => EffectAdmission.Observe(partition, lifetime);
 
-    internal void PersistCandidates(Guid currentIncarnation)
+    internal void PersistCandidates()
     {
         if (candidates.Count == NoCandidates)
         {
@@ -92,7 +92,7 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
 
         var appliedBytes = inner.ReadOwnedValue(KeySpace.AppliedBytes);
         var currentAppliedIndex = appliedBytes is null
-            ? AtomicPartitionRosterProtocol.NoReplicatedAppliedIndex
+            ? AtomicPartitionRosterProtocol.NoCanonicalSequence
             : NativeSerialization.Deserialize<long>(appliedBytes);
         foreach (var candidate in candidates)
         {
@@ -100,21 +100,18 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
             var existing = existingBytes is null ? null : NativeSerialization.Deserialize<AtomicPartitionCatalogEntryV1>(existingBytes);
             if (existing is not null)
             {
-                var historicalBound = AtomicPartitionRosterOriginValidation.ReadBound(inner, existing,
-                    existingBytes!, currentIncarnation);
                 AtomicPartitionRosterEntryValidation.Validate(existing, candidate.Key, storePosition,
-                    Math.Max(currentAppliedIndex, historicalBound));
+                    currentAppliedIndex);
                 continue;
             }
 
-            if (existingBytes is not null || inner.ReadOwnedValue(
-                AtomicPartitionRosterRestoreOriginSerialization.OriginKey(candidate.Key)) is not null)
+            if (existingBytes is not null)
             {
                 throw Errors.Fail(ErrorCode.Corruption, AtomicPartitionRosterProtocol.InvalidEntry);
             }
 
-            var firstSeenStorePosition = appliedIndex > AtomicPartitionRosterProtocol.NoReplicatedAppliedIndex
-                ? AtomicPartitionRosterProtocol.NoReplicatedStorePosition : storePosition;
+            var firstSeenStorePosition = appliedIndex > AtomicPartitionRosterProtocol.NoCanonicalSequence
+                ? AtomicPartitionRosterProtocol.NoStorePosition : storePosition;
             var entry = new AtomicPartitionCatalogEntryV1(AtomicPartitionRosterProtocol.CurrentVersion,
                 candidate.Key, firstSeenStorePosition, appliedIndex);
             var bytes = NativeSerialization.Serialize(entry);

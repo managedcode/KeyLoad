@@ -7,8 +7,6 @@ internal sealed class ConnectionAwaitedSettlementObservation(ConnectionOperation
     : IGrainRequestPhaseObserver, IGrainRequestNativePhaseObserver, IGrainRequestProducerDisposedObserver
 {
     private readonly ConcurrentDictionary<Guid, ConnectionAwaitedCallback> callbacks = new();
-    private readonly ConcurrentDictionary<Guid, GrainRequestContextState> identities = new();
-    private readonly ConcurrentDictionary<Guid, Task> deactivations = new();
 
     internal ConnectionAwaitedCallback Hold(Guid requestId, Exception? failure = null)
     {
@@ -22,20 +20,7 @@ internal sealed class ConnectionAwaitedSettlementObservation(ConnectionOperation
 
     public ValueTask ObserveAsync(GrainRequestProbeIdentity identity, GrainRequestPhase phase,
         IGrainContext context, CancellationToken token)
-    {
-        if (phase == GrainRequestPhase.RequestStarted)
-        {
-            if (RequestContext.Get(GrainRequestStreamProtocol.ContextKey) is not GrainRequestContextState state
-                || state.RequestId != identity.RequestId || state.CommandId != identity.CommandId
-                || context.GrainInstance is not ConnectionGrain connection || connection.GetPrimaryKey() != state.ConnectionId
-                || !identities.TryAdd(identity.RequestId, state)
-                || !deactivations.TryAdd(identity.RequestId, context.Deactivated))
-            {
-                throw Invalid();
-            }
-        }
-        return original.ObserveAsync(identity, phase, context, token);
-    }
+        => original.ObserveAsync(identity, phase, context, token);
 
     public ValueTask ObserveNativeAsync(GrainRequestProbeIdentity identity, GrainRequestPhase phase,
         SiloStorageIdentityProvider actualRuntime, CancellationToken token)
@@ -46,8 +31,10 @@ internal sealed class ConnectionAwaitedSettlementObservation(ConnectionOperation
 
     public ValueTask ProducerDisposedAsync(GrainRequestProbeIdentity identity, Guid connectionId, IGrainContext context)
     {
-        if (!identities.TryGetValue(identity.RequestId, out var state) || state.ConnectionId != connectionId
-            || context.GrainInstance is not ConnectionGrain connection || connection.GetPrimaryKey() != connectionId)
+        var observed = original.Read(identity.RequestId);
+        if (observed.ConnectionIdentity.ConnectionId != connectionId
+            || observed.ConnectionContext.GrainInstance is not ConnectionGrain connection
+            || connection.GetPrimaryKey() != connectionId)
         {
             throw Invalid();
         }
@@ -55,8 +42,8 @@ internal sealed class ConnectionAwaitedSettlementObservation(ConnectionOperation
         return callbacks.TryGetValue(identity.RequestId, out var callback) ? callback.NotifyAsync(connection.AdmissionClosedToken) : ValueTask.CompletedTask;
     }
 
-    internal GrainRequestContextState Identity(Guid requestId) => identities[requestId];
-    internal Task Deactivated(Guid requestId) => deactivations[requestId];
+    internal GrainRequestContextState Identity(Guid requestId) => original.Read(requestId).ConnectionIdentity;
+    internal Task Deactivated(Guid requestId) => original.Read(requestId).ConnectionContext.Deactivated;
     internal void ReleaseAll()
     {
         foreach (var callback in callbacks.Values)

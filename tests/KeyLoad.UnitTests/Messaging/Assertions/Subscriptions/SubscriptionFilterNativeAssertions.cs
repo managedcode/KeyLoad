@@ -27,7 +27,7 @@ internal static class SubscriptionFilterNativeAssertions
         var result = SubscriptionFilterColdTrial.Apply(db, OperationKind.ConfigureSubscription, request,
             request.CommandId, token);
         await Assert.That(Errors.Code(result.Problem)).IsEqualTo(expected);
-        
+
         await Assert.That(Image(store, request.Subscription.Source.Partition)).IsEquivalentTo(before, CollectionOrdering.Matching);
         var replay = SubscriptionFilterColdTrial.Apply(db, OperationKind.ConfigureSubscription, request,
             request.CommandId, token);

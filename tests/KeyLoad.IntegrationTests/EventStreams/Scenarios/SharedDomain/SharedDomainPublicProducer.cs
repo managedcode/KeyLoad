@@ -1,6 +1,6 @@
 using KeyLoad.Client;
-using KeyLoad.RecoveryTests.Features.EventStreams;
 using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.RecoveryTests.Features.EventStreams;
 using static KeyLoad.RecoveryTests.Features.EventStreams.SharedDomainProtocol;
 
 namespace KeyLoad.IntegrationTests.Features.EventStreams;

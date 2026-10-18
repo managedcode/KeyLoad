@@ -1,3 +1,4 @@
+using KeyLoad.Core.Features.BackupRestore.Serialization;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Storage;
 
@@ -21,13 +22,13 @@ internal static class TableDataCleanup
         ReadExecutionBudget work, DatabaseLimits limits)
     {
         var partitions = new List<PartitionRef>();
-        var inventory = work.VisitRange(view, AtomicPartitionRosterRestoreOriginSerialization.EntryPrefix(),
+        var inventory = work.VisitRange(view, AtomicPartitionRosterKeys.Prefix(),
             limits.MaxScanRecords, (key, value) =>
             {
                 var entry = NativeSerialization.Deserialize<AtomicPartitionCatalogEntryV1>(value);
                 DatabaseEngine.ValidatePartition(entry.Partition);
-                if (entry.Version != AtomicPartitionRosterRestoreOriginSerialization.EntryVersion
-                    || !key.SequenceEqual(AtomicPartitionRosterRestoreOriginSerialization.EntryKey(entry.Partition)))
+                if (entry.Version != AtomicPartitionRosterProtocol.CurrentVersion
+                    || !key.SequenceEqual(AtomicPartitionRosterKeys.Partition(entry.Partition)))
                 {
                     throw Errors.Fail(ErrorCode.Corruption, Invalid);
                 }

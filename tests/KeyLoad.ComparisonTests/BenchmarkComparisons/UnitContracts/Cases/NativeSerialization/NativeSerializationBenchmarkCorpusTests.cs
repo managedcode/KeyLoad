@@ -3,7 +3,7 @@ using System.Text.Json;
 using KeyLoad.BenchmarkScenarios.Features.BenchmarkComparisons;
 using TUnit.Assertions.Enums;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class NativeSerializationBenchmarkCorpusTests
 {

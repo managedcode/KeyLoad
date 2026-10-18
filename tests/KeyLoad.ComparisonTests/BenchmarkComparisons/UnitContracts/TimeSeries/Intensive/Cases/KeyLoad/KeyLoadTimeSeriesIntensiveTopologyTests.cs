@@ -1,8 +1,9 @@
 using System.Collections.Immutable;
 using KeyLoad.Client;
 using KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries.Intensive;
+using KeyLoad.UnitTests;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons.TimeSeries.Intensive;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons.TimeSeries.Intensive;
 
 internal sealed class KeyLoadTimeSeriesIntensiveTopologyTests
 {

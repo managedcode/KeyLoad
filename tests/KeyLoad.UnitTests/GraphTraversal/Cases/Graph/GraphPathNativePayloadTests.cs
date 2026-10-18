@@ -1,7 +1,6 @@
 using System.Collections.Immutable;
 using System.Text.Json;
 using KeyLoad.Clustering;
-using KeyLoad.Features.InternalSerialization;
 
 namespace KeyLoad.UnitTests.Features.GraphTraversal;
 

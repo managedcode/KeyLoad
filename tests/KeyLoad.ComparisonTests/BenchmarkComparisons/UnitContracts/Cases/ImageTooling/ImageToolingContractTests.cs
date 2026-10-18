@@ -1,4 +1,4 @@
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Exercises the production image-tooling pure contracts through real Node modules.</summary>
 internal sealed class ImageToolingContractTests

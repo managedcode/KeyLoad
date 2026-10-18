@@ -1,7 +1,7 @@
-using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Messaging;
@@ -113,7 +113,7 @@ internal static class QueueLiveInspectionAuthorityAssertions
             if (operation.Kind == OperationKind.Receive)
             {
                 await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(ErrorCode.StaleLease);
-                
+
                 await Assert.That(replay.Value).IsNull();
             }
             else

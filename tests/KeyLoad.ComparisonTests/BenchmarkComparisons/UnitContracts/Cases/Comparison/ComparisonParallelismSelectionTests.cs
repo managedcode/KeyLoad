@@ -3,7 +3,7 @@ using Aspire.Hosting;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using Microsoft.Extensions.Configuration;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 internal sealed class ComparisonParallelismSelectionTests
 {

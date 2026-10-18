@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
+namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
 /// <summary>Captures a bounded output prefix while draining the real redirected stream.</summary>
 internal sealed class ComparisonHostOutputCapture
