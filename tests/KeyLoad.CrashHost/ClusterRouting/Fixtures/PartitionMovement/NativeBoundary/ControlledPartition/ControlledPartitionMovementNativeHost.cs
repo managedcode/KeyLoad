@@ -1,6 +1,5 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Replication;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Storage;

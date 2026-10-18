@@ -6,7 +6,7 @@ namespace KeyLoad.Clustering;
 internal static class ResourceOwnerInventoryReadExecution
 {
     internal static ResourceOwnerInventoryReadReplyV1 Execute(DatabaseEngine database, PrincipalRecord principal,
-        ResourceOwnerInventoryReadRequestV1 query, ReplicaSiloDiscoveryState discovery,
+        ResourceOwnerInventoryReadRequestV1 query, SiloStorageIdentityProvider discovery,
         IOptions<DatabaseLimits> limits, TimeProvider clock, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();

@@ -7,7 +7,7 @@ internal static class NativeCommandObservationCommandExecution
 {
     internal static async Task<T> ExecuteAsync<T>(DatabaseEngine database, ICommitCoordinator coordinator,
         TimeProvider clock, GrainRoutingOptions settings, GrainRequestCodec codec,
-        IPhysicalRequestPlacement physical, ReplicaSiloDiscoveryState actualRuntime, NativeCommandObservation original,
+        IPhysicalRequestPlacement physical, SiloStorageIdentityProvider actualRuntime, NativeCommandObservation original,
         Func<CancellationToken, Task> admitPeer, NativeCommandObservationPublication<T> publication, CancellationToken token)
     {
         var failure = await ExecuteOwnedAsync(database, coordinator, clock, settings, codec, physical,
@@ -45,7 +45,7 @@ internal static class NativeCommandObservationCommandExecution
 
     private static async Task<Exception?> ExecuteOwnedAsync<T>(DatabaseEngine database, ICommitCoordinator coordinator,
         TimeProvider clock, GrainRoutingOptions settings, GrainRequestCodec codec,
-        IPhysicalRequestPlacement physical, ReplicaSiloDiscoveryState actualRuntime, NativeCommandObservation original,
+        IPhysicalRequestPlacement physical, SiloStorageIdentityProvider actualRuntime, NativeCommandObservation original,
         Func<CancellationToken, Task> admitPeer, NativeCommandObservationPublication<T> publication, CancellationToken token)
     {
         ReadExecutionBudgetStageCancellationLease? stage = null;
@@ -85,7 +85,7 @@ internal static class NativeCommandObservationCommandExecution
 
     private static async Task SubmitAndPublishAsync<T>(DatabaseEngine database, ICommitCoordinator coordinator,
         TimeProvider clock, GrainRoutingOptions settings, GrainRequestCodec codec,
-        IPhysicalRequestPlacement physical, ReplicaSiloDiscoveryState actualRuntime, NativeCommandObservation original,
+        IPhysicalRequestPlacement physical, SiloStorageIdentityProvider actualRuntime, NativeCommandObservation original,
         NativeCommandObservationPublication<T> publication, CancellationToken token)
     {
         var request = original.Request;

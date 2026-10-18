@@ -77,11 +77,10 @@ internal sealed class NativeResourceWorkPhysicalBinding
         }
     }
 
-    internal void RequireActual(PhysicalShardRecord actualOwner, ReplicaSiloDiscovery runtime)
+    internal void RequireActual(PhysicalShardRecord actualOwner, SiloStorageIdentity runtime)
     {
-        if (physical is null || !Same(physical, actualOwner) || !runtime.TransportReady
+        if (physical is null || !Same(physical, actualOwner) || string.IsNullOrEmpty(runtime.SiloAddress)
             || runtime.Incarnation != actualOwner.Incarnation
-            || !actualOwner.VoterIds.Contains(runtime.VoterId, StringComparer.Ordinal)
             || string.IsNullOrEmpty(runtime.SiloAddress))
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, NativeRequestWorkLimits.LeaseIdentityMessage);

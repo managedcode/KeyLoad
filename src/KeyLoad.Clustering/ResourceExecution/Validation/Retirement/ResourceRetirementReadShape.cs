@@ -3,7 +3,7 @@ namespace KeyLoad.Clustering;
 internal static class ResourceRetirementReadShape
 {
     internal static void Require(ResourceRetirementReadRequestV1 query, PrincipalRecord principal,
-        ReplicaSiloDiscovery actual, DatabaseLimits limits, TimeProvider clock, DateTimeOffset originalExpiry)
+        SiloStorageIdentity actual, DatabaseLimits limits, TimeProvider clock, DateTimeOffset originalExpiry)
     {
         if (query is null || query.Version != ResourceRetirementReadContract.Version || query.ObservedOwner?.Owner is null
             || query.ObservedOwner.Owner.VoterIds.IsDefaultOrEmpty
@@ -29,10 +29,9 @@ internal static class ResourceRetirementReadShape
         {
             throw Errors.Fail(ErrorCode.CursorExpired, ResourceRetirementReadScope.InvalidRequest);
         }
-        if (!actual.TransportReady || actual.VoterId != query.DestinationVoter
+        if (string.IsNullOrEmpty(actual.SiloAddress) || actual.SiloName != query.DestinationVoter
             || actual.SiloAddress != query.DestinationSiloAddress
-            || actual.Incarnation != query.ObservedOwner.Owner.Incarnation
-            || !query.ObservedOwner.Owner.VoterIds.Contains(actual.VoterId, StringComparer.Ordinal))
+            || actual.Incarnation != query.ObservedOwner.Owner.Incarnation)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, ResourceRetirementReadScope.InvalidRequest);
         }

@@ -9,7 +9,6 @@
     <InternalsVisibleTo Include="KeyLoad.CrashHost" />
     <InternalsVisibleTo Include="KeyLoad.RecoveryTests" />
     <InternalsVisibleTo Include="KeyLoad.IntegrationTests" />
-    <ProjectReference Include="../KeyLoad.Replication/KeyLoad.Replication.csproj" />
     <ProjectReference Include="../KeyLoad.Clustering/KeyLoad.Clustering.csproj" />
     <ProjectReference Include="../KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" />
     <ProjectReference Include="../KeyLoad.Query/KeyLoad.Query.csproj" />

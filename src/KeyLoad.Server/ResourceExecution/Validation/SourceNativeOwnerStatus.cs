@@ -6,7 +6,7 @@ namespace KeyLoad.Server.Features.ResourceExecution;
 internal static class SourceNativeOwnerStatus
 {
     internal static ResourceRetirementReadReplyV1 Stamp(ResourceRetirementReadReplyV1 reply,
-        PartitionHost partition, ReplicaSiloDiscovery actual, int maximumResultBytes, DatabaseLimits limits)
+        PartitionHost partition, SiloStorageIdentity actual, int maximumResultBytes, DatabaseLimits limits)
     {
         if (reply.OwnerStatus is not { } status)
         {

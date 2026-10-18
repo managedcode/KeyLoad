@@ -1,6 +1,5 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
-using KeyLoad.Replication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -10,21 +9,13 @@ internal static class QueueDeadlineServiceCycle
 {
     private const int NoRejectedRecords = 0;
 
-    internal static async Task<QueueDeadlineCursor?> RunAsync(DatabaseEngine database, ReplicaConsensus consensus,
-        IGrainFactory factory, TimeProvider clock, ILogger<RecurringDueGrainService> diagnostics,
+    internal static async Task<QueueDeadlineCursor?> RunAsync(DatabaseEngine database, ICommitCoordinator coordinator,
+        IGrainFactory factory, TimeProvider clock, ILogger<RecurringDueWorkerGrain> diagnostics,
         IOptions<DueCoordinationOptions> options, QueueDeadlineCursor? cursor, CancellationToken cancellationToken)
     {
         try
         {
-            if (!await consensus.IsLeaderAsync(cancellationToken).ConfigureAwait(true))
-            {
-                return cursor;
-            }
-            await consensus.ReadBarrierAsync(cancellationToken).ConfigureAwait(true);
-            if (!await consensus.IsLeaderAsync(cancellationToken).ConfigureAwait(true))
-            {
-                return cursor;
-            }
+            await coordinator.ReadBarrierAsync(cancellationToken).ConfigureAwait(true);
             var page = QueueDeadlineDiscovery.ReadPage(database, cursor, clock.GetUtcNow(), cancellationToken);
             cursor = page.Cursor;
             if (page.Rejected.Length > NoRejectedRecords)
@@ -59,7 +50,7 @@ internal static class QueueDeadlineServiceCycle
     }
 
     private static async Task DispatchAsync(IGrainFactory factory, QueueDeadlineHint hint, TimeProvider clock,
-        ILogger<RecurringDueGrainService> diagnostics, IOptions<DueCoordinationOptions> options,
+        ILogger<RecurringDueWorkerGrain> diagnostics, IOptions<DueCoordinationOptions> options,
         CancellationToken cancellationToken)
     {
         using var timeout = new CancellationTokenSource(options.Value.DispatchDeadline, clock);

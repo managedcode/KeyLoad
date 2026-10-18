@@ -2,7 +2,6 @@ using System.Collections.Immutable;
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Query;
-using KeyLoad.Replication;
 using ManagedCode.Communication.Orleans.Converters;
 using ManagedCode.Orleans.Identity.Core.Serializations;
 using Orleans.Serialization;
@@ -34,22 +33,8 @@ internal static class OrleansPartitionServiceRegistration
             var borrowed = Host(provider).Coordinator;
             return () => borrowed;
         });
-        services.AddSingleton<Func<IReplicaEndpoint>>(provider =>
-        {
-            var borrowed = Host(provider).Consensus;
-            return () => borrowed;
-        });
-        services.AddSingleton<Func<ReplicaConsensus>>(provider =>
-        {
-            var borrowed = Host(provider).Consensus;
-            return () => borrowed;
-        });
-        services.AddSingleton(provider =>
-        {
-            var replica = provider.GetRequiredService<Microsoft.Extensions.Options.IOptions<ReplicaConfiguration>>().Value;
-            return new PhysicalShardRecord(options.PhysicalShardId, replica.Incarnation, ImmutableArray.CreateRange(replica.VoterIds),
-                PhysicalShardCatalogStartupProtocol.InitialPlacementEpoch);
-        });
+        services.AddSingleton<SiloDatabaseClient>();
+        services.AddSingleton<SiloStorageIdentityProvider>();
         services.AddSingleton<QueryEngine>();
         services.AddSingleton(provider => new SearchEngine(Host(provider).Database,
             provider.GetRequiredService<ServerRuntimeOptions>().Core.QueryExecution, Host(provider).TextProjection,

@@ -1,6 +1,5 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src/KeyLoad.Replication/KeyLoad.Replication.csproj" />
     <Project Path="src/KeyLoad.Abstractions/KeyLoad.Abstractions.csproj" />
     <Project Path="src/KeyLoad.Core/KeyLoad.Core.csproj" />
     <Project Path="src/KeyLoad.Diagnostics/KeyLoad.Diagnostics.csproj" />

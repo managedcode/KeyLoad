@@ -89,7 +89,7 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, ILogger<ConnectionG
             throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
         }
         return workOwner.AcquireVerifiedProducer(request, services.GetRequiredService<PhysicalShardRecord>(),
-            services.GetRequiredService<ReplicaSiloDiscoveryState>().Read());
+            services.GetRequiredService<SiloStorageIdentityProvider>().Read());
     }
 
     private Guid OperationRequestId(string signedRequest)

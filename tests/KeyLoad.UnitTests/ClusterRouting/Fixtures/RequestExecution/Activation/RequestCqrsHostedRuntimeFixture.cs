@@ -1,5 +1,4 @@
 using KeyLoad.Clustering;
-using KeyLoad.Replication;
 using KeyLoad.UnitTests.Features.ClusterReplication;
 using KeyLoad.UnitTests.Features.Search;
 using Microsoft.Extensions.DependencyInjection;

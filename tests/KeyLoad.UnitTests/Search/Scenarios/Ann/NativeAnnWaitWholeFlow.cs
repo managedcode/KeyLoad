@@ -1,6 +1,5 @@
 using System.Text.Json;
 using KeyLoad.Clustering;
-using KeyLoad.Replication;
 using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.Features.Search;

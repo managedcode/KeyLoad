@@ -10,7 +10,7 @@ internal sealed record RemoteDocumentReplyV1(
     [property: global::Orleans.Id(2)] OwnedDocumentReadResultV1? Result,
     [property: global::Orleans.Id(3)] ErrorCode? Error,
     [property: global::Orleans.Id(4)] string? SafeDetail,
-    [property: global::Orleans.Id(5)] ReplicaSiloDiscovery EndpointDiscovery,
+    [property: global::Orleans.Id(5)] SiloStorageIdentity EndpointDiscovery,
     [property: global::Orleans.Id(6)] PartitionQueryLeafResultV1? QueryLeaf = null,
     [property: global::Orleans.Id(9)] KeyLoad.Query.Features.QueryExecution.DistributedSearchLeafResultV1? SearchLeaf = null,
     [property: global::Orleans.Id(KeyLoad.Core.Features.Messaging.RemoteTransferPeerProtocol.ReplyField)]

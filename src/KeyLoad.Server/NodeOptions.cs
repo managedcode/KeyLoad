@@ -46,7 +46,7 @@ internal sealed record NodeOptions
         CommandAdmission.Validate();
         HttpAdmission.Validate();
         McpMemory.Validate();
-        new KeyLoad.Replication.ReplicaCopyOptions { SiloCount = SiloCount, ReplicaCount = ReplicaCount }.Validate();
+        new KeyLoad.Clustering.ReplicaCopyOptions { SiloCount = SiloCount, ReplicaCount = ReplicaCount }.Validate();
         Span<byte> secret = stackalloc byte[32];
         if (Incarnation == Guid.Empty || string.IsNullOrWhiteSpace(DataDirectory)
             || string.IsNullOrWhiteSpace(SiloName) || string.IsNullOrWhiteSpace(ClusterId)

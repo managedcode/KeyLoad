@@ -20,7 +20,7 @@ internal static class NativeCommandObservationSourceExecution
         {
             var prepared = await target.PrepareOriginalCommandAsync(scope.Signed, token).ConfigureAwait(true);
             await codec.ObserveNativePhaseAsync(scope.Request, GrainRequestPhase.OriginalClaimReturned,
-                services.GetRequiredService<ReplicaSiloDiscoveryState>(), token).ConfigureAwait(true);
+                services.GetRequiredService<SiloStorageIdentityProvider>(), token).ConfigureAwait(true);
             if (prepared.Error is not null)
             {
                 result = prepared;
@@ -31,7 +31,7 @@ internal static class NativeCommandObservationSourceExecution
                 scope.Dispatched = true;
                 var first = await transport.ExecuteAsync(opaque, token).ConfigureAwait(true);
                 await codec.ObserveNativePhaseAsync(scope.Request, GrainRequestPhase.OriginalBusinessReplyReturned,
-                    services.GetRequiredService<ReplicaSiloDiscoveryState>(), token).ConfigureAwait(true);
+                    services.GetRequiredService<SiloStorageIdentityProvider>(), token).ConfigureAwait(true);
                 if (first.Error is { } code)
                 {
                     throw Errors.Fail(code, first.SafeDetail ?? GrainRoutingProtocol.InvalidRequest);

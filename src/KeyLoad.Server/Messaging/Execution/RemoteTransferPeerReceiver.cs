@@ -8,7 +8,7 @@ namespace KeyLoad.Server.Features.Messaging;
 internal sealed class RemoteTransferPeerReceiver(OrleansNode node, PartitionHost partition,
     IOptions<GrainRoutingOptions> routing, TimeProvider clock)
 {
-    internal ReplicaSiloDiscovery Discovery() => node.Discovery?.Read()
+    internal SiloStorageIdentity Discovery() => node.Discovery?.Read()
         ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteTransferPeerProtocol.Unavailable);
 
     internal Task<RemoteQueueTransferPeerResult> ExecuteAsync(RemoteQueueTransferPeerCall call,

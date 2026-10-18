@@ -97,8 +97,8 @@ internal static class ServerConfiguration
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapDefaultEndpoints();
-        ReplicaReadinessEndpoints.Map(app);
-        ReplicaMembershipHealthEndpoints.Map(app);
+        DatabaseReadinessEndpoints.Map(app);
+        OrleansHealthEndpoints.Map(app);
         AdminStaticAssets.Map(app);
         app.MapKeyLoadApi();
         app.MapMcp(McpFramingProtocol.Path);

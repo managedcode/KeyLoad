@@ -10,7 +10,6 @@
     <ProjectReference Include="../../src/KeyLoad.Client/KeyLoad.Client.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" />
     <ProjectReference Include="../KeyLoad.CrashHost/KeyLoad.CrashHost.csproj" IsAspireProjectResource="false" />
-    <ProjectReference Include="../../src/KeyLoad.Replication/KeyLoad.Replication.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Server/KeyLoad.Server.csproj" IsAspireProjectResource="false" />
     <PackageReference Include="Aspire.Hosting.Testing" />
     <PackageReference Include="ModelContextProtocol.Core" />

@@ -1,28 +1,19 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Messaging;
-using KeyLoad.Replication;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
 internal static class RemoteTransferServiceCycle
 {
-    internal static async Task<RemoteTransferPendingCursor?> RunAsync(DatabaseEngine database, ReplicaConsensus consensus,
+    internal static async Task<RemoteTransferPendingCursor?> RunAsync(DatabaseEngine database, ICommitCoordinator coordinator,
         IGrainFactory grains, TimeProvider clock, Microsoft.Extensions.Logging.ILogger diagnostics,
         IOptions<DueCoordinationOptions> options, RemoteTransferPendingCursor? cursor, CancellationToken token)
     {
         var next = cursor;
         try
         {
-            if (!await consensus.IsLeaderAsync(token).ConfigureAwait(true))
-            {
-                return cursor;
-            }
-            await consensus.ReadBarrierAsync(token).ConfigureAwait(true);
-            if (!await consensus.IsLeaderAsync(token).ConfigureAwait(true))
-            {
-                return cursor;
-            }
+            await coordinator.ReadBarrierAsync(token).ConfigureAwait(true);
             var subject = options.Value.TransferCoordinatorPrincipalId;
             if (subject is null)
             {

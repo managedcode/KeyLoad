@@ -1,6 +1,5 @@
 using System.Net;
 using KeyLoad.Clustering;
-using KeyLoad.Replication;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 using Orleans.Configuration;
@@ -14,17 +13,16 @@ internal static class OrleansSiloConfiguration
     {
         var options = nodeOptions.Value;
         options.Validate();
-        var replica = new ReplicaConfigurationFactory(nodeOptions).Create(Options.DefaultName);
         OrleansNativePeerServices.RegisterSiloOwners(builder, localhostClustering);
         OrleansMovementServiceRegistration.Register(builder.Services, options);
         OrleansPartitionServiceRegistration.Register(builder.Services, options);
         OrleansPartitionRuntimeRegistration.Register(builder.Services);
         OrleansRequestServiceRegistration.Register(builder.Services);
-        builder.UseOrleans(silo => Configure(silo, options, replica, address, localhostClustering));
+        builder.UseOrleans(silo => Configure(silo, options, address, localhostClustering));
         OrleansNativeHostedServiceRegistration.Guard(builder.Services);
     }
 
-    private static void Configure(ISiloBuilder silo, NodeOptions options, ReplicaConfiguration replica,
+    private static void Configure(ISiloBuilder silo, NodeOptions options,
         IPAddress address, NativeLocalhostClusteringOptions? localhostClustering)
     {
         silo.Configure<ClusterOptions>(cluster =>
@@ -32,16 +30,12 @@ internal static class OrleansSiloConfiguration
             cluster.ClusterId = options.ClusterId;
             cluster.ServiceId = OrleansNodeProtocol.ServiceId;
         });
-        OrleansNativeClustering.Configure(silo, options, replica, address, localhostClustering);
+        OrleansNativeClustering.Configure(silo, options, address, localhostClustering);
         ConfigureMessaging(silo.Services);
         PartitionStorageRegistration.Register(silo);
-        silo.AddGrainService<PartitionReplicaGrainService>();
         silo.AddGrainService<PartitionMovementGrainService>();
         silo.AddGrainService<global::KeyLoad.Server.Features.DocumentStorage.RemoteModelGrainService>();
         silo.AddGrainService<global::KeyLoad.Server.Features.GraphTraversal.RemoteGraphGrainService>();
-        silo.AddGrainService<RecurringDueGrainService>();
-        silo.AddGrainService<SampleChunkGrainService>();
-        silo.AddGrainService<AnnProjectionGrainService>();
         silo.Services.AddSingleton<OrleansNodeLifecycle>();
         silo.Services.AddSingleton<ILifecycleParticipant<ISiloLifecycle>>(provider => provider.GetRequiredService<OrleansNodeLifecycle>());
         silo.AddActivityPropagation();
@@ -57,11 +51,7 @@ internal static class OrleansSiloConfiguration
     }
 
     private static void ConfigureMessaging(IServiceCollection services)
-        => services.AddOptions<SiloMessagingOptions>().Configure<IOptions<DatabaseLimits>, IOptions<ReplicaConfiguration>,
-            IOptions<GrainRoutingOptions>>((messaging, limits, replica, routing) => messaging.MaxMessageBodySize = Math.Max(
-                checked(limits.Value.MaxBatchBytes + ReplicaTransportProtocol.MaximumMetadataBytes
-                    + ReplicaTransportProtocol.MaximumEnvelopeOverheadBytes),
-                Math.Max(checked(replica.Value.MaxAppendBytes + ReplicaTransportProtocol.MaximumMetadataBytes
-                    + ReplicaTransportProtocol.MaximumEnvelopeOverheadBytes),
-                    checked(routing.Value.MaximumCompletedBytes + ReplicaTransportProtocol.MaximumEnvelopeOverheadBytes))));
+        => services.AddOptions<SiloMessagingOptions>().Configure<IOptions<DatabaseLimits>,
+            IOptions<GrainRoutingOptions>>((messaging, limits, routing) => messaging.MaxMessageBodySize = Math.Max(
+                limits.Value.MaxBatchBytes, routing.Value.MaximumCompletedBytes));
 }

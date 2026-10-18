@@ -1,7 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Search;
-using KeyLoad.Replication;
 
 namespace KeyLoad.Clustering;
 
@@ -30,12 +29,12 @@ internal static class GrainOnlineTextPublicationCommand
             throw Errors.Fail(ErrorCode.PermissionDenied, GrainRoutingProtocol.AdministrationRequired);
         }
         var phase = NativeCommandPayload.Read<OnlineTextPublicationPhaseCommand>(operation);
-        if (maintenance is null || coordinator is not ClusterCoordinator owner)
+        if (maintenance is null)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
         }
         var work = maintenance.RequirePublicationWork(phase.SessionId, phase.Request, principal.Id);
-        _ = work.AdmitOriginal(() => owner.AdmitOnlineTextPublication(operation, cancellationToken));
+        _ = work.AdmitOriginal(() => coordinator.SubmitVerifiedAsync(operation, cancellationToken));
         return await work.AwaitCallerAsync(cancellationToken).ConfigureAwait(true);
     }
 

@@ -8,7 +8,7 @@ internal static class NativeCommandObservationRead
 {
     internal static async Task<T> ExecuteAsync<T>(DatabaseEngine database,
         ICommitCoordinator coordinator, NativeRequestWorkOwner owner, PhysicalShardRecord physical,
-        ReplicaSiloDiscovery runtime, string opaqueToken, IOptions<GrainRoutingOptions> options,
+        SiloStorageIdentity runtime, string opaqueToken, IOptions<GrainRoutingOptions> options,
         Func<CancellationToken, Task> admitPeer,
         Func<GrainOperationReply, ReadExecutionBudget, T> publish, Action<T> clearOnFailure, CancellationToken token)
     {

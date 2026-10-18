@@ -19,7 +19,7 @@ internal static class ResourceOwnerInventoryObservedReadExecution
             principal = GrainRequestAuthority.ReloadForRequest(database, request.Envelope, clock);
         }
         return ResourceOwnerInventoryReadExecution.Execute(database, principal, query,
-            services.GetRequiredService<ReplicaSiloDiscoveryState>(),
+            services.GetRequiredService<SiloStorageIdentityProvider>(),
             services.GetRequiredService<IOptions<DatabaseLimits>>(), clock, token);
     }
 }

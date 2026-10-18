@@ -1,7 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
-using KeyLoad.Replication;
 using KeyLoad.UnitTests.Features.Search;
 using Microsoft.Extensions.Options;
 

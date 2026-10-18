@@ -5,5 +5,5 @@ namespace KeyLoad.Clustering;
 internal interface IGrainRequestNativePhaseObserver
 {
     ValueTask ObserveNativeAsync(GrainRequestProbeIdentity identity, GrainRequestPhase phase,
-        ReplicaSiloDiscoveryState actualRuntime, CancellationToken cancellationToken);
+        SiloStorageIdentityProvider actualRuntime, CancellationToken cancellationToken);
 }

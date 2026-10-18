@@ -11,7 +11,7 @@ internal sealed class ResourceRetirementNativeExchange(PartitionMovementGrainSer
     ResourceOwnerInventoryNativeAuthority authority, ResourceOwnerInventoryNativeTrust trust,
     ResourceRetirementSignedExecution execution,
     PartitionHost partition, IOptions<NodeOptions> options, IOptions<DatabaseLimits> limits,
-    IOptions<GrainRoutingOptions> routing, ReplicaSiloDiscoveryState local, TimeProvider clock)
+    IOptions<GrainRoutingOptions> routing, SiloStorageIdentityProvider local, TimeProvider clock)
 {
     private const long UnassignedPolicyEpoch = 0;
 

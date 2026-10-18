@@ -1,6 +1,5 @@
 using System.Net;
 using KeyLoad.Clustering;
-using KeyLoad.Replication;
 using Microsoft.Extensions.Options;
 using Orleans.Configuration;
 
@@ -17,9 +16,9 @@ internal static class OrleansNativeClustering
             .Validate(hosting => hosting.IsValid(), OrleansHostingOptions.ValidationMessage).ValidateOnStart();
     }
 
-    internal static void Configure(ISiloBuilder silo, NodeOptions options, ReplicaConfiguration replica,
+    internal static void Configure(ISiloBuilder silo, NodeOptions options,
         IPAddress address, NativeLocalhostClusteringOptions? localhostClustering)
-        => ConfigureMembership(silo, replica.LocalId, options.ClusterId, options.SiloPort, address, localhostClustering);
+        => ConfigureMembership(silo, options.SiloName, options.ClusterId, options.SiloPort, address, localhostClustering);
 
     internal static void ConfigureMembership(ISiloBuilder silo, string siloName, string clusterId, int siloPort,
         IPAddress address, NativeLocalhostClusteringOptions? localhostClustering)

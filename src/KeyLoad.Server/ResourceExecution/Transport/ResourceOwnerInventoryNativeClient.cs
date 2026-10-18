@@ -16,14 +16,14 @@ internal sealed partial class ResourceOwnerInventoryNativeClient : IAsyncDisposa
     private readonly IOptions<DatabaseLimits> limits;
     private readonly IOptions<GrainRoutingOptions> routing;
     private readonly NodeOptions options;
-    private readonly ReplicaSiloDiscoveryState local;
+    private readonly SiloStorageIdentityProvider local;
     private readonly TimeProvider clock;
     private readonly NativeRequestWorkOwner work;
 
     internal ResourceOwnerInventoryNativeClient(PartitionHost partition, PartitionMovementGrainServiceClient movement,
         ResourceOwnerInventoryNativeAuthority authority, ResourceOwnerInventoryNativeTrust trust,
         ResourceOwnerInventorySignedReads reads, ResourceRetirementNativeExchange retirement, IOptions<DatabaseLimits> limits, IOptions<GrainRoutingOptions> routing,
-        IOptions<NodeOptions> options, ReplicaSiloDiscoveryState local, TimeProvider clock)
+        IOptions<NodeOptions> options, SiloStorageIdentityProvider local, TimeProvider clock)
     {
         this.partition = partition;
         this.movement = movement;

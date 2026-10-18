@@ -1,6 +1,5 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
-using KeyLoad.Replication;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests;

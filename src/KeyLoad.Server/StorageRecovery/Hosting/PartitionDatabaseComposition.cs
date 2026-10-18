@@ -1,7 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Replication;
 
 namespace KeyLoad.Server;
 

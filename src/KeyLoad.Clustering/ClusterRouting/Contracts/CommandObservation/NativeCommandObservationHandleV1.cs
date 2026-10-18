@@ -12,7 +12,7 @@ internal sealed record NativeCommandObservationHandleV1(
     [property: Orleans.Id(6)] string PrincipalId,
     [property: Orleans.Id(7)] Guid Incarnation,
     [property: Orleans.Id(8)] PhysicalShardRecord PhysicalOwner,
-    [property: Orleans.Id(9)] ReplicaSiloDiscovery Runtime,
+    [property: Orleans.Id(9)] SiloStorageIdentity Runtime,
     [property: Orleans.Id(10)] Guid NodeId,
     [property: Orleans.Id(11)] long ReadGeneration,
     [property: Orleans.Id(12)] DateTimeOffset ExpiresAt,

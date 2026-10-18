@@ -1,5 +1,4 @@
 using KeyLoad.Clustering;
-using KeyLoad.Replication;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.DocumentStorage;
 using KeyLoad.Server.Features.Search;
@@ -27,6 +26,9 @@ internal static class ServerRuntimeOptionsRegistration
     private static void RegisterClusterExecution(IServiceCollection services, IConfiguration configuration)
     {
         services.AddDueCoordinationOptions(configuration);
+        services.AddOptions<BackgroundWorkerOptions>().Bind(configuration.GetSection(BackgroundWorkerOptions.SectionName))
+            .Validate(options => options.FlushInterval > TimeSpan.Zero && options.MaximumBufferedEvents > 0,
+                BackgroundWorkerOptions.SectionName).ValidateOnStart();
         services.AddOptions<NativeDurableJobOptions>().Bind(configuration.GetSection(NativeDurableJobOptions.SectionName))
             .Validate(options => options.IsValid(), NativeDurableJobOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<ReplicaCopyOptions>().Bind(configuration.GetSection(ReplicaCopyOptions.SectionName))

@@ -9,7 +9,7 @@ internal static class ResourceOwnerInventoryReadShape
     private const long MinimumPolicyEpoch = 0;
 
     internal static void Require(ResourceOwnerInventoryReadRequestV1 query, PrincipalRecord principal,
-        ReplicaSiloDiscoveryState discovery, DatabaseLimits limits, TimeProvider clock)
+        SiloStorageIdentityProvider discovery, DatabaseLimits limits, TimeProvider clock)
     {
         if (query is null || principal is null || query.Version != Version || query.Request is null
             || query.Request.Version != Version || query.ObservedOwner is null || query.ObservedOwner.Owner is null
@@ -53,12 +53,11 @@ internal static class ResourceOwnerInventoryReadShape
         }
     }
 
-    private static void RequireNativeLocal(ResourceOwnerInventoryReadRequestV1 query, ReplicaSiloDiscovery actual)
+    private static void RequireNativeLocal(ResourceOwnerInventoryReadRequestV1 query, SiloStorageIdentity actual)
     {
-        if (!actual.TransportReady || actual.VoterId != query.DestinationVoter
+        if (string.IsNullOrEmpty(actual.SiloAddress) || actual.SiloName != query.DestinationVoter
             || actual.SiloAddress != query.DestinationSiloAddress
-            || actual.Incarnation != query.ObservedOwner.Owner.Incarnation
-            || !query.ObservedOwner.Owner.VoterIds.Contains(actual.VoterId, StringComparer.Ordinal))
+            || actual.Incarnation != query.ObservedOwner.Owner.Incarnation)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, ResourceOwnerInventoryReadScope.InvalidRequest);
         }

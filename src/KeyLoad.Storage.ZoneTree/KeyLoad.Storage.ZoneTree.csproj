@@ -16,6 +16,5 @@
     <PackageReference Include="ManagedCode.Storage.FileSystem" />
     <PackageReference Include="Cartograph.Catalog" />
     <InternalsVisibleTo Include="KeyLoad.AppHost" />
-    <InternalsVisibleTo Include="KeyLoad.Replication" />
   </ItemGroup>
 </Project>

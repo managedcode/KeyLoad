@@ -8,7 +8,7 @@ internal sealed class NativeRequestWorkChildren(Lock gate, NativeRequestWorkOwne
     NativeResourceWorkRetentions retentions, Func<bool> isAdmissionClosed)
 {
     internal NativeRequestWorkChildReservation Reserve(NativeRequestWorkLease parent,
-        DecodedGrainRequest verified, PhysicalShardRecord expectedOwner, ReplicaSiloDiscovery expectedRuntime)
+        DecodedGrainRequest verified, PhysicalShardRecord expectedOwner, SiloStorageIdentity expectedRuntime)
     {
         var identity = NativeRequestWorkChildIdentity.Create(verified, expectedOwner, expectedRuntime);
         lock (gate)
@@ -20,7 +20,7 @@ internal sealed class NativeRequestWorkChildren(Lock gate, NativeRequestWorkOwne
     }
 
     internal NativeRequestWorkLease AcquireVerifiedProducer(DecodedGrainRequest verified,
-        PhysicalShardRecord actualOwner, ReplicaSiloDiscovery actualRuntime)
+        PhysicalShardRecord actualOwner, SiloStorageIdentity actualRuntime)
     {
         var identity = NativeRequestWorkChildIdentity.IsSelected(verified)
             ? NativeRequestWorkChildIdentity.Create(verified, actualOwner, actualRuntime) : null;
@@ -68,7 +68,7 @@ internal sealed class NativeRequestWorkChildren(Lock gate, NativeRequestWorkOwne
         }
     }
 
-    private void RequireChildOwner(PhysicalShardRecord actualOwner, ReplicaSiloDiscovery actualRuntime)
+    private void RequireChildOwner(PhysicalShardRecord actualOwner, SiloStorageIdentity actualRuntime)
     {
         if (isAdmissionClosed())
         {

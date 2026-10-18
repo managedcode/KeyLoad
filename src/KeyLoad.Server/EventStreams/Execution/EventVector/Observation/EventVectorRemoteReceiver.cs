@@ -10,7 +10,7 @@ internal sealed class EventVectorRemoteReceiver(OrleansNode node, PartitionHost 
     EventVectorRemoteCallValidation authority, EventVectorNativeReceivingCall native,
     EventVectorRemoteEncoding encoding)
 {
-    internal ReplicaSiloDiscovery Discovery() => node.Discovery?.Read()
+    internal SiloStorageIdentity Discovery() => node.Discovery?.Read()
         ?? throw Errors.Fail(ErrorCode.OwnershipLost, EventVectorRemoteProtocol.Unavailable);
 
     internal ReadExecutionBudget CreateWork(EventVectorAdmittedCall admitted,

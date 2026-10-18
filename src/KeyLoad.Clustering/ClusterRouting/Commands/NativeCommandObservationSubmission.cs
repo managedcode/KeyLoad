@@ -7,7 +7,7 @@ internal static class NativeCommandObservationSubmission
 {
     internal static Task<NativeCommandObservation?> ReserveAsync(DatabaseEngine database, TimeProvider clock,
         DecodedGrainRequest request, NativeRequestWorkOwner? owner, NativeCapabilityWorkLifetime? commandWork,
-        IPhysicalRequestPlacement? physical, ReplicaSiloDiscoveryState? runtime, CancellationToken originalCallerToken)
+        IPhysicalRequestPlacement? physical, SiloStorageIdentityProvider? runtime, CancellationToken originalCallerToken)
     {
         if (request.Envelope.Observation is not { } admission)
         {
@@ -20,7 +20,7 @@ internal static class NativeCommandObservationSubmission
     private static async Task<NativeCommandObservation?> ReserveRequiredAsync(DatabaseEngine database,
         TimeProvider clock, DecodedGrainRequest request, NativeCommandObservationAdmissionV1 admission,
         NativeRequestWorkOwner? owner, NativeCapabilityWorkLifetime? commandWork,
-        IPhysicalRequestPlacement? physical, ReplicaSiloDiscoveryState? runtime, CancellationToken originalCallerToken)
+        IPhysicalRequestPlacement? physical, SiloStorageIdentityProvider? runtime, CancellationToken originalCallerToken)
     {
         if (!NativeCommandObservationScope.IsEligible(request) || owner is null || commandWork is null
             || physical is null || runtime is null)

@@ -79,6 +79,6 @@ internal sealed class RemoteResourceLifetimeReadEndpoint
             _ => throw RemoteResourceLifetimeReadValidation.Invalid()
         };
 
-    private ReplicaSiloDiscovery Discovery() => node.Discovery?.Read()
+    private SiloStorageIdentity Discovery() => node.Discovery?.Read()
         ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteResourceLifetimeReadProtocol.Unavailable);
 }

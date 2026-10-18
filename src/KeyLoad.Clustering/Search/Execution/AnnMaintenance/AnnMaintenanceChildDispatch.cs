@@ -39,7 +39,7 @@ internal static class AnnMaintenanceChildDispatch
             var verified = codec.VerifyRequest(signed, actorId);
             var producer = RequireParent(binding);
             reservation = producer.ReserveLocalChild(verified, services.GetRequiredService<PhysicalShardRecord>(),
-                services.GetRequiredService<ReplicaSiloDiscoveryState>().Read());
+                services.GetRequiredService<SiloStorageIdentityProvider>().Read());
             result = await AnnMaintenanceChildLifetime.RunAsync(services, principal, actorId, commandId,
                 reservation, scopeToken => ReadAsync<TResult>(executeChild, signed, serializer, actorId,
                     parent.Envelope.RequestId, clock, routing, diagnostics, command, scopeToken),

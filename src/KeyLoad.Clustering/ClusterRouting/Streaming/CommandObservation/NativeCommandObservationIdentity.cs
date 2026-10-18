@@ -34,7 +34,7 @@ internal static class NativeCommandObservationIdentity
     }
 
     internal static NativeCommandObservationHandleV1 Create(DecodedGrainRequest verified,
-        PhysicalShardRecord actualOwner, ReplicaSiloDiscovery actualRuntime, DatabaseEngine database)
+        PhysicalShardRecord actualOwner, SiloStorageIdentity actualRuntime, DatabaseEngine database)
     {
         var request = verified.Envelope;
         var identity = database.Store.Identity;
@@ -45,7 +45,7 @@ internal static class NativeCommandObservationIdentity
     }
 
     internal static void Require(NativeCommandObservationHandleV1 supplied, NativeCommandObservationHandleV1 original,
-        PhysicalShardRecord actualOwner, ReplicaSiloDiscovery actualRuntime, DatabaseEngine database)
+        PhysicalShardRecord actualOwner, SiloStorageIdentity actualRuntime, DatabaseEngine database)
     {
         var identity = database.Store.Identity;
         if (!Same(supplied, original) || !Same(supplied.PhysicalOwner, actualOwner)

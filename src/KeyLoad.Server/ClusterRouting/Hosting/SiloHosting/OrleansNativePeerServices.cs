@@ -1,5 +1,4 @@
 using KeyLoad.Clustering;
-using KeyLoad.Replication;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
@@ -28,15 +27,15 @@ internal static class OrleansNativePeerServices
     {
         services.AddSingleton<ReplicaNativeDiscoveryRuntime>(provider => new(
             provider.GetRequiredService<IOptions<ReplicaConfiguration>>(),
-            provider.GetRequiredService<ReplicaSiloDiscoveryState>(),
+            provider.GetRequiredService<SiloStorageIdentityProvider>(),
             provider.GetRequiredService<ReplicaEnvelopeAuthenticator>(),
             provider.GetRequiredService<ISiloStatusOracle>(),
             provider.GetRequiredService<IOptions<OrleansMembershipOptions>>(),
             provider.GetRequiredService<TimeProvider>(), provider.GetService<IReplicaNativeDiscoveryObserver>()));
-        services.AddSingleton<ReplicaSiloDiscoveryClient>(provider => new(
+        services.AddSingleton<SiloStorageIdentityClient>(provider => new(
             provider.GetRequiredService<IOptions<ReplicaConfiguration>>(),
             provider.GetRequiredService<IOptions<ReplicaPeerOptions>>(),
-            provider.GetRequiredService<ReplicaSiloDiscoveryState>(),
+            provider.GetRequiredService<SiloStorageIdentityProvider>(),
             provider.GetRequiredService<ReplicaEnvelopeAuthenticator>(),
             provider.GetRequiredService<TimeProvider>(), provider,
             provider.GetRequiredService<ISiloStatusOracle>(),

@@ -6,7 +6,7 @@ namespace KeyLoad.Server.Features.ClusterRouting;
 
 /// <summary>Directs every follow-up to the exact pre-effect claim generation with no directory refresh.</summary>
 internal sealed class CommandObservationNativeTransport(PartitionHost partition, IOptions<NodeOptions> options,
-    ReplicaSiloDiscoveryState local, PartitionMovementGrainServiceClient movement) : INativeCommandObservationTransport
+    SiloStorageIdentityProvider local, PartitionMovementGrainServiceClient movement) : INativeCommandObservationTransport
 {
     public Task<GrainOperationReply> ExecuteAsync(string opaqueToken, CancellationToken token)
         => SendAsync(CommandObservationNativeAction.Execute, opaqueToken, token);

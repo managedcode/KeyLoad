@@ -1,5 +1,4 @@
 using System.Buffers.Binary;
-using KeyLoad.Replication;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 

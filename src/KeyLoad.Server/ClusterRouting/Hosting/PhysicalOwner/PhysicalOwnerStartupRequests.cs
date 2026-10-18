@@ -32,7 +32,7 @@ internal sealed class PhysicalOwnerStartupRequests(OrleansNode node, IOptions<No
         var payload = NativeSerialization.Serialize(GrainNativeContracts.NoDtoMarker);
         var signed = node.CatalogRequestCodec().CreateRead(requestId, principal.Id, GrainReadKind.NodeStatus, payload);
         using var identity = node.OpenRequestContext(principal, requestId, Guid.Empty, cancellationToken);
-        var reply = await node.ExecutePhysicalShardStartupRequestAsync(requestId, signed, command: false,
+        var reply = await node.ExecuteStartupRequestAsync(requestId, signed, command: false,
             cancellationToken: cancellationToken).ConfigureAwait(false);
         cancellationToken.ThrowIfCancellationRequested();
         return GrainNativePayload.Read<GrainValue>(reply.Payload).Value as NodeStatus
@@ -48,7 +48,7 @@ internal sealed class PhysicalOwnerStartupRequests(OrleansNode node, IOptions<No
         var signed = node.CatalogRequestCodec().CreateCommand(requestId, principal.Id,
             OperationKind.RegisterPhysicalOwner, commandId, NativeSerialization.Serialize(request));
         using var identity = node.OpenRequestContext(principal, requestId, commandId, cancellationToken);
-        return await node.ExecutePhysicalShardStartupRequestAsync(requestId, signed, command: true,
+        return await node.ExecuteStartupRequestAsync(requestId, signed, command: true,
             cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 }

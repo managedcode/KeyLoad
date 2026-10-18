@@ -67,7 +67,7 @@ public sealed class CommandPartitionGrain(GrainRequestCodec codec, DatabaseEngin
             var context = codec.HasPhaseObserver ? ((IGrainBase)this).GrainContext : null;
             var reply = await NativeCommandObservationPreparation.ExecuteAsync(database, borrowCoordinator(),
                 clock, options, codec, borrowWorkOwner(), services.GetService<IPhysicalRequestPlacement>(),
-                services.GetService<ReplicaSiloDiscoveryState>(), request, this.GetPrimaryKeyString(),
+                services.GetService<SiloStorageIdentityProvider>(), request, this.GetPrimaryKeyString(),
                 context, cancellationToken).ConfigureAwait(true);
             return reply;
         }

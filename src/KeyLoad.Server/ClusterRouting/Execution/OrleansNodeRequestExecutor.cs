@@ -15,30 +15,30 @@ internal sealed class OrleansNodeRequestExecutor(IOptions<GrainRoutingOptions> r
             services.GetRequiredService<GrainRequestCodec>().CreateConnectionClose(connectionId), cancellationToken);
 
     internal Task<GrainOperationReply> ExecuteAsync(IGrainFactory? factory, IServiceProvider? runtime,
-        PhysicalShardCatalogStartup? catalog, bool databaseReady, bool requireCatalogAdmission,
+        bool databaseReady, bool requireDatabaseReady,
         Guid requestId, string signedRequest, bool command, CancellationToken cancellationToken)
-        => ExecuteCoreAsync(factory, runtime, catalog, databaseReady, requireCatalogAdmission,
+        => ExecuteCoreAsync(factory, runtime, databaseReady, requireDatabaseReady,
             requestId, signedRequest, command, null, cancellationToken);
 
-    internal Task<GrainOperationReply> ExecuteAsync(NativeNodeRequestTarget target, bool requireCatalogAdmission,
+    internal Task<GrainOperationReply> ExecuteAsync(NativeNodeRequestTarget target, bool requireDatabaseReady,
         Guid requestId, string signedRequest, bool command, CancellationToken cancellationToken)
-        => ExecuteAsync(target.Factory, target.Runtime, target.Catalog, target.DatabaseReady,
-            requireCatalogAdmission, requestId, signedRequest, command, cancellationToken);
+        => ExecuteAsync(target.Factory, target.Runtime, target.DatabaseReady,
+            requireDatabaseReady, requestId, signedRequest, command, cancellationToken);
 
     internal Task<GrainOperationReply> ExecuteWithProgressAsync(NativeNodeRequestTarget target,
         Guid requestId, string signedRequest, Func<GrainRequestProgress, CancellationToken, ValueTask> progress,
         CancellationToken cancellationToken)
-        => ExecuteCoreAsync(target.Factory, target.Runtime, target.Catalog, target.DatabaseReady, true,
+        => ExecuteCoreAsync(target.Factory, target.Runtime, target.DatabaseReady, true,
             requestId, signedRequest, false, progress, cancellationToken);
 
     private async Task<GrainOperationReply> ExecuteCoreAsync(IGrainFactory? factory, IServiceProvider? runtime,
-        PhysicalShardCatalogStartup? catalog, bool databaseReady, bool requireCatalogAdmission,
+        bool databaseReady, bool requireDatabaseReady,
         Guid requestId, string signedRequest, bool command,
         Func<GrainRequestProgress, CancellationToken, ValueTask>? progress, CancellationToken cancellationToken)
     {
-        if (requireCatalogAdmission && (!databaseReady || catalog is null || !catalog.IsReady))
+        if (requireDatabaseReady && !databaseReady)
         {
-            throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalShardCatalogFence.NotReady);
+            throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable);
         }
         var grains = factory ?? throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable);
         var services = runtime ?? throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable);
@@ -46,14 +46,6 @@ internal sealed class OrleansNodeRequestExecutor(IOptions<GrainRoutingOptions> r
         var clock = services.GetRequiredService<TimeProvider>();
         using var deadline = new CancellationTokenSource(routingOptions.Value.ExecutionLifetime, clock);
         using var execution = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadline.Token);
-        if (requireCatalogAdmission && catalog is not null)
-        {
-            if (!catalog.IsReady)
-            {
-                throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalShardCatalogFence.NotReady);
-            }
-            await catalog.EnsureAdmissionAsync(execution.Token).ConfigureAwait(false);
-        }
         var reply = await DrainAsync(grains, services, connectionId, requestId, signedRequest, command, clock,
             progress, execution.Token, cancellationToken).ConfigureAwait(false);
         if (reply.Error is { } error && reply.Metadata is null)

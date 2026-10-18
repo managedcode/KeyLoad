@@ -44,7 +44,7 @@ internal static class GrainRequestPhaseObservation
 
     internal static ValueTask ObserveNativeAsync(IGrainRequestPhaseObserver? observer,
         DecodedGrainRequest request, GrainRequestPhase phase,
-        ReplicaSiloDiscoveryState actualRuntime, CancellationToken cancellationToken)
+        SiloStorageIdentityProvider actualRuntime, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(actualRuntime);
         cancellationToken.ThrowIfCancellationRequested();

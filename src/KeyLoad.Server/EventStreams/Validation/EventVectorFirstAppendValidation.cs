@@ -1,5 +1,4 @@
 using KeyLoad.Core;
-using KeyLoad.Replication;
 
 namespace KeyLoad.Server.Features.EventStreams;
 

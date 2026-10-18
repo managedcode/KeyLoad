@@ -79,7 +79,7 @@ internal static class NativeDiscoveryCapabilityField
         }
         var value = reader.ReadFieldHeader();
         if (!value.HasFieldId || value.FieldIdDelta != NativeWireIdentities.ValueFieldDelta
-            || value.FieldType != typeof(ReplicaSiloDiscovery) || value.WireType != WireType.TagDelimited
+            || value.FieldType != typeof(SiloStorageIdentity) || value.WireType != WireType.TagDelimited
             || value.IsReference)
         {
             throw Invalid();

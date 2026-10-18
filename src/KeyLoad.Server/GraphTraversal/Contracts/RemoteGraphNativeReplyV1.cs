@@ -10,5 +10,5 @@ internal sealed record RemoteGraphNativeReplyV1(
     [property: global::Orleans.Id(3)] ReadOnlyMemory<byte> Payload,
     [property: global::Orleans.Id(4)] ErrorCode? Error,
     [property: global::Orleans.Id(5)] string? SafeDetail,
-    [property: global::Orleans.Id(6)] ReplicaSiloDiscovery ReceiverDiscovery,
+    [property: global::Orleans.Id(6)] SiloStorageIdentity ReceiverDiscovery,
     [property: global::Orleans.Id(7)] string Signature);

@@ -19,7 +19,7 @@ internal sealed class RemoteModelNativeRuntime : IAsyncDisposable
     private readonly NodeOptions options;
     private readonly IOptions<OrleansMembershipOptions> membershipOptions;
     private readonly GrainRoutingOptions routing;
-    private readonly ReplicaSiloDiscoveryState local;
+    private readonly SiloStorageIdentityProvider local;
     private readonly ReplicaNativeDiscoveryMembership membership;
     private readonly TimeProvider clock;
     private readonly ILogger<RemoteModelNativeRuntime> logger;
@@ -31,7 +31,7 @@ internal sealed class RemoteModelNativeRuntime : IAsyncDisposable
 
     public RemoteModelNativeRuntime(PartitionHost partition, IOptions<NodeOptions> options,
         IOptions<OrleansMembershipOptions> membershipOptions, IOptions<GrainRoutingOptions> routing,
-        ISiloStatusOracle oracle, ReplicaSiloDiscoveryState local, TimeProvider clock, ILogger<RemoteModelNativeRuntime> logger,
+        ISiloStatusOracle oracle, SiloStorageIdentityProvider local, TimeProvider clock, ILogger<RemoteModelNativeRuntime> logger,
         Func<NativeRequestWorkOwner> requestWork)
     {
         this.partition = partition;

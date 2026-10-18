@@ -1,4 +1,3 @@
-using KeyLoad.Replication;
 
 namespace KeyLoad.RecoveryTests.Features.Messaging;
 

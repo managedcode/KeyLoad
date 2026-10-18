@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 using Microsoft.Extensions.Options;
@@ -32,8 +33,10 @@ internal sealed class AdminNodeObserver(PartitionHost partition, CommandAdmissio
             }, storage, metrics.Snapshot())
             {
                 OperationalAnalytics = report,
-                LocalVoter = partition.Configuration.LocalId,
-                Voters = partition.Configuration.VoterIds
+                SiloName = services.GetRequiredService<ILocalSiloDetails>().Name,
+                ActiveSilos = services.GetRequiredService<IClusterMembershipService>().CurrentSnapshot.Members.Values
+                    .Where(member => member.Status == SiloStatus.Active).Select(member => member.Name)
+                    .Order(StringComparer.Ordinal).ToImmutableArray()
             };
         }
         finally

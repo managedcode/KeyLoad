@@ -10,9 +10,9 @@ internal sealed partial class PartitionMovementGrainService(GrainId id, Silo sil
     : GrainService(id, silo, loggerFactory), IPartitionMovementGrainService
 {
     private const int NoShutdownFailures = 0;
-    private ReplicaSiloDiscoveryState? discoveryState;
+    private SiloStorageIdentityProvider? discoveryState;
     private ReplicaEnvelopeAuthenticator? authenticator;
-    private ReplicaSiloDiscoveryState discovery => discoveryState
+    private SiloStorageIdentityProvider discovery => discoveryState
         ?? throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.Unavailable);
     private ReplicaEnvelopeAuthenticator authentication => authenticator
         ?? throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.Unavailable);
@@ -26,7 +26,7 @@ internal sealed partial class PartitionMovementGrainService(GrainId id, Silo sil
         await serviceProvider.GetRequiredService<Func<IPartitionStoragePublication>>()().WaitForOpenAsync(token).ConfigureAwait(true);
         await serviceProvider.GetRequiredService<OrleansNode>().InitializeLocalRuntimeAsync(token).ConfigureAwait(true);
         commandObservation = serviceProvider.GetRequiredService<CommandObservationNativeEndpoint>();
-        discoveryState = serviceProvider.GetRequiredService<ReplicaSiloDiscoveryState>();
+        discoveryState = serviceProvider.GetRequiredService<SiloStorageIdentityProvider>();
         authenticator = serviceProvider.GetRequiredService<ReplicaEnvelopeAuthenticator>();
         physicalProbe = serviceProvider.GetService<PhysicalOwnerProbeNativeRuntime>();
         resourceInventory = serviceProvider.GetRequiredService<Func<global::KeyLoad.Server.Features.ResourceExecution.ResourceOwnerInventoryNativeRuntime>>()();

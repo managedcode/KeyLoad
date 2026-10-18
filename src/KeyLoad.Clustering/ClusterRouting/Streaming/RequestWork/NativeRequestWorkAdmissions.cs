@@ -134,7 +134,7 @@ internal sealed class NativeRequestWorkAdmissions(IOptions<GrainRoutingOptions> 
     }
 
     internal NativeCommandObservation FindObservation(NativeCommandObservationHandleV1 handle,
-        PhysicalShardRecord actualOwner, ReplicaSiloDiscovery actualRuntime, KeyLoad.Core.DatabaseEngine database)
+        PhysicalShardRecord actualOwner, SiloStorageIdentity actualRuntime, KeyLoad.Core.DatabaseEngine database)
     {
         if (!active.TryGetValue((handle.ObservationId, NativeRequestWorkKind.ReadCapability), out var lease)
             || lease.CommandObservation is not { } observation)

@@ -1,17 +1,23 @@
+using KeyLoad.Clustering;
+using KeyLoad.Server.Features.ClusterRouting;
+
 namespace KeyLoad.Server;
 
 internal sealed partial class OrleansNode
 {
-    private async Task StopCoreAsync(Task registered, Task? preparing, Task? starting)
+    private async Task StopCoreAsync()
     {
-        await registered.ConfigureAwait(false);
+        await Task.Yield();
         var failures = new List<Exception>();
-        var cleanupFailures = new List<Exception>();
-        await requestLifetime.CancelAndJoinStartupAsync(preparing, starting, failures, cleanupFailures).ConfigureAwait(false);
-        await localRuntime.JoinResourcesAsync(requestLifetime, databaseBootstrap, physicalOwnerWork,
-            () => Volatile.Write(ref grains, null), cleanupFailures).ConfigureAwait(false);
-        closure.Complete(cleanupFailures);
-        failures.AddRange(cleanupFailures);
+        var startupFailures = new List<Exception>();
+        applicationServices.GetRequiredService<RuntimeJournalAdmission>().CloseScheduling();
+        await requestLifetime.CancelAndJoinStartupAsync(null, startup, startupFailures, failures).ConfigureAwait(false);
+        await OrleansNodeHostShutdown.JoinAsync(RequestWork,
+            applicationServices.GetService<INodeAdministration>() as IAsyncDisposable, failures).ConfigureAwait(false);
+        await requestLifetime.JoinAsync(failures).ConfigureAwait(false);
+        closure.Complete(failures);
+        Volatile.Write(ref grains, null);
+        failures.AddRange(startupFailures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

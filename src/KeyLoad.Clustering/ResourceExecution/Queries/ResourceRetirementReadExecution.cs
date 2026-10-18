@@ -7,7 +7,7 @@ namespace KeyLoad.Clustering;
 internal static class ResourceRetirementReadExecution
 {
     internal static ResourceRetirementReadReplyV1 Execute(DatabaseEngine database, PrincipalRecord principal,
-        DecodedGrainRequest request, ReplicaSiloDiscoveryState discovery, IOptions<DatabaseLimits> limits,
+        DecodedGrainRequest request, SiloStorageIdentityProvider discovery, IOptions<DatabaseLimits> limits,
         TimeProvider clock, ReadExecutionBudget work, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();

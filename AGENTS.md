@@ -193,6 +193,8 @@ Release retain their separate responsibilities and least-privilege permissions.
 
 ## Dependency ownership and delivery
 
+Version increases require the owner's explicit permission for that specific increase. This includes packages, releases, grain interfaces, protocol versions, serializer aliases and persisted/public contracts. Cleanup, refactoring, contract changes and standing delivery authorization do not authorize a version increase.
+
 `ManagedCode.*` projects and packages are ours. A confirmed defect is fixed in its
 owning sibling repository after reading its policy. Do not replace the dependency,
 copy its implementation or hide the defect with a consumer workaround.

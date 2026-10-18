@@ -12,7 +12,6 @@
     <ProjectReference Include="../../src/KeyLoad.Cli/KeyLoad.Cli.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Query/KeyLoad.Query.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Server/KeyLoad.Server.csproj" />
-    <ProjectReference Include="../../src/KeyLoad.Replication/KeyLoad.Replication.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" />
   </ItemGroup>
 </Project>

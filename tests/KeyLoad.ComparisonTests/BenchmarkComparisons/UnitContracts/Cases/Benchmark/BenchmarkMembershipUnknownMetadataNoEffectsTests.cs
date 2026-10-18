@@ -1,6 +1,5 @@
 using System.Buffers.Binary;
 using System.Text;
-using KeyLoad.Replication;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;

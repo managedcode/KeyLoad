@@ -11,18 +11,6 @@ internal static class RuntimeJournalStartup
     private const int BootstrapIdentityCount = 2;
     private const string BootstrapCommandDomain = "keyload-runtime-journal-bootstrap-v1\0";
     private static readonly byte[] BootstrapDomain = Encoding.ASCII.GetBytes(BootstrapCommandDomain);
-    internal static Task InitializeConfiguredAsync(IServiceProvider services, PartitionHost partition,
-        Func<CancellationToken, Task<PrincipalRecord>> authenticateAdministrator, NodeOptions options, ServerRuntimeOptions runtime,
-        CancellationToken cancellationToken)
-    {
-        if (options.PhysicalGroupTrust.Role == PhysicalGroupTrustRole.Disabled
-            || options.PhysicalGroupTrust.RemoteDocumentReads)
-        {
-            return InitializeAsync(services, partition, authenticateAdministrator, options, runtime, cancellationToken);
-        }
-        return Task.CompletedTask;
-    }
-
     internal static async Task InitializeAsync(IServiceProvider services, PartitionHost partition,
         Func<CancellationToken, Task<PrincipalRecord>> authenticateAdministrator, NodeOptions options, ServerRuntimeOptions runtime,
         CancellationToken cancellationToken)
@@ -34,7 +22,7 @@ internal static class RuntimeJournalStartup
         var requests = new RuntimeJournalStartupRequests(services.GetRequiredService<IGrainFactory>(),
             services.GetRequiredService<GrainRequestCodec>(), partition.Database, partition.Coordinator,
             services, clock, runtime.GrainRouting);
-        var commandId = BootstrapCommandId(options.PhysicalShardId, partition.Configuration.Incarnation);
+        var commandId = BootstrapCommandId(partition.Database.Store.Identity.Incarnation, partition.Database.Store.Identity.Incarnation);
         await InitializeAuthorityAsync(requests, authenticateAdministrator, commandId, runtime, clock, token)
             .ConfigureAwait(false);
         services.GetRequiredService<RuntimeJournalAdmission>().Open(token);
@@ -57,10 +45,7 @@ internal static class RuntimeJournalStartup
                 await requests.BootstrapAsync(administrator, commandId, token).ConfigureAwait(false);
                 return;
             }
-            catch (KeyLoadException error) when (error.Code == ErrorCode.UnknownWriteOutcome
-                || error.Code == ErrorCode.OwnershipLost
-                && (error.Message == global::KeyLoad.Clustering.ReplicaTransportProtocol.TransportUnavailable
-                    || error.Message == global::KeyLoad.Replication.ReplicaProtocol.NoLeader))
+            catch (KeyLoadException error) when (error.Code is ErrorCode.UnknownWriteOutcome or ErrorCode.OwnershipLost)
             {
                 await Task.Delay(runtime.DurableJobs.Value.BootstrapPollInterval, clock, token)
                     .ConfigureAwait(false);

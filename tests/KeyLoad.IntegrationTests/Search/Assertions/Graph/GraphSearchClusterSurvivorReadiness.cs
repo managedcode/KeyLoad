@@ -1,7 +1,6 @@
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
-using KeyLoad.Replication;
 
 namespace KeyLoad.IntegrationTests.Features.Search;
 

@@ -3,7 +3,6 @@
     <InternalsVisibleTo Include="KeyLoad.Clustering" />
     <InternalsVisibleTo Include="KeyLoad.Server" />
     <InternalsVisibleTo Include="KeyLoad.Query" />
-    <InternalsVisibleTo Include="KeyLoad.Replication" />
     <ProjectReference Include="../KeyLoad.Abstractions/KeyLoad.Abstractions.csproj" />
     <PackageReference Include="ManagedCode.TimeSeries" />
     <PackageReference Include="ZoneTree.Analytics" />

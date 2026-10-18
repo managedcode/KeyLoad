@@ -91,16 +91,16 @@ internal sealed class NodeAdministration(PartitionHost partition, CommandAdmissi
         => services.GetRequiredService<AdminNodeObserver>().ReadAsync(cancellationToken);
 
     /// <inheritdoc />
-    public async Task<NodeStatus> StatusAsync(CancellationToken cancellationToken)
+    public Task<NodeStatus> StatusAsync(CancellationToken cancellationToken)
     {
-        var state = await partition.Consensus.StateAsync(cancellationToken).ConfigureAwait(false);
+        cancellationToken.ThrowIfCancellationRequested();
         var identity = partition.Database.Store.Identity;
-        return new(identity.NodeId.ToString(), identity.Incarnation, state.MaterializedPosition, state.LeaderId,
-            partition.Configuration.VoterIds.Length, partition.Database.Durability,
-            services.GetRequiredService<OrleansNode>().DatabaseReady, Environment.ProcessId, identity.ReadGeneration)
-        {
-            ConsensusTerm = state.Term
-        };
+        var membership = services.GetRequiredService<IClusterMembershipService>().CurrentSnapshot;
+        var silos = membership.Members.Values.Count(member => member.Status == SiloStatus.Active);
+        var copies = services.GetRequiredService<IOptions<NodeOptions>>().Value.ReplicaCount;
+        return Task.FromResult(new NodeStatus(identity.NodeId.ToString(), identity.Incarnation,
+            partition.Database.Store.Position, silos, copies, partition.Database.Durability,
+            services.GetRequiredService<OrleansNode>().DatabaseReady, Environment.ProcessId, identity.ReadGeneration));
     }
 
     /// <summary>Observes and drains any accepted backup before the physical owner closes its store.</summary>

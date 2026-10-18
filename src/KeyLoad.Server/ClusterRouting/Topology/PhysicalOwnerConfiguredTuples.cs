@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Replication;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 

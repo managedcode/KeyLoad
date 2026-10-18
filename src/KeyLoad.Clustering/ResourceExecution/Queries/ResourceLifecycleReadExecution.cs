@@ -19,7 +19,7 @@ internal static class ResourceLifecycleReadExecution
                 principal, request, codec, context, token).ConfigureAwait(true);
         }
         return ResourceRetirementReadExecution.Execute(database, principal, request,
-            services.GetRequiredService<ReplicaSiloDiscoveryState>(),
+            services.GetRequiredService<SiloStorageIdentityProvider>(),
             services.GetRequiredService<IOptions<DatabaseLimits>>(), clock,
             retirementWork ?? throw Errors.Fail(ErrorCode.Corruption, ResourceRetirementReadScope.InvalidRequest), token);
     }

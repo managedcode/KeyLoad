@@ -1,5 +1,4 @@
 using OpenTelemetry;
-using KeyLoad.Replication;
 
 namespace KeyLoad.Server;
 
@@ -27,9 +26,10 @@ internal sealed class PartitionStorageGrainService(GrainId grainId, Silo silo, I
         => Task.FromResult(owner.Borrow().Database.ApplyStorageOperation(operation, cancellationToken));
 
     /// <inheritdoc />
-    public override Task Init(IServiceProvider serviceProvider)
+    public override async Task Init(IServiceProvider serviceProvider)
     {
         serviceProvider.GetRequiredService<ITelemetryHostInitializer>().Initialize();
-        return owner.OpenAsync();
+        await owner.OpenAsync().ConfigureAwait(true);
+        await serviceProvider.GetRequiredService<OrleansNode>().InitializeLocalRuntimeAsync(CancellationToken.None).ConfigureAwait(true);
     }
 }

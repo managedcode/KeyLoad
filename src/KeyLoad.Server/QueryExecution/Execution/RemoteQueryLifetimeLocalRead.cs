@@ -47,7 +47,7 @@ internal static class RemoteQueryLifetimeLocalRead
             var parent = RequireParent(binding);
             reservation = parent.ReserveLocalChild(verified,
                 node.RuntimeServices.GetRequiredService<PhysicalShardRecord>(),
-                node.RuntimeServices.GetRequiredService<ReplicaSiloDiscoveryState>().Read());
+                node.RuntimeServices.GetRequiredService<SiloStorageIdentityProvider>().Read());
             cancellation = CancellationTokenSource.CreateLinkedTokenSource(token, reservation.Cancellation);
             identity = node.OpenRequestContext(principal, requestId, Guid.Empty, cancellation.Token);
             var reply = await node.ExecuteAsync(requestId, signed, command: false,

@@ -1,5 +1,4 @@
 using KeyLoad.Query;
-using KeyLoad.Replication;
 using static KeyLoad.UnitTests.Features.DocumentStorage.DocumentPatchAtomicityContract;
 
 namespace KeyLoad.UnitTests.Features.DocumentStorage;

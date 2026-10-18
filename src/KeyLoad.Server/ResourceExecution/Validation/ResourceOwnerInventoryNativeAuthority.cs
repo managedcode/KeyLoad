@@ -10,7 +10,7 @@ namespace KeyLoad.Server.Features.ResourceExecution;
 
 /// <summary>Requires configured groups and actual ready Orleans generations; does not establish Core inventory completeness.</summary>
 internal sealed class ResourceOwnerInventoryNativeAuthority(OrleansNode node, PartitionHost partition,
-    IOptions<NodeOptions> options, PartitionMovementGrainServiceClient movement, ReplicaSiloDiscoveryState local)
+    IOptions<NodeOptions> options, PartitionMovementGrainServiceClient movement, SiloStorageIdentityProvider local)
 {
     private readonly NodeOptions settings = options.Value;
 
@@ -25,7 +25,7 @@ internal sealed class ResourceOwnerInventoryNativeAuthority(OrleansNode node, Pa
 
     internal async Task RequireBeforeSendAsync(ResourceOwnerInventoryNativeRequest request, CancellationToken token)
     {
-        await node.EnsureCatalogAdmissionAsync(token).ConfigureAwait(false);
+        await node.RequireDatabaseReadCutAsync(token).ConfigureAwait(false);
         RequireConfigured(request.Control, request.Destination);
         RequireLocal(request.Control, request.CallerVoter, request.CallerSiloAddress);
         var address = await ResolveAsync(request.Control, request.Destination, request.DestinationVoter, token)
@@ -40,7 +40,7 @@ internal sealed class ResourceOwnerInventoryNativeAuthority(OrleansNode node, Pa
 
     internal async Task RequireReceivingAsync(ResourceOwnerInventoryNativeRequest request, CancellationToken token)
     {
-        await node.EnsureCatalogAdmissionAsync(token).ConfigureAwait(false);
+        await node.RequireDatabaseReadCutAsync(token).ConfigureAwait(false);
         RequireConfigured(request.Control, request.Destination);
         RequireLocal(request.Destination, request.DestinationVoter, request.DestinationSiloAddress);
         await movement.RequireCallerAsync(request.CallerVoter, request.CallerSiloAddress, token).ConfigureAwait(false);
@@ -54,7 +54,7 @@ internal sealed class ResourceOwnerInventoryNativeAuthority(OrleansNode node, Pa
     internal async Task RequireBeforeSendAsync(ResourceRetirementNativeRequest request, ReadExecutionBudget work,
         ReadExecutionBudgetReadGrant? sourceMeta, CancellationToken token)
     {
-        await node.EnsureCatalogAdmissionAsync(work, sourceMeta, token).ConfigureAwait(false);
+        await node.RequireDatabaseReadCutAsync(work, sourceMeta, token).ConfigureAwait(false);
         RequireConfigured(request.Control, request.Destination);
         RequireLocal(request.Control, request.CallerVoter, request.CallerSiloAddress);
         var address = await ResolveAsync(request.Control, request.Destination, request.DestinationVoter, token)
@@ -70,7 +70,7 @@ internal sealed class ResourceOwnerInventoryNativeAuthority(OrleansNode node, Pa
     internal async Task RequireReceivingAsync(ResourceRetirementNativeRequest request, ReadExecutionBudget work,
         ReadExecutionBudgetReadGrant? sourceMeta, CancellationToken token)
     {
-        await node.EnsureCatalogAdmissionAsync(work, sourceMeta, token).ConfigureAwait(false);
+        await node.RequireDatabaseReadCutAsync(work, sourceMeta, token).ConfigureAwait(false);
         RequireConfigured(request.Control, request.Destination);
         RequireLocal(request.Destination, request.DestinationVoter, request.DestinationSiloAddress);
         await movement.RequireCallerAsync(request.CallerVoter, request.CallerSiloAddress, token).ConfigureAwait(false);

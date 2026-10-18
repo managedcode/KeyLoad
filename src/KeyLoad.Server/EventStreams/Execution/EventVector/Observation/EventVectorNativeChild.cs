@@ -34,7 +34,7 @@ internal static class EventVectorNativeChild
             }
             reservation = native.OriginalProducer.ReserveLocalChild(verified,
                 node.RuntimeServices.GetRequiredService<PhysicalShardRecord>(),
-                node.RuntimeServices.GetRequiredService<ReplicaSiloDiscoveryState>().Read());
+                node.RuntimeServices.GetRequiredService<SiloStorageIdentityProvider>().Read());
             cancellation = CancellationTokenSource.CreateLinkedTokenSource(token, reservation.Cancellation);
             identity = node.OpenRequestContext(principal, requestId, commandId, cancellation.Token);
             boundary?.Begin(cancellation.Token);

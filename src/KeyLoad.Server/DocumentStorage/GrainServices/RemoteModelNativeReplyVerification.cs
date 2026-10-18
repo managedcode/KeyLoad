@@ -8,7 +8,7 @@ internal static class RemoteModelNativeReplyVerification
     internal static async Task<RemoteModelNativeReply> VerifyAsync(RemoteModelNativeClient client,
         RegisteredPhysicalOwnerV1 destination, RemoteModelNativeRequest request, RemoteModelNativeReply received,
         long maximum, NodeOptions options, PartitionHost partition, PartitionMovementGrainServiceClient movement,
-        ReplicaSiloDiscoveryState local, TimeProvider clock, CancellationToken token)
+        SiloStorageIdentityProvider local, TimeProvider clock, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         if (request.ExpiresAt <= clock.GetUtcNow() || received is null || !RemoteModelNativeIdentity.ReplyShape(received, maximum))

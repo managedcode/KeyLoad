@@ -7,7 +7,7 @@ internal sealed record CommandObservationNativeRequest(
     [property: global::Orleans.Id(0)] int Version,
     [property: global::Orleans.Id(1)] CommandObservationNativeAction Action,
     [property: global::Orleans.Id(2)] string OpaqueToken,
-    [property: global::Orleans.Id(3)] ReplicaSiloDiscovery Caller,
-    [property: global::Orleans.Id(4)] ReplicaSiloDiscovery Destination,
+    [property: global::Orleans.Id(3)] SiloStorageIdentity Caller,
+    [property: global::Orleans.Id(4)] SiloStorageIdentity Destination,
     [property: global::Orleans.Id(5)] Guid Nonce,
     [property: global::Orleans.Id(6)] string Signature);

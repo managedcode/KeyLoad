@@ -1,7 +1,6 @@
 using System.Security.Cryptography;
 using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
-using KeyLoad.Replication;
 using KeyLoad.Storage;
 using Microsoft.Extensions.Options;
 
@@ -10,7 +9,7 @@ namespace KeyLoad.Server.Features.ClusterRouting;
 /// <summary>Authenticates exact native discovery bytes using the original native discovery MAC.</summary>
 internal static class PartitionMovementNativeDiscoveryIdentity
 {
-    internal static ReplicaSiloDiscovery ReadOwned(PartitionMovementGrainServiceDiscovery reply)
+    internal static SiloStorageIdentity ReadOwned(PartitionMovementGrainServiceDiscovery reply)
     {
         if (reply is null || reply.Payload.IsEmpty || reply.Payload.Length > ReplicaTransportProtocol.MaximumDiscoveryBytes
             || string.IsNullOrEmpty(reply.Signature) || reply.Signature.Length != ReplicaTransportProtocol.HashHexCharacters
@@ -18,12 +17,12 @@ internal static class PartitionMovementNativeDiscoveryIdentity
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
         }
-        return NativeSerialization.Deserialize<ReplicaSiloDiscovery>(reply.Payload.Span);
+        return NativeSerialization.Deserialize<SiloStorageIdentity>(reply.Payload.Span);
     }
 
     internal static void Require(NodeOptions options, ReplicaConfiguration configuration,
         RegisteredPhysicalOwnerV1 expected, SiloAddress address, Guid nonce,
-        PartitionMovementGrainServiceDiscovery reply, ReplicaSiloDiscovery discovery,
+        PartitionMovementGrainServiceDiscovery reply, SiloStorageIdentity discovery,
         IOptions<OrleansMembershipOptions> membership)
     {
         var owned = reply.Payload.ToArray();
@@ -38,7 +37,7 @@ internal static class PartitionMovementNativeDiscoveryIdentity
             }
         }
         finally { CryptographicOperations.ZeroMemory(key); }
-        var actual = NativeSerialization.Deserialize<ReplicaSiloDiscovery>(owned);
+        var actual = NativeSerialization.Deserialize<SiloStorageIdentity>(owned);
         if (actual != discovery || actual is not { TransportReady: true }
             || !expected.Owner.VoterIds.Contains(actual.VoterId, StringComparer.Ordinal)
             || actual.ClusterId != options.ClusterId || actual.Incarnation != expected.Owner.Incarnation

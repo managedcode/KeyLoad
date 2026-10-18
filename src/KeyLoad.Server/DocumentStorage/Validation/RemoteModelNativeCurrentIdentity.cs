@@ -6,7 +6,7 @@ namespace KeyLoad.Server.Features.DocumentStorage;
 
 internal static class RemoteModelNativeCurrentIdentity
 {
-    internal static void Require(NodeOptions options, PartitionHost partition, ReplicaSiloDiscoveryState local,
+    internal static void Require(NodeOptions options, PartitionHost partition, SiloStorageIdentityProvider local,
         ReplicaNativeDiscoveryMembership membership, RemoteModelNativeRequest request)
     {
         var expected = PhysicalOwnerConfiguredTuples.Local(options, partition);

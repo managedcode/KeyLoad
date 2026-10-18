@@ -85,7 +85,7 @@ internal sealed class NativeRequestWorkLease : IDisposable, IAsyncDisposable, IN
         => owner.RequireOriginalParentBinding(this);
 
     internal NativeRequestWorkChildReservation ReserveLocalChild(DecodedGrainRequest verified,
-        PhysicalShardRecord expectedOwner, ReplicaSiloDiscovery expectedRuntime)
+        PhysicalShardRecord expectedOwner, SiloStorageIdentity expectedRuntime)
         => owner.ReserveLocalChild(this, verified, expectedOwner, expectedRuntime);
 
     internal void AdmitPublication() => owner.AdmitPublication(this);

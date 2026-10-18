@@ -6,15 +6,15 @@ namespace KeyLoad.Server;
 
 internal static class NativeDiscoveryCapabilityOmission
 {
-    internal static byte[] Omit(ReadOnlyMemory<byte> original, ReplicaSiloDiscovery expected)
+    internal static byte[] Omit(ReadOnlyMemory<byte> original, SiloStorageIdentity expected)
     {
         if (original.IsEmpty || original.Length > ReplicaTransportProtocol.MaximumDiscoveryBytes
             || expected.RuntimeJournalReaderContract != StoreReaderContract.RuntimeJournal)
         {
             throw NativeDiscoveryCapabilityField.Invalid();
         }
-        RequireOriginal(expected, NativeSerialization.Deserialize<ReplicaSiloDiscovery>(original.Span));
-        var context = NativeSerializerProviders.Get(typeof(ReplicaSiloDiscovery));
+        RequireOriginal(expected, NativeSerialization.Deserialize<SiloStorageIdentity>(original.Span));
+        var context = NativeSerializerProviders.Get(typeof(SiloStorageIdentity));
         NativeDiscoveryCapabilityField.Span field;
         using (var session = context.Sessions.GetSession())
         {
@@ -31,7 +31,7 @@ internal static class NativeDiscoveryCapabilityOmission
                 throw NativeDiscoveryCapabilityField.Invalid();
             }
         }
-        var decoded = NativeSerialization.Deserialize<ReplicaSiloDiscovery>(omitted);
+        var decoded = NativeSerialization.Deserialize<SiloStorageIdentity>(omitted);
         if (decoded.RuntimeJournalReaderContract != StoreReaderContract.Unspecified)
         {
             throw NativeDiscoveryCapabilityField.Invalid();
@@ -43,7 +43,7 @@ internal static class NativeDiscoveryCapabilityOmission
         return omitted;
     }
 
-    private static void RequireOriginal(ReplicaSiloDiscovery expected, ReplicaSiloDiscovery actual)
+    private static void RequireOriginal(SiloStorageIdentity expected, SiloStorageIdentity actual)
     {
         if (actual.VoterId != expected.VoterId || actual.ClusterId != expected.ClusterId
             || actual.Incarnation != expected.Incarnation || actual.SiloAddress != expected.SiloAddress

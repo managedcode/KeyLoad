@@ -1,5 +1,4 @@
 using KeyLoad.Core;
-using KeyLoad.Replication;
 
 namespace KeyLoad.Clustering;
 
@@ -19,13 +18,13 @@ internal static class GrainOnlineTextCheckpointCommand
         {
             return null;
         }
-        if (coordinator is not ClusterCoordinator owner || request.Envelope.CommandId != checkpoint.CommandId)
+        if (request.Envelope.CommandId != checkpoint.CommandId)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
         }
         var operation = database.CreateNativeOperation(OperationKind.CommitProjectionBatch, checkpoint.CommandId,
             principal.Id, clock.GetUtcNow(), request.Payload);
-        _ = work.AdmitOriginal(() => owner.AdmitOnlineProjectionCheckpoint(operation, cancellationToken));
+        _ = work.AdmitOriginal(() => coordinator.SubmitVerifiedAsync(operation, cancellationToken));
         return work.AwaitCallerAsync(cancellationToken);
     }
 }

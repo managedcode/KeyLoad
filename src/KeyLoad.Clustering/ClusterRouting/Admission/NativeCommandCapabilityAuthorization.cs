@@ -15,14 +15,14 @@ internal static class NativeCommandCapabilityAuthorization
     internal static Task<PrincipalRecord> AuthorizeNativeAsync(DatabaseEngine database,
         ICommitCoordinator coordinator, TimeProvider clock, GrainRoutingOptions settings,
         GrainRequestCodec codec, IPhysicalRequestPlacement physical, DecodedGrainRequest request,
-        NativeCommandObservation observation, ReplicaSiloDiscoveryState actualRuntime, CancellationToken token)
+        NativeCommandObservation observation, SiloStorageIdentityProvider actualRuntime, CancellationToken token)
         => AuthorizeCoreAsync(database, coordinator, clock, settings, codec, physical, request,
             observation, null, actualRuntime, token);
 
     private static async Task<PrincipalRecord> AuthorizeCoreAsync(DatabaseEngine database,
         ICommitCoordinator coordinator, TimeProvider clock, GrainRoutingOptions settings,
         GrainRequestCodec? codec, IPhysicalRequestPlacement? physical, DecodedGrainRequest request,
-        NativeCommandObservation? observation, IGrainContext? context, ReplicaSiloDiscoveryState? nativeRuntime, CancellationToken token)
+        NativeCommandObservation? observation, IGrainContext? context, SiloStorageIdentityProvider? nativeRuntime, CancellationToken token)
     {
         var stage = GrainFailureStage.QuorumRead;
         try
@@ -78,7 +78,7 @@ internal static class NativeCommandCapabilityAuthorization
 
     internal static async ValueTask ObserveNativeAndValidateAsync(DatabaseEngine database, TimeProvider clock,
         GrainRoutingOptions settings, GrainRequestCodec codec, DecodedGrainRequest request,
-        GrainRequestPhase phase, ReplicaSiloDiscoveryState actualRuntime, CancellationToken token)
+        GrainRequestPhase phase, SiloStorageIdentityProvider actualRuntime, CancellationToken token)
     {
         await codec.ObserveNativePhaseAsync(request, phase, actualRuntime, token).ConfigureAwait(true);
         ValidateFresh(database, clock, settings, request, token);

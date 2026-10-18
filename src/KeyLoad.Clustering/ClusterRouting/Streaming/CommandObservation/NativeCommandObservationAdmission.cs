@@ -5,7 +5,7 @@ namespace KeyLoad.Clustering;
 internal static class NativeCommandObservationAdmission
 {
     internal static async Task<NativeCommandObservation> ReserveAsync(NativeRequestWorkOwner owner,
-        DecodedGrainRequest verified, NativeCommandObservationAdmissionV1 admission, NativeCapabilityWorkLifetime commandWork, PhysicalShardRecord actualOwner, ReplicaSiloDiscovery actualRuntime,
+        DecodedGrainRequest verified, NativeCommandObservationAdmissionV1 admission, NativeCapabilityWorkLifetime commandWork, PhysicalShardRecord actualOwner, SiloStorageIdentity actualRuntime,
         DatabaseEngine database, TimeProvider clock, CancellationToken originalCallerToken)
     {
         NativeCommandObservationIdentity.RequireAdmission(verified, admission, database);

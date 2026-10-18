@@ -7,7 +7,6 @@
     <InternalsVisibleTo Include="KeyLoad.IntegrationTests" />
     <ProjectReference Include="../KeyLoad.Core/KeyLoad.Core.csproj" />
     <ProjectReference Include="../KeyLoad.Query/KeyLoad.Query.csproj" />
-    <ProjectReference Include="../KeyLoad.Replication/KeyLoad.Replication.csproj" />
     <PackageReference Include="Microsoft.Orleans.Server" />
     <PackageReference Include="Microsoft.Orleans.Clustering.AzureStorage" />
     <PackageReference Include="Microsoft.Orleans.Streaming" />

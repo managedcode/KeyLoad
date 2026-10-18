@@ -16,14 +16,14 @@ internal sealed class RemoteModelNativeClient : GrainServiceClient<IRemoteModelG
     private readonly NodeOptions options;
     private readonly GrainRoutingOptions routing;
     private readonly PartitionMovementGrainServiceClient movement;
-    private readonly ReplicaSiloDiscoveryState local;
+    private readonly SiloStorageIdentityProvider local;
     private readonly TimeProvider clock;
     private readonly ReplicaDiscoveryLifetime lifetime;
 
     public RemoteModelNativeClient(IServiceProvider services, PartitionHost partition,
         IOptions<NodeOptions> options, IOptions<OrleansMembershipOptions> membership,
         IOptions<GrainRoutingOptions> routing, PartitionMovementGrainServiceClient movement,
-        ReplicaSiloDiscoveryState local, TimeProvider clock) : base(services)
+        SiloStorageIdentityProvider local, TimeProvider clock) : base(services)
     {
         this.partition = partition;
         this.options = options.Value;

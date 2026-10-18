@@ -14,11 +14,11 @@ internal static class ConnectionGrainGraphRegistration
                     nameof(IConnectionGrain.ExecuteStreamAsync))
                 .AddGrainServiceTransition<global::KeyLoad.Server.Features.ClusterRouting.PartitionMovementGrainService, IConnectionGrain>(
                     nameof(IConnectionGrain.ExecuteStreamAsync))
-                .AddGrainServiceTransition<SampleChunkGrainService, ISampleChunkCoordinatorGrain>(
+                .AddGrainServiceTransition<SampleChunkWorkerGrain, ISampleChunkCoordinatorGrain>(
                     nameof(ISampleChunkCoordinatorGrain.ScheduleAsync))
-                .AddGrainServiceTransition<AnnProjectionGrainService, IAnnProjectionCoordinatorGrain>(
+                .AddGrainServiceTransition<AnnProjectionWorkerGrain, IAnnProjectionCoordinatorGrain>(
                     nameof(IAnnProjectionCoordinatorGrain.ScheduleAsync))
-                .AddGrainServiceTransition<RecurringDueGrainService, IRecurringDueCoordinatorGrain>(
+                .AddGrainServiceTransition<RecurringDueWorkerGrain, IRecurringDueCoordinatorGrain>(
                     nameof(IRecurringDueCoordinatorGrain.ProcessDueAsync))
                 .AddGrainTransition<AnnProjectionCoordinatorGrain, IConnectionGrain>()
                 .MethodByName(nameof(AnnProjectionCoordinatorGrain.ExecuteJobAsync),

@@ -16,7 +16,7 @@ internal sealed class RemoteGraphNativeClient : GrainServiceClient<IRemoteGraphG
     private readonly NodeOptions options;
     private readonly GrainRoutingOptions routing;
     private readonly PartitionMovementGrainServiceClient movement;
-    private readonly ReplicaSiloDiscoveryState local;
+    private readonly SiloStorageIdentityProvider local;
     private readonly TimeProvider clock;
     private readonly ReplicaDiscoveryLifetime lifetime;
     private readonly CancellationTokenSource stopping;
@@ -26,7 +26,7 @@ internal sealed class RemoteGraphNativeClient : GrainServiceClient<IRemoteGraphG
 
     internal RemoteGraphNativeClient(IServiceProvider services, PartitionHost partition, IOptions<NodeOptions> options,
         IOptions<OrleansMembershipOptions> membership, IOptions<GrainRoutingOptions> routing,
-        PartitionMovementGrainServiceClient movement, ReplicaSiloDiscoveryState local, TimeProvider clock) : base(services)
+        PartitionMovementGrainServiceClient movement, SiloStorageIdentityProvider local, TimeProvider clock) : base(services)
     {
         ArgumentNullException.ThrowIfNull(partition);
         ArgumentNullException.ThrowIfNull(options);

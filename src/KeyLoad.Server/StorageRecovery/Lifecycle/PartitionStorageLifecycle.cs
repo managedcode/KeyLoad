@@ -8,30 +8,14 @@ internal sealed class PartitionStorageLifecycle(PartitionHostApplicationOwner ow
     : ILifecycleParticipant<ISiloLifecycle>
 {
     private const string LifecycleName = "KeyLoad.PartitionStorage";
-    private const string ProducerCaptureLifecycleSuffix = ".CaptureProducers";
     private const int NoOriginalFailures = 0;
-    private const int CaptureProducersStage = ServiceLifecycleStage.AfterRuntimeGrainServices;
     private const int AfterReplicaDrainStage = ServiceLifecycleStage.RuntimeStorageServices - 1;
     private readonly Lock gate = new();
     private Task? closing;
 
     public void Participate(ISiloLifecycle lifecycle)
     {
-        lifecycle.Subscribe(LifecycleName + ProducerCaptureLifecycleSuffix, CaptureProducersStage, CaptureProducersAsync);
         lifecycle.Subscribe(LifecycleName, AfterReplicaDrainStage, _ => Task.CompletedTask, StopAsync);
-    }
-
-    private Task CaptureProducersAsync(CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        // Native stage 8000 has already constructed and sequentially initialized these same services.
-        var nativeServices = services.GetServices<IGrainService>().ToArray();
-        var recurring = nativeServices.OfType<RecurringDueGrainService>().Single();
-        var chunks = nativeServices.OfType<SampleChunkGrainService>().Single();
-        var ann = nativeServices.OfType<AnnProjectionGrainService>().Single();
-        owner.CaptureStorageProducers(recurring.JoinStorageProducerAsync,
-            chunks.JoinStorageProducerAsync, ann.JoinStorageProducerAsync);
-        return Task.CompletedTask;
     }
 
     internal Task StopAsync(CancellationToken cancellationToken)

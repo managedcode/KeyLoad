@@ -36,7 +36,7 @@ internal sealed record NativeRequestWorkChildIdentity(Guid RequestId, ImmutableA
         };
 
     internal static NativeRequestWorkChildIdentity Create(DecodedGrainRequest verified,
-        PhysicalShardRecord actualOwner, ReplicaSiloDiscovery runtime)
+        PhysicalShardRecord actualOwner, SiloStorageIdentity runtime)
     {
         if (!IsSelected(verified) || verified.Envelope.RequestId == Guid.Empty
             || string.IsNullOrEmpty(verified.Envelope.PrincipalId)

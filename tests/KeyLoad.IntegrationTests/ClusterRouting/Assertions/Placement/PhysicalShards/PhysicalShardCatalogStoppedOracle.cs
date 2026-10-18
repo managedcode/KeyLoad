@@ -1,7 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.IntegrationTests.Features.StorageRecovery;
-using KeyLoad.Replication;
 using KeyLoad.Server;
 using Microsoft.Extensions.Logging.Abstractions;
 

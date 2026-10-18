@@ -6,7 +6,7 @@ namespace KeyLoad.Clustering;
 /// <summary>Executes only the claimed original node-local work through the existing native owner endpoint.</summary>
 internal sealed class NativeCommandObservationTarget(DatabaseEngine database, Func<ICommitCoordinator> borrowCoordinator,
     TimeProvider clock, IOptions<GrainRoutingOptions> options, NativeRequestWorkOwner owner,
-    IPhysicalRequestPlacement physical, ReplicaSiloDiscoveryState runtime, GrainRequestCodec codec)
+    IPhysicalRequestPlacement physical, SiloStorageIdentityProvider runtime, GrainRequestCodec codec)
 {
     internal Task<T> ExecuteAsync<T>(string opaque, Func<CancellationToken, Task> admitPeer,
         Func<GrainOperationReply, ReadExecutionBudget, T> publish, Action<T> clearOnFailure,

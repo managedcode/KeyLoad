@@ -1,7 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Diagnostics.Features.ResourceExecution;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace KeyLoad.Clustering;
@@ -20,7 +19,6 @@ internal sealed class ConnectionReadExecution(GrainRequestCodec codec, DatabaseE
     TimeProvider clock, NativeRequestWorkOwner workOwner,
     ILogger diagnostics, IGrainContext context)
 {
-    private readonly DatabaseEngine localDatabase = database;
     private readonly NativeRequestWorkOwner requestWorkOwner = workOwner;
     private readonly ConnectionReadCapabilities capabilities = new(database, services, clock, codec, context);
 
@@ -95,17 +93,6 @@ internal sealed class ConnectionReadExecution(GrainRequestCodec codec, DatabaseE
     private async Task<GrainOperationReply> ExecuteReadAsync(DecodedGrainRequest request,
         NativeCapabilityWorkLifetime work)
     {
-        if (request.Envelope.ReadKind == GrainReadKind.FollowerDocument)
-        {
-            var execution = new FollowerDocumentReadExecution(localDatabase, coordinator,
-                services.GetRequiredService<Func<KeyLoad.Replication.ReplicaConsensus>>()(),
-                services.GetRequiredService<PhysicalShardRecord>(), codec,
-                localDatabase.OperationLimitsOptions, clock);
-            var follower = await execution.ExecuteAsync(request, context, work)
-                .ConfigureAwait(true);
-            work.Stage = GrainFailureStage.ReplyEncoding;
-            return GrainReplyFactory.Value(value: follower, cancellationToken: work.Token, options: codec.ExecutionOptions);
-        }
         work.Stage = GrainFailureStage.QuorumRead;
         var barrier = request.Envelope.ReadKind == GrainReadKind.Authenticate
             ? DatabasePhaseKind.AuthorizedAuthenticationBarrier : DatabasePhaseKind.AuthorizedOperationBarrier;

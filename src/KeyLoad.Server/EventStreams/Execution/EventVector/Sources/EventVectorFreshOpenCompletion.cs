@@ -1,7 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.InternalSerialization;
-using KeyLoad.Replication;
 using KeyLoad.Server.Features.DocumentStorage;
 using Microsoft.Extensions.Options;
 

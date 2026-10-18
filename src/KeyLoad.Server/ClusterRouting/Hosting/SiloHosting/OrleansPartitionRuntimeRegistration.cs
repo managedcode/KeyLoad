@@ -1,6 +1,5 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Replication;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.DocumentStorage;
 using KeyLoad.Server.Features.GraphTraversal;
@@ -18,25 +17,25 @@ internal static class OrleansPartitionRuntimeRegistration
         services.AddSingleton(provider => new RemoteModelNativeRuntime(Host(provider),
             provider.GetRequiredService<IOptions<NodeOptions>>(), provider.GetRequiredService<IOptions<OrleansMembershipOptions>>(),
             provider.GetRequiredService<IOptions<GrainRoutingOptions>>(), provider.GetRequiredService<ISiloStatusOracle>(),
-            provider.GetRequiredService<ReplicaSiloDiscoveryState>(), provider.GetRequiredService<TimeProvider>(),
+            provider.GetRequiredService<SiloStorageIdentityProvider>(), provider.GetRequiredService<TimeProvider>(),
             provider.GetRequiredService<ILogger<RemoteModelNativeRuntime>>(),
             provider.GetRequiredService<Func<NativeRequestWorkOwner>>()));
         services.AddSingleton(provider => new RemoteModelNativeClient(provider, Host(provider),
             provider.GetRequiredService<IOptions<NodeOptions>>(), provider.GetRequiredService<IOptions<OrleansMembershipOptions>>(),
             provider.GetRequiredService<IOptions<GrainRoutingOptions>>(), provider.GetRequiredService<PartitionMovementGrainServiceClient>(),
-            provider.GetRequiredService<ReplicaSiloDiscoveryState>(), provider.GetRequiredService<TimeProvider>()));
+            provider.GetRequiredService<SiloStorageIdentityProvider>(), provider.GetRequiredService<TimeProvider>()));
         services.AddSingleton(provider => new NativeCommandObservationTarget(Host(provider).Database,
             provider.GetRequiredService<Func<ICommitCoordinator>>(), provider.GetRequiredService<TimeProvider>(),
             provider.GetRequiredService<IOptions<GrainRoutingOptions>>(),
             provider.GetRequiredService<Func<NativeRequestWorkOwner>>()(),
-            provider.GetRequiredService<IPhysicalRequestPlacement>(), provider.GetRequiredService<ReplicaSiloDiscoveryState>(),
+            provider.GetRequiredService<IPhysicalRequestPlacement>(), provider.GetRequiredService<SiloStorageIdentityProvider>(),
             provider.GetRequiredService<GrainRequestCodec>()));
         services.AddSingleton(provider => new CommandObservationNativeEndpoint(Host(provider),
-            provider.GetRequiredService<IOptions<NodeOptions>>(), provider.GetRequiredService<ReplicaSiloDiscoveryState>(),
+            provider.GetRequiredService<IOptions<NodeOptions>>(), provider.GetRequiredService<SiloStorageIdentityProvider>(),
             provider.GetRequiredService<PartitionMovementGrainServiceClient>(),
             provider.GetRequiredService<NativeCommandObservationTarget>()));
         services.AddSingleton<INativeCommandObservationTransport>(provider => new CommandObservationNativeTransport(Host(provider),
-            provider.GetRequiredService<IOptions<NodeOptions>>(), provider.GetRequiredService<ReplicaSiloDiscoveryState>(),
+            provider.GetRequiredService<IOptions<NodeOptions>>(), provider.GetRequiredService<SiloStorageIdentityProvider>(),
             provider.GetRequiredService<PartitionMovementGrainServiceClient>()));
         RemoteGraphNativeHosting.Register(services);
         RegisterDiscovery(services);
@@ -44,11 +43,11 @@ internal static class OrleansPartitionRuntimeRegistration
 
     private static void RegisterDiscovery(IServiceCollection services)
     {
-        services.AddSingleton(provider => new ReplicaSiloDiscoveryState(
+        services.AddSingleton(provider => new SiloStorageIdentityProvider(
             provider.GetRequiredService<IOptions<ReplicaConfiguration>>(), provider.GetRequiredService<IOptions<ReplicaPeerOptions>>(),
             provider.GetRequiredService<ILocalSiloDetails>(), RuntimeJournalStorePreparation.CurrentCapabilityEvidence(Host(provider))));
         services.AddSingleton(provider => new ReplicaEnvelopeAuthenticator(provider.GetRequiredService<IOptions<ReplicaConfiguration>>(),
-            provider.GetRequiredService<IOptions<ReplicaPeerOptions>>(), provider.GetRequiredService<ReplicaSiloDiscoveryState>(),
+            provider.GetRequiredService<IOptions<ReplicaPeerOptions>>(), provider.GetRequiredService<SiloStorageIdentityProvider>(),
             provider.GetRequiredService<TimeProvider>(), provider.GetRequiredService<IOptions<ReplicaTransportOptions>>(),
             provider.GetRequiredService<IOptions<ReplicaReplayLimits>>(), logger: provider.GetService<ILogger<ReplicaEnvelopeAuthenticator>>(),
             canonicalDatabase: Host(provider).Database));

@@ -7,7 +7,7 @@ internal static class ResourceOwnerInventoryNativeFactory
 {
     internal static async Task<ResourceOwnerInventoryNativeRuntime> CreateAsync(OrleansNode node,
         PartitionHost partition, ServerRuntimeOptions options, PartitionMovementGrainServiceClient movement,
-        ReplicaSiloDiscoveryState local, TimeProvider clock)
+        SiloStorageIdentityProvider local, TimeProvider clock)
     {
         partition.Database.RequireResourceLifetimeWorkFenceAttached();
         ResourceOwnerInventoryNativeClient? client = null;

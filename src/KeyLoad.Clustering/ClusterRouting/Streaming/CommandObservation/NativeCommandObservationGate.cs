@@ -8,7 +8,7 @@ internal sealed class NativeCommandObservationGate(Lock gate, NativeRequestWorkO
     NativeResourceWorkPhysicalBinding physical, NativeRequestWorkAdmissions admissions)
 {
     internal NativeRequestWorkLease AcquireCommandObservation(Guid id, NativeRequestWorkLease command,
-        PhysicalShardRecord actualOwner, ReplicaSiloDiscovery actualRuntime, DatabaseEngine database,
+        PhysicalShardRecord actualOwner, SiloStorageIdentity actualRuntime, DatabaseEngine database,
         NativeCommandObservationResources resources)
     {
         lock (gate)
@@ -45,7 +45,7 @@ internal sealed class NativeCommandObservationGate(Lock gate, NativeRequestWorkO
     }
 
     internal NativeCommandObservation ConsumeCommandObservation(NativeCommandObservationHandleV1 handle,
-        PhysicalShardRecord actualOwner, ReplicaSiloDiscovery actualRuntime, DatabaseEngine database)
+        PhysicalShardRecord actualOwner, SiloStorageIdentity actualRuntime, DatabaseEngine database)
     {
         lock (gate)
         {
@@ -59,7 +59,7 @@ internal sealed class NativeCommandObservationGate(Lock gate, NativeRequestWorkO
     }
 
     internal NativeCommandObservation BeginCommandExecution(NativeCommandObservationHandleV1 handle,
-        PhysicalShardRecord actualOwner, ReplicaSiloDiscovery actualRuntime, DatabaseEngine database)
+        PhysicalShardRecord actualOwner, SiloStorageIdentity actualRuntime, DatabaseEngine database)
     {
         lock (gate)
         {
@@ -75,7 +75,7 @@ internal sealed class NativeCommandObservationGate(Lock gate, NativeRequestWorkO
     }
 
     internal Task AbortCommandObservationByHandleAsync(NativeCommandObservationHandleV1 handle,
-        PhysicalShardRecord actualOwner, ReplicaSiloDiscovery actualRuntime, DatabaseEngine database)
+        PhysicalShardRecord actualOwner, SiloStorageIdentity actualRuntime, DatabaseEngine database)
     {
         NativeCommandObservation retained;
         lock (gate)

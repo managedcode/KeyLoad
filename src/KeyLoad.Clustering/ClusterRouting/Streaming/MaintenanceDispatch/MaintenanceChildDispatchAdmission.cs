@@ -36,7 +36,7 @@ internal sealed class MaintenanceChildDispatchAdmission(byte[]? ownedPayload) : 
             throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
         }
         reservation = native.OriginalProducer.ReserveLocalChild(verified,
-            services.GetRequiredService<PhysicalShardRecord>(), services.GetRequiredService<ReplicaSiloDiscoveryState>().Read());
+            services.GetRequiredService<PhysicalShardRecord>(), services.GetRequiredService<SiloStorageIdentityProvider>().Read());
         cancellation = CancellationTokenSource.CreateLinkedTokenSource(token, reservation.Cancellation);
         identity = new(services, principal, actorId, commandId, cancellation.Token,
             connectionId: NativeConnectionExecutionIdentity.Resolve(services));

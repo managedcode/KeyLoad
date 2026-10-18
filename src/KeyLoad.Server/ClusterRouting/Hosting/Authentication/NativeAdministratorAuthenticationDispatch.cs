@@ -18,7 +18,7 @@ internal static class NativeAdministratorAuthenticationDispatch
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
                     onDispatch();
-                    reply = await node.ExecutePhysicalShardStartupRequestAsync(requestId, signed, command: false,
+                    reply = await node.ExecuteStartupRequestAsync(requestId, signed, command: false,
                         cancellationToken: token).ConfigureAwait(false);
                 }, failures).ConfigureAwait(false);
             }

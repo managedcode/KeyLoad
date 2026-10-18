@@ -11,7 +11,7 @@ internal static class NativeCommandObservationPreparation
     internal static async Task<GrainOperationReply> ExecuteAsync(DatabaseEngine database,
         ICommitCoordinator coordinator, TimeProvider clock, IOptions<GrainRoutingOptions> options,
         GrainRequestCodec codec, NativeRequestWorkOwner owner, IPhysicalRequestPlacement? physical,
-        ReplicaSiloDiscoveryState? runtime, DecodedGrainRequest request, string actorKey,
+        SiloStorageIdentityProvider? runtime, DecodedGrainRequest request, string actorKey,
         IGrainContext? context, CancellationToken token)
     {
         var preparation = default(NativeCommandObservationPreparationWork);

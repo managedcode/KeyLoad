@@ -1,4 +1,3 @@
-using KeyLoad.Replication;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 

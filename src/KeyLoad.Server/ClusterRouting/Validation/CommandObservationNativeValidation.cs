@@ -6,7 +6,7 @@ namespace KeyLoad.Server.Features.ClusterRouting;
 internal static class CommandObservationNativeValidation
 {
     internal static void Require(CommandObservationNativeRequest request, PartitionHost partition,
-        NodeOptions options, ReplicaSiloDiscovery actual, PartitionMovementMac mac)
+        NodeOptions options, SiloStorageIdentity actual, PartitionMovementMac mac)
     {
         CommandObservationNativeMac.RequireSize(request, partition);
         if (request is null || request.Version != CommandObservationNativeProtocol.Version

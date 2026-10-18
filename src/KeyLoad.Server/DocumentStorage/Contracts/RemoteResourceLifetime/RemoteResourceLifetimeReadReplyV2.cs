@@ -11,4 +11,4 @@ internal sealed record RemoteResourceLifetimeReadReplyV2(
     [property: Orleans.Id(4)] ReadOnlyMemory<byte> Payload,
     [property: Orleans.Id(5)] ErrorCode? Error,
     [property: Orleans.Id(6)] string? SafeDetail,
-    [property: Orleans.Id(7)] ReplicaSiloDiscovery EndpointDiscovery);
+    [property: Orleans.Id(7)] SiloStorageIdentity EndpointDiscovery);

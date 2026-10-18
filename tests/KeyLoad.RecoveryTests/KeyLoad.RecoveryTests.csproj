@@ -9,7 +9,6 @@
     <ProjectReference Include="../../src/KeyLoad.Core/KeyLoad.Core.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Query/KeyLoad.Query.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Server/KeyLoad.Server.csproj" />
-    <ProjectReference Include="../../src/KeyLoad.Replication/KeyLoad.Replication.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" />
     <ProjectReference Include="../KeyLoad.CrashHost/KeyLoad.CrashHost.csproj" />
     <PackageReference Include="TUnit" />

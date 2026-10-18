@@ -34,7 +34,7 @@ internal sealed class AnnProjectionJobDispatch(GrainRequestCodec codec, IService
                 throw Errors.Fail(ErrorCode.OwnershipLost, AnnProjectionJobProtocol.Invalid);
             }
             reservation = native.OriginalProducer.ReserveLocalChild(verified,
-                services.GetRequiredService<PhysicalShardRecord>(), services.GetRequiredService<ReplicaSiloDiscoveryState>().Read());
+                services.GetRequiredService<PhysicalShardRecord>(), services.GetRequiredService<SiloStorageIdentityProvider>().Read());
             result = await AnnProjectionJobDispatchSettlement.RunOwnedAsync(services, principal, requestId,
                 original.CommandId, connectionId, reservation,
                 scopeToken => ReadAsync(grains, signed, requestId, original, connectionId, scopeToken), failures, cleanup, token).ConfigureAwait(true);

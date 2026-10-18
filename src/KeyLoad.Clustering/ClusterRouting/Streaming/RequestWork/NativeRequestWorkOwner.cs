@@ -67,26 +67,26 @@ public sealed class NativeRequestWorkOwner : IAsyncDisposable, IResourceLifetime
     }
 
     internal Task<NativeCommandObservation> ReserveCommandObservationAsync(DecodedGrainRequest verified,
-        NativeCommandObservationAdmissionV1 admission, NativeCapabilityWorkLifetime commandWork, PhysicalShardRecord actualOwner, ReplicaSiloDiscovery actualRuntime,
+        NativeCommandObservationAdmissionV1 admission, NativeCapabilityWorkLifetime commandWork, PhysicalShardRecord actualOwner, SiloStorageIdentity actualRuntime,
         DatabaseEngine database, TimeProvider clock, CancellationToken originalCallerToken)
         => NativeCommandObservationAdmission.ReserveAsync(this, verified, admission, commandWork,
             actualOwner, actualRuntime, database, clock, originalCallerToken);
 
     internal NativeRequestWorkLease AcquireCommandObservation(Guid id, NativeRequestWorkLease command,
-        PhysicalShardRecord actualOwner, ReplicaSiloDiscovery actualRuntime, DatabaseEngine database,
+        PhysicalShardRecord actualOwner, SiloStorageIdentity actualRuntime, DatabaseEngine database,
         NativeCommandObservationResources resources)
         => Observations.AcquireCommandObservation(id, command, actualOwner, actualRuntime, database, resources);
 
     internal NativeCommandObservation ConsumeCommandObservation(NativeCommandObservationHandleV1 handle,
-        PhysicalShardRecord actualOwner, ReplicaSiloDiscovery actualRuntime, DatabaseEngine database)
+        PhysicalShardRecord actualOwner, SiloStorageIdentity actualRuntime, DatabaseEngine database)
         => Observations.ConsumeCommandObservation(handle, actualOwner, actualRuntime, database);
 
     internal NativeCommandObservation BeginCommandExecution(NativeCommandObservationHandleV1 handle,
-        PhysicalShardRecord actualOwner, ReplicaSiloDiscovery actualRuntime, DatabaseEngine database)
+        PhysicalShardRecord actualOwner, SiloStorageIdentity actualRuntime, DatabaseEngine database)
         => Observations.BeginCommandExecution(handle, actualOwner, actualRuntime, database);
 
     internal Task AbortCommandObservationByHandleAsync(NativeCommandObservationHandleV1 handle,
-        PhysicalShardRecord actualOwner, ReplicaSiloDiscovery actualRuntime, DatabaseEngine database)
+        PhysicalShardRecord actualOwner, SiloStorageIdentity actualRuntime, DatabaseEngine database)
         => Observations.AbortCommandObservationByHandleAsync(handle, actualOwner, actualRuntime, database);
 
     internal void MarkCommandObservationSettled(NativeCommandObservation observation)
@@ -100,11 +100,11 @@ public sealed class NativeRequestWorkOwner : IAsyncDisposable, IResourceLifetime
         => children.RequireOriginalParentBinding(child);
 
     internal NativeRequestWorkChildReservation ReserveLocalChild(NativeRequestWorkLease parent,
-        DecodedGrainRequest verified, PhysicalShardRecord expectedOwner, ReplicaSiloDiscovery expectedRuntime)
+        DecodedGrainRequest verified, PhysicalShardRecord expectedOwner, SiloStorageIdentity expectedRuntime)
         => children.Reserve(parent, verified, expectedOwner, expectedRuntime);
 
     internal NativeRequestWorkLease AcquireVerifiedProducer(DecodedGrainRequest verified,
-        PhysicalShardRecord actualOwner, ReplicaSiloDiscovery actualRuntime)
+        PhysicalShardRecord actualOwner, SiloStorageIdentity actualRuntime)
         => children.AcquireVerifiedProducer(verified, actualOwner, actualRuntime);
 
     internal bool BeginChildDispatchCompletion(NativeRequestWorkChildReservation reservation)

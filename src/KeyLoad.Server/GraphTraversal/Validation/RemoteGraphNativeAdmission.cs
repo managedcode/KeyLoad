@@ -7,7 +7,7 @@ namespace KeyLoad.Server.Features.GraphTraversal;
 
 internal sealed class RemoteGraphNativeAdmission(PartitionHost partition, IOptions<NodeOptions> options,
     IOptions<OrleansMembershipOptions> membershipOptions, ISiloStatusOracle oracle,
-    ReplicaSiloDiscoveryState local, TimeProvider clock)
+    SiloStorageIdentityProvider local, TimeProvider clock)
 {
     private readonly ReplicaNativeDiscoveryMembership membership = new(oracle, membershipOptions);
 

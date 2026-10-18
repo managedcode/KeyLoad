@@ -3,7 +3,6 @@ using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Query.Features.Search;
-using KeyLoad.Replication;
 using KeyLoad.Server.Features.Search;
 
 namespace KeyLoad.Server;

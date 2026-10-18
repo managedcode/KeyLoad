@@ -7,7 +7,7 @@ namespace KeyLoad.Server.Features.ClusterRouting;
 
 /// <summary>Authenticates one closed native action and publishes inside its existing original observation frame.</summary>
 internal sealed class CommandObservationNativeEndpoint(PartitionHost partition, IOptions<NodeOptions> options,
-    ReplicaSiloDiscoveryState local, PartitionMovementGrainServiceClient movement, NativeCommandObservationTarget target)
+    SiloStorageIdentityProvider local, PartitionMovementGrainServiceClient movement, NativeCommandObservationTarget target)
 {
     internal async Task<CommandObservationNativeReply> ExecuteAsync(CommandObservationNativeRequest request,
         CancellationToken token)

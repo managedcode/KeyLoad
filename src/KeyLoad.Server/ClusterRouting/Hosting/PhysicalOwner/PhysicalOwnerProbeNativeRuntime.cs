@@ -116,7 +116,7 @@ internal sealed class PhysicalOwnerProbeNativeRuntime : IAsyncDisposable
         };
     }
 
-    private void RequireOuterShape(PartitionMovementGrainServiceRequest request, ReplicaSiloDiscovery local,
+    private void RequireOuterShape(PartitionMovementGrainServiceRequest request, SiloStorageIdentity local,
         DateTimeOffset now)
     {
         if (!options.PhysicalGroupTrust.RegisterPhysicalOwners || options.PhysicalGroupTrust.Role != PhysicalGroupTrustRole.Destination

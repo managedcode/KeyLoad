@@ -51,7 +51,7 @@ internal sealed class NativeCommandObservation
     }
 
     internal void Initialize(DecodedGrainRequest verified, NativeCommandObservationAdmissionV1 admission,
-        PhysicalShardRecord actualOwner, ReplicaSiloDiscovery actualRuntime, TimeProvider clock,
+        PhysicalShardRecord actualOwner, SiloStorageIdentity actualRuntime, TimeProvider clock,
         CancellationToken callerToken)
     {
         resources.Initialize(this, Lease, admission, verified.Envelope.ExpiresAt, clock, owner.ShutdownToken, callerToken);
@@ -146,7 +146,7 @@ internal sealed class NativeCommandObservation
     }
 
     internal void RequireIdentity(NativeCommandObservationHandleV1 supplied, PhysicalShardRecord actualOwner,
-        ReplicaSiloDiscovery actualRuntime, DatabaseEngine database)
+        SiloStorageIdentity actualRuntime, DatabaseEngine database)
         => NativeCommandObservationIdentity.Require(supplied, Handle, actualOwner, actualRuntime, database);
 
     internal bool MarkSubmittedAtGate()
