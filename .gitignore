@@ -665,11 +665,13 @@ backups/
 **/.aspire/
 build/KeyLoad.AppHost/aspire.config.json
 **/coverage/
-# CodeQuality C# sources remain tracked; generated coverage contents stay ignored.
-!/tests/*/CodeQuality/**/Coverage/
-/tests/*/CodeQuality/**/Coverage/**
-!/tests/*/CodeQuality/**/Coverage/**/
-!/tests/*/CodeQuality/**/Coverage/**/*.cs
+# Analyzer coverage assertion and fixture sources remain tracked.
+!/tests/KeyLoad.Analyzers.Tests/Assertions/Coverage/
+/tests/KeyLoad.Analyzers.Tests/Assertions/Coverage/*
+!/tests/KeyLoad.Analyzers.Tests/Assertions/Coverage/*.cs
+!/tests/KeyLoad.Analyzers.Tests/Fixtures/Coverage/
+/tests/KeyLoad.Analyzers.Tests/Fixtures/Coverage/*
+!/tests/KeyLoad.Analyzers.Tests/Fixtures/Coverage/*.cs
 BenchmarkDotNet.Artifacts/
 .env
 .env.*
