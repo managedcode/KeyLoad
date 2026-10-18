@@ -69,6 +69,7 @@ const namedMessages = {
   missingGovernanceFile: value => `Required governance file is missing: ${value}`,
   flatFeatureSource: value => `Feature source requires a responsibility folder: ${value}`,
   obsoleteProjectFeatures: value => `Project slices must live directly under the project: ${value}`,
+  redundantFeatureWrapper: value => `Single-feature project must place responsibility folders directly under its root: ${value}`,
   workingFile: value => `Working planning file is present: ${value}`,
   missingRootPolicy: value => `Root AGENTS.md is missing required policy ${value}.`,
   missingCommand: value => `Root AGENTS.md is missing the required command: ${value}.`,
@@ -133,6 +134,7 @@ async function walkRepository(root, currentDirectory, inventory) {
     }
     if (!entry.isFile()) continue;
     const repositoryPath = toRepositoryPath(root, absolutePath);
+    if (entry.name.endsWith('.cs')) inventory.sourceFiles.push(repositoryPath);
     if (WORKING_FILE_SUFFIXES.some(suffix => entry.name.endsWith(suffix))) inventory.workingFiles.push(repositoryPath);
     const projectSlice = /^(?:src|tests|benchmarks|analyzers|build)\/[^/]+\/([^/]+)\/[^/]+\.cs$/.exec(repositoryPath);
     const specificationSlice = projectSlice?.[1] === 'Restore' ? 'BackupRestore' : projectSlice?.[1];
@@ -194,6 +196,23 @@ async function validateLocalPolicies(root, projectPaths, modulePaths, diagnostic
   }
 }
 
+async function validateProjectResponsibilities(root, inventory, diagnostics) {
+  for (const projectPath of inventory.projects) {
+    const prefix = `${dirname(projectPath)}/`;
+    const folders = new Set(inventory.sourceFiles
+      .filter(source => source.startsWith(prefix))
+      .map(source => source.slice(prefix.length).split('/'))
+      .filter(parts => parts.length > 1)
+      .map(parts => parts[0]));
+    if (folders.size !== 1) continue;
+    const [folder] = folders;
+    const specification = folder === 'Restore' ? 'BackupRestore' : folder;
+    if (await exists(root, `docs/Features/${specification}.md`)) {
+      diagnostics.push(namedMessages.redundantFeatureWrapper(`${prefix}${folder}`));
+    }
+  }
+}
+
 async function validateRequiredFiles(root, diagnostics) {
   for (const repositoryPath of REQUIRED_FILES) {
     if (!(await exists(root, repositoryPath))) {
@@ -209,7 +228,7 @@ async function validateRequiredFiles(root, diagnostics) {
 
 async function validate(root) {
   const diagnostics = [];
-  const inventory = { projects: [], workingFiles: [], flatFeatureSources: [] };
+  const inventory = { projects: [], sourceFiles: [], workingFiles: [], flatFeatureSources: [] };
   await walkRepository(root, root, inventory);
   inventory.projects.sort();
   inventory.workingFiles.sort();
@@ -217,6 +236,7 @@ async function validate(root) {
   for (const repositoryPath of inventory.flatFeatureSources) diagnostics.push(repositoryPath.endsWith('/Features')
     ? namedMessages.obsoleteProjectFeatures(repositoryPath) : namedMessages.flatFeatureSource(repositoryPath));
   await validateSolutionInventory(root, inventory, diagnostics);
+  await validateProjectResponsibilities(root, inventory, diagnostics);
   await validateRootPolicy(root, diagnostics);
   await validateRequiredFiles(root, diagnostics);
   await validateLocalPolicies(root, inventory.projects, MODULE_PATHS, diagnostics);
