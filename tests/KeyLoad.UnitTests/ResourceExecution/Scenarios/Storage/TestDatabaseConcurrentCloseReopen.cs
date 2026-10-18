@@ -63,5 +63,5 @@ internal static class TestDatabaseConcurrentCloseReopen
     }
 
     private static string[] Directories(TestDatabase fixture)
-        => [fixture.Directory, Path.Combine(fixture.Directory, TestDatabaseConcurrentCloseProtocol.ReplicaDirectory)];
+        => [fixture.Directory];
 }

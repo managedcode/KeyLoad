@@ -50,7 +50,7 @@ internal sealed class UserAnalyticsRuntime(IOptions<DatabaseLimits> options) : I
         snapshot.Work.RequireResourceLifetimeBinding(binding);
         cancellationToken.ThrowIfCancellationRequested();
         UserAnalyticsGenerationExecution execution;
-        var completion = new TaskCompletionSource<NativeAnalyticsAggregate>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         lock (lifecycle)
         {
             ObjectDisposedException.ThrowIf(stopping, this);
@@ -66,13 +66,12 @@ internal sealed class UserAnalyticsRuntime(IOptions<DatabaseLimits> options) : I
         }
         try
         {
-            completion.SetResult(execution.Execute(snapshot, binding, cancellationToken));
+            return Task.FromResult(execution.Execute(snapshot, binding, cancellationToken));
         }
-        catch (Exception failure)
+        finally
         {
-            completion.SetException(failure);
+            completion.SetResult();
         }
-        return completion.Task;
     }
 
     public ValueTask DisposeAsync()
@@ -91,7 +90,7 @@ internal sealed class UserAnalyticsRuntime(IOptions<DatabaseLimits> options) : I
         foreach (var work in originals)
         {
             // The connection owns its query outcome; this owner separately retains every native cleanup failure.
-            await ((Task)work.Original).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+            await work.Original.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
             failures.AddRange(work.Execution.CleanupFailures);
         }
         if (!CanReleasePhysical)
@@ -101,5 +100,5 @@ internal sealed class UserAnalyticsRuntime(IOptions<DatabaseLimits> options) : I
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private sealed record Work(UserAnalyticsGenerationExecution Execution, Task<NativeAnalyticsAggregate> Original);
+    private sealed record Work(UserAnalyticsGenerationExecution Execution, Task Original);
 }

@@ -1,5 +1,4 @@
 using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 namespace KeyLoad.Clustering;
 
 /// <summary>Optional private observer of an independently owned, already-issued verified native operation.</summary>

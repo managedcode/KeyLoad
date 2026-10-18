@@ -1,7 +1,5 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.Messaging;
+using ManagedCode.Communication;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
@@ -122,7 +120,7 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
         return error;
     }
 
-    private void ValidateRoute(DecodedGrainRequest request, string actorKey, CancellationToken cancellationToken)
+    private static void ValidateRoute(DecodedGrainRequest request, string actorKey, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         GrainIdentityContext.Validate(request.Envelope, request.Envelope.RequestId);

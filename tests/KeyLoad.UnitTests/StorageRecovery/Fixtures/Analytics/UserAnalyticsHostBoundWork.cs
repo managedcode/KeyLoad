@@ -1,6 +1,5 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.CrashHost.Features.ResourceExecution;
 using KeyLoad.Server;
@@ -8,13 +7,12 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
-/// <summary>Actual physical-host work ownership for native component reads; no quorum claim.</summary>
+/// <summary>Actual physical-host work ownership for bounded native component reads.</summary>
 internal sealed class UserAnalyticsHostBoundWork : IAsyncDisposable
 {
     private const int NoCleanupFailures = 0;
     private const int OneCleanupFailure = 1;
     private const int FirstCleanupFailure = 0;
-    private const string MissingCatalog = "The native Analytics fixture requires its committed physical catalog.";
 
     private readonly NativeRequestWorkOwner owner;
 
@@ -27,11 +25,9 @@ internal sealed class UserAnalyticsHostBoundWork : IAsyncDisposable
         var work = new UserAnalyticsHostBoundWork(routing);
         try
         {
-            var catalog = host.Database.Store.Read(view => PhysicalShardCatalogRecordSerialization.Read(view))
-                ?? throw new InvalidOperationException(MissingCatalog);
-            var state = await host.Consensus.StateAsync(token);
-            work.owner.BindPhysicalOwner(catalog.DefaultShard);
-            work.owner.AttachResourceLifetimeWorkFence(host.Database, state.LastIndex);
+            token.ThrowIfCancellationRequested();
+            var identity = host.Database.Store.Identity;
+            work.owner.BindPhysicalOwner(new(identity.NodeId, identity.Incarnation));
             return work;
         }
         catch (Exception original) when (NativeCqrsBoundaryErrors.IsNonFatal(original))

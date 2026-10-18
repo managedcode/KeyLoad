@@ -1,4 +1,3 @@
-using KeyLoad.Core.Features.ResourceExecution;
 using ManagedCode.Communication;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;

@@ -1,4 +1,3 @@
-using KeyLoad.Core;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -51,7 +50,7 @@ internal sealed class RuntimeJournalStartupRequests(IGrainFactory grains, GrainR
     {
         var connectionId = NativeConnectionExecutionIdentity.Resolve(services);
         using var identity = principal is null
-            ? GrainRequestIdentityScope.ForRuntimeJournal(services, requestId, commandId, cancellationToken, connectionId)
+            ? GrainRequestIdentityScope.ForRuntimeJournal(services, requestId, commandId, connectionId, cancellationToken)
             : new GrainRequestIdentityScope(services, principal, requestId, commandId, cancellationToken,
                 connectionId: connectionId);
         var serializer = services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>();

@@ -9,7 +9,7 @@ namespace KeyLoad.Server;
 
 internal static class OrleansPartitionServiceRegistration
 {
-    internal static void Register(IServiceCollection services, NodeOptions options)
+    internal static void Register(IServiceCollection services)
     {
         services.AddSingleton(provider => Host(provider).Database);
         services.AddSingleton<Func<INativeAnnMaintenance>>(provider =>

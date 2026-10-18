@@ -44,9 +44,9 @@ internal sealed class PostgresSessionLoop(IServiceProvider services, global::Mic
                         Empty(frame.Payload);
                         await PostgresControlFlush.RunAsync(services, writer, context.ConnectionClosed).ConfigureAwait(false);
                         break;
-                    case PostgresMessageProtocol.SimpleQuery:
-                        catalog.BeginSimpleQuery();
-                        await SimpleAsync(frame.Payload, owner, identity, partition, cancellation, context.ConnectionClosed).ConfigureAwait(false);
+                    case PostgresMessageProtocol.QueryMessage:
+                        catalog.BeginQueryMessage();
+                        await ExecuteQueryMessageAsync(frame.Payload, owner, identity, partition, cancellation, context.ConnectionClosed).ConfigureAwait(false);
                         writer.Ready();
                         await PostgresControlFlush.RunAsync(services, writer, context.ConnectionClosed).ConfigureAwait(false);
                         break;
@@ -61,9 +61,9 @@ internal sealed class PostgresSessionLoop(IServiceProvider services, global::Mic
             }
             catch (Exception error) when (global::KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(error) && !context.ConnectionClosed.IsCancellationRequested)
             {
-                var simple = frame.Type == PostgresMessageProtocol.SimpleQuery;
-                draining = !simple;
-                await FailureAsync(error, simple, context.ConnectionClosed).ConfigureAwait(false);
+                var queryMessage = frame.Type == PostgresMessageProtocol.QueryMessage;
+                draining = !queryMessage;
+                await FailureAsync(error, queryMessage, context.ConnectionClosed).ConfigureAwait(false);
             }
         }
     }
@@ -78,14 +78,14 @@ internal sealed class PostgresSessionLoop(IServiceProvider services, global::Mic
         }
     }
 
-    private async Task FailureAsync(Exception original, bool simple, CancellationToken closed)
+    private async Task FailureAsync(Exception original, bool queryMessage, CancellationToken closed)
     {
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(catalog.ClearMutationIdentity, failures);
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             PostgresErrorReply.Write(writer, original);
-            if (simple)
+            if (queryMessage)
             {
                 writer.Ready();
             }
@@ -98,10 +98,10 @@ internal sealed class PostgresSessionLoop(IServiceProvider services, global::Mic
         }
     }
 
-    private async Task SimpleAsync(byte[] payload, ServerConnectionFeature owner, PostgresSessionIdentity identity,
+    private async Task ExecuteQueryMessageAsync(byte[] payload, ServerConnectionFeature owner, PostgresSessionIdentity identity,
         PartitionRef partition, PostgresCancellationSession cancellation, CancellationToken closed)
     {
-        var sql = SimpleSql(payload);
+        var sql = ReadQueryText(payload);
         if (string.IsNullOrWhiteSpace(sql))
         {
             writer.Empty(PostgresWireWriter.EmptyQueryResponse);
@@ -117,7 +117,7 @@ internal sealed class PostgresSessionLoop(IServiceProvider services, global::Mic
             portal, PostgresProtocol.AllRows, cancellation, Options, admission, catalog, describe: true, closed).ConfigureAwait(false);
     }
 
-    private string SimpleSql(ReadOnlySpan<byte> bytes)
+    private string ReadQueryText(ReadOnlySpan<byte> bytes)
     {
         var reader = new PostgresPayloadReader(bytes);
         var sql = reader.Text(services.GetRequiredService<IOptions<DatabaseLimits>>().Value.MaxQueryBytes);

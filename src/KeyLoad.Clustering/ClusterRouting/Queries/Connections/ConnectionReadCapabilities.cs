@@ -3,6 +3,7 @@ using KeyLoad.Core.Features.ClusterRouting.Identity;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Query;
 using KeyLoad.Query.Features.Search;
+using KeyLoad.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.Clustering;

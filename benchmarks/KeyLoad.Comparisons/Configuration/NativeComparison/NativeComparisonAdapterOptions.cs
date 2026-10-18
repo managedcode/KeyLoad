@@ -22,7 +22,7 @@ public sealed partial class NativeComparisonExecutionOptions
     public int Neo4jMaximumExecutionTimeSeconds { get; set; } = DefaultNeo4jMaximumExecutionTimeSeconds;
     /// <summary>The initial capacity of retained time-series read results.</summary>
     public int TimeSeriesInitialReadCapacity { get; set; } = DefaultTimeSeriesInitialReadCapacity;
-    /// <summary>The maximum samples requested by the ordinary KeyLoad TimeSeries adapter.</summary>
+    /// <summary>The maximum time-series rows requested by the ordinary KeyLoad adapter.</summary>
     public int KeyLoadTimeSeriesReadLimit { get; set; } = DefaultKeyLoadTimeSeriesReadLimit;
     /// <summary>The native asynchronous report file buffer capacity.</summary>
     public int ReportFileBufferBytes { get; set; } = DefaultReportFileBufferBytes;

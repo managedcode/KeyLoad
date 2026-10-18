@@ -29,7 +29,7 @@ internal sealed class PartitionStorageLifecycle(PartitionHostApplicationOwner ow
         // Retain the original close before cancellation callbacks can synchronously reenter.
         await Task.Yield();
         var failures = new List<Exception>();
-        // The same terminal owner joins accepted connections and requests, including DI fallback.
+        // The same terminal owner joins accepted connections and requests during DI disposal.
         await ServerFailureObserver.ObserveAsync(() => owner.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         ThrowOriginalFailures(failures);
     }

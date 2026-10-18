@@ -1,10 +1,9 @@
 using ManagedCode.Communication;
-using System.Text.Json;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
 internal sealed record RetainedSubmissionBudgetImage(Dictionary<string, string> Rows, long Position,
-    (long LastIndex, long CommittedIndex, long Term) Journal)
+    (long AppliedPosition, long StorePosition) Cut)
 {
     private const int MaximumImageRows = 64;
     private const string BoundedImageRequired = "The retained-outcome fixture exceeded its bounded image.";
@@ -22,17 +21,13 @@ internal sealed record RetainedSubmissionBudgetImage(Dictionary<string, string> 
             await Assert.That(actual[row.Key]).IsEqualTo(row.Value);
         }
         await Assert.That(fixture.Store.Position).IsEqualTo(Position);
-        await Assert.That(fixture.ReadCanonicalCut()).IsEqualTo(Journal);
+        await Assert.That(fixture.ReadCanonicalCut()).IsEqualTo(Cut);
     }
 
     internal static async Task ResultAsync(Result<object> expected, Result<object>? actual)
     {
         await Assert.That(actual).IsNotNull();
-        await Assert.That(Errors.Code(actual!.Problem)).IsEqualTo(Errors.Code(expected.Problem));
-        await Assert.That(actual.Problem?.Detail).IsEqualTo(expected.Problem?.Detail);
-        await Assert.That(actual.Json).IsEqualTo(expected.Json);
-        await Assert.That(JsonSerializer.Serialize(actual.Get<CommitReceipt>(), JsonDefaults.Options))
-            .IsEqualTo(JsonSerializer.Serialize(expected.Get<CommitReceipt>(), JsonDefaults.Options));
+        await NativeReplayResultAssertions.Same<CommitReceipt>(actual!, expected);
     }
 
     private static Dictionary<string, string> RowsOf(TestDatabase fixture) => fixture.Store.Read(view =>

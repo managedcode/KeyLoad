@@ -1,7 +1,6 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using KeyLoad.Clustering.Features.Search;
 using KeyLoad.Core;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.Clustering;
 

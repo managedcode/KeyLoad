@@ -183,11 +183,10 @@ its corpus and measured query schedule keep their control contract. Policy does 
 select a different corpus, algorithm, recall target or native topology.
 
 AC-VQ-004/005/006 include invalid-policy rejection, actual effective settings and
-unchanged corpus/accuracy/native algorithm, tested through the real composed host. The
-adapter policy evidence writer lives in `Reporting/NativeComparisonAdapterEvidence.cs`;
-the options type delegates its evidence operation to that helper, preserving every
-property, binding, validation rule and report key/value while keeping the combined
-partial options type within the 200-code-line limit.
+unchanged corpus/accuracy/native algorithm, tested through the real composed host.
+`NativeComparisonOperationalPolicy.Record` writes the effective adapter settings
+alongside the other execution parameters, preserving each report key and its
+invariant-culture value.
 `NativeComparisonAdapterPolicyTests` executes the actual binding, validation and
 evidence operation.
 

@@ -34,5 +34,5 @@ internal static class AdminStorageObserver
 
     internal static bool FileFailure(Exception error) => error is IOException or UnauthorizedAccessException or SecurityException;
 
-    private static AdminStorageSnapshot Missing() => new(null, null, null, null, MissingObservedFilesEmptyCount, false, [], Unavailable);
+    private static AdminStorageSnapshot Missing() => new(null, null, null, MissingObservedFilesEmptyCount, false, [], Unavailable);
 }

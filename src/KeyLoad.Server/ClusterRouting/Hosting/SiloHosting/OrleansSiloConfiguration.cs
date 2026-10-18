@@ -15,7 +15,7 @@ internal static class OrleansSiloConfiguration
         options.Validate();
         OrleansApplicationServices.RegisterSiloOwners(builder, localhostClustering);
         global::KeyLoad.Server.Features.ResourceExecution.NativeDropTableRegistration.Register(builder.Services);
-        OrleansPartitionServiceRegistration.Register(builder.Services, options);
+        OrleansPartitionServiceRegistration.Register(builder.Services);
         OrleansRequestServiceRegistration.Register(builder.Services);
         builder.UseOrleans(silo => Configure(silo, options, address, localhostClustering));
         OrleansNativeHostedServiceRegistration.Guard(builder.Services);

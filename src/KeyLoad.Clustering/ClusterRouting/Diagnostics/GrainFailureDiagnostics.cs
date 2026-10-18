@@ -53,9 +53,9 @@ internal static partial class GrainFailureDiagnostics
     /// <param name="logger">The optional application logger.</param>
     /// <param name="error">The rejected request exception; its object and text are never logged.</param>
     /// <param name="requestId">The request's non-secret correlation identifier.</param>
-    /// <param name="fallback">The call-site stage used when metadata is absent or invalid.</param>
+    /// <param name="callSiteStage">The call-site stage used when metadata is absent or invalid.</param>
     /// <param name="code">The public typed error code.</param>
-    internal static void Log(ILogger? logger, Exception error, Guid requestId, GrainFailureStage fallback, ErrorCode code)
+    internal static void Log(ILogger? logger, Exception error, Guid requestId, GrainFailureStage callSiteStage, ErrorCode code)
     {
         ArgumentNullException.ThrowIfNull(error);
         if (logger is null)
@@ -63,7 +63,7 @@ internal static partial class GrainFailureDiagnostics
             return;
         }
 
-        var stage = error.Data[StageMetadataKey] is GrainFailureStage marked && Enum.IsDefined(marked) ? marked : ValidStage(fallback);
+        var stage = error.Data[StageMetadataKey] is GrainFailureStage marked && Enum.IsDefined(marked) ? marked : ValidStage(callSiteStage);
         var category = Category(error, stage);
         var safeCode = Enum.IsDefined(code) ? code : ErrorCode.OwnershipLost;
         var causeKind = CauseKind(error, category);

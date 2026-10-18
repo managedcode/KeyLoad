@@ -33,9 +33,9 @@ internal static class AnalyticsCommandIdentityFlow
                 new(delete ? AnalyticsStoreProtocol.DeleteKind : AnalyticsStoreProtocol.UpsertKind, D.Store, D.Last, delete ? 2 : 1)], DurabilityProfile.ProcessDurable, 1);
             await A.ReceiptAsync(expected, owner.Submit(first).Get<CommitReceipt>());
             await A.RowsAsync(owner, delete, expectedReference, token);
-            await RetryAsync(owner, id, delete, first.PayloadJson, expected, expectedReference, token);
+            await RetryAsync(owner, id, delete, first.Value!.Fingerprint, expected, expectedReference, token);
             await owner.ReopenAsync();
-            await RetryAsync(owner, id, delete, first.PayloadJson, expected, expectedReference, token);
+            await RetryAsync(owner, id, delete, first.Value.Fingerprint, expected, expectedReference, token);
         }, token);
 
     private static async Task SeedAsync(SafeProjectorOperationDatabase owner)
@@ -49,15 +49,15 @@ internal static class AnalyticsCommandIdentityFlow
     private static async Task RetryAsync(SafeProjectorOperationDatabase owner, Guid id, bool delete,
         string originalIdentity, CommitReceipt expected, EntityRef expectedReference, CancellationToken token)
     {
-        // Every retry is newly issued from the original public DTO, not a retained signed operation.
+        // Every retry is newly issued from the original public DTO.
         var retry = Issue(owner, D.Request(owner.Source, id, delete, true));
-        await Assert.That(retry.PayloadJson).IsEqualTo(originalIdentity);
+        await Assert.That(retry.Value!.Fingerprint).IsEqualTo(originalIdentity);
         await A.UnchangedAsync(owner, async () =>
         {
             await A.ReceiptAsync(expected, owner.Submit(retry).Get<CommitReceipt>());
             await A.RowsAsync(owner, delete, expectedReference, token);
             var changed = Issue(owner, D.Request(owner.Source, id, delete, true, changed: true));
-            await Assert.That(changed.PayloadJson == originalIdentity).IsFalse();
+            await Assert.That(changed.Value!.Fingerprint == originalIdentity).IsFalse();
             var refused = owner.Submit(changed);
             await Assert.That(Errors.Code(refused.Problem)).IsEqualTo(ErrorCode.Conflict);
             await Assert.That(refused.Problem?.Detail).IsEqualTo("The command ID was already used with different content.");

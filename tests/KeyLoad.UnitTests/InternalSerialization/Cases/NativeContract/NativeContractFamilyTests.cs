@@ -5,7 +5,6 @@ namespace KeyLoad.UnitTests.Features.InternalSerialization;
 
 internal sealed class NativeContractFamilyTests
 {
-    private const long OwnershipEpoch = 7;
     private static readonly byte[] RawKey = [0x00, 0xff, 0x80];
 
     [Test]
@@ -49,10 +48,10 @@ internal sealed class NativeContractFamilyTests
     [Test]
     public async Task AcIs001AllConcreteMutationsRetainBaseScopeAndDerivedFields()
     {
-        var request = new CommandRequest(Guid.NewGuid(), NativeContractCases.Partition, NativeContractCases.Mutations, OwnershipEpoch);
+        var request = new CommandRequest(Guid.NewGuid(), NativeContractCases.Partition, NativeContractCases.Mutations);
         var actual = NativeSerialization.Deserialize<CommandRequest>(NativeSerialization.Serialize(request));
         await Assert.That(actual.CommandId).IsEqualTo(request.CommandId);
-        await Assert.That(actual.OwnershipEpoch).IsEqualTo(OwnershipEpoch);
+        await Assert.That(actual.Partition).IsEqualTo(request.Partition);
         await Assert.That(actual.Mutations.Length).IsEqualTo(request.Mutations.Length);
         for (var index = 0; index < actual.Mutations.Length; index++)
         {

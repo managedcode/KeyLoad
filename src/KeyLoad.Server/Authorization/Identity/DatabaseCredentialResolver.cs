@@ -8,7 +8,7 @@ internal static class DatabaseCredentialResolver
 {
     /// <summary>Fetches the owned native principal envelope without publishing an operation execution identity.</summary>
     /// <param name="context">The actual authenticated public request and services.</param>
-    /// <param name="executionObserver">The optional borrowed passive fixture observer; no credentials are exposed.</param>
+    /// <param name="executionObserver">The optional borrowed execution observer; no credentials are exposed.</param>
     /// <returns>The current persisted principal reply, decoded by the owning adapter.</returns>
     internal static async Task<ReadOnlyMemory<byte>> ReadAsync(HttpContext context,
         IDatabaseAuthenticationExecutionObserver? executionObserver = null)

@@ -10,7 +10,7 @@ internal static class PostgresOperationExecutor
         PostgresSessionIdentity identity, PartitionRef partition, PostgresBoundPortal portal, int maximumRows, PostgresRetainedAdmission admission,
         PostgresSessionCatalog catalog, CancellationToken token)
     {
-        var mutationIdentity = catalog.TakeMutationIdentity(out var ownershipEpoch);
+        var mutationIdentity = catalog.TakeMutationIdentity();
         if (maximumRows < PostgresProtocol.AllRows)
         {
             throw Errors.Fail(ErrorCode.Validation, PostgresProtocol.Invalid);
@@ -32,7 +32,7 @@ internal static class PostgresOperationExecutor
                 AllowFullScan: portal.Statement.Rows && profile.AllowFullScan,
                 QueryDialectVersion: portal.Statement.Rows || portal.Statement.UsesProfileDialect
                     ? profile.QueryDialectVersion : SqlOperationProtocol.DefaultQueryDialectVersion,
-                CommandId: mutationIdentity, OwnershipEpoch: ownershipEpoch);
+                CommandId: mutationIdentity);
             var compilation = SqlOperationCompiler.CompileNativeSessionPlan(request, services.GetRequiredService<IOptions<DatabaseLimits>>(),
                 options.MaximumCanonicalPayloadBytes, services.GetRequiredService<IOptions<QueryExecutionOptions>>(),
                 portal.Statement.ParameterOids.Length, token);
@@ -83,7 +83,7 @@ internal static class PostgresOperationExecutor
         {
             return false;
         }
-        catalog.ArmMutationIdentity(contextId, compilation.ContextOwnershipEpoch);
+        catalog.ArmMutationIdentity(contextId);
         reply.Payload = McpBoundedJson.Serialize(true, maximumJsonBytes);
         token.ThrowIfCancellationRequested();
         portal.Completed = true;

@@ -55,9 +55,9 @@ internal sealed record NodeOptions
         CommandAdmission.Validate();
         HttpAdmission.Validate();
         McpMemory.Validate();
-        new KeyLoad.Clustering.ReplicaCopyOptions { SiloCount = SiloCount, ReplicaCount = ReplicaCount }.Validate();
         Span<byte> secret = stackalloc byte[SigningKeyBytes];
         if (Incarnation == Guid.Empty || string.IsNullOrWhiteSpace(DataDirectory)
+            || SiloCount < InitialCount || ReplicaCount < InitialCount || ReplicaCount > SiloCount
             || string.IsNullOrWhiteSpace(SiloName) || string.IsNullOrWhiteSpace(ClusterId)
             || string.IsNullOrWhiteSpace(SiloAddress) || SiloPort is <= IPEndPoint.MinPort or > IPEndPoint.MaxPort
             || !Convert.TryFromBase64String(SigningKey, secret, out var length) || length != secret.Length

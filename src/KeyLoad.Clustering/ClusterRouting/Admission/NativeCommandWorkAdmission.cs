@@ -1,6 +1,5 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using KeyLoad.Core;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.Clustering;
 
@@ -21,7 +20,7 @@ internal static class NativeCommandWorkAdmission
             work.Bind([]); // Dropping a resource cannot retain its closing lifetime.
             return;
         }
-        var operation = originalIntent ?? (CarriesVerifiedOperation(request, kind)
+        var operation = originalIntent ?? (CarriesVerifiedOperation(kind)
             ? database.OwnCommand(GrainNativePayload.Read<Command<DatabaseCommand>>(request.Payload))
             : database.CreateCommand(kind, request.Envelope.CommandId, principal.Id, clock.GetUtcNow(), request.Payload));
         if (operation.Value!.Kind != kind || operation.CommandId != request.Envelope.CommandId || operation.UserId != principal.Id)
@@ -43,6 +42,6 @@ internal static class NativeCommandWorkAdmission
             [.. work.OriginalProducer.Dependencies], policyEpoch);
     }
 
-    private static bool CarriesVerifiedOperation(DecodedGrainRequest request, OperationKind kind)
+    private static bool CarriesVerifiedOperation(OperationKind kind)
         => kind is OperationKind.OnlineTextPublicationPhase or OperationKind.Bm25CorpusPublicationPhase;
 }

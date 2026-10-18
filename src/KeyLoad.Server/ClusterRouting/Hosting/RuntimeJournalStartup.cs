@@ -1,7 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
 using KeyLoad.Clustering;
-using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.Server;
 
@@ -12,7 +11,7 @@ internal static class RuntimeJournalStartup
     private const string BootstrapCommandDomain = "keyload-runtime-journal-bootstrap-v1\0";
     private static readonly byte[] BootstrapDomain = Encoding.ASCII.GetBytes(BootstrapCommandDomain);
     internal static async Task InitializeAsync(IServiceProvider services, PartitionHost partition,
-        Func<CancellationToken, Task<PrincipalRecord>> authenticateAdministrator, NodeOptions options, ServerRuntimeOptions runtime,
+        Func<CancellationToken, Task<PrincipalRecord>> authenticateAdministrator, ServerRuntimeOptions runtime,
         CancellationToken cancellationToken)
     {
         var clock = services.GetRequiredService<TimeProvider>();

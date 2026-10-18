@@ -9,9 +9,7 @@ internal sealed class PostgresSessionCatalog(global::Microsoft.Extensions.Option
     private readonly Dictionary<string, PostgresBoundPortal> portals = new(StringComparer.Ordinal);
     private int retained;
     private Guid? mutationIdentity;
-    private long? mutationOwnershipEpoch;
     private const int MutationIdentityBytes = 16;
-    private const int MutationOwnershipEpochBytes = sizeof(long);
     internal PostgresPreparedStatement Statement(string name)
         => statements.TryGetValue(name, out var value) ? value : throw Errors.Fail(ErrorCode.Validation, Missing);
     internal PostgresBoundPortal Portal(string name)
@@ -75,7 +73,7 @@ internal sealed class PostgresSessionCatalog(global::Microsoft.Extensions.Option
             statements[name] = next;
         }
     }
-    internal void BeginSimpleQuery()
+    internal void BeginQueryMessage()
     {
         Sync();
         CloseStatement(string.Empty);
@@ -97,30 +95,22 @@ internal sealed class PostgresSessionCatalog(global::Microsoft.Extensions.Option
         portals.Clear();
     }
     internal void ArmMutationIdentity(Guid identity)
-
-        => ArmMutationIdentity(identity, null);
-    internal void ArmMutationIdentity(Guid identity, long? ownershipEpoch)
     {
         if (mutationIdentity.HasValue)
         {
             ClearMutationIdentity();
             throw ScriptDomOperationErrors.Invalid();
         }
-        if (identity == Guid.Empty || ownershipEpoch < SqlMutationIdentityFields.InitialOwnershipEpoch)
+        if (identity == Guid.Empty)
         {
             throw ScriptDomOperationErrors.Invalid();
         }
-        Resize(PostgresProtocol.EmptyBytes, checked(MutationIdentityBytes
-            + (ownershipEpoch.HasValue ? MutationOwnershipEpochBytes : PostgresProtocol.EmptyBytes)));
+        Resize(PostgresProtocol.EmptyBytes, MutationIdentityBytes);
         mutationIdentity = identity;
-        mutationOwnershipEpoch = ownershipEpoch;
     }
     internal Guid? TakeMutationIdentity()
-     => TakeMutationIdentity(out _);
-    internal Guid? TakeMutationIdentity(out long? ownershipEpoch)
     {
         var value = mutationIdentity;
-        ownershipEpoch = mutationOwnershipEpoch;
         ClearMutationIdentity();
         return value;
     }
@@ -128,10 +118,8 @@ internal sealed class PostgresSessionCatalog(global::Microsoft.Extensions.Option
     {
         if (mutationIdentity.HasValue)
         {
-            Resize(checked(MutationIdentityBytes
-                + (mutationOwnershipEpoch.HasValue ? MutationOwnershipEpochBytes : PostgresProtocol.EmptyBytes)), PostgresProtocol.EmptyBytes);
+            Resize(MutationIdentityBytes, PostgresProtocol.EmptyBytes);
             mutationIdentity = null;
-            mutationOwnershipEpoch = null;
         }
     }
 
@@ -150,7 +138,6 @@ internal sealed class PostgresSessionCatalog(global::Microsoft.Extensions.Option
         admission.Resize(retained, PostgresProtocol.EmptyBytes);
         retained = PostgresProtocol.EmptyBytes;
         mutationIdentity = null;
-        mutationOwnershipEpoch = null;
         statements.Clear();
         portals.Clear();
     }

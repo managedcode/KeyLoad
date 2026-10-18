@@ -11,7 +11,7 @@ internal sealed class NativeRequestWorkLease : IDisposable, IAsyncDisposable, IN
     private ResourceLifetimeWorkResultRetention? resultRetention;
     private readonly CancellationTokenSource cancellation = new();
     private readonly TaskCompletionSource<NativeRequestWorkOriginalSettlement> settlement = new(TaskCreationOptions.RunContinuationsAsynchronously);
-    private NativeRequestWorkLeasePublication publication = new();
+    private NativeRequestWorkLeasePublication publication;
     private bool contextFrozen;
     private Exception? originalFailure;
     private Exception? cleanupFailure;

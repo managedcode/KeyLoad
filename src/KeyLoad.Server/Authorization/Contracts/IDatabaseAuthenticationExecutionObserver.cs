@@ -1,6 +1,6 @@
 namespace KeyLoad.Server;
 
-/// <summary>Passive, borrowed fixture observation of actual standard credential execution.</summary>
+/// <summary>Passive, borrowed observation of actual standard credential execution.</summary>
 internal interface IDatabaseAuthenticationExecutionObserver
 {
     void Started(string httpRequestId, Guid authenticateRequestId);

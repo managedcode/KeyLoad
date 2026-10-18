@@ -1,3 +1,4 @@
+using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Core.Features.BlobStorage;
@@ -137,7 +138,22 @@ internal sealed class PartitionHost : IAsyncDisposable
 
     private async Task DisposeCoreAsync()
     {
-        await PartitionHostDisposal.RunAsync(this, () => stores.Dispose(), DisposeRowVisibility).ConfigureAwait(false);
+        var failures = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(() => PartitionHostDisposal.RunAsync(this, DisposeRowVisibility, failures), failures)
+            .ConfigureAwait(false);
+        try
+        {
+            stores.Dispose();
+        }
+        catch (Exception failure) when (NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
+        catch (Exception failure) when (!NativeCqrsBoundaryErrors.IsNonFatal(failure))
+        {
+            failures.Add(failure);
+        }
+        ServerFailureObserver.ThrowIfAny(failures);
         ownership.Host.ReleaseReturned();
     }
 

@@ -21,7 +21,6 @@ internal static class RetainedSubmissionBudgetFlow
 
     internal static async Task RunAsync()
     {
-        // Real local ordered native fixture; this is not a multi-voter/CLUSTER acknowledgement test.
         using var fixture = new TestDatabase();
         fixture.Configure(Collection, ResourceKind.Collection);
         var subject = new PrincipalRecord(Subject, fixture.Partition.TenantId,
@@ -33,7 +32,7 @@ internal static class RetainedSubmissionBudgetFlow
         var original = Issue(fixture, DocumentId);
         var committed = fixture.SubmitIssued(original);
         await Assert.That(Errors.Code(committed.Problem)).IsNull();
-        await Assert.That(committed.Get<CommitReceipt>().CommandId).IsEqualTo(original.Id);
+        await Assert.That(committed.Get<CommitReceipt>().CommandId).IsEqualTo(original.CommandId);
         var work = Work(fixture);
         await HealthyAsync(fixture, original, committed, work);
         await MissingAsync(fixture);

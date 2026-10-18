@@ -1,6 +1,4 @@
 using System.Collections.Immutable;
-using KeyLoad.Core;
-using KeyLoad.Core.Features.ResourceExecution;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;

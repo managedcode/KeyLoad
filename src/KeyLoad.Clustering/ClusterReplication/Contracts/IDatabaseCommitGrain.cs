@@ -1,5 +1,5 @@
-using ManagedCode.Communication.Commands;
 using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using Orleans.CodeGeneration;
 
 namespace KeyLoad.Clustering;

@@ -18,11 +18,11 @@ internal sealed class NativePublicCommandTransportTests
         using var database = new TestDatabase();
         var operation = NativePublicNormalizationFixture.Create(database, shape);
         var decoded = Decode(database, operation);
-        await Assert.That(decoded.CommandId).IsEqualTo(operation.Id);
-        await Assert.That(decoded.CommandKind).IsEqualTo(operation.Kind);
+        await Assert.That(decoded.CommandId).IsEqualTo(operation.CommandId);
+        await Assert.That(decoded.CommandKind).IsEqualTo(operation.Value!.Kind);
         var codec = new GrainRequestCodec(database.Database, TimeProvider.System, UnitRoutingOptions.Routing());
-        var request = codec.Verify(codec.CreateCommand(Guid.NewGuid(), operation.PrincipalId,
-            operation.Kind, operation.Id, decoded.Payload));
+        var request = codec.Verify(codec.CreateCommand(Guid.NewGuid(), operation.UserId!,
+            operation.Value.Kind, operation.CommandId, decoded.Payload));
         var actorKey = GrainPartitionResolver.Resolve(request);
         var executor = new GrainCommandExecutor(database.Database, new EmbeddedCoordinator(database.Database), TimeProvider.System, UnitRoutingOptions.Routing());
         var result = await SignedGrainRequestTestContext.ExecuteAsync(executor, request, actorKey, CancellationToken.None);
@@ -31,8 +31,8 @@ internal sealed class NativePublicCommandTransportTests
         var stored = NativePublicNormalizationFixture.Stored(database, operation);
         await Assert.That(Errors.Code(stored.Result.Problem)).IsEqualTo(result.Error);
         await Assert.That(stored.Result.Problem?.Detail).IsEqualTo(result.SafeDetail);
-        var retry = codec.Verify(codec.CreateCommand(Guid.NewGuid(), operation.PrincipalId,
-            operation.Kind, operation.Id, decoded.Payload));
+        var retry = codec.Verify(codec.CreateCommand(Guid.NewGuid(), operation.UserId!,
+            operation.Value.Kind, operation.CommandId, decoded.Payload));
         await Assert.That(retry.Envelope.RequestId).IsNotEqualTo(request.Envelope.RequestId);
         var repeated = await SignedGrainRequestTestContext.ExecuteAsync(executor, retry, actorKey, CancellationToken.None);
         await Assert.That(repeated).IsEqualTo(result);
@@ -41,7 +41,7 @@ internal sealed class NativePublicCommandTransportTests
 
     private static McpDecodedOperation Decode(TestDatabase database, Command<DatabaseCommand> operation)
     {
-        using var document = JsonDocument.Parse(operation.PayloadJson);
+        using var document = JsonDocument.Parse(NativePublicNormalizationFixture.PublicJson(operation));
         var arguments = new Dictionary<string, JsonElement>
         {
             [McpCatalogProtocol.Request] = document.RootElement.Clone()

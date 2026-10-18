@@ -49,7 +49,10 @@ internal sealed class ImplementationTermPermissions(SemanticModel model,
          symbol is IFieldSymbol
          {
              IsStatic: true, Name: nameof(ImplementationTermCatalog.DataContractTypes) or
-             nameof(ImplementationTermCatalog.DataRecordFamilyFields) or nameof(ImplementationTermCatalog.MeasurementTypes)
+             nameof(ImplementationTermCatalog.DataRecordFamilyFields) or nameof(ImplementationTermCatalog.DataReadKinds) or
+             nameof(ImplementationTermCatalog.DataRequestPhases) or nameof(ImplementationTermCatalog.DataToolDescriptionFields) or
+             nameof(ImplementationTermCatalog.DataRuntimeTypes) or nameof(ImplementationTermCatalog.MeasurementTypes) or
+             nameof(ImplementationTermCatalog.MeasurementMembers)
          } ||
          symbol is IMethodSymbol { Name: nameof(ImplementationTermCatalog.Read) or "Classify" or "Compound" });
 

@@ -19,18 +19,18 @@ internal sealed class GrainRequestIdentityScope : IDisposable
     internal GrainRequestIdentityScope(IServiceProvider runtimeServices, PrincipalRecord? principal,
         Guid requestId, Guid commandId, CancellationToken cancellationToken,
         global::Orleans.Runtime.SiloAddress? placement = null, Guid connectionId = default)
-        : this(runtimeServices, principal?.Id, requestId, commandId, cancellationToken, placement, connectionId)
+        : this(runtimeServices, principal?.Id, requestId, commandId, placement, connectionId, cancellationToken)
     {
     }
 
     internal static GrainRequestIdentityScope ForRuntimeJournal(IServiceProvider runtimeServices,
-        Guid requestId, Guid commandId, CancellationToken cancellationToken, Guid connectionId)
+        Guid requestId, Guid commandId, Guid connectionId, CancellationToken cancellationToken)
         => new(runtimeServices, RuntimeJournalIdentity.ProtectedPrincipalId, requestId, commandId,
-            cancellationToken, null, connectionId);
+            null, connectionId, cancellationToken);
 
     private GrainRequestIdentityScope(IServiceProvider runtimeServices, string? subject,
-        Guid requestId, Guid commandId, CancellationToken cancellationToken,
-        global::Orleans.Runtime.SiloAddress? placement, Guid connectionId)
+        Guid requestId, Guid commandId, global::Orleans.Runtime.SiloAddress? placement,
+        Guid connectionId, CancellationToken cancellationToken)
     {
         var state = new GrainRequestContextState(requestId, commandId, connectionId,
             runtimeServices.GetService<ILocalSiloDetails>()?.SiloAddress);

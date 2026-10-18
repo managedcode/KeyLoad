@@ -1,5 +1,4 @@
 using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 namespace KeyLoad.Clustering.Features.Search;
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(OnlineTextRequestScope.CapabilityResultAlias)]

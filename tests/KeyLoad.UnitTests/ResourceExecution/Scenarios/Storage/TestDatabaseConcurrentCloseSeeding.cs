@@ -11,13 +11,13 @@ internal static class TestDatabaseConcurrentCloseSeeding
             [new PutDocument(TestDatabaseConcurrentCloseProtocol.Collection, TestDatabaseConcurrentCloseProtocol.Document,
                 TestDatabaseConcurrentCloseProtocol.Body, TestDatabaseConcurrentCloseProtocol.MissingRevision)]);
         var result = fixture.Submit(OperationKind.Batch, command, id: id);
-        var expectedIndex = checked(before.CommittedIndex + TestDatabaseConcurrentCloseProtocol.IndexStep);
+        var expectedIndex = checked(before.AppliedPosition + TestDatabaseConcurrentCloseProtocol.IndexStep);
         var expected = new CommitReceipt(id, new(fixture.Store.Identity.Incarnation, fixture.Partition.AtomicPartitionId, expectedIndex), [new(TestDatabaseConcurrentCloseProtocol.MutationKind, TestDatabaseConcurrentCloseProtocol.Collection,
                 TestDatabaseConcurrentCloseProtocol.Document, TestDatabaseConcurrentCloseProtocol.Revision)], DurabilityProfile.ProcessDurable, 1);
         await TestDatabaseConcurrentCloseAssertions.ReceiptAsync(result, expected);
         var cut = fixture.ReadCanonicalCut();
-        await Assert.That(cut.LastIndex).IsEqualTo(expectedIndex);
-        await Assert.That(cut.CommittedIndex).IsEqualTo(expectedIndex);
+        await Assert.That(cut.AppliedPosition).IsEqualTo(expectedIndex);
+        await Assert.That(cut.StorePosition).IsEqualTo(checked(before.StorePosition + TestDatabaseConcurrentCloseProtocol.IndexStep));
         var original = fixture.ReadStoredOutcome(id).PreparedCommand ?? throw new InvalidOperationException();
         await Assert.That(original.CommandId).IsEqualTo(id);
         await Assert.That(original.Value!.Kind).IsEqualTo(OperationKind.Batch);

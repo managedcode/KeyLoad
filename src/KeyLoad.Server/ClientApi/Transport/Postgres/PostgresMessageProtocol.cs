@@ -2,7 +2,7 @@ namespace KeyLoad.Server;
 
 internal static class PostgresMessageProtocol
 {
-    internal const byte SimpleQuery = (byte)'Q';
+    internal const byte QueryMessage = (byte)'Q';
     internal const byte Parse = (byte)'P';
     internal const byte Bind = (byte)'B';
     internal const byte Describe = (byte)'D';

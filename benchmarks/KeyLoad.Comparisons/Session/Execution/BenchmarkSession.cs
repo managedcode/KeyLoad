@@ -2,7 +2,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons;
 
-/// <summary>Orders distinct measured tests over one fixture-owned native database without resetting its data.</summary>
+/// <summary>Orders distinct measurements over one session-owned native database without resetting its data.</summary>
 public sealed class BenchmarkSession
 {
     private readonly BenchmarkSessionDocumentWorkload documents;

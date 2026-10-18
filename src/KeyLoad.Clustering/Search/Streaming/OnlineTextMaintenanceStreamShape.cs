@@ -14,7 +14,6 @@ internal sealed class OnlineTextMaintenanceStreamShape(Guid requestId)
             || chunk.ProgressResult is not { IsSuccess: true, Value: not null } result
             || result.Problem is not null || result.Value is not { } progress
             || progress.RequestId != requestId || progress.AnnPhase is not null || progress.TextPhase is not null
-            || progress.EventFeedTail is not null
             || progress.OnlineTextPhase is not { } next || chunk.Final is not null || chunk.EventId is not null
             || chunk.Message != OnlineTextProgress.PhaseCompleted
             || chunk.EventType != CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>.ResolveEventType(chunk.Kind)

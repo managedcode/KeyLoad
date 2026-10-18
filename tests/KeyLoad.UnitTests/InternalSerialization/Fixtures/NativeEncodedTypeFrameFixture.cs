@@ -13,7 +13,6 @@ internal static class NativeEncodedTypeFrameFixture
     private const string Collection = "framing-records";
     private const string DocumentId = "framing-document";
     private const string DocumentJson = "{\"value\":\"界λ\",\"count\":7}";
-    private const long OwnershipEpoch = 7;
     private const long ExpectedRevision = 3;
     private const long StoredMessages = 2;
     private const long InFlightMessages = 3;
@@ -27,7 +26,7 @@ internal static class NativeEncodedTypeFrameFixture
 
     internal static CommandRequest Command() => new(CommandId,
         new(Tenant, Database, Domain, PartitionKey),
-        [new PutDocument(Collection, DocumentId, DocumentJson, ExpectedRevision)], OwnershipEpoch);
+        [new PutDocument(Collection, DocumentId, DocumentJson, ExpectedRevision)]);
 
     internal static QueueCounters Counters() => new(StoredMessages, StoredBytes, InFlightMessages, InFlightBytes, NextReadySequence);
 

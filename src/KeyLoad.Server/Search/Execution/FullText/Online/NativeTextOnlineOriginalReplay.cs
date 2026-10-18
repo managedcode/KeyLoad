@@ -19,7 +19,7 @@ internal sealed class NativeTextOnlineOriginalReplay(DatabaseEngine database, Se
         {
             return null;
         }
-        var result = original.Get<OnlineTextIndexMaintenanceResult>();
+        var result = original.Value.Get<OnlineTextIndexMaintenanceResult>();
         var publication = database.ReadOnlineTextOriginalPublication(principal.Id, request.Request, budget)
             ?? throw NativeTextErrors.Ownership();
         var retained = sessions.CaptureOriginals(principal.Id, request.Request, budget);

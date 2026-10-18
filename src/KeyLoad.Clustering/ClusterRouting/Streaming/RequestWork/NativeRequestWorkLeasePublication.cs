@@ -1,5 +1,3 @@
-using System.Collections.Immutable;
-
 namespace KeyLoad.Clustering;
 
 /// <summary>Holds publication and completion-observer state under the original request owner gate.</summary>

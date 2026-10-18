@@ -28,7 +28,7 @@ public sealed class DueCoordinationOptions
     /// <summary>Gets or sets the cancellation deadline shared by service and coordinator dispatch.</summary>
     public TimeSpan DispatchDeadline { get; set; } = TimeSpan.FromSeconds(DefaultDispatchDeadlineSeconds);
 
-    /// <summary>Gets or sets the fallback polling interval when no applied-position change arrives.</summary>
+    /// <summary>Gets or sets the interval between bounded observations of canonical due work.</summary>
     public TimeSpan PollInterval { get; set; } = TimeSpan.FromSeconds(DefaultPollIntervalSeconds);
 
     /// <summary>Gets or sets the minimum interval between consecutive discovery cycle starts.</summary>

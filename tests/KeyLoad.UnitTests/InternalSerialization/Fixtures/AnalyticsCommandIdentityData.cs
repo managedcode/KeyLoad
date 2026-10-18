@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Text.Json;
 
 namespace KeyLoad.UnitTests.Features.InternalSerialization;
 
@@ -38,4 +39,56 @@ internal static class AnalyticsCommandIdentityData
 
     internal static CommandRequest Request(TestDatabase db, Guid id, bool delete, bool reverse, bool changed = false)
         => new(id, db.Partition, [new PutDocument(Collection, Document, Json, 0), Analytics(delete, reverse, changed)]);
+
+    internal static string CanonicalIdentity(Guid id, PartitionRef partition, bool delete)
+    {
+        var document = new
+        {
+            Access = (RowAccess?)null,
+            Collection,
+            ExpectedRevision = 0L,
+            ExplicitReplacement = false,
+            Id = Document,
+            Json,
+            Kind = "putDocument",
+            Resource = Collection
+        };
+        object analytics = delete ? new
+        {
+            ExpectedRevisions = new SortedDictionary<string, long>(StringComparer.Ordinal) { [First] = 1, [Last] = 1 },
+            Kind = AnalyticsStoreProtocol.DeleteKind,
+            Resource = Store,
+            Store
+        } : new
+        {
+            Events = new[] { CanonicalEvent(First), CanonicalEvent(Last) },
+            ExpectedRevisions = new SortedDictionary<string, long>(StringComparer.Ordinal) { [First] = 0, [Last] = 0 },
+            Kind = AnalyticsStoreProtocol.UpsertKind,
+            Resource = Store,
+            Store
+        };
+        return JsonSerializer.Serialize(new
+        {
+            CommandId = id,
+            Mutations = new[] { document, analytics },
+            Partition = new
+            {
+                partition.AtomicPartitionId,
+                partition.DatabaseId,
+                partition.PartitionKey,
+                partition.TenantId,
+                partition.TransactionDomainId
+            }
+        }, JsonDefaults.Options);
+    }
+
+    private static object CanonicalEvent(string id) => new
+    {
+        Dimensions = new SortedDictionary<string, string>(StringComparer.Ordinal) { [First] = "alpha", [Last] = "omega" },
+        Id = id,
+        Links = Array.Empty<EntityRef>(),
+        Metrics = new SortedDictionary<string, double>(StringComparer.Ordinal) { [First] = 2d, [Last] = 4d },
+        RowAccess = (RowAccess?)null,
+        Timestamp = From.AddMinutes(1)
+    };
 }

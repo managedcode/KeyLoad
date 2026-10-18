@@ -30,7 +30,13 @@ internal static class ImplementationTermCatalog
     internal const string SampleFieldsType = "KeyLoad.Core.Features.InternalSerialization.SampleReadScopeFields";
     internal const string DataAssembly = "KeyLoad.Abstractions";
     internal const string DataCoreAssembly = "KeyLoad.Core";
+    internal const string DataRuntimeAssembly = "KeyLoad.Clustering";
+    internal const string DataRuntimeNamespace = "KeyLoad.Clustering";
+    internal const string DataServerAssembly = "KeyLoad.Server";
     internal const string DataRecordFamiliesType = "KeyLoad.Core.Features.ClusterRouting.Contracts.PartitionRecordFamilies";
+    internal const string DataReadKindType = "KeyLoad.Clustering.GrainReadKind";
+    internal const string DataRequestPhaseType = "KeyLoad.Clustering.GrainRequestPhase";
+    internal const string DataToolDescriptionsType = "KeyLoad.Server.McpToolDescriptions";
     internal const string DataNamespace = "KeyLoad";
     internal const string DataFeatureNamespaceSuffix = ".Features.TimeSeries";
     internal static readonly string[] NativeNamespaces =
@@ -57,6 +63,23 @@ internal static class ImplementationTermCatalog
         "Sample", "SampleChunkBlock", "SampleChunkCorrection", "SampleChunkManifest", "SampleChunkWindow",
         "SampleIdentity", "SampleRetention", "SampleRollup", "SampleSequence"
     ];
+    internal static readonly string[] DataReadKinds =
+    [
+        "Samples", "LatestSample", "AggregateSamples", "AggregateSampleWindows", "SampleRetention",
+        "SampleRollup", "SampleChunkWindow"
+    ];
+    internal static readonly string[] DataRequestPhases =
+    [
+        "SampleChunkAdmissionPersisted", "SampleChunkNativeJobReturned", "SampleChunkAdmissionRefused"
+    ];
+    internal static readonly string[] DataToolDescriptionFields =
+    [
+        "SeriesLatest", "SeriesAggregate", "SeriesWindows", "SeriesSampleChunkWindow"
+    ];
+    internal static readonly string[] DataRuntimeTypes =
+    [
+        "ISampleChunkWorkerGrain", "SampleChunkWorkerGrain", "ISampleChunkCoordinatorGrain", "SampleChunkCoordinatorGrain"
+    ];
     internal static readonly string[] NativeModelContracts =
     [
         "Orleans.Serialization.Codecs.IFieldCodec`1", "Orleans.Serialization.Cloning.IDeepCopier`1",
@@ -71,6 +94,15 @@ internal static class ImplementationTermCatalog
         "KeyLoad.AdminNodeSnapshot", "KeyLoad.OperationalAnalyticsCounters",
         "KeyLoad.OperationalAnalyticsReport", "KeyLoad.OperationalAnalyticsRow",
         "KeyLoad.SiteTests.Features.BenchmarkComparisons.SiteIsolatedFixture"
+    ];
+    internal static readonly string[] MeasurementMembers =
+    [
+        "KeyLoad.Comparisons.NativeComparisonExecutionOptions.ResourceSampleIntervalMilliseconds",
+        "KeyLoad.Comparisons.NativeComparisonOperationalPolicy.DefaultResourceSampleIntervalMilliseconds",
+        "KeyLoad.Comparisons.NativeComparisonOperationalPolicy.MaximumResourceSampleIntervalMilliseconds",
+        "KeyLoad.Comparisons.VectorComparisonProfile.LatencySampleCount",
+        "KeyLoad.Comparisons.VectorComparisonProfileValues.LatencySampleCount",
+        "KeyLoad.Comparisons.VectorProfileJsonFields.LatencySampleCount"
     ];
 
     private static readonly Regex Words = new("[A-Z]?[a-z]+|[A-Z]+(?![a-z])", RegexOptions.CultureInvariant);

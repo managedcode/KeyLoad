@@ -148,13 +148,13 @@ internal static class McpGatewayMetaArgumentReader
         return query;
     }
 
-    private static int ReadOptionalInt(IDictionary<string, JsonElement> arguments, string key, int fallback, int maximum)
+    private static int ReadOptionalInt(IDictionary<string, JsonElement> arguments, string key, int defaultValue, int maximum)
     {
         const int ParsedValidationBoundary = 1;
 
         if (!arguments.TryGetValue(key, out var value))
         {
-            return fallback;
+            return defaultValue;
         }
         if (value.ValueKind != JsonValueKind.Number || !value.TryGetInt32(out var parsed) || parsed < ParsedValidationBoundary || parsed > maximum)
         {

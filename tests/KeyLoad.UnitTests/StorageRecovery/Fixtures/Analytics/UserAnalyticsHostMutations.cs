@@ -8,14 +8,8 @@ namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
 internal static class UserAnalyticsHostMutations
 {
-    internal static async Task BootstrapAsync(PartitionHostRecoveryFixture fixture, PartitionHost host, CancellationToken token)
+    internal static async Task BootstrapAsync(PartitionHost host, CancellationToken token)
     {
-        var bootstrap = new BootstrapPhysicalShardCatalogRequest(1, 0, fixture.Options.PhysicalShardId,
-            host.Configuration.Incarnation, host.Configuration.VoterIds);
-        var operation = host.Database.CreateCommand(OperationKind.BootstrapPhysicalShardCatalog,
-            PhysicalShardCatalogIdentity.CreateBootstrapCommandId(fixture.Options.PhysicalShardId),
-            PartitionStoreProtocol.AdministratorId, TimeProvider.System.GetUtcNow(), NativeSerialization.Serialize(bootstrap));
-        await UserAnalyticsHostAssertions.SameAsync(true, host.Database.ApplyEmbedded(operation, token).Get<bool>());
         var definition = new ResourceDefinition(P.Store, ResourceKind.AnalyticsStore, P.Domain)
         {
             AnalyticsSchema = new([P.Region], [P.Amount])
@@ -36,7 +30,7 @@ internal static class UserAnalyticsHostMutations
         var operation = host.Database.CreateCommand(OperationKind.Batch, command.CommandId,
             PartitionStoreProtocol.AdministratorId, TimeProvider.System.GetUtcNow(), NativeSerialization.Serialize(command), work);
         var expected = new CommitReceipt(command.CommandId, new(host.Database.Store.Identity.Incarnation,
-            P.Partition.AtomicPartitionId, checked(host.Database.Store.Position + 1)), [new(kind, P.Store, id, generation)], DurabilityProfile.ProcessDurable, 1);
+            P.Partition.AtomicPartitionId, checked(host.Database.LastApplied + 1)), [new(kind, P.Store, id, generation)], DurabilityProfile.ProcessDurable, 1);
         var actual = host.Database.Apply(operation).Get<CommitReceipt>();
         await UserAnalyticsHostAssertions.SameAsync(expected, actual);
         await Assert.That(actual.Mutations.Single().CompositionReferences.IsEmpty).IsTrue();

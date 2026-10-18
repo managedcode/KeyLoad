@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Server;
+using KeyLoad.UnitTests.Features.ClusterRouting;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
@@ -13,12 +14,10 @@ internal sealed class PartitionStoragePublicationBorrowFixture : IAsyncDisposabl
     private const string AdministratorPrefix = "root.";
     private const int SecretBytes = 32;
     private const int NoFailures = 0;
-    private const string VoterA = "https://127.0.0.1:5501";
-    private const string VoterB = "https://127.0.0.1:5502";
-    private const string VoterC = "https://127.0.0.1:5503";
     private const string UnknownOwner = "The original native publication owner has not joined; retain its root.";
     private readonly NodeOptions options;
     private PartitionHostApplicationOwner? owner;
+    private RequestCqrsHostedRuntimeFixture? native;
     private Task? closing;
     private bool retained;
 
@@ -28,12 +27,8 @@ internal sealed class PartitionStoragePublicationBorrowFixture : IAsyncDisposabl
         options = new()
         {
             DataDirectory = DirectoryPath,
-            PublicEndpoint = VoterA,
-            Peers = [VoterA, VoterB, VoterC],
-            PhysicalShardId = Guid.NewGuid(),
             Incarnation = Guid.NewGuid(),
             SigningKey = Secret(),
-            PeerSecret = Secret(),
             AdminKey = AdministratorPrefix + Secret()
         };
         options.Validate();
@@ -52,9 +47,14 @@ internal sealed class PartitionStoragePublicationBorrowFixture : IAsyncDisposabl
         {
             await CloseOwnerAsync().ConfigureAwait(false);
         }
+        if (native is null)
+        {
+            native = new();
+            await native.InitializeAsync(TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
+        }
         var runtime = ServerRuntimeTestOptions.Runtime(options);
         owner = new(runtime, new AuthorizationPolicy(), new CommandAdmissionGovernor(runtime.CommandAdmission),
-            TimeProvider.System, NullLogger<ReplicaConsensus>.Instance);
+            TimeProvider.System, NullLogger<PartitionHost>.Instance, native.Grains);
         await owner.OpenAsync().ConfigureAwait(false);
     }
 
@@ -94,6 +94,10 @@ internal sealed class PartitionStoragePublicationBorrowFixture : IAsyncDisposabl
             {
                 failures.Add(new InvalidOperationException(UnknownOwner));
             }
+        }
+        if (native is not null)
+        {
+            await ServerFailureObserver.ObserveAsync(() => native.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         }
         if (failures.Count == NoFailures && !retained && Directory.Exists(DirectoryPath))
         {

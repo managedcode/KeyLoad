@@ -39,8 +39,7 @@ internal static class ScriptDomValuesInsertOperation
         parameters.CompleteOptional();
         checkBudget();
         token.ThrowIfCancellationRequested();
-        return new(identity, request.Partition, mutations.MoveToImmutable(),
-            request.OwnershipEpoch ?? SqlMutationIdentityFields.InitialOwnershipEpoch);
+        return new(identity, request.Partition, mutations.MoveToImmutable());
     }
     private const string RowsExceeded = "The SQL INSERT exceeds its existing mutation limit.";
 }

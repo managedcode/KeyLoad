@@ -76,6 +76,16 @@ internal static class ImplementationTermSymbols
             family.ToDisplayString() == ImplementationTermCatalog.DataRecordFamiliesType &&
             family.ContainingAssembly.Name == ImplementationTermCatalog.DataCoreAssembly &&
             Array.Exists(ImplementationTermCatalog.DataRecordFamilyFields, name => name == symbol.Name) ||
+            symbol is IFieldSymbol { ContainingType: { TypeKind: TypeKind.Enum } runtime } &&
+            runtime.ContainingAssembly.Name == ImplementationTermCatalog.DataRuntimeAssembly &&
+            (runtime.ToDisplayString() == ImplementationTermCatalog.DataReadKindType &&
+             Array.Exists(ImplementationTermCatalog.DataReadKinds, name => name == symbol.Name) ||
+             runtime.ToDisplayString() == ImplementationTermCatalog.DataRequestPhaseType &&
+             Array.Exists(ImplementationTermCatalog.DataRequestPhases, name => name == symbol.Name)) ||
+            symbol is IFieldSymbol { IsConst: true, Type.SpecialType: SpecialType.System_String, ContainingType: { } descriptions } &&
+            descriptions.ContainingAssembly.Name == ImplementationTermCatalog.DataServerAssembly &&
+            descriptions.ToDisplayString() == ImplementationTermCatalog.DataToolDescriptionsType &&
+            Array.Exists(ImplementationTermCatalog.DataToolDescriptionFields, name => name == symbol.Name) ||
             HasPath(symbol, ImplementationTermCatalog.TimeSeriesPath) ||
             HasPath(ValueType(symbol), ImplementationTermCatalog.TimeSeriesPath) ||
             symbol?.ContainingType?.ToDisplayString() == ImplementationTermCatalog.SampleFieldsType ||
@@ -92,6 +102,8 @@ internal static class ImplementationTermSymbols
     }
 
     internal static bool Measurement(ISymbol? symbol) =>
+        symbol is IFieldSymbol or IPropertySymbol && symbol.ContainingAssembly.Name == "KeyLoad.Comparisons" &&
+        Array.Exists(ImplementationTermCatalog.MeasurementMembers, member => member == symbol.ToDisplayString()) ||
         symbol is IFieldSymbol { Name: "Samples", ContainingType: { } owner } &&
         owner.ToDisplayString() == "KeyLoad.SiteTests.Features.BenchmarkComparisons.SiteIsolatedFields" ||
         TypeMeans(ValueType(symbol), MeasurementType, new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default)) ||
@@ -110,7 +122,10 @@ internal static class ImplementationTermSymbols
          type.ContainingNamespace?.ToDisplayString().EndsWith(ImplementationTermCatalog.DataFeatureNamespaceSuffix, StringComparison.Ordinal) == true ||
          type.ContainingAssembly?.Name == ImplementationTermCatalog.DataAssembly &&
          type.ContainingNamespace?.ToDisplayString() == ImplementationTermCatalog.DataNamespace &&
-         Array.Exists(ImplementationTermCatalog.DataContractTypes, name => name == type.Name);
+         Array.Exists(ImplementationTermCatalog.DataContractTypes, name => name == type.Name) ||
+         type.ContainingAssembly?.Name == ImplementationTermCatalog.DataRuntimeAssembly &&
+         type.ContainingNamespace?.ToDisplayString() == ImplementationTermCatalog.DataRuntimeNamespace &&
+         Array.Exists(ImplementationTermCatalog.DataRuntimeTypes, name => name == type.Name);
 
     private static bool TypeMeans(ITypeSymbol? type, Func<ITypeSymbol, bool> accepts, HashSet<ITypeSymbol> visited)
     {

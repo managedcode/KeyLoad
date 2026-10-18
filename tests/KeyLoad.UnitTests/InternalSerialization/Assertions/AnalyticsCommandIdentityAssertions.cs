@@ -24,7 +24,15 @@ internal static class AnalyticsCommandIdentityAssertions
 
     internal static async Task OrderAsync(Command<DatabaseCommand> operation, bool delete)
     {
-        using var document = JsonDocument.Parse(operation.PayloadJson);
+        var request = NativeSerialization.Deserialize<CommandRequest>(operation.Value!.Input.Span);
+        using var document = JsonSerializer.SerializeToDocument(request, JsonDefaults.Options);
+        await Assert.That(operation.Value.Fingerprint).IsEqualTo(JsonData.Fingerprint(new
+        {
+            Id = operation.CommandId,
+            Kind = operation.Value.Kind,
+            PrincipalId = operation.UserId!,
+            PayloadJson = D.CanonicalIdentity(request.CommandId, request.Partition, delete)
+        }));
         var mutations = document.RootElement.GetProperty(MutationsKey);
         await Assert.That(mutations[0].GetProperty(KindKey).GetString()).IsEqualTo("putDocument");
         await Assert.That(mutations[0].GetProperty(JsonKey).GetString()).IsEqualTo(D.Json);
@@ -46,7 +54,7 @@ internal static class AnalyticsCommandIdentityAssertions
     }
 
     private static async Task KeysAsync(JsonElement map)
-        => await Assert.That(map.EnumerateObject().Select(property => property.Name)
+        => await Assert.That(map.EnumerateObject().Select(property => property.Name).Order(StringComparer.Ordinal)
             .SequenceEqual([D.First, D.Last], StringComparer.Ordinal)).IsTrue();
 
     internal static EntityRef Reference(SafeProjectorOperationDatabase owner) => owner.Store.Read(view =>
@@ -84,15 +92,14 @@ internal static class AnalyticsCommandIdentityAssertions
         var image = TeamRowPolicyAssertions.Image(owner.Store);
         var position = owner.Store.Position;
         var applied = owner.Database.LastApplied;
-        var journal = owner.JournalCut();
+        var cut = owner.ReadCanonicalCut();
         var outbox = owner.Database.GetOutboxStatus(D.Root, owner.Source.Partition);
         await action();
         await Assert.That(NativeSerialization.Serialize(owner.Store.Identity).SequenceEqual(identity)).IsTrue();
         await Assert.That(TeamRowPolicyAssertions.Image(owner.Store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
         await Assert.That(owner.Store.Position).IsEqualTo(position);
         await Assert.That(owner.Database.LastApplied).IsEqualTo(applied);
-        // This exact native fixture resolves an already retained ID/scope without appending again.
-        await Assert.That(owner.JournalCut()).IsEqualTo(journal);
+        await Assert.That(owner.ReadCanonicalCut()).IsEqualTo(cut);
         await O.EqualAsync(outbox, owner.Database.GetOutboxStatus(D.Root, owner.Source.Partition));
     }
 
@@ -101,26 +108,27 @@ internal static class AnalyticsCommandIdentityAssertions
         using var database = new TestDatabase();
         var id = Guid.NewGuid();
         var request = new CommandRequest(id, database.Partition, [new PutDocument(D.Collection, D.Document, D.Json, 0)]);
-        await OldIdentityAsync(database.Database, OperationKind.Batch, id, request);
+        await NativeIdentityAsync(database.Database, OperationKind.Batch, id, request);
         var definition = new ResourceDefinition(D.Collection, ResourceKind.Collection, database.Partition.TransactionDomainId);
-        await OldIdentityAsync(database.Database, OperationKind.ConfigureResource, Guid.NewGuid(),
+        await NativeIdentityAsync(database.Database, OperationKind.ConfigureResource, Guid.NewGuid(),
             new ConfigureResourceRequest(database.Partition.TenantId, database.Partition.DatabaseId, definition));
     }
 
-    private static async Task OldIdentityAsync<T>(DatabaseEngine database, OperationKind kind, Guid id, T request)
+    private static async Task NativeIdentityAsync<T>(DatabaseEngine database, OperationKind kind, Guid id, T request)
     {
-        var operation = database.CreateCommand(kind, id, D.Root, database.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(request));
+        var identity = JsonSerializer.Serialize(request, JsonDefaults.Options);
+        var operation = database.CreateCommand(kind, id, D.Root, database.EvaluationClock.GetUtcNow(), identity);
         var work = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock,
             TestContext.Current!.Execution.CancellationToken);
         var charged = database.CreateCommand(kind, id, D.Root, new DateTimeOffset(operation.Timestamp), NativeSerialization.Serialize(request), work);
-        await Assert.That(charged.PayloadJson).IsEqualTo(operation.PayloadJson);
-        await Assert.That(operation.PayloadJson).IsEqualTo(JsonSerializer.Serialize(request, JsonDefaults.Options));
+        await Assert.That(charged.Value!.Input.Span.SequenceEqual(operation.Value!.Input.Span)).IsTrue();
+        await Assert.That(charged.Value.Fingerprint).IsEqualTo(operation.Value.Fingerprint);
         await Assert.That(DatabaseCommandFingerprint.Compute(operation)).IsEqualTo(JsonData.Fingerprint(new
         {
-            operation.CommandId,
-            operation.Value!.Kind,
-            operation.UserId!,
-            operation.PayloadJson
+            Id = operation.CommandId,
+            Kind = operation.Value.Kind,
+            PrincipalId = operation.UserId!,
+            PayloadJson = identity
         }));
     }
 }

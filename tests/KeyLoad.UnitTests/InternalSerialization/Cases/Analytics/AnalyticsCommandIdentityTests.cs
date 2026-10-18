@@ -9,6 +9,6 @@ internal sealed class AnalyticsCommandIdentityTests
         => AnalyticsCommandIdentityFlow.RunAsync(delete, TestContext.Current!.Execution.CancellationToken);
 
     [Test]
-    public Task NonAnalyticsIssuanceRetainsOriginalJsonAndFrozenFingerprint()
+    public Task NonAnalyticsIssuanceRetainsPublicIdentityInFrozenFingerprint()
         => AnalyticsCommandIdentityAssertions.NonAnalyticsAsync();
 }

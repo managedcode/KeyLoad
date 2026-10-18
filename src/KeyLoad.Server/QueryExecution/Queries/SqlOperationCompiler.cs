@@ -25,10 +25,6 @@ internal static class SqlOperationCompiler
     {
         SqlOperationBounds.Validate(request, limitsOptions, maximumPayloadBytes, queryOptions, token);
         SqlOriginalMutationIdentity.ValidateDeclared(request.CommandId);
-        if (request.OwnershipEpoch < SqlMutationIdentityFields.InitialOwnershipEpoch)
-        {
-            throw ScriptDomOperationErrors.Invalid();
-        }
         if (positionalParameterCount is < MinimumNativeParameterCount || positionalParameterCount > queryOptions.Value.MaximumParameters)
         {
             throw ScriptDomOperationErrors.Invalid();
@@ -41,19 +37,13 @@ internal static class SqlOperationCompiler
         }
         if (nativeIdentityControl && statement is global::Microsoft.SqlServer.TransactSql.ScriptDom.SetCommandStatement control)
         {
-            if (request.CommandId.HasValue || request.OwnershipEpoch.HasValue || request.AllowFullScan || request.Cursor is not null
+            if (request.CommandId.HasValue || request.AllowFullScan || request.Cursor is not null
                 || request.Parameters is { Count: > MinimumNativeParameterCount }
                 || positionalParameterCount != MinimumNativeParameterCount)
             {
                 throw ScriptDomOperationErrors.Invalid();
             }
-            var controlIdentity = ScriptDomContextIdentity.ReadControl(control, budget.Check, token);
-            return new(null, controlIdentity.Identity, controlIdentity.OwnershipEpoch);
-        }
-        if (request.OwnershipEpoch.HasValue && statement is not global::Microsoft.SqlServer.TransactSql.ScriptDom.InsertStatement
-            { InsertSpecification.InsertSource: global::Microsoft.SqlServer.TransactSql.ScriptDom.ValuesInsertSource })
-        {
-            throw ScriptDomOperationErrors.Invalid();
+            return new(null, ScriptDomContextIdentity.Read(control, budget.Check, token));
         }
         var operation = statement switch
         {

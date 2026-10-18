@@ -1,5 +1,5 @@
-using ManagedCode.Communication;
 using KeyLoad.Clustering;
+using ManagedCode.Communication;
 
 namespace KeyLoad.Server.Features.Search;
 

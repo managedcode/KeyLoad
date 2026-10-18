@@ -1,4 +1,3 @@
-using KeyLoad.Clustering;
 using ZoneTree.AbstractFileStream;
 
 namespace KeyLoad.Server.Features.Search;
@@ -67,20 +66,6 @@ internal sealed class NativeTextBoundedStreamWrites(IFileStream original, Native
         }
         ServerFailureObserver.Observe(Exit, failures);
         ServerFailureObserver.ThrowIfAny(failures);
-    }
-
-    internal async ValueTask WriteAsync(ReadOnlyMemory<byte> bytes, CancellationToken token)
-    {
-        token.ThrowIfCancellationRequested();
-        var reservation = BeginWrite(bytes.Length);
-        var failures = new List<Exception>();
-        try
-        {
-            await original.WriteAsync(bytes, token).ConfigureAwait(false);
-        }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        Complete(reservation, failures);
     }
 
     internal void ThrowRetained()

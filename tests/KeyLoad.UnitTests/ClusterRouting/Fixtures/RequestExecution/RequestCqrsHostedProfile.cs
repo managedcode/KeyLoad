@@ -15,7 +15,8 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 internal sealed class RequestCqrsHostedProfile(TimeProvider clock, IOptions<GrainRoutingOptions> routing,
     IGrainRequestPhaseObserver? observer, IGrainRequestPurposeObserver? purposeObserver,
-    bool nativeText, bool nativeAnn, DatabaseLimits? limits, RequestCqrsHostedClusterNode? clusterNode = null)
+    bool nativeText, bool nativeAnn, DatabaseLimits? limits, RequestCqrsHostedClusterNode? clusterNode = null,
+    Func<IServiceProvider, ILifecycleParticipant<ISiloLifecycle>>? lifecycleParticipantFactory = null)
 {
     internal const string Root = "root";
     private const string Credential = "root.unit-test-credential-32-characters";
@@ -36,6 +37,7 @@ internal sealed class RequestCqrsHostedProfile(TimeProvider clock, IOptions<Grai
     internal bool NativeAnn { get; } = nativeAnn;
     internal NativeRuntimeTestOptions Timing { get; } = new();
     internal RequestCqrsHostedClusterNode? ClusterNode { get; } = clusterNode;
+    internal Func<IServiceProvider, ILifecycleParticipant<ISiloLifecycle>>? LifecycleParticipantFactory { get; } = lifecycleParticipantFactory;
 
     internal string[] Arguments(string directory, int siloPort)
     {

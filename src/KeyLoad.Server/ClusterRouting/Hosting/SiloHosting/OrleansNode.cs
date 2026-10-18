@@ -1,5 +1,4 @@
 using KeyLoad.Clustering;
-using KeyLoad.Core;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
@@ -7,7 +6,7 @@ namespace KeyLoad.Server;
 
 /// <summary>Borrows native Orleans hosting and the silo-local storage owner for public operations.</summary>
 internal sealed partial class OrleansNode(IServiceProvider applicationServices, IOptions<NodeOptions> nodeOptions,
-    ILoggerFactory loggerFactory, ServerRuntimeOptions runtimeOptions, TimeProvider? clock = null) : IAsyncDisposable
+    ILoggerFactory loggerFactory, ServerRuntimeOptions runtimeOptions) : IAsyncDisposable
 {
     private readonly Lock lifecycle = new();
     private readonly OrleansNodeRequestLifetime requestLifetime = new(runtimeOptions.GrainRouting);
@@ -79,7 +78,7 @@ internal sealed partial class OrleansNode(IServiceProvider applicationServices, 
         var settings = nodeOptions.Value;
         await RuntimeJournalStartup.InitializeAsync(applicationServices, Partition,
             token => NativeAdministratorAuthenticationRequests.StartupAsync(this, settings.AdminKey,
-                runtimeOptions.McpExecution, token), settings, runtimeOptions, cancellationToken).ConfigureAwait(false);
+                runtimeOptions.McpExecution, token), runtimeOptions, cancellationToken).ConfigureAwait(false);
         var factory = Grains ?? throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable);
         await factory.GetGrain<IRecurringDueWorkerGrain>(BackgroundWorkerIdentity.Messaging()).WakeAsync(cancellationToken).ConfigureAwait(false);
         await factory.GetGrain<ISampleChunkWorkerGrain>(BackgroundWorkerIdentity.TimeSeries()).WakeAsync(cancellationToken).ConfigureAwait(false);
@@ -95,16 +94,6 @@ internal sealed partial class OrleansNode(IServiceProvider applicationServices, 
         => requests.ExecuteAsync(CurrentRequestTarget, false, requestId, signedRequest, command, cancellationToken);
 
     private NativeNodeRequestTarget CurrentRequestTarget => new(Grains, applicationServices, DatabaseReady);
-
-    internal Task RequireDatabaseReadCutAsync(CancellationToken token) => Partition.Coordinator.ReadBarrierAsync(token);
-
-    internal async Task RequireDatabaseReadCutAsync(ReadExecutionBudget work,
-        KeyLoad.Core.Features.ResourceExecution.Execution.ReadExecutionBudgetReadGrant? sourceMeta, CancellationToken token)
-    {
-        work.Check();
-        await Partition.Coordinator.ReadBarrierAsync(token).ConfigureAwait(false);
-        work.Check();
-    }
 
     public Task StopAsync(CancellationToken cancellationToken)
     {

@@ -46,7 +46,7 @@ internal static class PartitionHostApplicationFlow
         {
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                var session = new PartitionHostApplicationSession(fixture.Options);
+                var session = await PartitionHostApplicationSession.CreateAsync(fixture.Options).ConfigureAwait(false);
                 sessions.Add(session);
                 await PartitionHostApplicationLock.RefuseAsync(session, fixture.Options.DataDirectory);
                 await session.CloseAsync(failures);
@@ -59,7 +59,7 @@ internal static class PartitionHostApplicationFlow
     private static async Task HealthyAsync(PartitionHostRecoveryFixture fixture,
         List<PartitionHostApplicationSession> sessions)
     {
-        var session = new PartitionHostApplicationSession(fixture.Options);
+        var session = await PartitionHostApplicationSession.CreateAsync(fixture.Options).ConfigureAwait(false);
         sessions.Add(session);
         var host = await PartitionHostApplicationConcurrency.OpenAsync(session.Owner).ConfigureAwait(false);
         await PartitionHostApplicationLock.ExcludedAsync(fixture.Options.DataDirectory);
@@ -71,7 +71,7 @@ internal static class PartitionHostApplicationFlow
         await PartitionHostApplicationConcurrency.CloseAsync(session.Owner).ConfigureAwait(false);
         for (var cold = PartitionHostApplicationProtocol.FirstCold; cold < PartitionHostApplicationProtocol.ColdCycles; cold++)
         {
-            var reopened = new PartitionHostApplicationSession(fixture.Options);
+            var reopened = await PartitionHostApplicationSession.CreateAsync(fixture.Options).ConfigureAwait(false);
             sessions.Add(reopened);
             var recovered = await PartitionHostApplicationConcurrency.OpenAsync(reopened.Owner).ConfigureAwait(false);
             await cut.RequireAsync(recovered.Database.Store).ConfigureAwait(false);

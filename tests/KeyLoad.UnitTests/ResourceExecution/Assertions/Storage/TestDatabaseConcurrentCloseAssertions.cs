@@ -26,7 +26,7 @@ internal static class TestDatabaseConcurrentCloseAssertions
         var actual = owner.GetDocument(TestDatabaseConcurrentCloseProtocol.Principal, reference);
         await Assert.That(JsonDefaults.Serialize(actual).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         var expectedRecord = new DocumentRecord(reference, TestDatabaseConcurrentCloseProtocol.Revision,
-            TestDatabaseConcurrentCloseProtocol.Body, new RowAccess(), state.Original.EvaluatedAt);
+            TestDatabaseConcurrentCloseProtocol.Body, new RowAccess(), new DateTimeOffset(state.Original.Timestamp));
         var page = store.Read(view => view.Scan(DocumentStorageKeys.Prefix(state.Partition,
             TestDatabaseConcurrentCloseProtocol.Collection), TestDatabaseConcurrentCloseProtocol.PageLimit));
         await Assert.That(page.HasMore).IsFalse();

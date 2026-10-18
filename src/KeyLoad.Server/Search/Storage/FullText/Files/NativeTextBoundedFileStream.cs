@@ -5,6 +5,7 @@ namespace KeyLoad.Server.Features.Search;
 
 internal sealed class NativeTextBoundedFileStream : Stream, IFileStream
 {
+    private const string SynchronousAccessRequired = "The native text file owner supports synchronous engine access only.";
     private readonly IFileStream original;
     private readonly NativeTextBoundedStreamWrites writes;
     private readonly Lock disposalGate = new();
@@ -47,12 +48,12 @@ internal sealed class NativeTextBoundedFileStream : Stream, IFileStream
     public override long Seek(long offset, SeekOrigin origin)
         => writes.MutatePosition(() => original.Seek(offset, origin));
     public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken token)
-        => original.ReadAsync(buffer, offset, count, token);
+        => throw new NotSupportedException(SynchronousAccessRequired);
     public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken token = default)
-        => original.ReadAsync(buffer, token);
+        => throw new NotSupportedException(SynchronousAccessRequired);
     public override void Flush() => original.Flush();
     public void Flush(bool flushToDisk) => original.Flush(flushToDisk);
-    public override Task FlushAsync(CancellationToken token) => original.FlushAsync(token);
+    public override Task FlushAsync(CancellationToken token) => throw new NotSupportedException(SynchronousAccessRequired);
 
     public override void Write(byte[] buffer, int offset, int count)
         => Write(buffer.AsSpan(offset, count));
@@ -87,9 +88,9 @@ internal sealed class NativeTextBoundedFileStream : Stream, IFileStream
     }
 
     public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken token)
-        => writes.WriteAsync(buffer.AsMemory(offset, count), token).AsTask();
+        => throw new NotSupportedException(SynchronousAccessRequired);
     public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken token = default)
-        => writes.WriteAsync(buffer, token);
+        => throw new NotSupportedException(SynchronousAccessRequired);
 
     protected override void Dispose(bool disposing)
     {
@@ -144,7 +145,7 @@ internal sealed class NativeTextBoundedFileStream : Stream, IFileStream
         var beforeNativeClose = failures.Count;
         try
         {
-            await original.DisposeAsync().ConfigureAwait(false);
+            original.Dispose();
         }
         catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
         catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }

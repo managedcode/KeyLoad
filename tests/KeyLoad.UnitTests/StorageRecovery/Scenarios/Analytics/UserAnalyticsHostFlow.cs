@@ -9,7 +9,7 @@ internal static class UserAnalyticsHostFlow
         UserAnalyticsHostCut? cut = null;
         await fixture.RunHostAsync(async host =>
         {
-            await UserAnalyticsHostMutations.BootstrapAsync(fixture, host, token);
+            await UserAnalyticsHostMutations.BootstrapAsync(host, token);
             var initial = await UserAnalyticsHostMutations.ApplyAsync(host, UserAnalyticsHostMutations.Initial(),
                 AnalyticsStoreProtocol.UpsertKind, P.Second, 1);
             await UserAnalyticsHostRuntimeTrial.RunAsync(fixture, host, async runtime =>

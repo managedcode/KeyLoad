@@ -25,15 +25,19 @@ internal sealed class RequestCqrsHostedRuntimeFixture : IAsyncInitializer, IAsyn
     private readonly string directory = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
     private WebApplication? application;
     private OrleansNode? node;
+    private string[]? arguments;
+    private int? reservedSiloPort;
+    private Task? stopping;
     private Task? disposal;
 
     internal RequestCqrsHostedRuntimeFixture(TimeProvider? clock = null, GrainRoutingOptions? routing = null,
         IGrainRequestPhaseObserver? observer = null, IGrainRequestPurposeObserver? purposeObserver = null,
         bool nativeTextMaintenance = false, bool nativeAnnMaintenance = false, DatabaseLimits? limits = null,
-        RequestCqrsHostedClusterNode? clusterNode = null)
+        RequestCqrsHostedClusterNode? clusterNode = null,
+        Func<IServiceProvider, ILifecycleParticipant<ISiloLifecycle>>? lifecycleParticipantFactory = null)
     {
         profile = new(clock ?? TimeProvider.System, UnitRoutingOptions.Routing(routing), observer, purposeObserver,
-            nativeTextMaintenance, nativeAnnMaintenance, limits, clusterNode);
+            nativeTextMaintenance, nativeAnnMaintenance, limits, clusterNode, lifecycleParticipantFactory);
     }
 
     internal IGrainFactory Grains => Services.GetRequiredService<IGrainFactory>();
@@ -55,29 +59,73 @@ internal sealed class RequestCqrsHostedRuntimeFixture : IAsyncInitializer, IAsyn
 
     internal async Task InitializeAsync(CancellationToken cancellationToken)
     {
-        using var deadline = new CancellationTokenSource(Timing.StartupTimeout, TimeProvider.System);
-        using var startup = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, cancellationToken);
         try
         {
-            var siloPort = profile.ClusterNode?.SiloPort ?? ports.AllocateConsecutivePortPairs(OnePort).Item1;
-            var primary = profile.ClusterNode?.PrimaryEndpoint ?? new IPEndPoint(IPAddress.Loopback, siloPort);
-            application = await ServerConfiguration.BuildAsync(profile.Arguments(directory, siloPort),
-                localhostClustering: new(primary),
-                phaseObserver: profile.Observer, purposeObserver: profile.PurposeObserver,
-                configureServices: profile.Register, startupCancellation: startup.Token).ConfigureAwait(false);
-            node = Services.GetRequiredService<OrleansNode>();
-            await application.StartAsync(startup.Token).ConfigureAwait(false);
-            await node.StartAsync(startup.Token).ConfigureAwait(false);
-            await Local.Coordinator.ReadBarrierAsync(startup.Token).ConfigureAwait(false);
-            Database = new(Local);
+            await StartApplicationAsync(cancellationToken).ConfigureAwait(false);
         }
         catch (Exception original)
         {
             var failures = new List<Exception> { original };
-            await ServerFailureObserver.ObserveAsync(() => DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+            await ServerFailureObserver.ObserveAsync(() => StopAsync(CancellationToken.None), failures).ConfigureAwait(false);
             ServerFailureObserver.ThrowIfAny(failures);
             throw;
         }
+    }
+
+    internal async Task StopAsync(CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        Task owned;
+        lock (lifecycle)
+        {
+            owned = stopping ??= StopApplicationAsync();
+        }
+        await owned.ConfigureAwait(false);
+    }
+
+    internal async Task RestartAsync(CancellationToken cancellationToken)
+    {
+        await StopAsync(cancellationToken).ConfigureAwait(false);
+        lock (lifecycle)
+        {
+            ObjectDisposedException.ThrowIf(disposal is not null, this);
+            stopping = null;
+        }
+        try
+        {
+            await StartApplicationAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception original)
+        {
+            var failures = new List<Exception> { original };
+            await ServerFailureObserver.ObserveAsync(() => StopAsync(CancellationToken.None), failures).ConfigureAwait(false);
+            ServerFailureObserver.ThrowIfAny(failures);
+            throw;
+        }
+    }
+
+    private async Task StartApplicationAsync(CancellationToken cancellationToken)
+    {
+        ObjectDisposedException.ThrowIf(disposal is not null, this);
+        if (application is not null || stopping is not null)
+        {
+            throw new InvalidOperationException("The native CQRS host requires a joined restart before another initialization.");
+        }
+        using var deadline = new CancellationTokenSource(Timing.StartupTimeout, TimeProvider.System);
+        using var startup = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, cancellationToken);
+        reservedSiloPort ??= profile.ClusterNode?.SiloPort ?? ports.AllocateConsecutivePortPairs(OnePort).Item1;
+        var siloPort = reservedSiloPort.Value;
+        arguments ??= profile.Arguments(directory, siloPort);
+        var primary = profile.ClusterNode?.PrimaryEndpoint ?? new IPEndPoint(IPAddress.Loopback, siloPort);
+        application = await ServerConfiguration.BuildAsync(arguments, localhostClustering: new(primary),
+            lifecycleParticipantFactory: profile.LifecycleParticipantFactory,
+            phaseObserver: profile.Observer, purposeObserver: profile.PurposeObserver,
+            configureServices: profile.Register, startupCancellation: startup.Token).ConfigureAwait(false);
+        node = Services.GetRequiredService<OrleansNode>();
+        await application.StartAsync(startup.Token).ConfigureAwait(false);
+        await node.StartAsync(startup.Token).ConfigureAwait(false);
+        await Local.Coordinator.ReadBarrierAsync(startup.Token).ConfigureAwait(false);
+        Database = new(Local);
     }
 
     public ValueTask DisposeAsync()
@@ -91,10 +139,7 @@ internal sealed class RequestCqrsHostedRuntimeFixture : IAsyncInitializer, IAsyn
     private async Task DisposeCoreAsync()
     {
         var failures = new List<Exception>();
-        if (application is not null)
-        {
-            await CloseApplicationAsync(application, failures).ConfigureAwait(false);
-        }
+        await ServerFailureObserver.ObserveAsync(() => StopAsync(CancellationToken.None), failures).ConfigureAwait(false);
         if (failures.Count == NoFailures)
         {
             ServerFailureObserver.Observe(ports.Dispose, failures);
@@ -104,6 +149,20 @@ internal sealed class RequestCqrsHostedRuntimeFixture : IAsyncInitializer, IAsyn
             }
         }
         ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+    private async Task StopApplicationAsync()
+    {
+        if (application is null)
+        {
+            return;
+        }
+        var failures = new List<Exception>();
+        await CloseApplicationAsync(application, failures).ConfigureAwait(false);
+        ServerFailureObserver.ThrowIfAny(failures);
+        application = null;
+        node = null;
+        Database = null!;
     }
 
     private async Task CloseApplicationAsync(WebApplication app, List<Exception> failures)
