@@ -7,7 +7,7 @@ internal static class EventProjectionLineageR41Trial
 {
     internal static async Task RunAsync(ClusterFixture fixture, CancellationToken token)
     {
-        var state = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, async admin =>
+        var state = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, async admin =>
         {
             var state = await EventProjectionLineageR41Seed.CreateAsync(fixture, admin, token);
             await WithActorsAsync(fixture, state, async (worker, reader) =>
@@ -28,7 +28,7 @@ internal static class EventProjectionLineageR41Trial
         for (var cold = 0; cold < 2; cold++)
         {
             await NativeTextProtectedPublicColdRestart.RunAsync(fixture, token);
-            _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, async admin =>
+            _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, async admin =>
             {
                 await WithActorsAsync(fixture, state, (worker, reader) => RetainedAsync(admin, worker, reader, state, token), token);
                 return true;
@@ -36,12 +36,12 @@ internal static class EventProjectionLineageR41Trial
         }
     }
     private static Task<bool> WithActorsAsync(ClusterFixture fixture, EventProjectionLineageR41State state,
-     Func<RequestCqrsRf3Callers, RequestCqrsRf3Callers, Task> body, CancellationToken token)
-     => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, state.Worker.Secret,
-      worker => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node3, state.Reader.Secret,
+     Func<RequestCqrsClusterCallers, RequestCqrsClusterCallers, Task> body, CancellationToken token)
+     => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, state.Worker.Secret,
+      worker => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node3, state.Reader.Secret,
        async reader => { await body(worker, reader); return true; }, token), token);
-    private static async Task RetainedAsync(RequestCqrsRf3Callers admin, RequestCqrsRf3Callers worker,
-     RequestCqrsRf3Callers reader, EventProjectionLineageR41State state, CancellationToken token)
+    private static async Task RetainedAsync(RequestCqrsClusterCallers admin, RequestCqrsClusterCallers worker,
+     RequestCqrsClusterCallers reader, EventProjectionLineageR41State state, CancellationToken token)
     {
         await EventProjectionLineageR41Canonical.CurrentAsync(admin, reader, state, token);
         await EventProjectionLineageR41Refusal.BothAsync(admin, worker, reader, state, token);

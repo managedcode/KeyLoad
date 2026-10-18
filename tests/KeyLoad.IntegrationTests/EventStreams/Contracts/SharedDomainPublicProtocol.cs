@@ -2,8 +2,8 @@ namespace KeyLoad.IntegrationTests.Features.EventStreams;
 
 internal static class SharedDomainPublicProtocol
 {
-    internal const string TenantPrefix = "kl081-rf3-";
-    internal const string ColdScenario = "kl081-shared-transaction-domains";
+    internal const string TenantPrefix = "cluster-";
+    internal const string ColdScenario = "shared-transaction-domains";
     internal const string PutKind = "putDocument";
     internal const string AppendKind = "appendEvents";
     internal const string EnqueueKind = "enqueue";
@@ -11,8 +11,6 @@ internal static class SharedDomainPublicProtocol
     internal const string UnexpectedMutation = "The shared-domain public producer contains an unexpected mutation.";
     internal const string TokenScopeDetail = "The delivery token scope is invalid.";
     internal const string EpochDetail = "The principal policy changed since this command was evaluated.";
-    internal const int PlacementVersion = 1;
-    internal const int Rf3Voters = 3;
     internal const int NoAttempts = 0;
     internal const int FirstAttempt = 1;
     internal const int ReceiveCount = 1;

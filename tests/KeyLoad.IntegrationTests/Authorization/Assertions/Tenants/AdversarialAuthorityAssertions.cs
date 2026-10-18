@@ -8,7 +8,7 @@ namespace KeyLoad.IntegrationTests.Features.Authorization;
 internal static class AdversarialAuthorityAssertions
 {
     internal static Task DocumentAsync(AdversarialAuthoritySeed seed, DocumentResult actual)
-        => SqlRf3Protocol.EqualAsync(new DocumentResult(seed.Scenario.Reference,
+        => SqlClusterProtocol.EqualAsync(new DocumentResult(seed.Scenario.Reference,
             McpCallerProtocol.FirstRevision, McpDocumentProtocol.InitialJson, false, []), actual);
 
     internal static async Task<AdversarialAuthorityImage> ImageAsync(KeyLoadClient root,
@@ -45,11 +45,11 @@ internal static class AdversarialAuthorityAssertions
         foreach (var seed in new[] { state.Owned, state.Foreign })
         {
             var sdk = await McpCallerAssertions.SdkSuccessAsync(await root.CommitAsync(seed.Command, token));
-            await SqlRf3Protocol.EqualAsync(seed.Receipt, sdk);
+            await SqlClusterProtocol.EqualAsync(seed.Receipt, sdk);
             var official = await McpCallerAssertions.SuccessAsync<CommitReceipt>(await rootSession.CallAsync(
                 McpCallerTools.DocumentsCommit, seed.Command, token));
-            await SqlRf3Protocol.EqualAsync(seed.Receipt, official.Value);
+            await SqlClusterProtocol.EqualAsync(seed.Receipt, official.Value);
         }
-        await SqlRf3Protocol.EqualAsync(before, await ImageAsync(root, state, token));
+        await SqlClusterProtocol.EqualAsync(before, await ImageAsync(root, state, token));
     }
 }

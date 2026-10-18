@@ -18,7 +18,7 @@ internal static class GraphVertexPublicCommands
         => new(state.Seed.Graph, GraphVertexPublicState.EdgeId, state.Seed.LocalSource, target,
             GraphVertexPublicState.Label, GraphVertexPublicState.Json, expected);
 
-    internal static async Task Commit(RequestCqrsRf3Callers callers, GraphVertexPublicState state,
+    internal static async Task Commit(RequestCqrsClusterCallers callers, GraphVertexPublicState state,
         CommandRequest command, MutationReceipt[] expected, CancellationToken token)
     {
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.CommitAsync(command, token));
@@ -30,15 +30,15 @@ internal static class GraphVertexPublicCommands
         await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
         await Assert.That(receipt.Mutations.SequenceEqual(expected)).IsTrue();
         state.Original.Add((command, receipt));
-        await SqlRf3Protocol.EqualAsync(receipt, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
+        await SqlClusterProtocol.EqualAsync(receipt, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
             await callers.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token))).Value);
     }
 
-    internal static async Task Refuse(RequestCqrsRf3Callers callers, GraphVertexPublicState state,
+    internal static async Task Refuse(RequestCqrsClusterCallers callers, GraphVertexPublicState state,
         CommandRequest command, ErrorCode error, CancellationToken token)
     {
         var sdk = await callers.Sdk.CommitAsync(command, token);
-        await SagaTimeoutRf3Assertions.AssertSdkErrorAsync(sdk, error);
+        await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(sdk, error);
         await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(
             McpCallerTools.DocumentsCommit, command, token), error, dispatched: true);
         state.Refusals.Add((command, error));
@@ -50,7 +50,7 @@ internal static class GraphVertexPublicCommands
         => new(UpsertKind, state.Seed.Graph, GraphVertexPublicState.HealthyId, 1L);
 
     internal static MutationReceipt PutReceipt(long revision)
-        => new(PutKind, GraphIncomingRf3Scenario.Collection, GraphVertexPublicState.NewId, revision);
+        => new(PutKind, GraphIncomingClusterScenario.Collection, GraphVertexPublicState.NewId, revision);
 
     internal static MutationReceipt EdgeReceipt(GraphVertexPublicState state, long revision, bool remove = false)
         => new(remove ? DeleteKind : UpsertKind, state.Seed.Graph, GraphVertexPublicState.EdgeId, revision);

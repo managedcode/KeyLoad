@@ -5,8 +5,8 @@ namespace KeyLoad.IntegrationTests.Features.Messaging;
 
 internal static class CompetingInboxPublicPolicy
 {
-    internal static async Task RepairAsync(CompetingInboxPublicState state, RequestCqrsRf3Callers root,
-        RequestCqrsRf3Callers sdk, RequestCqrsRf3Callers official, CancellationToken token)
+    internal static async Task RepairAsync(CompetingInboxPublicState state, RequestCqrsClusterCallers root,
+        RequestCqrsClusterCallers sdk, RequestCqrsClusterCallers official, CancellationToken token)
     {
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => SetAsync(state, root, CompetingInboxPublicProtocol.WithdrawnEpoch, false, token), failures);
@@ -34,7 +34,7 @@ internal static class CompetingInboxPublicPolicy
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
-    private static async Task SetAsync(CompetingInboxPublicState state, RequestCqrsRf3Callers root,
+    private static async Task SetAsync(CompetingInboxPublicState state, RequestCqrsClusterCallers root,
         long epoch, bool allowed, CancellationToken token)
     {
         var expected = state.Identity.Principal with
@@ -49,8 +49,8 @@ internal static class CompetingInboxPublicPolicy
             Principal = expected
         };
     }
-    internal static async Task RefuseAsync(CompetingInboxPublicState state, RequestCqrsRf3Callers root,
-        RequestCqrsRf3Callers sdk, RequestCqrsRf3Callers official, ProcessingRequest request,
+    internal static async Task RefuseAsync(CompetingInboxPublicState state, RequestCqrsClusterCallers root,
+        RequestCqrsClusterCallers sdk, RequestCqrsClusterCallers official, ProcessingRequest request,
         ErrorCode code, string detail, CancellationToken token)
     {
         var failures = new List<Exception>();

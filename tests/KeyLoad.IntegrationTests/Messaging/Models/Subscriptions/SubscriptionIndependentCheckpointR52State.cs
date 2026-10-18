@@ -1,8 +1,8 @@
 namespace KeyLoad.IntegrationTests.Features.Messaging;
 
-internal sealed class SubscriptionIndependentCheckpointR52State(SubscriptionFilterRf3Seed seed)
+internal sealed class SubscriptionIndependentCheckpointR52State(SubscriptionFilterClusterSeed seed)
 {
-    internal SubscriptionFilterRf3Seed Seed { get; } = seed;
+    internal SubscriptionFilterClusterSeed Seed { get; } = seed;
     internal ReceiveSubscriptionRequest? OriginalRequest
     {
         get; set;
@@ -27,7 +27,7 @@ internal sealed class SubscriptionIndependentCheckpointR52State(SubscriptionFilt
     {
         Policy = new()
         {
-            MaxWindow = SubscriptionFilterRf3Protocol.Window
+            MaxWindow = SubscriptionFilterClusterProtocol.Window
         }
     };
     internal List<(SetSubscriptionPausedRequest Request, SubscriptionInfo Result)> PauseHistory { get; } = [];
@@ -49,10 +49,6 @@ internal sealed class SubscriptionIndependentCheckpointR52State(SubscriptionFilt
         get; set;
     }
     internal OutboxStatus? Outbox
-    {
-        get; set;
-    }
-    internal AtomicPartitionPlacementResolution? Placement
     {
         get; set;
     }

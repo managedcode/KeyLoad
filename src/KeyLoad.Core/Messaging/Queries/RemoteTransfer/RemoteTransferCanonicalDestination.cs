@@ -20,7 +20,7 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, RemoteTransferPeerProtocol.Invalid);
         }
-        var placement = ResolveRegisteredPlacement(view, destination.Partition, catalog.DefaultShard);
+        var placement = ResolveRegisteredPlacement(destination.Partition, catalog.DefaultShard);
         if (placement.PhysicalShardId == configuredPhysicalOwner.PhysicalShardId)
         {
             RequireLocalResourceOwner(view, destination.Partition);
@@ -48,7 +48,6 @@ public sealed partial class DatabaseEngine
         {
             return Resource(view, destination.Partition, destination.Queue, ResourceKind.WorkQueue);
         }
-        RequireNoUnpublishedPartitionMoveTarget(view, destination.Partition);
         return BindResourceDefinition(view, destination.Partition, destination.Queue, ResourceKind.WorkQueue);
     }
 }

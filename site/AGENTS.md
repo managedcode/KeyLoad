@@ -1,95 +1,31 @@
 # KeyLoad site
 
-## Purpose and entry points
+## Purpose, entry points and ownership
+
 - Owns the static Pages website that presents benchmark comparisons using verified GitHub Actions reports.
 - HTML/modules/styles entry: `Features/BenchmarkComparisons/`; thin builder: `scripts/build.mjs`; real qualification: `tests/KeyLoad.SiteTests` through the unified Aspire AppHost.
-
-## Ownership and boundaries
-- Feature-owned site behavior MUST live under `Features/<SliceName>/` with the same canonical feature name and `docs/Features/<SliceName>.md`; retired flat assets MUST be removed with their obsolete references.
 - The site MUST display only the complete authenticated current Benchmarks cohort, preserve exact original source/run/attempt/artifact links and pass all publication gates. No fabricated, local-only, durability or production-readiness claims.
 - Do not introduce a backend, credentials, or a second source of truth for benchmark measurements.
 - Preserve the official Three.js 0.186.1 vendor files byte-for-byte against their local manifest and license. `.gitattributes` excludes only upstream `space-before-tab` findings for those exact two files so generic diff checks do not require mutating vendor bytes; authored site files retain normal whitespace checks.
-
-## Commands and evidence
-- Benchmarks runs complete Aspire-owned TUnit/browser/coverage qualification before the bounded standalone builder consumes the actual isolated aggregate and original receipt. The obsolete comparison-suite/three-profile publisher is retired under owner-directed ADR-076.
-- Run publication qualification only through `.github/workflows/benchmarks.yml`; local development evidence cannot qualify published measurements.
-
-## Skills and protected risks
 - Applicable skills: none installed; skill installation is prohibited by owner direction.
 - Preserve accessible rendering, provenance links and strict input validation. Never include credentials or claim site publication until the Pages workflow succeeds.
 
-## Read-first and canonical slice ownership
-- Read the [root policy](../AGENTS.md), [architecture map](../docs/Architecture.md), [RepositoryGovernance feature](../docs/Features/RepositoryGovernance.md), and [ADR-032](../docs/ADR/ADR-032-mcaf-governance.md) first.
-- Owned slice: `BenchmarkComparisons`; target path: `Features/BenchmarkComparisons/`, matching `docs/Features/BenchmarkComparisons.md`.
-- TUnit through Aspire is the only qualification runner. Node probes and Chrome are real child tools of these tests; adding another test framework is forbidden.
+The primary hero is the existing animated Three.js composition with a central database, eight connected data models and the agent above it. Preserve the artwork fallback and accessible model labels. Bounds are 120,000 triangles, 30 draw calls, 1,000,000 pixels and DPR 1.5. Preserve official vendor files, manifests and licenses byte-for-byte. Product content may publish without benchmark figures; displayed figures require authenticated original GitHub artifacts.
 
-## ADR-040 migration execution
-- The canonical HTML/modules/styles MUST remain under `Features/BenchmarkComparisons/`, with `scripts/build.mjs` as the thin build entry and Aspire-owned `tests/KeyLoad.SiteTests` as the only qualification runner. Remove superseded assets and tests together with their reviewed replacement; do not keep a legacy implementation for later cleanup.
-- Read the design/acceptance/execution contracts in `docs/Features/BenchmarkComparisons.md`, ADR-040/076 and the frozen feature `protocol.md`. Site qualification/publication MUST stay in `benchmarks.yml`; validation without all delivery gates MUST NOT deploy. Successful exact source/run verification precedes archive use; website and measured revisions remain separate. DNS remains outside this task.
-- A local isolated static build and real-browser design/graphics inspection are the narrowly specified ADR-040 manual exceptions. They cannot qualify numeric tests, database behavior, coverage, publication or durability.
+## Boundaries and protected risks
 
-## Subsequent fresh-evidence publication task
-- The owner's subsequent instruction requests a separate post-test Pages publication workflow, recorded in the BenchmarkComparisons publication contract and REQ/AC-BC-028/ADR-040. The earlier design task's no-publication rule remains its scope record; DNS remains excluded from this new task.
-- Publication MUST preserve qualified measured-source checkout and independently accurate site/measured/control-workflow SHA fields. Validate-only candidate source MUST NOT deploy. Every figure MUST be computed from the actual authenticated comparison-job JSON; unsupported/missing/failed values remain unavailable.
-- The new publication route MUST consume the exact verified archive/raw bytes, complete site/browser/native qualification, a current-run/attempt/artifact freshness check, and least-privilege Pages deployment. Never restore the old independent publisher bypass or treat configuration as a deployment receipt.
+Follow the [root policy](../AGENTS.md) and the owning feature specification. Keep changes in their actual owner, preserve unrelated work, and remove replaced code together with exclusive callers and fixtures. Use native Orleans calls for distributed execution and silo-local ZoneTree owners for files. Preserve persisted authorization, operation correctness, resource bounds, cancellation and joined shutdown. Never turn a static check or focused test into a claim of complete runtime qualification.
 
-## Owner-directed site-only boundary, 2026-10-02
-- The latest owner instruction supersedes this task's earlier equal-source restriction above: current trusted-main website source is qualified independently; measured source remains in a separate inspected checkout. Accurately retain website/measured/control SHA and actual successful comparison-job provenance. All site/browser/native/format/governance gates remain mandatory.
-- Whole database-workflow success is not this website task's dependency. Use actual successful comparison evidence and accurate link labels even when unrelated jobs fail. Read the revised AC-BC-028 contract before implementation; do not present historical reports as qualification of current database code.
+## Commands and verification
 
-## Owner-directed shared comparison pipeline, 2026-10-03
-- ADR-064/076 place all comparative tests in Benchmarks; Pages follows only its complete current producer with exact original identity. Retire active legacy collection, rendering and dependencies while preserving immutable historical evidence as history and every applicable site/source/provenance/qualification gate.
+From the repository root:
 
-## Owner-directed failed-cell publication, 2026-10-04
+```sh
+node site/scripts/build.mjs
+```
 
-- Owner correction 2026-10-04 moves website work to CI: Benchmarks only compares databases and emits authenticated JSON, including unavailable cells. CI automatically consumes that producer JSON for the landing and owns website tests/build/Pages. Preserve every website gate in CI; never run Chrome, browser/site qualification or static-site generation inside Benchmarks or make them dependencies of metrics production. This explicitly supersedes the earlier Benchmarks placement while retaining exactly three workflows.
-- ADR-080 permits authenticated same-run failed cells alongside successful competitors. Render failed cells as no data with null numeric fields and actual job links; an entirely unavailable cohort has a null corpus digest. Full TUnit/browser/coverage/source/freshness gates remain mandatory. Original retained GitHub report fixtures are parser/coverage test inputs only, never current publication measurements.
+Use the root's complete solution, native TUnit, real process recovery and Aspire SDK/MCP gates as applicable. Local checks are development evidence; delivered-source qualification and public measurements require exact-source Linux GitHub artifacts. Do not weaken compiler, analyzer, source-identity, coverage or runtime assertions.
 
-## Latest benchmark and separate build action, 2026-10-04
-- The latest owner clarification explicitly permits static website building after benchmark JSON or a separate CI trigger, superseding the interim static-build prohibition above. The selected independent CI action runs on own-main push/manual and completed Benchmarks events, always consumes the newest completed own-main push/manual benchmark and its successful authenticated aggregate, and retains original source/run/attempt, failed/null cells, all website gates and predeploy freshness. Never fall back to older evidence after rejecting the latest completed producer.
+## Skills
 
-## Latest completed result eligibility, 2026-10-04
-- Latest benchmark metrics means the newest completed own-main push/manual Benchmarks producer with success/failure conclusion. Pending, skipped and canceled workflows have no completed comparison cohort and MUST NOT displace ready JSON. Exclude them before choosing the latest eligible producer; then reject its missing/corrupt/failed aggregate without older fallback. A canceled workflow_run event still cannot authorize publication. This refines the latest-result rule without accepting incomplete or fabricated measurements.
-
-## Feature-local executable artifacts
-- This module uses the root-approved fully colocated executable-artifact convention: keep each feature-owned script, website module or workflow with its canonical feature/artifact and its existing entry point. C# Grains/Models folders are N/A here because this module contains executable web, shell or YAML artifacts. Preserve source-bound historical receipts; update live consumers when solution source paths move.
-
-## Independent website publication, owner correction 2026-10-06
-- Website source changes MUST independently build, qualify and publish the website in CI without waiting for a benchmark run. Use the newest completed own-main Benchmarks producer whose authenticated aggregate is ready when one exists; a run with no successful aggregate is not available website data. If no ready producer exists, publish the qualified product website with no benchmark figures or synthetic measurement artifacts. New ready benchmark JSON MUST automatically trigger a fresh website build/publication. This rule-specific correction supersedes mandatory benchmark availability and newest-failed-producer blocking in the earlier publication rules; corrupt/expired/unauthenticated evidence, provider errors, website test failures and stale source still fail closed. Preserve exactly three workflows, independent CI website jobs, original metric provenance and full metric/archive/browser/coverage gates whenever metrics are included. The no-metrics route has its own complete asset/browser/source/coverage qualification; measurement-only tests and archive gates are N/A to an artifact which includes no measurements, never reported as passed or replaced with fabricated inputs.
-
-## Separate Website workflow, owner correction 2026-10-06
-
-- The owner's explicit correction supersedes the earlier three-workflow limit and every CI/Benchmarks website placement: `Build and Tests` (`ci.yml`) owns full solution build, repository checks and ordinary tests; `Website` (`website.yml`) independently owns site qualification/build/Pages on trusted main pushes, manual dispatch and completed Benchmarks events. `Benchmarks` and manual `Release` retain their existing scopes. Website uses ready authenticated metrics when available and publishes the fully qualified content-only site when none exist; all applicable source, browser, coverage, freshness and permission gates remain mandatory.
-
-## Current first-release Website contract, owner corrections 2026-10-06
-
-- The current four workflows are Build and Tests (`build-and-tests.yml`), Benchmarks (`benchmarks.yml`), Website (`website.yml`) and prepared manual Release (`release.yml`). Only Website builds, qualifies and publishes the site on trusted main push/manual; Benchmarks ends with a bounded Website dispatch and Website has no `workflow_run` executor subscription. These explicit owner corrections supersede every earlier three-workflow, filename, executor, placement and completion-subscription clause; every unrelated suite, permission and qualification rule remains mandatory.
-- The sole measured producer contract is the current 924-worker/1,716-input website cohort plus separately authenticated 418-cell document family in ADR-076. Its executed dependency manifest contains exactly 84 current source paths. Remove old-plan readers, schemas, event-file parsers and their exclusive fixtures or inventory entries under the root owner-only migration/legacy super rule. This supersedes earlier 270/277 and old-reader requirements only; retain bounded authenticated REST producer/artifact provenance, exact current source and input hashes, failed/null accounting, strict selected-evidence rejection, freshness and unchanged 80/70/90 coverage thresholds.
-- When no current authenticated producer is ready, qualify the complete content-only site without figures. Real native TUnit/Node/Chrome operations, no skips in each applicable suite, source/coverage inventories and needs-gated least-privilege Pages remain required. Local tests enter the same Aspire-owned AppHost and are development evidence; genuine exact-source Linux/provider proof closes delivery. Controlled rejection inputs cannot become published measurements.
-
-## Owner correction: screenshot-identified animation, 2026-10-06
-
-- When the owner identifies an existing visual block in a screenshot and asks for another animation, replace that block's animation while preserving its surrounding landing layout. Do not infer a separate new block. A requested cluster illustration must show meaningful moving requests/grains/graph interactions, rather than a mostly static arrangement of cards or shapes.
-
-## Owner local visual review, 2026-10-07
-
-- For the current landing-animation iterations, show the completed local animated preview and obtain the owner's approval before the next commit/push. Prepare the implementation and verification first; approval is the final checkpoint for delivery.
-
-## Owner correction: original artwork informs a live scene, 2026-10-09
-
-- The landing's primary product illustration MUST be an actual native Three.js object/scene. The owner-selected frosted-glass product artwork is a visual direction for its geometry, materials, lighting and movement; it MUST NOT replace the interactive scene with a still image. Original raster artwork may illustrate the README. Preserve the existing native renderer, bounded lifecycle, accessible static poster and qualification gates while making the scene visually engaging.
-- The owner's repeated visual-quality correction requires recognizable, finished model objects in that scene, with readable silhouettes, smooth edges and deliberate spacing. The latest 2026-10-09 instruction selects the original agent-context.png composition: a central three-layer database, eight connected model platforms and the agent above it. Match that visual directly; do not substitute isolated silo groups, grain spheres or label clutter. The owner explicitly requests sufficient polygons for smooth models: ADR-040 now bounds this scene to 120,000 triangles while retaining the 30-draw-call, 1,000,000-pixel and DPR 1.5 limits, native renderer and lifecycle gates.
-
-## Owner correction: clients and SQL in the cluster illustration, 2026-10-07
-
-- The owner's 2026-10-09 composition correction supersedes the earlier requirement for three generic external client boxes and a repeated scene logo: remove those objects and their captions from the hero. Keep SQL within the database's connected table model, with all model names available accessibly. The original artwork is the static fallback; the primary scene remains native animated Three.js. This is a product illustration change, not a change to the actual Orleans/RF3 storage architecture.
-
-
-## Current native comparison topology, owner direction 2026-10-09
-
-- ADR-122 supersedes every active two-node comparison inventory: current benchmark planning, admission, original-file provenance and site projection accept only native one-node or three-node cells. Reject two-node current inputs before acquisition; RF3 majority remains two acknowledgements. Preserve immutable historical original bytes/hashes without a legacy reader or current qualification fallback.
-- The existing control/scale/vector family now has 924 workers and 1,716 original inputs (1,656 suite files and 60 provider files), with the 84-path executed source closure. This current topology contract supersedes earlier active 1,386-worker/2,530-input clauses; new document-family evidence must receive its own exact inventory before publication. All source, authorization, native operation, complete cohort, provenance and coverage gates remain mandatory.
-
-## Native benchmark methodology, owner direction 2026-10-09
-
-- ADR-122 and Methodology require only actual native1/3 topology, one shared pure/mixed/ingestion inventory and exclusive measurements. Active two-node dispatch/admission is removed; RF3 majority remains2. Preserve authenticated original failure/null and resource/source/provenance gates; new document-family originals are separately admitted before any numerical website rendering. Executed source closure reflects every new transitive input, with unchanged80/70/90 coverage thresholds.
+Use the installed Orleans skill for Orleans design and the relevant installed formatting, Aspire or diagnostics skill when the task needs it. Follow explicit owner scope and dependency-adoption rules.

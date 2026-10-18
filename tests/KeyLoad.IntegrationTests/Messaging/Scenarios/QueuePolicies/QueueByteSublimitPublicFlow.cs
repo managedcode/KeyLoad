@@ -14,21 +14,21 @@ internal static class QueueByteSublimitPublicFlow
     internal static async Task RunAsync(ClusterFixture fixture, bool mcpFirst)
     {
         using var deadline = McpCallerDeadline.Create();
-        var owner = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
+        var owner = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
             root => QueueLifecyclePublicSeed.RunAsync(root,
                 mcpFirst ? QueueLifecyclePublicProtocol.Mcp : QueueLifecyclePublicProtocol.Sdk, true, deadline.Token),
             deadline.Token);
-        var state = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, owner.OperatorKey,
+        var state = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, owner.OperatorKey,
             callers => StartAsync(callers, owner, deadline.Token), deadline.Token);
-        await ModelSqlRf3Cold.RunAsync(fixture, deadline.Token);
-        await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node3, owner.OperatorKey,
+        await ModelSqlClusterCold.RunAsync(fixture, deadline.Token);
+        await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node3, owner.OperatorKey,
             callers => FirstColdAsync(callers, state, deadline.Token), deadline.Token);
-        await ModelSqlRf3Cold.RunAsync(fixture, deadline.Token);
-        await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, owner.OperatorKey,
+        await ModelSqlClusterCold.RunAsync(fixture, deadline.Token);
+        await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, owner.OperatorKey,
             callers => SecondColdAsync(callers, state, deadline.Token), deadline.Token);
     }
 
-    private static async Task<QueueByteSublimitPublicState> StartAsync(RequestCqrsRf3Callers callers,
+    private static async Task<QueueByteSublimitPublicState> StartAsync(RequestCqrsClusterCallers callers,
         QueueLifecyclePublicState owner, CancellationToken token)
     {
         await QueueLifecyclePublicRoutes.CommitAsync(callers, owner, new(Guid.NewGuid(), owner.Partition,
@@ -45,11 +45,11 @@ internal static class QueueByteSublimitPublicFlow
         await Assert.That(delivery.DeliveryGeneration).IsEqualTo(1L);
         await Assert.That(delivery.PayloadJson).IsEqualTo(QueueLifecyclePublicProtocol.CanonicalPayload);
         await Assert.That(delivery.HeadersJson).IsEqualTo(QueueLifecyclePublicProtocol.Headers);
-        await QueueLeaseRf3Assertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
+        await QueueLeaseClusterAssertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
             await callers.Sdk.ReceiveAsync(request, token)), claim);
         var replay = await McpCallerAssertions.SuccessAsync<ReceiveResult>(
             await callers.Mcp.CallAsync(McpCallerTools.MessagesReceive, request, token));
-        await QueueLeaseRf3Assertions.EqualAsync(replay.Value, claim);
+        await QueueLeaseClusterAssertions.EqualAsync(replay.Value, claim);
         var nack = new DeliveryCommand(Guid.NewGuid(), owner.Lane, delivery.Token, DeliveryAction.Nack);
         await CompleteAsync(callers, owner, nack, QueueByteSublimitPublicAssertions.First, 3L, token);
         var state = new QueueByteSublimitPublicState(owner, request, claim, delivery);
@@ -65,7 +65,7 @@ internal static class QueueByteSublimitPublicFlow
         return state;
     }
 
-    private static async Task<bool> FirstColdAsync(RequestCqrsRf3Callers callers,
+    private static async Task<bool> FirstColdAsync(RequestCqrsClusterCallers callers,
         QueueByteSublimitPublicState state, CancellationToken token)
     {
         var owner = state.Owner;
@@ -92,7 +92,7 @@ internal static class QueueByteSublimitPublicFlow
         return true;
     }
 
-    private static async Task<bool> SecondColdAsync(RequestCqrsRf3Callers callers,
+    private static async Task<bool> SecondColdAsync(RequestCqrsClusterCallers callers,
         QueueByteSublimitPublicState state, CancellationToken token)
     {
         var second = new MessageMetadata(QueueByteSublimitPublicAssertions.Second, MessageState.Acked,
@@ -111,7 +111,7 @@ internal static class QueueByteSublimitPublicFlow
         await Assert.That(delivery.DeliveryGeneration).IsEqualTo(2L);
         await Assert.That(delivery.PayloadJson).IsEqualTo(QueueLifecyclePublicProtocol.CanonicalPayload);
         await Assert.That(delivery.HeadersJson).IsEqualTo(QueueLifecyclePublicProtocol.Headers);
-        await QueueLeaseRf3Assertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
+        await QueueLeaseClusterAssertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
             await callers.Sdk.ReceiveAsync(request, token)), claim.Value);
         var ack = new DeliveryCommand(Guid.NewGuid(), state.Owner.Lane, delivery.Token, DeliveryAction.Ack);
         await CompleteAsync(callers, state.Owner, ack, QueueByteSublimitPublicAssertions.First, 6L, token);
@@ -122,7 +122,7 @@ internal static class QueueByteSublimitPublicFlow
         return true;
     }
 
-    private static async Task CompleteAsync(RequestCqrsRf3Callers callers, QueueLifecyclePublicState owner,
+    private static async Task CompleteAsync(RequestCqrsClusterCallers callers, QueueLifecyclePublicState owner,
         DeliveryCommand command, string id, long version, CancellationToken token)
     {
         var receipt = await QueueLifecyclePublicRoutes.CallAsync(callers, owner.Route, owner.Partition,
@@ -134,7 +134,7 @@ internal static class QueueByteSublimitPublicFlow
             CollectionOrdering.Matching);
     }
 
-    private static async Task HealthyAsync(RequestCqrsRf3Callers callers,
+    private static async Task HealthyAsync(RequestCqrsClusterCallers callers,
         QueueByteSublimitPublicState state, CancellationToken token)
     {
         await QueueLifecyclePublicRoutes.CommitAsync(callers, state.Owner, new(Guid.NewGuid(), state.Owner.Partition,
@@ -148,7 +148,7 @@ internal static class QueueByteSublimitPublicFlow
         await Assert.That(delivery.DeliveryGeneration).IsEqualTo(1L);
         var replay = await McpCallerAssertions.SuccessAsync<ReceiveResult>(
             await callers.Mcp.CallAsync(McpCallerTools.MessagesReceive, request, token));
-        await QueueLeaseRf3Assertions.EqualAsync(replay.Value, claim);
+        await QueueLeaseClusterAssertions.EqualAsync(replay.Value, claim);
         await Assert.That(delivery.PayloadJson).IsEqualTo(QueueLifecyclePublicProtocol.CanonicalPayload);
         await Assert.That(delivery.HeadersJson).IsEqualTo(QueueLifecyclePublicProtocol.Headers);
         var ack = new DeliveryCommand(Guid.NewGuid(), state.Owner.Lane, delivery.Token, DeliveryAction.Ack);
@@ -157,7 +157,7 @@ internal static class QueueByteSublimitPublicFlow
         state.Owner.Deliveries.Add((ack, receipt));
         await Assert.That(receipt.Mutations).IsEquivalentTo(new MutationReceipt[] {
             new("Ack", state.Owner.Lane.Queue, QueueByteSublimitPublicAssertions.Healthy, 3L) }, CollectionOrdering.Matching);
-        await SagaTimeoutRf3Assertions.AssertSdkErrorAsync(
+        await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(
             await callers.Sdk.ReceiveAsync(request, token), ErrorCode.StaleLease);
         await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(
             McpCallerTools.MessagesReceive, request, token), ErrorCode.StaleLease, true);

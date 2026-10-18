@@ -1,50 +1,39 @@
-# ADR-102: Same-owner cross-partition graph edge delivery
+# ADR-102: Cross-partition graph edge delivery
 
-Status: Accepted implementation contract; source integration and actual tests remain required. Related REQ/AC-GRAPH-XPART-001..005 and KL-038. See [CrossPartitionEdges](../Features/GraphTraversal/CrossPartitionEdges.md).
+Status: Accepted implementation contract; source integration and actual tests remain required. Related REQ/AC-GRAPH-XPART-001..005. See [CrossPartitionEdges](../Features/GraphTraversal/CrossPartitionEdges.md).
 
 ## Decision
 
-The existing source atomic partition remains the canonical owner of each graph edge. For a distinct target atomic partition on the same fully validated current physical shard, source mutation commits a revisioned graph-owned delivery intent in its ordinary replicated atomic transaction. Destination reverse adjacency is a derived record applied in a separate ordinary replicated transaction. Source completion is another separate source transaction. We do not claim cross-partition atomic commit. This stage uses the existing authenticated signed-native CQRS envelope and persisted current grants as trust authority; locator fields and original principal/policy metadata never authorize a caller. Because source and target resolve to the same physical store, completion reloads committed receiver high-water state from that store. This trust/completion rule cannot be reused across physical owners.
+The source atomic partition remains the canonical owner of each graph edge. For a distinct target atomic partition, the source mutation commits a revisioned graph-owned delivery intent in its ordinary atomic transaction. The destination reverse adjacency is a derived record applied in a separate ordinary atomic transaction; the apply reaches the target partition grain through an ordinary Orleans call and runs on that partition's silo-local ZoneTree owner ([ADR-136](ADR-136-native-orleans-partition-ownership.md)). Source completion is another separate source transaction. We do not claim cross-partition atomic commit. The delivery uses the existing authenticated signed-native CQRS envelope and persisted current grants as trust authority; locator fields and original principal/policy metadata never authorize a caller. Completion reloads the committed receiver high-water state through the target partition grain.
 
-## Ordered implementation stages and ownership
+## Ordered implementation stages
 
-1. Freeze the stable generated native aliases/IDs and source/version/intent/receiver/completion contracts in GraphTraversal Abstractions. The accepted feature table additionally fixes the generated capacity record, direction enum and canonical fingerprint tuple before their implementation; checked native capacity accounting and the exact tuple are authoritative. Root joins the central native alias and mutation registries.
-2. Root joins the `ApplyCrossPartitionReverseEdge` and `CompleteCrossPartitionReverseEdge` cases through the existing mutation validator, persisted authorization, reauthorization, `ApplyMutations`, and Orleans batch resolver. Root also joins `ReadIncomingGraphEdgesRequestV1` through the read validator, `GrainReadKind`, Core read capability, Server route and SDK/official-MCP read-only tool. The worker owns the bounded Core incoming reader and native Unit cases; no shared dispatcher or public route is duplicated.
-3. Core source mutation writes canonical edge, source owner version, coalesced target intent and normal outbox entry in one existing transaction. Target apply validates actual source intent, canonical owner state, full physical tuple and current source/target graph grants in the target native transaction; active delivery validates both visible endpoints. It writes the derived reverse row and receiver high-water together.
-4. `ReadIncomingGraphEdgesRequestV1` performs one current node-local store read. It admits at most `MaxResults`, scans at most `MaxScanRecords`, charges point/range/result bytes through the existing `ReadExecutionBudgetReadGrant` and `BudgetedReadView`, and checks the original deadline. It verifies current source canonical edge/version plus destination high-water in that read cut and returns only visible, matching rows. If more eligible rows remain than the requested result limit, it returns no page and fails visibly; no partial result or completeness claim is allowed. Its output marks `eventual-reverse.v1`.
-5. Source completion validates the actual target receiver state from the same same-owner native view, exact current source intent and current source plus destination graph-write grants before retiring/accounting the intent. Target applied/source completion lost is safe to retry; superseded old messages are harmless stale no-ops. A later separate service stage may automate bounded page/apply/complete calls through native ManagedCode CQRS; no task fanout or network under apply gate.
-6. Tests are actual ZoneTree tests for source atomicity, exact aliases/serialization, placement, duplicate/out-of-order/tombstone behavior, target/source separate commits, incoming query privacy/read budgets, revocation, endpoint deletion, capacity, corruption, retry and source completion failure. Root owns authenticated actual RF3 .NET/MCP tests across all three nodes, build, normal/scalar/recovery suites and exact-source CI evidence.
+1. Freeze the stable generated native aliases/IDs and source/version/intent/receiver/completion contracts in GraphTraversal Abstractions. The accepted feature table additionally fixes the generated capacity record, direction enum and canonical fingerprint tuple before their implementation; checked native capacity accounting and the exact tuple are authoritative.
+2. Core source mutation writes the canonical edge, source owner version, coalesced target intent and normal outbox entry in one existing transaction. Target apply validates the actual source intent, canonical owner state and current source/target graph grants in the target native transaction; active delivery validates both visible endpoints. It writes the derived reverse row and receiver high-water together.
+3. `ReadIncomingGraphEdgesRequestV1` performs one current local store read on the target partition. It admits at most `MaxResults`, scans at most `MaxScanRecords`, charges point/range/result bytes through the existing `ReadExecutionBudgetReadGrant` and `BudgetedReadView`, and checks the original deadline. It verifies the current source canonical edge/version plus destination high-water in that read cut and returns only visible, matching rows. If more eligible rows remain than the requested result limit, it returns no page and fails visibly; no partial result or completeness claim is allowed. Its output marks `eventual-reverse.v1`.
+4. Source completion validates the actual target receiver state, the exact current source intent and current source plus destination graph-write grants before retiring/accounting the intent. Target applied/source completion lost is safe to retry; superseded old messages are harmless stale no-ops. A later service stage may automate bounded page/apply/complete calls through native ManagedCode CQRS; no task fanout or network under the apply gate.
+5. Tests are actual ZoneTree tests for source atomicity, exact aliases/serialization, duplicate/out-of-order/tombstone behavior, target/source separate commits, incoming query privacy/read budgets, revocation, endpoint deletion, capacity, corruption, retry and source completion failure.
 
 ## Limits, rollout and rollback
 
-The source-stage fingerprint correction implements REQ/AC-GRAPH-XPART-001 before
-this feature's first qualified release. Root owns the GraphTraversal Serialization
-input-tree normalizer and native regression cases. Freeze a fixed independently
-owned record and string-occurrence tree before encoding the unchanged generated fingerprint tuple;
-CLR reference sharing cannot determine a delivery or corruption decision. Verify
-equal digests after separate actual native edge-frame decoding, independently
-allocated equal references, and changed full identity/content. Keep all aliases,
-field IDs, exact content and global native serialization behavior unchanged.
-Invalid digests fail closed; no fallback or automatic rewrite is accepted.
-Real restart/RF3 qualification remains required for populated data. Rollback
-retains canonical data, intents and high-water records.
+The source-stage fingerprint correction implements REQ/AC-GRAPH-XPART-001 before this feature's first qualified release. Freeze a fixed independently owned record and string-occurrence tree before encoding the unchanged generated fingerprint tuple; CLR reference sharing cannot determine a delivery or corruption decision. Verify equal digests after separate actual native edge-frame decoding, independently allocated equal references, and changed full identity/content. Keep all aliases, field IDs, exact content and global native serialization behavior unchanged. Invalid digests fail closed; no fallback or automatic rewrite is accepted. Real restart and cluster qualification remains required for populated data. Rollback retains canonical data, intents and high-water records.
 
 ```mermaid
 sequenceDiagram
-    participant R as Request grain
-    participant S as Source atomic partition
-    participant T as Target atomic partition
-    R->>S: Commit canonical edge and bounded intents
-    R->>T: Apply locator after current source verification
-    T-->>R: Separate committed high-water state
-    R->>S: Complete only the current matching intent
-    Note over S,T: One validated physical owner, no cross-partition atomic transaction
+    participant C as Connection grain
+    participant S as Source partition grain
+    participant T as Target partition grain
+    C->>S: Commit canonical edge and bounded intents
+    C->>T: Apply locator after current source verification
+    T-->>C: Separate committed high-water state
+    C->>S: Complete only the current matching intent
+    Note over S,T: Separate ordinary transactions, no cross-partition atomic commit
 ```
 
-Use `MaxScanRecords` and `MaxBatchBytes` for pending intent and receiver-state capacity, plus `MaxResults`/`MaxScanRecords`/`MaxBatchBytes` per bounded repair page and the original request deadline. Failed reservation prevents source commit. Do not discard unresolved intents or receiver tombstones automatically. Current placement must be validated against the complete same-shard tuple; different owners fail closed. Rollout uses the current native schema without rewriting existing records. Rollback stops new cross-partition writes/repair but retains canonical source records, unresolved intents and target high-water state. No restart is allowed to reinterpret an unknown native envelope as success. Physical movement remains subject to a separate owner-fenced contract and signed receipt.
+Use `MaxScanRecords` and `MaxBatchBytes` for pending intent and receiver-state capacity, plus `MaxResults`/`MaxScanRecords`/`MaxBatchBytes` per bounded repair page and the original request deadline. Failed reservation prevents source commit. Do not discard unresolved intents or receiver tombstones automatically. Rollout uses the current native schema without rewriting existing records. Rollback stops new cross-partition writes/repair but retains canonical source records, unresolved intents and target high-water state. No restart is allowed to reinterpret an unknown native envelope as success.
 
-## Verification and agent roles
+## Verification
 
-The exact public Batch union/discriminator registration is frozen in [CrossPartitionEdges](../Features/GraphTraversal/CrossPartitionEdges.md#mutation-and-delivery-rules). Root joins the existing mutation union/authorization/dispatch; graph worker pins every new per-type native alias and field ID plus public mutation round trips. Delivery remains existing SDK `CommitAsync(CommandRequest)` with no separate write endpoint or dispatcher.
+The exact public Batch union/discriminator registration is frozen in [CrossPartitionEdges](../Features/GraphTraversal/CrossPartitionEdges.md#mutation-and-delivery-rules). Delivery remains existing SDK `CommitAsync(CommandRequest)` with no separate write endpoint or dispatcher.
 
-Feature-local worker owns new Abstractions/Core/Unit GraphTraversal contracts and source, not central dispatch/public caller files. Root integrates alias and mutation joins, docs and inventory; root runs exact canonical build, normal/scalar Unit, process recovery and real RF3 .NET/MCP Aspire gates. No document may mark KL-038 implemented or qualified from native unit source alone. Remote-owner transfer, automatic background coordinator, SQL join, frontend and complete KL-038 delivery-window qualification remain open.
+No document may mark cross-partition edges implemented or qualified from native unit source alone. The automatic background delivery service (a StatelessWorker batching pattern per [ADR-094](ADR-094-orleans-due-coordination.md)), SQL join, frontend and complete delivery-window qualification remain open.

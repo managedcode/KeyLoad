@@ -1,42 +1,25 @@
 # Search
 
-The accepted concurrent delivery contracts are
-[FilteredRetrieval](Search/FilteredRetrieval.md),
-[GraphRetrieval](Search/GraphRetrieval.md) and
-[EventProjectionLineage](Search/EventProjectionLineage.md). Their source stages
-retain this feature's original runtime, authorization, SQL and RF3 acceptance.
+Search covers authorized text, vector, graph and hybrid retrieval over committed ZoneTree data. The delivery contracts of its children are [FilteredRetrieval](Search/FilteredRetrieval.md), [GraphRetrieval](Search/GraphRetrieval.md), [EventProjectionLineage](Search/EventProjectionLineage.md), [NativeFullTextProjection](Search/NativeFullTextProjection.md), [ManagedAnn](Search/ManagedAnn.md) and [OnlineGenerationLifetime](Search/OnlineGenerationLifetime.md). Index generations are disposable node-local storage state derived from canonical committed records; they are never an authority for acknowledged writes, authorization or replication. Distributed search is performed by Orleans grains that query the partitions through ordinary Orleans calls and merge the results; cluster concept: [ADR-136](../ADR/ADR-136-native-orleans-partition-ownership.md).
 
-Owner decision2026-10-03 selects ZoneTree.FullTextSearch as the full-text provider
-under [ADR-071](../ADR/ADR-071-canonical-zonetree-providers.md) and the remaining
-projection/freshness boundaries of [ADR-009](../ADR/ADR-009-search-provider-boundaries.md).
-REQ-SQLC-010 / AC-SQLC-010 maps TASK-SQLC-R4 source review to
-[the pinned candidate findings and real test gates](../implementation/zonetree-fulltextsearch-review.md).
-Research is complete; provider selection is fixed, while integration and native
-performance qualification are pending.
-Freeze canonical-commit/index-generation freshness, tokenizer/hash/rank parity,
-nonpartial cancellation, authorization/read cuts, rebuild/rollback and resource
-bounds before implementation. The first native candidate-generation contract is
-now frozen in [ADR-078](../ADR/ADR-078-native-full-text-projection.md) and
-[NativeFullTextProjection](Search/NativeFullTextProjection.md); source and runtime
-qualification are pending. The provider's query language does not replace SQL.
+ZoneTree.FullTextSearch is the selected full-text provider under [ADR-071](../ADR/ADR-071-canonical-zonetree-providers.md) and the projection/freshness boundaries of [ADR-009](../ADR/ADR-009-search-provider-boundaries.md). Canonical-commit/index-generation freshness, tokenizer/hash/rank parity, nonpartial cancellation, authorization/read cuts, rebuild/rollback and resource bounds are frozen in [ADR-078](../ADR/ADR-078-native-full-text-projection.md). The provider's query language does not replace SQL.
 
 | Requirement | Acceptance | Mapping |
 |---|---|---|
-| REQ-ZT-003: actual selected full-text provider is a bounded derived projection | AC-ZT-003: centrally pinned published/source-bound ZoneTree.FullTextSearch, authorized exact token/identity/rank oracle, nonpartial cancellation and real replay/rebuild/swap/RF3 tests pass; stale/corrupt generations cannot return success | TASK-ZT-FTS-CONTRACT then Search provider tests, process recovery and SDK/official MCP RF3; pending |
+| REQ-ZT-003: the selected full-text provider is a bounded derived projection | AC-ZT-003: the centrally pinned ZoneTree.FullTextSearch, an authorized exact token/identity/rank oracle, nonpartial cancellation and real replay/rebuild/swap tests on the Aspire replicated cluster pass; stale or corrupt generations cannot return success | Search provider tests, process recovery and SDK/official MCP tests |
 
-Status: Accepted resource repair contract; implementation and CI qualification pending.
-Decision: [ADR-035](../ADR/ADR-035-memory-performance.md), TASK-MP-006B.
-Scope: exact persisted-policy text/vector/hybrid reads under one committed apply cut.
-Public request/response JSON, BM25 tokenization and reciprocal-rank fusion remain identical.
+## Resource contract for exact reads
+
+Decision: [ADR-035](../ADR/ADR-035-memory-performance.md). Scope: exact persisted-policy text/vector/hybrid reads under one committed apply cut. Public request/response JSON, BM25 tokenization and reciprocal-rank fusion remain identical.
 
 | Requirement | Acceptance / pass and fail condition | Test and evidence |
 |---|---|---|
-| REQ-SR-001 | AC-MP-004: every visible corpus document still affects BM25 count/average/term frequency, including missing fields; ranks, ordinal ID ties, normalization and query-term accumulation are exact | Real-store Unicode/repeated/missing/nonmatching corpus and golden score/rank cases; GitHub TUnit |
-| REQ-SR-002 | AC-MP-004: vector candidates obey space/revision/row/field authorization; query finite/dimension/metric validation occurs once; selected SIMD/scalar metric preserves accumulation | Real-store stale/hidden/mismatched-space cases plus finite/zero/large-vector metric golden cases |
+| REQ-SR-001 | AC-MP-004: every visible corpus document still affects BM25 count/average/term frequency, including missing fields; ranks, ordinal ID ties, normalization and query-term accumulation are exact | Real-store Unicode/repeated/missing/nonmatching corpus and golden score/rank cases |
+| REQ-SR-002 | AC-MP-004: vector candidates obey space/revision/row/field authorization; query finite/dimension/metric validation occurs once; the SIMD metric preserves accumulation | Real-store stale/hidden/mismatched-space cases plus finite/zero/large-vector metric golden cases |
 | REQ-SR-003 | AC-MP-003/004: scans consume scoped borrowed records; retained rank state contains identity/statistics/scores rather than full corpus JSON/vector arrays | Real large-payload rank cases, bounded read failures and allocation/resource artifacts |
-| REQ-SR-004 | AC-MP-004/005: branch ranks and text-then-vector RRF accumulation are unchanged; select at most Limit results before decoding/projecting final payloads and account actual final point reads | Exact text/vector/hybrid ranks, ties/weights, shared-budget and output boundary cases |
-| REQ-SR-005 | AC-MP-004/012: cancellation/work/result exhaustion leaves the committed position unchanged and a following call succeeds; no unbounded gate/iterator lifetime | Real persisted-policy cancellation/overflow/healthy-following-call tests; RF3 SDK/MCP integration |
-| REQ-SR-006 | AC-MP-003/004/011/012: all analytical engines on one DatabaseEngine obey one positive MaxConcurrentQueries ceiling; saturated/cancelled calls cannot perform ranking or storage work | TASK-MP-006C real-store mixed-entry admission/release cases in UnitTests/Features/ResourceExecution; exact GitHub qualification |
+| REQ-SR-004 | AC-MP-004/005: branch ranks and text-then-vector RRF accumulation are unchanged; at most Limit results are selected before decoding/projecting final payloads and the actual final point reads are accounted | Exact text/vector/hybrid ranks, ties/weights, shared-budget and output boundary cases |
+| REQ-SR-005 | AC-MP-004/012: cancellation/work/result exhaustion leaves the committed position unchanged and a following call succeeds; no unbounded gate/iterator lifetime | Real persisted-policy cancellation/overflow/healthy-following-call tests; SDK/MCP integration |
+| REQ-SR-006 | AC-MP-003/004/011/012: all analytical engines on one DatabaseEngine obey one positive MaxConcurrentQueries ceiling; saturated/cancelled calls cannot perform ranking or storage work | Real-store mixed-entry admission/release cases in UnitTests/Features/ResourceExecution |
 
 ```mermaid
 flowchart LR
@@ -50,101 +33,19 @@ flowchart LR
     Project --> Output[Measure complete response]
 ```
 
-Lead owns `Core/Features/DocumentStorage/DocumentStorageKeys.cs`,
-`Core/Features/DocumentStorage/VisibleDocumentReads.cs`,
-`Core/Features/Search/VisibleVectorReads.cs` and existing Core read-helper joins.
-Both visitor methods use the existing read view and one ReadExecutionBudget; they
-decode a single record, check persisted row visibility and invoke an owned-record
-callback without accumulating a full page. Vector visits charge each referenced
-document and reject stale/deleted/hidden candidates as before. Existing public
-array-returning read helpers consume the same visitor algorithm for their distinct
-owned-result contracts. No callback may mutate the read transaction or escape the cut.
+The Core document-storage keys and the visible-document and visible-vector readers use the existing read view and one ReadExecutionBudget. Both visitor methods decode a single record, check persisted row visibility and invoke an owned-record callback without accumulating a full page; vector visits charge each referenced document and reject stale/deleted/hidden candidates as before. The array-returning read helpers consume the same visitor algorithm. No callback may mutate the read transaction or escape the cut.
 
-TASK-MP-006B owns `Query/SearchEngine.cs`, new `Query/Features/Search/` helpers and
-new `UnitTests/Features/Search/` tests. It may update only the shared-budget numeric
-calculation in `ReadExecutionTests.TextAndVectorBranchesShareOneReadByteBudget`
-to include the real selected-document reads; all assertions and existing cases stay.
-Other test/contract/server/CI/docs files belong to the lead or their existing owner.
+Text ranking retains lengths and query-term counts plus identities only for matching records; all visible documents still contribute corpus statistics. The text JSON pointer is compiled once. Vector ranking retains identities and scores, prepares the finite validation and cosine norm once, computes only the chosen metric and preserves the Vector.Widen/Vector.Dot/scalar-tail reduction grouping. Exact hybrid fusion requires bounded metadata for every ranked candidate (dropping branches to Limit before fusion is forbidden); a bounded top-result heap then selects final payloads. Final selected point reads trade at most Limit extra reads for removing full-corpus payload retention, stay inside the same read cut and consume the shared raw-byte budget. `DocumentStorageKeys.RecordKey` and `Prefix` supply canonical keys to both visitors and selected reloads.
 
-Text ranking retains lengths and query-term counts plus identities only for
-matching records; all visible documents still contribute corpus statistics.
-Compile the text JSON pointer once. Vector ranking retains identities and scores;
-prepare the query's finite validation and cosine norm once, compute only the chosen
-metric, and preserve the existing Vector.Widen/Vector.Dot/scalar reduction grouping.
-Exact hybrid fusion requires bounded metadata for every ranked candidate; dropping
-branches to Limit before fusion is forbidden. A bounded top-result heap then
-selects final payloads. Final selected point reads trade at most Limit extra reads
-for removing full-corpus payload retention, remain inside the same read cut, and
-consume the shared raw-byte budget. They are never free or described as eliminated.
-`DocumentStorageKeys.RecordKey` and `Prefix` supply canonical document keys to
-both visitors and selected reloads; their stored bytes remain identical.
+REQ-SR-003/004/005 also fix the shared text/vector byte boundary: with two documents, a vector and lineage, the shared hybrid request must exceed the budget by its additional corpus document read, including the Resource key/native payload and the absent BM25-head key in the arithmetic, while each isolated branch returns its complete literal records and ranks; limits are not raised and a healthy follow-up and a cold reopen keep complete rows and position. Coverage includes missing/empty text, Unicode, repeated terms, differing corpus lengths, same-score IDs, zero vectors, nonfinite values, dimension/space mismatch, stale revision, hidden/redacted fields, exact and excess byte/output/work budgets, cancellation and recovery of subsequent reads, on real ZoneTree with persisted policy. UI and data migration are N/A because the stored format and wire shape do not change.
 
-Positive, negative, edge and error coverage includes missing/empty text, Unicode,
-repeated terms, differing corpus lengths, same-score IDs, zero vectors, nonfinite
-values, dimension/space mismatch, stale revision, hidden/redacted fields, exact and
-excess byte/output/work budgets, cancellation and recovery of subsequent reads.
-Tests use real ZoneTree and persisted policy, never fakes. GitHub Actions owns all
-test/load execution. Build/formatter checks are development/static evidence only.
-UI/data migration are N/A because stored format and wire shape do not change;
-RF3/MCP public integration and measured server memory remain required join gates.
+## SIMD execution
 
-## Portable SIMD validation qualification
+REQ-SIMD-005: the normal product requires native hardware-accelerated .NET SIMD. Core owns `Features/Search/Validation/SimdRuntime.cs` and the public `KeyLoad.SimdRuntime.RequireHardwareSupport()` admission. `System.Numerics.Vector.IsHardwareAccelerated` admits the supported CPU's .NET implementation; unsupported execution throws an explicit `PlatformNotSupportedException`. The server calls that admission before serialization initialization, configuration construction or node-local storage acquisition; standalone similarity validates its dimension bounds and then calls the same admission before vector validation. There is no scalar fallback and no SIMD disable selection; native Vector finite blocks, Widen/Dot accumulation, bounded scalar tails, error order, authorization, read cuts, cancellation and the original metrics are preserved.
 
-### Current mandatory SIMD contract — owner correction 2026-10-11
+AC-SIMD-005 maps REQ-SIMD-005 to the VectorMetricValidationTests, VectorMetricGoldenTests and CanonicalVectorPublicMetricTests whole operations: every native lane and tail keeps its finite/error result (NaN, +Infinity and -Infinity at every full-block lane and scalar-tail position; empty, 4097 and mismatched dimensions; query validation before invalid metric); lengths 1, the runtime vector width, width+1, two widths+1 and 4096 preserve the selected metric goldens, finite extremes and zero-vector handling; the three canonical metrics exercise a real complete native block plus a bounded tail, full authorized pages, cancellation without effects and a healthy continuation. Only full finite-validation blocks use portable `Vector.Abs` and strict `Vector.LessThanAll(..., +Infinity)`; the length check, scalar `float.IsFinite` tail and all metric reductions are identical. Unsupported hardware is rejected rather than advertised as supported; no speed improvement is claimed without matched measurements.
 
-The following current contract supersedes the hardware-disabled/full scalar
-execution and qualification instructions in the historical stages below. Their
-original source and report receipts remain historical evidence.
-
-REQ-SIMD-005: the normal product requires native hardware-accelerated .NET SIMD.
-Core owns `Features/Search/Validation/SimdRuntime.cs` and the shared public
-`KeyLoad.SimdRuntime.RequireHardwareSupport()` admission. The native
-`System.Numerics.Vector.IsHardwareAccelerated` predicate admits the supported
-CPU's actual .NET implementation; unsupported execution throws an explicit
-`PlatformNotSupportedException`. Server's existing ClientApi composition calls
-that admission before serialization initialization, configuration construction
-or node-local storage acquisition. Standalone similarity validates its original
-dimension bounds and then invokes the same admission before vector validation.
-Remove the complete scalar fallback and SIMD disable selections. Preserve native
-Vector finite blocks, Widen/Dot accumulation, bounded scalar tails, error order,
-authorization, read cuts, cancellation and the original metrics.
-
-AC-SIMD-005 maps REQ-SIMD-005 to the existing VectorMetricValidationTests,
-VectorMetricGoldenTests and CanonicalVectorPublicMetricTests whole operations:
-every native lane and tail keeps its original finite/error result; the three
-canonical metrics exercise a real complete native block plus a bounded tail,
-full authorized pages, cancellation without effects and healthy continuation.
-Native source review must also verify that Server calls the shared hardware
-admission before configuration/storage and that no complete scalar fallback
-remains. Unsupported hardware is rejected rather than advertised as supported;
-these operation results do not establish a speed improvement.
-
-REQ-SIMD-006: current execution and qualification expose one normal SIMD-enabled
-profile. Native test selection rejects `unit-scalar` and inherited hardware/SIMD
-disable requests before launching a runner. CI retains normal unit, process
-recovery, genuine Aspire RF3 SDK/MCP and every applicable functional coverage
-group/control with unchanged parallelism50, thresholds and evidence guards.
-
-AC-SIMD-006 maps REQ-SIMD-006 to the existing
-NativeTUnitSelectionTests.NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections
-whole selection operation and the actual production source-manifest,
-descriptor/coverage and task-acceptance operations. They must reject retired
-profile inputs, preserve original failed inputs/receipts, restore original bytes
-and admit the complete healthy normal operation. Original full Linux suites,
-source/PE/PDB/TRX binding, native RF3 cleanup and coverage80/70/critical90 remain
-required; retirement of duplicate profiles is not a passing coverage result.
-
-TASK-SIMD-MANDATORY-001 implements REQ-SIMD-005/006 and AC-SIMD-005/006 under
-ADR-035: the kernel owner supplies native admission/finite-block changes and
-existing whole-operation metric tests; the integration owner joins early Server
-admission, native selector, CI and documentation; CodeQuality owns the strict
-normal-only source/report/task validators and their complete operation tests.
-Review the combined batch before one coherent build/analysis/format and affected
-native TUnit run. Root owns final source binding, all-code commit/push and genuine
-Linux acceptance. Performance comparisons use equivalent competitor workloads
-and authenticated original previous-code baselines, with matching inputs,
-hardware, topology, resources and durability. No forced-no-SIMD profile, legacy
-reader, format migration or synthetic performance evidence is introduced.
+REQ-SIMD-006: execution and qualification expose one normal SIMD-enabled profile; native test selection rejects `unit-scalar` and inherited hardware/SIMD disable requests before launching a runner (AC-SIMD-006, `NativeTUnitSelectionTests`).
 
 ```mermaid
 flowchart LR
@@ -152,591 +53,98 @@ flowchart LR
     Support -->|supported| Blocks[Native vector blocks and bounded tails]
     Support -->|unsupported| Refuse[Explicit failure before storage startup]
     Blocks --> Flow[Original bounded authorized operation]
-    Flow --> Evidence[Normal native tests and matched benchmarks]
 ```
 
-On 2026-10-02 the owner explicitly mapped the earlier SMID wording to SIMD and
-directed .NET intrinsics first, Rust only after profiling. The existing Accepted
-ADR-035 TASK-MP-006D validation stage is now executed under
-[AC-SIMD-001–004](Search.md) and its
-[protected-source/CI task graph](Search.md). Unchanged c486
-run37060131271 has all five first-authored public/real-ZoneTree metric regressions
-passing on every OS (normal units871/871 each), and RF3 SDK/MCP46/46. Root independently
-verified all native report byte/source/count identities in
-[the exact receipt](https://github.com/managedcode/KeyLoad/actions/runs/37060131271).
-The run still fails Windows recovery and native comparison completion; it is not
-full product qualification. Full-block finite validation uses portable .NET JIT
-intrinsics; metric Vector.Widen/Vector.Dot/scalar grouping stays unchanged. Same-SHA
-normal and hardware-disabled full unit invocations retain separate native reports.
-Speed, allocations/RSS, numeric coverage and broad endurance/fault completion remain
-open until actual matching GitHub evidence exists.
+REQ-NATIVE-WAL-NORMAL-001 / AC-NATIVE-WAL-NORMAL-001: the native checksum-profile recovery test (`NativeChecksumProfileRecoveryTests.CurrentNativeWalPreserves257RecordsAndBothAppendsAcrossFourProcesses`, no parameters) checks SIMD eligibility before opening its store and runs four real processes in seed, first-append, second-append and cold order; it retains the 257 native corpus rows, both acknowledged command/receipt/native outcome appends, original retry and conflicting-body refusal, complete persisted models/outbox, a byte-exact cold cut and the same-root identity. The parent passes only mode, root and phase; it never writes intrinsics environment variables. The actual guard `Vector.IsHardwareAccelerated && (Sse2.IsSupported || AdvSimd.IsSupported)` precedes storage acquisition. This is process recovery, not power-loss or performance qualification.
 
-TASK-RUNTIME-SEARCH-BYTES-W3 preserves REQ-SR-001 / AC-MP-003/011/012 after
-Ubuntu run37021991878 atfa80c701 reports1048511 rather than1048576 added stored
-bytes. The fixture compares complete DocumentRecord encodings, including65
-UpdatedAt values, while its two batches currently sample independent command
-times. Native System.Text.Json trims fractional-second zeros; the65-byte delta
-fits a one-byte timestamp-width difference, but CI contains no timestamps proving
-that exact cause. Capture one actual UTC time after configuration and use it for
-both separate batches with distinct matching inner/outer command IDs. Equality
-is permitted by the existing persisted command-clock contract. Assert actual
-stored times match that captured value before measurement, retain the exact
-1MiB stored-byte difference and every allocation/result/score assertion. No
-synthetic clock, tolerance, changed grouping or byte counter is accepted. The
-worker owns only SearchResourceTests.cs; the lead reviews metadata and timing
-boundaries, builds and obtains renewed exact multi-OS GitHub proof. ADR035 owns
-source-only rollback; production/API/data migration is N/A for this fixture repair.
+## Full search contract
 
-TASK-MP-006D, REQ-SR-002 and AC-SEARCH-001 expand the metric edge proof before
-optimizing finite-value validation. Public `SearchEngine.Similarity` cases and
-real-store search cases live in NEW
-`tests/KeyLoad.UnitTests/Search/Cases/Vector/VectorMetricValidationTests.cs` and
-`VectorMetricGoldenTests.cs`. The test worker owns only these files; the lead
-alone owns any `PreparedSimilarity.Validate` implementation, CI, docs and join.
+Actors: an authorized text/vector/hybrid caller and the index-generation worker. Entry points: `SearchRequest`, `SearchEngine`, canonical vectors, the .NET SDK and HTTP search. Request-time lexical scoring, exact vector scoring and weighted rank fusion are distinct from provider-backed indexes.
 
-Pass requires exact error codes/details for query and candidate NaN/+Infinity/
--Infinity at every full-block lane and scalar-tail position; empty, 4097 and
-mismatched dimensions; query-validation-before-invalid-metric precedence. Finite
-lengths 1, runtime vector width, width+1, two widths+1 and 4096 preserve selected
-metric goldens, finite extremes and zero-vector handling. Normal and
-`DOTNET_EnableHWIntrinsic=0` GitHub invocations must both qualify the same source;
-the public scoring oracle and real-store outcomes must agree. No private test
-provider or mock is introduced.
-
-Only full finite-validation blocks may use portable `Vector.Abs` and strict
-`Vector.LessThanAll(..., +Infinity)`; the length check, scalar `float.IsFinite`
-tail, query/candidate error order and all metric reductions remain identical.
-Existing tests and full RF3/SDK/MCP gates remain required. ADR-035 records ordered
-baseline/implementation/fallback stages. This internal compatible optimization has
-no data/wire migration; rollback restores the validation loop. Numeric performance
-budgets and improved throughput/allocation claims still require TASK-MP-011B's
-matched actual server receipts.
-
-## Повний пошуковий контракт
-
-Актори: authorized text/vector/hybrid caller та майбутній index-generation worker. Entry points: [SearchRequest](../../src/KeyLoad.Abstractions/Queries.cs), [SearchEngine](../../src/KeyLoad.Query/Search/Queries/QueryExecution/SearchEngine.cs), [canonical vectors](../../src/KeyLoad.Core/GraphAndSeries.cs), [.NET SDK](../../src/KeyLoad.Client/KeyLoadClient.cs) і [HTTP search](../../src/KeyLoad.Server/ApiEndpoints.cs). Source-present request-time lexical scoring, exact vector scoring і weighted rank fusion відрізняються від майбутніх provider-backed indexes.
-
-| Вимога | Acceptance / flows | Test mapping |
+| Requirement | Acceptance / flows | Test mapping |
 |---|---|---|
-| REQ-SEARCH-001: canonical vector space/revision/dimensions/metric мають exact semantics | AC-SEARCH-001: valid vector search збігається з exact metric oracle; nonfinite/malformed/dimension/space mismatch відхиляється; stale/deleted vector не входить у result; finite large/zero values мають declared handling | Existing `HybridFusionRanksEligibleDocumentsAndInvalidatesStaleVectors`, `LargeFiniteVectorsAndSampleValuesRemainValidAndSimilarityDoesNotOverflow` у [GraphAndSearchTests](../../tests/KeyLoad.UnitTests/GraphAndSearchTests.cs); metric edge expansion PLANNED |
-| REQ-SEARCH-002: lexical/hybrid branches мають deterministic scoring, weights та ties | AC-SEARCH-002: empty/missing/repeated/Unicode terms і same-score IDs зберігають current lexical/fusion algorithm; corpus statistics і branch-rank windows не silently обрізані перед exact fusion | Existing hybrid test та REQ-SR-001/004 golden cases; full golden/multi-branch quality corpus PLANNED under [ADR-018](../ADR/ADR-018-global-rank-fusion.md) |
-| REQ-SEARCH-003: усі branches використовують один authorized current cut | AC-SEARCH-003: hidden rows/vertices/protected field-use заборонені; payload/metadata не містить omitted PII; invalid/revoked grants відхиляються до unsafe scoring; selected point reads залишаються в тому самому cut | Existing [SecurityAndQueryTests](../../tests/KeyLoad.UnitTests/SecurityAndQueryTests.cs), GraphAndSearchTests; real SDK/MCP search adversarial expansion PLANNED |
-| REQ-SEARCH-004: work/cancellation/results і freshness semantics явні | AC-SEARCH-004: exact bounds зберігають result, excess budget/cancellation дає typed failure з healthy following call; source revision перевірена; derived watermark/generation не advertised до реалізації | Existing [ReadExecutionTests](../../tests/KeyLoad.UnitTests/ResourceExecution/Cases/Read/ReadExecution/ReadExecutionTests.cs) `TextAndVectorBranchesShareOneReadByteBudget`, `SearchAndGraphResultBudgetsIncludeProtocolMetadata`; REQ-SR-003/005 і AC-MP preserved |
-| REQ-SEARCH-005: provider/index lifecycle не змінює canonical authority | AC-SEARCH-005: PLANNED provider audit/rebuild/generation-swap/recovery tests доводять declared tokenizer/BM25 statistics/privacy/freshness; missing/incompatible projection дає declared fallback/error, не silently weaker result | PLANNED KL-028/029/031/039/067/097 suites; [ADR-009](../ADR/ADR-009-search-provider-boundaries.md), [ChangeFeeds](ChangeFeeds.md) |
-| REQ-SEARCH-006: ANN/global ranking/graph retrieval проходять окремі correctness-quality-resource gates | AC-SEARCH-006: PLANNED exact oracle і quality corpus перевіряють recall, ties, filter/row scope, global candidate completeness, versioned rank and recovery; unavailable capability explicit unsupported | PLANNED KL-030/032/055–060/074, [ADR-018](../ADR/ADR-018-global-rank-fusion.md), [ADR-019](../ADR/ADR-019-managed-ann.md); перший bounded managed HNSW candidate прийнято в [ManagedAnn](Search/ManagedAnn.md), реалізація/quality/lifecycle/public qualification очікують |
+| REQ-SEARCH-001: canonical vector space/revision/dimensions/metric have exact semantics | AC-SEARCH-001: a valid vector search matches the exact metric oracle; nonfinite/malformed/dimension/space mismatches are rejected; a stale/deleted vector is not in the result; finite large/zero values have declared handling | `HybridFusionRanksEligibleDocumentsAndInvalidatesStaleVectors`, `LargeFiniteVectorsAndSampleValuesRemainValidAndSimilarityDoesNotOverflow`; metric edge cases |
+| REQ-SEARCH-002: lexical/hybrid branches have deterministic scoring, weights and ties | AC-SEARCH-002: empty/missing/repeated/Unicode terms and same-score IDs keep the lexical/fusion algorithm; corpus statistics and branch-rank windows are not truncated before exact fusion | Hybrid test and REQ-SR-001/004 golden cases; quality corpus per [ADR-018](../ADR/ADR-018-global-rank-fusion.md) |
+| REQ-SEARCH-003: all branches use one authorized current cut | AC-SEARCH-003: hidden rows/vertices and protected field-use are forbidden; payload/metadata contain no omitted PII; invalid/revoked grants are rejected before unsafe scoring; selected point reads stay in the same cut | SecurityAndQueryTests, GraphAndSearchTests; SDK/MCP adversarial search |
+| REQ-SEARCH-004: work, cancellation, results and freshness semantics are explicit | AC-SEARCH-004: exact bounds keep the result, excess budget/cancellation gives a typed failure with a healthy following call; the source revision is checked; a derived watermark/generation is not advertised without an implementation | `TextAndVectorBranchesShareOneReadByteBudget`, `SearchAndGraphResultBudgetsIncludeProtocolMetadata` |
+| REQ-SEARCH-005: provider/index lifecycle does not change canonical authority | AC-SEARCH-005: provider audit/rebuild/generation-swap/recovery tests prove the declared tokenizer/BM25 statistics/privacy/freshness; a missing or incompatible projection yields a declared error, never a silently weaker result | provider and recovery suites; [ADR-009](../ADR/ADR-009-search-provider-boundaries.md), [ChangeFeeds](ChangeFeeds.md) |
+| REQ-SEARCH-006: ANN/global ranking/graph retrieval pass separate correctness-quality-resource gates | AC-SEARCH-006: an exact oracle and quality corpus verify recall, ties, filter/row scope, global candidate completeness, versioned rank and recovery; an unavailable capability is explicitly unsupported | [ADR-018](../ADR/ADR-018-global-rank-fusion.md), [ADR-019](../ADR/ADR-019-managed-ann.md), [ManagedAnn](Search/ManagedAnn.md) |
 
-Target map: Abstractions/Core/Query/Client/Server/tests `Features/Search/`; shared adapters — ClientApi, provider/codec/host integration — один lead. Frontend N/A, окремий UI не запитано. PII lineage — [ADR-015](../ADR/ADR-015-sensitive-data-lineage.md), budgets/security — [ADR-010](../ADR/ADR-010-query-budgets-security.md). Existing flat SearchEngine та mixed GraphAndSeries лишаються ADR-032 migration debt; new ownership не робить legacy layout compliant.
+Frontend is N/A: no separate UI is requested. PII lineage: [ADR-015](../ADR/ADR-015-sensitive-data-lineage.md); budgets/security: [ADR-010](../ADR/ADR-010-query-budgets-security.md). Provider-backed BM25, qualified managed ANN, online generation swap, full freshness barriers and distributed global retrieval have separate contracts in the child documents. Qualification is only through real TUnit/recovery/Aspire-cluster SDK/MCP tests and actual JSON benchmarks, without invented speed/quality numbers.
 
-Усі current test methods — source coverage, не passing run. Provider-backed BM25, qualified managed ANN, online generation swap, full freshness barriers, graph-scoped/global distributed retrieval залишаються planned/in-progress; proposed choices не реалізуються до contract acceptance. Product qualification тільки exact GitHub real TUnit/recovery/Docker RF3 SDK/MCP та actual JSON benchmarks, без invented speed/quality numbers.
+[ManagedAnn](Search/ManagedAnn.md) defines the first-party packed managed HNSW candidate with explicit pre-allocation memory/work/scratch admission and independent real-store recall/metric/filter tests; no external ANN package is used. [ManagedAnnSeed](Search/ManagedAnnSeed.md), REQ/AC-ASD-001–006, defines a bounded Core/Search input seam: persisted minimum-grant authority, owned visible vectors and scalar source/applied/outbox metadata in one read cut, then charged ordinal sorting and exact-bit hashing outside the gate.
 
-Accepted 2026-10-04 [ManagedAnn R1](Search/ManagedAnn.md) implements an independently authored first-party packed managed HNSW candidate with explicit pre-allocation memory/work/scratch admission and independent real-store recall/metric/filter tests. No external ANN package or public approximate search is enabled by that contract. Online native ZoneTree projection/replay and versioned SQL/SDK/MCP completeness/freshness are separate R2/R3 contracts and remain pending.
+## Controlled quality corpus
 
-Accepted R2A [ManagedAnnSeed](Search/ManagedAnnSeed.md), REQ/AC-ASD-001–006, implements a bounded Core/Search input seam: persisted minimum-grant authority, owned visible vectors and scalar source/applied/outbox metadata in one read cut, then charged ordinal sorting and exact-bit hashing outside the gate. Local actual Aspire normal/scalar development regressions passed 34/34 each after full Release/formatter/governance checks; their original reports and unchanged source/runtime inventories are recorded in the linked spec. It is a historical computational seed and does not complete the persistent projection, current-public-authorization, replay, recovery or delivered-source Linux/RF3 gates.
+REQ-SEARCH-007 / AC-SEARCH-007 add a controlled first-party quality oracle under [ADR-018](../ADR/ADR-018-global-rank-fusion.md). The corpus has 32 literal documents, fixed four-dimensional vectors and six literal query definitions (English, Ukrainian, repeated and missing text, graph-only discovery, selective allowed IDs and an empty allowed set). Query definitions and relevance grades 0..3 are authored before execution and never derive from observed ranks; persisted grants and independently declared eligible IDs define each query's eligible set. The judgments describe the controlled fixture only, not an external evaluation dataset or a production relevance target.
 
-## TASK-SEARCH-QUALITY-CORPUS: controlled relevance and window sensitivity
+Pass requires real node-local ZoneTree documents, vectors, graph edges and persisted authorization, using the actual `SearchEngine.GraphSearchAsync`, the BM25 `TextRanker`, the exact-vector branch, the graph retriever and the native ZoneTree.FullTextSearch projection. Native and scalar-tail lexical parity preserves IDs, scores and stable order. Complete branches are captured with limit 32 only after seeding, all observations keep the same committed position and authority, complete candidate IDs match the independent eligible-set declarations, ineligible IDs are omitted, order is deterministic on repeat, an empty selection returns no candidates and missing branches contribute nothing.
 
-Root freezes this first KL-074 implementation stage on2026-10-05 before delegated
-writes. REQ-SEARCH-007 / AC-SEARCH-007 add a controlled first-party quality oracle
-under [ADR-018](../ADR/ADR-018-global-rank-fusion.md). Its corpus is32 literal
-documents, fixed four-dimensional vectors and six literal query definitions,
-including English, Ukrainian, repeated and missing text, graph-only discovery,
-selective allowed IDs and an empty allowed set. Query definitions and relevance
-grades0..3 are authored before execution and must not derive from observed ranks.
-Persisted grants and independently declared eligible IDs define each query's
-eligible set; complete branch output is an observation, not its own eligibility
-oracle. Relevance judgments identify the controlled fixture, with no claim of an
-external evaluation dataset or production relevance target.
+The independent metric helper computes Recall@5/10, MRR@10 and graded nDCG@5/10 with gain 2^grade-1 and discount 1/log2(rank+1); a query without relevant eligible documents returns 0, duplicate ranked IDs are rejected, and hand-computed goldens (perfect/reversed rankings, missing relevant IDs, ties, empty input) verify the helper independently of production ranking. Every metric is finite in 0..1. Test-only window widths 1, 4, 8 and 32 per active branch truncate the real complete observations and run the actual `SearchRankFusion` kernel and `GlobalBranchWindowMerger`; width 32 reproduces the complete branch union and the production fusion, smaller widths expose truncation and candidate recall, and growing widths never lose union candidates. These controls expose no request-time window knob and prove no distributed global-ranking contract. When two canonical vectors have equal similarity their RRF contributions still differ (for example 1/61 and 1/62) because fusion is rank-based.
 
-Pass requires real node-local ZoneTree documents, vectors, graph edges and
-persisted authorization. Use the actual SearchEngine.GraphSearchAsync, current
-BM25 TextRanker, exact-vector branch, graph retriever and native
-ZoneTree.FullTextSearch projection. Native/scalar lexical parity preserves IDs,
-scores and stable order. Capture complete branches with limit32 only after
-seeding; all observations must retain the same committed position and authority.
-Verify complete candidate IDs against the independent eligible-set declarations,
-unchanged current generation, deterministic repeated order, and omission of
-ineligible IDs. Empty selection returns no candidates; missing branches contribute
-nothing. Existing cancellation, budget and authorization tests remain required.
+The finite hybrid task acceptance maps as follows.
 
-The independent metric helper computes Recall@5/10, MRR@10 and graded nDCG@5/10,
-using gain2^grade-1 and discount1/log2(rank+1). A query with no relevant eligible
-documents returns0 for each metric; duplicate ranked IDs are rejected. Literal
-hand-computed ordered-list goldens, perfect/reversed rankings, missing relevant
-IDs, ties and empty input verify the helper independently of production ranking.
-Every observed metric is finite and within0..1. Retain deterministic fixture-only
-query/window/metric observations for review; do not add timing thresholds or infer
-a production relevance threshold from these controlled samples.
-
-Frozen test-only window widths are1,4,8,32 per active branch. Truncate the real
-complete branch observations and invoke the actual SearchRankFusion kernel; also
-exercise GlobalBranchWindowMerger against equivalent explicit finite windows.
-Width32 must reproduce the complete branch union and production full fusion;
-smaller widths truthfully expose truncation and their observed candidate recall.
-Increasing widths must not lose union candidates. These sensitivity controls do
-not expose a request-time window knob, change scorer semantics, or prove a
-distributed global-ranking contract. A product window/scorer option needs its own
-ADR/API contract before implementation.
-
-Canonical ownership: only NEW UnitTests Features/Search/Cases,
-Helpers, Assertions and pure Models/Contracts as needed, all prefixed HybridQuality.
-Luna cluster_wave prepares an immutable private packet; root alone reviews,
-integrates, runs actual Aspire normal/scalar callers and commits. Production
-Search, public contracts, BenchmarkComparisons runners, website and shared fixtures
-receive no delegated writes. The parallel comparison owner retains actual scorer
-variants, pre-run primary-target selection, masking/freshness/timeouts, matched
-GitHub performance cohorts and gain/no-gain publication. Frontend and public SDK/MCP
-changes are N/A for this controlled unit oracle because request contracts are
-unchanged; their existing Search RF3 acceptance remains mandatory.
-
-The initial actual Aspire cohort passed the two independent metric-golden cases
-and exposed an invalid equality assertion on the single-vector caller's RRF
-scores. The tie oracle must read the two actual authorized canonical vector
-records, verify their literal four0.5 components/full space/revision, then assert
-the observed d20/d21 first-two ID order and the distinct literal RRF contributions
-1/61 and1/62. Equal source similarity does not make rank-based fusion scores equal.
-Preserve that failed original report and repeat the unchanged quality/eligibility
-requirements; no production scoring change or assertion relaxation is authorized.
-
-Rollback removes only the new test harness and restores this stage's prior status;
-there is no data or wire migration. Root review verifies qrels are independent,
-tests use actual providers and observations are labeled. Required evidence is the
-original native reports and unchanged pre/post source/runtime input inventories.
-This stage does not close KL-074, AC-SEARCH-006, global ranking, RF3, Linux or
-performance/publication qualification.
-
-
-TASK-KL027-CANONICAL-ATOMIC-REVISION-R2 freezes the direct PutVector batch gap under original KL027, REQ-SR-002/REQ-SEARCH-001 and AC-SEARCH-001 before test correction. TestDatabase.Submit serializes a valid CommandRequest and calls actual DatabaseEngine.Apply; normalization serializes typed mutations without applying vector-dimension or document-revision validation. Both tested errors therefore occur during owned batch execution after the document revision2 mutation: invalid values length versus Space.Dimension yields exactly Validation / “The vector dimension or values are invalid.”; the otherwise valid vector with stale ExpectedDocumentRevision yields exactly RevisionConflict / “The expected revision does not match.”. Existing CommandId with changed content is the distinct Conflict contract, not a stale-revision error. Pre-admission/invalid-envelope failures are not claimed to persist an outcome.
-
-Each first execution rejection resets staged document/vector effects, persists the complete failed outcome and advances the native store position exactly once. Repeating the same CommandId and payload returns the identical complete OperationResult and identical native outcome bytes with stable post-rejection position. Full document result and full vector-search source documents/scores/order remain byte-identical; a real healthy document/vector batch commits revision2 and reverses exact dot-product ranking. Valid unmatched-model requests exclude incompatible spaces and a matching-space follow-up remains healthy. Feature-local Search/Cases/CanonicalVectorAtomicRevisionTests.cs and Assertions/CanonicalVectorRejectedOutcomeAssertions.cs own these two native argument cases; existing atomic/typed-space ADR contracts suffice with no new production boundary. The immutable R1 private draft retains its incorrect Conflict/unchanged-position expectations as unqualified history and must not be joined. Root owns fresh build and native normal/scalar reports; KL027 remains open and no SIMD, performance, RF3 or whole-feature qualification follows from this authored packet.
-
-
-## TASK-KL027-AUTHORITATIVE-VECTOR-PROFILE-001
-
-REQ-VECTOR-PROFILE-001: a collection may declare a bounded server-persisted immutable set of field vector profiles through the existing authenticated ConfigureResource command. Each typed VectorFieldProfile binds canonical JSON pointer Field to full VectorSpace(Id,Dimension,Metric,Model,Version). ResourceDefinition gains new native Id13 VectorProfiles, default empty; VectorFieldProfile has stable GenerateSerializer/Alias and Id0Field/Id1Space. Existing aliases/IDs never move. No new transport/operation enum. Empty profiles retain explicitly unrestricted existing collection semantics; a configured field has an authoritative expected profile. First release only, no format fallback/migration or silent new interpretation of valid existing vectors.
-
-AC-VECTOR-PROFILE-001: actual native ConfigureResource persists profile, same-ID exact replay is immutable; missing/duplicate/noncanonical field, null profile item, malformed identifiers, invalid metric/dimension and more than32 field profiles reject exact Validation/ResourceExhausted with native canonical outcome semantics and no configured resource effect. Profiles are collection-only. Existing policy-only ResourcePolicyUpdates fingerprint forbids profile mutation, including valid admin replacement; no profile-changing migration introduced.
-
-REQ-VECTOR-PROFILE-002: every canonical vector publication (direct PutVector and ApplyVectorProjection) compares declared full profile with the persisted configured field after fresh persisted operation/field/row authorization and current target revision but before vector/lineage publication. Invalid coordinates/dimensions retain existing exact Validation diagnostic. Well-shaped wrong configured profile yields Validation / 'The declared vector profile does not match the configured field.' No embedding-model inference from numeric values. Authorization retains precedence and no profile metadata disclosure.
-
-AC-VECTOR-PROFILE-002: native real same-partition mixed document+PutVector batch with correct dimension but wrong declared model must return exact Validation once, reset complete document/vector/lineage/source effects, persist complete failed receipt once and advance canonical position exactly once. Identical immutable command/principal repeated call retains identical outcome bytes and stable position; changed-content sameID remains distinct Conflict. Then fresh correct-model document/vector revision2 commits atomically with literal document/sidecar/full exactsearch ranking, preserves rival state, native reopen/replay; unauthorized wrong-profile caller remains denied without revealing profile. Both direct vector and actual authorized lineage projection paths enforced.
-
-REQ-VECTOR-PROFILE-003 / AC-VECTOR-PROFILE-003: public ConfigureResource JSON, generated native Orleans serializers and SDK/official MCP/shared SQL operations carry the same typed bounded profile declaration. Exact operation schemas/digests/closed tool catalogue/source inventory must be updated from actual DTO/schema generation; no manual fake schema, new dispatcher or LocalImage whitelist expansion. Valid search query for a different model keeps existing empty incompatible-candidate result; this does not substitute for configured write mismatch rejection. Real transport negative/healthy whole-flow cases remain mandatory, plus native normal/scalar/process/RF3/Linux qualification. No SIMD acceleration, ANN/performance or originalKL027 closure until original missing criterion actually passes.
-
-Ordered owners and join: (1) freeze this Search/ADR contract; (2) Abstractions Search Contracts VectorFieldProfile + feature Serialization alias, additive ResourceDefinitionId13; (3) Core Search Validation authoritative-profile validator plus direct/lineage publication callers; ResourceConfiguration calls bounded typed schema validator; (4) ClientApi shared generated schemas/current JSON decoder bindings and owning source goldens; SDK/SQL reuse ConfigureResource DTO; (5) actual UnitTests Search profile configuration/mixedatomic failure/replay/fullstate/healthy/reopen + projection parity; public Integration Search existing real fixture SDK/officialMCP/SQL regression; (6) root guarded join/build/format/native census/fullnormal/scalar/recovery/RF3/Linux. No product tasks relocated/detached. Rollback before release removes only new field/validator/tests/contracts; no stored-format downgrade promise. Dependency versions unchanged. Root reviews implementation and owns live writes/builds/tests/Git.
-
-Private implementation maps both actual publication paths to VectorFieldProfiles.Require, with projection validation before prior effect lookup/reuse. Native generated public JSON/MCP/SQL decoder/schema types recurse through additive ResourceDefinition.VectorProfiles and VectorFieldProfile; no separate schema or transport dispatcher. New ConfiguredVectorProfileTests (direct and lineage), ConfiguredVectorProfileSchemaTests, and ConfiguredVectorProfileRf3Tests (SDK/officialMCP/SDKSQL/officialMCPSQL) are authored whole-flow gates, not native PASS. Empty-profile original callers remain unrestricted. Root owns actual fresh generated schema/census/full Linux execution.
-
-Current admission boundary: explicit public VectorProfiles:null is rejected by the existing strict JSON collection converter. Embedded normalization preserves its native Validation / 'The operation contains invalid protocol JSON.' decode-failure marker and persists the unknown-scope failed outcome once, without a resource effect; identical malformed replay preserves the entire post-failure store and cut. The actual MCP HeaderCommand decoder rejects Validation / 'The tool arguments do not match the canonical operation contract.' before database admission and preserves the entire store and cut. A fresh command identity then configures the valid typed definition and replays its exact healthy outcome. Null items instead reach bounded Core Validation. These distinct established boundaries are tested rather than replaced with a new serializer or receipt contract. Generic native serializer and transport semantics remain unchanged. Official MCP model rejection retains full error envelope assertions and exact literal Mismatch detail.
-
-The complete configured-profile effect oracle excludes only this original command's exact canonical outcome key, its partition locator when applicable, and the committed clock. ConfigureResource uses a global outcome; Batch uses a partition outcome and locator. The entire post-failure image and position must remain identical on immutable replay. Hybrid Explain literal hit oracles preserve the fixture's persisted field policy: use grants permit ranking, while absent raw-read grants return literal '{}' with both '/body' and '/embedding' marked redacted; branch ranks, weights, contributions and final score remain independently specified.
-
-
-## TASK-KL033-AUTHORIZED-HYBRID-EXPLAIN-001
-
-REQ-SEARCH-EXPLAIN-001 / AC-SEARCH-EXPLAIN-001: opt-in SearchRequest.Explain (native Id12, default false) adds optional RankedDocument.Explanation (Id2, omitted JSON when absent), shared by ordinary and graph retrieval via GraphSearchRequest.Search. Typed v1 SearchHitExplanation contains FusionConstant and at most three ordered SearchBranchContribution records: fixed Text/Vector/Graph enum, actual one-based native rank after existing authorization/allowlist/graph scope and deterministic branch order, configured weight, exact weight/(FusionConstant+rank) double contribution. Final score remains the existing deterministic RankedDocument.Score; branch contributions use the same existing arithmetic evaluation/order. No raw similarity, term statistics, hidden candidate IDs, paths, query payload, private inventory or new ranking algorithm. Contributions describe only actual positive-weight fused branches; default ranking/JSON remains unchanged, including current zero-weight behavior.
-
-REQ-SEARCH-EXPLAIN-002 / AC-SEARCH-EXPLAIN-002: capture actual already-computed contribution values only when requested; maximum three ordered contributions per authorized canonical EntityRef, candidate count constrained by existing native branch work/window bounds. Before retaining each contribution, exact serialized contribution bytes cumulatively must fit existing MaximumResultBytes; an oversized individual contribution uses existing result-byte error, cumulative capture overflow gives BudgetExceeded with safe detail The search explanation byte budget is exceeded. Selected-hit contribution lookup checks the original shared read budget/cancellation; no new readcut, principal reload, dispatcher or unbounded enumeration. Include complete metadata in existing exact cumulative result byte measurement before retaining each hit and final array. Budget rejection/cancellation exposes no partial success and does not mutate canonical store.
-
-REQ-SEARCH-EXPLAIN-003 / AC-SEARCH-EXPLAIN-003: real ZoneTree wholeflows compare independent weighted Text/Vector/Graph scores/contributions, ordinal ties, allowed-candidate changes, denied field/hidden entity privacy, original cancellation/fullstore+cut/no partial then full literal healthy. Real RF3 SDK/official MCP and Q1 CALL graph-search operation carries actual opt-in typed request and complete result metadata through existing routes/schema; no new operation tool or named SQL dialect syntax. Qrels/window acceptance remains separately bound to approved cohort and existing internal GlobalBranchWindows contract; allowlist changes are not advertised as measured relevance-window qualification. No rerank/BM25/public candidate-window knob introduced.
-
-Ownership: Abstractions Search/Contracts; Query Search/Queries existing fusion+projection+ordinary/graph execution; owning Unit/Integration Search flow roles. Native aliases and existing IDs retained; new aliases keyload.search.hit-explanation.v1 and keyload.search.branch-contribution.v1. No persisted format migration/fallback; new typed fields must be rebuilt together. Root joins/builds/runs all native and Linux gates; no source-authored PASS or KL033 closure. Rollback removes opt-in field/metadata and authored flows only before release, without modifying raw authority/provider.
-
-R2 test ownership: DeniedExplainAndOriginalCancellationReturnNoPartialResultBeforeHealthyLiteralRead now cancels the original caller token synchronously from the existing owning TimeProvider only after same-store native RangeExaminedBytes increases. No asynchronous polling, sleeps, record padding, production hook or fake storage. Joined SearchEngine worker settles before fullstore/cut checks and healthy literal flow. Existing approved qrels/window gate remains separate.
-
-
-# KL034 selected native FTS prefix wait — proposed bounded implementation contract
-
-Original KL034 is Search freshness contract (architecture-v0.3.uk.md), not ANN availability. TASK-KL034-NATIVE-FTS-WAIT-001 maps REQ-SEARCH-004/005 and new REQ-SEARCH-WAIT-001/002/003 to AC-SEARCH-WAIT-001/002/003, ADR-009 and ClientApi shared-operation ownership. This packet is source implementation only; native execution, RF3 and original task closure remain pending.
-
-1. A generated, aliased WaitForIndexRequest contains Partition, Collection, TextField and MinimumToken (existing CommitToken). A generated result contains the actual current applied CommitToken and the authorized resource SchemaVersion and principal PolicyEpoch. It does not expose principal identity, physical node ID, local file paths, document counts, hidden rows, posting counts or an invented persisted index watermark.
-2. The standalone read enters the existing unique request actor/CQRS read dispatcher and fresh quorum/applied barrier. In its single canonical read cut, fresh persisted Query|DocumentsRead and field-use authorization precede token/provider diagnostics. Validate exact incarnation, atomic partition and physical placement epoch plus positive minimum position against actual persisted AppliedBytes. Missing/invalid AppliedBytes is Corruption; future or wrong-scope token is TokenInvalidated. Local ZoneTree Store.Position is used only by the existing native TextProjectionScope, never as replicated prefix authority. The returned applied token is constructed from the same placement witness and AppliedBytes.
-3. Selected native FTS is mandatory for this operation. Without the selected provider, return UnsupportedCapability; ANN remains gated. Acquire the actual current-generation native projection lease. Visit all visible canonical documents using existing budgeted visitor and canonical field tokenizer, BeginRecord/ObserveToken each actual record/token, then complete existing native VerifyCandidates with empty terms/candidates to verify complete corpus visitation and publish a newly built generation. Empty verification requests do not rank a fabricated query. Existing generation mismatch/corruption errors and native generation quotas remain unchanged.
-4. The operation returns only after successful publication/verification and joined native lease settlement. A pinned lease protects its generation under existing owner lifecycle. The original shared ReadExecutionBudget bounds admission, raw scan, token work, physical native projection, timeout, cancellation and result bytes; no polling, retry, custom timeout or admin privilege. Failure/cancellation returns no partial result. Canonical data, receipts and replication position are unchanged. Projection state is disposable and may be retired/rebuilt under existing failure rules.
-5. SDK, HTTP, official MCP discovery/schema/effect hints and Q1 existing CALL invoke this one typed operation. A new discovery-only tool does not widen initial operation exposure or local-image qualification whitelist. No SELECT grammar or window syntax is introduced. Default search behavior and ranking remain unchanged.
-6. Actual native tests must prove acknowledged prefix success, wrong scope/future token, fresh field denial, elapsed deadline and cancellation after observed real work, full canonical image/cut invariance and subsequent healthy literal text ranks. Actual SDK/official MCP/Q1 CALL must use an acknowledged token, compare full typed wait results on an owning node/cut where comparable and then independent literal search results. Node cuts must not be assumed equal across nodes. Required after-join Linux normal/scalar/RF3 qualification is explicit and unexecuted.
-
-REQ-SEARCH-WAIT-001 / AC-SEARCH-WAIT-001 → NativeTextWaitForIndexTests.RejectedMinimumPrefixRetainsCompleteStoreThenNativePublicationReturnsLiteralHealthy (future/wrong-incarnation two native cases); same-cut applied token authority and complete healthy literal Ukrainian/English output. REQ-SEARCH-WAIT-002 / AC-SEARCH-WAIT-002 → NativeTextWaitObservedWorkTests.ActualNativePublicationWorkCancellationOrDeadlineSettlesWithoutPartialThenLiteralHealthy (original cancellation/deadline two cases); real native range-work, exact safe errors/no partial, full canonical bytes/cut and complete healthy output. REQ-SEARCH-WAIT-003 / AC-SEARCH-WAIT-003 → NativeTextWaitRf3Tests.AcknowledgedNativeTextPrefixSdkOfficialMcpAndQ1CallRejectDeniedThenPublishHealthyAndExcludeDeleted; actual persisted ordinary identity, protected field denial, SDK/official MCP and both existing Q1 CALL routes, complete result parity and literal deleted-document exclusion. Existing native catalog/decode cases verify shared generated schemas and71 operations/30 body read DTOs as supporting controls, not product operation evidence. All execution evidence is pending root native runs.
-
-Native owning-config clarification for TASK-KL034-NATIVE-FTS-WAIT-001: actual canonical document/token visitation remains in SearchEngine and reads its existing centrally bound, validated, frozen IOptions<QueryExecutionOptions> snapshot. It introduces no separate raw-settings constructor, fresh policy binding, modified limit or configuration-owner exception. The full original native publication/cancellation/deadline/healthy-operation cases remain required.
-
-## TASK-KL027-EXACT-NATIVE-ACCEPTANCE-001
-
-Under REQ-SEARCH-001, REQ-SR-002 and REQ-VECTOR-PROFILE-001..003, the original KL027 criteria map to the existing complete native operations: CanonicalVectorPublicMetricTests and VectorMetricGoldenTests prove independent distance/top-k boundaries; VectorMetricValidationTests and ConfiguredVectorProfileSchemaTests/NullArrayTests prove exact malformed/model/dimension rejection with healthy follow-up; CanonicalVectorAtomicRevisionTests and ConfiguredVectorProfileTests prove whole failed receipts/replay, atomic document/vector/lineage rollback, valid revision2 publication and genuine native cold reopen. SearchTests and ImmutableVectorInputTests retain stale revision, finite extremes, owned query and cancellation behavior. The exact native unit union contains27 cases, without benchmark contributors.
-
-AC-KL027-NATIVE-001: current normal and hardware-disabled unit invocations must discover and execute precisely those27 original UIDs/types/parameters/source paths and report27/27 with no skips, original failures, joined exit/readers/disposal and unchanged original source/DLL/PDB manifests. AC-KL027-NATIVE-002: ConfiguredVectorProfileRf3Tests must execute its four actual sdk/mcp/sdk-sql/mcp-sql complete negative/replay/healthy flows on the genuine Aspire-owned RF3 topology, with discovered endpoints, persisted configured model, independent full document/revision/rank oracles and exact same-command receipt parity; all owned resources and image registry must settle. Its scalar profile disables caller-process intrinsics only and does not relabel the three server processes. Both native lanes run independently in the existing Linux task matrix under ADR117 with TUnit limit20. Runtime/package/protocol/performance claims remain scoped to actual original evidence. Mandatory full current-source normal/scalar/recovery/RF3 and other task/product gates remain separate; adding a selector, a local pass or changing status cannot waive them. Root owns this contract, exact original metadata union, bounded task adapter/verifier, workflow, artifact verification and final acceptance evidence; no production code or capability change belongs to the lane addition.
-
-## Original KL-027 task acceptance, 2026-10-09
-
-REQ-SEARCH-001, REQ-SR-002, REQ-VECTOR-PROFILE-001, REQ-VECTOR-PROFILE-002, REQ-VECTOR-PROFILE-003 and AC-SEARCH-001, AC-MP-004, AC-KL027-NATIVE-001, AC-KL027-NATIVE-002
-qualify the original architecture task criteria at source
-`55f3e1771c0c4534640218808b44c3f8119437a9`. ADR-117 owns native source-bound execution; existing
-Search metric/atomicity contracts and ADR-035 own vector correctness.
-
-[normal job 113675923322](https://github.com/managedcode/KeyLoad/actions/runs/37885964187/job/113675923322)
-passed the exact 31-case declared union without skips. Original artifact
-[11597045667](https://github.com/managedcode/KeyLoad/actions/runs/37885964187/artifacts/11597045667)
-has authenticated SHA256 `b65f68bfd6e7177f24999f2b25d2f295289ba982d07839fceedb735da3121500`.
-
-[scalar job 113675923319](https://github.com/managedcode/KeyLoad/actions/runs/37885964187/job/113675923319)
-passed the exact 31-case declared union without skips. Original artifact
-[11596895627](https://github.com/managedcode/KeyLoad/actions/runs/37885964187/artifacts/11596895627)
-has authenticated SHA256 `d920fa4b7b12dd3e522082646326c55ae2b3f703c5a1306f35b7921006cad2dd`.
-
-Original API/run/attempt/archive digest, exact native discovery/UID/TRX unions,
-compiled source/PE/PDB and Git source/build-input bytes, prepared/before/after
-images, native20/profile environment, joined child readers/exit/disposal, final
-source verification and owned RF3 image registry removal were authenticated.
-The canonical status retains the compact profile receipts; original failed
-and earlier passing cohorts remain unchanged.
-
-Twenty-seven native vector operations per profile qualify independent metric
-and exact top-k/allowlist correctness, malformed/model/dimension rejection,
-atomic document/vector revision and failed-outcome replay with cold healthy
-continuation. Four genuine RF3 sdk/mcp/sdk-sql/mcp-sql flows retain full literal
-document/revision/rank and original receipt assertions. Scalar RF3 disables
-intrinsics only in the caller; server processes are not relabeled scalar.
-
-This closes only the original task scope at the accepted source. Stage36
-Pointer/allocation/diagnostic source is not qualified by these originals.
-Mandatory complete current normal/scalar/recovery/full RF3, full product
-functional coverage, endurance/power-loss/fault and performance gates remain
-open; no production readiness, speed superiority or full-model/full-SQL claim
-follows. Root owns final evidence review and status/doc join. ADR: N/A for this
-evidence-only closeout; no runtime contract changes.
-
-
-## TASK-KL033-NATIVE-TASK-ACCEPTANCE-001: original finite hybrid rank and Explain
-
-Original KL-033 in architecture-v0.3.uk.md requires deterministic BM25/vector candidate merge with weighted RRF/stable ties, actual score contributions and measured candidate-window effects on a relevance corpus. The existing accepted TASK-KL033-AUTHORIZED-HYBRID-EXPLAIN-001 and TASK-SEARCH-QUALITY-CORPUS provide the source implementation; this additive native lane freezes their complete finite task acceptance union before Linux qualification.
-
-| Original criterion | Requirements and acceptance | Existing complete operations |
+| Criterion | Requirements and acceptance | Operations |
 |---|---|---|
-| Deterministic weighted rank and ordinal ties | REQ/AC-SEARCH-002; REQ-SR-001/004 and AC-MP-004/005; REQ/AC-GSEARCH-003 | ThreeWayHybridFusionTests complete independent weighted oracle/scope/allowlist/zero-weight authorization; SearchTests.HybridFusionRanksEligibleDocumentsAndInvalidatesStaleVectors canonical stale revision; ThreeWayHybridRf3Tests real SDK/official MCP/SearchSql and Q1 CALL exact results |
-| Literal Explain, authorized metadata and bounded negative-to-healthy | REQ/AC-SEARCH-EXPLAIN-001/002/003; REQ/AC-SEARCH-003/004 | HybridExplainWholeFlowTests actual ranks/weights/contributions, original observed-work cancellation and byte exhaustion/no partial/full unchanged cut then healthy; HybridExplainPrivacyWholeFlowTests literal hidden-row exclusion; real RF3 opt-in SDK/official MCP/Q1 metadata |
-| Measured relevance-window effects | REQ/AC-SEARCH-007; REQ/AC-RANK-001..004 | HybridQualityRealStoreTests actual native/exact branch observations over approved32 documents/six independent qrels and widths1/4/8/32, emitted Recall/MRR/nDCG/candidate recall/truncation, unchanged canonical cut and repeated ordering; HybridQualityMetricOracleTests hand goldens; GlobalBranchWindowMergeLayout/Budget/Validation supporting production-kernel controls |
-| Derived lexical recovery supporting the finite task | REQ/AC-FTS-003/004/005; ADR-078 | NativeTextProjectionProcessRecoveryTests genuine process cuts through owner/posting/inventory/manifest/activation, original and replacement generations, full canonical cut and healthy rebuild output |
+| Deterministic weighted rank and ordinal ties | REQ/AC-SEARCH-002; REQ-SR-001/004; REQ/AC-GSEARCH-003 | `ThreeWayHybridFusionTests`, `SearchTests.HybridFusionRanksEligibleDocumentsAndInvalidatesStaleVectors`, `ThreeWayHybridClusterTests` (SDK, official MCP, SearchSql and Q1 CALL) |
+| Literal Explain, authorized metadata and bounded negative-to-healthy | REQ/AC-SEARCH-EXPLAIN-001/002/003; REQ/AC-SEARCH-003/004 | `HybridExplainWholeFlowTests`, `HybridExplainPrivacyWholeFlowTests`, opt-in Explain through SDK/official MCP/Q1 |
+| Measured relevance-window effects | REQ/AC-SEARCH-007; REQ/AC-RANK-001..004 | `HybridQualityRealStoreTests`, `HybridQualityMetricOracleTests`, `GlobalBranchWindowMerge*` controls |
+| Derived lexical recovery | REQ/AC-FTS-003/004/005; ADR-078 | `NativeTextProjectionProcessRecoveryTests` process cuts and healthy rebuild |
 
-Actual R863 selected native metadata declares29 Unit cases (28 hybrid plus1 canonical revision),10 supporting Recovery cases and6 genuine Aspire RF3 cases:45 per profile. These are discovered native case identities, not a count inferred from source Arguments. The canonical task contract retains exact native class/method/parameterized display/typed parameter/source identities. Supporting window/metric controls do not replace the actual ZoneTree or public RF3 operations. R863 local related Unit and Recovery execution remains development evidence; no fresh Linux RF3 qualification is inferred.
+The optional rerank hook is not part of the contract and no public candidate-window knob exists. A product window or scorer option needs its own ADR and API contract.
 
-The optional rerank hook is not selected by the accepted current contract; no reranker or public candidate-window knob is introduced. Original KL029/KL032 dependency qualification, incremental seven-cut recovery, managed ANN/recall, distributed/global statistics/window completeness, KL074 external quality gains, performance/endurance/power-loss and complete product gates remain independent and open. A passing finite task lane cannot close them or advertise full Search. ADR018 remains Proposed for its broader global-ranking contract.
+## Authoritative vector profiles
 
-Root joins the unchanged native architecture under REQ/AC-TUNIT-ENTRY-010 and ADR117, obtains exact delivered-source Linux normal/scalar original artifacts and retains complete native census/TRX/source-image/cleanup evidence before any task acceptance claim. Scalar RF3 changes only the caller; its server processes are not relabeled scalar. All mandatory complete suites remain required. Frontend N/A: execution orchestration only; data/protocol migration N/A. Rollback removes the additive lane while retaining all original reports and prior lanes.
+REQ-VECTOR-PROFILE-001: a collection may declare a bounded, server-persisted, immutable set of field vector profiles through the authenticated ConfigureResource command. Each typed `VectorFieldProfile` binds a canonical JSON-pointer Field to a full `VectorSpace(Id, Dimension, Metric, Model, Version)`. `ResourceDefinition` gains native Id13 `VectorProfiles` (default empty), and `VectorFieldProfile` has stable alias and Id0 Field / Id1 Space. Empty profiles keep the unrestricted collection semantics; a configured field has an authoritative expected profile. AC-VECTOR-PROFILE-001: ConfigureResource persists the profile and same-ID replay is immutable; missing/duplicate/noncanonical fields, a null profile item, malformed identifiers, an invalid metric/dimension and more than 32 field profiles reject with exact Validation/ResourceExhausted and no resource effect. Profiles are collection-only and the policy-only ResourcePolicyUpdates fingerprint forbids profile mutation.
 
-### Original Linux acceptance, 2026-10-09
+REQ-VECTOR-PROFILE-002: every canonical vector publication (direct PutVector and ApplyVectorProjection) compares the declared full profile with the configured field after fresh persisted operation/field/row authorization and the current target revision but before vector/lineage publication. Invalid coordinates/dimensions keep their Validation diagnostic; a well-shaped wrong profile yields Validation "The declared vector profile does not match the configured field." There is no embedding-model inference from numeric values, authorization keeps precedence and no profile metadata is disclosed. AC-VECTOR-PROFILE-002: a same-partition document+PutVector batch with the right dimension but wrong model returns exact Validation once, resets all document/vector/lineage/source effects, persists the failed receipt once and advances the position once; the repeated identical command returns the identical outcome bytes at a stable position while changed content under the same ID is Conflict; a fresh correct-model revision-2 batch commits atomically with literal document/sidecar/exact-search ranking and survives reopen; an unauthorized wrong-profile caller is denied without learning the profile.
 
-The complete mapped original KL-033 criteria above passed at source
-`9c5fe578b1e74a40c83b101ae65ebd0459bd5f1f` in
-[Build and Tests run 37920436876](https://github.com/managedcode/KeyLoad/actions/runs/37920436876).
-The [normal job](https://github.com/managedcode/KeyLoad/actions/runs/37920436876/job/113786795887)
-and [scalar caller job](https://github.com/managedcode/KeyLoad/actions/runs/37920436876/job/113786795704)
-each passed the exact 45-case native union: 29 Unit, 10 genuine process-recovery
-and 6 Aspire-owned RF3 SDK/official MCP/SearchSql/Q1 cases. There were no failed
-or skipped cases. Both profiles used native maximum parallelism 20; the scalar
-profile disabled caller intrinsics only.
+REQ-VECTOR-PROFILE-003 / AC-VECTOR-PROFILE-003: public ConfigureResource JSON, generated native serializers and the SDK/official MCP/SQL operations carry the same typed bounded declaration, generated schemas are updated from actual DTOs, and a search for a different model keeps its empty incompatible-candidate result. Explicit `VectorProfiles:null` is rejected by the strict collection converter with Validation "The operation contains invalid protocol JSON." (the failed outcome persists once; identical malformed replay preserves the store); the MCP decoder rejects it before admission; a fresh command with the valid definition succeeds. `ConfiguredVectorProfileTests`, `ConfiguredVectorProfileSchemaTests` and `ConfiguredVectorProfileClusterTests` (SDK, official MCP, SDK SQL, official MCP SQL) are the whole-flow gates; the effect oracle excludes only the command's own outcome key, its partition locator and the committed clock.
 
-The canonical [acceptance record](../implementation/kl-033-linux-acceptance-20261009.json)
-binds the authenticated original archives to their run/source, exact contract,
-native UID/TRX union, source spans, compiled DLL/PDB and unchanged prepared,
-before and after images. All original native process exits and readers joined
-and were disposed without failures. The six emitted relevance observations per
-profile contain actual native candidate windows 1/4/8/32 and measured
-Recall/MRR/nDCG, candidate recall and truncation over the approved corpus.
-The record SHA-256 is
-`f00e939e0de09a22b150c9e1a6858f5521bee1127a5d85a49dd5d833112fed68`.
+REQ-SEARCH-001 / REQ-SR-002 and the vector profile requirements are exercised by the native vector operations `CanonicalVectorPublicMetricTests`, `VectorMetricGoldenTests`, `VectorMetricValidationTests`, `ConfiguredVectorProfileSchemaTests`, `CanonicalVectorAtomicRevisionTests`, `ConfiguredVectorProfileTests`, `SearchTests` and `ImmutableVectorInputTests` (AC-NATIVE: metric and exact top-k/allowlist correctness, malformed/model/dimension rejection, atomic document/vector revision with failed-outcome replay, valid revision-2 publication, native cold reopen, stale revision, finite extremes, owned query and cancellation). A direct PutVector batch fails during owned batch execution after the document mutation: invalid dimension yields Validation "The vector dimension or values are invalid." and a stale `ExpectedDocumentRevision` yields RevisionConflict "The expected revision does not match."; each first rejection resets the staged effects, persists the complete failed outcome and advances the position once, and the identical repeat returns the identical outcome.
 
-This closes the original three KL-033 criteria at that source. Current shared
-execution changes require fresh compilation and qualification. The broader
-Search, complete current suites, provider publication, functional coverage,
-performance, endurance and power-loss gates above remain open. ADR: N/A for
-this evidence-only closeout; no runtime or public contract changes.
+## Explain
 
+REQ-SEARCH-EXPLAIN-001 / AC-SEARCH-EXPLAIN-001: opt-in `SearchRequest.Explain` (native Id12, default false) adds an optional `RankedDocument.Explanation` (Id2, omitted from JSON when absent), shared by ordinary and graph retrieval. The typed v1 `SearchHitExplanation` holds the FusionConstant and at most three ordered `SearchBranchContribution` records: a fixed Text/Vector/Graph enum, the actual one-based native rank after authorization/allowlist/graph scope, the configured weight and the exact weight/(FusionConstant+rank) contribution. The final score is the existing deterministic score. It exposes no raw similarity, term statistics, hidden candidate IDs, paths, query payload or private inventory; contributions describe only actual positive-weight fused branches and default ranking/JSON is unchanged. Aliases: `keyload.search.hit-explanation.v1`, `keyload.search.branch-contribution.v1`.
 
-### TASK-KL034-NATIVE-WAIT-AUTHORITY-002
+REQ-SEARCH-EXPLAIN-002 / AC-SEARCH-EXPLAIN-002: already-computed values are captured only when requested, at most three per authorized canonical EntityRef and within the native branch work/window bounds. Exact serialized contribution bytes cumulatively must fit MaximumResultBytes before each is retained; an oversized individual contribution uses the result-byte error and cumulative overflow gives BudgetExceeded "The search explanation byte budget is exceeded." Lookup uses the shared read budget and cancellation, no partial success is returned and the store is not mutated. REQ-SEARCH-EXPLAIN-003 / AC-SEARCH-EXPLAIN-003: real ZoneTree whole flows compare independent weighted Text/Vector/Graph contributions, ordinal ties, allowed-candidate changes, denied-field and hidden-entity privacy and original cancellation (synchronously after same-store native RangeExaminedBytes increases) with no partial result and a literal healthy follow-up; SDK, official MCP and Q1 CALL graph search carry the typed opt-in request and full metadata. Under the persisted field policy of the fixture, use grants permit ranking while absent raw-read grants return `{}` with `/body` and `/embedding` redacted.
 
-REQ-SEARCH-WAIT-001 / AC-SEARCH-WAIT-001 retains the existing exact token/applied
-authority contract. SearchWaitAuthorityTests adds genuine native wrong atomic
-partition, changed placement epoch and zero minimum-position refusals, plus
-missing/negative persisted canonical AppliedBytes. Each actual WaitForIndex call
-returns its existing exact TokenInvalidated or Corruption detail, no partial
-result, and unchanged complete native bytes/cut. The metadata trials save and
-restore only the exact actual original native applied row under joined fixture
-ownership; restoration is test corruption repair, not a migration/production
-recovery or manufactured new read authority. Its intentional repair commit may
-advance the local storage cut; healthy wait must report the original actual
-replica-applied token, never that local Store.Position. Full independently literal
-WaitForIndexResult/schema/policy plus bilingual document/rank pages and complete
-canonical cut/image invariance prove healthy continuation. Original assertion
-and fixture/projection cleanup/restore errors are all retained.
+## Wait for index
 
-Canonical source ownership: Unit Search Cases/SearchWaitAuthorityTests.cs,
-Helpers/SearchWaitAuthorityTrial.cs and Assertions/SearchWaitAuthorityState.cs;
-existing actual ReplicaAppliedPositionWaitFixture, native projection and public
-SearchEngine own the real operations. No mock/provider/new dispatcher/timer,
-new timeout/default/token/API/alias/format or policy change. Root guarded join,
-coherent build, exact fresh native metadata and normal/scalar native controls and the existing real Linux RF3 scope qualify
-the source; authored case counts are not discovery or pass evidence. Existing
-KL02958/18/9 scope and all mandatory global suites remain unchanged.
+REQ-SEARCH-WAIT-001 / AC-SEARCH-WAIT-001: a generated, aliased `WaitForIndexRequest` has Partition, Collection, TextField and MinimumToken (a CommitToken); the result holds the current applied CommitToken plus the authorized resource SchemaVersion and principal PolicyEpoch, and exposes no principal identity, node ID, file paths, counts, hidden rows or invented watermark. The read runs on the caller's connection grain; in one canonical read cut, fresh persisted Query|DocumentsRead and field-use authorization precede token/provider diagnostics. The token's incarnation and atomic partition and a positive minimum position are validated against the persisted AppliedBytes (missing or invalid AppliedBytes is Corruption; a future or wrong-scope token is TokenInvalidated); local ZoneTree Store.Position is never used as replicated prefix authority.
 
-Broader KL034 remains explicit: current WaitForIndexRequest selects NativeText
-only. ApproximateSearchRequest has no minimum token or wait selector; existing
-ANN pins/stale-generation/replay/public reads do not by themselves implement an
-ANN minimum-prefix wait. This initial FTS boundary cannot silently close broader
-required projection waiting/generation criteria. Any additive ANN wait interface
-requires its own accepted generated contract, authority/lifecycle/budget and
-real SDK/official MCP/Q1 complete-flow qualification. No new public API is
-invented here and no broader capability is declared complete.
+The selected native FTS provider is mandatory (without it the result is UnsupportedCapability). The operation acquires the current-generation projection lease, visits all visible canonical documents with the budgeted visitor and the canonical field tokenizer, completes native VerifyCandidates with empty terms/candidates to verify full corpus visitation and publish a newly built generation, and returns only after publication and joined lease settlement. The shared ReadExecutionBudget bounds admission, scan, token work, native projection, timeout, cancellation and result bytes; there is no polling or retry. Failure or cancellation returns no partial result and canonical data is unchanged. SDK, HTTP, official MCP and the Q1 CALL invoke this one typed operation, which does not widen initial discovery.
 
+REQ-SEARCH-WAIT-002 / AC-SEARCH-WAIT-002: observed-work cancellation or deadline settles without a partial result and a following healthy operation returns literal ranks (`NativeTextWaitObservedWorkTests`); an unavailable provider returns UnsupportedCapability with unchanged canonical state and the registered projection then completes. REQ-SEARCH-WAIT-003 / AC-SEARCH-WAIT-003: through SDK, official MCP and both Q1 CALL routes (`NativeTextWaitClusterTests`), a protected-field denial returns PermissionDenied with no partial result and scoped history intact (all three seed DocumentChange entries and the six-entry outbox head stay exact, and both signed cursors continue with no new change); the same identity then waits on an acknowledged prefix and the literal document/rank arrays match before the delete and after the acknowledged delete wait with deleted-document exclusion (`DocumentReadResult.Document` is null). Authority tests cover wrong atomic partition, zero minimum position and missing/negative AppliedBytes (`SearchWaitAuthorityTests`); the test restores only the saved row and a healthy wait reports the replica-applied token, never the local Store.Position. Independent status reads on the same node bracket each wait's applied position (within the before and after materialized bounds and at least the acknowledged minimum), with the schema equal to the configured resource schema and the PolicyEpoch equal to the persisted principal's.
 
-### TASK-KL034-NATIVE-PROVIDER-FAILURE-003
+REQ-SEARCH-ANN-WAIT-001 / AC-SEARCH-ANN-WAIT-001: `WaitForAnnIndex` selects Partition, Collection, VectorField, Space, Consumer, IndexGeneration and MinimumToken (IDs 0..6); the result IDs 0..3 are IndexedToken, IndexGeneration, SchemaVersion and PolicyEpoch. Routes `/v1/search/ann/wait-for-index` and `keyload_search_wait_for_ann_index` use the same read-only idempotent operation in the SDK, official MCP and Q1 CALL. Fresh persisted Query/DocumentsRead/VectorSearch and field authorization precede token/generation diagnostics, a future token fails TokenInvalidated, the acquisition uses an identifier-only selection shared with ANN read (no fabricated SearchRequest or query vector) and only the acquired lease's manifest supplies the indexed prefix and generation. A prefix below the minimum or a missing/stale generation fails HistoryUnavailable (no automatic restore, poll or retry); a prefix beyond the same-view applied authority fails Corruption (missing or negative AppliedBytes is Corruption before any lease). REQ-SEARCH-ANN-WAIT-002 / AC-SEARCH-ANN-WAIT-002/003: wrong/future/zero tokens and stale update/delete fail without a partial result while the canonical state and receipts stay intact; an explicit authorized Restore then yields a literal healthy ANN search; SDK, official MCP and both Q1 paths return equal typed token/generation/schema/policy results, persisted denial, stale refusal, deleted exclusion, original replay and cold recovery on the replicated cluster. After a cold restart the recovered status keeps the same NodeId/incarnation and a nondecreasing ReadGeneration and Applied, and a successful stable-command replay legitimately advances Applied. Initial discovery stays three tools; the catalog grows by the cluster backup owner and this operation.
 
-REQ-SEARCH-WAIT-002 / AC-SEARCH-WAIT-002 and REQ/AC-SEARCH-005 preserve
-WaitForIndexExecution's existing unavailable-provider failure. The same actual
-replica-applied seed, fresh authorized native canonical view and original
-minimum token are passed to a real SearchEngine with its supported absent
-native text provider. Its actual operation must return the exact existing
-UnsupportedCapability detail, null partial result and unchanged complete
-canonical image/cut. The actual registered native projection then completes
-WaitForIndex with independently literal complete result and bilingual document
-rank pages, preserving the whole native canonical image/cut. No provider fake,
-fallback, configuration/default, timeout, token, public API or production code
-change is introduced. All initiating and native fixture/projection cleanup
-failures remain joined and retained. This adds one source-declared case to
-SearchWaitAuthorityTests; fresh native metadata and normal/scalar execution are
-required, not inferred. Existing KL02958/18/9 remains unchanged. Root owns join,
-compiler, runtime verification and final original-task closure; all mandatory
-Linux full-suite/RF3/product qualification gates remain required.
-
-
-### TASK-KL034-ANN-WAIT-001 — actual pinned ANN minimum prefix
-
-REQ-SEARCH-ANN-WAIT-001 / AC-SEARCH-ANN-WAIT-001: WaitForAnnIndex selects Partition, Collection, VectorField, Space, Consumer, IndexGeneration and MinimumToken with generated IDs0..6. Result IDs0..3 are IndexedToken, IndexGeneration, SchemaVersion and PolicyEpoch. Routes `/v1/search/ann/wait-for-index` and `keyload_search_wait_for_ann_index` use the same readonly/idempotent non-destructive generated operation in SDK, official MCP and Q1 CALL. Initial discovery remains three; ClusterBackupOwner and this operation together extend the original76 catalog to78. Neither selector grants authority. Existing aliases, IDs, enums and defaults remain unchanged.
-
-Fresh persisted Query/DocumentsRead/VectorSearch and field authorization precede token/generation diagnostics. At the original authorized view, the acknowledged positive token must bind current incarnation, atomic partition, placement and actual replicated AppliedBytes. Future tokens fail TokenInvalidated. Native acquisition uses an identifier-only selection shared with ANN read; it never fabricates a SearchRequest or query vector. The original reader memory reservation, administrator-owned source capture, dependency/placement/corpus checks and genuine native pin remain intact. Only the acquired lease's actual NativeAnnIndexLease.Manifest supplies indexed applied prefix and generation. A prefix below minimum, missing or stale generation fails HistoryUnavailable; no automatic Restore/poll/retry. Prefix beyond same-view applied authority fails Corruption. Result builds the indexed token through the canonical authorized view, not copied caller metadata or local Store.Position. Request/work/result and native memory use unchanged validated owners and original budgets.
-
-AC-SEARCH-ANN-WAIT-002: actual replicated log/materializer and maintained native generation must prove positive acknowledged prefix; wrong/future/zero tokens and stale update/delete fail without partial result, full canonical state/receipts remain intact, explicit authorized Restore then literal healthy ANN search. Existing observed-work cancellation/deadline and generation pin/release controls remain mandatory; no mock provider/timer establishes this acceptance.
-
-AC-SEARCH-ANN-WAIT-003: genuine Aspire RF3 SDK/official MCP/both Q1 paths must prove typed token/generation/schema/policy equality, persisted denial, stale/refusal then explicit Restore/deleted exclusion, original replay and cold owner recovery. Native normal/scalar discovery, original TRX, source/image and cleanup provenance precede qualification; this source packet supplies no runtime PASS. Independent fault/endurance/coverage gates remain open.
+REQ-SEARCH-ANN-COLD-HORIZON-001/002 / AC-SEARCH-ANN-COLD-HORIZON-001/002: a no-delta Restore admits the unchanged completed manifest only after current corpus/checkpoint validation; its Source is the current canonical observation and may be ahead of the retained publication, and the cold wait carries the exact warm indexed token unchanged (publication generation, incarnation, atomic partition and warm indexed position) instead of relabelling the later source observation as indexed progress. Restore Source.NodeId equals the admitted pin owner, Source.Incarnation equals the retained token and Source.AppliedPosition covers the horizon.
 
 ```mermaid
 flowchart LR
   Caller[SDK MCP Q1] --> Authority[Fresh persisted policy and applied cut]
-  Authority --> Pin[Actual native generation acquisition]
+  Authority --> Pin[Native generation acquisition]
   Pin --> Prefix[Acquired manifest indexed prefix]
   Prefix --> Result[Typed bounded result after joined disposal]
 ```
 
+REQ/AC-ANN-MAINT-001/003 and REQ/AC-SEARCH-005: administrator maintenance (Build, Restore, Release) of the selected ANN and text indexes is published through the two canonical POST routes `AnnMaintenanceProtocol.Route` and `TextIndexMaintenanceProtocol.Route`, which map to the same `ApiGrainDispatch.SubmitAsync` with `OperationKind.MaintainAnnIndex` / `MaintainTextIndex` and the request's CommandId. The connection grain validates the current persisted administrator, command identity, node ID and mode before native maintenance; a wrong NodeId returns OwnershipLost with its detail. Route publication grants no authority.
 
-### TASK-KL034-ANN-WAIT-REPLAY-CUT-002 — native cold replay cut oracle
+## Classification lineage
 
-REQ-SEARCH-ANN-WAIT-002 / AC-SEARCH-ANN-WAIT-003 retain the genuine same-root RF3 cold recovery, fresh current owner connection, original stable-command replay, exact full original receipt and independently literal complete ANN results before and after replay. A successful replay validates current persisted authority and returns the original canonical outcome. Its fresh native replication entry legitimately advances AppliedBytes: ReplicaLeader.SubmitAsync appends a new index; DatabaseEngine.ReplayCommand writes that actual replicationIndex to KeySpace.AppliedBytes after validating incarnation, fingerprint, scope and cached-result authority. Therefore NativeAnnWaitRf3Cold.ContinueAsync requires the same NodeId/incarnation, nondecreasing ReadGeneration and strictly greater actual post-replay Applied. No count-derived cut, new token or fabricated index is used. Exact unchanged applied-cut assertions for read-only and rejected waits remain unchanged.
+REQ-SEARCH-LINEAGE-WHOLE-001 / AC-SEARCH-LINEAGE-WHOLE-001 (with REQ-SEARCH-003/005, REQ-AUTH-009, AC-LINEAGE-002/003 and [ADR-015](../ADR/ADR-015-sensitive-data-lineage.md)): a persisted vector effect and a native ZoneTree.FullTextSearch generation preserve classified-result omission across reader revocation, explicit persisted repair and same-root cold reopen. Warm vector and native text calls return the complete RankedDocument (reference, revision, empty redacted JSON, ordered input/vector omissions, exact rank score, null explanation); revoked calls return Unauthenticated with unchanged canonical image and position; a ConfigurePrincipal repair restores the same literals; after the provider is disposed and the canonical store reopened, the provider is rebuilt on its path with complete literals and the retained vector/lineage bytes and effect receipt. A malformed persisted lineage (SourceEventRevision=0) fails closed with exact Corruption, the failed search preserves every raw row and position, restoring only the captured original lineage bytes returns the original rows, and the same CommandId replays with a stable receipt.
 
-Ordered implementation and ownership: freeze Search and ADR-009 contract; change only IntegrationTests/Search/Scenarios/Ann/NativeAnnWaitRf3Cold replay assertions; root verifies exact guarded join, native compiler/analyzers and both Linux normal/scalar whole KL034 invocations. Root owns native UID/source/image/report and cleanup evidence. No command behavior, serialization, persistence format, catalog, provider, deadlines, retries, topology, scheduling, or dependency changes. Rollback removes this fixture oracle and this appendix before release; it does not change database semantics. This corrects the earlier private audit's Applied-invariance label without rewriting its immutable original receipt. No runtime PASS, initiating failure cause, product qualification or broader task closure follows from the source correction.
+REQ-SEARCH-LINEAGE-CLUSTER-ORACLE-003 / AC-SEARCH-LINEAGE-CLUSTER-ORACLE-003: each SDK and official MCP result must independently match the complete literal reference (partition, collection, ID), revision 1, derived/baseline JSON, redacted=true, ordered `/input` and `/embedding` omissions, the expected rank-fusion score and no explanation; caller agreement alone is insufficient and unknown expected IDs fail closed.
 
+REQ-SEARCH-LINEAGE-PUBLIC-013 / AC-SEARCH-LINEAGE-PUBLIC-013 (REQ-LINEAGE-002/003): the SDK reader and the official MCP reader are revoked at the next policy epoch (Unauthenticated without protected result, credential or source disclosure), then repaired at the next epoch with the original capability and field grants and only the source-hiding row restriction removed; the healthy results are the complete redacted derived and baseline literals with rank contributions 1/61 and 1/62. After two cold restarts of the same volumes, fresh clients return the same literals and the original receipt bytes, the persisted node/incarnation is unchanged and the generation and Applied position are nondecreasing; successful replays may advance replicated state but never rewrite receipt IDs or cuts.
 
-### TASK-KL034-ANN-WAIT-COLD-REFUSAL-003 — actual boundary and complete caller oracles
+Current persisted worker policy is checked before a cached projection outcome is disclosed (REQ/AC-AUTH-007/008/009, AC-LINEAGE-003): after the original success, a real ConfigureWorker revocation makes that exact command retry Unauthenticated without changing rows or cut; after a persisted repair at a higher epoch the original success is PermissionDenied under the changed-policy rule and is never rewritten, a genuinely new command ID succeeds under the repaired epoch (canonical effect reuse preserves the original mutation receipt, vector and 18-field lineage) and its replay keeps the full receipt and rows; the old ID stays PermissionDenied after a same-root reopen with the same NodeId/incarnation and nondecreasing ReadGeneration. A weaker target classification is refused atomically (PermissionDenied, no vector or lineage); a ConfigureResource CAS schema 1 to 2 that moves `/embedding` from projection-public to projection-sensitive, followed by a new worker command, creates the projection with all 18 lineage fields (source and target schema 2, worker epoch 1), and cold retains old failed-ID PermissionDenied and the new successful receipt. All native MutationReceipt values are compared field by field including the ordered CompositionReferences (record equality of generated immutable arrays is not semantic equality), and a new principal starts at the initial epoch while a changed principal uses the checked current epoch plus one.
 
-REQ-SEARCH-ANN-WAIT-001/002 and AC-SEARCH-ANN-WAIT-002/003 retain the same genuine RF3 case, resources, original deadline, command, full receipt, acknowledged minimum token and fresh current owner acquisition. Capture actual administrator Status on node1 immediately before the original all-node Kill/Restart. After native healthy notifications and a freshly authenticated same-node connection, compare the actual recovered status against that pre-stop observation: exact persisted NodeId/incarnation, nondecreasing ReadGeneration and Applied. This is the real cold boundary; the existing distinct before/after original-command replay oracle remains unchanged, including strictly increasing replay Applied. No old request-scoped cut or cursor is reused after restart.
+## Original-operation maintenance receipts
 
-Every original denied, stale and missing-generation refusal now executes the same request through SDK, official MCP, Q1 SDK CALL and Q1 official MCP CALL. Require definitive original error code, no partial typed/JSON result and the original exact unchanged captured Applied across these read-only refusals; each operation retains its own fresh authorized captured cut. Existing following fresh authorized wait, complete literal search, explicit Restore where required, original receipt replay and cold continuation retain all four successful routes. No standalone getter cases, automatic Restore, retry, token renewal or altered budget establish success.
+REQ-SEARCH-ANN-ORIGINAL-COMPILER-001/002 / AC-SEARCH-ANN-ORIGINAL-COMPILER-001/002: the original generated record alias and field IDs, bounded retired-operation digest accounting, the maintenance session and the caller cancellation are preserved; a failed receipt replacement marks the owning root uncertain before rethrowing every original exception (no recovery fallback), and an absent enrollment performs the final read-budget check and joined memory disposal while a present enrollment retains every fresh persisted principal, reservation, publication digest, result, authority and read-cut validation.
 
-The independently authored full ANN literal oracle follows actual persisted field policy, not query-use authority. NativeTextRf3Scenario declares /text and /embedding with default RawReadGrant pii.read and /secret with its explicit private read grant; the original reader receives vector use only and none of these read grants. AuthorizationPolicy.Project filters policies by RawReadGrant in declaration order and omits all three paths. Therefore every original row requires owner-only JSON and ordered redactions /text,/embedding,/secret, with unchanged reference, revision, score bits/order, complete page metadata and SDK/official MCP/both Q1 equality. Original administrator receipts and reader grants stay intact. This source proof is not a runtime failure classification.
+## Decisions and verification
 
-Ordered ownership: freeze Search/ADR009; Integration Search Assertions/NativeAnnWaitRf3Assertions owns four-route refusal and literal privacy; Helpers/NativeAnnWaitRf3Scenario owns the actual immediate pre-stop observation; Helpers/NativeAnnWaitRf3Cold owns fresh post-restart comparison and all original cleanup/continuation. Root guarded join, coherent native build/analyzers, authentic discovery/source/image admission and fresh Linux normal/scalar complete operations are required. Original745 reports predate these ANN wait cases and provide no positive or negative discovery evidence for them. Original FTS freshness, observed-work failure, genuine native pin/retirement/generation controls and all mandatory suites remain required. No public API, provider, persistence, topology, scheduling or production policy changes; rollback removes only these additive fixture oracles and this appendix. Runtime qualification remains open.
-
-
-### TASK-KL034-FTS-FOUR-ROUTE-004 — complete original refusal and deleted-exclusion flow
-
-REQ-SEARCH-WAIT-003 / AC-SEARCH-WAIT-003 and REQ/AC-SEARCH-003/004 preserve the original NativeTextWaitRf3Tests declaration, persisted ordinary reader grants, native FTS provider, original deadline/options and acknowledged seed/delete receipts. Its protected-field refusal executes the original SDK and official MCP calls and the actual Q1 SDK CALL and Q1 official MCP CALL. Require the original exact PermissionDenied code/detail, null typed or undefined JSON result, genuine dispatched official error envelope and complete original scoped history preservation before healthy publication. Independent replicated progress is checked separately from collection history; a denied read does not require global Applied to remain numerically frozen.
-
-The same actual authorized identity then completes original four-route minimum-prefix waits. Every independently authored complete expected literal document/rank array is compared through actual SDK, official MCP, Q1 SDK SearchExecute CALL and Q1 official MCP SearchExecute CALL before the original genuine delete and after its acknowledged minimum-prefix wait. Keep exact owner-only projected JSON, native declaration-ordered redactions, references, revisions, score bits/order and deleted exclusion. The original administrator absent-document read remains. Full expected results come from the original literal oracle, not copied observed values.
-
-Ordered ownership: freeze Search/ADR009; Integration Search Cases/NativeTextWaitRf3Tests owns additional real negative calls and complete scoped-history/no-partial assertions; Assertions/NativeTextWaitRf3Assertions owns additional real full literal CALL comparisons. Root reconciles current documentation ancestry with the already prepared ANN cold/negative/privacy stage, guards all preimages, then performs native compiler/analyzers and authentic delivered-source Linux normal/scalar discovery/source-image/report/cleanup qualification. This adds no declaration, public API, production behavior, retry, token renewal, deadline, grant, resource/topology or policy change. Existing ANN cold/full original receipt replay and all original FTS/ANN Unit/lifecycle/recovery gates remain required. Rollback removes only these additive caller oracles and this appendix. No historical failure cause, native UID, PASS, endurance or performance claim follows from source coverage.
-
-
-### TASK-KL034-ANN-WAIT-APPLIED-ROW-005 — native corruption to exact repair
-
-REQ-SEARCH-ANN-WAIT-002 / AC-SEARCH-ANN-WAIT-002 and REQ-SEARCH-WAIT-001 / AC-SEARCH-WAIT-001 extend the actual replicated-prefix native authority flow with two supporting operation cases, missing and negative canonical AppliedBytes. Native AnnWaitExecution.Read first validates the original acknowledged token, then reads and natively deserializes AppliedBytes; missing or negative rows refuse Corruption before any projection lease is admitted. The fixture saves its exact original bytes, genuinely deletes or writes a negative native long row under the existing store transaction, and invokes the actual ANN wait. Require Corruption, no partial result and complete unchanged faulted canonical bytes/cut.
-
-Finally restores only the fixture-owned exact original row through the native transaction and joins original operation/assertion and restoration failures. This is explicit test-fixture repair, never automatic production repair. After restoration, the complete original canonical image including the original durable receipt remains equal, while the actual new native store position is freshly captured rather than predicted. The original acknowledged minimum/generation then produces the complete typed healthy wait and independent literal ANN page (all three original rows, scores, revisions, order and page metadata); both read operations leave the restored bytes/current cut unchanged. No production API, constant, timeout, retry, topology, authorization or scheduling change.
-
-Ordered ownership: this feature and ADR precede NativeAnnWaitAuthorityTests. The existing five token-refusal cases remain intact; the two new Arguments are source declarations only. Root alone joins guarded source and binds actual native discovery, source/PDB/image and original Linux normal/scalar Unit outcomes; supporting native owner tests do not replace whole RF3 four-route, cold, process or broader acceptance. Rollback removes only the new test operation and this contract delta. Qualification remains OPEN.
-
-
-### TASK-KL034-FIRST-BUILD-NATIVE-OBSERVATION-006
-
-Freeze before source implementation; source-only, no qualification. Maps REQ-SEARCH-ANN-WAIT-001/002, AC-SEARCH-ANN-WAIT-002/003 and REQ-ANN-MAINT-001/003, AC-ANN-MAINT-001/003 under ADR009. Authentic aeb run37981021139 job113991243855 first Build returned UnknownWriteOutcome; original response/status/native child failure was not retained. No cause is inferred from elapsed35s or Watchdog warning.
-
-Only the existing first explicit Build request gets a passive Search-owned DelegatingHandler. Its HttpClient uses the original IHttpMessageHandlerFactory.CreateHandler(string.Empty), actual named HttpClientFactoryOptions actions, Aspire GetEndpoint and Timeout.InfiniteTimeSpan, with the original caller cancellation token and original SDK execution options. No alternate sockets handler, probe, request, retry or response consumption. Handler forwards the same request/token and unconsumed original response. Up to8 typed observations admit only sendStarted/settled/responseReceived/HTTPstatus, closed None/Canceled/HttpRequest/Io/Other failure category and actual send/original cancellation flags; explicit saturation is retained. No URI/header/body/message/identity/clock/timestamp or secrets. Observations start immediately before first Build and stop on its actual settlement; setup/status/discovery and subsequent operations are excluded.
-
-Shared RequestCqrsRf3Callers gets only additive internal observed-client ownership construction. Existing ConnectAsync retains its default native client construction and SDK/MCP startup and primary+cleanup ledger. The observed HttpClient owns its actual DelegatingHandler; the caller owner disposes it after original producers/MCP settle, including startup failure. First Build keeps the same SDK-success assertion and full result. If it throws or returns failure, retain the original exception/assertion, stop observation, append console diagnostic failure, rethrow through the native ServerFailureObserver failure ledger without promotion or reconciliation. Factory constructor failure joins all already-created original HTTP/reader ownership.
-
-Slice/source order: docs Search +ADR009, Search Diagnostics/NativeAnnWaitHttpObservation, Search Helpers/NativeAnnWaitObservedSdk and NativeAnnWaitRf3Build, shared ClusterRouting Helpers/RequestCqrsRf3Callers guarded additive constructor, existing Search NativeAnnWaitRf3Scenario uses it. One unchanged real RF3 case covers explicit Build, denied/stale minimum wait, exact literal results and deleted exclusion, explicit Restore, four SDK/officialMCP/Q1 paths, same-root cold and original receipt replay plus healthy continuation. Limits/defaults/topology/provider/format/aliases/IDs/full task scopes unchanged. Root reviews/joins/censuses/executes fresh Linux normal/scalar; no runtime or coverage claim. Rollback removes this test-owned observation and additive caller overload only.
-
-
-## TASK-KL034-NATIVE-OBSERVATION-OWNERSHIP-002
-
-REQ-SEARCH-ANN-WAIT-001/002, AC-SEARCH-ANN-WAIT-002/003: the closed passive first-Build observation is non-disposable data. A separate actual DelegatingHandler wraps the native pipeline. The existing official caller owns and settles its original SDK HttpClient; the scenario retains explicit using scopes for the original SDK HttpClient and separate handler. The existing caller settles that same HttpClient first; its outer native idempotent dispose guard covers every construction and operation failure. The handler settles after the original caller, with operation and cleanup failures retained separately in the existing failure ledger. The HttpClient uses disposeHandler=false, and the factory joins both resources on construction/configuration failure, clears the already-settled handler output, and propagates the original failure. Preserve fatal and nonfatal cleanup exceptions through the existing native classification and failure ledger. Preserve every original send/cancellation token, response, bounded observation, exception and joined cleanup. This separation makes the actual resource owner explicit without suppressing CA2000 or adding an operation, retry, timeout, public contract or qualification claim. Existing ADR-009 observation contracts remain sufficient.
-
-# TASK-KL034-NATIVE-MAINTENANCE-HTTP-001
-
-REQ-SEARCH-ANN-WAIT-001/002, AC-SEARCH-ANN-WAIT-002/003 and REQ/AC-ANN-MAINT-001/003 require genuine administrator maintenance before public freshness/cold operations. Existing KL029 NativeTextMaintenanceRf3Tests precise wrong-owner refusal and all four public caller paths remain mandatory under Search provider authority (REQ/AC-SEARCH-005).
-
-Original own-main source8c3/run38017420672 job114110692719 log SHA256 f0d37d112f2ead7a6584c5ee331ebd33912e4efe1e110ae4e65685a358b7f585 and original native TRX record the selected ANN Build request receiving actual HTTP404 with both actual send/original tokens uncancelled. This establishes a missing HTTP route at that boundary; it does not identify a native ANN storage/apply failure. Current compiled semantic references to AnnMaintenanceProtocol.Route and TextIndexMaintenanceProtocol.Route exist only in SDK Send and MCP route contracts, not in endpoint registration. SearchApi.Map registers online maintenance but omitted the two existing native maintenance routes. Their real ConnectionGrain parent implementations already validate current persisted administrator, command identity, physical NodeId and mode before native maintenance; wrong NodeId must return OwnershipLost with its original detail.
-
-Implementation contract: Search Transport/SearchApi maps ONLY the two existing canonical POST routes and existing typed request DTOs to SAME ApiGrainDispatch.SubmitAsync, exact existing OperationKind.MaintainAnnIndex/MaintainTextIndex and request.CommandId. Preserve actual foreground HttpContext/server ConnectionGrain/cancellation/identity/CQRS, fresh native persisted authority, original envelopes/aliases/IDs/MAC, ordered storage owners, full original safe errors/receipts and every current mapping. No new route string, parallel dispatcher, SDK404 translation change, fallback/retry/limit/default/deadline or provider repair. Ordinary authorization is mandatory; route publication grants no authority.
-
-Regression uses the existing complete operations, without new Args/UID or weakened assertions: NativeAnnWaitRf3Tests.RealSdkOfficialMcpAndBothQ1MinimumWaitRejectDeniedStaleThenRestoreDeletedExclusionAndColdHealthy requires actual SDK Build success then denied/stale no partial reply, SDK/official MCP/Q1 freshness, explicit Restore, full literal update/deletion exclusion and same-volume cold original receipt/healthy continuation. NativeTextMaintenanceRf3Tests.ProtectedNativeTextMaintenanceReplaysBilingualUpdateDeleteAcrossAllPublicPaths retains Sdk/Mcp/SdkSql/McpSql Args, exact OwnerAsync SDK and MCP OwnershipLost/detail plus unchanged full native/current state, then original legal bilingual Build/Restore/Release/receipt operations. These genuine operations already fail if routes are absent; do not add property/getter-only route assertions or claim a route repair resolves any subsequent native refusal.
-
-Ordered stages: append this Search/ADR009 contract before source; register the existing two endpoints; root builds/discovers and runs exact current-source Linux normal/scalar KL034 and KL029 plus existing native/refusal/cancellation/cold suites. Rollback removes only these two registrations. Original failed artifacts remain immutable. Source-only native preview/reconstruction is not runtime PASS/full acceptance; downstream failures remain genuine owning evidence.
-
-# TASK-KL029-NATIVE-ORIGINAL-CUT-ORACLES-001
-
-REQ/AC-FTS-005 and REQ/AC-SEARCH-WAIT-001/002 retain complete original RF3 receipts, business history/current documents/vector/index state, persisted denial and SDK/official MCP/Q1/cold continuation. Original source8c3/run38017420672 Applied41→42 replay failure and last Q1 false complete comparison remain immutable; the latter does NOT identify any particular differing field.
-
-Native authority proof: ReplicaLeader.SubmitAsync appends every admitted original replay, waits materializer then ResolveOutcome. ReplicaState.Snapshot.MaterializedPosition is Materializer.Database.LastApplied; NodeAdministration.StatusAsync exposes that exact native value. Query.WaitForIndexCore reads SAME canonical KeySpace.AppliedBytes under actual Store.Read and Token uses the current default physical-placement witness. Thus independent Status reads on the same fixture physical owner bracket each actual Wait's applied position. Their values are not local Store.Position: ChangeFeedPage.CutPosition uses that distinct local committed position and is NEVER compared to replicated Applied.
-
-Implementation order and roles: freeze this Search/ADR009 contract, then Integration Search Assertions/NativeTextWaitRf3CutAssertions brackets EACH original SDK/MCP/Q1 read with administrator Status; same NodeId/incarnation/read generation/routing authority and original token partition/incarnation/ownership are mandatory. AppliedPosition must be within its actual materialized before/after bounds and >=original acknowledged minimum. SchemaVersion equals original configured resource schema; PolicyEpoch equals the actual ConfigurePrincipal returned persisted principal. Retain every field and bounded typed mismatch diagnostics; do not copy expected authority/schema/epoch from returned Wait. Same original case passes administrator/schema/epoch to the helper, preserving all four real calls, denial/no partial, literal rankings/deleted exclusion and original deadline/cleanup. Scenario stores actual ConfigurePrincipal reply in its existing identity fixture; no fabricated epoch or trusted roles.
-
-Replay Assertions/NativeTextRf3ReplayHistory captures full original public change-feed history before real original MCP replay and independently reads it afterwards. All DocumentChange bytes (original commit/time/reference/revision/deleted/before/after), ThroughSequence/Tail/FirstAvailable/HasMore remain identical; original complete receipt and literal document/vector/text results remain. Both actual signed cursors are independently consumed through the real public API and must yield no new change with unchanged complete history metadata. Cursor expiry/signature and local CutPosition legitimately differ per cut: require actual nonempty accepted cursor, monotonic local cut and unchanged actual physical owner, never fabricated stable RF3 Applied. Preserve no-link/stop/cold owners, identities, native old receipt, all case Arguments and every full literal oracle. Production is unchanged; no dispatcher/observer/timer/retry/default/limit/auth/serialization/alias/ID changes.
-
-Rollback restores only fixture oracles and removes purpose helpers. Root fresh exact-source Linux normal/scalar AcFts005UpdatedTextAndNativeProjectionRecoverAcrossLeaderLossAndRestart and AcknowledgedNativeTextPrefixSdkOfficialMcpAndQ1CallRejectDeniedThenPublishHealthyAndExcludeDeleted remain required, plus unchanged four native maintenance Args and all native/refusal/recovery/full RF3 suites. Source-only checks do not establish runtime PASS or cause of the unlogged original Q1 differing field.
-
-
-# TASK-NATIVE-WAL-SIMD-NORMAL-ONLY-001
-
-Owner 2026-10-11 SIMD-always correction supersedes the active cross-profile directions of REQ/AC-NATIVE-WAL-PROFILE-001/002. REQ-NATIVE-WAL-NORMAL-001 requires native SIMD eligibility before opening this test-owned store and four original real processes in seed → first-append → second-append → cold order. AC-NATIVE-WAL-NORMAL-001 maps to NativeChecksumProfileRecoveryTests.CurrentNativeWalPreserves257RecordsAndBothAppendsAcrossFourProcesses with zero parameters: retain the 257 exact native corpus rows, both acknowledged command/receipt/native outcome appends, original retry/conflicting-body refusal, complete persisted models/outbox, byte-exact cold cut and same-root identity. This is process recovery, not power-loss or performance qualification.
-
-The parent passes only existing mode/root/phase (three arguments), never writes DOTNET/COMPlus intrinsics environment or exposes a retired profile selector. The actual native Vector.IsHardwareAccelerated && (Sse2.IsSupported || AdvSimd.IsSupported) guard remains before storage acquisition. Ambient unavailable/disabled native hardware cannot count as success. Remove only exclusively retired options/binding/validator and protocol profile flags/index. Old four-argument shapes fail the unchanged strict argument-count refusal; no compatibility reader, migration or new authority. Capability output remains actual bounded native facts; completion is phase-only and emitted after genuine native store close and failure ledger settlement.
-
-Keep the original StorageTrialLease, 90-second original execution/30-second cleanup owners, bounded pipe readers, original initiating/fatal/cleanup exceptions, exact phase order/child count, each real process/task/handle join and original deadline/cancellation. Keep every independent corpus byte (including historically named scalar-append data), command ID, generated alias/field ID and complete receipt/effect/outcome/cut check. CrashHostApplication continues the same existing TryRun dispatch; no other mode or feature changes. ZoneTree issue182 and historical profile receipts remain immutable history; the existing genuine native checksums/dependency ownership are untouched.
-
-Ownership: existing Recovery StorageRecovery Cases/Processes; CrashHost StorageRecovery Protocol/Scenario and deletion of exclusively retired Configuration/Options+Binding. Append this superseding contract to StorageRecovery.md, Search.md and ADR035 before source. Root alone composes docs/current selectors, native full solution build/format/discovery and actual normal complete process execution. Audit task/contributor inventories for the renamed zero-argument method; do not create native UID or change strict counts before fresh original compiled census. No private broad build, new Docker, kernel/Server/Storage/Blob/Messaging/Graph/workflow/selector changes. Rollback is only the coherent current test/protocol admission tranche under owner direction; never restore active forced-scalar execution by silently accepting old arguments.
-
-
-## KL067 complete classification-lineage refusal and cold oracle
-
-TASK-KL067-CLASSIFICATION-WHOLE-001 maps REQ-SEARCH-003/005 and REQ-AUTH-009 to AC-SEARCH-003/005 and AC-AUTH-009, under ADR-015 and the existing AC-LINEAGE-002/003. Native source already checks current source field-use, row visibility, classifications and revision; this stage changes no product authority or projection format. The existing AcLineage002RevokedReaderCannotSearchDerivedVectors case is extended instead of adding a duplicate test.
-
-REQ-SEARCH-LINEAGE-WHOLE-001: a genuine persisted vector effect and actual native ZoneTree.FullTextSearch generation must preserve classified-result omission across current reader revocation, explicit persisted repair and same-root cold reopen. AC-SEARCH-LINEAGE-WHOLE-001: warm vector and native text calls return an independently reconstructed complete RankedDocument (reference, revision, empty redacted JSON, ordered input/vector omissions, exact rank score, null explanation); both revoked calls return Unauthenticated with unchanged complete canonical image and position. A real ConfigurePrincipal operation repairs the reader; fresh healthy calls return the same literals. Dispose the original native provider before native canonical reopen, then reconstruct the provider on its same owned path and verify complete literals, retained vector/lineage bytes and the original effect receipt.
-
-Owned source: UnitTests Search/Cases/EventProjectionPolicyTests.cs and Search/Scenarios/Projections/ClassificationLineageWholeFlow.cs plus ClassificationLineageWholeAssertions.cs. Product SearchEngine/PreparedSimilarity/SIMD, other search cases, shared fixtures, public DTOs/aliases/IDs and all limits/deadlines remain unchanged. This is a genuine real-store/native-provider Unit gate, not RF3/process-kill/coverage evidence. Existing EventProjectionRf3Tests, lineage process cases and ANN lineage lifecycle/replay gates remain required and open until authenticated current-source execution. Root owns coherent build/analysis/format and normal native50 execution of /*/*/EventProjectionPolicyTests/AcLineage002RevokedReaderCannotSearchDerivedVectors. No scalar profile or migration is introduced.
-
-
-### KL067 genuine corrupt-lineage repair continuation
-
-TASK-KL067-CLASSIFICATION-CORRUPTION-002 extends the SAME AcLineage002MalformedPersistedLineageFailsClosedInsteadOfLeakingTheVector, under REQ/AC-SEARCH-LINEAGE-WHOLE-001 and AC-LINEAGE-002/003. Preserve its genuine native fault of SourceEventRevision=0 and exact Corruption. Verify the actual injected encoded row is the only changed canonical row and its owning storage commit advances position once. The failed search must preserve every damaged raw row and that position. Restore ONLY exact captured original lineage bytes through the same native commit owner; all original canonical rows return, with a second measured position increment (not a fabricated apply receipt/cut). Reopen the same canonical root, verify complete18-field lineage/vector and native text/vector literals from READY5, then replay SAME original CommandId with stable effect receipt and no new raw rows/cut. This is fixture fault/read repair, not a product recovery API, admitted failed-write outcome or power-loss proof.
-
-
-### TASK-KL067-CLASSIFICATION-RF3-ORACLE-003 — complete independent caller payload
-
-REQ-SEARCH-LINEAGE-RF3-ORACLE-003 / AC-SEARCH-LINEAGE-RF3-ORACLE-003 strengthens the existing AC-LINEAGE-001..003 SDK/official MCP operations: each result must independently match the complete original literal reference (partition, collection, ID), revision1, derived/baseline JSON, redacted=true, ordered `/input` and `/embedding` omissions, unchanged expected rank-fusion score and absent explanation. Caller agreement alone is insufficient. The exact existing scenario seeds and policy grants determine these literals; no result is adopted as expectation.
-
-Implementation owner: IntegrationTests Search/Assertions/Projections/EventProjectionRf3Assertions.cs only. Existing EventProjectionRf3Tests retain all original command IDs, receipts, changed-payload conflict, stale input/reclassification refusal and baseline-only results; EventProjectionRf3LeaderLoss retains original kill, receipt replay, restart and all-node checks. Both SDK and MCP are compared against the independently constructed full DTO. Unknown expected document IDs fail closed. No product schema, alias/ID, authority, deadline, retry, resource bound or topology changes.
-
-Ordered dependency: CLASSIFICATION-WHOLE-001 READY5, CLASSIFICATION-CORRUPTION-002, then this additive oracle successor; preserve every earlier doc appendage. Rollback removes only this assertion refinement. Runtime gates remain exact-source Linux Aspire RF3 for all three original EventProjectionRf3Tests methods, including leader-loss/restart. Source review/native preview alone does not qualify or close KL-067.
-
-### TASK-SEARCH-NATIVE-ORACLE-COMPILATION-001 — preserve whole-operation metric and adaptive flows
-
-CanonicalVectorPublicMetricTests retains all three real native metrics, hardware-vector block plus tail dimensions, independent literal ordering/scores and cancellation/no-effect/healthy continuation. Its coordinate fixture returns the existing ImmutableArray<float> representation required by PutVector and SearchRequest; generating alternate public constructors is prohibited. AdaptiveFilteredPlannerTests keeps the complete existing budget-refusal and healthy operation in its extracted full-flow helper; remove only the unused former private assertion with the native IDE0051 action. Actual integrated compiler/native reports and RF3/Linux qualification remain required.
-
-
-## TASK-KL066-PROJECTION-ORIGINAL-POLICY-004
-
-REQ/AC-AUTH007/008/009, REQ/AC-SEARCH-LINEAGE-WHOLE-001 and original AC-LINEAGE-003 require current persisted worker policy before disclosing a cached projection outcome. Extend SAME original EventProjectionReplayTests.AcLineage003NativeReopenPreservesEffectLineageAndStableReceipt after every original assertion. Capture its genuine original CommandId before first Apply. Real ConfigureWorker revocation makes that exact original success retry Unauthenticated without altering the full native row image or cut. Persisted repair advances the policy epoch: original success remains PermissionDenied under existing ValidateCachedResult, never rewritten or disclosed as current authority. Healthy continuation MUST use a genuinely NEW ID at the repaired epoch. Existing canonical effect reuse preserves the original full mutation receipt/vector/18-field lineage; its genuine new outcome/clock is not misreported as globally no-effect.
-
-After actual new-ID settlement, same-ID replay must retain full receipt and exact complete raw rows/cut. Real native text and vector reads independently match complete redacted literals through the prior CLASSIFICATION-WHOLE-001 helper. Dispose/join the original provider before genuine same-root Harness.Reopen; check actual NodeId/incarnation/nondecreasing ReadGeneration, complete canonical rows/cut, old-ID PermissionDenied, current new-ID full receipt/no-effect replay, exact original lineage/vector and full fresh native text/vector result. Original constructor/fixture disposal and failures remain; provider directly disposes on success and preserves initiating plus cleanup errors on refusal.
-
-Owner paths: Unit/Search/Cases/EventProjectionReplayTests.cs and new Helpers/ProjectionOriginalPolicyContinuation.cs; Search feature and ADR022 append only. Dependencies READY5→corruption4→RF3oracle3 docs; exact native ApplyCommittedCommand/ExecuteAndBuildOutcome/ReplayCommand/ValidateCachedResult/PersistCommandOutcome implement the unchanged product contract. No new API, token, aliases/Ids, stored format, grants, quota, clock, cancellation/deadline, retry or policy relaxation. Rollback removes only this test-owned continuation and original-ID capture, preserving all original assertions. Required unchanged native normal-SIMD50 selector /*/*/EventProjectionReplayTests/AcLineage003NativeReopenPreservesEffectLineageAndStableReceipt and full Linux gates remain OPEN; private native preview/source is not execution/PASS or completed KL066/067.
-
-
-## TASK-KL067-CLASSIFICATION-REPAIR-COLD-005
-
-REQ/AC-AUTH006/007/008/009, AC-LINEAGE001..003 and original weaker-target refusal require a complete original classification repair operation. SAME EventProjectionInputTests.AcLineage002RejectsAWeakerTargetClassificationAtomically retains every original PermissionDenied/vector-null/lineage-null assertion; capture its actual first failed CommandId through the exact unchanged Harness.Submit→Database.Apply→Get<CommitReceipt> path. First definitive failure genuinely persists an outcome/clock, so do not claim unchanged global rows/cut for that first admitted command. Subsequent SAME failed-ID replay, including after repair, must preserve complete raw rows/cut and PermissionDenied rather than rewrite it as success.
-
-Actual root ConfigureResource CAS schema1→2 repairs ONLY original /embedding Classification from projection-public to projection-sensitive; all other resource identity/policies/grants remain. Independent complete persisted replacement is checked. A genuinely NEW worker command creates its first actual canonical projection with full literal mutation receipt, vector [1,0]/space/revision1 and all18 lineage fields, including actual source+target schema2 and original worker epoch1. Real native text and vector independently return full redacted target literals through READY5. No grants/epoch/cursor/generation are forged or relaxed.
-
-Join original provider before same-root reopen, check actual NodeId/incarnation/nondecreasing ReadGeneration and complete native rows/cut. Cold retains exact vector/lineage bytes, all18 schema2 facts, old failed-ID PermissionDenied and new successful-ID exact receipt/no-effect replay; fresh text/vector healthy reads leave full rows/cut unchanged. Owners: existing Unit/Search/Cases/EventProjectionInputTests.cs + new Helpers/ProjectionClassificationRepairFlow.cs; feature/ADR015 append only. Dependency original READY5→corruption4→RF3oracle3→original-policy4 doc chain (ADR015 exact R3 postimage). Existing native transaction/outcome/history/authorization/format/aliases/Ids/limits/deadlines remain unchanged. Rollback removes only continuation/original failed-ID capture, preserving original assertions and immutable reports. Required unchanged original normal native-SIMD50 selector /*/*/EventProjectionInputTests/AcLineage002RejectsAWeakerTargetClassificationAtomically and full exact-source Linux gates remain OPEN; source/preview is not PASS.
-
-
-### TASK-KL066-067-NATIVE-RECEIPT-EPOCH-010
-
-REQ/AC-SEARCH-LINEAGE-WHOLE-001 and AC-LINEAGE-002/003 require the existing original warm/replay/cold flows to compare all native MutationReceipt values: Kind, Resource, Id, Revision and ordered CompositionReferences. Generated record equality includes ImmutableArray backing identity and does not prove decoded semantic equality. Retain every complete raw-row/cut and captured vector/lineage byte assertion. No persisted format, alias, field ID or product equality contract changes.
-
-The existing FilteredPolicy cold continuation must genuinely ConfigurePrincipal with checked current persisted PolicyEpoch plus one, read from its owning native store; a new principal begins at the existing initial epoch. Retain original grants/revocation, ordered command/outcome, complete healthy literals and both same-root cold passes. No policy bypass, clock/limit/deadline changes or fabricated authority. Existing mapped native SIMD50 operations and required exact-source Linux/RF3 gates remain mandatory; source and compiler receipts are not operation PASS.
-
-
-## TASK-KL067-PUBLIC-LINEAGE-REPAIR-COLD-013
-
-REQ-SEARCH-LINEAGE-PUBLIC-013 / AC-SEARCH-LINEAGE-PUBLIC-013 refine REQ-LINEAGE-002/003, AC-LINEAGE-002/003 and current persisted authorization under ADR-015/022/089. Extend SAME original AcLineage002SourceHiddenFromPersistedReaderCannotProduceVisibleDerivedVector after its complete baseline-only SDK/official MCP oracle. Keep original worker Node1, SDK reader Node2 and official MCP Node3 calls, same command/credential/partition/event/vector/row policy and deadline. Preserve the actual original full projection receipt.
-
-Configure the actual returned reader principal at checked current epoch+1 with Revoked=true. The original SDK and official MCP search must return Unauthenticated without protected result/credential/source disclosure. Full privileged ordered source/derived/baseline document literals and SAME physical query cut bracket those read-only refusals; acknowledged policy mutation and admitted receipt replay are not called globally no-effect. Genuine next-epoch ConfigurePrincipal repair retains original capability and field grants, removes only source-hiding row restriction/owner. Healthy SDK/MCP return independent complete redacted derived+baseline results, original references/revision1/ordered input+embedding omissions/rank1/61+1/62/null explanations.
-
-Warm owners settle before two fixture-owned all-three same-volume cold passes. Begin all original restart owners before health waits. Fresh real SDK/MCP clients must preserve complete literal model/vector results and SAME original receipt bytes, exact persisted node/incarnation and nondecreasing generation/replication Applied; physical query cut remains a separate same-node fact. Replayed successful commands may advance actual replication state, never fabricate or rewrite receipt IDs/cuts. Existing ServerFailureObserver and RequestCqrsRf3Callers.RunOwnedAsync retain primary/cleanup failures and genuine HTTP/MCP lifetime. No new product API/schema/Id/quota/timeout/retry/provider or trusted roles.
-
-Exact original public declarations and native UIDs are bound by isolated compiler/discovery proof; declarations do not establish runtime PASS. Local-image enrollment is ONLY three exact original EventProjectionRf3Tests methods, with current native typed admission verified before source join. Existing AcRpol004PolicyAckFencesReadersCursorsAndStaleRetriedUpdatesAcrossRf3 remains unchanged as KL066 four-route current-policy/cursor/repair/cold owner. Read-owned BuildInputs READY4 is an explicit separate dependency. Owning private compiler/analysis, fresh source/producer/copy guards, exclusive fixture-owned normal SIMD50 RF3 and delivered exact-source Linux coverage/fault gates remain OPEN. Rollback removes only this original-case continuation/helpers/exact selector additions; no canonical bytes or policies migrate.
-
-
-### Native ANN original-operation compiler ownership
-
-REQ-SEARCH-ANN-ORIGINAL-COMPILER-001 maps to AC-SEARCH-ANN-ORIGINAL-COMPILER-001: retain the exact original generated record alias and field IDs, bounded retired-operation digest accounting, same original maintenance session and caller cancellation. A failed original receipt replacement marks the same owning root uncertain before rethrowing every original Exception; no recovery fallback is admitted. The genuine original maintenance/replay/refusal/publication and cold-reopen flows remain the runtime oracle.
-
-REQ-SEARCH-ANN-ORIGINAL-COMPILER-002 maps to AC-SEARCH-ANN-ORIGINAL-COMPILER-002: an absent enrollment performs the same final read-budget check and joined memory disposal; present enrollment must retain every fresh persisted principal, reservation, publication digest, result, authority and read-cut validation before returning the exact original enrollment. Flatten only the absent branch and keep failure/disposal aggregation unchanged. Native source previews do not qualify execution, SIMD performance, process recovery or RF3.
-
-
-### TASK-KL034-FTS-REFUSAL-SEED-007
-
-REQ-SEARCH-WAIT-003 maps to AC-SEARCH-WAIT-003. Before the four original protected-field refusals, independently require all three original seed DocumentChange entries: a/b/c in sequence1/2/3, original complete SeedToken, full known references/revision1, Before=null, Deleted=false and complete raw administrator document bodies with no redaction. All six original document/vector mutations append native outbox entries, so the public page has ThroughSequence=Tail=6 and FirstAvailable=1, with HasMore=false and a genuine nonempty cursor. The batch timestamp must be nondefault UTC and identical across the three changes; the receipt does not expose its exact value, so this is a shape/coherence check followed by complete byte preservation.
-
-After exact SDK, official MCP and both Q1 PermissionDenied responses with no partial result, compare the entire original history including all timestamp bytes and complete ThroughSequence/Tail/FirstAvailable/HasMore. Consume BOTH genuine pre/post signed cursors and require empty complete continuation with unchanged head metadata. Native cursor validation reloads persisted principal/resource and checks purpose, incarnation, partition, collection, principal, policy epoch, schema, visibility epoch and expiry. The original endpoint must retain NodeId/incarnation/read generation/routing readiness; replicated Applied may advance. These endpoint observations do not establish the physical owner of a separately routed read.
-
-The complete original authorized four-route prefix waits, independently literal ranked/privacy results, genuine delete receipt, deleted exclusion and successful DocumentReadResult.Document=null remain mandatory. The projected history oracle does not prove every raw resource/vector/outbox row unchanged or independently correlate a returned cut with its native store owner. Those stronger gates stay OPEN; no new hook, forced placement, authority substitution, fabricated timestamp, snapshot or copied expected cut is introduced.
-
-Canonical map: existing Integration Search Cases/NativeTextWaitRf3Tests owns the whole operation; Assertions/NativeTextRf3ReplayHistory owns independent seed literals and both authentic cursor continuations; NativeTextWaitRf3CutAssertions retains existing endpoint lifecycle checks; native storage/provider/auth code is unchanged. Original run38180879404/sourcef4f654fb7c36402bd5dc793700c1592f00cf6a1b/job114592983457 reported Applied21 versus22; the underlying extra-apply cause was not retained and is not claimed. Original log SHA2563f1b4811dcc7d6247c897d479e88e739ba670434b567a57d0e9fb3caa9b751a1 remains immutable.
-
-```mermaid
-flowchart LR
-    Seed[Three complete literal seed changes and six-entry head] --> Refuse[Four original protected-field refusals]
-    Refuse --> History[Complete retained history and both signed cursors]
-    History --> Healthy[Authorized prefix waits and full literal rankings]
-    Healthy --> Delete[Original delete receipt and inner null document]
-```
-
-Root performs current compilation/analyzers, original native UID discovery and genuine fixture-owned Aspire RF3 on exact delivered-source Linux with required recovery, cleanup and fault gates. All compiler/runtime/admission gates remain OPEN for this preview. Rollback removes only the coherent oracle changes and requirements refinement, retaining original failures and all product authority/durability contracts.
-
-
-### TASK-KL034-FTS-PUBLIC-STATE-008
-
-REQ-SEARCH-WAIT-003 / AC-SEARCH-WAIT-003 also require genuinely authorized administrator Get operations for ALL three seed documents before and after the original four-route denial. Reuse the same independent complete literal document oracle, including the nonmatching c document; inspect DocumentReadResult.Document and preserve all expected fields. Capture the complete genuine OutboxStatus before denial, independently require Head.Tail=6, FirstAvailable=1, StoredRecords=6, positive StoredBytes and empty Consumers, then require the entire response exactly unchanged afterward. The exact native stored byte count is observed and preserved; do not fabricate it from corpus size or serialize a reconstructed timestamp as proof.
-
-Existing Cases/NativeTextWaitRf3Tests and Assertions/NativeTextRf3ReplayHistory own this bounded public-state pass-through and shared literal oracle. Native GetOutboxStatus validates current persisted administrative authority under its own genuine Store.Read. Full readonly ResourceDefinition and VectorRecord payload operations are absent from the reviewed SDK surface; Search rankings do not prove raw vector bits. These public operations do not become a single gated canonical snapshot or independently identify the owner of a returned read cut. Strong raw/resource/vector/owner gates and all runtime qualification remain OPEN. No test declaration, product hook, grant, timeout, checkpoint, topology, stored format, provider or public API change.
-
-
-## Native completed text-index wait read-cut observation (future guarded proposal)
-
-REQ-FTS-CUT-PROBE-001 maps to AC-FTS-CUT-PROBE-001: the optional SAME IQueryReadCutObserver captures actual Store.Identity, physical StorePosition, exact returned AppliedToken, persisted principal/PolicyEpoch/schema, partition and SHA256 of the original generated native WaitForIndexRequest after genuine provider cleanup inside the original authorized WithQueryView. Publish only after that owning read returns; no view escapes, second read, snapshot inference or physical/applied-position comparison. Null observer returns before metadata or digest allocation. Scalar query schema remains distinct.
-
-REQ-FTS-CUT-PROBE-002 maps to AC-FTS-CUT-PROBE-002: the same registered probe adjunct accepts only genuine RequestStarted/Hold WaitForIndex claims with server-verified request/connection, captured native AuthorizationReload context and original source Released proof. Append an unarmable typed sidecar/marker with existing bounds and immutable publication/lifecycle owners. Same native partition/activation validators apply; no signing keys, roles, row content or cursor bytes are published.
-
-Canonical map: Search Models/Execution/Queries own in-process capture/publication; ClusterRouting Diagnostics owns the same enabled private adjunct and strict typed sidecar; existing hosting forwards the same optional observer. Unit Search genuine NativeTextWait observation roles verify provider parity, full canonical image, real Store.Read callback after gate exit, invalid incarnation/future token/current FieldUse refusal before observation and subsequent healthy operation. Public APIs/JSON/provider contracts are unchanged (frontend N/A). Compiler, actual Unit, Linux RF3 SDK/MCP, native claim lifetime, resource limits and cleanup gates remain OPEN. Capture-time owner/cut and later publication are explicit observed coordinates, not a fabricated concurrent snapshot or current-owner guarantee.
-
-
-## Native ANN cold restore retains the published indexed horizon
-
-REQ-SEARCH-ANN-COLD-HORIZON-001 maps to AC-SEARCH-ANN-COLD-HORIZON-001: a no-delta Restore admits the unchanged completed manifest only after genuine current corpus/checkpoint validation. Its maintenance Source is the current canonical observation and may have a greater AppliedPosition than the retained publication. The cold wait oracle carries the exact warm indexed CommitToken already proven equal across SDK, official MCP and both SQL routes; it must not relabel the later maintenance source observation as newly indexed progress.
-
-REQ-SEARCH-ANN-COLD-HORIZON-002 maps to AC-SEARCH-ANN-COLD-HORIZON-002: the SAME original NativeAnnWaitRf3Tests.RealSdkOfficialMcpAndBothQ1MinimumWaitRejectDeniedStaleThenRestoreDeletedExclusionAndColdHealthy preserves publication generation, token incarnation/atomic partition/ownership epoch and exact warm indexed position through the genuine same-volume RF3 cold lifecycle. Require current restore Source.NodeId to equal the admitted pin owner, Source.Incarnation to equal the retained token and Source.AppliedPosition to cover that horizon. All four original exact token/result checks, current authorization, HistoryUnavailable refusal, literal deleted exclusion, complete original receipt replay, advancing canonical replay apply, healthy search and original resource/cleanup failure ledger remain mandatory.
-
-Slice map: Integration Search Helpers/NativeAnnWaitRf3Scenario owns the warm validated token handoff; Helpers/NativeAnnWaitRf3Cold owns cold source/indexed-coordinate separation; existing Assertions/NativeAnnWaitRf3Assertions preserves the exact four public-route oracle. No product, schema, publication, provider, SDK/MCP or persisted format change. The retained token is proven by actual warm responses; NodeStatus remains a separate lifecycle bracket, never read-cut owner proof. Native source preview is not compiler, current-image census, Unit, Linux RF3 or joined cleanup qualification; these gates remain OPEN.
-
-
-## Original KL-034 Linux acceptance, 2026-10-12
-
-The original architecture criteria—minimum committed prefix, visible timeout/failure and deleted-document exclusion with stale projection—are closed at source `01a9c5eb01016336daab31b8a4ea76ef13f2918d`. REQ/AC-SEARCH-WAIT-001/002/003 and REQ/AC-SEARCH-ANN-WAIT-001/002 plus AC-SEARCH-ANN-WAIT-003 map to the unchanged complete native token/corruption/provider/cancellation/deadline/pin/generation operations and genuine SDK, official MCP and both Q1 RF3 cold flows.
-
-[Linux job 114832829570](https://github.com/managedcode/KeyLoad/actions/runs/38255628305/job/114832829570) passed the exact declared union: 24 Unit and two Aspire Docker RF3 cases, zero failed/skipped, native maximum parallelism 50 with normal mandatory SIMD execution. Authenticated [artifact 11750713895](https://github.com/managedcode/KeyLoad/actions/runs/38255628305/artifacts/11750713895) SHA256 `a7d1604656d4674139892777d396848b0d79c6337926f45452b6c603e869af7b` contains the original native discovery, TRX, process, image and cleanup evidence. The [acceptance record](../implementation/kl-034-linux-acceptance-20261012.json) independently verifies all 107 original hashes, all 26 exact TRX case identities, source/image verification, joined child exit/readers/disposal and owned registry removal.
-
-This delivered-source task acceptance supersedes earlier source-only/pending KL-034 statements for its original scope. Earlier failed originals remain intact. The separate proposed raw read-cut observer, full product suites/coverage, wider fault/endurance/power-loss and performance gates remain open; this record supplies no speed or production-readiness claim. ADR: N/A for evidence-only closeout; runtime and public contracts are unchanged.
-
-## Original shared text/vector native-byte boundary
-
-REQ-SR-003/004/005 / AC-MP-003/004/005/012: TextAndVectorBranchesShareOneReadByteBudget independently includes the actual Resource key/native payload and absent BM25-head key in the original two-document + vector + lineage native-byte arithmetic. Both original isolated branches retain complete literal records/ranks; the SAME shared hybrid request still exceeds by its additional corpus document read. Do not raise a production limit or erase metadata, lineage, selected reloads or duplicate the budget. Preserve the original UID/caller token, exact BudgetExceeded, no canonical effects, released allowance, original healthy follow-up and same-root cold complete rows/position. This fixture correction is not a resource/performance or RF3 qualification claim.
+Related: [ADR-009](../ADR/ADR-009-search-provider-boundaries.md), [ADR-010](../ADR/ADR-010-query-budgets-security.md), [ADR-015](../ADR/ADR-015-sensitive-data-lineage.md), [ADR-018](../ADR/ADR-018-global-rank-fusion.md), [ADR-019](../ADR/ADR-019-managed-ann.md), [ADR-022](../ADR/ADR-022-policy-epoch-revocation.md), [ADR-035](../ADR/ADR-035-memory-performance.md), [ADR-071](../ADR/ADR-071-canonical-zonetree-providers.md), [ADR-078](../ADR/ADR-078-native-full-text-projection.md), [ADR-089](../ADR/ADR-089-event-projection-lineage.md), [ADR-117](../ADR/ADR-117-native-tunit-ci-entry.md). Qualification runs through TUnit, process recovery and the Aspire-owned replicated cluster using the .NET SDK and official MCP clients; no speed, quality or production-readiness claim exists without matched measured evidence.

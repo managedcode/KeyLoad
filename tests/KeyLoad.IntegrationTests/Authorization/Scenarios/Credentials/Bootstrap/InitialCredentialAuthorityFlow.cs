@@ -12,7 +12,7 @@ internal static class InitialCredentialAuthorityFlow
         var image = await AdversarialAuthorityTrial.WithRootAsync(fixture, McpCallerProtocol.Node1,
             root => InitialCredentialAuthorityValues.ImageAsync(root, state, token));
         await CredentialAuthorityCold.RestartAsync(fixture, token);
-        await SqlRf3Protocol.EqualAsync(image, await AdversarialAuthorityTrial.WithRootAsync(fixture, McpCallerProtocol.Node1,
+        await SqlClusterProtocol.EqualAsync(image, await AdversarialAuthorityTrial.WithRootAsync(fixture, McpCallerProtocol.Node1,
             root => InitialCredentialAuthorityValues.ImageAsync(root, state, token)));
         await InitialCredentialAuthorityClients.RunAsync(fixture, state, invalidKey, token);
     }

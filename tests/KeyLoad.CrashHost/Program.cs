@@ -30,8 +30,7 @@ if (await SampleChunkCrashScenario.TryRunAsync(args))
 }
 
 _ = SerializationExecutionRegistration.Process.Value;
-if (await D2ImportCrashScenario.TryRunAsync(args)
-    || await D2InventoryCrashScenario.TryRunAsync(args)
+if (await D2InventoryCrashScenario.TryRunAsync(args)
     || await BlobCommitCutScenario.TryRunAsync(args)
     || await UserAnalyticsProcessScenario.TryRunAsync(args)
     || await NativeChecksumProfileScenario.TryRunAsync(args)
@@ -39,8 +38,6 @@ if (await D2ImportCrashScenario.TryRunAsync(args)
     || await NativeTextOnlineCrashScenario.TryRunAsync(args)
     || await NativeTextIncrementalCrashScenario.TryRunAsync(args)
     || await NativeTextCrashScenario.TryRunAsync(args)
-    || await ControlledPartitionMovementProcessScenario.TryRunAsync(args)
-    || await NativeInstallFrameInspection.TryRunAsync(args)
     || await C1OutcomeInspection.TryRunAsync(args)
     || await C1SubmissionOutcomeInspection.TryRunAsync(args)
     || await C1SubmissionJournalInspection.TryRunAsync(args)

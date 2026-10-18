@@ -1,10 +1,10 @@
 namespace KeyLoad.IntegrationTests.Features.GraphTraversal;
 
-internal sealed class GraphCycleFrontierPublicState(GraphIncomingRf3Seed seed)
+internal sealed class GraphCycleFrontierPublicState(GraphIncomingClusterSeed seed)
 {
     internal const string Owner = "cycle-reader";
     internal const string OtherOwner = "cycle-other";
-    internal GraphIncomingRf3Seed Seed { get; } = seed;
+    internal GraphIncomingClusterSeed Seed { get; } = seed;
     internal EntityRef Start => Vertex("r42-s");
     internal EntityRef A => Vertex("r42-a");
     internal EntityRef B => Vertex("r42-b");
@@ -15,7 +15,6 @@ internal sealed class GraphCycleFrontierPublicState(GraphIncomingRf3Seed seed)
         get; set;
     }
     internal long BranchRevision { get; set; } = 1L;
-    internal AtomicPartitionPlacementResolution Placement { get; set; } = null!;
     internal OutboxStatus Outbox { get; set; } = null!;
     internal List<(CommandRequest Command, CommitReceipt Receipt)> Originals { get; } = [];
     internal EdgeRecord[] Edges =>
@@ -38,6 +37,6 @@ internal sealed class GraphCycleFrontierPublicState(GraphIncomingRf3Seed seed)
 
     internal TraverseRequest Request(int depth, int vertices, int edges)
         => new(Seed.TargetPartition, Seed.Graph, Start, depth, vertices, edges);
-    private EntityRef Vertex(string id) => new(Seed.TargetPartition, GraphIncomingRf3Scenario.Collection, id);
+    private EntityRef Vertex(string id) => new(Seed.TargetPartition, GraphIncomingClusterScenario.Collection, id);
     private static EdgeRecord Edge(string id, EntityRef from, EntityRef to) => new(id, from, to, "cycle", "{}", 1L);
 }

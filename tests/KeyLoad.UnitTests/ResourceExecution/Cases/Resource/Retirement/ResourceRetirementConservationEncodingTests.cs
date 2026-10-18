@@ -3,7 +3,7 @@ using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
-/// <summary>Encoding and algebra regressions only; these do not simulate a successful phase23 or an RF3 receipt.</summary>
+/// <summary>Encoding and algebra regressions only; these do not simulate a successful phase23 or an CLUSTER receipt.</summary>
 internal sealed class ResourceRetirementConservationEncodingTests
 {
     [Test]

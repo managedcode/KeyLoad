@@ -12,10 +12,10 @@ internal static class NativeRetainedSnapshotSelectionProgram
               '/*/*/ClusterTests/RetainedReplicaCatchesUpThroughNativeSnapshotAndKeepsCommandOutcomes ']) {
               try { nativeSelection([retainedSnapshotArgs[0], '--KeyLoadTests:Filter='+badFilter, retainedSnapshotArgs[2]], {}); }
               catch (failure) {
-                if (failure.message !== 'Invalid native local RF3 image selection.') throw failure;
+                if (failure.message !== 'Invalid native local CLUSTER image selection.') throw failure;
                 retainedSnapshotUnsupportedCount++; continue;
               }
-              throw new Error('Unsupported retained native snapshot RF3 filter was accepted.');
+              throw new Error('Unsupported retained native snapshot CLUSTER filter was accepted.');
             }
             """;
 }

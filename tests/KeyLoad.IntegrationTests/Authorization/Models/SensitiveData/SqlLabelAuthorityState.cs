@@ -3,5 +3,5 @@ using KeyLoad.IntegrationTests.Features.Search;
 
 namespace KeyLoad.IntegrationTests.Features.Authorization;
 
-internal sealed record SqlLabelAuthorityState(GraphSearchRf3Scenario Scenario,
+internal sealed record SqlLabelAuthorityState(GraphSearchClusterScenario Scenario,
     McpPersistedIdentity Identity, Guid RepairCommand, PrincipalRecord RepairResult);

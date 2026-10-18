@@ -26,8 +26,6 @@ internal static class McpCallerTools
     internal const string QuerySearch = "keyload_query_search";
     internal const string QueryGraphPath = McpCallerProtocol.QueryGraphPath;
     internal const string QueryPartitions = McpCallerProtocol.QueryPartitions;
-    internal const string AdminPartitionPlacementBind = McpCallerProtocol.AdminPartitionPlacementBind;
-    internal const string AdminPartitionPlacementRead = McpCallerProtocol.AdminPartitionPlacementRead;
     internal const string QueryAst = "keyload_query_ast";
     internal const string QueryCapabilities = "keyload_query_capabilities";
     internal const string ChangesRead = "keyload_changes_read";

@@ -7,30 +7,30 @@ namespace KeyLoad.IntegrationTests.Features.BlobStorage;
 
 internal static class BlobListRowPolicyPublicReplay
 {
-    internal static async Task RunAsync(RequestCqrsRf3Callers admin, RequestCqrsRf3Callers reader,
+    internal static async Task RunAsync(RequestCqrsClusterCallers admin, RequestCqrsClusterCallers reader,
         BlobSupersessionPublicTrial.Version[] versions, CancellationToken token)
     {
         foreach (var version in versions)
         {
-            await SqlRf3Protocol.EqualAsync(version.Begun, await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.BeginBlobUploadAsync(version.Begin, token)));
+            await SqlClusterProtocol.EqualAsync(version.Begun, await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.BeginBlobUploadAsync(version.Begin, token)));
             await CurrentAsync(admin, reader, versions, token);
-            await SqlRf3Protocol.EqualAsync(version.Begun, (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobUploadInfo>>(
+            await SqlClusterProtocol.EqualAsync(version.Begun, (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobUploadInfo>>(
                 await admin.Mcp.CallAsync("keyload_blobs_begin_upload", version.Begin, token))).Value);
             await CurrentAsync(admin, reader, versions, token);
-            await SqlRf3Protocol.EqualAsync(version.Written, await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.WriteBlobPartAsync(version.Part, token)));
+            await SqlClusterProtocol.EqualAsync(version.Written, await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.WriteBlobPartAsync(version.Part, token)));
             await CurrentAsync(admin, reader, versions, token);
-            await SqlRf3Protocol.EqualAsync(version.Written, (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobUploadInfo>>(
+            await SqlClusterProtocol.EqualAsync(version.Written, (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobUploadInfo>>(
                 await admin.Mcp.CallAsync("keyload_blobs_write_part", version.Part, token))).Value);
             await CurrentAsync(admin, reader, versions, token);
-            await SqlRf3Protocol.EqualAsync(version.Completed, await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.CompleteBlobUploadAsync(version.Complete, token)));
+            await SqlClusterProtocol.EqualAsync(version.Completed, await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.CompleteBlobUploadAsync(version.Complete, token)));
             await CurrentAsync(admin, reader, versions, token);
-            await SqlRf3Protocol.EqualAsync(version.Completed, (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobMetadata>>(
+            await SqlClusterProtocol.EqualAsync(version.Completed, (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobMetadata>>(
                 await admin.Mcp.CallAsync("keyload_blobs_complete_upload", version.Complete, token))).Value);
             await CurrentAsync(admin, reader, versions, token);
         }
     }
 
-    private static async Task CurrentAsync(RequestCqrsRf3Callers admin, RequestCqrsRf3Callers reader,
+    private static async Task CurrentAsync(RequestCqrsClusterCallers admin, RequestCqrsClusterCallers reader,
         BlobSupersessionPublicTrial.Version[] versions, CancellationToken token)
     {
         await BlobListRowPolicyPublicAssertions.OwnerAAsync(reader, versions, token);

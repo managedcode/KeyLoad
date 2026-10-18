@@ -18,7 +18,7 @@ internal static class PhysicalShardCatalogNativeColdBootstrapFlow
             using var deadline = new CancellationTokenSource(timing.StartupTimeout, TimeProvider.System);
             using var startup = CancellationTokenSource.CreateLinkedTokenSource(token, deadline.Token);
             await using var owners = await ControlledPartitionMovementNativeHostFactory.CreateAsync(
-                null, null, null, null, null, null, null,
+                null, null, null, null, null, null,
                 (index, node) => RequireUnseededRoot(observed, index, node), startup.Token);
             await ServerFailureObserver.ObserveAsync(async () =>
             {

@@ -24,9 +24,9 @@ internal static class FunctionalGateOperationalAnalytics
         var command = new CommandRequest(Guid.NewGuid(), ctx.Partition,
             [new PutDocument(reference.Collection, reference.Id, Json, Empty)]);
         var receipt = await ctx.SdkAsync(ctx.Writer.Sdk.CommitAsync(command, token));
-        await SqlRf3Protocol.EqualAsync(receipt, await ctx.McpAsync<CommitReceipt>(ctx.Writer,
+        await SqlClusterProtocol.EqualAsync(receipt, await ctx.McpAsync<CommitReceipt>(ctx.Writer,
             McpCallerTools.DocumentsCommit, command, token));
-        await SqlRf3Protocol.EqualAsync(new[] { new MutationReceipt(PutKind, reference.Collection, reference.Id, Created) },
+        await SqlClusterProtocol.EqualAsync(new[] { new MutationReceipt(PutKind, reference.Collection, reference.Id, Created) },
             receipt.Mutations.ToArray());
         await DocumentAsync(ctx, reference, token);
         var first = await ctx.SdkAsync(ctx.Administrator.Sdk.DashboardAsync(token));
@@ -38,24 +38,24 @@ internal static class FunctionalGateOperationalAnalytics
         var denied = await ctx.Reader.Sdk.DashboardAsync(token);
         await Assert.That(denied.IsFailed).IsTrue();
         await Assert.That(denied.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
-        await SqlRf3Protocol.EqualAsync(receipt, await ctx.SdkAsync(ctx.Writer.Sdk.CommitAsync(command, token)));
-        await SqlRf3Protocol.EqualAsync(receipt, await ctx.McpAsync<CommitReceipt>(ctx.Writer,
+        await SqlClusterProtocol.EqualAsync(receipt, await ctx.SdkAsync(ctx.Writer.Sdk.CommitAsync(command, token)));
+        await SqlClusterProtocol.EqualAsync(receipt, await ctx.McpAsync<CommitReceipt>(ctx.Writer,
             McpCallerTools.DocumentsCommit, command, token));
         await DocumentAsync(ctx, reference, token);
         var cleanup = new CommandRequest(Guid.NewGuid(), ctx.Partition,
             [new DeleteDocument(reference.Collection, reference.Id, Created)]);
         var removed = await ctx.SdkAsync(ctx.Writer.Sdk.CommitAsync(cleanup, token));
-        await SqlRf3Protocol.EqualAsync(new[] { new MutationReceipt(DeleteKind, reference.Collection, reference.Id, Deleted) },
+        await SqlClusterProtocol.EqualAsync(new[] { new MutationReceipt(DeleteKind, reference.Collection, reference.Id, Deleted) },
             removed.Mutations.ToArray());
-        await SqlRf3Protocol.EqualAsync(removed, await ctx.McpAsync<CommitReceipt>(ctx.Writer,
+        await SqlClusterProtocol.EqualAsync(removed, await ctx.McpAsync<CommitReceipt>(ctx.Writer,
             McpCallerTools.DocumentsCommit, cleanup, token));
     }
 
     private static async Task DocumentAsync(FunctionalGateContext ctx, EntityRef reference, CancellationToken token)
     {
         var expected = new DocumentReadResult(new(reference, Created, Json, false, []));
-        await SqlRf3Protocol.EqualAsync(expected, await ctx.SdkAsync(ctx.Reader.Sdk.GetAsync(reference, token)));
-        await SqlRf3Protocol.EqualAsync(expected, await ctx.McpAsync<DocumentReadResult>(ctx.Reader,
+        await SqlClusterProtocol.EqualAsync(expected, await ctx.SdkAsync(ctx.Reader.Sdk.GetAsync(reference, token)));
+        await SqlClusterProtocol.EqualAsync(expected, await ctx.McpAsync<DocumentReadResult>(ctx.Reader,
             McpCallerTools.DocumentsGet, new GetDocumentRequest(reference), token));
     }
 

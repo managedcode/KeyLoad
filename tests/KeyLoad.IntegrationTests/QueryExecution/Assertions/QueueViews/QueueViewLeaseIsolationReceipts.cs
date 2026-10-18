@@ -1,30 +1,25 @@
-using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.ClientApi;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
 internal static class QueueViewLeaseIsolationReceipts
 {
-    internal static async Task SeedAsync(RequestCqrsRf3Callers root, SqlModelViewRf3Scenario scenario, CancellationToken token)
+    internal static async Task SeedAsync(SqlModelViewClusterScenario scenario)
     {
-        await AssertAsync(root, scenario, scenario.Receipt, scenario.Original.CommandId,
-        [new(QueueViewLeaseIsolationProtocol.AppendKind, SqlModelViewRf3Scenario.StreamSet,
-            SqlModelViewRf3Scenario.StreamId, QueueViewLeaseIsolationProtocol.LeasedVersion),
-         new(QueueViewLeaseIsolationProtocol.EnqueueKind, SqlModelViewRf3Scenario.Queue,
-            SqlModelViewRf3Scenario.FirstMessageId, QueueViewLeaseIsolationProtocol.InitialVersion),
-         new(QueueViewLeaseIsolationProtocol.EnqueueKind, SqlModelViewRf3Scenario.Queue,
-            SqlModelViewRf3Scenario.SecondMessageId, QueueViewLeaseIsolationProtocol.InitialVersion)], token);
+        await AssertAsync(scenario, scenario.Receipt, scenario.Original.CommandId,
+        [new(QueueViewLeaseIsolationProtocol.AppendKind, SqlModelViewClusterScenario.StreamSet,
+            SqlModelViewClusterScenario.StreamId, QueueViewLeaseIsolationProtocol.LeasedVersion),
+         new(QueueViewLeaseIsolationProtocol.EnqueueKind, SqlModelViewClusterScenario.Queue,
+            SqlModelViewClusterScenario.FirstMessageId, QueueViewLeaseIsolationProtocol.InitialVersion),
+         new(QueueViewLeaseIsolationProtocol.EnqueueKind, SqlModelViewClusterScenario.Queue,
+            SqlModelViewClusterScenario.SecondMessageId, QueueViewLeaseIsolationProtocol.InitialVersion)]);
     }
 
-    internal static async Task AssertAsync(RequestCqrsRf3Callers root, SqlModelViewRf3Scenario scenario, CommitReceipt actual,
-        Guid command, System.Collections.Immutable.ImmutableArray<MutationReceipt> mutations, CancellationToken token)
+    internal static async Task AssertAsync(SqlModelViewClusterScenario scenario, CommitReceipt actual,
+        Guid command, System.Collections.Immutable.ImmutableArray<MutationReceipt> mutations)
     {
-        var placement = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ReadAtomicPartitionPlacementAsync(
-            new(QueueViewLeaseIsolationProtocol.One, scenario.Partition), token));
         await Assert.That(actual.Token.Position).IsGreaterThan((long)QueueViewLeaseIsolationProtocol.Empty);
-        await SqlRf3Protocol.EqualAsync(new CommitReceipt(command,
-            new(placement.Incarnation, scenario.Partition.AtomicPartitionId, actual.Token.Position, placement.PlacementEpoch),
+        await SqlClusterProtocol.EqualAsync(new CommitReceipt(command,
+            new(actual.Token.Incarnation, scenario.Partition.AtomicPartitionId, actual.Token.Position, actual.Token.OwnershipEpoch),
             mutations, DurabilityProfile.QuorumProcessDurable), actual);
     }
 }

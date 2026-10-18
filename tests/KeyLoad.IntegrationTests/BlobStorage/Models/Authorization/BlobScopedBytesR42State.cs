@@ -5,7 +5,6 @@ internal sealed class BlobScopedBytesR42State(int index, BlobRef blob, Guid uplo
     internal int Index { get; } = index;
     internal BlobRef Blob { get; } = blob;
     internal BeginBlobUploadRequest Begin { get; } = new(Guid.NewGuid(), blob, upload, BlobScopedBytesR42Corpus.Length, 0L);
-    internal AtomicPartitionPlacementResolution Placement { get; set; } = null!;
     internal BlobCommitResult<BlobUploadInfo> Begun { get; set; } = null!;
     internal WriteBlobPartRequest[] Parts { get; } = new WriteBlobPartRequest[2];
     internal BlobCommitResult<BlobUploadInfo>[] Written { get; } = new BlobCommitResult<BlobUploadInfo>[2];

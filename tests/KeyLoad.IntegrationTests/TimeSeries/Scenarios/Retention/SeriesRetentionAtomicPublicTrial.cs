@@ -8,11 +8,11 @@ internal static class SeriesRetentionAtomicPublicTrial
 {
     internal static async Task RunAsync(ClusterFixture fixture, CancellationToken token)
     {
-        var state = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
+        var state = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
             fixture.AdminKey, async administrator =>
             {
                 var prepared = await SeriesRetentionAtomicPublicPreparation.CreateAsync(fixture, administrator, token);
-                return await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node3,
+                return await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node3,
                     prepared.Reader.Secret, async reader =>
                     {
                         await CommitAsync(administrator, prepared, prepared.Seed,
@@ -34,8 +34,8 @@ internal static class SeriesRetentionAtomicPublicTrial
                     }, token);
             }, token);
         await CredentialAuthorityCold.RestartAsync(fixture, token);
-        _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
-            fixture.AdminKey, administrator => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App,
+        _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
+            fixture.AdminKey, administrator => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App,
                 McpCallerProtocol.Node3, state.Reader.Secret, async reader =>
                 {
                     await SeriesRetentionAtomicPublicCurrent.AssertAsync(administrator, reader, state, token);
@@ -49,8 +49,8 @@ internal static class SeriesRetentionAtomicPublicTrial
                     return true;
                 }, token), token);
         await CredentialAuthorityCold.RestartAsync(fixture, token);
-        _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
-            fixture.AdminKey, administrator => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App,
+        _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
+            fixture.AdminKey, administrator => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App,
                 McpCallerProtocol.Node3, state.Reader.Secret, async reader =>
                 {
                     await SeriesRetentionAtomicPublicCurrent.AssertAsync(administrator, reader, state, token);
@@ -60,15 +60,14 @@ internal static class SeriesRetentionAtomicPublicTrial
                 }, token), token);
     }
 
-    private static async Task CommitAsync(RequestCqrsRf3Callers administrator, SeriesRetentionAtomicPublicState state,
+    private static async Task CommitAsync(RequestCqrsClusterCallers administrator, SeriesRetentionAtomicPublicState state,
         CommandRequest command, string kind, long revision, bool mcpFirst, CancellationToken token)
     {
         var receipt = mcpFirst
             ? (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
                 await administrator.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token))).Value
             : await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.CommitAsync(command, token));
-        await SdkProblemBudgetPublicAssertions.ReceiptAsync(receipt, command, state.Placement,
-            [new(kind, TimeSeriesRf3Scenario.Set, SeriesRetentionAtomicPublicExpected.Series, revision)]);
+        await SdkProblemBudgetPublicAssertions.ReceiptAsync(receipt, command, [new(kind, TimeSeriesClusterScenario.Set, SeriesRetentionAtomicPublicExpected.Series, revision)]);
         state.Originals.Add((command, receipt));
         state.CurrentOutbox = await McpCallerAssertions.SdkSuccessAsync(
             await administrator.Sdk.OutboxStatusAsync(state.Scenario.Partition, token));

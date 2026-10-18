@@ -40,7 +40,7 @@ internal static class StrongReadSessionFlow
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 using var deadline = McpCallerDeadline.Create();
-                await ModelSqlRf3Cold.RunAsync(fixture, deadline.Token);
+                await ModelSqlClusterCold.RunAsync(fixture, deadline.Token);
                 await ReadWaveAsync(fixture, McpCallerProtocol.Node1, state, deadline.Token);
             }, failures);
         }
@@ -48,7 +48,7 @@ internal static class StrongReadSessionFlow
     }
     private static Task<StrongReadSessionState> MutateWaveAsync(ClusterFixture fixture, string node,
         StrongReadSessionState state, CancellationToken token)
-        => RootAsync(fixture, node, root => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, node,
+        => RootAsync(fixture, node, root => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, node,
             state.Identity.Secret, async reader =>
             {
                 await StrongReadSessionReads.HealthyAsync(root, reader, state, token);
@@ -66,7 +66,7 @@ internal static class StrongReadSessionFlow
             }, token), token);
     private static Task<bool> ReadWaveAsync(ClusterFixture fixture, string node, StrongReadSessionState state,
         CancellationToken token)
-        => RootAsync(fixture, node, root => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, node,
+        => RootAsync(fixture, node, root => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, node,
             state.Identity.Secret, async reader =>
             {
                 await StrongReadSessionReads.HealthyAsync(root, reader, state, token);
@@ -74,6 +74,6 @@ internal static class StrongReadSessionFlow
                 await StrongReadSessionMutations.ReplayAsync(root, state, token);
                 return true;
             }, token), token);
-    private static Task<T> RootAsync<T>(ClusterFixture fixture, string node, Func<RequestCqrsRf3Callers, Task<T>> operation,
-        CancellationToken token) => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, node, fixture.AdminKey, operation, token);
+    private static Task<T> RootAsync<T>(ClusterFixture fixture, string node, Func<RequestCqrsClusterCallers, Task<T>> operation,
+        CancellationToken token) => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, node, fixture.AdminKey, operation, token);
 }

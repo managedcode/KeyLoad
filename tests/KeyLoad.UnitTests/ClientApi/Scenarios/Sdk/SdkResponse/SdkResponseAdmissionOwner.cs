@@ -40,7 +40,7 @@ internal sealed class SdkResponseAdmissionOwner(TestDatabase database, bool cont
 
     private static CommitToken CreateExpectedToken(TestDatabase database)
     {
-        var placement = database.Database.ReadAtomicPartitionPlacement(Root, new(PlacementVersion, database.Partition));
+        var placement = database.Database.ReadAtomicPartitionPlacement(Root, database.Partition);
         return new(placement.Incarnation, database.Partition.AtomicPartitionId,
             checked(database.Store.Position + NextCommit), placement.PlacementEpoch);
     }

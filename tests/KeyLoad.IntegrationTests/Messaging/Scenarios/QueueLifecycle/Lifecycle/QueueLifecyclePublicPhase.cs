@@ -5,7 +5,7 @@ namespace KeyLoad.IntegrationTests.Features.Messaging;
 
 internal static partial class QueueLifecyclePublicPhase
 {
-    internal static async Task BeginAsync(RequestCqrsRf3Callers callers, QueueLifecyclePublicState state, CancellationToken token)
+    internal static async Task BeginAsync(RequestCqrsClusterCallers callers, QueueLifecyclePublicState state, CancellationToken token)
     {
         await BatchAsync(callers, state, [Enqueue(QueueLifecyclePublicProtocol.Parked), Enqueue(QueueLifecyclePublicProtocol.Pending)], token);
         var parked = await ClaimAsync(callers, state, QueueLifecyclePublicProtocol.Parked, token);
@@ -30,11 +30,11 @@ internal static partial class QueueLifecyclePublicPhase
     private static EnqueueMessage Enqueue(string id) => new(QueueLifecyclePublicProtocol.Queue, id,
         QueueLifecyclePublicProtocol.Payload, QueueLifecyclePublicProtocol.Headers, OrderingKey: QueueLifecyclePublicProtocol.Ordering);
 
-    private static Task<CommitReceipt> BatchAsync(RequestCqrsRf3Callers callers, QueueLifecyclePublicState state,
+    private static Task<CommitReceipt> BatchAsync(RequestCqrsClusterCallers callers, QueueLifecyclePublicState state,
         Mutation[] mutations, CancellationToken token)
         => QueueLifecyclePublicRoutes.CommitAsync(callers, state, new(Guid.NewGuid(), state.Partition, [.. mutations]), token);
 
-    private static async Task<Delivery> ClaimAsync(RequestCqrsRf3Callers callers, QueueLifecyclePublicState state, string id, CancellationToken token)
+    private static async Task<Delivery> ClaimAsync(RequestCqrsClusterCallers callers, QueueLifecyclePublicState state, string id, CancellationToken token)
     {
         var request = new ReceiveRequest(Guid.NewGuid(), state.Lane, LeaseSeconds: QueueLifecyclePublicProtocol.LeaseSeconds);
         var result = await QueueLifecyclePublicRoutes.CallAsync(callers, state.Route, state.Partition, McpCallerTools.MessagesReceive,
@@ -48,7 +48,7 @@ internal static partial class QueueLifecyclePublicPhase
         return delivery;
     }
 
-    private static async Task CompleteAsync(RequestCqrsRf3Callers callers, QueueLifecyclePublicState state, Delivery delivery,
+    private static async Task CompleteAsync(RequestCqrsClusterCallers callers, QueueLifecyclePublicState state, Delivery delivery,
         DeliveryAction action, CancellationToken token)
     {
         var command = new DeliveryCommand(Guid.NewGuid(), state.Lane, delivery.Token, action);

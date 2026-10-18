@@ -15,13 +15,13 @@ internal static class DeclarativeReverseQuotaFlow
     private const string MissingSeed = "The original literal composition source document is unavailable.";
 
     internal static async Task<DeclarativeReverseQuotaState> SeedAndRefuseAsync(
-        RequestCqrsRf3Callers callers, CancellationToken token)
+        RequestCqrsClusterCallers callers, CancellationToken token)
     {
-        var scenario = await RelationalSqlRf3Scenario.CreateAsync(callers.Sdk, token);
-        var link = new QueueGraphLink(scenario.First, scenario.Second, RelationalSqlRf3Tokens.EdgeLabel);
+        var scenario = await RelationalSqlClusterScenario.CreateAsync(callers.Sdk, token);
+        var link = new QueueGraphLink(scenario.First, scenario.Second, RelationalSqlClusterTokens.EdgeLabel);
         var seed = scenario.Command(
-            new PutDocument(RelationalSqlRf3Tokens.Table, RelationalSqlRf3Tokens.FirstId, RelationalSqlRf3Tokens.FirstRow),
-            new PutDocument(RelationalSqlRf3Tokens.Table, RelationalSqlRf3Tokens.SecondId, RelationalSqlRf3Tokens.SecondRow));
+            new PutDocument(RelationalSqlClusterTokens.Table, RelationalSqlClusterTokens.FirstId, RelationalSqlClusterTokens.FirstRow),
+            new PutDocument(RelationalSqlClusterTokens.Table, RelationalSqlClusterTokens.SecondId, RelationalSqlClusterTokens.SecondRow));
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.CommitAsync(seed, token));
         await Assert.That(receipt.CommandId).IsEqualTo(seed.CommandId);
         var first = await PublicReadAssertions.DocumentAsync(await callers.Sdk.GetAsync(scenario.First, token))
@@ -36,7 +36,7 @@ internal static class DeclarativeReverseQuotaFlow
         var configureId = Guid.NewGuid();
         var actual = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ConfigureResourceAsync(configureId,
             new(scenario.Partition.TenantId, scenario.Partition.DatabaseId, expected), token));
-        await SqlRf3Protocol.EqualAsync(expected, actual);
+        await SqlClusterProtocol.EqualAsync(expected, actual);
         var holder = scenario.Command(new EnqueueMessage(Target, DeclarativeReverseQuotaTrial.HolderId,
             DeclarativeReverseQuotaTrial.Payload));
         var holderReceipt = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.CommitAsync(holder, token));
@@ -49,7 +49,7 @@ internal static class DeclarativeReverseQuotaFlow
     }
 
     internal static async Task<DeclarativeReverseQuotaState> RepairAndHealthyAsync(
-        RequestCqrsRf3Callers callers, DeclarativeReverseQuotaState state, CancellationToken token)
+        RequestCqrsClusterCallers callers, DeclarativeReverseQuotaState state, CancellationToken token)
     {
         await OriginalAsync(callers, state, token);
         state = await DeclarativeReverseQuotaTrial.ReleaseAsync(callers, state, token);
@@ -59,7 +59,7 @@ internal static class DeclarativeReverseQuotaFlow
             CommandId = Guid.NewGuid()
         };
         var sql = DeclarativeCompositionSql.Reverse(healthy, (GraphToQueueMutation)healthy.Mutations[0]);
-        var receipt = await SqlRf3Protocol.McpAsync<CommitReceipt>(callers.Mcp, sql, token);
+        var receipt = await SqlClusterProtocol.McpAsync<CommitReceipt>(callers.Mcp, sql, token);
         state = state with
         {
             Healthy = healthy,
@@ -69,10 +69,10 @@ internal static class DeclarativeReverseQuotaFlow
         return state;
     }
 
-    internal static async Task OriginalAsync(RequestCqrsRf3Callers callers,
+    internal static async Task OriginalAsync(RequestCqrsClusterCallers callers,
         DeclarativeReverseQuotaState state, CancellationToken token)
     {
-        await SqlRf3Protocol.EqualAsync(state.Problem, await RefusedAsync(callers, state.Refused, token));
+        await SqlClusterProtocol.EqualAsync(state.Problem, await RefusedAsync(callers, state.Refused, token));
         await DeclarativeReverseQuotaAssertions.ModelsAsync(callers, state, token);
         await DeclarativeReverseQuotaTrial.HistoryAsync(callers, state, token);
         if (state.Healthy is not { } healthy || state.Receipt is not { } receipt)
@@ -81,14 +81,14 @@ internal static class DeclarativeReverseQuotaFlow
         }
         await DeclarativeReverseQuotaAssertions.ReceiptAsync(healthy, receipt);
         var sql = DeclarativeCompositionSql.Reverse(healthy, (GraphToQueueMutation)healthy.Mutations[0]);
-        await SqlRf3Protocol.EqualAsync(receipt, await SqlRf3Protocol.SdkAsync<CommitReceipt>(callers.Sdk, sql, token));
-        await SqlRf3Protocol.EqualAsync(receipt, await SqlRf3Protocol.McpAsync<CommitReceipt>(callers.Mcp, sql, token));
-        await SqlRf3Protocol.EqualAsync(receipt,
+        await SqlClusterProtocol.EqualAsync(receipt, await SqlClusterProtocol.SdkAsync<CommitReceipt>(callers.Sdk, sql, token));
+        await SqlClusterProtocol.EqualAsync(receipt, await SqlClusterProtocol.McpAsync<CommitReceipt>(callers.Mcp, sql, token));
+        await SqlClusterProtocol.EqualAsync(receipt,
             await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.CommitAsync(healthy, token)));
         await DeclarativeReverseQuotaAssertions.ModelsAsync(callers, state, token);
     }
 
-    private static async Task<JsonElement> RefusedAsync(RequestCqrsRf3Callers callers,
+    private static async Task<JsonElement> RefusedAsync(RequestCqrsClusterCallers callers,
         CommandRequest command, CancellationToken token)
     {
         var sql = DeclarativeCompositionSql.Reverse(command, (GraphToQueueMutation)command.Mutations[0]);

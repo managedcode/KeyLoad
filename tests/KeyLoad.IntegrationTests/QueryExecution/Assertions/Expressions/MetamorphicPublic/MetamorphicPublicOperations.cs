@@ -6,7 +6,7 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
 internal static class MetamorphicPublicOperations
 {
-    internal static async Task RunAsync(RequestCqrsRf3Callers root, RequestCqrsRf3Callers reader, MetamorphicPublicState state,
+    internal static async Task RunAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers reader, MetamorphicPublicState state,
         MetamorphicPublicPlan[] plans, bool descending, int offset, bool denied, CancellationToken token)
     {
         var expected = MetamorphicPublicData.Reference(state.Rows, descending, offset);
@@ -29,7 +29,7 @@ internal static class MetamorphicPublicOperations
             }
         }
     }
-    private static async Task PagesAsync(RequestCqrsRf3Callers root, RequestCqrsRf3Callers reader, MetamorphicPublicState state,
+    private static async Task PagesAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers reader, MetamorphicPublicState state,
         MetamorphicPublicPlan plan, int route, string path, ImmutableArray<MetamorphicPublicRow> expected,
         bool official, CancellationToken token)
     {

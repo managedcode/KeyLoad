@@ -1,9 +1,8 @@
 namespace KeyLoad.IntegrationTests.Features.BlobStorage;
 
-internal sealed class BlobGlobalQuotaR49State(PartitionRef partition, AtomicPartitionPlacementResolution placement, OutboxStatus outbox)
+internal sealed class BlobGlobalQuotaR49State(PartitionRef partition, OutboxStatus outbox)
 {
     internal PartitionRef Partition { get; } = partition;
-    internal AtomicPartitionPlacementResolution Placement { get; } = placement;
     internal OutboxStatus Outbox { get; } = outbox;
     internal HashSet<string> ConfiguredResources { get; } = [];
     internal BlobGlobalQuotaR49Upload Control { get; } = new(new(partition, BlobGlobalQuotaR49Corpus.ControlResource, BlobGlobalQuotaR49Corpus.ControlName), BlobGlobalQuotaR49Corpus.SmallLength);

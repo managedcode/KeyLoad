@@ -14,7 +14,7 @@ internal static class RequestCqrsRpcFailureParser
     internal static bool TryParse(string line, Guid waveId, string node, out RequestCqrsRpcFailureRecord record)
     {
         record = null!;
-        if (line.Length > RequestCqrsRf3McpRejectionNodeCapture.MaximumLineCharacters)
+        if (line.Length > RequestCqrsClusterMcpRejectionNodeCapture.MaximumLineCharacters)
         {
             return false;
         }

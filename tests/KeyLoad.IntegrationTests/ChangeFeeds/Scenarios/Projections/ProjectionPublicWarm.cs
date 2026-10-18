@@ -5,7 +5,7 @@ namespace KeyLoad.IntegrationTests.Features.ChangeFeeds;
 
 internal static class ProjectionPublicWarm
 {
-    internal static async Task<ProjectionPublicState> RunAsync(RequestCqrsRf3Callers root, RequestCqrsRf3Callers caller,
+    internal static async Task<ProjectionPublicState> RunAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers caller,
         PartitionRef partition, McpPersistedIdentity identity, CancellationToken token)
     {
         var source = new CommandRequest(Guid.NewGuid(), partition,

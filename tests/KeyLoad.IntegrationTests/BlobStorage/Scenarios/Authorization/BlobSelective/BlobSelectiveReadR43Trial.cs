@@ -7,14 +7,14 @@ internal static class BlobSelectiveReadR43Trial
 {
     internal static async Task RunAsync(ClusterFixture fixture, CancellationToken token)
     {
-        _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
+        _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
             async admin =>
             {
-                var (versions, placement) = await BlobSelectiveReadR43Publication.CreateAsync(admin, token);
+                var versions = await BlobSelectiveReadR43Publication.CreateAsync(admin, token);
                 var blob = versions[0].Begin.Blob;
                 var identity = await McpPersistedIdentity.CreateAsync(fixture, blob.Partition, blob.Resource, Capability.BlobRead, token);
                 await Assert.That(identity.Principal.PolicyEpoch).IsEqualTo(1L);
-                var state = new BlobSelectiveReadR43State(versions, placement, identity)
+                var state = new BlobSelectiveReadR43State(versions, identity)
                 {
                     Both = identity.Principal with
                     {
@@ -24,7 +24,7 @@ internal static class BlobSelectiveReadR43Trial
                     }
                 };
                 await PersistAsync(admin, state, state.Both, token);
-                return await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, identity.Secret,
+                return await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, identity.Secret,
                     async reader =>
                     {
                         await BlobSelectiveReadR43Reads.MatrixAsync(admin, reader, state, false, token);
@@ -44,11 +44,11 @@ internal static class BlobSelectiveReadR43Trial
                     }, token);
             }, token);
     }
-    private static async Task PersistAsync(RequestCqrsRf3Callers admin, BlobSelectiveReadR43State state,
+    private static async Task PersistAsync(RequestCqrsClusterCallers admin, BlobSelectiveReadR43State state,
         PrincipalRecord expected, CancellationToken token)
     {
         var actual = await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), expected, token));
-        await SqlRf3Protocol.EqualAsync(expected, actual);
+        await SqlClusterProtocol.EqualAsync(expected, actual);
         state.Identity = state.Identity with
         {
             Principal = actual

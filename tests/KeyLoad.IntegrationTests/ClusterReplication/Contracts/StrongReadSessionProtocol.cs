@@ -15,7 +15,7 @@ internal static class StrongReadSessionProtocol
     internal const string DeleteKind = "deleteDocument";
     internal const string DocumentField = "document";
     internal const string KillScenario = "strong-session-absence-failover";
-    internal const string MissingLeader = "The original leader is not an owned RF3 resource.";
+    internal const string MissingLeader = "The original leader is not an owned CLUSTER resource.";
     internal const string MissingState = "The original acknowledged session state is unavailable.";
     internal const string WrongIncarnation = "The document session token belongs to another incarnation.";
     internal const string WrongScope = "The document session token belongs to another atomic partition or placement.";
@@ -25,7 +25,6 @@ internal static class StrongReadSessionProtocol
     internal const string Star = "*";
     internal const string IdPath = "/@id";
     internal const string Scan = "bounded-full-scan";
-    internal const int PlacementVersion = 1;
     internal const int InventoryBound = 8;
     internal const int ColdCuts = 2;
     internal const int AuthorityPrecedenceVariants = 1;

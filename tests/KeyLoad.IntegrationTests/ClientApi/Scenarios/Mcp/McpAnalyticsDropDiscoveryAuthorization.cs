@@ -6,12 +6,12 @@ namespace KeyLoad.IntegrationTests.Features.ClientApi;
 
 internal static class McpAnalyticsDropDiscoveryAuthorization
 {
-    internal static async Task VerifyAsync(ClusterFixture fixture, RequestCqrsRf3Callers root,
+    internal static async Task VerifyAsync(ClusterFixture fixture, RequestCqrsClusterCallers root,
         McpAnalyticsDropDiscoveryState state, CancellationToken token)
     {
         var identity = await McpPersistedIdentity.CreateAsync(root.Sdk, state.Partition, "*",
             Capability.AnalyticsRead | Capability.DocumentsRead, token);
-        await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, identity.Secret, async reader =>
+        await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, identity.Secret, async reader =>
         {
             await McpAnalyticsDropDiscoveryAssertions.ReadsAsync(reader, state, token);
             var revoked = identity.Principal with
@@ -19,7 +19,7 @@ internal static class McpAnalyticsDropDiscoveryAuthorization
                 Grants = [],
                 PolicyEpoch = checked(identity.Principal.PolicyEpoch + 1)
             };
-            await SqlRf3Protocol.EqualAsync(revoked, await McpCallerAssertions.SdkSuccessAsync(
+            await SqlClusterProtocol.EqualAsync(revoked, await McpCallerAssertions.SdkSuccessAsync(
                 await root.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), revoked, token)));
             await DeniedAsync(reader, state, token);
             await McpAnalyticsDropDiscoveryAssertions.ReadsAsync(root, state, token);
@@ -27,14 +27,14 @@ internal static class McpAnalyticsDropDiscoveryAuthorization
             {
                 PolicyEpoch = checked(revoked.PolicyEpoch + 1)
             };
-            await SqlRf3Protocol.EqualAsync(repaired, await McpCallerAssertions.SdkSuccessAsync(
+            await SqlClusterProtocol.EqualAsync(repaired, await McpCallerAssertions.SdkSuccessAsync(
                 await root.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), repaired, token)));
             await McpAnalyticsDropDiscoveryAssertions.ReadsAsync(reader, state, token);
             return true;
         }, token);
     }
 
-    private static async Task DeniedAsync(RequestCqrsRf3Callers reader,
+    private static async Task DeniedAsync(RequestCqrsClusterCallers reader,
         McpAnalyticsDropDiscoveryState state, CancellationToken token)
     {
         var read = await reader.Sdk.ReadAnalyticsEventsAsync(P.Read(state.Partition), token);

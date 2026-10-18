@@ -35,10 +35,10 @@ internal static class PostgresPortalOwnershipFrames
 
     internal static byte[] Description()
     {
-        var name = Encoding.UTF8.GetBytes(PostgresRf3Protocol.ResultColumn + PostgresPortalOwnershipProtocol.Terminator);
+        var name = Encoding.UTF8.GetBytes(PostgresClusterProtocol.ResultColumn + PostgresPortalOwnershipProtocol.Terminator);
         var bytes = new byte[sizeof(short) + name.Length + sizeof(int) + sizeof(short)
             + sizeof(int) + sizeof(short) + sizeof(int) + sizeof(short)];
-        BinaryPrimitives.WriteInt16BigEndian(bytes, PostgresRf3Protocol.OneColumn);
+        BinaryPrimitives.WriteInt16BigEndian(bytes, PostgresClusterProtocol.OneColumn);
         name.CopyTo(bytes, sizeof(short));
         var offset = sizeof(short) + name.Length + sizeof(int) + sizeof(short);
         BinaryPrimitives.WriteInt32BigEndian(bytes.AsSpan(offset), PostgresPortalOwnershipProtocol.JsonbOid);

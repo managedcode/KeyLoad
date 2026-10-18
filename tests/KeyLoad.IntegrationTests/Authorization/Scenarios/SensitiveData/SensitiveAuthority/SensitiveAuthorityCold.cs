@@ -42,7 +42,7 @@ internal static class SensitiveAuthorityCold
             await Assert.That(after[node].Applied).IsGreaterThanOrEqualTo(before[node].Applied);
             await Assert.That(after[node].RoutingReady).IsTrue();
         }
-        await SqlRf3Protocol.EqualAsync(image, await ImageAsync(fixture, state, token));
+        await SqlClusterProtocol.EqualAsync(image, await ImageAsync(fixture, state, token));
         await SensitiveAuthorityClients.RunAsync(fixture, state.Identity.Secret, async (root, reader, session) =>
         {
             await SensitiveAuthorityContinuation.CurrentAsync(root, reader, session, state, token);

@@ -18,7 +18,7 @@ internal static class DeclarativeCompositionBudgetFlow
     private const long InitialRevision = 1;
 
     internal static async Task<DeclarativeCompositionBudgetState> RunAsync(KeyLoadClient sdk, McpOfficialClient mcp,
-        RelationalSqlRf3Scenario scenario, QueueGraphLink link, CancellationToken token)
+        RelationalSqlClusterScenario scenario, QueueGraphLink link, CancellationToken token)
     {
         foreach (var (name, kind) in new[] { (Queue, ResourceKind.WorkQueue), (Graph, ResourceKind.Graph) })
         {
@@ -42,8 +42,8 @@ internal static class DeclarativeCompositionBudgetFlow
             await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SqlOperationProtocol.ToolName, refusedSql, token),
                 ErrorCode.BudgetExceeded, dispatched: true);
             await Assert.That((await GraphAsync(sdk, scenario, token)).Edges).IsEmpty();
-            await SqlRf3Protocol.EqualAsync(beforeFirst, await MessageAsync(sdk, scenario.Partition, First, token));
-            await SqlRf3Protocol.EqualAsync(beforeSecond, await MessageAsync(sdk, scenario.Partition, Second, token));
+            await SqlClusterProtocol.EqualAsync(beforeFirst, await MessageAsync(sdk, scenario.Partition, First, token));
+            await SqlClusterProtocol.EqualAsync(beforeSecond, await MessageAsync(sdk, scenario.Partition, Second, token));
         }
         var exactMutation = limitedMutation with
         {
@@ -51,11 +51,11 @@ internal static class DeclarativeCompositionBudgetFlow
         };
         var exact = scenario.Command(exactMutation);
         var healthySql = DeclarativeCompositionSql.Forward(exact, exactMutation);
-        var receipt = await SqlRf3Protocol.SdkAsync<CommitReceipt>(sdk, healthySql, token);
+        var receipt = await SqlClusterProtocol.SdkAsync<CommitReceipt>(sdk, healthySql, token);
         await Assert.That(receipt.CommandId).IsEqualTo(exact.CommandId);
         await Assert.That(receipt.Mutations.Length).IsEqualTo(ExactMaximum);
-        await SqlRf3Protocol.EqualAsync(receipt, await SqlRf3Protocol.McpAsync<CommitReceipt>(mcp, healthySql, token));
-        await SqlRf3Protocol.EqualAsync(receipt, await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(exact, token)));
+        await SqlClusterProtocol.EqualAsync(receipt, await SqlClusterProtocol.McpAsync<CommitReceipt>(mcp, healthySql, token));
+        await SqlClusterProtocol.EqualAsync(receipt, await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(exact, token)));
         var graph = await GraphAsync(sdk, scenario, token);
         await Assert.That(graph.Edges.Select(edge => edge.Id).SequenceEqual(new[] { Prefix + First, Prefix + Second })).IsTrue();
         foreach (var edge in graph.Edges)
@@ -66,34 +66,34 @@ internal static class DeclarativeCompositionBudgetFlow
             await Assert.That(edge.AttributesJson).IsEqualTo(link.AttributesJson);
             await Assert.That(edge.Revision).IsEqualTo(InitialRevision);
         }
-        await SqlRf3Protocol.EqualAsync(beforeFirst, await MessageAsync(sdk, scenario.Partition, First, token));
-        await SqlRf3Protocol.EqualAsync(beforeSecond, await MessageAsync(sdk, scenario.Partition, Second, token));
+        await SqlClusterProtocol.EqualAsync(beforeFirst, await MessageAsync(sdk, scenario.Partition, First, token));
+        await SqlClusterProtocol.EqualAsync(beforeSecond, await MessageAsync(sdk, scenario.Partition, Second, token));
         return new(limited, exact, receipt, beforeFirst, beforeSecond, graph);
     }
 
-    internal static async Task ColdAsync(global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsRf3Callers callers, RelationalSqlRf3Scenario scenario,
+    internal static async Task ColdAsync(global::KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers callers, RelationalSqlClusterScenario scenario,
         DeclarativeCompositionBudgetState state, CancellationToken token)
     {
         var exact = (QueueToGraph)state.Command.Mutations[0];
         var sql = DeclarativeCompositionSql.Forward(state.Command, exact);
-        await SqlRf3Protocol.EqualAsync(state.Receipt, await SqlRf3Protocol.SdkAsync<CommitReceipt>(callers.Sdk, sql, token));
-        await SqlRf3Protocol.EqualAsync(state.Receipt, await SqlRf3Protocol.McpAsync<CommitReceipt>(callers.Mcp, sql, token));
-        await SqlRf3Protocol.EqualAsync(state.Graph, await GraphAsync(callers.Sdk, scenario, token));
-        await SqlRf3Protocol.EqualAsync(state.First, await MessageAsync(callers.Sdk, scenario.Partition, First, token));
-        await SqlRf3Protocol.EqualAsync(state.Second, await MessageAsync(callers.Sdk, scenario.Partition, Second, token));
+        await SqlClusterProtocol.EqualAsync(state.Receipt, await SqlClusterProtocol.SdkAsync<CommitReceipt>(callers.Sdk, sql, token));
+        await SqlClusterProtocol.EqualAsync(state.Receipt, await SqlClusterProtocol.McpAsync<CommitReceipt>(callers.Mcp, sql, token));
+        await SqlClusterProtocol.EqualAsync(state.Graph, await GraphAsync(callers.Sdk, scenario, token));
+        await SqlClusterProtocol.EqualAsync(state.First, await MessageAsync(callers.Sdk, scenario.Partition, First, token));
+        await SqlClusterProtocol.EqualAsync(state.Second, await MessageAsync(callers.Sdk, scenario.Partition, Second, token));
         var limited = DeclarativeCompositionSql.Forward(state.Refused, (QueueToGraph)state.Refused.Mutations[0]);
         var refused = await callers.Sdk.ExecuteSqlAsync(limited, token);
         await Assert.That(refused.IsFailed).IsTrue();
         await Assert.That(refused.Problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.BudgetExceeded));
         await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, limited, token),
             ErrorCode.BudgetExceeded, dispatched: true);
-        await SqlRf3Protocol.EqualAsync(state.Graph, await GraphAsync(callers.Sdk, scenario, token));
-        await SqlRf3Protocol.EqualAsync(state.First, await MessageAsync(callers.Sdk, scenario.Partition, First, token));
-        await SqlRf3Protocol.EqualAsync(state.Second, await MessageAsync(callers.Sdk, scenario.Partition, Second, token));
+        await SqlClusterProtocol.EqualAsync(state.Graph, await GraphAsync(callers.Sdk, scenario, token));
+        await SqlClusterProtocol.EqualAsync(state.First, await MessageAsync(callers.Sdk, scenario.Partition, First, token));
+        await SqlClusterProtocol.EqualAsync(state.Second, await MessageAsync(callers.Sdk, scenario.Partition, Second, token));
     }
 
     private static Task<global::KeyLoad.GraphTraversal> GraphAsync(KeyLoadClient sdk,
-        RelationalSqlRf3Scenario scenario, CancellationToken token)
+        RelationalSqlClusterScenario scenario, CancellationToken token)
         => ReadGraphAsync(sdk, new(scenario.Partition, Graph, scenario.First), token);
 
     private static async Task<global::KeyLoad.GraphTraversal> ReadGraphAsync(KeyLoadClient sdk,
@@ -106,7 +106,7 @@ internal static class DeclarativeCompositionBudgetFlow
         var message = await PublicReadAssertions.MessageAsync(await sdk.InspectAsync(new(new(partition, Queue), id), token));
         await Assert.That(message).IsNotNull();
         await Assert.That(message!.Metadata.State).IsEqualTo(MessageState.Ready);
-        await Assert.That(message.Metadata.Attempts).IsEqualTo(RelationalSqlRf3Tokens.NoResults);
+        await Assert.That(message.Metadata.Attempts).IsEqualTo(RelationalSqlClusterTokens.NoResults);
         await Assert.That(message.Metadata.LeaseOwner).IsNull();
         return message;
     }

@@ -1,5 +1,4 @@
 using KeyLoad.Core.Features.BackupRestore.Execution;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Execution;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
 using KeyLoad.Core.Features.InternalSerialization;
@@ -11,11 +10,8 @@ namespace KeyLoad.Core;
 public sealed partial class DatabaseEngine
 {
     private void RequireOriginalEffectAdmission(AtomicPartitionRosterTransaction transaction,
-        PrincipalRecord principal, ReplicatedOperation operation, CommandOutcomePartitionScope scope)
-    {
-        RequireResourceEffectAdmission(transaction, principal, operation);
-        RequireNoPartitionMovementFence(transaction, operation, scope);
-    }
+        PrincipalRecord principal, ReplicatedOperation operation)
+        => RequireResourceEffectAdmission(transaction, principal, operation);
 
     private void RequireResourceEffectAdmission(AtomicPartitionRosterTransaction transaction,
         PrincipalRecord principal, ReplicatedOperation operation)
@@ -35,7 +31,7 @@ public sealed partial class DatabaseEngine
         ObserveAdditionalResourceEffects(observed, principal, operation);
         if (RequiresCompositionEffectCapture(operation))
         {
-            transaction.EffectAdmission.ActivateOriginalBindings(CompositionAdmissionView(observed, operation), admission,
+            transaction.EffectAdmission.ActivateOriginalBindings(observed, admission,
                 lifetime => RequireCompositionEndpointPolicy(principal, operation, lifetime));
         }
         else
@@ -95,7 +91,7 @@ public sealed partial class DatabaseEngine
             {
                 try
                 {
-                    current.ActivateOriginalBindings(CompositionAdmissionView(observed, operation), admission,
+                    current.ActivateOriginalBindings(observed, admission,
                         lifetime => RequireCompositionEndpointPolicy(principal, operation, lifetime));
                 }
                 catch (KeyLoadException denial) when (denial.Code == ErrorCode.PermissionDenied)

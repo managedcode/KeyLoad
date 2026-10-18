@@ -17,9 +17,9 @@ public sealed partial class DatabaseEngine
             : PhysicalShardCatalogRecordSerialization.Read(view, grant))
             ?? throw Errors.Fail(ErrorCode.NotFound, MissingPhysicalCatalog);
         PhysicalShardCatalogValidation.ValidateCatalog(catalog);
-        var sourcePlacement = ResolveGraphPlacement(view, source, catalog.DefaultShard, grant);
+        var sourcePlacement = ResolvePlacement(source, catalog.DefaultShard);
         var destinationPlacement = source == destination ? sourcePlacement
-            : ResolveGraphPlacement(view, destination, catalog.DefaultShard, grant);
+            : ResolvePlacement(destination, catalog.DefaultShard);
         if (sourcePlacement.PhysicalShardId != destinationPlacement.PhysicalShardId
             || sourcePlacement.Incarnation != destinationPlacement.Incarnation
             || sourcePlacement.PlacementEpoch != destinationPlacement.PlacementEpoch
@@ -31,18 +31,5 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, ForeignPlacementExecution);
         }
-    }
-
-    private static AtomicPartitionPlacementResolution ResolveGraphPlacement(IKeyValueView view,
-        PartitionRef partition, PhysicalShardRecord defaultShard, ReadExecutionBudgetReadGrant? grant)
-    {
-        var directory = grant is null ? AtomicPartitionPlacementSerialization.ReadDirectory(view)
-            : AtomicPartitionPlacementSerialization.ReadDirectory(view, grant);
-        var row = grant is null ? AtomicPartitionPlacementSerialization.ReadRow(view, partition)
-            : AtomicPartitionPlacementSerialization.ReadRow(view, partition, grant);
-        var owner = row is null ? defaultShard
-            : ResolveRegisteredPlacementOwner(view, defaultShard, row.PhysicalShardId,
-                ErrorCode.Corruption, grant);
-        return ResolvePlacement(partition, owner, directory, row);
     }
 }

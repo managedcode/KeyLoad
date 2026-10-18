@@ -98,8 +98,8 @@ internal sealed class RequestCqrsResourceCompletionEvidence
         if (stage == RequestCqrsLifecycleStage.CaptureDrain)
         {
             ServerFailureObserver.Observe(() => FailDrain(cancellationToken.IsCancellationRequested,
-                statusFor(RequestCqrsRf3Protocol.Node1), statusFor(RequestCqrsRf3Protocol.Node2),
-                statusFor(RequestCqrsRf3Protocol.Node3)), observationFailures);
+                statusFor(RequestCqrsClusterProtocol.Node1), statusFor(RequestCqrsClusterProtocol.Node2),
+                statusFor(RequestCqrsClusterProtocol.Node3)), observationFailures);
         }
         ServerFailureObserver.Observe(() => failureObserver?.Invoke(stage), observationFailures);
         ServerFailureObserver.ThrowIfAny(observationFailures);
@@ -108,8 +108,8 @@ internal sealed class RequestCqrsResourceCompletionEvidence
     internal void RecordOriginalJoin(bool captureCanceled, Func<string, TaskStatus?> statusFor,
         List<Exception> failures, Action<RequestCqrsLifecycleStage>? failureObserver, RequestCqrsLifecycleStage stage)
         => RequestCqrsLifecycleFailureObserver.Observe(() => JoinOriginal(captureCanceled,
-            statusFor(RequestCqrsRf3Protocol.Node1), statusFor(RequestCqrsRf3Protocol.Node2),
-            statusFor(RequestCqrsRf3Protocol.Node3)), failures, failureObserver, stage);
+            statusFor(RequestCqrsClusterProtocol.Node1), statusFor(RequestCqrsClusterProtocol.Node2),
+            statusFor(RequestCqrsClusterProtocol.Node3)), failures, failureObserver, stage);
 
     internal RequestCqrsCleanupCompletionSnapshot Snapshot()
         => new(node1, node2, node3, drain);
@@ -135,9 +135,9 @@ internal sealed class RequestCqrsResourceCompletionEvidence
 
     private RequestCqrsCompletionCallSnapshot ReadCompletion(string node) => node switch
     {
-        RequestCqrsRf3Protocol.Node1 => node1,
-        RequestCqrsRf3Protocol.Node2 => node2,
-        RequestCqrsRf3Protocol.Node3 => node3,
+        RequestCqrsClusterProtocol.Node1 => node1,
+        RequestCqrsClusterProtocol.Node2 => node2,
+        RequestCqrsClusterProtocol.Node3 => node3,
         _ => throw new ArgumentOutOfRangeException(nameof(node))
     };
 
@@ -145,13 +145,13 @@ internal sealed class RequestCqrsResourceCompletionEvidence
     {
         switch (node)
         {
-            case RequestCqrsRf3Protocol.Node1:
+            case RequestCqrsClusterProtocol.Node1:
                 node1 = value;
                 break;
-            case RequestCqrsRf3Protocol.Node2:
+            case RequestCqrsClusterProtocol.Node2:
                 node2 = value;
                 break;
-            case RequestCqrsRf3Protocol.Node3:
+            case RequestCqrsClusterProtocol.Node3:
                 node3 = value;
                 break;
             default:
@@ -162,12 +162,12 @@ internal sealed class RequestCqrsResourceCompletionEvidence
     private RequestCqrsCompletionCallSnapshot ReadScopeCompletion(RequestCqrsScopeCompletionOwner owner,
         string node) => (owner, node) switch
         {
-            (RequestCqrsScopeCompletionOwner.Explicit, RequestCqrsRf3Protocol.Node1) => scope.ExplicitNode1,
-            (RequestCqrsScopeCompletionOwner.Explicit, RequestCqrsRf3Protocol.Node2) => scope.ExplicitNode2,
-            (RequestCqrsScopeCompletionOwner.Explicit, RequestCqrsRf3Protocol.Node3) => scope.ExplicitNode3,
-            (RequestCqrsScopeCompletionOwner.Batch, RequestCqrsRf3Protocol.Node1) => scope.BatchNode1,
-            (RequestCqrsScopeCompletionOwner.Batch, RequestCqrsRf3Protocol.Node2) => scope.BatchNode2,
-            (RequestCqrsScopeCompletionOwner.Batch, RequestCqrsRf3Protocol.Node3) => scope.BatchNode3,
+            (RequestCqrsScopeCompletionOwner.Explicit, RequestCqrsClusterProtocol.Node1) => scope.ExplicitNode1,
+            (RequestCqrsScopeCompletionOwner.Explicit, RequestCqrsClusterProtocol.Node2) => scope.ExplicitNode2,
+            (RequestCqrsScopeCompletionOwner.Explicit, RequestCqrsClusterProtocol.Node3) => scope.ExplicitNode3,
+            (RequestCqrsScopeCompletionOwner.Batch, RequestCqrsClusterProtocol.Node1) => scope.BatchNode1,
+            (RequestCqrsScopeCompletionOwner.Batch, RequestCqrsClusterProtocol.Node2) => scope.BatchNode2,
+            (RequestCqrsScopeCompletionOwner.Batch, RequestCqrsClusterProtocol.Node3) => scope.BatchNode3,
             _ => throw new ArgumentOutOfRangeException(nameof(node))
         };
 
@@ -175,12 +175,12 @@ internal sealed class RequestCqrsResourceCompletionEvidence
         string node, RequestCqrsCompletionCallSnapshot value)
         => (owner, node) switch
         {
-            (RequestCqrsScopeCompletionOwner.Explicit, RequestCqrsRf3Protocol.Node1) => scope with { ExplicitNode1 = value },
-            (RequestCqrsScopeCompletionOwner.Explicit, RequestCqrsRf3Protocol.Node2) => scope with { ExplicitNode2 = value },
-            (RequestCqrsScopeCompletionOwner.Explicit, RequestCqrsRf3Protocol.Node3) => scope with { ExplicitNode3 = value },
-            (RequestCqrsScopeCompletionOwner.Batch, RequestCqrsRf3Protocol.Node1) => scope with { BatchNode1 = value },
-            (RequestCqrsScopeCompletionOwner.Batch, RequestCqrsRf3Protocol.Node2) => scope with { BatchNode2 = value },
-            (RequestCqrsScopeCompletionOwner.Batch, RequestCqrsRf3Protocol.Node3) => scope with { BatchNode3 = value },
+            (RequestCqrsScopeCompletionOwner.Explicit, RequestCqrsClusterProtocol.Node1) => scope with { ExplicitNode1 = value },
+            (RequestCqrsScopeCompletionOwner.Explicit, RequestCqrsClusterProtocol.Node2) => scope with { ExplicitNode2 = value },
+            (RequestCqrsScopeCompletionOwner.Explicit, RequestCqrsClusterProtocol.Node3) => scope with { ExplicitNode3 = value },
+            (RequestCqrsScopeCompletionOwner.Batch, RequestCqrsClusterProtocol.Node1) => scope with { BatchNode1 = value },
+            (RequestCqrsScopeCompletionOwner.Batch, RequestCqrsClusterProtocol.Node2) => scope with { BatchNode2 = value },
+            (RequestCqrsScopeCompletionOwner.Batch, RequestCqrsClusterProtocol.Node3) => scope with { BatchNode3 = value },
             _ => throw new ArgumentOutOfRangeException(nameof(node))
         };
 

@@ -7,7 +7,7 @@ namespace KeyLoad.AppHost.Features.ClusterReplication;
 /// <summary>Reads the explicit local-development image identity without weakening GitHub image parsing.</summary>
 internal sealed partial record LocalDevelopmentContainerImage(string Reference, string Tag, string ReceiptPath)
 {
-    private const string LocalImageReceiptPrefix = "TestResults/rf3/local-images/image-";
+    private const string LocalImageReceiptPrefix = "TestResults/cluster/local-images/image-";
     private const string JsonFileSuffix = ".json";
 
     private const int HasInvalidImageIdentityStructuralValue = 0;
@@ -16,7 +16,7 @@ internal sealed partial record LocalDevelopmentContainerImage(string Reference, 
 
     private const string EnabledValue = "true";
 
-    private const string Invalid = "Local RF3 container image configuration is invalid.";
+    private const string Invalid = "Local CLUSTER container image configuration is invalid.";
     private const string TagPrefix = "local-";
     internal const string Repository = "keyload/local-server";
 
@@ -58,7 +58,7 @@ internal sealed partial record LocalDevelopmentContainerImage(string Reference, 
             || HasConflictingImageSelectors(builder);
 
     private static bool HasInvalidImageIdentity(string? provenance, string? reference, string? receiptPath, string? child, Microsoft.Extensions.Options.IOptions<ContainerImageExecutionOptions> options)
-        => provenance != LocalRf3ImageExecution.Provenance || reference is null || receiptPath is null
+        => provenance != LocalClusterImageExecution.Provenance || reference is null || receiptPath is null
             || child != EnabledValue
             || reference!.Length > options.Value.MaximumLocalImageCharacters
             || !new Regex(LocalDevelopmentContainerImageMetadataName, RegexOptions.CultureInvariant, options.Value.MatchTimeout).IsMatch(reference)

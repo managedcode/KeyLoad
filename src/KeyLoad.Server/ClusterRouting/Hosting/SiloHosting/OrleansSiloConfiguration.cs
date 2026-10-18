@@ -15,11 +15,11 @@ internal static class OrleansSiloConfiguration
         var options = nodeOptions.Value;
         options.Validate();
         var replica = new ReplicaConfigurationFactory(nodeOptions).Create(Options.DefaultName);
-        OrleansNativePeerServices.RegisterSiloOwners(builder, options, localhostClustering);
+        OrleansNativePeerServices.RegisterSiloOwners(builder, localhostClustering);
         OrleansMovementServiceRegistration.Register(builder.Services, options);
         OrleansPartitionServiceRegistration.Register(builder.Services, options);
         OrleansPartitionRuntimeRegistration.Register(builder.Services);
-        OrleansRequestServiceRegistration.Register(builder.Services, options);
+        OrleansRequestServiceRegistration.Register(builder.Services);
         builder.UseOrleans(silo => Configure(silo, options, replica, address, localhostClustering));
         OrleansNativeHostedServiceRegistration.Guard(builder.Services);
     }
@@ -39,10 +39,6 @@ internal static class OrleansSiloConfiguration
         silo.AddGrainService<PartitionMovementGrainService>();
         silo.AddGrainService<global::KeyLoad.Server.Features.DocumentStorage.RemoteModelGrainService>();
         silo.AddGrainService<global::KeyLoad.Server.Features.GraphTraversal.RemoteGraphGrainService>();
-        if (options.RequestCqrsProbe.Enabled)
-        {
-            silo.AddGrainService<RequestCqrsProbeGrainService>();
-        }
         silo.AddGrainService<RecurringDueGrainService>();
         silo.AddGrainService<SampleChunkGrainService>();
         silo.AddGrainService<AnnProjectionGrainService>();
@@ -55,7 +51,7 @@ internal static class OrleansSiloConfiguration
 #pragma warning disable ORLEANSEXP001
         silo.AddActivationRepartitioner();
 #pragma warning restore ORLEANSEXP001
-        ConnectionGrainGraphRegistration.Register(silo, options.RequestCqrsProbe.Enabled);
+        ConnectionGrainGraphRegistration.Register(silo);
         NativeRuntimeJournalRegistration.Register(silo);
         EventFeedNativeProviderRegistration.Register(silo);
     }

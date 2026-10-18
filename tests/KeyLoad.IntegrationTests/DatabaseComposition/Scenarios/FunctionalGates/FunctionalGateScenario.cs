@@ -20,7 +20,7 @@ internal static class FunctionalGateScenario
     }
 
     private static Task<bool> ExecuteAsync(FunctionalGateFixture fixture, CancellationToken token)
-        => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, fixture.NodeNames[0], fixture.AdminKey, async administrator =>
+        => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, fixture.NodeNames[0], fixture.AdminKey, async administrator =>
         {
             var suffix = Guid.NewGuid().ToString(FunctionalGateProtocol.GuidFormat);
             var partition = new PartitionRef(FunctionalGateProtocol.TenantPrefix + suffix,

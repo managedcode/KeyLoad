@@ -14,16 +14,10 @@ namespace KeyLoad.Server;
 /// <param name="runtimeOptions">The shared validated options snapshots.</param>
 /// <param name="clock">Borrowed runtime clock.</param>
 /// <param name="physicalOwnerWork">Borrowed physical-owner probe work joined before native teardown.</param>
-/// <param name="discoveryOmission">Optional native discovery observation.</param>
-/// <param name="partitionMovementNativeObserver">Optional original native movement observation.</param>
 internal sealed partial class OrleansNode(IServiceProvider applicationServices, IOptions<NodeOptions> nodeOptions,
     ILoggerFactory loggerFactory, ServerRuntimeOptions runtimeOptions, TimeProvider? clock = null,
-    PhysicalOwnerProbeWorkOwner? physicalOwnerWork = null,
-    NativeDiscoveryOmissionOwner? discoveryOmission = null,
-    IPartitionMovementNativeObserver? partitionMovementNativeObserver = null) : IAsyncDisposable
+    PhysicalOwnerProbeWorkOwner? physicalOwnerWork = null) : IAsyncDisposable
 {
-    internal NativeDiscoveryOmissionOwner? DiscoveryOmission => discoveryOmission;
-    internal IPartitionMovementNativeObserver? NativeMovementObservation => partitionMovementNativeObserver;
     private readonly Lock lifecycle = new();
     private readonly OrleansNodeRequestLifetime requestLifetime = new(runtimeOptions.GrainRouting);
     private readonly OrleansNodeLocalRuntime localRuntime = new(applicationServices, runtimeOptions,
@@ -38,7 +32,6 @@ internal sealed partial class OrleansNode(IServiceProvider applicationServices, 
     private Task? localPreparation;
     internal NativeRequestWorkOwner RequestWork => requestLifetime.Work;
     internal NativeConnectionOwnerIdentity ConnectionOwner => connectionOwner;
-    internal TenantPlacementNativeRuntime? TenantPlacementRuntime => localRuntime.TenantPlacement;
     internal global::KeyLoad.Server.Features.ResourceExecution.ResourceOwnerInventoryNativeRuntime? ResourceInventoryRuntime => localRuntime.ResourceInventory;
     private IGrainFactory? grains;
     private Task? shutdown;
@@ -47,7 +40,6 @@ internal sealed partial class OrleansNode(IServiceProvider applicationServices, 
     private Task? startup;
     private readonly OrleansNodeStartupWait startupWait = new();
     private readonly OrleansNodeDatabaseBootstrap databaseBootstrap = new();
-    internal PartitionMovementRuntime? Movement => localRuntime.Movement;
     internal RemoteDocumentRuntime? RemoteDocuments => localRuntime.Documents;
     private int siloJoined;
     internal global::KeyLoad.Server.Features.GraphTraversal.RemoteGraphNodeResources GraphResources => localRuntime.Graphs;
@@ -132,7 +124,6 @@ internal sealed partial class OrleansNode(IServiceProvider applicationServices, 
             localRuntime.AttachNativeReceivers();
             Volatile.Write(ref siloJoined, OrleansNodeProtocol.JoinedSilo);
             Volatile.Write(ref grains, applicationServices.GetRequiredService<IGrainFactory>());
-            localRuntime.StartPlacement();
         }
     }
 

@@ -56,7 +56,7 @@ internal static class EarlyAdmissionQualificationFlow
                     await ServerFailureObserver.ObserveAsync(async () =>
                     {
                         using var phase = McpCallerDeadline.Create();
-                        await ModelSqlRf3Cold.RunAsync(fixture, phase.Token);
+                        await ModelSqlClusterCold.RunAsync(fixture, phase.Token);
                         _ = await RootAsync(fixture, async root =>
                         {
                             await ReaderAsync(fixture, state, reader => HealthyAsync(root, reader, state, phase.Token), phase.Token);
@@ -68,18 +68,18 @@ internal static class EarlyAdmissionQualificationFlow
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
-    private static async Task HealthyAsync(RequestCqrsRf3Callers root, RequestCqrsRf3Callers reader,
+    private static async Task HealthyAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers reader,
         EarlyAdmissionQualificationState state, CancellationToken token)
     {
         await EarlyAdmissionQualificationReads.WaveAsync(root, reader, state, true, ErrorCode.Validation, false, token);
         await EarlyAdmissionQualificationReads.WaveAsync(root, reader, state, false, null, false, token);
         await EarlyAdmissionQualificationReplay.RunAsync(root, state, token);
     }
-    private static Task<T> RootAsync<T>(ClusterFixture fixture, Func<RequestCqrsRf3Callers, Task<T>> operation,
-        CancellationToken token) => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
+    private static Task<T> RootAsync<T>(ClusterFixture fixture, Func<RequestCqrsClusterCallers, Task<T>> operation,
+        CancellationToken token) => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
             fixture.AdminKey, operation, token);
     private static Task<bool> ReaderAsync(ClusterFixture fixture, EarlyAdmissionQualificationState state,
-        Func<RequestCqrsRf3Callers, Task> operation, CancellationToken token)
-        => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, state.Identity.Secret,
+        Func<RequestCqrsClusterCallers, Task> operation, CancellationToken token)
+        => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, state.Identity.Secret,
             async reader => { await operation(reader); return true; }, token);
 }

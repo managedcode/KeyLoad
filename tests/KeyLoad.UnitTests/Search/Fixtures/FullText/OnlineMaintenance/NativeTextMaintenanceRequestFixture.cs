@@ -14,7 +14,7 @@ internal static class NativeTextMaintenanceRequestFixture
                     [MutationDiscriminatorNames.PutDocument, MutationDiscriminatorNames.PatchDocument,
                         MutationDiscriminatorNames.DeleteDocument])), configureId, cancellationToken);
         var placement = database.Database.ReadAtomicPartitionPlacement(NativeTextMaintenanceTestValues.Principal,
-            new(NativeTextMaintenanceTestValues.PlacementVersion, database.Partition));
+            database.Partition);
         return new(Guid.NewGuid(), consumer, NativeTextBilingualAudit.Collection, NativeTextMaintenanceTestValues.Field,
             NativeTextMaintenanceTestValues.Generation, database.Store.Identity.NodeId,
             new(placement.PhysicalShardId, placement.Incarnation, placement.VoterIds, placement.PlacementEpoch),

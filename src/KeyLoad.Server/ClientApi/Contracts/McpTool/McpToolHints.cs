@@ -10,7 +10,6 @@ internal readonly record struct McpToolHints(bool ReadOnly, bool Idempotent, boo
 {
     internal static McpToolHints ForRead(GrainReadKind kind) => kind switch
     {
-        GrainReadKind.PlacementPolicy or GrainReadKind.PlacementPlan or GrainReadKind.PlacementIntent => new(true, true, false),
         GrainReadKind.FollowerDocument => new(true, true, false),
         GrainReadKind.Document => new(true, true, false),
         GrainReadKind.Stream => new(true, true, false),
@@ -48,7 +47,6 @@ internal readonly record struct McpToolHints(bool ReadOnly, bool Idempotent, boo
         GrainReadKind.NodeStatus => new(true, true, false),
         GrainReadKind.AdminDashboard or GrainReadKind.AdminResources or GrainReadKind.AdminQueue
             => new(true, true, false),
-        GrainReadKind.AtomicPartitionPlacement => new(true, true, false),
         GrainReadKind.BlobMetadata or GrainReadKind.BlobUploadInfo or GrainReadKind.BlobRange or GrainReadKind.BlobList
             => new(true, true, false),
         _ => throw new ArgumentOutOfRangeException(nameof(kind), McpCatalogProtocol.InvalidOperation)
@@ -58,11 +56,8 @@ internal readonly record struct McpToolHints(bool ReadOnly, bool Idempotent, boo
     {
         OperationKind.UpsertRemoteGraphEdge or OperationKind.DeleteRemoteGraphEdge or OperationKind.DeliverRemoteGraphEdge
             => new(false, true, true),
-        OperationKind.ConfigurePlacementPolicy or OperationKind.PersistPlacementIntent or OperationKind.ApplyPlacementIntent
-            => new(false, true, true),
         OperationKind.Batch => new(false, true, true),
         OperationKind.EventFeedControl => new(false, false, true),
-        OperationKind.MovePartition => new(false, true, true),
         OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex => new(false, false, true),
         OperationKind.MaintainOnlineTextIndex => new(false, true, true),
         OperationKind.ReceiveAcrossLanes => new(false, false, true),
@@ -86,7 +81,6 @@ internal readonly record struct McpToolHints(bool ReadOnly, bool Idempotent, boo
         OperationKind.CommitProjectionBatch => new(false, true, true),
         OperationKind.ReleaseProjectionConsumer => new(false, true, true),
         OperationKind.PurgeOutbox => new(false, true, true),
-        OperationKind.BindAtomicPartitionPlacement => new(false, true, false),
         OperationKind.BeginBlobUpload or OperationKind.WriteBlobPart or OperationKind.AbortBlobUpload
             => new(false, true, false),
         OperationKind.CompleteBlobUpload or OperationKind.DeleteBlob or OperationKind.ReclaimBlob

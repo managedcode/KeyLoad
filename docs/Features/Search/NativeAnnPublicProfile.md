@@ -1,6 +1,6 @@
 # Native ANN public maintenance profile
 
-Supplement to [Search](../Search.md), KL030/KL031/KL059.
+Supplement to [Search](../Search.md).
 
 ## Confirmed defect and requirements
 
@@ -23,4 +23,4 @@ flowchart LR
 
 ## Slice and gates
 
-Server: Search/Execution/Ann/NativeAnnPublicAcquisition.cs and Search/Lifecycle/Ann/NativeAnnPublicReadLease.cs. Unit: Search/Cases/NativeAnnPublicProfileTests.cs and Search/Scenarios/Ann/Search/NativeAnnPublicProfileFlow.cs. Existing Search fixtures and assertions remain authoritative. The complete source is joined; current-source compiler, public SDK/MCP and Docker/Aspire RF3, recovery, cancellation/resource and Linux exact-source execution gates remain OPEN. Source closure is not a runtime receipt or performance measurement. No Core policy, snapshot, manifest, schema, authorization or live-query implementation is replaced.
+Server: Search/Execution/Ann/NativeAnnPublicAcquisition.cs and Search/Lifecycle/Ann/NativeAnnPublicReadLease.cs. Unit: Search/Cases/NativeAnnPublicProfileTests.cs and Search/Scenarios/Ann/Search/NativeAnnPublicProfileFlow.cs. Existing Search fixtures and assertions remain authoritative. Source closure is not a runtime receipt or performance measurement. No Core policy, snapshot, manifest, schema, authorization or live-query implementation is replaced.

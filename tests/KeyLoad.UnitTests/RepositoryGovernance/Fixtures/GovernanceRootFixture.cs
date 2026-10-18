@@ -1,18 +1,19 @@
-using System.Text.Json;
+using System.Xml.Linq;
 
 namespace KeyLoad.UnitTests.Features.RepositoryGovernance;
 
 internal sealed class GovernanceRootFixture : IDisposable
 {
-    private const string RecordPath = "docs/implementation/mcaf-installation.json";
+    private const string SolutionPath = "KeyLoad.slnx";
     private const string GovernanceFeature = "docs/Features/RepositoryGovernance.md";
     private const string GovernanceAdr = "docs/ADR/ADR-032-mcaf-governance.md";
     private const string Architecture = "docs/Architecture.md";
     private const string RootPolicy = "AGENTS.md";
     private const string LocalPolicy = "AGENTS.md";
-    private const string ProjectsField = "projects";
-    private const string ModulesField = "modules";
+    private const string ProjectElement = "Project";
+    private const string PathAttribute = "Path";
     private const string TemporaryDirectoryPrefix = "keyload-governance-";
+    private static readonly string[] ModulePaths = ["docs", "site", "scripts", ".github/workflows", "analyzers", "build"];
 
     private GovernanceRootFixture(string root) => Root = root;
 
@@ -30,14 +31,13 @@ internal sealed class GovernanceRootFixture : IDisposable
                 $"{TemporaryDirectoryPrefix}{Guid.NewGuid():N}"));
             Directory.CreateDirectory(fixture.Root);
             var source = GovernanceNodeProcess.RepositoryRoot;
-            using var record = JsonDocument.Parse(await File.ReadAllTextAsync(
-                Path.Combine(source, RecordPath), cancellationToken));
+            var solution = XDocument.Load(Path.Combine(source, SolutionPath));
             var paths = new HashSet<string>(StringComparer.Ordinal)
             {
-                RecordPath, RootPolicy, GovernanceFeature, GovernanceAdr, Architecture
+                SolutionPath, RootPolicy, GovernanceFeature, GovernanceAdr, Architecture
             };
-            AddProjectPaths(record.RootElement, paths);
-            AddModulePaths(record.RootElement, paths);
+            AddProjectPaths(solution, paths);
+            AddModulePaths(paths);
             await fixture.CopyRequiredFilesAsync(source, paths, cancellationToken);
             var completed = fixture;
             fixture = null;
@@ -60,21 +60,21 @@ internal sealed class GovernanceRootFixture : IDisposable
         }
     }
 
-    private static void AddProjectPaths(JsonElement record, HashSet<string> paths)
+    private static void AddProjectPaths(XDocument solution, HashSet<string> paths)
     {
-        foreach (var project in record.GetProperty(ProjectsField).EnumerateArray())
+        foreach (var project in solution.Descendants(ProjectElement))
         {
-            var path = project.GetString()!;
+            var path = project.Attribute(PathAttribute)!.Value;
             paths.Add(path);
             paths.Add(Path.Combine(Path.GetDirectoryName(path)!, LocalPolicy));
         }
     }
 
-    private static void AddModulePaths(JsonElement record, HashSet<string> paths)
+    private static void AddModulePaths(HashSet<string> paths)
     {
-        foreach (var module in record.GetProperty(ModulesField).EnumerateArray())
+        foreach (var module in ModulePaths)
         {
-            paths.Add(Path.Combine(module.GetString()!, LocalPolicy));
+            paths.Add(Path.Combine(module, LocalPolicy));
         }
     }
 

@@ -70,7 +70,7 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentFenceChanged);
         }
-        var placement = ResolveRegisteredPlacement(view, reference.Partition, catalog.DefaultShard);
+        var placement = ResolveRegisteredPlacement(reference.Partition, catalog.DefaultShard);
         if (placement.PhysicalShardId == catalog.DefaultShard.PhysicalShardId)
         {
             return null;
@@ -78,7 +78,6 @@ public sealed partial class DatabaseEngine
         var directory = PhysicalOwnerDirectorySerialization.Read(view)
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentFenceChanged);
         var destination = directory.Owners.Single(entry => entry.Owner.PhysicalShardId == placement.PhysicalShardId);
-        RequireNoUnpublishedPartitionMoveTarget(view, reference.Partition);
         // This source cut supplies authorization metadata for the admitted remote data owner.
         var resource = BindResourceDefinition(view, reference.Partition, reference.Collection, ResourceKind.Collection);
         var coverage = PartitionControlLifetimeCoverage.Capture(view, reference.Partition, [resource], Limits.MaxBatchBytes);

@@ -1,6 +1,6 @@
 # ADR-005: Canonical namespaces and ordered key codec
 
-Status: Accepted; KL-007 v1 codec and captured-envelope criteria implemented and Linux-qualified. Resource-family and full StorageRecovery qualification remain open. Related current source: `src/KeyLoad.Abstractions/Storage/Serialization/KeyCodec.cs` and `src/KeyLoad.Core/KeySpace.cs`; product source [sections 4, 7–9, 18, and 36](../design/architecture-v0.3.uk.md).
+Status: Accepted; v1 codec and captured-envelope criteria implemented and Linux-qualified. Resource-family and full StorageRecovery qualification remain open. Related current source: `src/KeyLoad.Abstractions/Storage/Serialization/KeyCodec.cs` and `src/KeyLoad.Core/KeySpace.cs`; product source [sections 4, 7–9, 18, and 36](../design/product-specification.md).
 
 ## Context and decision
 
@@ -33,13 +33,13 @@ flowchart LR
     Codec --> Golden[Golden encoding vectors]
 ```
 
-## 2026-10-04 v1 validation and ownership completion
+## v1 validation and ownership
 
-KL-007 adds REQ-KEYCODEC-001..004 and AC-KEYCODEC-001..004 in
+This decision adds REQ-KEYCODEC-001..004 and AC-KEYCODEC-001..004 in
 [StorageRecovery](../Features/StorageRecovery.md). This freezes validation of
 the existing format; every byte emitted for a supported valid existing key
 remains unchanged. Identity digests, native aliases/Ids, current data epoch7, journals,
-RF3 and public wire DTOs remain unchanged. Unsupported data epochs fail closed.
+cluster and public wire DTOs remain unchanged. Unsupported data epochs fail closed.
 
 The v1 type order is missing10, null11, bool20, int64/normalized int30, decimal31,
 finite double32, UTC timestamp40, UTF-8 string50, and byte array60 (hex tags).
@@ -68,9 +68,7 @@ representability checks. Both parse-text construction and parsing must use
 InvariantCulture: a changed CurrentCulture or custom non-ASCII negative sign
 cannot change a durable key's meaning. Pin literal positive/negative fractional
 decimal v1 vectors and decode them under such a culture, restoring the caller's
-culture in finally. TASK-KEYCODEC-CULTURE assigns only this invariant construction
-and new KeyCodecCultureContractTests to query_wave Luna/high before the final
-normal/scalar/recovery source freeze. Do not add a duplicate decimal serializer or re-encode
+culture in finally. Do not add a duplicate decimal serializer or re-encode
 every decoded key. Keep successful hot paths free of new full-envelope copies.
 Invalid UTF text and timestamps use narrow validation; never retain offending
 data in an error or relax existing malformed guards.
@@ -83,74 +81,8 @@ is an independently owned copy; this does not promise a deeply immutable CLR
 backing array. Test the actual authoritative storage isolation, native envelope
 roundtrip and reopen, rather than changing those carriers or adding a new API.
 
-Ordered implementation: root freezes this contract, feature mapping and task
-graph; query_wave Luna/high owns only KeyCodec.cs, KeyCodecDecimal.cs,
-KeyCodecReadPrimitives.cs and cohesive new Features/StorageRecovery/KeyCodec*
-validation helpers if needed; lifecycle_wave Luna/high owns new KeyCodec*
-UnitTests/Features/StorageRecovery corpus, malformed, golden and real-store
-ownership tests; root reviews every diff and joins full build/formatter,
-Aspire normal/scalar/recovery and exact-source Linux/RF3 originals.
-Existing10,000 decimal cases and all golden vectors remain intact; add an
-independent10,000 generated mixed-type/composite corpus and literal corruption
-vectors. No skips, mock provider, suppressed diagnostic or altered tolerance.
-
 Rollout is a homogeneous current-format build after qualification. No canonical
 writer output changes, rewrite or dual-version reader is allowed. Rollback
 restores prior validation while preserving valid durable keys; its malformed
 exception leaks remain explicitly unqualified. SDK/MCP/frontend changes N/A:
 unchanged database operations. Dependency repair N/A: the defect is KeyLoad-owned.
-
-The 2026-10-04 local receipt (report removed from repository)
-records14 new KeyCodec cases and4 original cases in unchanged full Aspire
-normal/scalar suites at2889/2889 each, recovery228/228 and1000 unique actual
-atomic process cuts. Literal fractional decimal goldens pass under invariant
-and custom-sign cultures. Exact delivered-source Linux/RF3 originals, endurance,
-power-loss and measured acceleration remain separate required gates.
-
-TASK-KEYCODEC-NATIVE-IDENTITY makes the existing exact-source Linux review
-concrete. The Build and Tests `verify` job prepares the unchanged native
-CodeQuality production-source manifest and test-image sidecars immediately
-after its Release solution build, runs the original normal/scalar/full-recovery
-commands, then verifies those same receipts and uploads them with the original
-reports. Root freezes and reviews this contract; the workflow owner changes only
-`.github/workflows/build-and-tests.yml` and joins on the existing
-`functional-coverage.production-source-manifest.ps1` prepare/verify calls. Review
-the 33 owned KL-007 source rows and original source/run/attempt/artifact provenance
-against the executed UnitTests and RecoveryTests DLL/PDB hashes, MVID,
-portable-PDB and compiler-source identities from that same build. A different
-job's rebuilt images cannot establish this binding. This adds no schema, binary
-archive, format change, test subset or new acceptance prerequisite. All18 mapped
-normal/scalar cases and the original unfiltered recovery stage must pass; other
-failures remain visible and RF3/endurance/power-loss gates remain separate.
-Verification comprises the existing native source-ownership regressions,
-workflow static checks, and the original Linux artifacts. Rollback removes only
-the additive workflow receipt steps; no storage or runtime rollback is needed.
-
-TASK-KEYCODEC-COVERAGE-GAPS implements the existing REQ/AC-KEYCODEC-002/003 in
-StorageRecovery. Root freezes the source-bound199/203 local line baseline and
-reviews the final join; cli_static_collection Luna owns only
-`UnitTests/Features/StorageRecovery/Cases/KeyCodecMalformedContractTests.cs`.
-First add independent persisted NaN/infinity, unterminated text/binary, invalid
-decimal digit and30-digit vectors to one whole rejection/unchanged-bytes/healthy
-roundtrip operation. Then build and execute the original native codec cases in
-normal/scalar mode and collect actual scoped coverage with unchanged source and
-test/product DLL/PDB identity. Root updates the real native case roster and
-retains current-source Linux normal/scalar and full recovery originals before
-KL-007 closure. Constant-only token files are executable-coverage N/A; a native
-report without branch outcomes cannot establish branch coverage. Keep the final
-decimal representability guard even if the preceding canonical-domain checks
-make it unreachable; coverage does not authorize altering the implementation or
-adding artificial private calls. Production storage/format/trust/topology and
-dependency changes are N/A. Rollback removes only the added regression flow.
-
-## KL-007 acceptance evidence, 2026-10-07
-
-[Linux run37554329420, verify job112576973966](https://github.com/managedcode/KeyLoad/actions/runs/37554329420/job/112576973966)
-at259a3fa5 passed19/19 mapped cases in each normal/scalar lane, the full2,765/2,765
-unit runs and235/235 process recovery. Native source/test-image identity
-verification passed after those suites. The33-file owned closure remains exact
-in the current checkout and is bound to original source/PDB/project-input rows.
-[StorageRecovery](../Features/StorageRecovery.md#kl-007-v1-key-and-captured-envelope-completion)
-and [status.json](../implementation/status.json) retain the criterion mapping,
-original artifact identities and hashes. KL-007 is complete; this receipt does
-not qualify full RF3, endurance, power-loss or measured acceleration.

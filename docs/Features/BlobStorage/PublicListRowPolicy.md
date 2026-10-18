@@ -8,17 +8,17 @@ AC-BLOB-LIST-ROW-002: persisted grants removal epoch4 must produce literal Permi
 
 ```mermaid
 sequenceDiagram
- Admin->>RF3: publish four real heads/parts
- Reader->>RF3: limit1 A pages b,d,empty
- Admin->>RF3: persist OwnerId B epoch3
- Reader->>RF3: first a / old b cursor c
- Admin->>RF3: remove grants epoch4
- Reader->>RF3: first and cursor PermissionDenied
- Admin->>RF3: complete metadata and literal ranges
- Admin->>RF3: repair grants/owner A epoch5
- Reader->>RF3: A pages b,d,empty
- Admin->>RF3: replay each original receipt
- Reader->>RF3: current A pages after each replay
+ Admin->>cluster: publish four real heads/parts
+ Reader->>cluster: limit1 A pages b,d,empty
+ Admin->>cluster: persist OwnerId B epoch3
+ Reader->>cluster: first a / old b cursor c
+ Admin->>cluster: remove grants epoch4
+ Reader->>cluster: first and cursor PermissionDenied
+ Admin->>cluster: complete metadata and literal ranges
+ Admin->>cluster: repair grants/owner A epoch5
+ Reader->>cluster: A pages b,d,empty
+ Admin->>cluster: replay each original receipt
+ Reader->>cluster: current A pages after each replay
 ```
 
-Source proposal only. One declared case, no Arguments, no inferred UID. Compiler, current-image census/runtime and exact-source Linux RF3 qualification remain OPEN. Public state observations are separate authorized reads, not an atomic canonical image, raw journal or cross-owner cut proof. Existing ClusterFixture and RunOwnedAsync own original Aspire resources and client failure/disposal joins. No shared fixture, protocol, policy implementation or product API change.
+Source proposal only. One declared case, no Arguments, no inferred UID. Compiler, current-image census/runtime and exact-source Linux cluster qualification remain OPEN. Public state observations are separate authorized reads, not an atomic canonical image, raw journal or cross-owner cut proof. Existing ClusterFixture and RunOwnedAsync own original Aspire resources and client failure/disposal joins. No shared fixture, protocol, policy implementation or product API change.

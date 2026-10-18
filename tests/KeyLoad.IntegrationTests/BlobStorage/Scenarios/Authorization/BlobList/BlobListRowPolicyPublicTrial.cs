@@ -11,26 +11,26 @@ internal static class BlobListRowPolicyPublicTrial
     internal const string OwnerB = "blob-list-owner-b";
 
     internal static Task<bool> RunAsync(ClusterFixture fixture, CancellationToken token)
-        => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
+        => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
             admin => SetupAsync(fixture, admin, token), token);
 
-    private static async Task<bool> SetupAsync(ClusterFixture fixture, RequestCqrsRf3Callers admin, CancellationToken token)
+    private static async Task<bool> SetupAsync(ClusterFixture fixture, RequestCqrsClusterCallers admin, CancellationToken token)
     {
-        var scenario = await RelationalSqlRf3Scenario.CreateAsync(admin.Sdk, token);
+        var scenario = await RelationalSqlClusterScenario.CreateAsync(admin.Sdk, token);
         var versions = await BlobListRowPolicyPublicPublication.CreateAsync(admin, scenario.Partition, token);
         var identity = await McpPersistedIdentity.CreateAsync(fixture, scenario.Partition,
-            RelationalSqlRf3Tokens.Blobs, Capability.BlobRead, token);
+            RelationalSqlClusterTokens.Blobs, Capability.BlobRead, token);
         var principal = await PersistAsync(admin, identity.Principal with
         {
             OwnerId = OwnerA,
             RestrictRows = true,
             PolicyEpoch = 2L
         }, token);
-        return await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, identity.Secret,
+        return await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, identity.Secret,
             reader => ExerciseAsync(admin, reader, principal, versions, token), token);
     }
 
-    private static async Task<bool> ExerciseAsync(RequestCqrsRf3Callers admin, RequestCqrsRf3Callers reader,
+    private static async Task<bool> ExerciseAsync(RequestCqrsClusterCallers admin, RequestCqrsClusterCallers reader,
         PrincipalRecord principal, BlobSupersessionPublicTrial.Version[] versions, CancellationToken token)
     {
         await BlobListRowPolicyPublicAssertions.OwnerAAsync(reader, versions, token);
@@ -59,10 +59,10 @@ internal static class BlobListRowPolicyPublicTrial
         return true;
     }
 
-    private static async Task<PrincipalRecord> PersistAsync(RequestCqrsRf3Callers admin, PrincipalRecord expected, CancellationToken token)
+    private static async Task<PrincipalRecord> PersistAsync(RequestCqrsClusterCallers admin, PrincipalRecord expected, CancellationToken token)
     {
         var actual = await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), expected, token));
-        await SqlRf3Protocol.EqualAsync(expected, actual);
+        await SqlClusterProtocol.EqualAsync(expected, actual);
         return actual;
     }
 }

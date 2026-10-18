@@ -28,7 +28,7 @@ internal static class QueryOnlyEpochR46Policy
             (grant.Capabilities & Capability.DocumentsRead) != 0)).IsTrue();
         var persisted = await McpCallerAssertions.SdkSuccessAsync(
             await administrator.ConfigurePrincipalAsync(Guid.NewGuid(), expected, token));
-        await SqlRf3Protocol.EqualAsync(expected, persisted);
+        await SqlClusterProtocol.EqualAsync(expected, persisted);
         return current with
         {
             Principal = persisted

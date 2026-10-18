@@ -5,7 +5,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 
 internal static class StrongReadSessionReads
 {
-    internal static async Task HealthyAsync(RequestCqrsRf3Callers root, RequestCqrsRf3Callers reader,
+    internal static async Task HealthyAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers reader,
         StrongReadSessionState state, CancellationToken token)
     {
         EntityRef[] references = [new(state.Partition, Collection, SentinelId),
@@ -18,7 +18,7 @@ internal static class StrongReadSessionReads
             }
         }
     }
-    private static async Task OneAsync(RequestCqrsRf3Callers root, RequestCqrsRf3Callers reader,
+    private static async Task OneAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers reader,
         StrongReadSessionState state, EntityRef reference, CommitToken minimum, CancellationToken token)
     {
         var expected = reference.Id == SentinelId
@@ -30,7 +30,7 @@ internal static class StrongReadSessionReads
                 reader, reference, minimum, expected, route, token), token);
         }
     }
-    internal static async Task InvalidAsync(RequestCqrsRf3Callers root, RequestCqrsRf3Callers reader,
+    internal static async Task InvalidAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers reader,
         StrongReadSessionState state, bool policyDenied, CancellationToken token)
     {
         var minimum = state.Commits.First().Receipt.Token;
@@ -45,7 +45,7 @@ internal static class StrongReadSessionReads
             }
         }
     }
-    private static async Task RejectRoutesAsync(RequestCqrsRf3Callers root, RequestCqrsRf3Callers reader,
+    private static async Task RejectRoutesAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers reader,
         StrongReadSessionState state, EntityRef reference, CommitToken minimum, ErrorCode code, string detail,
         CancellationToken token)
     {

@@ -6,7 +6,7 @@ namespace KeyLoad.Server.Features.ClusterRouting;
 internal static class OrleansNodeHostShutdown
 {
     internal static async Task JoinAsync(NativeRequestWorkOwner requestWork, IAsyncDisposable? administration,
-        RequestCqrsProbeNativeRelay? relay, RequestCqrsProbeObserver? observer, List<Exception> failures)
+        List<Exception> failures)
     {
         Task? drain = null;
         ServerFailureObserver.Observe(() => drain = requestWork.DrainAsync(), failures);
@@ -17,14 +17,6 @@ internal static class OrleansNodeHostShutdown
         if (drain is not null)
         {
             await ServerFailureObserver.ObserveAsync(() => drain, failures).ConfigureAwait(false);
-        }
-        if (relay is not null)
-        {
-            await ServerFailureObserver.ObserveAsync(relay.StopAsync, failures).ConfigureAwait(false);
-        }
-        if (observer is not null)
-        {
-            await ServerFailureObserver.ObserveAsync(() => observer.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         }
     }
 }

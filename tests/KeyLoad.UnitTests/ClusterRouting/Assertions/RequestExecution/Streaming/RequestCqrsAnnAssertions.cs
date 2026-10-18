@@ -19,7 +19,7 @@ internal static class RequestCqrsAnnAssertions
         CommitReceipt receipt, long position, MutationReceipt[] mutations)
     {
         var placement = database.Database.ReadAtomicPartitionPlacement(RequestCqrsAnnTestData.Principal,
-            new(RequestCqrsAnnTestData.Version, database.Partition));
+            database.Partition);
         var expected = new CommitReceipt(command.CommandId,
             new(database.Store.Identity.Incarnation, database.Partition.AtomicPartitionId, position, placement.PlacementEpoch),
             [.. mutations], database.Database.Durability);

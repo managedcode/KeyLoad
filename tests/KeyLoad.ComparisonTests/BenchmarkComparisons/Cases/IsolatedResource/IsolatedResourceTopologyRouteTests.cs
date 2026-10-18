@@ -18,7 +18,7 @@ internal sealed class IsolatedResourceTopologyRouteTests
     private const string ScaleProfileEnvironment = "Benchmarks__ScaleProfile";
     private const string EvidenceProfileEnvironment = "Benchmarks__EvidenceProfile";
 
-    /// <summary>AC-ISO-001/003: actual AppHost entry selects exact native KRN nodes before legacy RF3/TimeSeries.</summary>
+    /// <summary>AC-ISO-001/003: actual AppHost entry selects exact native KRN nodes before legacy CLUSTER/TimeSeries.</summary>
     [Test]
     [Arguments(KeyLoad, 1)]
     [Arguments(KeyLoad, 3)]
@@ -110,7 +110,7 @@ internal sealed class IsolatedResourceTopologyRouteTests
         await Assert.That(Directory.Exists(Path.Combine(model.Root, "native"))).IsFalse();
     }
 
-    /// <summary>AC-ISO-004: normal production composition retains RF3 and cannot enable the benchmark opt-in.</summary>
+    /// <summary>AC-ISO-004: normal production composition retains CLUSTER and cannot enable the benchmark opt-in.</summary>
     [Test]
     public async Task DefaultProductionEntryStillBuildsThreeVotersWithoutBenchmarkOptIn()
     {

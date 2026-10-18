@@ -9,7 +9,7 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
 internal static class MetamorphicPublicCalls
 {
-    internal static Task<Result<QueryPage>> SdkAsync(RequestCqrsRf3Callers reader, MetamorphicPublicPlan plan,
+    internal static Task<Result<QueryPage>> SdkAsync(RequestCqrsClusterCallers reader, MetamorphicPublicPlan plan,
         int route, string? cursor, CancellationToken token)
         => route == 0 ? reader.Sdk.QueryAsync(plan.Sql with
         {
@@ -19,7 +19,7 @@ internal static class MetamorphicPublicCalls
             {
                 Cursor = cursor
             }, token);
-    internal static Task<CallToolResult> McpAsync(RequestCqrsRf3Callers reader, MetamorphicPublicPlan plan,
+    internal static Task<CallToolResult> McpAsync(RequestCqrsClusterCallers reader, MetamorphicPublicPlan plan,
         int route, string? cursor, CancellationToken token)
         => route == 0 ? reader.Mcp.CallAsync(McpCallerTools.QueryExecute, plan.Sql with
         {
@@ -31,12 +31,12 @@ internal static class MetamorphicPublicCalls
             }, token);
     private static AstQueryRequest Ast(MetamorphicPublicPlan plan, int route)
         => route == 1 ? plan.Parsed : route == 2 ? plan.Json : plan.CSharp;
-    internal static async Task DeniedAsync(RequestCqrsRf3Callers reader, MetamorphicPublicPlan plan, int route, string secret, CancellationToken token)
+    internal static async Task DeniedAsync(RequestCqrsClusterCallers reader, MetamorphicPublicPlan plan, int route, string secret, CancellationToken token)
     {
         var sdk = await SdkAsync(reader, plan, route, null, token);
         await Assert.That(sdk.IsFailed).IsTrue();
         await Assert.That(sdk.Value).IsNull();
-        await SqlRf3Protocol.EqualAsync(Errors.Problem(ErrorCode.PermissionDenied,
+        await SqlClusterProtocol.EqualAsync(Errors.Problem(ErrorCode.PermissionDenied,
             "The query requires a protected field-use grant."), sdk.Problem);
         var reply = await McpAsync(reader, plan, route, null, token);
         await McpCallerAssertions.ErrorAsync(reply, ErrorCode.PermissionDenied, dispatched: true);

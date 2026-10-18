@@ -8,7 +8,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 internal static class LocalImageVerifierProcessProof
 {
     internal const string ExpectedOutput = "bounded-native-output";
-    internal const string VerificationFailure = "The local RF3 image could not be verified.";
+    internal const string VerificationFailure = "The local CLUSTER image could not be verified.";
     internal const string SuccessMode = "success";
     internal const string ErrorMode = "error";
     internal const string WaitMode = "wait";

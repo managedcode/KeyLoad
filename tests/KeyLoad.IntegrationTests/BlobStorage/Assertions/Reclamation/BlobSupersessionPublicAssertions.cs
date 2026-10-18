@@ -7,20 +7,20 @@ namespace KeyLoad.IntegrationTests.Features.BlobStorage;
 
 internal static class BlobSupersessionPublicAssertions
 {
-    internal static async Task ReplayAsync(RequestCqrsRf3Callers callers,
+    internal static async Task ReplayAsync(RequestCqrsClusterCallers callers,
         BlobSupersessionPublicTrial.Version value, CancellationToken token)
     {
-        await SqlRf3Protocol.EqualAsync(value.Begun,
+        await SqlClusterProtocol.EqualAsync(value.Begun,
             await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.BeginBlobUploadAsync(value.Begin, token)));
-        await SqlRf3Protocol.EqualAsync(value.Begun, (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobUploadInfo>>(
+        await SqlClusterProtocol.EqualAsync(value.Begun, (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobUploadInfo>>(
             await callers.Mcp.CallAsync("keyload_blobs_begin_upload", value.Begin, token))).Value);
-        await SqlRf3Protocol.EqualAsync(value.Written,
+        await SqlClusterProtocol.EqualAsync(value.Written,
             await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.WriteBlobPartAsync(value.Part, token)));
-        await SqlRf3Protocol.EqualAsync(value.Written, (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobUploadInfo>>(
+        await SqlClusterProtocol.EqualAsync(value.Written, (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobUploadInfo>>(
             await callers.Mcp.CallAsync("keyload_blobs_write_part", value.Part, token))).Value);
-        await SqlRf3Protocol.EqualAsync(value.Completed,
+        await SqlClusterProtocol.EqualAsync(value.Completed,
             await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.CompleteBlobUploadAsync(value.Complete, token)));
-        await SqlRf3Protocol.EqualAsync(value.Completed, (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobMetadata>>(
+        await SqlClusterProtocol.EqualAsync(value.Completed, (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobMetadata>>(
             await callers.Mcp.CallAsync("keyload_blobs_complete_upload", value.Complete, token))).Value);
         foreach (var receipt in new[] { value.Begun.Receipt, value.Written.Receipt, value.Completed.Receipt })
         {
@@ -33,23 +33,23 @@ internal static class BlobSupersessionPublicAssertions
         await Assert.That(value.Completed.Receipt.CommandId).IsEqualTo(value.Complete.CommandId);
     }
 
-    internal static async Task CurrentAsync(RequestCqrsRf3Callers callers,
+    internal static async Task CurrentAsync(RequestCqrsClusterCallers callers,
         BlobSupersessionPublicTrial.Version current, CancellationToken token)
     {
         var metadata = new BlobMetadataRequest(current.Begin.Blob);
-        await SqlRf3Protocol.EqualAsync(current.Completed.Value,
+        await SqlClusterProtocol.EqualAsync(current.Completed.Value,
             await PublicReadAssertions.MetadataAsync(await callers.Sdk.GetBlobMetadataAsync(metadata, token)));
-        await SqlRf3Protocol.EqualAsync(current.Completed.Value, (await PublicReadAssertions.RequiredMetadataAsync(
+        await SqlClusterProtocol.EqualAsync(current.Completed.Value, (await PublicReadAssertions.RequiredMetadataAsync(
             await callers.Mcp.CallAsync("keyload_blobs_metadata", metadata, token))).Value);
         var request = new BlobReadRequest(current.Begin.Blob, 2, 0, current.Part.Bytes.Length);
         var expected = new BlobReadResult(current.Completed.Value, 0, current.Part.Bytes);
-        await SqlRf3Protocol.EqualAsync(expected,
+        await SqlClusterProtocol.EqualAsync(expected,
             await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ReadBlobRangeAsync(request, token)));
-        await SqlRf3Protocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<BlobReadResult>(
+        await SqlClusterProtocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<BlobReadResult>(
             await callers.Mcp.CallAsync("keyload_blobs_read_range", request, token))).Value);
     }
 
-    internal static async Task StaleAsync(RequestCqrsRf3Callers callers,
+    internal static async Task StaleAsync(RequestCqrsClusterCallers callers,
         BlobSupersessionPublicTrial.Version first, CancellationToken token)
     {
         var request = new BlobReadRequest(first.Begin.Blob, 1, 0, first.Part.Bytes.Length);

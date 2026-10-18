@@ -11,7 +11,7 @@ internal static class GraphPathFieldUseR43Policy
     private const string SdkDetail = "The query requires a protected field-use grant.";
     private const string McpDetail = "The authenticated principal is not permitted to perform this operation.";
 
-    internal static async Task RefuseAsync(RequestCqrsRf3Callers admin, RequestCqrsRf3Callers reader,
+    internal static async Task RefuseAsync(RequestCqrsClusterCallers admin, RequestCqrsClusterCallers reader,
         GraphPathFieldUseR43State state, CancellationToken token)
     {
         foreach (var sql in new[] { false, true })
@@ -20,15 +20,15 @@ internal static class GraphPathFieldUseR43Policy
                 : await reader.Sdk.ShortestPathAsync(state.Request(true), token);
             await Assert.That(result.IsFailed).IsTrue();
             await Assert.That(result.Value).IsNull();
-            await SqlRf3Protocol.EqualAsync(Errors.Problem(ErrorCode.PermissionDenied, SdkDetail), result.Problem);
+            await SqlClusterProtocol.EqualAsync(Errors.Problem(ErrorCode.PermissionDenied, SdkDetail), result.Problem);
             await GraphPathFieldUseR43Current.ObserveAsync(admin, state, token);
             await GraphPathFieldUseR43Reads.HealthyAsync(admin, reader, state, false, token);
-            var reply = sql ? await reader.Mcp.CallAsync(GraphPathRf3Scenario.SqlTool, state.Sql(true), token)
-                : await reader.Mcp.CallAsync(GraphPathRf3Scenario.DirectTool, state.Request(true), token);
+            var reply = sql ? await reader.Mcp.CallAsync(GraphPathClusterScenario.SqlTool, state.Sql(true), token)
+                : await reader.Mcp.CallAsync(GraphPathClusterScenario.DirectTool, state.Request(true), token);
             await McpCallerAssertions.ErrorAsync(reply, ErrorCode.PermissionDenied, dispatched: true);
             await Assert.That(reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
                 .GetProperty(DetailKey).GetString()).IsEqualTo(McpDetail);
-            await McpCallerAssertions.DoesNotDiscloseAsync(reply, state.Identity.Secret, GraphPathRf3Scenario.SecretMarker);
+            await McpCallerAssertions.DoesNotDiscloseAsync(reply, state.Identity.Secret, GraphPathClusterScenario.SecretMarker);
             await GraphPathFieldUseR43Current.ObserveAsync(admin, state, token);
             await GraphPathFieldUseR43Reads.HealthyAsync(admin, reader, state, false, token);
         }

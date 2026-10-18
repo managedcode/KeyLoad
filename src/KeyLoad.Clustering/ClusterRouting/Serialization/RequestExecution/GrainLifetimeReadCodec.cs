@@ -14,33 +14,6 @@ internal static class GrainLifetimeReadCodec
             NativeSerialization.Serialize(request), request.Frame.ExpiresAt));
     }
 
-    internal static string CreateControlledDocumentReadV2(this GrainRequestCodec codec, Guid requestId,
-        string principalId, ControlledDocumentReadRequestV2 request)
-    {
-        var context = codec.LifetimeReadContext;
-        return codec.Issue(GrainRequestEnvelopeConstruction.MovementRead(context.Database, context.Now, context.Lifetime,
-            requestId, principalId, GrainReadKind.ControlledDocumentV2, DocumentLifetimeReadScope.Purpose,
-            NativeSerialization.Serialize(request), request.Frame.Original.ExpiresAt));
-    }
-
-    internal static string CreateControlledBlobReadV2(this GrainRequestCodec codec, Guid requestId,
-        string localPrincipalId, ControlledBlobReadRequestV2 request)
-    {
-        var context = codec.LifetimeReadContext;
-        return codec.Issue(GrainRequestEnvelopeConstruction.MovementRead(context.Database, context.Now, context.Lifetime,
-            requestId, localPrincipalId, GrainReadKind.ControlledBlobV2, ControlledBlobLifetimeReadProtocol.Purpose,
-            NativeSerialization.Serialize(request), request.Frame.Original.ExpiresAt));
-    }
-
-    internal static string CreateControlledBlobOutcomeReadV2(this GrainRequestCodec codec, Guid requestId,
-        string localPrincipalId, ControlledBlobReadRequestV2 request)
-    {
-        var context = codec.LifetimeReadContext;
-        return codec.Issue(GrainRequestEnvelopeConstruction.MovementRead(context.Database, context.Now, context.Lifetime,
-            requestId, localPrincipalId, GrainReadKind.ControlledBlobOutcomeV2, ControlledBlobOutcomeReadProtocolV2.Purpose,
-            NativeSerialization.Serialize(request), request.Frame.Original.ExpiresAt));
-    }
-
     internal static string CreatePartitionQueryLeafV2(this GrainRequestCodec codec, Guid requestId, string principalId,
         ReadOnlyMemory<byte> payload, DateTimeOffset expiresAt)
     {

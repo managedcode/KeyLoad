@@ -21,7 +21,7 @@ internal sealed record NativeTextNestedWildcardPublicScenario(PartitionRef Parti
     internal SearchRequest Request() => new(Partition, Collection, Field, "needle", Limit: 1);
 
     internal static async Task<NativeTextNestedWildcardPublicScenario> CreateAsync(ClusterFixture fixture,
-        RequestCqrsRf3Callers administrator, CancellationToken token)
+        RequestCqrsClusterCallers administrator, CancellationToken token)
     {
         var partition = new PartitionRef("nested-text-" + Guid.NewGuid().ToString("N"),
             "nested-db", "nested-domain", Guid.NewGuid().ToString("N"));
@@ -41,9 +41,9 @@ internal sealed record NativeTextNestedWildcardPublicScenario(PartitionRef Parti
             RestrictRows = true,
             OwnerId = "owner-a"
         };
-        var identity = await NativeTextRf3Scenario.ConfigureIdentityAsync(fixture, principal, token);
+        var identity = await NativeTextClusterScenario.ConfigureIdentityAsync(fixture, principal, token);
         await Assert.That(identity.Principal.PolicyEpoch).IsEqualTo(1L);
-        await SqlRf3Protocol.EqualAsync(new[] { new MutationReceipt("putDocument", Collection, "a", 1L) },
+        await SqlClusterProtocol.EqualAsync(new[] { new MutationReceipt("putDocument", Collection, "a", 1L) },
             receipt.Mutations.ToArray());
         await Assert.That(receipt.CommandId).IsEqualTo(original.CommandId);
         await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);

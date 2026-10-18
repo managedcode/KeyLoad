@@ -1,38 +1,28 @@
 # KeyLoad.Core
 
-## Purpose and entry points
+## Purpose, entry points and ownership
+
 - Owns core database domain behavior and orchestration primitives.
 - Current principal types include `DatabaseEngine`, `KeySpace`, document/event/messaging/graph models, admission governors, queues, subscriptions and projection outbox; see the named source files at this project root.
-
-## Ownership and boundaries
 - New feature behavior belongs under `<SliceName>/` with the canonical `docs/Features/<SliceName>.md`; shared primitives outside a slice require genuine cross-feature use.
-- Core logic must not take ownership of physical node storage. A node-local `PartitionHost` owns storage, journals, file locks and the apply gate; Orleans grains route commands. Keep atomic partition identity distinct from physical placement.
-- Root-level feature files are migration debt. Preserve caller-visible validation and authorization boundaries; no DotNext cluster expansion, fake runtime proof or hidden fallback behavior.
-
-## Commands and evidence
-- GitHub Actions solution build: `dotnet build KeyLoad.slnx --no-restore --configuration Release`.
-- Owner correction2026-10-03 requires the actual Aspire entry after solution restore/build: `dotnet run --project build/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit`; related process and RF3 checks use `recovery` and `rf3` through that same entry. AppHost owns child execution, dependencies, artifacts and shutdown. Local development is authorized; exact-source Linux GitHub qualification remains mandatory.
-
-## Skills and protected risks
+- Core logic must not take ownership of physical node storage. The silo-local ZoneTree owner (node-local `PartitionHost`) owns its storage, journals, file locks and the apply gate, and files never move with activations; Orleans grains route commands and Orleans does all clustering (ADR-136).
 - Applicable skills: none installed; skill installation is prohibited by owner direction.
 - Transactions, command ordering, admission, projections and recovery contracts are high-risk. Runtime claims require the exact GitHub Actions run/SHA/artifacts; process-kill evidence does not establish power-loss durability.
 
-## Read-first and canonical slice ownership
-- Shared cache retention admission belongs to `ResourceExecution/` under ADR-058. One externally composed node budget owns atomic modeled byte/entry reservations; closing admission keeps outstanding charges until idempotent release. It does not own physical storage or establish an RSS limit.
-- Owns `RelationalStorage/` final-image/schema/raw-patch validation under ADR-055; typed rows reuse canonical Collection entity/index storage. Preserve mixed-model atomicity, graph/vector identity, exact raw numeric checks and per-operation bounds.
-- Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
-- Owned slices: `DocumentStorage`, `EventStreams`, `Messaging`, `GraphTraversal`, and `TimeSeries`; target paths: `DocumentStorage/`, `EventStreams/`, `Messaging/`, `GraphTraversal/`, and `TimeSeries/`.
-- `DatabaseEngine.cs` and shared atomic transaction primitives remain shared building blocks; feature behavior goes in its named slice.
-- Also owns the `Search` visible-vector read capability under `Search/`, consumed by Query's matching Search slice. It preserves node-local read-cut ownership and persisted authorization; see `docs/Features/Search.md` and ADR-035. Shared document-key construction belongs to `DocumentStorage/`.
-- Shared canonical JSON writing/hash transport belongs to `ResourceExecution/` under ADR-035; preserve exact validation, fingerprints and signatures across its DocumentStorage, QueryExecution and ChangeFeeds callers.
-- Shared commit/outcome, canonical-key and authorization interfaces remain genuinely cross-feature building blocks. Admission/inbox lifecycle belongs to `ResourceExecution/` under ADR-042; the node-local store and Orleans hosting clocks keep their existing owners.
-- Owns `BlobStorage/` under ADR-038: canonical bounded raw parts/manifests/quotas, current persisted authority and gated range reads. No separate provider/outcome log, full-payload outbox or grain-owned files; the integration lead owns existing engine dispatch and resource/bootstrap joins.
-- Owns `Authorization/Commands/ResourcePolicyUpdates.cs` under ADR-093: pure policy-only metadata CAS validation. The existing canonical ResourceConfiguration apply gate and persisted administrator authorization own the write; this helper owns no storage, routing or physical migration.
-- Owns `Restore/` durable logical-partition roster registration under ADR-008 and TASK-KL042-CATALOG-001A. The shared atomic commit owns publication; the feature tracks actual staged scopes, bounded by validated operation limits, without taking physical store ownership or declaring legacy backfill complete.
-## Feature-local responsibility folders
+## Boundaries and protected risks
 
-- Every populated `<SliceName>/` source area MUST group feature-owned C# files in populated child folders by their actual responsibility (for example `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Serialization/`, `Validation/`, `Recovery/`, `Admission/`, `Lifecycle/`, `Storage/`, or `Execution/` where applicable). Do not leave a flat mix of roles or create empty placeholders. Keep each role local to its owning feature; preserve namespaces, public signatures, serialization aliases/IDs, and source bytes during structural moves. Keep genuine project composition roots and shared cross-feature building blocks outside feature slices.
+Follow the [root policy](../../AGENTS.md) and the owning feature specification. Keep changes in their actual owner, preserve unrelated work, and remove replaced code together with exclusive callers and fixtures. Use native Orleans calls for distributed execution and silo-local ZoneTree owners for files. Preserve persisted authorization, operation correctness, resource bounds, cancellation and joined shutdown. Never turn a static check or focused test into a claim of complete runtime qualification.
 
-## Consolidated authorization ownership, 2026-10-17
+## Commands and verification
 
-Authorization policy evaluation and replay input policy are owned here under `Authorization/`; the separate Security assembly is removed. Preserve fresh persisted permission checks and all negative authorization flows.
+From the repository root:
+
+```sh
+dotnet build KeyLoad.slnx --no-restore --configuration Release -warnaserror
+```
+
+Use the root's complete solution, native TUnit, real process recovery and Aspire SDK/MCP gates as applicable. Local checks are development evidence; delivered-source qualification and public measurements require exact-source Linux GitHub artifacts. Do not weaken compiler, analyzer, source-identity, coverage or runtime assertions.
+
+## Skills
+
+Use the installed Orleans skill for Orleans design and the relevant installed formatting, Aspire or diagnostics skill when the task needs it. Follow explicit owner scope and dependency-adoption rules.

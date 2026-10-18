@@ -1,7 +1,7 @@
 # DueCoordination within Messaging
 
-Accepted S2 contract for KL-100, REQ/AC-JOBS-005 and
-[ADR-094](../../ADR/ADR-094-orleans-due-coordination.md). S1 canonical records,
+Accepted contract for REQ/AC-JOBS-005 and
+[ADR-094](../../ADR/ADR-094-orleans-due-coordination.md). Canonical records,
 UTC due arithmetic, caller/creator checks, occurrence identities, queue limits
 and atomic transitions remain the authority. No separate durable due index or
 storage-format transition is introduced. Due work is delivered by Orleans
@@ -12,7 +12,7 @@ an Orleans timer; no component checks leadership. Cluster concept:
 | Requirement | Measurable acceptance and automated mapping |
 |---|---|
 | REQ-DUE-001: finite fair discovery | AC-DUE-001: real ZoneTree schedules/sagas spanning more than a page, canceled/not-due/terminal records, mixed full partitions and concurrent lower/higher-key insertions preserve a fixed sweep upper bound; every readable preexisting key is visited, page count is at most 32, actual examined bytes include lookahead and differ explicitly from admitted bytes, cancellation rejects executable work, no payload or open view escapes. Unreadable provider frames fail explicitly. `DueJobDiscoveryTests` |
-| REQ-DUE-002: native isolated Orleans execution | AC-DUE-002: a bounded pool of Orleans `[StatelessWorker]` grains accepts due-work hints, buffers them in memory and, on an Orleans timer whose interval is a typed option (for example 5 seconds), writes the batch through the normal grain to ZoneTree-owner path; each Batch is signed with a fresh request GUID, consumes native ManagedCode CQRS to settlement, scopes the creator ID through ManagedCode identity/RequestContext, and reloads persisted authority. No leadership check gates any step. Production DI/graph joins and autonomous emissions pass on the Aspire replicated cluster. `DueCoordinationRf3Tests` |
+| REQ-DUE-002: native isolated Orleans execution | AC-DUE-002: a bounded pool of Orleans `[StatelessWorker]` grains accepts due-work hints, buffers them in memory and, on an Orleans timer whose interval is a typed option (for example 5 seconds), writes the batch through the normal grain to ZoneTree-owner path; each Batch is signed with a fresh request GUID, consumes native ManagedCode CQRS to settlement, scopes the creator ID through ManagedCode identity/RequestContext, and reloads persisted authority. No leadership check gates any step. Production DI/graph joins and autonomous emissions pass on the Aspire replicated cluster. `DueCoordinationClusterTests` |
 | REQ-DUE-003: canonical retries and lifecycle | AC-DUE-003: duplicate hints/timers (every silo may run workers and emit the same hint), lost ACK, cancel/completion, creator revocation, silo restart and silo loss preserve one occurrence identity or one saga timeout; an unavailable majority does not change canonical state; stop cancels and joins all started work, flushing or discarding its buffer, before storage shutdown. Native process and cluster tests |
 | REQ-DUE-004: bounded admission and visible failures | AC-DUE-004: one page and one dispatched job per service at a time; fixed tick and total job deadline, at most one retry with the same command ID for uncertain transport, failed jobs cannot monopolize the page, safe structured failure diagnostics contain no templates/credentials/IDs; healthy subsequent jobs still run. Unit and cluster failure/cancellation cases |
 
@@ -147,7 +147,7 @@ independently requires its original scheduled/lease index and the exact
 state/version/deadline CAS. An already cancelled discovery rejects without touching
 message state, even when the indexed prefix cannot fit its original page.
 
-AC-MSG-092-DEADLINE requires the actual not-due Conflict, stale RevisionConflict,
+AC-MSG-DEADLINE-ADVANCE requires the actual not-due Conflict, stale RevisionConflict,
 paused DispatchPaused and revoked/current-policy refusal to retain complete message
 bodies/metadata/index/counters; exact original successful receipt replay must
 survive two cold reopens and fresh healthy work. Full-jitter lease expiry retains
@@ -169,7 +169,7 @@ bootstrap administrator is not a data-authority substitute.
 Mapped tests: `QueueDeadlineNativeWholeFlowTests` (typed PromoteScheduled /
 ExpireLease / ExpireMessage, signed lease retry deadline),
 `QueueDeadlineProcessRecoveryTests` (five original CommitStage arguments),
-`QueueDeadlineAutonomousRf3Tests` (selected-principal revoke/cold, null-selected
+`QueueDeadlineAutonomousClusterTests` (selected-principal revoke/cold, null-selected
 service) and the canonical schema / typed native decode / public JSON roundtrip of
 one independently authored AdvanceQueueDeadline input. Qualification stays OPEN
 until the current-source native build, normal/scalar Unit, real process recovery and

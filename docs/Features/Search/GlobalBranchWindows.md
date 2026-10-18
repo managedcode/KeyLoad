@@ -1,19 +1,15 @@
 # GlobalBranchWindows within Search
 
-Accepted R1 kernel for original KL-057 under
-[ADR-096](../../ADR/ADR-096-global-branch-windows.md), prerequisite to KL-037
-fan-out. RF3 replicas are not independent shards. This stage introduces bounded
-per-modality global windows and complete EntityRef ordering; it does not advertise
-a distributed query protocol, global snapshot or strict multi-shard BM25.
+Global branch windows under [ADR-096](../../ADR/ADR-096-global-branch-windows.md) are the kernel for distributed search: a coordinating Orleans grain queries several logical partitions through ordinary Orleans calls and merges their per-modality windows. Replica copies of one partition are not independent shards. The kernel introduces bounded per-modality global windows and complete EntityRef ordering; it does not advertise a global snapshot or strict multi-shard BM25.
 
 | Requirement | Acceptance and tests |
 |---|---|
 | REQ-RANK-001: global window before fusion | AC-RANK-001: independent centralized oracle and two/three window layouts return identical exact candidates/ranks for identical comparable scores, missing branch contributes zero, duplicated replica candidates contribute once; RRF is applied after global modality ordering. `GlobalBranchWindowTests` |
 | REQ-RANK-002: full stable identity and comparable witnesses | AC-RANK-002: same Id in different tenant/database/domain/partition/collection remains distinct and ties use ordinal full EntityRef; duplicate reference with conflicting score/revision fails explicitly; nonfinite values or differing score-profile/corpus/statistics epochs fail, never win by arrival order |
 | REQ-RANK-003: bounded truthful completeness | AC-RANK-003: record/byte/window/deadline/cancellation limits are checked before retention, failed/missing/approximate/truncated windows cannot be marked exhaustive; exact mode fails closed, explicit incomplete mode retains its missing-window/approximation flags; boundary failures release all owned temporary work |
-| REQ-RANK-004: real existing runtime join | AC-RANK-004: the same core candidate-order/merge kernel is consumed by current SearchRankFusion through a single-partition adapter, preserving all current exact text/vector/graph results and source-cut authorization. Single-window fast path avoids redundant materialization; actual Aspire unit and RF3 suites and exact-source Linux gates pass |
+| REQ-RANK-004: real existing runtime join | AC-RANK-004: the same core candidate-order/merge kernel is consumed by current SearchRankFusion through a single-partition adapter, preserving all current exact text/vector/graph results and source-cut authorization. Single-window fast path avoids redundant materialization; unit and replicated-cluster suites pass |
 
-Root freezes an internal generated v1 BranchWindow contract containing branch
+The internal generated v1 BranchWindow contract containing branch
 name/kind, source logical window identity, comparable score-profile and corpus/
 statistics-scope witness, completion/approximation/truncation flags and finite
 candidates with full EntityRef, document revision and modality score. The merge
@@ -52,7 +48,7 @@ existing weightedRrfV1. A bounded k-way heap plus bounded unique-candidate state
 is allowed; no task per record or unbounded transport. Every examined candidate
 is charged even if duplicated, rejected or beyond the selected window. The
 single-partition adapter reuses the same kernel/order and existing authorized
-local branch arrays without inventing a global statistics epoch or physical shard
+local branch arrays without inventing a global statistics epoch or shard
 identity. Full fan-out/read-cut/policy/statistics contracts remain a later stage.
 
 Validation rejects malformed requests, identifiers, uninitialized arrays,
@@ -65,20 +61,11 @@ Expected and received window lists each obey MaxScanRecords and their exact
 native metadata is included in the one shared MaxBatchBytes accounting. Every
 examined candidate across all windows counts against the same MaxScanRecords.
 
-Luna lifecycle_wave owns NEW Query Features/Search Contracts/Models/Queries/
-Validation for the merger/order and existing SearchRankFusion narrow join, plus
-NEW UnitTests Search Cases/Helpers/Assertions/Models. Root owns shared declarations,
-future routing/SDK/MCP/contracts, docs and all gates. Prepare a private scoped
-patch against3985008 while root tests the stable compilation. Do not change
-rankers, physical topology, persisted statistics, public SearchRequest, policy
-projections or existing expected results to force a pass. Escalate a contract
-ambiguity; root freezes exact DTO aliases/IDs before any inter-grain publication.
+The merger and order live in the Query Search slice (Contracts/Models/Queries/Validation) with a narrow join into SearchRankFusion; rankers, physical topology, persisted statistics, public SearchRequest, policy projections and existing expected results are unchanged.
 
-Frontend/new SDK/MCP syntax N/A in R1: existing search consumes its local adapter.
+Frontend/new SDK/MCP syntax N/A: existing search consumes its local adapter.
 Canonical data migration N/A; this internal computational stage persists nothing.
-Rollback restores the capable runtime with unchanged canonical data. KL-057 stays
-in progress until actual multiple-shard layout, missing-shard, bounded fan-out,
-current authorization/read-cut and original quality/performance qualification pass.
+Full fan-out qualification requires an actual multiple-partition layout, missing-partition handling, bounded fan-out, current authorization/read-cut and quality/performance evidence.
 
 ```mermaid
 flowchart LR

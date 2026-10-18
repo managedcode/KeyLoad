@@ -1,4 +1,3 @@
-using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
@@ -14,10 +13,6 @@ public sealed partial class DatabaseEngine
     {
         cancellationToken.ThrowIfCancellationRequested();
         Authorization.Require(principal, reference.Partition, reference.Collection, Capability.DocumentsRead);
-        if (AtomicPartitionPlacementSerialization.ReadRow(view, reference.Partition) is not null)
-        {
-            _ = ReadPlacementWitness(view, reference.Partition);
-        }
         if (minimumToken is not null)
         {
             ValidateDocumentSessionToken(view, reference.Partition, minimumToken);

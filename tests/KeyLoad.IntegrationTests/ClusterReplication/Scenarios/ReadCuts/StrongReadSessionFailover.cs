@@ -12,7 +12,7 @@ internal static class StrongReadSessionFailover
     internal static async Task<StrongReadSessionState> RunAsync(ClusterFixture fixture, StrongReadSessionState state,
         Func<string, Task<StrongReadSessionState>> operation, CancellationToken token)
     {
-        var leader = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
+        var leader = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
             async root => new Uri((await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.StatusAsync(token))).Leader!).Host, token);
         string[] members = [McpCallerProtocol.Node1, McpCallerProtocol.Node2, McpCallerProtocol.Node3];
         if (!members.Contains(leader, StringComparer.Ordinal))
@@ -30,7 +30,7 @@ internal static class StrongReadSessionFailover
             await ElectionAsync(fixture, survivor, state, token);
             result = await operation(survivor);
         }, failures);
-        using var cleanup = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline, TimeProvider.System);
+        using var cleanup = new CancellationTokenSource(RequestCqrsClusterProtocol.CleanupDeadline, TimeProvider.System);
         if (stopped)
         {
             await ServerFailureObserver.ObserveAsync(() => fixture.RestartContainerAsync(leader, cleanup.Token), failures);
@@ -51,11 +51,11 @@ internal static class StrongReadSessionFailover
                 var original = state.Commits.First();
                 var replay = await ClusterReplicationTestSupport.RetryDuringElectionAsync(
                     () => sdk.CommitAsync(original.Command, token), token);
-                await SqlRf3Protocol.EqualAsync(original.Receipt, await McpCallerAssertions.SdkSuccessAsync(replay));
+                await SqlClusterProtocol.EqualAsync(original.Receipt, await McpCallerAssertions.SdkSuccessAsync(replay));
             }, failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
-        _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, survivor, fixture.AdminKey, async root =>
+        _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, survivor, fixture.AdminKey, async root =>
         {
             await StrongReadSessionCurrent.CheckAsync(root, state, token);
             return true;

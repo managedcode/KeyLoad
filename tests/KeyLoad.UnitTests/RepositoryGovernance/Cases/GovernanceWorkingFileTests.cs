@@ -13,9 +13,10 @@ internal sealed class GovernanceWorkingFileTests
     private const string DraftContent = "working draft";
     private const string RootPolicyPath = "AGENTS.md";
     private const string ProjectPath = "src/KeyLoad.Abstractions/KeyLoad.Abstractions.csproj";
-    private const string SuccessMarker = "PASS: preserved root prefix";
+    private const string SuccessMarker = "PASS: current solution inventory";
     private const string WorkingFileMarker = "Working planning file is present: ";
-    private const string PrefixFailureMarker = "preserved prefix SHA256 mismatch";
+    private const string PolicyFailureMarker = "Root AGENTS.md is missing required policy ";
+    private const string InvalidPolicy = "# Incomplete governance";
     private const string InventoryFailureMarker = "Project inventory is missing: ";
 
     [Test]
@@ -48,16 +49,14 @@ internal sealed class GovernanceWorkingFileTests
     }
 
     [Test]
-    public async Task ModifiedPreservedRootPrefixStillFails()
+    public async Task MissingRequiredRootPolicyFails()
     {
         using var fixture = await GovernanceRootFixture.CreateAsync(TestContext.Current!.Execution.CancellationToken);
         var policy = fixture.PathFor(RootPolicyPath);
-        var bytes = await File.ReadAllBytesAsync(policy, TestContext.Current!.Execution.CancellationToken);
-        bytes[0] ^= 1;
-        await File.WriteAllBytesAsync(policy, bytes, TestContext.Current!.Execution.CancellationToken);
+        await File.WriteAllTextAsync(policy, InvalidPolicy, TestContext.Current!.Execution.CancellationToken);
         var result = await GovernanceNodeProcess.RunAsync(fixture.Root);
         await Assert.That(result.ExitCode).IsEqualTo(FailureExit);
-        await Assert.That(result.Error).Contains(PrefixFailureMarker);
+        await Assert.That(result.Error).Contains(PolicyFailureMarker);
     }
 
     [Test]

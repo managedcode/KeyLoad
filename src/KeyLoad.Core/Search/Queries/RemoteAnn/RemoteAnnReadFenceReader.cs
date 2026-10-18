@@ -58,7 +58,7 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, RemoteAnnReadInvalid);
         }
-        var placement = ResolveRegisteredPlacement(bounded, consumer.Partition, catalog.DefaultShard);
+        var placement = ResolveRegisteredPlacement(consumer.Partition, catalog.DefaultShard);
         if (!PhysicalOwnerEntryValidation.SameOwner(original.Placement,
             new(placement.PhysicalShardId, placement.Incarnation, placement.VoterIds, placement.PlacementEpoch)))
         {

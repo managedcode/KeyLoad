@@ -2,7 +2,7 @@
 
 Status: accepted implementation contract, 2026-10-05; qualification pending.
 Canonical slice: GraphTraversal. Parent: [GraphTraversal](../GraphTraversal.md).
-Decision: [ADR-098](../../ADR/ADR-098-bounded-graph-paths.md). Task: KL-023.
+Decision: [ADR-098](../../ADR/ADR-098-bounded-graph-paths.md).
 
 ## Public contracts
 
@@ -67,7 +67,7 @@ foreign endpoint, which fails UnsupportedCapability.
 | Requirement | Measurable acceptance and automated mapping |
 |---|---|
 | REQ-GRAPH-007: shortest path and explicit depth frontiers | AC-GRAPH-006: independent input-model BFS agrees on ordered full EntityRef vertices and edges for direct/longer/converging paths, shuffled insertion, overlapping IDs across collections, cycles/self-loops, unreachable and depth0/exact/one-short cases. Equal-hop ties follow frontier discovery order then native ordinal edge-ID order. GraphShortestPathTests and independent GraphPath reference oracle. |
-| REQ-GRAPH-008: one authorized current read cut | AC-GRAPH-007: denied graph/source collection propagates PermissionDenied; missing/hidden/deleted source is NotFound. Hidden/missing/denied/deleted target and hidden intermediate give the same closed no-path result. A nonempty label filter requires the persisted graph `/label` field policy `RawUseGrant`; `RawReadGrant` is distinct and does not authorize filter use. A missing use grant returns `PermissionDenied` before adjacency traversal; null/empty labels do not apply this field-use check. Edge `AttributesJson` is projected by current persisted graph policy. Actual-store revocation/read-cut plus SDK/official MCP Linux RF3 failover cases exclude stale/hidden payload. |
+| REQ-GRAPH-008: one authorized current read cut | AC-GRAPH-007: denied graph/source collection propagates PermissionDenied; missing/hidden/deleted source is NotFound. Hidden/missing/denied/deleted target and hidden intermediate give the same closed no-path result. A nonempty label filter requires the persisted graph `/label` field policy `RawUseGrant`; `RawReadGrant` is distinct and does not authorize filter use. A missing use grant returns `PermissionDenied` before adjacency traversal; null/empty labels do not apply this field-use check. Edge `AttributesJson` is projected by current persisted graph policy. Actual-store revocation/read-cut plus SDK/official MCP Linux cluster failover cases exclude stale/hidden payload. |
 | REQ-GRAPH-009: finite node/edge/time/byte work | AC-GRAPH-008: charge every examined candidate before label/visibility filtering. Exact required node/edge cap succeeds; one less throws BudgetExceeded without partial success. Check cancellation/deadline during every frontier, scan, dereference, predecessor walk and output. Retention is admitted before insertion; exact output includes protocol metadata. Real during-work cancellation and healthy follow-up preserve committed position. |
 | REQ-GRAPH-010: shared SQL/SDK/MCP execution | AC-GRAPH-009: literal/parameter SQL matches direct result/CutPosition/errors. Reject malformed versions/syntax/parameters, extra statements, foreign partitions and exhausted bounds. Real Aspire replicated-cluster SDK/official MCP preserve the connection-grain and native CQRS lifecycle; official discovery verifies both `keyload_graph_shortest_path` and `keyload_query_graph_path`, exact typed request/result schemas, and read-only/idempotent/non-destructive hints against the independent ClientApi oracle. Nested `PartitionRef` has exactly its four identity fields plus computed `atomicPartitionId`; only the four identity fields are required. |
 
@@ -149,8 +149,8 @@ aggregate RSS bound.
    and introduce no other dispatcher.
 5. Strict Release build, format, governance and the actual Aspire
    normal/scalar/process/replicated-cluster gates run with exact Linux
-   SHA/run/artifacts retained, and the full KL-023 acceptance chain is updated
-   honestly. Focused passes cannot close KL-023 or waive complete required suites.
+   SHA/run/artifacts retained, and the full acceptance chain is updated
+   honestly. Focused passes cannot waive complete required suites.
 
 Frontend is N/A: a database read capability. Weighted/cross-partition paths
 require separate contracts. No canonical format, data migration or
@@ -169,7 +169,7 @@ flowchart LR
 ```
 
 
-## TASK-GRAPH-PATH-CORRUPTION-001 — actual persisted adjacency refusal
+## Actual persisted adjacency refusal
 
 REQ-GRAPH-008/009 and AC-GRAPH-007/008 additionally map to native shortest-path
 corruption flows in `GraphShortestPathCorruptionTests`. Seed genuine documents
@@ -181,16 +181,3 @@ operation after joined close/reopen, then restore only the injected row and
 verify the full healthy path, edge fields and unchanged read cut/store image.
 Cases cover absent edge, changed edge identity/source/foreign target, invalid
 stored label/target identifier, malformed adjacency and the wrong native root type.
-
-Root owns only new GraphTraversal Cases/Helpers/Models test files and this
-acceptance map. Existing ADR-098 defines the native consistency checks; no new
-production contract, public API, record/format or migration is required. Static
-review identifies an untested error flow, not a confirmed ZoneTree defect.
-Combined solution build/analyzer/formatter and native SIMD TUnit tests precede
-any result claim; current-source Linux, recovery and RF3 qualification remain
-mandatory and separate. Rollback removes only these additive tests and mapping.
-
-Development verification on 2026-10-11 passed all eight native corruption/repair
-flows (8/8) in the reviewed isolated snapshot. Shared build, affected-suite and
-qualification limits are recorded in [the Messaging development result](../Messaging.md#task-msg-counter-debit-001--exact-retained-usage-before-lifecycle-debit).
-Current-source Linux and Aspire RF3 qualification remain open.

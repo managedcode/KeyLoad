@@ -7,7 +7,7 @@ internal static class BlobGlobalQuotaR49Trial
 {
     internal static async Task RunAsync(ClusterFixture fixture, CancellationToken token)
     {
-        var state = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, async callers =>
+        var state = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, async callers =>
         {
             var state = await BlobGlobalQuotaR49Seed.RunAsync(callers, token);
             await BlobGlobalQuotaR49Operations.BeginAsync(callers, state, state.Held, state.Held.Begin, token);
@@ -30,7 +30,7 @@ internal static class BlobGlobalQuotaR49Trial
             return state;
         }, token);
         await NativeTextProtectedPublicColdRestart.RunAsync(fixture, token);
-        _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, async callers =>
+        _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, async callers =>
         {
             await BlobGlobalQuotaR49Replay.AllAsync(callers, state, token);
             var healthy = new BlobGlobalQuotaR49Upload(state.Attempt.Blob, BlobGlobalQuotaR49Corpus.SmallLength);
@@ -40,7 +40,7 @@ internal static class BlobGlobalQuotaR49Trial
             return true;
         }, token);
         await NativeTextProtectedPublicColdRestart.RunAsync(fixture, token);
-        _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, async callers =>
+        _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, async callers =>
         {
             await BlobGlobalQuotaR49Replay.AllAsync(callers, state, token);
             return true;

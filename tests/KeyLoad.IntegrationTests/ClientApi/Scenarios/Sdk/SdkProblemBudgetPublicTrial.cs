@@ -8,7 +8,7 @@ internal static class SdkProblemBudgetPublicTrial
 {
     internal static async Task RunAsync(ClusterFixture fixture, CancellationToken token)
     {
-        var state = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
+        var state = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
             fixture.AdminKey, async administrator =>
             {
                 var prepared = await SdkProblemBudgetPublicPreparation.CreateAsync(fixture, administrator, token);
@@ -21,7 +21,7 @@ internal static class SdkProblemBudgetPublicTrial
         for (var cycle = 0; cycle < 2; cycle++)
         {
             await RestartAsync(fixture, token);
-            _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
+            _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
                 fixture.AdminKey, async administrator =>
                 {
                     var current = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.StatusAsync(token));

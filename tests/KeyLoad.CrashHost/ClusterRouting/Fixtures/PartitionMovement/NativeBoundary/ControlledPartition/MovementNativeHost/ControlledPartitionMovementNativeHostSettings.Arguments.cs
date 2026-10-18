@@ -37,8 +37,6 @@ internal sealed partial class ControlledPartitionMovementNativeHostSettings
         Set(nameof(NodeOptions.SiloPort), silos[index].Port.ToString(CultureInfo.InvariantCulture));
         Set(nameof(NodeOptions.AllowLoopbackHttp), Enabled);
         Set(nameof(NodeOptions.AllowPrivateNetworkHttp), Enabled);
-        arguments.Add(ConfigurationArgumentPrefix + PartitionMovementExecutionOptions.SectionName + KeySeparator
-            + nameof(PartitionMovementExecutionOptions.Enabled) + Assignment + Enabled);
         var trust = nameof(NodeOptions.PhysicalGroupTrust) + KeySeparator;
         Set(trust + nameof(PhysicalGroupTrustOptions.Role),
             (control ? PhysicalGroupTrustRole.Control : PhysicalGroupTrustRole.Destination).ToString());

@@ -20,7 +20,7 @@ internal static class QueueViewLeaseIsolationFlow
                 QueueViewLeaseIsolationState state;
                 using (var deadline = McpCallerDeadline.Create())
                 {
-                    state = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
+                    state = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
                         root => QueueViewLeaseIsolationSeed.RunAsync(fixture, root, deadline.Token), deadline.Token);
                 }
                 using (var deadline = McpCallerDeadline.Create())

@@ -5,7 +5,7 @@ namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
 internal static class EventReferenceSelectSetup
 {
-    internal static async Task<EventReferenceSelectState> RunAsync(ClusterFixture fixture, RequestCqrsRf3Callers admin,
+    internal static async Task<EventReferenceSelectState> RunAsync(ClusterFixture fixture, RequestCqrsClusterCallers admin,
         CancellationToken token)
     {
         var partition = new PartitionRef("event-select-" + Guid.NewGuid().ToString("N"), "database", "domain", Guid.NewGuid().ToString("N"));
@@ -48,7 +48,7 @@ internal static class EventReferenceSelectSetup
         return state;
     }
 
-    internal static async Task PolicyAsync(RequestCqrsRf3Callers admin, EventReferenceSelectState state,
+    internal static async Task PolicyAsync(RequestCqrsClusterCallers admin, EventReferenceSelectState state,
         long epoch, bool allow, bool names, CancellationToken token)
     {
         var fields = new List<string> { EventReferenceSelectProtocol.RefRead };
@@ -73,7 +73,7 @@ internal static class EventReferenceSelectSetup
         await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), principal, token));
     }
 
-    private static async Task ConfigureAsync(RequestCqrsRf3Callers admin, PartitionRef partition,
+    private static async Task ConfigureAsync(RequestCqrsClusterCallers admin, PartitionRef partition,
         ResourceDefinition definition, CancellationToken token)
         => await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ConfigureResourceAsync(Guid.NewGuid(),
             new(partition.TenantId, partition.DatabaseId, definition), token));

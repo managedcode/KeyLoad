@@ -27,7 +27,6 @@ internal sealed class RemoteDocumentNativeFixture : IDisposable
     internal static readonly PartitionRef Partition = new(Tenant, "remote-db", "remote-domain", PartitionKey);
     internal static readonly EntityRef Reference = new(Partition, Collection, DocumentId);
     internal static readonly Guid WriteId = Guid.Parse("102b95e5-2657-40bb-9d1a-efc39b18877d");
-    internal static readonly Guid BindId = Guid.Parse("651fa2f2-67e0-4193-b880-94a3a3f8cf41");
     internal PhysicalShardCatalogFixture Source
     {
         get;
@@ -77,9 +76,6 @@ internal sealed class RemoteDocumentNativeFixture : IDisposable
         Write = Operation(Destination, OperationKind.Batch, WriteId,
             new CommandRequest(WriteId, Partition, [new PutDocument(Collection, DocumentId, OriginalJson)]));
         Receipt = Require(Destination.Database.Apply(Write, First)).Get<CommitReceipt>();
-        Require(Source.Database.Apply(Operation(Source, OperationKind.BindAtomicPartitionPlacement, BindId,
-            new BindAtomicPartitionPlacementRequest(Version, Empty, Partition,
-                PhysicalOwnerDirectoryWholeFlow.Destination.Owner.PhysicalShardId))));
     }
 
     internal static ReplicatedOperation Operation<T>(PhysicalShardCatalogFixture fixture,

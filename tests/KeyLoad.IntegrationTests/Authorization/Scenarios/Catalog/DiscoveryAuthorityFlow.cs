@@ -47,7 +47,7 @@ internal static class DiscoveryAuthorityFlow
     private static async Task<PrincipalRecord> PersistAsync(KeyLoadClient root, Guid commandId, PrincipalRecord expected, CancellationToken token)
     {
         var actual = await McpCallerAssertions.SdkSuccessAsync(await root.ConfigurePrincipalAsync(commandId, expected, token));
-        await SqlRf3Protocol.EqualAsync(expected, actual);
+        await SqlClusterProtocol.EqualAsync(expected, actual);
         return actual;
     }
 }

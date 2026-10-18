@@ -18,11 +18,11 @@ internal static class LeftFilteredJoinPublicFlow
         }, token);
 
     private static async Task WithReaderAsync(ClusterFixture fixture, LeftFilteredJoinState state,
-        Func<RequestCqrsRf3Callers, Task> operation, CancellationToken token)
+        Func<RequestCqrsClusterCallers, Task> operation, CancellationToken token)
     {
-        await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, state.Identity.Secret,
+        await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, state.Identity.Secret,
             async callers => { await operation(callers); return true; }, token);
-        await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
+        await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
             async callers => { await LeftFilteredJoinRefusals.SourcesAsync(callers.Sdk, state, token); return true; }, token);
     }
 }

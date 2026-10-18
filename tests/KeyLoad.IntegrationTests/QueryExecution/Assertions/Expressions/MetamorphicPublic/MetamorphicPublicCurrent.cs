@@ -7,17 +7,17 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
 internal static class MetamorphicPublicCurrent
 {
-    internal static async Task ObserveAsync(RequestCqrsRf3Callers root, MetamorphicPublicState state,
+    internal static async Task ObserveAsync(RequestCqrsClusterCallers root, MetamorphicPublicState state,
         Func<Task> operation, CancellationToken token)
     {
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(operation, failures);
         await ServerFailureObserver.ObserveAsync(() => ImageAsync(root, state, token), failures);
-        await ServerFailureObserver.ObserveAsync(async () => await SqlRf3Protocol.EqualAsync(state.Outbox,
+        await ServerFailureObserver.ObserveAsync(async () => await SqlClusterProtocol.EqualAsync(state.Outbox,
             await QueryCursorRequestIdentityR47Current.OutboxAsync(root, state.Partition, token)), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
-    private static async Task ImageAsync(RequestCqrsRf3Callers root, MetamorphicPublicState state, CancellationToken token)
+    private static async Task ImageAsync(RequestCqrsClusterCallers root, MetamorphicPublicState state, CancellationToken token)
     {
         var request = new AstQueryRequest(state.Partition, new(MetamorphicPublicData.Collection, null, [new("*", "*")], null,
             [new("/@id", false)], MetamorphicPublicData.Count), AllowFullScan: true);
@@ -26,12 +26,12 @@ internal static class MetamorphicPublicCurrent
             .Select(row => new QueryRow(row.Id, 1L, row.Json, false, [])).ToArray();
         await MetamorphicPublicResults.PageAsync(actual, expected, "bounded-full-scan", true);
     }
-    internal static async Task ReplayAsync(RequestCqrsRf3Callers root, MetamorphicPublicState state, CancellationToken token)
+    internal static async Task ReplayAsync(RequestCqrsClusterCallers root, MetamorphicPublicState state, CancellationToken token)
         => await ObserveAsync(root, state, async () =>
         {
-            await SqlRf3Protocol.EqualAsync(state.Receipt,
+            await SqlClusterProtocol.EqualAsync(state.Receipt,
                 await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.CommitAsync(state.Seed, token)));
-            await SqlRf3Protocol.EqualAsync(state.Receipt, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
+            await SqlClusterProtocol.EqualAsync(state.Receipt, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
                 await root.Mcp.CallAsync(McpCallerTools.DocumentsCommit, state.Seed, token))).Value);
         }, token);
 }

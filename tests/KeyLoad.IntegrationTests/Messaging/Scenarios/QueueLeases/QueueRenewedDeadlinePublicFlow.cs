@@ -7,42 +7,42 @@ internal static class QueueRenewedDeadlinePublicFlow
 {
     internal static async Task RunAsync(ClusterFixture fixture, CancellationToken token)
     {
-        var seed = await QueueLeaseRf3Setup.CreateAsync(fixture, token);
-        var state = await QueueDeadlineRf3Callers.UseAsync(fixture, McpCallerProtocol.Node2, seed.Worker.Secret,
+        var seed = await QueueLeaseClusterSetup.CreateAsync(fixture, token);
+        var state = await QueueDeadlineClusterCallers.UseAsync(fixture, McpCallerProtocol.Node2, seed.Worker.Secret,
             callers => WarmAsync(callers, seed, token), token);
-        await QueueLeaseRf3Cold.RestartAsync(fixture, token);
+        await QueueLeaseClusterCold.RestartAsync(fixture, token);
         await ProducerReplayAsync(fixture, state, token);
-        await QueueDeadlineRf3Callers.UseAsync(fixture, McpCallerProtocol.Node3, seed.Worker.Secret,
+        await QueueDeadlineClusterCallers.UseAsync(fixture, McpCallerProtocol.Node3, seed.Worker.Secret,
             async callers => { await FirstColdAsync(callers, state, token); return true; }, token);
-        await QueueLeaseRf3Cold.RestartAsync(fixture, token);
+        await QueueLeaseClusterCold.RestartAsync(fixture, token);
         await ProducerReplayAsync(fixture, state, token);
-        var settled = await QueueDeadlineRf3Callers.UseAsync(fixture, McpCallerProtocol.Node2, seed.Worker.Secret,
+        var settled = await QueueDeadlineClusterCallers.UseAsync(fixture, McpCallerProtocol.Node2, seed.Worker.Secret,
             callers => SecondColdAsync(callers, state, token), token);
         await HealthyAsync(fixture, settled, token);
     }
 
-    private static async Task<QueueRenewedDeadlinePublicState> WarmAsync(RequestCqrsRf3Callers callers,
-        QueueLeaseRf3Seed seed, CancellationToken token)
+    private static async Task<QueueRenewedDeadlinePublicState> WarmAsync(RequestCqrsClusterCallers callers,
+        QueueLeaseClusterSeed seed, CancellationToken token)
     {
         var request = new ReceiveRequest(Guid.NewGuid(), seed.Lane);
         await Assert.That(request.LeaseSeconds).IsEqualTo(30);
         await Assert.That(seed.Resource.QueuePolicy.MaxLeaseSeconds).IsEqualTo(300);
         var claim = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ReceiveAsync(request, token));
         var delivery = await Assert.That(claim.Deliveries).HasSingleItem();
-        await QueueLeaseRf3Assertions.LiteralDeliveryAsync(delivery, QueueLeaseRf3Protocol.Message, QueueLeaseRf3Protocol.Payload);
+        await QueueLeaseClusterAssertions.LiteralDeliveryAsync(delivery, QueueLeaseClusterProtocol.Message, QueueLeaseClusterProtocol.Payload);
         await Assert.That(delivery.Attempt).IsEqualTo(1);
         await Assert.That(delivery.LeaseVersion).IsEqualTo(1L);
         await Assert.That(delivery.DeliveryGeneration).IsEqualTo(1L);
-        var leased = new MessageInspection(new(QueueLeaseRf3Protocol.Message, MessageState.Leased, 1, 2L, 1L,
+        var leased = new MessageInspection(new(QueueLeaseClusterProtocol.Message, MessageState.Leased, 1, 2L, 1L,
             null, null, seed.Worker.Principal.Id, 1L, delivery.LeaseUntil),
-            QueueLeaseRf3Protocol.Payload, QueueLeaseRf3Protocol.Headers);
+            QueueLeaseClusterProtocol.Payload, QueueLeaseClusterProtocol.Headers);
         await QueueRenewedDeadlinePublicAssertions.ImagesAsync(callers, seed, leased, token);
         var renew = new DeliveryCommand(Guid.NewGuid(), seed.Lane, delivery.Token, DeliveryAction.Renew,
             seed.Resource.QueuePolicy.MaxLeaseSeconds);
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.CompleteAsync(renew, token));
         await QueueRenewedDeadlinePublicAssertions.ReceiptAsync(receipt, renew.CommandId, seed.Lane,
-            QueueLeaseRf3Protocol.Message, "Renew", 3L);
-        var observed = await QueueLeaseRf3Assertions.InspectAsync(callers.Sdk, seed.Lane, token);
+            QueueLeaseClusterProtocol.Message, "Renew", 3L);
+        var observed = await QueueLeaseClusterAssertions.InspectAsync(callers.Sdk, seed.Lane, token);
         await Assert.That(observed.Metadata.LeaseUntil).IsNotNull();
         var until = observed.Metadata.LeaseUntil
             ?? throw new InvalidOperationException("The successful renewal omitted its current deadline.");
@@ -66,10 +66,10 @@ internal static class QueueRenewedDeadlinePublicFlow
 
     private static CommandRequest Deadline(QueueRenewedDeadlinePublicState state, long version, DateTimeOffset due)
         => new(Guid.NewGuid(), state.Seed.Lane.Partition,
-            [new AdvanceQueueDeadline(state.Seed.Lane.Queue, QueueLeaseRf3Protocol.Message,
+            [new AdvanceQueueDeadline(state.Seed.Lane.Queue, QueueLeaseClusterProtocol.Message,
                 MessageState.Leased, version, 1L, due, QueueDeadlineKind.ExpireLease)]);
 
-    private static async Task AddRefusalAsync(RequestCqrsRf3Callers callers,
+    private static async Task AddRefusalAsync(RequestCqrsClusterCallers callers,
         QueueRenewedDeadlinePublicState state, CommandRequest request, ErrorCode code, CancellationToken token)
     {
         var detail = QueueRenewedDeadlinePublicAssertions.Detail(code);
@@ -78,7 +78,7 @@ internal static class QueueRenewedDeadlinePublicFlow
         await QueueRenewedDeadlinePublicAssertions.ImagesAsync(callers, state.Seed, state.Renewed, token);
     }
 
-    private static async Task FirstColdAsync(RequestCqrsRf3Callers callers,
+    private static async Task FirstColdAsync(RequestCqrsClusterCallers callers,
         QueueRenewedDeadlinePublicState state, CancellationToken token)
     {
         await QueueRenewedDeadlinePublicAssertions.LiveOriginalAsync(callers, state, token);
@@ -104,7 +104,7 @@ internal static class QueueRenewedDeadlinePublicFlow
         }
     }
 
-    private static async Task<QueueRenewedDeadlineSettled> SecondColdAsync(RequestCqrsRf3Callers callers,
+    private static async Task<QueueRenewedDeadlineSettled> SecondColdAsync(RequestCqrsClusterCallers callers,
         QueueRenewedDeadlinePublicState state, CancellationToken token)
     {
         await QueueRenewedDeadlinePublicAssertions.LiveOriginalAsync(callers, state, token);
@@ -113,7 +113,7 @@ internal static class QueueRenewedDeadlinePublicFlow
         var receipt = await McpCallerAssertions.SuccessAsync<CommitReceipt>(
             await callers.Mcp.CallAsync(McpCallerTools.MessagesComplete, ack, token));
         await QueueRenewedDeadlinePublicAssertions.ReceiptAsync(receipt.Value, ack.CommandId, state.Seed.Lane,
-            QueueLeaseRf3Protocol.Message, "Ack", 4L);
+            QueueLeaseClusterProtocol.Message, "Ack", 4L);
         var acked = new MessageInspection(state.Renewed.Metadata with
         {
             State = MessageState.Acked,
@@ -128,13 +128,13 @@ internal static class QueueRenewedDeadlinePublicFlow
 
     private static Task<bool> ProducerReplayAsync(ClusterFixture fixture,
         QueueRenewedDeadlinePublicState state, CancellationToken token)
-        => QueueDeadlineRf3Callers.UseAsync(fixture, McpCallerProtocol.Node1, fixture.AdminKey, async callers =>
+        => QueueDeadlineClusterCallers.UseAsync(fixture, McpCallerProtocol.Node1, fixture.AdminKey, async callers =>
         {
-            await QueueLeaseRf3Assertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
+            await QueueLeaseClusterAssertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
                 await callers.Sdk.CommitAsync(state.Seed.Enqueue, token)), state.Seed.EnqueueReceipt);
             var reply = await McpCallerAssertions.SuccessAsync<CommitReceipt>(
                 await callers.Mcp.CallAsync(McpCallerTools.DocumentsCommit, state.Seed.Enqueue, token));
-            await QueueLeaseRf3Assertions.EqualAsync(reply.Value, state.Seed.EnqueueReceipt);
+            await QueueLeaseClusterAssertions.EqualAsync(reply.Value, state.Seed.EnqueueReceipt);
             return true;
         }, token);
 
@@ -143,22 +143,22 @@ internal static class QueueRenewedDeadlinePublicFlow
     {
         var state = settled.Original;
         var command = new CommandRequest(Guid.NewGuid(), state.Seed.Lane.Partition,
-            [new EnqueueMessage(state.Seed.Lane.Queue, QueueLeaseRf3Protocol.Healthy,
-                QueueLeaseRf3Protocol.HealthyPayload, QueueLeaseRf3Protocol.Headers)]);
-        var receipt = await QueueDeadlineRf3Callers.UseAsync(fixture, McpCallerProtocol.Node1, fixture.AdminKey,
+            [new EnqueueMessage(state.Seed.Lane.Queue, QueueLeaseClusterProtocol.Healthy,
+                QueueLeaseClusterProtocol.HealthyPayload, QueueLeaseClusterProtocol.Headers)]);
+        var receipt = await QueueDeadlineClusterCallers.UseAsync(fixture, McpCallerProtocol.Node1, fixture.AdminKey,
             async callers =>
             {
-                await QueueLeaseRf3Assertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
+                await QueueLeaseClusterAssertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
                     await callers.Sdk.CommitAsync(state.Seed.Enqueue, token)), state.Seed.EnqueueReceipt);
                 var actual = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.CommitAsync(command, token));
                 var replay = await McpCallerAssertions.SuccessAsync<CommitReceipt>(
                     await callers.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token));
-                await QueueLeaseRf3Assertions.EqualAsync(replay.Value, actual);
+                await QueueLeaseClusterAssertions.EqualAsync(replay.Value, actual);
                 return actual;
             }, token);
         await QueueRenewedDeadlinePublicAssertions.ReceiptAsync(receipt, command.CommandId, state.Seed.Lane,
-            QueueLeaseRf3Protocol.Healthy, "enqueue", 1L);
-        await QueueDeadlineRf3Callers.UseAsync(fixture, McpCallerProtocol.Node3, state.Seed.Worker.Secret,
+            QueueLeaseClusterProtocol.Healthy, "enqueue", 1L);
+        await QueueDeadlineClusterCallers.UseAsync(fixture, McpCallerProtocol.Node3, state.Seed.Worker.Secret,
             async callers =>
             {
                 await HealthyClaimAsync(callers, settled, token);
@@ -166,7 +166,7 @@ internal static class QueueRenewedDeadlinePublicFlow
             }, token);
     }
 
-    private static async Task HealthyClaimAsync(RequestCqrsRf3Callers callers,
+    private static async Task HealthyClaimAsync(RequestCqrsClusterCallers callers,
         QueueRenewedDeadlineSettled settled, CancellationToken token)
     {
         var state = settled.Original;
@@ -174,27 +174,27 @@ internal static class QueueRenewedDeadlinePublicFlow
         var claim = await McpCallerAssertions.SuccessAsync<ReceiveResult>(
             await callers.Mcp.CallAsync(McpCallerTools.MessagesReceive, request, token));
         var delivery = await Assert.That(claim.Value.Deliveries).HasSingleItem();
-        await QueueLeaseRf3Assertions.LiteralDeliveryAsync(delivery, QueueLeaseRf3Protocol.Healthy, QueueLeaseRf3Protocol.HealthyPayload);
+        await QueueLeaseClusterAssertions.LiteralDeliveryAsync(delivery, QueueLeaseClusterProtocol.Healthy, QueueLeaseClusterProtocol.HealthyPayload);
         await Assert.That(delivery.Attempt).IsEqualTo(1);
         await Assert.That(delivery.LeaseVersion).IsEqualTo(1L);
         await Assert.That(delivery.DeliveryGeneration).IsEqualTo(1L);
-        await QueueLeaseRf3Assertions.EqualAsync(
+        await QueueLeaseClusterAssertions.EqualAsync(
             await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ReceiveAsync(request, token)), claim.Value);
         var ack = new DeliveryCommand(Guid.NewGuid(), state.Seed.Lane, delivery.Token, DeliveryAction.Ack);
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.CompleteAsync(ack, token));
         await QueueRenewedDeadlinePublicAssertions.ReceiptAsync(receipt, ack.CommandId, state.Seed.Lane,
-            QueueLeaseRf3Protocol.Healthy, "Ack", 3L);
-        await QueueLeaseRf3Assertions.ReplayedAsync(callers.Sdk, callers.Mcp, ack, receipt, token);
-        await QueueLeaseRf3Assertions.DeniedAsync(await callers.Sdk.ReceiveAsync(request, token), ErrorCode.StaleLease);
+            QueueLeaseClusterProtocol.Healthy, "Ack", 3L);
+        await QueueLeaseClusterAssertions.ReplayedAsync(callers.Sdk, callers.Mcp, ack, receipt, token);
+        await QueueLeaseClusterAssertions.DeniedAsync(await callers.Sdk.ReceiveAsync(request, token), ErrorCode.StaleLease);
         await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(
             McpCallerTools.MessagesReceive, request, token), ErrorCode.StaleLease, true);
-        var expected = new MessageInspection(new(QueueLeaseRf3Protocol.Healthy, MessageState.Acked,
+        var expected = new MessageInspection(new(QueueLeaseClusterProtocol.Healthy, MessageState.Acked,
             1, 3L, 2L, null, null, LeaseVersion: 1L), null, null);
-        await QueueLeaseRf3Assertions.EqualAsync(await PublicReadAssertions.MessageAsync(
-            await callers.Sdk.InspectAsync(new(state.Seed.Lane, QueueLeaseRf3Protocol.Healthy), token)), expected);
+        await QueueLeaseClusterAssertions.EqualAsync(await PublicReadAssertions.MessageAsync(
+            await callers.Sdk.InspectAsync(new(state.Seed.Lane, QueueLeaseClusterProtocol.Healthy), token)), expected);
         var inspected = await PublicReadAssertions.RequiredMessageAsync(await callers.Mcp.CallAsync(
-            McpCallerTools.MessagesInspect, new InspectMessageRequest(state.Seed.Lane, QueueLeaseRf3Protocol.Healthy), token));
-        await QueueLeaseRf3Assertions.EqualAsync(inspected.Value, expected);
+            McpCallerTools.MessagesInspect, new InspectMessageRequest(state.Seed.Lane, QueueLeaseClusterProtocol.Healthy), token));
+        await QueueLeaseClusterAssertions.EqualAsync(inspected.Value, expected);
         await QueueRenewedDeadlinePublicAssertions.SettledOriginalAsync(callers, settled, token);
         var empty = await McpCallerAssertions.SdkSuccessAsync(
             await callers.Sdk.ReceiveAsync(new(Guid.NewGuid(), state.Seed.Lane), token));

@@ -45,22 +45,14 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
             return await ResourceLifecycleReadExecution.ExecuteAsync(localDatabase, services, runtimeClock,
                 principal, request, codec, context, retirementWork, cancellationToken).ConfigureAwait(true);
         }
-        if (kind is GrainReadKind.PlacementPolicy or GrainReadKind.PlacementPlan or GrainReadKind.PlacementIntent)
+        if (GrainLifetimeReadCapabilities.Handles(kind))
         {
-            return await TenantPlacementReadExecution.ExecuteAsync(localDatabase, services, runtimeClock,
-                principal, request, cancellationToken).ConfigureAwait(true);
-        }
-        if (GrainControlledReadCapabilities.Handles(kind))
-        {
-            return kind == GrainReadKind.PartitionMovementParentState && codec.HasPhaseObserver
-                ? await MovementParentStateObservedRead.ExecuteAsync(localDatabase, services, runtimeClock,
-                    principal, request, codec, context, binding, cancellationToken).ConfigureAwait(true)
-                : GrainControlledReadCapabilities.Execute(localDatabase, services, runtimeClock,
-                    principal, request, binding, cancellationToken);
+            return GrainLifetimeReadCapabilities.Execute(localDatabase, services, runtimeClock,
+                principal, request, binding, cancellationToken);
         }
         if (PhysicalOwnerReadCapabilities.Handles(kind))
         {
-            return await PhysicalOwnerReadCapabilities.ExecuteAsync(services, runtimeClock, codec, context,
+            return await PhysicalOwnerReadCapabilities.ExecuteAsync(services, runtimeClock,
                 principal, request, cancellationToken).ConfigureAwait(true);
         }
         if (GrainNativeMaintenanceReadCapabilities.Handles(kind))
@@ -144,7 +136,7 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         }
         if (GrainBlobReadCapabilities.Handles(kind))
         {
-            return await blobs.ExecuteAsync(kind, principal, request, binding, cancellationToken).ConfigureAwait(true);
+            return blobs.Execute(kind, principal, request, binding, cancellationToken);
         }
         if (ConnectionRemoteTransferReadCapabilities.HandlesPeer(kind, request.Envelope))
         {

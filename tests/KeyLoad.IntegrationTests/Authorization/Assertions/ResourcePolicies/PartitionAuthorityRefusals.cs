@@ -16,14 +16,14 @@ internal static class PartitionAuthorityRefusals
         await Assert.That(direct.Value).IsNull();
         await Assert.That(direct.Problem?.ErrorCode).IsEqualTo(error.ToString());
         await SafeAsync(JsonSerializer.Serialize(direct, JsonDefaults.Options), state.Identity.Secret);
-        var call = SqlRf3Protocol.Call(state.Scenario.Partitions[PartitionAuthorityProtocol.FirstLeaf],
-            PartitionQueryRf3Protocol.ToolName, request);
+        var call = SqlClusterProtocol.Call(state.Scenario.Partitions[PartitionAuthorityProtocol.FirstLeaf],
+            PartitionQueryClusterProtocol.ToolName, request);
         var q1 = await sdk.ExecuteSqlAsync(call, token);
         await Assert.That(q1.IsSuccess).IsFalse();
         await Assert.That(q1.Value.ValueKind).IsEqualTo(JsonValueKind.Undefined);
         await Assert.That(q1.Problem?.ErrorCode).IsEqualTo(error.ToString());
         await SafeAsync(JsonSerializer.Serialize(q1.Problem, JsonDefaults.Options), state.Identity.Secret);
-        await OfficialAsync(async () => await session.CallAsync(PartitionQueryRf3Protocol.ToolName,
+        await OfficialAsync(async () => await session.CallAsync(PartitionQueryClusterProtocol.ToolName,
             request, token), state.Identity.Secret, error);
         await OfficialAsync(async () => await session.CallAsync(SqlOperationProtocol.ToolName,
             call, token), state.Identity.Secret, error);

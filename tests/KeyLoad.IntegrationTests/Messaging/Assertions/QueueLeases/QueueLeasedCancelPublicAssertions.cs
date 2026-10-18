@@ -11,7 +11,7 @@ internal static class QueueLeasedCancelPublicAssertions
     internal const string Replacement = "leased-cancel-replacement";
     internal const string Witness = "leased-cancel-witness";
 
-    internal static async Task ImagesAsync(RequestCqrsRf3Callers callers,
+    internal static async Task ImagesAsync(RequestCqrsClusterCallers callers,
         QueueLeasedCancelPublicState state, bool cancelled, CancellationToken token)
     {
         var owner = state.Owner;
@@ -26,7 +26,7 @@ internal static class QueueLeasedCancelPublicAssertions
         await Assert.That(witness.Revision).IsEqualTo(1L);
     }
 
-    internal static async Task MessageAsync(RequestCqrsRf3Callers callers, QueueLifecyclePublicState owner,
+    internal static async Task MessageAsync(RequestCqrsClusterCallers callers, QueueLifecyclePublicState owner,
         string id, MessageInspection? expected, CancellationToken token)
     {
         var request = new InspectMessageRequest(owner.Lane, id);
@@ -37,17 +37,17 @@ internal static class QueueLeasedCancelPublicAssertions
             .SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     }
 
-    internal static async Task<JsonElement> RefusedAsync(RequestCqrsRf3Callers callers, QueueLifecyclePublicState owner,
+    internal static async Task<JsonElement> RefusedAsync(RequestCqrsClusterCallers callers, QueueLifecyclePublicState owner,
         CommandRequest command, ErrorCode code, CancellationToken token)
     {
         var result = await callers.Sdk.CommitAsync(command, token);
-        await SagaTimeoutRf3Assertions.AssertSdkErrorAsync(result, code);
+        await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(result, code);
         await Assert.That(result.Value).IsNull();
         await QueueLifecyclePublicRoutes.RefusedAsync(callers, owner, command, code, token);
         return JsonSerializer.SerializeToElement(result.Problem, JsonDefaults.Options);
     }
 
-    internal static async Task OriginalAsync(RequestCqrsRf3Callers callers, QueueLeasedCancelPublicState state,
+    internal static async Task OriginalAsync(RequestCqrsClusterCallers callers, QueueLeasedCancelPublicState state,
         CancellationToken token)
     {
         await QueueLifecyclePublicRoutes.ReplayAsync(callers, state.Owner, token);
@@ -62,20 +62,20 @@ internal static class QueueLeasedCancelPublicAssertions
                 saved.Code, token);
         }
         var original = await callers.Sdk.ReceiveAsync(state.Claim, token);
-        await SagaTimeoutRf3Assertions.AssertSdkErrorAsync(original, ErrorCode.StaleLease);
+        await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(original, ErrorCode.StaleLease);
         await Assert.That(original.Value).IsNull();
         await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.MessagesReceive,
             state.Claim, token), ErrorCode.StaleLease, true);
         foreach (var action in new[] { DeliveryAction.Ack, DeliveryAction.Nack, DeliveryAction.Renew })
         {
             var command = new DeliveryCommand(Guid.NewGuid(), state.Owner.Lane, state.Claimed.Deliveries.Single().Token, action);
-            await SagaTimeoutRf3Assertions.AssertSdkErrorAsync(await callers.Sdk.CompleteAsync(command, token), ErrorCode.StaleLease);
+            await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(await callers.Sdk.CompleteAsync(command, token), ErrorCode.StaleLease);
             await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.MessagesComplete,
                 command, token), ErrorCode.StaleLease, true);
         }
     }
 
-    internal static async Task FinalImagesAsync(RequestCqrsRf3Callers callers,
+    internal static async Task FinalImagesAsync(RequestCqrsClusterCallers callers,
         QueueLeasedCancelPublicState state, bool healthy, CancellationToken token)
     {
         await MessageAsync(callers, state.Owner, Target, new(new(Target, MessageState.Cancelled,

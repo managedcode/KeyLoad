@@ -6,7 +6,7 @@ using KeyLoad.Server;
 namespace KeyLoad.IntegrationTests.Features.Messaging;
 
 /// <summary>AC-CLIENT-004/005/006: SDK and official MCP dispatch commands share exact effects and replay.</summary>
-/// <param name="fixture">The actual Aspire-owned Docker RF3 application.</param>
+/// <param name="fixture">The actual Aspire-owned Docker CLUSTER application.</param>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class AdminDispatchClientParityTests(ClusterFixture fixture)

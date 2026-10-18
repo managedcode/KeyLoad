@@ -35,7 +35,7 @@ internal static class SubscriptionIndependentCheckpointR52Refusals
     {
         await Assert.That(failure.IsFailed).IsTrue();
         await Assert.That(failure.Value).IsNull();
-        await SubscriptionFilterRf3Assertions.EqualAsync(failure.Problem, Errors.Problem(code, detail));
+        await SubscriptionFilterClusterAssertions.EqualAsync(failure.Problem, Errors.Problem(code, detail));
     }
 
     internal static async Task McpAsync(ModelContextProtocol.Protocol.CallToolResult reply, ErrorCode code)

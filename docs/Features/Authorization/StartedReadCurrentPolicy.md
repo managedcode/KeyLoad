@@ -1,6 +1,6 @@
 # Started native read stream and current persisted policy
 
-Canonical task: KL-066 / REQ-AUTH-007 / AC-AUTH-007, [Authorization](../Authorization.md), [ClusterRouting](../ClusterRouting.md), [ADR-022](../../ADR/ADR-022-policy-epoch-revocation.md) and [ADR-125](../../ADR/ADR-125-connection-owned-execution.md).
+Requirements: REQ-AUTH-007 / AC-AUTH-007, [Authorization](../Authorization.md), [ClusterRouting](../ClusterRouting.md), [ADR-022](../../ADR/ADR-022-policy-epoch-revocation.md) and [ADR-125](../../ADR/ADR-125-connection-owned-execution.md).
 
 REQ-STARTED-READ-001 / AC-STARTED-READ-001: an original database-signed native ConnectionGrain read which has already produced and delivered its actual Started frame must still load current persisted authority after its existing operation barrier. Retaining the original verified subject/context/connection is not permission to retain the old principal policy. A real root-authorized revocation or expiry policy-change ACK while that original producer is held must prevent its later document payload. The same actual activation must independently serve an authorized sibling subject while the original remains held.
 
@@ -35,38 +35,16 @@ flowchart LR
 
 ## Scope, ownership and gates
 
-This is a distinct begun-read checkpoint regression. Existing fresh-after-revocation command tests, held-write authority faults, ordinary SQL/AST cursor repair/two-cold, scalar live-current-policy continuation and EventFeedTail cancellation/current-refusal flows remain unchanged. It does not duplicate them or introduce another SQL/live/tail scenario. Feature-owned Contracts/Models/Helpers/Assertions/Cases above and this child doc are new-only SourceN. Product, existing fixture/provider/native serialization identities, routing limits, deadlines and clocks are untouched. Frontend/public HTTP/MCP/new infrastructure N/A for this native foundation stage.
+This is a distinct begun-read checkpoint regression. Existing fresh-after-revocation command tests, held-write authority faults, ordinary SQL/AST cursor repair/two-cold, scalar live-current-policy continuation and EventFeedTail cancellation/current-refusal flows remain unchanged. It does not duplicate them or introduce another SQL/live/tail scenario. Product, existing fixture/provider/native serialization identities, routing limits, deadlines and clocks are untouched. Frontend/public HTTP/MCP/new infrastructure N/A for this native foundation stage.
 
-The native fixture has one actual Orleans test silo and real node-local ZoneTree/native RF3-configured journal/materializer admission, with no real three-peer transport/quorum. Its ProcessDurable receipt does not prove Docker/Aspire RF3, public SDK/official MCP, a long multi-page tail, process restart, two cold owners, live expiry timing or complete KL-066 acceptance. Those original required gates remain mandatory and separate; no runtime execution or provider disposal fault was manufactured. The complete native raw image oracle is bounded and source-known. Existing fixture owns the actual native cluster/request-work owner/store shutdown; the new consumer joins its original task and producer before that shutdown, retaining all actual cleanup errors.
+The native fixture has one actual Orleans test silo and real node-local ZoneTree/native CLUSTER-configured journal/materializer admission, with no real three-node replicated cluster. Its ProcessDurable receipt does not prove Docker/Aspire cluster, public SDK/official MCP, a long multi-page tail, process restart, two cold owners, live expiry timing or complete acceptance. The complete native raw image oracle is bounded and source-known. Existing fixture owns the actual native cluster/request-work owner/store shutdown; the new consumer joins its original task and producer before that shutdown, retaining all actual cleanup errors.
 
-Prepared parse/numeric/nesting preflight, source/API review and retained guards are not semantic compilation or execution. Root adoption/independent full peer, native discovery, normal Unit/nativeSIMD50, recovery, public RF3 and exact-source Linux qualification remain OPEN. No SDK/build/test/Git/SourceY command was run by this lane. No task-status or global-plan edit is proposed.
+Prepared parse/numeric/nesting preflight, source/API review and retained guards are not semantic compilation or execution. No SDK/build/test/Git/SourceY command was run by this lane. No task-status or global-plan edit is proposed.
 
-## Native Started frame representation and original R209 failure
+## Native Started frame representation
 
-The original R209 Unit cohort reached the complete Started equality and failed
-all three variants before later refusal/repair assertions. The original output
-records only Boolean equality failure, not the actual serialized frame; it is
-retained and does not prove a policy enforcement defect.
+The original output records only Boolean equality failure, not the actual serialized frame; it is retained and does not prove a policy enforcement defect.
 
-The independently expected frame must describe the actual native Orleans boundary.
-ManagedCode.Communication and its Orleans package are pinned to 10.3.7, whose
-NuGet repository identity is commit 3dfe26393eb472e476572db8fb000c3ea35699bf.
-The original ConnectionGrain writes Started with the independently generated
-request ID and first sequence 1. The pinned
-[chunk converter](https://github.com/managedcode/Communication/blob/3dfe26393eb472e476572db8fb000c3ea35699bf/ManagedCode.Communication.Orleans/Converters/CqrsStreamChunkSurrogateConverter.cs)
-stores the resolved EventType into its surrogate and reconstructs that explicit
-value. Therefore the independent complete expected Started frame explicitly sets
-the native literal cqrs-started; a factory-only chunk with raw EventType unset
-omits that member from JSON and is the wrong representation oracle for this
-post-Orleans observation. No observed field is copied into the expectation.
+The independently expected frame must describe the actual native Orleans boundary. ManagedCode.Communication and its Orleans package are pinned to 10.3.7, whose NuGet repository identity is commit 3dfe26393eb472e476572db8fb000c3ea35699bf. The original ConnectionGrain writes Started with the independently generated request ID and first sequence 1. The pinned [chunk converter](https://github.com/managedcode/Communication/blob/3dfe26393eb472e476572db8fb000c3ea35699bf/ManagedCode.Communication.Orleans/Converters/CqrsStreamChunkSurrogateConverter.cs) stores the resolved EventType into its surrogate and reconstructs that explicit value. Therefore the independent complete expected Started frame explicitly sets the native literal cqrs-started; a factory-only chunk with raw EventType unset omits that member from JSON and is the wrong representation oracle for this post-Orleans observation. No observed field is copied into the expectation.
 
-Full canonical JSON equality remains exact, including request ID, progress Result,
-sequence and event metadata; Started-only diagnostic string equality reports the complete
-expected/actual Started frame instead of an opaque Boolean. That frame contains
-only request ID, progress and protocol metadata; generic document/receipt/problem
-equality retains its original Boolean oracle without logging caller payload. Existing failure,
-selected cancellation, independent writer/reader policy, original raw outcome,
-healthy same-activation read, replay and joined close assertions remain unchanged.
-This fixes a source-confirmed oracle mismatch. The next original runtime cohort
-must determine whether it explains the entire actual failure; no successful rerun,
-new native failure injection or additional two-cold/RF3 proof is claimed here.
+Full canonical JSON equality remains exact, including request ID, progress Result, sequence and event metadata; Started-only diagnostic string equality reports the complete expected/actual Started frame instead of an opaque Boolean. That frame contains only request ID, progress and protocol metadata; generic document/receipt/problem equality retains its original Boolean oracle without logging caller payload. Existing failure, selected cancellation, independent writer/reader policy, original raw outcome, healthy same-activation read, replay and joined close assertions remain unchanged. This fixes a source-confirmed oracle mismatch. The next original runtime cohort must determine whether it explains the entire actual failure; no successful rerun, new native failure injection or additional two-cold/cluster proof is claimed here.

@@ -1,4 +1,3 @@
-using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Core.Features.ResourceExecution;
 using ManagedCode.Communication;
 using ManagedCode.Communication.CQRS;
@@ -142,7 +141,7 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, ILogger<ConnectionG
             }
             if (request.Envelope.Purpose == ResourceRetirementCommandScope.Purpose
                 || request.Envelope.Purpose is RemoteGraphRequestScope.ParentPurpose or EventVectorRequestScope.ParentPurpose
-                || request.Envelope.CommandKind is OperationKind.ReceiveAcrossLanes or OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex or OperationKind.MaintainOnlineTextIndex or OperationKind.MovePartition or OperationKind.ApplyPlacementIntent)
+                || request.Envelope.CommandKind is OperationKind.ReceiveAcrossLanes or OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex or OperationKind.MaintainOnlineTextIndex)
             {
                 reply = await NativeConnectionParentExecution.ExecuteAsync(request, ExecuteStreamAsync, services, codec,
                     clock, chunkSerializer, options, diagnostics, ((IGrainBase)this).GrainContext, writer, purpose).ConfigureAwait(true);
@@ -181,8 +180,7 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, ILogger<ConnectionG
         ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, IResourceLifetimeWorkBinding binding)
     {
         ArgumentNullException.ThrowIfNull(binding);
-        if (request.Envelope.CommandKind != OperationKind.Batch
-            && (request.Envelope.CommandKind is not { } kind || !BlobStorageOperations.Handles(kind)))
+        if (request.Envelope.CommandKind != OperationKind.Batch)
         {
             return null;
         }
@@ -191,17 +189,8 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, ILogger<ConnectionG
         {
             return null;
         }
-        Func<CancellationToken, ValueTask>? grantSettled = null;
-        Func<CancellationToken, ValueTask>? outcomeObserved = null;
-        if (codec.HasPhaseObserver)
-        {
-            var context = ((IGrainBase)this).GrainContext;
-            grantSettled = token => codec.ObservePhaseAsync(request, GrainRequestPhase.ControlledDocumentGrantSettled, context, token);
-            outcomeObserved = token => codec.ObservePhaseAsync(request, GrainRequestPhase.ControlledDocumentOutcomeReturned, context, token);
-        }
         var original = await controlled.TryExecuteAsync(request.Envelope, request.Payload, binding,
-            writer.CancellationToken, grantSettled, outcomeObserved).ConfigureAwait(true);
+            writer.CancellationToken).ConfigureAwait(true);
         return original is null ? null : GrainReplyFactory.Operation(original, options, writer.CancellationToken);
     }
-
 }

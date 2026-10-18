@@ -41,7 +41,7 @@ internal static class CompositeIndexCrashScenario
             CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource(), CrashExecutionOptions.Messaging(),
             CrashExecutionOptions.GraphExecution(), CrashExecutionOptions.ChangeFeedExecution(),
             CrashExecutionOptions.BlobExecution(), CrashExecutionOptions.NativeClaimsExecution(),
-            CrashExecutionOptions.TimeSeriesExecution(), CrashExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
+            CrashExecutionOptions.TimeSeriesExecution());
 
     private static async Task PrepareAsync(string directory, DatabaseEngine database)
     {

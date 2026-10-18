@@ -33,8 +33,7 @@ public sealed partial class DatabaseEngine
         }
         ResourceRetirementStorage.RequireOpen(transaction, control.Lifetime, Limits);
         var receipt = PreparationReceipt(transaction, control, operation, phase.Phase, position);
-        var reservation = new ResourceRetirementOwnerReservationV1(control, receiver,
-            ResourceRetirementMovementSnapshot.Capture(transaction, OperationLimitsOptions), receipt)
+        var reservation = new ResourceRetirementOwnerReservationV1(control, receiver, [], receipt)
         {
             Attempt = body.Attempt,
             OriginalFingerprint = NativeOperationFingerprint.Compute(operation)

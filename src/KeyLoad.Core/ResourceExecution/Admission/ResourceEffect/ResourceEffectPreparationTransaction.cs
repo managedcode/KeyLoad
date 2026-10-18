@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Core.Features.ClusterRouting.Execution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.ResourceExecution;
@@ -23,10 +22,6 @@ internal sealed class ResourceEffectPreparationTransaction : ResourceEffectObser
         this.scope = scope;
         Work = work;
     }
-
-    internal ResourceEffectPreparationTransaction WithControlledResources(PartitionRef partition,
-        ImmutableArray<ResourceDefinition> definitions, ResourceLifetimeCoverageV1 coverage, int maximumBytes)
-        => new(new PartitionControlEffectTransaction(inner, partition, definitions, coverage, maximumBytes), scope, Work);
 
     public void Put(byte[] key, byte[] value) => inner.Put(key, value);
     public void Delete(byte[] key) => inner.Delete(key);

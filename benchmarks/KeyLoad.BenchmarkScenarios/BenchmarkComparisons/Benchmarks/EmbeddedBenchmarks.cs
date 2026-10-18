@@ -140,25 +140,15 @@ public class EmbeddedBenchmarks : IDisposable
 
         internal void Initialize(PartitionRef partition)
         {
-            const int BootstrapCatalogVersion = 1;
-            const int InitialCatalogRevision = 0;
-
             store = new(new(directory), options.Storage, options.PointCache, timeProvider);
             database = new(store, new AuthorizationPolicy(), options.Database, options.DueWork, options.EventSource,
-                options.Messaging, options.GraphExecution, options.ChangeFeedExecution, options.BlobExecution, options.NativeClaimsExecution, options.TimeSeriesExecution, options.MovementCheckpoints,
-                UnavailablePartitionMovementCheckpointVerifier.Instance, timeProvider);
+                options.Messaging, options.GraphExecution, options.ChangeFeedExecution, options.BlobExecution, options.NativeClaimsExecution, options.TimeSeriesExecution, timeProvider);
             database.Bootstrap(new(PrincipalId, PrincipalScope,
                 [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
             {
                 ClusterAdministrator = true
             },
                 DatabaseEngine.Credential(PrincipalId, PrincipalId, BenchmarkCredential));
-            var shardId = store.Identity.NodeId;
-            var catalog = new BootstrapPhysicalShardCatalogRequest(BootstrapCatalogVersion, InitialCatalogRevision, shardId, store.Identity.Incarnation,
-                [shardId.ToString(GuidFormat)]);
-            Database.Apply(Database.CreateNativeOperation(OperationKind.BootstrapPhysicalShardCatalog,
-                PhysicalShardCatalogIdentity.CreateBootstrapCommandId(shardId), PrincipalId,
-                timeProvider.GetUtcNow(), NativeSerialization.Serialize(catalog))).Get<bool>();
             Submit(OperationKind.ConfigureResource,
                 new ConfigureResourceRequest(TenantId, DatabaseId,
                     new(CollectionId, ResourceKind.Collection, CollectionId)));

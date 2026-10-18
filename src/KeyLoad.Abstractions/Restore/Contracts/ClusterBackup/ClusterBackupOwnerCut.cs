@@ -7,7 +7,6 @@ namespace KeyLoad;
 /// <param name="CaptureId">Stable identity of this real capture invocation.</param>
 /// <param name="Owner">Actual configured physical owner admitted against persisted catalog.</param>
 /// <param name="Catalog">Actual complete native physical catalog.</param>
-/// <param name="Directory">Actual explicit placement directory, if present.</param>
 /// <param name="StorePosition">Exact archived physical position.</param>
 /// <param name="AppliedIndex">Actual physical materialized replica cut.</param>
 /// <param name="Partitions">Complete native monotonic roster at the same view.</param>
@@ -20,7 +19,6 @@ public sealed record ClusterBackupOwnerCut(
     [property: Orleans.Id(ClusterBackupOwnerCut.CaptureField)] Guid CaptureId,
     [property: Orleans.Id(ClusterBackupOwnerCut.OwnerField)] PhysicalShardRecord Owner,
     [property: Orleans.Id(ClusterBackupOwnerCut.CatalogField)] PhysicalShardCatalog Catalog,
-    [property: Orleans.Id(ClusterBackupOwnerCut.DirectoryField)] AtomicPartitionPlacementDirectoryV1? Directory,
     [property: Orleans.Id(ClusterBackupOwnerCut.PositionField)] long StorePosition,
     [property: Orleans.Id(ClusterBackupOwnerCut.AppliedField)] long AppliedIndex,
     [property: Orleans.Id(ClusterBackupOwnerCut.PartitionsField)] ImmutableArray<ClusterBackupPartitionCut> Partitions,
@@ -35,7 +33,6 @@ public sealed record ClusterBackupOwnerCut(
     private const int CaptureField = 1;
     private const int OwnerField = 2;
     private const int CatalogField = 3;
-    private const int DirectoryField = 4;
     private const int PositionField = 5;
     private const int AppliedField = 6;
     private const int PartitionsField = 7;

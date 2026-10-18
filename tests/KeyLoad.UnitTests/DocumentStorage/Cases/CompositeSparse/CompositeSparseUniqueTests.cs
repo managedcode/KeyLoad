@@ -9,7 +9,7 @@ internal sealed class CompositeSparseUniqueTests
     [Arguments(false, true)]
     [Arguments(true, false)]
     [Arguments(true, true)]
-    public async Task Kl011CompositeNullAndMissingUniquePoliciesPreserveLiteralNativeDeltas(bool includeNull, bool includeMissing)
+    public async Task CompositeNullAndMissingUniquePoliciesPreserveLiteralNativeDeltas(bool includeNull, bool includeMissing)
     {
         using var db = new TestDatabase();
         db.Configure(CompositeSparseUniqueAssertions.Collection, ResourceKind.Collection,

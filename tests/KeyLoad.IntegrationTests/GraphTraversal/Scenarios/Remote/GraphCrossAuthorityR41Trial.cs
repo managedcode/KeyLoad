@@ -7,7 +7,7 @@ internal static class GraphCrossAuthorityR41Trial
 {
     internal static async Task RunAsync(ClusterFixture fixture, CancellationToken token)
     {
-        var state = new GraphCrossAuthorityR41State(await GraphIncomingRf3Scenario.CreateAsync(fixture, token));
+        var state = new GraphCrossAuthorityR41State(await GraphIncomingClusterScenario.CreateAsync(fixture, token));
         await OwnedAsync(fixture, state, async (administrator, reader) =>
         {
             await GraphCrossAuthorityR41Commands.SeedAsync(administrator, state, token);
@@ -27,7 +27,7 @@ internal static class GraphCrossAuthorityR41Trial
         await ColdAsync(fixture, state, token);
     }
 
-    private static async Task PolicyAsync(RequestCqrsRf3Callers administrator,
+    private static async Task PolicyAsync(RequestCqrsClusterCallers administrator,
         GraphCrossAuthorityR41State state, long epoch, CancellationToken token)
     {
         var original = state.Seed.Reader.Principal;
@@ -36,14 +36,14 @@ internal static class GraphCrossAuthorityR41Trial
             PolicyEpoch = epoch,
             Grants = epoch == 2L
             ? [.. original.Grants.Where(grant => grant.Database != state.Seed.FirstSourcePartition.DatabaseId
-                || grant.Resource != GraphIncomingRf3Scenario.Collection)] : original.Grants
+                || grant.Resource != GraphIncomingClusterScenario.Collection)] : original.Grants
         };
-        await SqlRf3Protocol.EqualAsync(desired, await McpCallerAssertions.SdkSuccessAsync(
+        await SqlClusterProtocol.EqualAsync(desired, await McpCallerAssertions.SdkSuccessAsync(
             await administrator.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), desired, token)));
         state.Hidden = epoch == 2L;
     }
 
-    private static async Task VerifyAsync(RequestCqrsRf3Callers administrator, RequestCqrsRf3Callers reader,
+    private static async Task VerifyAsync(RequestCqrsClusterCallers administrator, RequestCqrsClusterCallers reader,
         GraphCrossAuthorityR41State state, CancellationToken token)
     {
         await GraphCrossAuthorityR41Bounds.VerifyAsync(reader, administrator, state, token);
@@ -58,8 +58,8 @@ internal static class GraphCrossAuthorityR41Trial
     }
 
     private static async Task OwnedAsync(ClusterFixture fixture, GraphCrossAuthorityR41State state,
-        Func<RequestCqrsRf3Callers, RequestCqrsRf3Callers, Task> operation, CancellationToken token)
-        => _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
-            async administrator => await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2,
+        Func<RequestCqrsClusterCallers, RequestCqrsClusterCallers, Task> operation, CancellationToken token)
+        => _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
+            async administrator => await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2,
                 state.Seed.Reader.Secret, async reader => { await operation(administrator, reader); return true; }, token), token);
 }

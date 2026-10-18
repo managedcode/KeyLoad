@@ -25,7 +25,7 @@ internal static class RequestCqrsConnectionCancellationParser
         out RequestCqrsConnectionCancellationRecord record)
     {
         record = null!;
-        if (line.Length > RequestCqrsRf3McpRejectionNodeCapture.MaximumLineCharacters)
+        if (line.Length > RequestCqrsClusterMcpRejectionNodeCapture.MaximumLineCharacters)
         {
             return false;
         }

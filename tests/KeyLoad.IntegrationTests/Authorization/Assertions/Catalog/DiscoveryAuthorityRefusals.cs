@@ -22,7 +22,7 @@ internal static class DiscoveryAuthorityRefusals
         var sdkDenied = await reader.GetAsync(state.Scenario.Reference, token);
         await Assert.That(sdkDenied.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
         await SdkAsync(sdkDenied, state, ErrorCode.PermissionDenied);
-        await SqlRf3Protocol.EqualAsync(before, await DiscoveryAuthorityValues.ImageAsync(root, state, token));
+        await SqlClusterProtocol.EqualAsync(before, await DiscoveryAuthorityValues.ImageAsync(root, state, token));
     }
 
     internal static async Task UnauthenticatedAsync(ClusterFixture fixture, KeyLoadClient root, KeyLoadClient reader,
@@ -31,7 +31,7 @@ internal static class DiscoveryAuthorityRefusals
         var before = await DiscoveryAuthorityValues.ImageAsync(root, state, token);
         var sdk = await reader.GetAsync(state.Scenario.Reference, token);
         await SdkAsync(sdk, state, ErrorCode.Unauthenticated);
-        await SqlRf3Protocol.EqualAsync(new ManagedCode.Communication.Problem
+        await SqlClusterProtocol.EqualAsync(new ManagedCode.Communication.Problem
         {
             Type = UnauthenticatedProblemType,
             Title = nameof(ErrorCode.Unauthenticated),
@@ -39,16 +39,16 @@ internal static class DiscoveryAuthorityRefusals
             Detail = UnavailableCredentialDetail,
             ErrorCode = nameof(ErrorCode.Unauthenticated)
         }, sdk.Problem);
-        await SqlRf3Protocol.EqualAsync(before, await DiscoveryAuthorityValues.ImageAsync(root, state, token));
+        await SqlClusterProtocol.EqualAsync(before, await DiscoveryAuthorityValues.ImageAsync(root, state, token));
         var error = await Assert.ThrowsAsync<HttpRequestException>(() => session.CallAsync(
             McpCallerTools.DocumentsGet, new GetDocumentRequest(state.Scenario.Reference), token));
         await Assert.That(error).IsNotNull();
         await Assert.That(error?.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
         await Assert.That(error?.Message.Contains(state.Identity.Secret, StringComparison.Ordinal) == true).IsFalse();
         await Assert.That(error?.Message.Contains(McpDocumentProtocol.PrivateValue, StringComparison.Ordinal) == true).IsFalse();
-        await SqlRf3Protocol.EqualAsync(before, await DiscoveryAuthorityValues.ImageAsync(root, state, token));
+        await SqlClusterProtocol.EqualAsync(before, await DiscoveryAuthorityValues.ImageAsync(root, state, token));
         await McpUnauthorizedProbe.VerifyAsync(fixture, McpCallerProtocol.Node2, state.Identity.Secret, token);
-        await SqlRf3Protocol.EqualAsync(before, await DiscoveryAuthorityValues.ImageAsync(root, state, token));
+        await SqlClusterProtocol.EqualAsync(before, await DiscoveryAuthorityValues.ImageAsync(root, state, token));
     }
 
     private static async Task SdkAsync(ManagedCode.Communication.Result<DocumentReadResult> result,

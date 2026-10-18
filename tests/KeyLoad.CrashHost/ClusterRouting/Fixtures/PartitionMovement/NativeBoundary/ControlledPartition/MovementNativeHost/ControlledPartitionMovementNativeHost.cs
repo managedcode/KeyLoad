@@ -65,7 +65,6 @@ internal sealed partial class ControlledPartitionMovementNativeHost
         if (applicationDisposal is { IsCompletedSuccessfully: true })
         {
             ServerFailureObserver.Observe(() => ControlledPartitionMovementNativePublication.RequireClosed(silo(), discovery), failures);
-            ServerFailureObserver.Observe(NativeObservation.Dispose, failures);
             Volatile.Write(ref joined, silo().HasJoinedRequestWork && discovery?.Read().TransportReady != true);
         }
         ServerFailureObserver.ThrowIfAny(failures);

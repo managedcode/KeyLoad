@@ -1,7 +1,7 @@
 # ADR-042: explicit command admission and inbox resource ownership
 
 Status: Accepted implementation contract; implementation and qualification pending.
-Owner: ResourceExecution for the admission implementation; root owns shared integration, review and delivered qualification.
+Owner: ResourceExecution for the admission implementation.
 Related: ADR-033, ADR-035, ADR-041; ResourceExecution AC-MP-006/012 and
 REQ-RESOURCE-001 / AC-RESOURCE-001.
 
@@ -47,7 +47,7 @@ Name existing constants and error details once, with no budget or route changes.
 |---|---|---|
 | REQ-ADM-001: explicit bounded reservation transfer | AC-ADM-001: completion/failure/disposal releases once; rejected/canceled admission changes no quota; data saturation leaves control capacity | ResourceExecution `CommandAdmissionGovernorTests`, `HttpAdmissionGovernorTests` and `AdmissionOwnershipTests` |
 | REQ-ADM-002: correct inbox lifecycle | AC-ADM-002: FIFO and burst eight are exact; Stop fails queued work; waiting reader exits before DisposeAsync completes; repeated disposal is safe; disposed/concurrent-reader calls reject | ResourceExecution `AdmittedCommandInboxTests` and `AdmittedCommandReadAllocationTests` with bounded task coordination |
-| REQ-ADM-003: integrated current API | AC-ADM-003: all callers use the current declarations; actual dependency-enabled build and format pass; GitHub TUnit/full gates pass at delivered SHA | Current caller inventory, full Release build/format, exact-source Linux TUnit and required recovery/RF3 run/jobs/artifacts |
+| REQ-ADM-003: integrated current API | AC-ADM-003: all callers use the current declarations; actual dependency-enabled build and format pass; GitHub TUnit/full gates pass at delivered SHA | Current caller inventory, full Release build/format, exact-source Linux TUnit and required recovery/cluster run/jobs/artifacts |
 
 ```mermaid
 flowchart LR
@@ -73,12 +73,11 @@ flowchart LR
    negative argument, quota, principal, cancellation, stopped/disposed and
    concurrent-reader flows. No source-text behavior checks or test-only production
    hooks substitute for the real operation.
-3. Local unit and process-recovery tests use the canonical Aspire-owned entry and
+3. Local unit and process-recovery tests use the canonical native TUnit entry and
    are development evidence. Delivered qualification requires exact-source Linux
-   GitHub Build and Tests, recovery and RF3 jobs, with the RF3 path using the real
+   GitHub Build and Tests, recovery and replicated-cluster jobs, with that path using the real
    .NET and official MCP clients.
-4. Root owns shared contracts/configuration, caller integration, complete review
-   and delivery. Keep this ADR Accepted until every applicable criterion and
+4. Keep this ADR Accepted until every applicable criterion and
    delivered-source gate has actual evidence.
 
 A source overlap or need to change public behavior, quota/error order, persisted
@@ -96,93 +95,6 @@ actual configured Linux GitHub gates.
 Primary guidance: [CA2000 ownership transfer](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca2000)
 and [async disposal](https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-disposeasync).
 
-## Physical catalog startup control admission
-
-TASK-ADM-CATALOG-BOOTSTRAP implements the ResourceExecution refinement of
-REQ-RESOURCE-001 / AC-RESOURCE-001 and REQ-ADM-001 / AC-ADM-001. Original Linux
-run37541109923 rejects `BootstrapPhysicalShardCatalog` during node1 startup at
-`PhysicalShardCatalogStartup.SubmitBootstrapAsync`; its ordinary data ceiling is
-4,096 bytes, exactly the governor's envelope floor, and serialized bootstrap
-work cannot fit. Node2's subsequent unavailable-majority error is secondary.
-The initial catalog mutation must use the existing bounded control reserve.
-It remains administrator-authenticated, authorized and RF3 committed through
-the same unique request grain; no admission or credential bypass is introduced.
-
-Root freezes this contract, the worker changes only
-`src/KeyLoad.Core/ResourceExecution/Commands/CommandAdmission/CommandAdmissionGovernor.cs`
-and its existing `CommandAdmissionGovernorTests.cs`, then root reviews and joins
-strict build/format, focused normal/scalar governor operations and the unchanged
-actual Aspire RF3 admission case. Add only the existing bootstrap operation kind
-to the reserved classifier; preserve every lane ceiling and shared replication
-or inbox consumer. The regression executes full data/control reserve,
-rejection, exact lease release and healthy reuse, rather than asserting the
-classifier result alone. Delivered qualification requires the original Linux
-SDK/control/RF3 flow; source or local governor success cannot establish it.
-No wire, storage, deployment, format or dependency change is needed. Rollback
-removes only this operation's classifier inclusion and its matching regression;
-the original startup failure remains unqualified until real execution passes.
-
-## Native runtime-journal startup control admission
-
-TASK-ADM-RUNTIME-JOURNAL-BOOTSTRAP extends the existing catalog startup reserve
-under REQ/AC-RESOURCE-001 and REQ/AC-ADM-001. R199's actual RF3 admission flow
-fails in RuntimeJournalStartupRequests.BootstrapAsync:4096-byte data capacity
-cannot retain its ordinary envelope plus payload. The complete closed action,
-shape, native authority, bounds and negative matrix are frozen in the linked
-ResourceExecution feature before code. Reserve only the exact authenticated
-native BootstrapIdentity shape; ordinary RuntimeJournal actions remain data.
-No kind-wide exemption, caller role/purpose trust, data-budget change or journal
-provider replacement is accepted. The signed request, persisted administrator,
-protected identity, reauthorization, ordered apply and RF3 contracts stay exact.
-
-Ordered implementation: root freezes contract; worker uses native bounded
-inspection and current shape checks, then joins operation-aware reservation in
-Core ResourceExecution/Commands, immutable admitted lane reuse in inbox/command
-and CommandInboxLanes, and matching post-authority replica classification in
-Replication/ClusterReplication/Admission/ReplicaNativeOperationAdmission.cs.
-Worker adds whole-operation ResourceExecution unit cases/helpers with genuine
-issued native operations, state preservation, saturation/release and healthy
-reuse. Root independently reviews the guarded source, runs full Release,
-normal/scalar focused operations and formatter/governance, then uses a fresh
-verified image for the unchanged real SDK/MCP admission RF3 case and original
-Linux qualification. Existing journal authority/signature/purpose and recovery
-regressions remain mandatory. Capture lane once and preserve all fairness and
-shutdown ownership; never materialize an unbounded ordinary body to classify it.
-
-No storage/wire/dependency/public API rollout is required. Rollback removes only
-this narrow classifier/reservation integration and matching regressions; no data
-rewrite, migration or alternate representation exists. Until actual required
-native gates pass, this accepted repair is source work pending qualification.
-Full admission/mixed-load/performance and other feature gates remain open.
-
-
-## TASK-KL076-TENANT-TURNS-001
-
-REQ-RESOURCE-TENANT-001 / AC-RESOURCE-TENANT-001 supersedes only global FIFO between tenants: the existing two-lane inbox preserves FIFO within each authenticated tenant and dispatches one command per tenant turn in each lane. The original configured control burst, reservation ceilings, fresh persisted principal, single consumer/commit gate, original cancellation and consumer-owned completion/release remain unchanged. Tenant comes from the immutable actual admitted lease, never caller roles or payload claims. Empty tenant queues are removed, and queue owners are bounded by outstanding admitted commands. No public/persisted contract, default, provider or dispatcher changes. Modeled bytes are not process RSS.
-
-The finite native operation flow queues busy A and B, proves B's independent literal fair turn and A's per-tenant order, cap-refusal complete no-effects, accepted-response cancellation retaining ownership, joined real producer release, healthy subsequent work, exact original receipt replay and same-root cold records. Existing control-burst/single-tenant FIFO/shutdown/cancellation operation tests remain mandatory. Core ResourceExecution owns CommandInboxLanes, AdmittedCommand and feature-local CommandTenantLane; Unit ResourceExecution owns TenantAdmissionWholeFlowTests and its genuine fixture/assertions. Root integrates guarded docs before code and executes final whole-source/Linux gates. No numeric UID or runtime PASS is assigned from source. SDK/official MCP sustained overload, physical CPU/RSS/disk liveness, compaction/reindex/transitive budgets and full KL-076 acceptance remain OPEN.
-
-
-TASK-KL076-WAIT-CANCELLATION-002 retains the first actual tenant operation failure and corrects only its authored CLR wait oracle: pre-cancelled original Task.WaitAsync must throw exact TaskCanceledException with the same original caller token, while synchronous admission cancellation remains exact OperationCanceledException. The admitted completion stays pending and the complete reservation/raw state/journal image remains unchanged until the original native producer settles. No product cancellation, deadline, lease, result or cold contract changes. The original full flow/UID and all independent literal receipts/records remain mandatory.
-
-
-TASK-KL076-SEMANTIC-RECEIPT-003 retains the corrected runtime original failure: MutationReceipt native record equality also compares its private ImmutableArray backing state, so default-versus-empty representation can reject an otherwise equal complete logical receipt. The whole tenant operation independently checks every native field: mutation Kind/Resource/Id/Revision plus complete CompositionReferences; DocumentResult Reference/Revision/Json/Redacted/RedactedFields; canonical DocumentRecord Reference/Revision/Json/Access OwnerId/ProjectId/TeamId/UpdatedAt/Deleted. Literal records, original signed timestamps, complete original commit token/durability, exact native original outcome replay, raw no-effect image/journal cut and cold healthy assertions remain unchanged. No observed value becomes an expected value, no field is omitted, and no production serialization/layout/equality contract changes. Initial compiler/wait/mutation failures remain immutable; fresh whole-operation runtime qualification is required.
-
-TASK-KL076-ORIGINAL-FAILURE-004: the whole operation decodes its original native result before the full replay oracle, preserving the actual returned ErrorCode/SafeDetail exception on rejection rather than replacing it with a missing-value assertion. Every existing full result/model/raw-cut assertion remains. Original R3 failure is retained; no cause is assigned until original result evidence.
-
-TASK-KL076-NATIVE-SELECTED-CLOCK-005: original R4 returned ClockUncertain because the test submitted preissued commands with explicitTime=true after fair reordering. Actual ReplicaLeader.AppendOwned evaluates using state.Clock inside its selected leader gate before native append. The complete operation now uses existing TestDatabase.SubmitIssuedEmbedded with original cancellation; literal UpdatedAt is bound to the genuine retained native entry, with original command ID/principal/body equality, original complete receipt/replay and unchanged raw/cold assertions. No production clock, native authority, guard, quota or outcome changes. Original R4 remains failed and does not establish a product scheduler defect.
-
-REQ-RESOURCE-TENANT-SHUTDOWN-001 / AC-RESOURCE-TENANT-SHUTDOWN-001 / TASK-KL076-TENANT-SHUTDOWN-001: the existing complete tenant operation now additionally owns an independent native fixture proving Stop releases queued A/B leases with exact UnknownWriteOutcome/503/original detail and no storage/journal effects while retaining the selected original reservation. The selected genuine native producer ACKs; a fresh inbox re-admits the unchanged never-applied IDs, proves full literal receipts/models/replay, joins both inboxes and reopens the same native root for complete cold replay and healthy continuation. No new declaration/UID/product policy/clock/budget/timeout is introduced.
-
-REQ-TIME-PEER-001 / AC-TIME-PEER-001 / TASK-TIME-PEER-001: the genuine native peer signer and receiver use the same borrowed fixture TimeProvider. An unchanged original signed envelope expires without nonce or canonical effects; fresh real request/reply preserves every field/body/MAC and exact provider timestamp, then original duplicate refuses with unchanged complete native state. Existing System-clock controls and product clocks/config/defaults/aliases/quotas remain unchanged. The fixture-only optional provider and complete operation do not qualify RF3, database effects or the global call-site audit.
-
-
 ## Queue-owned command reservation transfer
 
-TASK-KL076-QUEUED-LEASE-001 refines REQ-RESOURCE-001 / AC-RESOURCE-001, REQ-ADM-001/002 / AC-ADM-001/002 and REQ-RESOURCE-TENANT-001 / AC-RESOURCE-TENANT-001. The current inbox returns its command before actual dequeue; premature public finalization currently returns governor capacity while the original command/TCS/tenant turn and signal remain queued. This source-proven bounded-retention counterexample has no assigned historical runtime failure or measured memory/latency magnitude.
-
-The existing actual CommandTenantLane.Dequeue marks transfer only after removing that command. Before transfer, Complete/Fail reject InvalidOperationException without result/finalization/lease mutation. Dispose from an awaiting submitting scope leaves queue-owned work and reservation intact, just as response cancellation cannot release accepted ownership; the consumer or Stop still owns settlement. After actual transfer, the original Complete/Fail/Dispose once-only result/error/release stays unchanged. Stop already removes each queued entry before failing it; no new queue, lock, provider, dispatcher, quota, numeric default, caller role or wire/persistence contract exists. Native mark-transfer is internal to the existing queue, not authority supplied by a caller. A disposal racing dequeue may finalize only after removal, when queue retention no longer requires that lease.
-
-Extend the EXISTING TenantAdmissionWholeFlowTests operation through TenantAdmissionRefusals: queued Dispose twice, premature Complete and Fail must preserve pending completion, the FULL governor snapshot and genuine raw storage/journal cuts. The original capacity refusal, principal mismatch and original response cancellation remain; actual subsequent dequeue must return the same original IDs in the existing tenant order. Genuine ordered native submit retains every literal receipt/model/outcome, known same-ID replay, healthy following command, joined inbox shutdown and same-root cold receipt/model assertions. No new test declaration/UID, fake completion, arbitrary root, forced scalar, deadline or healthy clock change. Existing inbox FIFO/control-burst, dispatched disposal, tenant shutdown and reader-drain cases remain mandatory.
-
-Owned source: Core ResourceExecution AdmittedCommand and CommandTenantLane; existing Unit ResourceExecution TenantAdmissionRefusals. Core public valid consumer calls and actual ClusterCoordinator.AdmitAsync/ExecuteAsync remain unchanged: authenticated pending response cancellation does not dispose a queued command; actual consumer completes only a removed command. Existing using scopes in whole tests can dispose still-queued work on assertion failure, so queued Dispose is deferred, not a cleanup-throw workaround. Current source review is not runtime/compiler/PASS; Root owns native build/analysis/format/native50 and exact-source Linux/RF3 qualification. Full KL076 admission/resource/performance gates remain open.
+REQ-RESOURCE-001 / AC-RESOURCE-001, REQ-ADM-001/002 / AC-ADM-001/002 and REQ-RESOURCE-TENANT-001 / AC-RESOURCE-TENANT-001: a queued command's governor reservation is owned by the queue until the actual dequeue. `CommandTenantLane.Dequeue` marks transfer only after removing the command. Before transfer, Complete and Fail reject with InvalidOperationException without result, finalization or lease mutation, and Dispose from an awaiting submitting scope leaves queue-owned work and reservation intact (response cancellation cannot release accepted ownership); the consumer or Stop still owns settlement. After transfer the original once-only Complete/Fail/Dispose result, error and release are unchanged. The tenant admission whole-flow operation verifies that queued Dispose twice, premature Complete and Fail preserve the pending completion, the full governor snapshot and raw storage/journal cuts, and that the next dequeue returns the same IDs in tenant order.

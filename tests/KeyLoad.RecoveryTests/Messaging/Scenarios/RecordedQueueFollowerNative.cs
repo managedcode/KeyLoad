@@ -28,7 +28,7 @@ internal static class RecordedQueueFollowerNative
         token.ThrowIfCancellationRequested();
         var index = checked(leader.Log.State.LastIndex + NextIndexStep);
         var placement = leader.Database.ReadAtomicPartitionPlacement(PeerDiscoveryNativeClockProfile.PrincipalId,
-            new(PlacementVersion, Partition));
+            Partition);
         var expected = new CommitToken(placement.Incarnation, Partition.AtomicPartitionId, index, placement.PlacementEpoch);
         var original = leader.Database.CreateNativeOperation(kind, id, PeerDiscoveryNativeClockProfile.PrincipalId,
             default, NativeSerialization.Serialize(request));

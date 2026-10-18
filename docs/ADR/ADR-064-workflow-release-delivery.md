@@ -1,10 +1,10 @@
 # ADR-064: Four workflows and source-bound release delivery
 
-Status: Accepted. Date: 2026-10-03. Owner: KeyLoad lead/integrator.
+Status: Accepted. Date: 2026-10-03.
 Requirements/acceptance: REQ/AC-PIPE-001..004 and REQ/AC-REL-001..003.
 Workflow responsibility follows ADR-062 and independent Website publication in ADR-112.
-The later owner correction defers actual Release packaging/publication until product
-readiness or an explicit release request; retain this implementation contract for
+Actual Release packaging/publication is deferred until product
+readiness or an explicit release request; this implementation contract describes
 the prepared manual workflow. Provider qualification remains deferred.
 
 ## Decision and implementation contract
@@ -15,12 +15,12 @@ Website workflow; Website owns its qualification and Pages deployment;
 Release is a prepared manual workflow; execute packaging or publication only
 after product readiness or an explicit owner release request. When authorized, it
 builds and publishes source-bound database distributions/images/packages with
-`vM.m.yyMMdd.N`. Keep the existing RF3 topology, node-local storage, workloads,
+`vM.m.yyMMdd.N`. Keep the existing cluster topology, node-local storage, workloads,
 isolated Linux cells and all product/site qualification requirements.
 
 ```mermaid
 flowchart TD
-    CI[Build and Tests unit scalar recovery RF3] --> Gate[Exact-source successful CI]
+    CI[Build and Tests unit scalar recovery cluster] --> Gate[Exact-source successful CI]
     B[Benchmarks all native cells] --> A[Complete same-run aggregate]
     A --> Trigger[Final Benchmarks Website dispatch]
     Trigger --> Q[Independent Website qualification]
@@ -31,13 +31,11 @@ flowchart TD
     Gate --> F
 ```
 
-1. Lead owns workflow YAML, central version, Dockerfiles/distribution, policies,
-   source-closure integration, durable docs, commits/pushes and final evidence.
-   The [execution graph](../implementation/pipeline-release-v2-execution.md) defines
-   disjoint read/write workers and lead join/review. Approved acceptance precedes
-   write delegation. Local development uses only the Aspire-owned entry; exact-source Linux delivery gates remain required.
+1. The workflow YAML, central version, Dockerfiles/distribution, policies,
+   source-closure integration and durable docs are one coherent change with its
+   final evidence. Approved acceptance precedes implementation. Local development uses only the native TUnit entry; exact-source Linux delivery gates remain required.
 2. Build and Tests retains analyzer/full build/format/governance/unit/scalar/
-   process recovery and genuine Docker/Aspire SDK/MCP RF3 under main/PR/manual.
+   process recovery and genuine Docker/Aspire SDK/MCP cluster under main/PR/manual.
    Every suite enters the intended AppHost and uses its discovered endpoints;
    failures remain visible and no required suite is skipped to publish a release.
 3. Benchmarks retains the complete canonical per-database matrices, isolated Linux
@@ -61,8 +59,8 @@ flowchart TD
 6. Read-only build restores/builds/formats/governs full source, packs actual projects,
    publishes Linux x64 server distribution, builds/exports existing server and
    benchmark images with version/source labels, verifies package versions and all
-   asset hashes. RF3 distribution uses three persistent node-local Docker owners
-   and the existing exact membership/routing configuration, with no local user data.
+   asset hashes. cluster distribution uses three persistent node-local Docker owners
+   and the existing exact cluster configuration, with no local user data.
 7. After the Release workflow is authorized, write-limited publication verifies
    exact-source successful CI and actual assets,
    creates an annotated source/run/manifest-bound git tag without force, pushes
@@ -71,21 +69,15 @@ flowchart TD
    identities; reject foreign/conflicting tags/images/assets. Failed publication
    retains recoverable evidence; do not mark partial output successful. Credentials
    stay in GitHub job context. No DNS or NuGet feed publication is added.
-8. Integrate TUnit role/version/current-producer/nonproducer regressions;
-   inspect all worker diffs and exact original native jobs; validate static scoped
-   inventory, commit/push main, inspect actual CI/Benchmarks/Release jobs/artifacts.
-   Current pre-existing SDK-status/RF3/Timescale/full-archive gaps remain explicit.
+8. TUnit role/version/current-producer/nonproducer regressions join the change;
+   exact original native jobs are inspected, static scoped inventory is validated,
+   and actual CI/Benchmarks/Release jobs/artifacts are checked.
+   Current pre-existing SDK-status/cluster/Timescale/full-archive gaps remain explicit.
    Accepted cannot become Implemented without all required delivery evidence.
 
 ## Readable shared Benchmarks repair contract
 
-REQ-PIPE-005/006 / AC-UB-001..006 under [acceptance](../implementation/unified-benchmarks-workflow.md#acceptance)
-and [task graph](../implementation/unified-benchmarks-workflow.md#execution) implement the owner's subsequent
-job/step correction. The lead owns four workflow files, used composite labels,
-policy and durable docs. A bounded test worker owns existing workflow-source tests
-and new label regressions; a bounded contract worker owns only displayed-name
-collector constants and matching independent oracles after the exact name map is
-frozen. No topology, ACK, credentials, storage, package, workload or release change.
+REQ-PIPE-005/006 / AC-UB-001..006 implement the job/step naming requirement across the four workflow files, used composite labels, policy and durable docs. No topology, ACK, credentials, storage, package, workload or release change.
 
 ```mermaid
 flowchart LR
@@ -121,5 +113,4 @@ rolls orchestration back, while published artifacts/tags remain recoverable reco
 Missing complete metric inputs cannot supply partial metrics; Website may publish its
 qualified content-only state under ADR-112. A failed exact-source Build and Tests
 gate blocks Release publication. The
-[acceptance matrix](../implementation/pipeline-release-v2-acceptance.md) maps every
-criterion to TUnit, authentic provider/artifact proof or an explicit blocked review.
+acceptance criteria map each requirement to TUnit, authentic provider/artifact proof or an explicit blocked review.

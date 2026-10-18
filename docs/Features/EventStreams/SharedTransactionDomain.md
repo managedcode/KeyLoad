@@ -1,6 +1,6 @@
-# Shared TransactionDomain (KL-081)
+# Shared TransactionDomain
 
-Status: reviewed SourceN implementation ready for main integration; no current compiled discovery, runtime or RF3 acceptance.
+Status: reviewed implementation; no current compiled discovery, runtime or cluster acceptance.
 Owner: companion2 root. Canonical feature: [EventStreams](../EventStreams.md).
 
 A persisted resource definition supplies its transaction domain. Tenant, database,
@@ -10,7 +10,7 @@ identities. Resource policy updates do not rebind an existing resource's domain.
 
 | Requirement | Acceptance | Original operation proof |
 |---|---|---|
-| REQ-SHARED-DOMAIN-001: resolve every referenced resource through the current persisted catalog | AC-SHARED-DOMAIN-001: two active domains on the same owner, same literal key and same command/entity/event/message IDs retain distinct records, immutable receipts, native outcome rows and signed claims | SharedDomainWholeFlowTests; SharedDomainProcessRecoveryTests; SharedDomainPublicRf3Tests |
+| REQ-SHARED-DOMAIN-001: resolve every referenced resource through the current persisted catalog | AC-SHARED-DOMAIN-001: two active domains on the same owner, same literal key and same command/entity/event/message IDs retain distinct records, immutable receipts, native outcome rows and signed claims | SharedDomainWholeFlowTests; SharedDomainProcessRecoveryTests; SharedDomainPublicClusterTests |
 | REQ-SHARED-DOMAIN-002: one producer/consumer request affects only its authorized full atomic scope | AC-SHARED-DOMAIN-002: real document+event+queue producer and processing effects+ACK commit together; late foreign-domain producer/consumer effects refuse with Conflict and leave both domains' model bytes intact | Same native workflow and real process cuts; public .NET and official MCP flows |
 | REQ-SHARED-DOMAIN-003: preserve the prior isolated resource-domain contract | AC-SHARED-DOMAIN-003: collection, StreamSet and queue each bind to their own resource-name domain; the SAME command GUID succeeds independently in all three scopes, while a mixed legacy-resource batch is refused | Same five-scope corpus; no legacy parser, lookup fallback or data conversion |
 | REQ-SHARED-DOMAIN-004: retain current authority and binding after retry/restart | AC-SHARED-DOMAIN-004: denied historical replay discloses no receipt, restored grants retain the historical policy-epoch fence and permit fresh healthy IDs; original outcome bytes remain unchanged; domain rebinding refuses UnsupportedCapability; two cold owners retain exact identity, native history, content and healthy continuation | Native raw-history/policy and Docker SDK/MCP same-volume cold phases |
@@ -21,7 +21,7 @@ flowchart LR
     Catalog --> Scope{Same tenant/database/domain/key?}
     Scope -->|yes| Commit[One ordered node-local atomic commit]
     Scope -->|no| Refuse[Stable refusal without model effects]
-    Commit --> RF3[Unchanged RF3 acknowledgement barrier]
+    Commit --> cluster[Unchanged cluster acknowledgement barrier]
     Commit --> History[Scoped immutable outcomes and fenced delivery]
 ```
 
@@ -46,7 +46,7 @@ capability or performance claim is introduced. SQL uses the existing authorized
 model operations; complete SQL/protocol qualification is a separate existing gate.
 Unit uses genuine ZoneTree and current native APIs. Process cases kill only the
 owned child after native boundaries and join exit/readers/locks; they do not prove
-power-loss durability. Public cases require fixture-owned Aspire Docker RF3,
+power-loss durability. Public cases require fixture-owned Aspire Docker cluster,
 actual .NET SDK and official MCP clients, unchanged persisted identity, discovery
 and connection-owned Orleans execution. Native discovery supplies real test UIDs;
 source declarations and prepared-source previews are not execution receipts.
@@ -54,16 +54,15 @@ source declarations and prepared-source previews are not execution receipts.
 Join order: this contract, shared immutable corpus, native operations/oracles,
 process child and recovery oracle, actual public client flow, reviewed ordinary
 CrashHost dispatch addition, then sole main coordinator formatting/build/full
-required unit/recovery/RF3 checks. No product change is presently justified by a
-confirmed defect. SourceN remains unadoptable until the complete packet and peers
+required unit/recovery/cluster checks. No product change is presently justified by a
+confirmed defect. The implementation remains unadoptable until the complete packet and peers
 are ready; rollback removes additive test/contract source only, never data.
 
 The public flow submits all five original producers through one actual SDK object
 and independently replays them through the official MCP client. This does not infer
 transport activation counts; ADR-125's existing native connection probes qualify
-that separate lifecycle contract. It verifies actual persisted RF3 placement, all
-three native voter identities and distinct atomic identities on the same physical
-owner, then kills/joins/restarts every original node twice through ClusterFixture.
+that separate lifecycle contract. It verifies all
+three native replica identities and distinct atomic identities, then kills/joins/restarts every original node twice through ClusterFixture.
 Original credentials and volumes are retained; each cold phase creates real fresh
 client connections and rechecks original receipts, models and event history.
 
@@ -87,4 +86,4 @@ acknowledged writes; cross-node equal cut numbers are not asserted.
 No compatibility path, persisted alias/field ID, credential format, retention
 policy, delivery generation or deduplication horizon changes. The initial public
 producer, genuine claimed Processing+effects+ACK, policy revoke/restore, fresh
-healthy producer and second cold continuation belong to one complete RF3 flow.
+healthy producer and second cold continuation belong to one complete cluster flow.

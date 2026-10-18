@@ -9,7 +9,7 @@ using KeyLoad.UnitTests.Features.DocumentStorage;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 
-/// <summary>Uses two original real ZoneTree owners; this is target-execution evidence, not an RF3 transport.</summary>
+/// <summary>Uses two original real ZoneTree owners; this is target-execution evidence, not an CLUSTER transport.</summary>
 internal sealed class QueryLifetimeNativeFlow(RemoteDocumentNativeFixture fixture, bool sourceNarrower)
 {
     internal RemoteDocumentNativeFixture Fixture => fixture;

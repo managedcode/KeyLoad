@@ -6,7 +6,7 @@ namespace KeyLoad.IntegrationTests.Features.Messaging;
 
 internal static partial class QueueLifecyclePublicPhase
 {
-    internal static async Task ContinueAsync(ClusterFixture fixture, RequestCqrsRf3Callers callers, QueueLifecyclePublicState state, CancellationToken token)
+    internal static async Task ContinueAsync(ClusterFixture fixture, RequestCqrsClusterCallers callers, QueueLifecyclePublicState state, CancellationToken token)
     {
         await QueueLifecyclePublicAssertions.InitialAsync(callers, state, token);
         await QueueLifecyclePublicRoutes.ReplayAsync(callers, state, token);
@@ -26,7 +26,7 @@ internal static partial class QueueLifecyclePublicPhase
         var delivery = await ClaimAsync(callers, state, QueueLifecyclePublicProtocol.Pending, token);
         await Assert.That(delivery.DeliveryGeneration).IsEqualTo(QueueLifecyclePublicProtocol.Two);
         var old = new DeliveryCommand(Guid.NewGuid(), state.Lane, state.OriginalPending!.Token, DeliveryAction.Ack);
-        await SagaTimeoutRf3Assertions.AssertSdkErrorAsync(await callers.Sdk.CompleteAsync(old, token), ErrorCode.StaleLease);
+        await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(await callers.Sdk.CompleteAsync(old, token), ErrorCode.StaleLease);
         await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.MessagesComplete, old, token), ErrorCode.StaleLease, dispatched: true);
         await CompleteAsync(callers, state, delivery, DeliveryAction.Ack, token);
         await QueueLifecyclePublicAssertions.TerminalAsync(callers, state, token);

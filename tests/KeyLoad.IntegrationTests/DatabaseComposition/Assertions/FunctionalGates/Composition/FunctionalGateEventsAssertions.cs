@@ -43,7 +43,7 @@ internal static class FunctionalGateEventsAssertions
             McpCallerTools.DocumentsCommit, command, token), ErrorCode.PermissionDenied, dispatched: true);
     }
 
-    internal static async Task ReadAsync(FunctionalGateContext context, RequestCqrsRf3Callers caller,
+    internal static async Task ReadAsync(FunctionalGateContext context, RequestCqrsClusterCallers caller,
         StreamRef stream, EventData[] expected, CommitReceipt receipt, CancellationToken token)
     {
         var sdk = await context.SdkAsync(caller.Sdk.ReadStreamAsync(new(stream), token));
@@ -91,7 +91,7 @@ internal static class FunctionalGateEventsAssertions
         await Assert.That(JsonElement.DeepEquals(expectedHeaders.RootElement, actualHeaders.RootElement)).IsTrue();
     }
 
-    private static async Task TraversalAsync(FunctionalGateContext context, RequestCqrsRf3Callers caller,
+    private static async Task TraversalAsync(FunctionalGateContext context, RequestCqrsClusterCallers caller,
         StreamRef stream, StreamPage full, CancellationToken token)
     {
         var reverseRequest = new ReadStreamRequest(stream, Direction: StreamReadDirection.Backward);
@@ -124,7 +124,7 @@ internal static class FunctionalGateEventsAssertions
         await Assert.That(suffix.Head).IsEqualTo(full.Head);
     }
 
-    private static async Task ReplayAsync(FunctionalGateContext context, RequestCqrsRf3Callers caller,
+    private static async Task ReplayAsync(FunctionalGateContext context, RequestCqrsClusterCallers caller,
         StreamRef stream, StreamPage full, CancellationToken token)
     {
         var request = new ReadAggregateReplayRequest(stream, FunctionalGateEventsProtocol.Reducer,
@@ -144,7 +144,7 @@ internal static class FunctionalGateEventsAssertions
         await SameAsync(full.Events, actual.Events);
     }
 
-    private static async Task SourceAsync(FunctionalGateContext context, RequestCqrsRf3Callers caller,
+    private static async Task SourceAsync(FunctionalGateContext context, RequestCqrsClusterCallers caller,
         StreamRef stream, StreamPage full, CancellationToken token)
     {
         var source = new EventSourceRef(stream.Partition, stream.StreamSet, EventSourceKind.Stream, stream.StreamId);

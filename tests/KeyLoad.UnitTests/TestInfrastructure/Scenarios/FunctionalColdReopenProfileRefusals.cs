@@ -40,6 +40,5 @@ internal static class FunctionalColdReopenProfileRefusals
         yield return [new(P.Suite, "unit")];
         yield return [new(P.LoggerControl, P.True)];
         yield return [new(P.Benchmark, P.True)];
-        yield return [new(P.TwoRf3, "two-rf3")];
     }
 }

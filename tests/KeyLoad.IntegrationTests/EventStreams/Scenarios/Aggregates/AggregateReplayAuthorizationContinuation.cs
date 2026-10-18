@@ -10,8 +10,8 @@ internal static class AggregateReplayAuthorizationContinuation
 {
     private static readonly string[] Nodes = [McpCallerProtocol.Node1, McpCallerProtocol.Node2, McpCallerProtocol.Node3];
 
-    internal static async Task RunAsync(ClusterFixture fixture, AggregateReplayRf3Scenario scenario,
-        AggregateReplayRf3Tests owner, CancellationToken token)
+    internal static async Task RunAsync(ClusterFixture fixture, AggregateReplayClusterScenario scenario,
+        AggregateReplayClusterTests owner, CancellationToken token)
     {
         var failures = new List<Exception>();
         AggregateReplayAuthorizationOriginal? original = null;
@@ -36,7 +36,7 @@ internal static class AggregateReplayAuthorizationContinuation
         ServerFailureObserver.ThrowIfAny(failures);
         var root = fixture.Root;
         var before = await StatusesAsync(fixture, token);
-        await FeedLiveRf3Cold.RestartAsync(fixture, token);
+        await FeedLiveClusterCold.RestartAsync(fixture, token);
         await Assert.That(fixture.Root).IsEqualTo(root);
         await Assert.That(Directory.Exists(root)).IsTrue();
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -52,9 +52,9 @@ internal static class AggregateReplayAuthorizationContinuation
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static Task<RequestCqrsRf3Callers> ConnectAsync(ClusterFixture fixture,
-        AggregateReplayRf3Scenario scenario, CancellationToken token)
-        => RequestCqrsRf3Callers.ConnectObservedAsync(fixture.App, McpCallerProtocol.Node3,
+    private static Task<RequestCqrsClusterCallers> ConnectAsync(ClusterFixture fixture,
+        AggregateReplayClusterScenario scenario, CancellationToken token)
+        => RequestCqrsClusterCallers.ConnectObservedAsync(fixture.App, McpCallerProtocol.Node3,
             scenario.WorkerSecret, McpCallerHttp.Create(fixture, McpCallerProtocol.Node1), token);
 
     private static async Task<NodeStatus[]> StatusesAsync(ClusterFixture fixture, CancellationToken token)

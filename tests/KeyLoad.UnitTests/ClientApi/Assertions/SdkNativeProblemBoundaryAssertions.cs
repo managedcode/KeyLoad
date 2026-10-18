@@ -24,7 +24,7 @@ internal static class SdkNativeProblemBoundaryAssertions
         await Assert.That(operation.Id).IsEqualTo(command.CommandId);
         await Assert.That(operation.PrincipalId).IsEqualTo(root ? P.Root : state.Principal.Id);
         await EqualAsync(command, NativeCommandPayload.Read<CommandRequest>(operation));
-        var placement = db.Database.ReadAtomicPartitionPlacement(P.Root, new(P.PlacementVersion, db.Partition));
+        var placement = db.Database.ReadAtomicPartitionPlacement(P.Root, db.Partition);
         MutationReceipt[] mutations = root
             ? [new(P.Put, state.Forbidden.Collection, P.Document, P.FirstRevision), new(P.Put, P.Allowed, P.Document, P.FirstRevision)]
             : [new(P.Put, P.Allowed, P.Document, P.HealthyRevision)];

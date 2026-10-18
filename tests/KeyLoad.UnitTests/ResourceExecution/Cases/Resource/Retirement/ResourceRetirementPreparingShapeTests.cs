@@ -1,6 +1,6 @@
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
-// Native generated DTO and private shape boundary tests; no live membership, transport or RF3 qualification claim.
+// Native generated DTO and private shape boundary tests; no live membership, transport or CLUSTER qualification claim.
 internal sealed class ResourceRetirementPreparingShapeTests
 {
     [Test]

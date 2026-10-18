@@ -3,7 +3,7 @@ namespace KeyLoad.UnitTests.Features.DatabaseComposition;
 internal sealed class TypedQueueGraphPrimaryIdentityTests
 {
     [Test]
-    public async Task AcKl095TypedRetainedPrimaryJsonRefusesAtomicCompositionThenRepairsOriginalIdAndColdContinuation()
+    public async Task TypedRetainedPrimaryJsonRefusesAtomicCompositionThenRepairsOriginalIdAndColdContinuation()
     {
         foreach (var from in new[] { true, false })
         {

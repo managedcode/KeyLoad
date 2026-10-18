@@ -5,7 +5,7 @@ namespace KeyLoad.IntegrationTests.Features.GraphTraversal;
 
 internal static class GraphCycleFrontierPublicBounds
 {
-    internal static async Task VerifyAsync(RequestCqrsRf3Callers admin, RequestCqrsRf3Callers reader,
+    internal static async Task VerifyAsync(RequestCqrsClusterCallers admin, RequestCqrsClusterCallers reader,
         GraphCycleFrontierPublicState state, CancellationToken token)
     {
         await GraphCycleFrontierPublicReads.MatrixAsync(admin, reader, state, token);

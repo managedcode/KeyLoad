@@ -11,14 +11,14 @@ internal static class NativeTextRequestRefusalPublicTrial
 
     internal static async Task RunAsync(ClusterFixture fixture, CancellationToken token)
     {
-        _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
+        _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
             fixture.AdminKey, async administrator =>
             {
-                var scenario = await NativeTextRf3Scenario.CreateAsync(fixture, token);
+                var scenario = await NativeTextClusterScenario.CreateAsync(fixture, token);
                 var identity = await scenario.CreateReaderAsync(fixture, true, true, false, true, token);
                 var original = await PublishAsync(administrator, scenario, token);
                 var baseline = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.OutboxStatusAsync(scenario.Partition, token));
-                return await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2,
+                return await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2,
                     identity.Secret, async reader =>
                     {
                         var healthy = scenario.Text(Term);
@@ -38,12 +38,12 @@ internal static class NativeTextRequestRefusalPublicTrial
             }, token);
     }
 
-    private static async Task<Original> PublishAsync(RequestCqrsRf3Callers administrator,
-        NativeTextRf3Scenario scenario, CancellationToken token)
+    private static async Task<Original> PublishAsync(RequestCqrsClusterCallers administrator,
+        NativeTextClusterScenario scenario, CancellationToken token)
     {
         var command = new CommandRequest(Guid.NewGuid(), scenario.Partition,
-            [new PutDocument(NativeTextRf3Scenario.Collection, Id,
-                NativeTextRf3Scenario.Document(Term, NativeTextRf3Scenario.OwnerA), 0L, new(NativeTextRf3Scenario.OwnerA))]);
+            [new PutDocument(NativeTextClusterScenario.Collection, Id,
+                NativeTextClusterScenario.Document(Term, NativeTextClusterScenario.OwnerA), 0L, new(NativeTextClusterScenario.OwnerA))]);
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.CommitAsync(command, token));
         return new(command, receipt);
     }

@@ -10,7 +10,7 @@ internal static class EventMessageSensitivePublicTrial
     internal static async Task RunAsync(ClusterFixture fixture, bool subscription, bool dataAuthority, bool header)
     {
         using var deadline = McpCallerDeadline.Create();
-        var states = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
+        var states = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
             async root =>
             {
                 var seeded = await EventMessageSensitivePublicSeed.RunAsync(root, subscription, dataAuthority, header, deadline.Token);
@@ -20,16 +20,16 @@ internal static class EventMessageSensitivePublicTrial
                 await EventMessageSensitiveSafeR52Flow.WarmAsync(fixture, root, safe, deadline.Token);
                 return (Original: seeded, Safe: safe);
             }, deadline.Token);
-        await FeedLiveRf3Cold.RestartAsync(fixture, deadline.Token);
-        await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
+        await FeedLiveClusterCold.RestartAsync(fixture, deadline.Token);
+        await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
             async root =>
             {
                 await RunReadersAsync(fixture, root, states.Original, true, deadline.Token);
                 await EventMessageSensitiveSafeR52Flow.AfterFirstColdAsync(fixture, root, states.Safe, deadline.Token);
                 return true;
             }, deadline.Token);
-        await FeedLiveRf3Cold.RestartAsync(fixture, deadline.Token);
-        await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
+        await FeedLiveClusterCold.RestartAsync(fixture, deadline.Token);
+        await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
             async root =>
             {
                 await EventMessageSensitiveSafeR52Flow.AfterSecondColdAsync(fixture, root, states.Safe, deadline.Token);
@@ -37,10 +37,10 @@ internal static class EventMessageSensitivePublicTrial
             }, deadline.Token);
     }
 
-    private static Task<bool> RunReadersAsync(ClusterFixture fixture, RequestCqrsRf3Callers root,
+    private static Task<bool> RunReadersAsync(ClusterFixture fixture, RequestCqrsClusterCallers root,
         EventMessageSensitivePublicState state, bool cold, CancellationToken token)
-        => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, state.Key,
-            async worker => await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, state.InspectorKey,
+        => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, state.Key,
+            async worker => await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, state.InspectorKey,
                 async inspector =>
                 {
                     if (cold)
@@ -54,8 +54,8 @@ internal static class EventMessageSensitivePublicTrial
                     return true;
                 }, token), token);
 
-    private static async Task LiveAsync(RequestCqrsRf3Callers root, RequestCqrsRf3Callers worker,
-        RequestCqrsRf3Callers inspector, EventMessageSensitivePublicState state, CancellationToken token)
+    private static async Task LiveAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers worker,
+        RequestCqrsClusterCallers inspector, EventMessageSensitivePublicState state, CancellationToken token)
     {
         var caller = state.DataAuthority ? root : worker;
         state.OriginalId = Guid.NewGuid();
@@ -82,7 +82,7 @@ internal static class EventMessageSensitivePublicTrial
         await EventMessageSensitivePublicAssertions.ReplayAsync(root, caller, state, token);
     }
 
-    private static async Task ColdAsync(RequestCqrsRf3Callers root, RequestCqrsRf3Callers worker,
+    private static async Task ColdAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers worker,
         EventMessageSensitivePublicState state, CancellationToken token)
     {
         var after = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.StatusAsync(token));

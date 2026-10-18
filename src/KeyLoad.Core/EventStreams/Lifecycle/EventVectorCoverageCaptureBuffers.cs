@@ -15,8 +15,6 @@ internal static class EventVectorCoverageCaptureBuffers
         Clear(capture.EntryChecksum);
         Clear(capture.PhysicalCatalog);
         Clear(capture.RegisteredOwnerRows);
-        Clear(capture.PlacementRows);
-        Clear(capture.LogicalDirectory);
         Clear(capture.AtomicPartitionRosterRows);
         Clear(capture.SourceHeadRows);
         Clear(capture.RosterOriginRows);

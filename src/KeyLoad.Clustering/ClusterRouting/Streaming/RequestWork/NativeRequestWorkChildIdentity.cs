@@ -8,8 +8,7 @@ internal sealed record NativeRequestWorkChildIdentity(Guid RequestId, ImmutableA
 {
     internal static bool IsSelectedPurpose(string? purpose)
         => purpose is QueryLifetimeReadProtocol.Purpose or DocumentLifetimeReadScope.Purpose
-            or AnnProjectionLifetimeObservationScope.Purpose or ControlledBlobLifetimeReadProtocol.Purpose
-            or ControlledBlobOutcomeReadProtocolV2.Purpose or RemoteGraphRequestScope.ReadPurpose
+            or AnnProjectionLifetimeObservationScope.Purpose or RemoteGraphRequestScope.ReadPurpose
             or AnnMaintenanceChildScope.Purpose or AnnProjectionJobChildScope.Purpose
             or TextMaintenanceChildScope.Purpose or OnlineTextRequestScope.Purpose or MultiLaneReceiveChildScope.Purpose
             or EventVectorRequestScope.ControlPurpose or EventVectorRequestScope.SourcePurpose;
@@ -19,14 +18,9 @@ internal sealed record NativeRequestWorkChildIdentity(Guid RequestId, ImmutableA
         {
             QueryLifetimeReadProtocol.Purpose => request.Envelope.ReadKind is
                 GrainReadKind.PartitionQueryLeafV2 or GrainReadKind.DistributedSearchLeafV2,
-            DocumentLifetimeReadScope.Purpose => request.Envelope.ReadKind is
-                GrainReadKind.OwnedDocumentV2 or GrainReadKind.ControlledDocumentV2,
+            DocumentLifetimeReadScope.Purpose => request.Envelope.ReadKind is GrainReadKind.OwnedDocumentV2,
             AnnProjectionLifetimeObservationScope.Purpose =>
                 request.Envelope.ReadKind == GrainReadKind.AnnProjectionObservationV2,
-            ControlledBlobLifetimeReadProtocol.Purpose =>
-                request.Envelope.ReadKind == GrainReadKind.ControlledBlobV2,
-            ControlledBlobOutcomeReadProtocolV2.Purpose =>
-                request.Envelope.ReadKind == GrainReadKind.ControlledBlobOutcomeV2,
             RemoteGraphRequestScope.ReadPurpose => RemoteGraphRequestScope.HandlesRead(request.Envelope.ReadKind),
             AnnMaintenanceChildScope.Purpose => AnnMaintenanceChildScope.IsSelected(request.Envelope),
             AnnProjectionJobChildScope.Purpose => AnnProjectionJobChildScope.IsSelected(request.Envelope),

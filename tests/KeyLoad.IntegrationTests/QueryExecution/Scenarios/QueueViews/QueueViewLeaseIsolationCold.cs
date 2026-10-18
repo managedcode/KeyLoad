@@ -14,7 +14,7 @@ internal static class QueueViewLeaseIsolationCold
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 using var deadline = McpCallerDeadline.Create();
-                await ModelSqlRf3Cold.RunAsync(fixture, deadline.Token);
+                await ModelSqlClusterCold.RunAsync(fixture, deadline.Token);
                 await WaveAsync(fixture, state, deadline.Token);
             }, failures);
         }
@@ -22,10 +22,10 @@ internal static class QueueViewLeaseIsolationCold
     }
 
     private static Task<bool> WaveAsync(ClusterFixture fixture, QueueViewLeaseIsolationState state, CancellationToken token)
-        => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, root =>
-            RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, state.Reader.Secret, async reader =>
+        => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, root =>
+            RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, state.Reader.Secret, async reader =>
             {
-                await SqlRf3Protocol.EqualAsync(state.Terminal
+                await SqlClusterProtocol.EqualAsync(state.Terminal
                     ?? throw new InvalidOperationException(QueueViewLeaseIsolationProtocol.Absent),
                     await QueueViewLeaseIsolationImages.ReadAsync(root, state, token));
                 await QueueViewLeaseIsolationReads.RunAsync(root, reader, state, token);

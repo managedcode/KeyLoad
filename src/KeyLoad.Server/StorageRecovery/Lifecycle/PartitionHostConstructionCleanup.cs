@@ -10,37 +10,21 @@ internal static class PartitionHostConstructionCleanup
 {
     internal static async Task RunAsync(Exception error, NativeTextOnlineMaintenanceService? openedOnlineText,
         NativeTextIncrementalMaintenanceService? openedTextMaintenance, NativeAnnMaintenanceService? openedAnnMaintenance,
-        ClusterCoordinator? openedCoordinator, ReplicaConsensus? openedConsensus, ReplicaMaterializer? applying,
-        ITextProjection? openedText, DurableReplicaLog? openedLog, CacheMemoryBudget? openedCacheMemory,
-        Features.Messaging.RemoteTransferPeerVerificationOwner? TransferVerification,
-        Features.ClusterRouting.RequestCqrsCanonicalApplyBridge ApplyProbe, RowVisibilityCache? rowVisibility,
+        ITextProjection? openedText, CacheMemoryBudget? openedCacheMemory,
+        Features.Messaging.RemoteTransferPeerVerificationOwner? TransferVerification, RowVisibilityCache? rowVisibility,
         PartitionStores? stores, Action requireTransferVerifierClosed)
     {
         const int FailuresCountValidationBoundary = 1;
         var failures = new List<Exception> { error };
         await DisposeDerivedOwnersAsync(openedOnlineText, openedTextMaintenance, openedAnnMaintenance,
-            openedCoordinator, openedConsensus, failures).ConfigureAwait(false);
-        Task? joiningMaterializer = null;
-        if (applying is not null)
-        {
-            ServerFailureObserver.Observe(() => joiningMaterializer = applying.DisposeAsync().AsTask(), failures);
-            if (joiningMaterializer is not null)
-            {
-                await ServerFailureObserver.ObserveAsync(() => joiningMaterializer, failures).ConfigureAwait(false);
-            }
-        }
-        if (TransferVerification is not null && (applying is null || joiningMaterializer is { IsCompletedSuccessfully: true }))
+            failures).ConfigureAwait(false);
+        if (TransferVerification is not null)
         {
             ServerFailureObserver.Observe(TransferVerification.Dispose, failures);
         }
-        ServerFailureObserver.Observe(ApplyProbe.CloseFrameObservation, failures);
         if (openedText is not null)
         {
             ServerFailureObserver.Observe(openedText.Dispose, failures);
-        }
-        if (openedLog is not null)
-        {
-            ServerFailureObserver.Observe(openedLog.Dispose, failures);
         }
         DisposeRowVisibility(rowVisibility, failures);
         if (openedCacheMemory is not null)
@@ -60,7 +44,7 @@ internal static class PartitionHostConstructionCleanup
 
     private static async Task DisposeDerivedOwnersAsync(NativeTextOnlineMaintenanceService? openedOnlineText,
         NativeTextIncrementalMaintenanceService? openedTextMaintenance, NativeAnnMaintenanceService? openedAnnMaintenance,
-        ClusterCoordinator? openedCoordinator, ReplicaConsensus? openedConsensus, List<Exception> failures)
+        List<Exception> failures)
     {
         if (openedOnlineText is not null)
         {
@@ -73,14 +57,6 @@ internal static class PartitionHostConstructionCleanup
         if (openedAnnMaintenance is not null)
         {
             await ServerFailureObserver.ObserveAsync(() => openedAnnMaintenance.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
-        }
-        if (openedCoordinator is not null)
-        {
-            await ServerFailureObserver.ObserveAsync(() => openedCoordinator.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
-        }
-        if (openedConsensus is not null)
-        {
-            await ServerFailureObserver.ObserveAsync(() => openedConsensus.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         }
     }
 

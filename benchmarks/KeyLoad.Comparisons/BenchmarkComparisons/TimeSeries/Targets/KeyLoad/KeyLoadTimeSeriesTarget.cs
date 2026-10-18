@@ -10,10 +10,10 @@ namespace KeyLoad.Comparisons.Features.BenchmarkComparisons.TimeSeries;
 internal sealed class KeyLoadTimeSeriesTarget(HttpClient http, string apiKey, IOptions<KeyLoadClientExecutionOptions> clientOptions, IOptions<NativeComparisonExecutionOptions> executionOptions, string? image = null)
     : ITimeSeriesPersistentTarget
 {
-    private const string PersistedRF3TimeSeriesToken = "Persisted RF3 time-series";
+    private const string PersistedCLUSTERTimeSeriesToken = "Persisted CLUSTER time-series";
 
     private const string TargetName = "KeyLoad TimeSeries";
-    private const string StorageGuarantee = "RF3 process-durable storage; power-loss durability unqualified";
+    private const string StorageGuarantee = "CLUSTER process-durable storage; power-loss durability unqualified";
     private const string AcknowledgementGuarantee = "Quorum acknowledgement through the public .NET SDK";
     private const string ConfigureCommandPurpose = "configure-resource";
     private const string SeedCommandPurpose = "seed-samples";
@@ -23,7 +23,7 @@ internal sealed class KeyLoadTimeSeriesTarget(HttpClient http, string apiKey, IO
     public TimeSeriesTargetMetadata Metadata
     {
         get;
-    } = new(TargetName, PersistedRF3TimeSeriesToken,
+    } = new(TargetName, PersistedCLUSTERTimeSeriesToken,
         StorageGuarantee, AcknowledgementGuarantee, image, null);
 
     public async Task InitializeAsync(TimeSeriesComparisonWorkload workload, CancellationToken cancellationToken)
@@ -32,14 +32,14 @@ internal sealed class KeyLoadTimeSeriesTarget(HttpClient http, string apiKey, IO
 
         const string KeyLoadStatusFailedToken = "KeyLoadStatusFailed";
         const int ThreeNodeTopology = 3;
-        const string KeyLoadRf3RequiredDetail = "KeyLoadRf3Required";
+        const string KeyLoadClusterRequiredDetail = "KeyLoadClusterRequired";
 
         ArgumentNullException.ThrowIfNull(workload);
         var status = RequireSuccess(await client.StatusAsync(cancellationToken).ConfigureAwait(false),
             KeyLoadStatusFailedToken);
         if (status.Voters != ThreeNodeTopology || status.Durability != DurabilityProfile.QuorumProcessDurable)
         {
-            throw TimeSeriesComparisonTargetErrors.Create(KeyLoadRf3RequiredDetail);
+            throw TimeSeriesComparisonTargetErrors.Create(KeyLoadClusterRequiredDetail);
         }
 
         var definition = new ResourceDefinition(workload.SetName, ResourceKind.TimeSeries,

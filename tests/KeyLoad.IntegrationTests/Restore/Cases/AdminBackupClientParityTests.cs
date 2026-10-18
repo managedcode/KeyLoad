@@ -6,7 +6,7 @@ using KeyLoad.IntegrationTests.Features.DocumentStorage;
 namespace KeyLoad.IntegrationTests.Features.BackupRestore;
 
 /// <summary>AC-CLIENT-004/006: admin backup has typed parity across the real public callers.</summary>
-/// <param name="fixture">The actual Aspire-owned Docker RF3 application.</param>
+/// <param name="fixture">The actual Aspire-owned Docker CLUSTER application.</param>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class AdminBackupClientParityTests(ClusterFixture fixture)

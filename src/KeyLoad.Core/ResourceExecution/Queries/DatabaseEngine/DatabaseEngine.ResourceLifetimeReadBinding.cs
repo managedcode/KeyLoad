@@ -11,7 +11,6 @@ public sealed partial class DatabaseEngine
     {
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(partition);
-        RequireNoUnpublishedPartitionMoveTarget(view, partition);
         RequireLocalResourceOwner(view, partition);
         var pair = ReadBoundResourcePair(view, partition, name, kind);
         BindAuthenticatedReadResourceLifetime(view, partition, pair.Definition, pair.Lifetime);

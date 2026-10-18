@@ -1,6 +1,6 @@
 # ADR-109: Native vector qualification and additional comparison databases
 
-Status: Accepted by the owner's 2026-10-05 implementation request; qualification pending.
+Status: Accepted; qualification pending.
 
 ## Problem and decision
 
@@ -9,9 +9,8 @@ The existing 4,096-record control measures exact vectors, while the separate
 establishes vector scale, approximate recall or index construction cost. SurrealDB
 and HelixDB are absent from the website-producing native inventory.
 
-Add both real engines and a separate immutable vector profile family. The owner
-subsequently limited every active benchmark family to 100k and 1m records. Preserve
-the existing control workload and truthful historical artifacts. Do not rename
+Add both real engines and a separate immutable vector profile family. Every active benchmark family is limited to 100k and 1m records. Preserve
+the existing control workload. Do not rename
 approximate search as exact, fabricate native clusters, infer database RAM from
 client RSS, or publish local measurements. The acceptance contract is
 [VectorQualification](../Features/BenchmarkComparisons/VectorQualification.md).
@@ -32,29 +31,12 @@ flowchart LR
 
 Related requirements: REQ-VQ-001..007; acceptance: AC-VQ-001..007.
 
-1. TASK-VQ-001 (lead): freeze shared profile/report/interfaces and corpus/query/
-   recall contracts with focused real-flow TUnit tests before adapter integration.
-2. TASK-VQ-002 (native-engine worker): native SurrealDB/HelixDB adapters under
-   `benchmarks/KeyLoad.Comparisons/BenchmarkComparisons/Targets/`; matching
-   Aspire resources, immutable image/source pins, host factory registration and
-   native comparison regressions. The worker owns these new engine paths and
-   reports every shared join to the lead. No global tool installation.
-3. TASK-VQ-003 (vector worker): corpus, exact reference, runner and PostgreSQL
-   native exact/HNSW/IVFFlat execution under the same feature's Vector subdomain;
-   real query/update results, index metadata and recall validation. Other native
-   targets advertise only capabilities they actually implement.
-4. TASK-VQ-004 (pipeline worker): canonical inventory, isolated plans, per-engine
-   workflow groups, strict original-artifact aggregation and website rendering;
-   TUnit plan/admission/browser regressions. Own scripts/site/workflows, without
-   rewriting immutable historical evidence or manufacturing new measured cells.
-5. TASK-VQ-005 (lead): inspect every diff, integrate configuration/report/image/
-   resource joins, run governance, restore, build, Aspire-owned unit/comparison/
-   site suites and formatter, then final canonical solution build. Recovery/RF3
-   gates remain mandatory for product changes; this adapter work does not waive
-   existing qualification. Commit completed stages on the current branch.
-6. TASK-VQ-006 (lead): push stable changes and observe genuine Linux Benchmarks
-   workers and authenticated aggregation/site delivery. Record exact SHA/run/
-   attempt/original artifacts; configuration alone is not native proof.
+1. Shared profile/report/interfaces and corpus/query/recall contracts are frozen with focused real-flow TUnit tests before adapter integration.
+2. Native SurrealDB/HelixDB adapters live under `benchmarks/KeyLoad.Comparisons/BenchmarkComparisons/Targets/` with matching Aspire resources, immutable image/source pins, host factory registration and native comparison regressions. No global tool installation.
+3. Corpus, exact reference, runner and PostgreSQL native exact/HNSW/IVFFlat execution live under the same feature's Vector subdomain, with real query/update results, index metadata and recall validation. Other native targets advertise only capabilities they actually implement.
+4. Canonical inventory, isolated plans, per-engine workflow groups, strict original-artifact aggregation and website rendering carry TUnit plan/admission/browser regressions across scripts/site/workflows, without rewriting immutable historical evidence or manufacturing new measured cells.
+5. Integrate configuration/report/image/resource joins, then run governance, restore, build, Aspire-owned unit/comparison/site suites and formatter, and a final canonical solution build. Recovery and cluster gates remain mandatory for product changes; this adapter work does not waive existing qualification.
+6. Push stable changes and observe genuine Linux Benchmarks workers and authenticated aggregation/site delivery, recording exact SHA/run/attempt/original artifacts; configuration alone is not native proof.
 
 Baseline: existing source review identifies only exact vectors in the small
 control; no new native or vector qualification has run. The shared checkout has
@@ -64,7 +46,7 @@ parameter warning in OrleansNode; recheck the current snapshot before tests.
 ## Boundaries, rollout and risks
 
 This changes benchmark adapters, report/configuration contracts and publication,
-not KeyLoad product storage or RF3 authority. Reuse central package pins and
+not KeyLoad product storage or majority-acknowledged authority. Reuse central package pins and
 Aspire resources. Native external APIs are researched from official source;
 unqualified/unsupported community topologies carry an explicit unavailable
 receipt. SurrealDB experimental TiKV clustering must not be advertised as a
@@ -83,29 +65,7 @@ native workload artifacts. Until then this ADR remains Accepted.
 ## Typed native execution policy
 
 The 2026-10-06 general configuration correction requires the bounded execution
-policy join specified in VectorQualification TASK-VQ-POLICY-001. The comparison
+policy join specified in VectorQualification. The comparison
 host centrally binds and validates IOptions; adapters consume typed policy and
 retain effective limits. Immutable profile/corpus/index identities stay frozen.
 No unrelated product configuration or protocol change is authorized here.
-
-TASK-VQ-JOB-001 repairs the image preparation/current-job authority join under
-AC-VQ-007 and AC-ISO-006/007. Image preparation selects the original control
-cohort without a workload cell; worker selection binds the canonical cell,
-job name and profile before the unchanged authenticated GitHub transport.
-The exact selection, rejection and real-operation test contract is specified
-in VectorQualification. The lead owns docs and final integration; the tooling
-worker owns the selection helper and its focused Node/TUnit regressions.
-
-TASK-VQ-NEST-001 repairs the nested native fixture's test-selector composition
-under AC-VQ-005 and the existing Aspire-owned test boundary in ADR-074. Cleared
-environment selectors are unselected; explicit empty CLI selections and
-conflicting native workloads remain rejected. Its exact scope, reproduced
-baseline and real composition/native-flow checks are in VectorQualification.
-
-TASK-VQ-CLOCK-001 joins the native target/session and vector factory provider
-propagation under AC-VQ-005/006 and the owning clock contract in ADR-113. The
-worker owns the bounded propagation and native flow observations; the lead
-owns integration, canonical build/format, actual Aspire flows and exact-source
-Linux qualification. Preserve per-instance validated vector options and actual
-native state, data, cancellation and index contracts. VectorQualification
-defines the exact provider observations and preserved-state negative flow.

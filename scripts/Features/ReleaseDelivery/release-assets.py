@@ -185,7 +185,7 @@ def verify_database_distribution(path, reservation):
                 "server/KeyLoad.Server.deps.json", "cli/KeyLoad.Cli", "cli/KeyLoad.Cli.dll", "compose.yml",
                 "initialize.sh", "README.md", ".env.example", "release-version.json"}
     if not required.issubset(names) or "server" not in names or "cli" not in names:
-        fail("Database distribution lacks the server, CLI, or RF3 deployment payload.")
+        fail("Database distribution lacks the server, CLI, or CLUSTER deployment payload.")
     with tarfile.open(path, mode="r:gz") as archive:
         if not archive.getmember("server").isdir() or not archive.getmember("cli").isdir():
             fail("Database distribution server and CLI roots must be explicit directories.")

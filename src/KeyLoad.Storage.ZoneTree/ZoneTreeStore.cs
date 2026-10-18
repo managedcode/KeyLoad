@@ -22,15 +22,6 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView, INativeCatalogB
     /// <summary>Gets the latest local durable journal position.</summary>
     public long Position => runtime.Position;
 
-    /// <summary>Native UTF8 size of the fixed encoded-frame rejection detail, for bounded transport reservation.</summary>
-    public static int EncodedFrameLimitRejectionDetailBytes => ZoneTreeEncodedFrameRejection.DetailBytes;
-
-    /// <summary>Classifies only the owning native encoded-frame rejection; it grants no execution authority.</summary>
-    /// <param name="result">The actual resolved operation outcome, or no outcome.</param>
-    /// <returns>Whether the exact stored error is the native encoded frame limit refusal.</returns>
-    public static bool IsEncodedFrameLimitRejection(OperationResult? result)
-        => ZoneTreeEncodedFrameRejection.Matches(result);
-
     /// <summary>Validates current identity admission without creating or recovering a store.</summary>
     /// <param name="options">The same directory and identity requirements used by the future owner.</param>
     /// <param name="executionOptions">The centrally validated storage execution policy.</param>

@@ -12,7 +12,7 @@ internal static class PolicyEpochAuthorityOutage
     private const string Scenario = "policy-cursor-authority-unavailable";
     private static readonly string[] StoppedNodes = [McpCallerProtocol.Node1, McpCallerProtocol.Node3];
 
-    internal static async Task RunAsync(ClusterFixture fixture, RequestCqrsRf3Callers reader,
+    internal static async Task RunAsync(ClusterFixture fixture, RequestCqrsClusterCallers reader,
         KeyLoadClient root, PolicyEpochPublicState state, CancellationToken token)
     {
         var cursors = await PolicyEpochPublicAssertions.PagesAsync(reader, root, state.Scenario, false, token);
@@ -29,18 +29,18 @@ internal static class PolicyEpochAuthorityOutage
             }
             await PolicyEpochAuthorityRefusals.AllAsync(reader, state, cursors, token);
         }, failures);
-        using var cleanup = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline, TimeProvider.System);
+        using var cleanup = new CancellationTokenSource(RequestCqrsClusterProtocol.CleanupDeadline, TimeProvider.System);
         await RestoreAsync(fixture, stopped, failures, cleanup.Token);
         ServerFailureObserver.ThrowIfAny(failures);
         var after = await PolicyEpochPublicAssertions.ImageAsync(root, state.Scenario, token);
-        await SqlRf3Protocol.EqualAsync(before.Rows.ToArray(), after.Rows.ToArray());
+        await SqlClusterProtocol.EqualAsync(before.Rows.ToArray(), after.Rows.ToArray());
         await Assert.That(after.CutPosition).IsGreaterThanOrEqualTo(before.CutPosition);
-        await SqlRf3Protocol.EqualAsync(outbox,
+        await SqlClusterProtocol.EqualAsync(outbox,
             await McpCallerAssertions.SdkSuccessAsync(await root.OutboxStatusAsync(state.Scenario.Partition, token)));
         await PolicyEpochPublicRefusals.AllAsync(fixture, reader, root, state, ErrorCode.CursorExpired, token);
         await PolicyEpochPublicAssertions.PagesAsync(reader, root, state.Scenario, false, token);
         await PolicyEpochPublicPolicy.ReplayAsync(root, state, token);
-        await SqlRf3Protocol.EqualAsync(outbox,
+        await SqlClusterProtocol.EqualAsync(outbox,
             await McpCallerAssertions.SdkSuccessAsync(await root.OutboxStatusAsync(state.Scenario.Partition, token)));
     }
 

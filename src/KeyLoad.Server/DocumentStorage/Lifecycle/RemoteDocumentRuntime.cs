@@ -1,6 +1,5 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.Messaging;
 using KeyLoad.Server.Features.QueryExecution;
@@ -20,11 +19,6 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
     private Task? disposal;
     internal bool IsJoined => work.IsJoined;
     internal IRemoteDocumentReadRouter? Router
-    {
-        get; private set;
-    }
-
-    internal IRemoteBlobReadRouter? BlobRouter
     {
         get; private set;
     }
@@ -81,15 +75,8 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
         {
             client = new(options.Node, options.Membership, clock, node.BorrowRemoteModelClient);
             Router = new RemoteDocumentRouter(node, partition, options.Node, options.Core.DatabaseLimits, client, work, clock);
-            BlobRouter = new RemoteBlobReadRouter(node, partition, options.Node, options.Core.DatabaseLimits, client, work, clock);
-            if (options.PartitionMovement.Value.Enabled)
-            {
-                CommandRouter = new ControlledDocumentCommandRouter(node, partition, options.Node,
-                options.Core.DatabaseLimits,
-                new ControlledBlobSourceRead(node, partition, options.Node, options.Core.DatabaseLimits, client, clock), clock);
-            }
             CommandRouter = new RemoteTransferCommandRouter(node, partition, options.Node,
-                options.Core.DatabaseLimits, client, work, clock, CommandRouter);
+                options.Core.DatabaseLimits, client, work, clock);
             if (settings.RemotePartitionQueries)
             {
                 QueryRouter = new RemotePartitionQueryRouter(node, partition, options.Node, client, work, clock);
@@ -99,11 +86,9 @@ internal sealed class RemoteDocumentRuntime : IAsyncDisposable
         }
         else
         {
-            var controlledBlob = new RemoteControlledBlobReceiver(node, partition, options.Node,
-                options.Membership, options.GrainRouting, clock);
             var transfer = partition.TransferVerification is null ? null
                 : new RemoteTransferPeerReceiver(node, partition, options.GrainRouting, clock);
-            Endpoint = new(options.Node, work, controlledBlob,
+            Endpoint = new(options.Node, work,
                 options.Membership, options.GrainRouting, clock, transfer,
                 new RemoteResourceLifetimeReadEndpoint(node, partition, options, clock));
         }

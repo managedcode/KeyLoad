@@ -9,9 +9,9 @@ internal static class FunctionalGateColdDropAssertions
         CancellationToken token)
     {
         var expected = new DocumentReadResult(table.Fresh);
-        await SqlRf3Protocol.EqualAsync(expected, await context.SdkAsync(
+        await SqlClusterProtocol.EqualAsync(expected, await context.SdkAsync(
             context.Reader.Sdk.GetAsync(table.Fresh.Reference, token)));
-        await SqlRf3Protocol.EqualAsync(expected, await context.McpAsync<DocumentReadResult>(context.Reader,
+        await SqlClusterProtocol.EqualAsync(expected, await context.McpAsync<DocumentReadResult>(context.Reader,
             McpCallerTools.DocumentsGet, new GetDocumentRequest(table.Fresh.Reference), token));
         foreach (var id in new[] { table.OriginalReference.Id, FunctionalGateColdDropRows.AdministratorId })
         {
@@ -19,9 +19,9 @@ internal static class FunctionalGateColdDropAssertions
             {
                 Id = id
             };
-            await SqlRf3Protocol.EqualAsync(new DocumentReadResult(null), await context.SdkAsync(
+            await SqlClusterProtocol.EqualAsync(new DocumentReadResult(null), await context.SdkAsync(
                 context.Reader.Sdk.GetAsync(absent, token)));
-            await SqlRf3Protocol.EqualAsync(new DocumentReadResult(null),
+            await SqlClusterProtocol.EqualAsync(new DocumentReadResult(null),
                 await context.McpAsync<DocumentReadResult>(context.Reader, McpCallerTools.DocumentsGet,
                     new GetDocumentRequest(absent), token));
         }

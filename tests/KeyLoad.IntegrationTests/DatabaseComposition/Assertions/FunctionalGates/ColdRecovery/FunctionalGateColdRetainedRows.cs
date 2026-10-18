@@ -16,8 +16,8 @@ internal static class FunctionalGateColdRetainedRows
     {
         var reference = expected.Document!.Reference;
         await Assert.That(reference.Lifetime).IsNotNull();
-        await SqlRf3Protocol.EqualAsync(expected, await context.SdkAsync(context.Reader.Sdk.GetAsync(reference, token)));
-        await SqlRf3Protocol.EqualAsync(expected, await context.McpAsync<DocumentReadResult>(context.Reader,
+        await SqlClusterProtocol.EqualAsync(expected, await context.SdkAsync(context.Reader.Sdk.GetAsync(reference, token)));
+        await SqlClusterProtocol.EqualAsync(expected, await context.McpAsync<DocumentReadResult>(context.Reader,
             McpCallerTools.DocumentsGet, new GetDocumentRequest(reference), token));
     }
 
@@ -34,9 +34,9 @@ internal static class FunctionalGateColdRetainedRows
         var command = new CommandRequest(Guid.NewGuid(), state.Partition,
             [new PutDocument(reference.Collection, reference.Id, ReaderProbeJson, AbsentRevision)]);
         await FunctionalGateColdRetainedRefusals.AllAsync(context, command, unchanged, token);
-        await SqlRf3Protocol.EqualAsync(new DocumentReadResult(null), await context.SdkAsync(
+        await SqlClusterProtocol.EqualAsync(new DocumentReadResult(null), await context.SdkAsync(
             context.Reader.Sdk.GetAsync(reference, token)));
-        await SqlRf3Protocol.EqualAsync(new DocumentReadResult(null), await context.McpAsync<DocumentReadResult>(
+        await SqlClusterProtocol.EqualAsync(new DocumentReadResult(null), await context.McpAsync<DocumentReadResult>(
             context.Reader, McpCallerTools.DocumentsGet, new GetDocumentRequest(reference), token));
     }
 

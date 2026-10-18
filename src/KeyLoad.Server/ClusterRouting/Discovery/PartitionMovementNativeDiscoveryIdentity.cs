@@ -24,10 +24,8 @@ internal static class PartitionMovementNativeDiscoveryIdentity
     internal static void Require(NodeOptions options, ReplicaConfiguration configuration,
         RegisteredPhysicalOwnerV1 expected, SiloAddress address, Guid nonce,
         PartitionMovementGrainServiceDiscovery reply, ReplicaSiloDiscovery discovery,
-        IOptions<OrleansMembershipOptions> membership,
-        Action<PartitionMovementNativeObservationStage>? observeStage = null)
+        IOptions<OrleansMembershipOptions> membership)
     {
-        observeStage?.Invoke(PartitionMovementNativeObservationStage.DiscoveryMac);
         var owned = reply.Payload.ToArray();
         var key = Convert.FromBase64String(Secret(options, configuration, expected));
         try
@@ -40,7 +38,6 @@ internal static class PartitionMovementNativeDiscoveryIdentity
             }
         }
         finally { CryptographicOperations.ZeroMemory(key); }
-        observeStage?.Invoke(PartitionMovementNativeObservationStage.DiscoveryContract);
         var actual = NativeSerialization.Deserialize<ReplicaSiloDiscovery>(owned);
         if (actual != discovery || actual is not { TransportReady: true }
             || !expected.Owner.VoterIds.Contains(actual.VoterId, StringComparer.Ordinal)
@@ -77,15 +74,4 @@ internal static class PartitionMovementNativeDiscoveryIdentity
             ?? throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
     }
 
-    internal static string ReplySecret(NodeOptions options, ReplicaConfiguration configuration, bool local)
-    {
-        var expected = local ? PhysicalOwnerConfiguredTuples.Local(options, configuration)
-            : options.PhysicalGroupTrust.Role switch
-            {
-                PhysicalGroupTrustRole.Control => PhysicalOwnerConfiguredTuples.Destination(options, configuration),
-                PhysicalGroupTrustRole.Destination => PhysicalOwnerConfiguredTuples.Control(options, configuration),
-                _ => throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof)
-            };
-        return Secret(options, configuration, expected);
-    }
 }

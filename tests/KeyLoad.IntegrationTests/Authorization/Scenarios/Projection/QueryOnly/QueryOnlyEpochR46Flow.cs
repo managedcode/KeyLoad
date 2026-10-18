@@ -54,8 +54,8 @@ internal static class QueryOnlyEpochR46Flow
     }
 
     private static Task<T> RunOwnedAsync<T>(ClusterFixture fixture, McpPersistedIdentity identity,
-        Func<RequestCqrsRf3Callers, RequestCqrsRf3Callers, Task<T>> operation, CancellationToken token)
-        => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, fixture.AdminKey,
-            root => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, identity.Secret,
+        Func<RequestCqrsClusterCallers, RequestCqrsClusterCallers, Task<T>> operation, CancellationToken token)
+        => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, fixture.AdminKey,
+            root => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, identity.Secret,
                 reader => operation(root, reader), token), token);
 }

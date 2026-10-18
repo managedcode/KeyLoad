@@ -8,7 +8,7 @@ namespace KeyLoad.IntegrationTests.Features.ChangeFeeds;
 internal static class ProjectionPublicSetup
 {
     internal static async Task<(PartitionRef Partition, McpPersistedIdentity Identity)> CreateAsync(
-        RequestCqrsRf3Callers root, CancellationToken token)
+        RequestCqrsClusterCallers root, CancellationToken token)
     {
         var partition = new PartitionRef(ProjectionPublicProtocol.TenantPrefix + Guid.NewGuid().ToString(ProjectionPublicProtocol.GuidFormat),
             ProjectionPublicProtocol.Database, ProjectionPublicProtocol.Domain, Guid.NewGuid().ToString(ProjectionPublicProtocol.GuidFormat));

@@ -1,7 +1,3 @@
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Core.Features.ClusterRouting.Execution;
-using KeyLoad.Core.Features.ClusterRouting.Serialization;
-using KeyLoad.Core.Features.ClusterRouting.Validation;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
@@ -16,16 +12,6 @@ public sealed partial class DatabaseEngine
             var batch = Payload<CommandRequest>(operation);
             return !batch.Mutations.IsDefault && batch.Mutations.Any(static mutation
                 => mutation is QueueToGraph or GraphToQueueMutation or UpsertEdge or DeleteEdge);
-        }
-        if (operation.Kind == OperationKind.PartitionMovementPhase)
-        {
-            var phase = PartitionMovementNativePayload.ReadAuthenticated(operation).Original;
-            if (phase.Stage == PartitionMovePeerStage.ControlApplyCommand)
-            {
-                var body = NativeSerialization.Deserialize<PartitionControlApplyBody>(phase.Body.Span);
-                return body.Delegation.OriginalOperation is { Kind: OperationKind.Batch } original
-                    && RequiresCompositionEffectCapture(original);
-            }
         }
         return false;
     }
@@ -47,18 +33,7 @@ public sealed partial class DatabaseEngine
     private void RequireCompositionEndpointPolicy(PrincipalRecord principal, ReplicatedOperation operation,
         ResourceLifetimeV1 lifetime)
     {
-        PartitionRef partition;
-        if (operation.Kind == OperationKind.PartitionMovementPhase)
-        {
-            var phase = PartitionMovementNativePayload.ReadAuthenticated(operation).Original;
-            var body = NativeSerialization.Deserialize<PartitionControlApplyBody>(phase.Body.Span);
-            principal = body.Delegation.Principal;
-            partition = phase.Partition;
-        }
-        else
-        {
-            partition = Payload<CommandRequest>(operation).Partition;
-        }
+        var partition = Payload<CommandRequest>(operation).Partition;
         if (lifetime.TenantId != partition.TenantId || lifetime.DatabaseId != partition.DatabaseId
             || lifetime.TransactionDomainId != partition.TransactionDomainId)
         {
@@ -67,41 +42,9 @@ public sealed partial class DatabaseEngine
         Authorization.Require(principal, partition, lifetime.ResourceName, Capability.DocumentsRead);
     }
 
-    private IKeyValueView CompositionAdmissionView(IKeyValueView view, ReplicatedOperation operation)
-    {
-        if (operation.Kind != OperationKind.PartitionMovementPhase)
-        {
-            return view;
-        }
-        var authenticated = PartitionMovementNativePayload.ReadAuthenticated(operation);
-        var phase = authenticated.Original;
-        var proof = authenticated.LifetimeProofs.Single();
-        var coverage = PartitionControlLifetimeProofValidation.Require(phase, proof, Limits.MaxBatchBytes);
-        var body = NativeSerialization.Deserialize<PartitionControlApplyBody>(phase.Body.Span);
-        return new PartitionControlResourceView(view, phase.Partition, body.Delegation.Resources,
-            coverage, Limits.MaxBatchBytes);
-    }
-
     private void ObserveCompositionPrefix(ResourceEffectPreparationTransaction transaction,
         PrincipalRecord principal, ReplicatedOperation operation, long position, bool preserveBudgetFailure)
     {
-        if (operation.Kind == OperationKind.PartitionMovementPhase)
-        {
-            var authenticated = PartitionMovementNativePayload.ReadAuthenticated(operation);
-            var phase = authenticated.Original;
-            var proof = authenticated.LifetimeProofs.Single();
-            var coverage = PartitionControlLifetimeProofValidation.Require(phase, proof, Limits.MaxBatchBytes);
-            var body = NativeSerialization.Deserialize<PartitionControlApplyBody>(phase.Body.Span);
-            var original = body.Delegation.OriginalOperation
-                ?? throw Errors.Fail(ErrorCode.Corruption, ResourceEffectAdmissionProtocol.Invalid);
-            operation = original with
-            {
-                EvaluatedAt = operation.EvaluatedAt
-            };
-            principal = body.Delegation.Principal;
-            transaction = transaction.WithControlledResources(phase.Partition, body.Delegation.Resources,
-                coverage, Limits.MaxBatchBytes);
-        }
         var batch = Payload<CommandRequest>(operation);
         try
         {

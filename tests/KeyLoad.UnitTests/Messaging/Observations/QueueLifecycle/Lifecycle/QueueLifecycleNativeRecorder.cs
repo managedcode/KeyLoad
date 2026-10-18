@@ -33,7 +33,7 @@ internal sealed class QueueLifecycleNativeRecorder(DatabaseEngine database, Queu
             return;
         }
         var store = owner.Store;
-        var placement = owner.ReadAtomicPartitionPlacement(Subject, new(NextCommitPosition, lane.Partition));
+        var placement = owner.ReadAtomicPartitionPlacement(Subject, lane.Partition);
         var token = new CommitToken(placement.Incarnation, lane.Partition.AtomicPartitionId,
             checked(store.Position + NextCommitPosition), placement.PlacementEpoch);
         var before = store.Read(view =>

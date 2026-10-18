@@ -3,7 +3,7 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 internal sealed class SqlQueueReferenceJoinTests
 {
     [Test]
-    public async Task AcKl095QueueEntityReferenceJoinRefusesThenRepairsPersistedPolicyAndReplaysLiteralRowsAcrossTwoColdCuts()
+    public async Task QueueEntityReferenceJoinRefusesThenRepairsPersistedPolicyAndReplaysLiteralRowsAcrossTwoColdCuts()
     {
         var failures = new List<Exception>();
         try

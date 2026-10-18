@@ -10,7 +10,7 @@ internal static class BlobReservationQuotaPublicPublication
     internal sealed record Reservation(BeginBlobUploadRequest First, BlobCommitResult<BlobUploadInfo> Begun,
         BeginBlobUploadRequest Refused);
 
-    internal static async Task<Reservation> ReserveAsync(RequestCqrsRf3Callers callers, CancellationToken token)
+    internal static async Task<Reservation> ReserveAsync(RequestCqrsClusterCallers callers, CancellationToken token)
     {
         var partition = new PartitionRef("blob-quota-" + Guid.NewGuid().ToString("N"),
             "public-quota", "domain", Guid.NewGuid().ToString("N"));
@@ -20,7 +20,7 @@ internal static class BlobReservationQuotaPublicPublication
         };
         var configured = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ConfigureResourceAsync(
             Guid.NewGuid(), new(partition.TenantId, partition.DatabaseId, resource), token));
-        await SqlRf3Protocol.EqualAsync(resource, configured);
+        await SqlClusterProtocol.EqualAsync(resource, configured);
         var first = new BeginBlobUploadRequest(Guid.NewGuid(), new(partition, resource.Name, "reservation"),
             Guid.NewGuid(), 4L, 0L);
         var begun = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.BeginBlobUploadAsync(first, token));
@@ -36,7 +36,7 @@ internal static class BlobReservationQuotaPublicPublication
         }, Guid.NewGuid(), 1L, 0L));
     }
 
-    internal static async Task<BlobSupersessionPublicTrial.Version> PublishAsync(RequestCqrsRf3Callers callers,
+    internal static async Task<BlobSupersessionPublicTrial.Version> PublishAsync(RequestCqrsClusterCallers callers,
         BeginBlobUploadRequest refused, CancellationToken token)
     {
         var begin = refused with

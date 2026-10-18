@@ -277,7 +277,7 @@ def ci_jobs(run):
             fail("Exact-source CI job URL is missing or foreign.")
         records.append({"id": job["id"], "name": name, "url": html_url, "status": job["status"], "conclusion": job["conclusion"]})
     if mandatory_names != REQUIRED_CI_JOBS:
-        fail("Exact-source CI attempt lacks a mandatory build, analyzer, repository, or RF3 job.")
+        fail("Exact-source CI attempt lacks a mandatory build, analyzer, repository, or CLUSTER job.")
     return sorted(records, key=lambda item: item["name"])
 
 

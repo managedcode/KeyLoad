@@ -7,7 +7,7 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 internal static class RequestCqrsNativeTextCheckpointObservation
 {
-    private const string ObservationPrefix = "KL029_ORIGINAL_CHECKPOINT_CUT";
+    private const string ObservationPrefix = "ORIGINAL_CHECKPOINT_CUT";
 
     internal static async Task RecordAsync(RequestCqrsHostedRuntimeFixture fixture,
         TextIndexMaintenanceRequest request, CancellationToken token)

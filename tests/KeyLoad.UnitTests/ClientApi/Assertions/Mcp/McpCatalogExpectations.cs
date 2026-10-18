@@ -37,10 +37,6 @@ internal static class McpCatalogExpectations
     private const string GraphIncomingEdgesRoute = "/v1/graph/incoming";
     internal const string QueryGraphPath = "keyload_query_graph_path";
     private const string QueryGraphPathRoute = "/v1/query/graph-path";
-    internal const string AdminPartitionPlacementBind = "keyload_admin_partition_placement_bind";
-    private const string AdminPartitionPlacementBindRoute = "/v1/admin/partition-placement/bind";
-    internal const string AdminPartitionPlacementRead = "keyload_admin_partition_placement_read";
-    private const string AdminPartitionPlacementReadRoute = "/v1/admin/partition-placement/read";
     internal const string SeriesRead = "keyload_series_read";
     internal const string SeriesLatest = "keyload_series_latest";
     internal const string SeriesAggregate = "keyload_series_aggregate";
@@ -118,7 +114,7 @@ internal static class McpCatalogExpectations
     internal const string OutboxPurge = "keyload_outbox_purge";
     private const string OutboxPurgeRoute = "/v1/admin/outbox/purge";
 
-    internal const int Count = 102;
+    internal const int Count = 93;
     internal static ImmutableArray<(string Name, string Route, GrainReadKind? ReadKind, OperationKind? CommandKind)> Entries
     {
         get;
@@ -128,7 +124,6 @@ internal static class McpCatalogExpectations
         ("keyload_analytics_aggregate", "/v1/analytics/aggregate", GrainReadKind.AnalyticsAggregate, null),
         ("keyload_tables_drop", "/v1/admin/tables/drop", null, OperationKind.DropTable),
         .. McpRemoteGraphCatalogExpectations.Entries,
-        .. McpPlacementCatalogExpectations.Entries,
         .. KeyLoad.UnitTests.Features.Search.SearchMcpCatalogEntries.All,
         (DocumentsGet, DocumentsGetRoute, GrainReadKind.Document, null),
         (DocumentsReadFollower, DocumentsReadFollowerRoute, GrainReadKind.FollowerDocument, null),
@@ -145,9 +140,6 @@ internal static class McpCatalogExpectations
         (GraphShortestPath, GraphShortestPathRoute, GrainReadKind.GraphShortestPath, null),
         (GraphIncomingEdges, GraphIncomingEdgesRoute, GrainReadKind.GraphIncomingEdges, null),
         (QueryGraphPath, QueryGraphPathRoute, GrainReadKind.SqlGraphPath, null),
-        (McpMovementCatalogProtocol.Name, McpMovementCatalogProtocol.Route, null, OperationKind.MovePartition),
-        (AdminPartitionPlacementBind, AdminPartitionPlacementBindRoute, null, OperationKind.BindAtomicPartitionPlacement),
-        (AdminPartitionPlacementRead, AdminPartitionPlacementReadRoute, GrainReadKind.AtomicPartitionPlacement, null),
         .. McpSeriesCatalogExpectations.Entries,
         (QueryExecute, QueryExecuteRoute, GrainReadKind.Query, null),
         (QuerySearch, QuerySearchRoute, GrainReadKind.SqlGraphSearch, null),

@@ -17,7 +17,7 @@ internal static class ContainerRuntimeProtocol
     internal const string ExitedState = "exited";
     internal const string ArtifactsDirectory = "artifacts";
     internal const string QualificationDirectory = "qualification";
-    internal static readonly CompositeFormat ReceiptFileName = CompositeFormat.Parse("rf3-container-restart-{0}-{1}.json");
+    internal static readonly CompositeFormat ReceiptFileName = CompositeFormat.Parse("cluster-container-restart-{0}-{1}.json");
     internal static readonly CompositeFormat BeforeKillFailure = CompositeFormat.Parse("Aspire container '{0}' is '{1}' before SIGKILL.");
     internal static readonly CompositeFormat ExitFailure = CompositeFormat.Parse("Aspire container '{0}' did not exit after Docker SIGKILL.");
     internal static readonly CompositeFormat MissingKillFailure = CompositeFormat.Parse("No verified SIGKILL receipt exists for Aspire container '{0}'.");

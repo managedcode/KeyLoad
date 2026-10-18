@@ -12,7 +12,7 @@ internal sealed class NativeTextBilingualLifecycleTests
     private const string DeleteKind = "deleteDocument";
 
     [Test]
-    public async Task Kl028LiteralUkrainianEnglishDeleteReplayAndNativeReopenPreserveAuthorizedResults()
+    public async Task LiteralUkrainianEnglishDeleteReplayAndNativeReopenPreserveAuthorizedResults()
     {
         using var database = new TestDatabase();
         database.Configure(NativeTextBilingualAudit.Collection, ResourceKind.Collection);

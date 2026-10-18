@@ -1,6 +1,5 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.QueryExecution;
 
@@ -13,7 +12,6 @@ internal sealed class RemoteResourceLifetimeReadEndpoint
     private readonly ServerRuntimeOptions options;
     private readonly TimeProvider clock;
     private readonly RemoteDocumentLifetimeReceiver documents;
-    private readonly RemoteBlobLifetimeReceiver blobs;
     private readonly RemoteQueryLifetimeReceiver queries;
 
     internal RemoteResourceLifetimeReadEndpoint(OrleansNode node, PartitionHost partition,
@@ -24,7 +22,6 @@ internal sealed class RemoteResourceLifetimeReadEndpoint
         this.options = options;
         this.clock = clock;
         documents = new(node, partition, options, clock);
-        blobs = new(node, partition, options, clock);
         queries = new(node, partition, options, clock);
     }
 
@@ -77,8 +74,7 @@ internal sealed class RemoteResourceLifetimeReadEndpoint
         CancellationToken token)
         => call.Kind switch
         {
-            RemoteResourceLifetimeReadKindV2.Document or RemoteResourceLifetimeReadKindV2.ControlledDocument => documents.ExecuteAsync(call, binding, token),
-            RemoteResourceLifetimeReadKindV2.ControlledBlob => blobs.ExecuteAsync(call, binding, token),
+            RemoteResourceLifetimeReadKindV2.Document => documents.ExecuteAsync(call, binding, token),
             RemoteResourceLifetimeReadKindV2.PartitionQuery or RemoteResourceLifetimeReadKindV2.DistributedSearch => queries.ExecuteAsync(call, binding, token),
             _ => throw RemoteResourceLifetimeReadValidation.Invalid()
         };

@@ -6,7 +6,7 @@ namespace KeyLoad.IntegrationTests.Features.Messaging;
 
 internal static class QueueOrderedRetryPublicSeed
 {
-    internal static async Task<QueueOrderedRetryPublicState> RunAsync(RequestCqrsRf3Callers root, int route,
+    internal static async Task<QueueOrderedRetryPublicState> RunAsync(RequestCqrsClusterCallers root, int route,
         QueueParkedHeadPolicy parkedHead, CancellationToken token)
     {
         var suffix = Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat);
@@ -44,7 +44,7 @@ internal static class QueueOrderedRetryPublicSeed
         }, deniedKey, token);
         return new(new(partition, key, deniedKey, route), parkedHead);
     }
-    private static async Task ConfigureAsync(RequestCqrsRf3Callers root, PrincipalRecord principal, string key, CancellationToken token)
+    private static async Task ConfigureAsync(RequestCqrsClusterCallers root, PrincipalRecord principal, string key, CancellationToken token)
     {
         await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), principal, token));
         await Assert.That((await McpCallerAssertions.SdkStatusAsync(await root.Sdk.ConfigureApiKeyAsync(Guid.NewGuid(),

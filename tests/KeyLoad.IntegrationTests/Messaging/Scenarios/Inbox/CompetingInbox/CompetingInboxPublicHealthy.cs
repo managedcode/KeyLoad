@@ -5,8 +5,8 @@ namespace KeyLoad.IntegrationTests.Features.Messaging;
 
 internal static class CompetingInboxPublicHealthy
 {
-    internal static async Task RunAsync(CompetingInboxPublicState state, RequestCqrsRf3Callers root,
-        RequestCqrsRf3Callers worker, CancellationToken token)
+    internal static async Task RunAsync(CompetingInboxPublicState state, RequestCqrsClusterCallers root,
+        RequestCqrsClusterCallers worker, CancellationToken token)
     {
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => CompetingInboxPublicModels.RequireAsync(state, root, token), failures);
@@ -17,8 +17,8 @@ internal static class CompetingInboxPublicHealthy
         await ServerFailureObserver.ObserveAsync(() => CompetingInboxPublicModels.RequireAsync(state, root, token), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
-    private static async Task ProduceAsync(CompetingInboxPublicState state, RequestCqrsRf3Callers root,
-        RequestCqrsRf3Callers worker, CancellationToken token)
+    private static async Task ProduceAsync(CompetingInboxPublicState state, RequestCqrsClusterCallers root,
+        RequestCqrsClusterCallers worker, CancellationToken token)
     {
         await CompetingInboxPublicSeed.EnqueueAsync(state, root, CompetingInboxPublicProtocol.Next, token);
         var delivery = await CompetingInboxPublicSeed.ReceiveAsync(state, worker, CompetingInboxPublicProtocol.Next, token);

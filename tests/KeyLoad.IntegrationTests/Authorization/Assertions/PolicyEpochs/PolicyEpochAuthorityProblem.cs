@@ -51,8 +51,8 @@ internal static class PolicyEpochAuthorityProblem
     {
         await Assert.That(Encoding.UTF8.GetByteCount(text) <= MaximumFailureBytes).IsTrue();
         await Assert.That(text.Contains(credential, StringComparison.Ordinal)).IsFalse();
-        await Assert.That(text.Contains(ResourcePolicyUpdateRf3Protocol.SecretValue, StringComparison.Ordinal)).IsFalse();
-        await Assert.That(text.Contains(ResourcePolicyUpdateRf3Protocol.SeedJson, StringComparison.Ordinal)).IsFalse();
+        await Assert.That(text.Contains(ResourcePolicyUpdateClusterProtocol.SecretValue, StringComparison.Ordinal)).IsFalse();
+        await Assert.That(text.Contains(ResourcePolicyUpdateClusterProtocol.SeedJson, StringComparison.Ordinal)).IsFalse();
         await Assert.That(text.Contains(PolicyEpochPublicProtocol.SecondJson, StringComparison.Ordinal)).IsFalse();
     }
 

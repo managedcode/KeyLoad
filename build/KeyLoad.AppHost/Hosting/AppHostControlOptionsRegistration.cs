@@ -1,4 +1,3 @@
-using KeyLoad.AppHost.Features.BlobStorage;
 using KeyLoad.AppHost.Features.ClusterReplication;
 using KeyLoad.AppHost.Features.ClusterRouting;
 using KeyLoad.AppHost.Features.CodeQuality;
@@ -15,12 +14,13 @@ namespace KeyLoad.AppHost.Hosting;
 [ConfigurationBinding]
 internal static class AppHostControlOptionsRegistration
 {
-    internal const string InvalidContainerFaultSelection = "Container fault commands require an explicit ephemeral RF3 test profile.";
+    internal const string InvalidContainerFaultSelection = "Container fault commands require an explicit ephemeral CLUSTER test profile.";
     private const string ProtocolSection = "KeyLoadTests:ProtocolCohort";
     private const string BenchmarkSection = "Benchmarks";
     private const string LoggerModelControlSetting = "KeyLoadTests:LoggerModelControl";
     private const string LoggerModelControlEnabledValue = "true";
     private const string EphemeralSetting = "KeyLoad:Ephemeral";
+    private const string BenchmarksEnabledSetting = "Benchmarks:Enabled";
     private const string DataRootSetting = "KeyLoad:DataRoot";
     private const string InvalidLoggerModelControl = "The C1 logger model control selection is invalid.";
     private const string FunctionalNodeCountSetting = "KeyLoadTests:FunctionalNodeCount";
@@ -29,8 +29,6 @@ internal static class AppHostControlOptionsRegistration
     private const int SingleFunctionalNodeCount = 1;
     private const int ThreeFunctionalNodeCount = 3;
     private const string InvalidFunctionalTopology = "Functional topology requires one or three real ephemeral nodes and an exclusive owned data root.";
-    private const string NativeBlobRootKey = "Root";
-    private const string NativeBlobSessionKey = "SessionId";
     private const int SectionPresenceCount = 1;
 
     internal static IOptions<AppHostControlOptions> Bind(IConfiguration configuration, IOptions<TestExecutionOptions> execution,
@@ -39,32 +37,16 @@ internal static class AppHostControlOptionsRegistration
         var options = new OptionsManager<AppHostControlOptions>(
             new OptionsFactory<AppHostControlOptions>([new ConfigureOptions<AppHostControlOptions>(value =>
             {
-                value.RequestProbe = RequestCqrsProbeProfileSettingsReader.Read(configuration);
                 value.Tests = TestSuiteSettings.Read(configuration, execution, coverage);
-                value.TwoRf3 = TwoRf3Profile.ValidateAndRead(configuration);
-                value.RemoteDocumentReads = configuration[TwoRf3ProfileProtocol.RemoteDocumentSetting] == TwoRf3ProfileProtocol.Enabled;
-                value.RemotePartitionQueries = configuration[TwoRf3ProfileProtocol.RemoteQuerySetting] == TwoRf3ProfileProtocol.Enabled;
-                value.ProtectedDocumentMovement = configuration[TwoRf3ProfileProtocol.ProtectedDocumentMovementSetting] == TwoRf3ProfileProtocol.Enabled;
-                value.MovementMaxBatchBytes = TwoRf3Profile.ReadMovementMaxBatchBytes(configuration);
-                value.MovementMaxFrameBytes = TwoRf3Profile.ReadMovementMaxFrameBytes(configuration);
-                value.TenantCapacityPlacement = TenantCapacityPlacementProfile.Validate(
-                    configuration[TenantCapacityPlacementProfile.Setting], configuration[TwoRf3ProfileProtocol.Setting],
-                    configuration[TwoRf3ProfileProtocol.ProtectedDocumentMovementSetting],
-                    configuration[TwoRf3ProfileProtocol.RemoteQuerySetting], configuration[TwoRf3ProfileProtocol.RegistrationSetting]);
                 ProtocolCohortImages.ValidateMode(configuration);
                 value.ProtocolCohortEnabled = configuration.GetValue<bool>(ProtocolCohortImages.EnabledSetting);
-                value.Ephemeral = configuration.GetValue<bool>(TwoRf3ProfileProtocol.EphemeralSetting);
-                value.BenchmarksEnabled = configuration.GetValue<bool>(TwoRf3ProfileProtocol.BenchmarksEnabledSetting);
+                value.Ephemeral = configuration.GetValue<bool>(EphemeralSetting);
+                value.BenchmarksEnabled = configuration.GetValue<bool>(BenchmarksEnabledSetting);
                 value.TargetSelected = configuration[BenchmarkSessionSelection.TargetSetting] is not null;
                 value.ProtocolCohortConfigured = configuration.GetSection(ProtocolSection).GetChildren().Take(SectionPresenceCount).Any();
                 value.ComparisonSelectorsPresent = HasSection(configuration, BenchmarkSection);
                 value.ContainerFaults = ReadContainerFaults(configuration, value);
                 value.LoggerModelControl = ReadLoggerModelControl(configuration, value);
-                value.MovementFrameObservation = MovementFrameObservationSettingsReader.Read(configuration, value);
-                value.NativeDiscoveryOmission = NativeDiscoveryOmissionProfile.ReadSettings(configuration, value);
-                value.EventVectorReservedProbe = EventVectorReservedProbeProfile.Read(configuration, value);
-                value.NativeBlobWireProbe = ReadNativeBlobWireProbe(configuration, value);
-                value.ProtectedMovementProbe = ProtectedMovementProbeProfile.Read(configuration, value);
                 value.FunctionalColdReopen = FunctionalColdReopenProfile.Read(configuration, value);
                 value.FunctionalNodeCount = ReadFunctionalNodeCount(configuration, value);
                 value.ExclusiveOwnerContention = ExclusiveOwnerContentionProfile.Read(configuration, value);
@@ -85,13 +67,11 @@ internal static class AppHostControlOptionsRegistration
             || configuration[EphemeralSetting] != LoggerModelControlEnabledValue
             || string.IsNullOrWhiteSpace(configuration[DataRootSetting])
             || !Path.IsPathFullyQualified(configuration[DataRootSetting]!)
-            || options.Tests is not null || options.TwoRf3 || options.BenchmarksEnabled
+            || options.Tests is not null || options.BenchmarksEnabled
             || options.TargetSelected || options.ComparisonSelectorsPresent
             || options.ProtocolCohortEnabled || options.ProtocolCohortConfigured
             || options.ContainerFaults && !options.FunctionalColdReopen
-            || options.LoggerModelControl || options.RequestProbe is not null
-            || options.MovementFrameObservation is not null || options.NativeDiscoveryOmission is not null
-            || options.EventVectorReservedProbe || options.NativeBlobWireProbe is not null || options.ProtectedMovementProbe
+            || options.LoggerModelControl
             || TestSuiteSelectionValidator.HasRetiredBenchmarkSelection(configuration))
         {
             throw new InvalidOperationException(InvalidFunctionalTopology);
@@ -110,26 +90,6 @@ internal static class AppHostControlOptionsRegistration
         return enabled;
     }
 
-    private static RequestCqrsProbeProfileSettings? ReadNativeBlobWireProbe(IConfiguration configuration,
-        AppHostControlOptions options)
-    {
-        var section = configuration.GetSection(NativeBlobWireProbeProfile.Section);
-        var root = section[NativeBlobRootKey];
-        var session = section[NativeBlobSessionKey];
-        if (root is null && session is null)
-        {
-            return null;
-        }
-        if (!options.Ephemeral || !options.TwoRf3 || options.BenchmarksEnabled || options.ProtocolCohortEnabled
-            || !options.RemoteDocumentReads || !options.RemotePartitionQueries || !options.ProtectedDocumentMovement
-            || options.RequestProbe is null || session != options.RequestProbe.SessionId
-            || string.IsNullOrEmpty(root) || !Path.IsPathFullyQualified(root))
-        {
-            throw new InvalidOperationException(NativeBlobWireProbeProfile.Invalid);
-        }
-        return new RequestCqrsProbeProfileSettings(root, session!);
-    }
-
     private static bool ReadLoggerModelControl(IConfiguration configuration, AppHostControlOptions options)
     {
         var control = configuration.GetSection(LoggerModelControlSetting);
@@ -142,11 +102,11 @@ internal static class AppHostControlOptionsRegistration
 
         if (selected != LoggerModelControlEnabledValue
             || hasNestedSelection
-            || options.Tests is not null || options.RequestProbe is not null || options.TwoRf3
+            || options.Tests is not null
             || options.ProtocolCohortEnabled || options.ProtocolCohortConfigured || options.BenchmarksEnabled
             || options.TargetSelected || options.ComparisonSelectorsPresent
             || TestSuiteSelectionValidator.HasRetiredBenchmarkSelection(configuration)
-            || configuration[LocalRf3ImageRequest.EnabledSetting] == LoggerModelControlEnabledValue
+            || configuration[LocalClusterImageRequest.EnabledSetting] == LoggerModelControlEnabledValue
             || configuration[EphemeralSetting] != LoggerModelControlEnabledValue
             || string.IsNullOrWhiteSpace(configuration[DataRootSetting]))
         {

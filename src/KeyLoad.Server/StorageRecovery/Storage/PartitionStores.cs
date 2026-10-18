@@ -1,5 +1,4 @@
 using System.Runtime.ExceptionServices;
-using KeyLoad.Replication;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
 using Microsoft.Extensions.Options;
@@ -36,20 +35,16 @@ internal sealed class PartitionStores : IDisposable
         {
             PartitionRootAdmission.InspectWhileOwned(directory);
             var canonicalOptions = StoreOptions(options, Path.Combine(directory, PartitionStoreProtocol.CanonicalDirectory), canonicalObserver);
-            var replicaOptions = StoreOptions(options, Path.Combine(directory, ReplicaProtocol.ReplicaDirectory));
             ZoneTreeStore.ValidateIdentityBeforeOpen(canonicalOptions, executionOptions);
-            ZoneTreeStore.ValidateIdentityBeforeOpen(replicaOptions, executionOptions);
             if (!OperatingSystem.IsWindows())
             {
                 File.SetUnixFileMode(directory, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
             }
             Canonical = ZoneTreeStore.OpenOwned(canonicalOptions, executionOptions, cacheOptions, settlement.Canonical, clock);
-            Replica = ZoneTreeStore.OpenOwned(replicaOptions, executionOptions, cacheOptions, settlement.Replica, clock);
         }
         catch (Exception error)
         {
             var failures = new List<Exception> { error };
-            CloseReplica(failures);
             CloseCanonical(failures);
             CloseOwnership(failures);
             ServerFailureObserver.ThrowIfAny(failures);
@@ -61,11 +56,6 @@ internal sealed class PartitionStores : IDisposable
     {
         get;
     }
-    internal ZoneTreeStore Replica
-    {
-        get;
-    }
-
     private static ZoneTreeStoreOptions StoreOptions(NodeOptions options, string directory,
         Action<CommitStage, long, int>? observer = null) => new(directory)
         {
@@ -81,7 +71,7 @@ internal sealed class PartitionStores : IDisposable
             if (closeAttempted)
             {
                 originalCloseFailure?.Throw();
-                if (!settlement.Canonical.IsReleased || !settlement.Replica.IsReleased)
+                if (!settlement.Canonical.IsReleased)
                 {
                     throw new InvalidOperationException(OriginalCloseUnjoined);
                 }
@@ -89,7 +79,6 @@ internal sealed class PartitionStores : IDisposable
             }
             closeAttempted = true;
             var failures = new List<Exception>();
-            CloseReplica(failures);
             CloseCanonical(failures);
             CloseOwnership(failures);
             try
@@ -101,26 +90,6 @@ internal sealed class PartitionStores : IDisposable
                 originalCloseFailure = ExceptionDispatchInfo.Capture(failure);
                 throw;
             }
-        }
-    }
-
-    private void CloseReplica(List<Exception> failures)
-    {
-        if (Replica is null)
-        {
-            return;
-        }
-        try
-        {
-            Replica.Dispose();
-        }
-        catch (Exception failure) when (KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
-        {
-            failures.Add(failure);
-        }
-        catch (Exception failure) when (!KeyLoad.Clustering.NativeCqrsBoundaryErrors.IsNonFatal(failure))
-        {
-            failures.Add(failure);
         }
     }
 

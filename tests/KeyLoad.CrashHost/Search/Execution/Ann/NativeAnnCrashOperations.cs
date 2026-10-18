@@ -36,7 +36,7 @@ internal static class NativeAnnCrashOperations
         id = Guid.NewGuid();
         _ = Apply(commands, OperationKind.ConfigureProjectionConsumer,
             new ConfigureProjectionConsumerRequest(id, consumer, new(NativeAnnCrashContract.Generation, [], [.. Kinds]), InitialCheckpoint), id).Get<ProjectionConsumerInfo>();
-        var placement = database.ReadAtomicPartitionPlacement(CrashFixtureValues.Principal, new(NativeAnnCrashContract.Version, partition));
+        var placement = database.ReadAtomicPartitionPlacement(CrashFixtureValues.Principal, partition);
         return new(Guid.NewGuid(), consumer, NativeAnnCrashContract.Collection, NativeAnnCrashContract.Field,
             NativeAnnCrashContract.Space, NativeAnnCrashContract.Generation, database.Store.Identity.NodeId,
             new(placement.PhysicalShardId, placement.Incarnation, placement.VoterIds, placement.PlacementEpoch), AnnMaintenanceMode.Build);

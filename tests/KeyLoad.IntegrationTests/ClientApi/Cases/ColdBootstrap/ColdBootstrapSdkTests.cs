@@ -6,7 +6,7 @@ namespace KeyLoad.IntegrationTests.Features.ClientApi;
 internal sealed class ColdBootstrapSdkTests
 {
     [Test]
-    public async Task Kl014FreshOwnedRf3BootstrapCliAndPersistedSdkRetainExactCommandIdentity()
+    public async Task FreshOwnedClusterBootstrapCliAndPersistedSdkRetainExactCommandIdentity()
     {
         ClusterFixture? fixture = null;
         string? root = null;
@@ -40,7 +40,7 @@ internal sealed class ColdBootstrapSdkTests
         await Assert.That(cold.DirectoryExisted || cold.FileExisted).IsFalse();
         await Assert.That(fixture.Root).IsEqualTo(cold.Root);
         fixture.RegisterNativeCoverageCase<ColdBootstrapSdkTests>(
-            nameof(Kl014FreshOwnedRf3BootstrapCliAndPersistedSdkRetainExactCommandIdentity));
+            nameof(FreshOwnedClusterBootstrapCliAndPersistedSdkRetainExactCommandIdentity));
         await ColdBootstrapSdkFlow.RunAsync(fixture, TestContext.Current!.Execution.CancellationToken)
             .ConfigureAwait(false);
     }

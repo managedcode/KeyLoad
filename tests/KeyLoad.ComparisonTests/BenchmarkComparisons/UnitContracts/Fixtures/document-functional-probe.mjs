@@ -12,7 +12,7 @@ import { runBounded } from '../../../../../scripts/Features/BenchmarkComparisons
 import { hashRegularFile } from '../../../../../scripts/Features/BenchmarkComparisons/isolated-github-files.mjs';
 
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
-const entries = ['TestResults/rf3-heavy-load/original.trx', 'keyload-images/image-receipt.json',
+const entries = ['TestResults/cluster-heavy-load/original.trx', 'keyload-images/image-receipt.json',
   'keyload-images/server-manifest.json', 'keyload-images/comparisons-manifest.json'];
 export function controlledFunctionalProof(cohort) {
   return { job: { id: 9000, name: FUNCTIONAL.job,

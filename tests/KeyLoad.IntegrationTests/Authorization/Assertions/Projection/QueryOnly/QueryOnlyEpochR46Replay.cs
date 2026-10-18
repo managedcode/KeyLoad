@@ -6,14 +6,14 @@ namespace KeyLoad.IntegrationTests.Features.Authorization;
 
 internal static class QueryOnlyEpochR46Replay
 {
-    internal static async Task RequireAsync(RequestCqrsRf3Callers root,
-        RequestCqrsRf3Callers reader, QueryOnlyEpochR46State state, CancellationToken token)
+    internal static async Task RequireAsync(RequestCqrsClusterCallers root,
+        RequestCqrsClusterCallers reader, QueryOnlyEpochR46State state, CancellationToken token)
     {
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.CommitAsync(state.Original.Seed, token));
-        await SqlRf3Protocol.EqualAsync(state.Original.Receipt, receipt);
+        await SqlClusterProtocol.EqualAsync(state.Original.Receipt, receipt);
         await QueryOnlyEpochR46Current.RequireAsync(root, reader, state, token);
         var reply = await root.Mcp.CallAsync(McpCallerTools.DocumentsCommit, state.Original.Seed, token);
-        await SqlRf3Protocol.EqualAsync(state.Original.Receipt,
+        await SqlClusterProtocol.EqualAsync(state.Original.Receipt,
             (await McpCallerAssertions.SuccessAsync<CommitReceipt>(reply)).Value);
         await QueryOnlyEpochR46Current.RequireAsync(root, reader, state, token);
     }

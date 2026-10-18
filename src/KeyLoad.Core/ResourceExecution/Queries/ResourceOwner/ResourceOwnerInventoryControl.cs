@@ -83,7 +83,7 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.Corruption, ResourceOwnerInventoryReadValidation.Malformed);
         }
         var result = new ResourceOwnerInventoryControlV1(request, definition, lifetime, catalog, directory,
-            ReadInventoryPlacementRevision(view), principal.Id, principal.PolicyEpoch)
+            ResourceOwnerInventoryReadValidation.EmptyRevision, principal.Id, principal.PolicyEpoch)
         {
             RetirementAttempt = retirementAttempt
         };

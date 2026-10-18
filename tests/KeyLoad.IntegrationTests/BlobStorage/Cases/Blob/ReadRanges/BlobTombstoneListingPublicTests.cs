@@ -5,6 +5,6 @@ namespace KeyLoad.IntegrationTests.Features.BlobStorage;
 internal sealed class BlobTombstoneListingPublicTests(ClusterFixture fixture)
 {
     [Test]
-    public Task RetiredAndUnpublishedHeadsAdvanceEmptyCursorWhileCurrentRevisionAndOriginalResultsSurviveTwoRf3ColdCycles()
+    public Task RetiredAndUnpublishedHeadsAdvanceEmptyCursorWhileCurrentRevisionAndOriginalResultsSurviveTwoClusterColdCycles()
         => BlobTombstoneListingPublicTrial.RunAsync(fixture, TestContext.Current!.Execution.CancellationToken);
 }

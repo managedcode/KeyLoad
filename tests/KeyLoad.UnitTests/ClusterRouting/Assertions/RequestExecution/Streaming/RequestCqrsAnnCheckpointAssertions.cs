@@ -17,7 +17,7 @@ internal static class RequestCqrsAnnCheckpointAssertions
         var checkpoint = actual.Checkpoint ?? throw new InvalidOperationException();
         var database = fixture.Database;
         var placement = database.Database.ReadAtomicPartitionPlacement(RequestCqrsAnnTestData.Principal,
-            new(RequestCqrsAnnTestData.Version, database.Partition));
+            database.Partition);
         var through = request.Mode == AnnMaintenanceMode.Build
             ? RequestCqrsAnnTestData.OriginalTail : RequestCqrsAnnTestData.ChangedTail;
         var checkpointCommits = request.Mode == AnnMaintenanceMode.Build

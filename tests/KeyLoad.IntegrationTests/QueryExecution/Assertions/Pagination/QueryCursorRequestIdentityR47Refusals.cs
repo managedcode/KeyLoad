@@ -6,8 +6,8 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
 internal static class QueryCursorRequestIdentityR47Refusals
 {
-    internal static async Task RequireAsync(RequestCqrsRf3Callers root,
-        RequestCqrsRf3Callers reader, QueryCursorRequestIdentityR47State state,
+    internal static async Task RequireAsync(RequestCqrsClusterCallers root,
+        RequestCqrsClusterCallers reader, QueryCursorRequestIdentityR47State state,
         bool afterCold, CancellationToken token)
     {
         foreach (var original in state.OriginalPages)
@@ -19,7 +19,7 @@ internal static class QueryCursorRequestIdentityR47Refusals
             var sdk = await reader.Sdk.QueryAsync(request, token);
             await Assert.That(sdk.IsSuccess).IsFalse();
             await Assert.That(sdk.Value).IsNull();
-            await SqlRf3Protocol.EqualAsync(Errors.Problem(ErrorCode.CursorExpired,
+            await SqlClusterProtocol.EqualAsync(Errors.Problem(ErrorCode.CursorExpired,
                 QueryCursorRequestIdentityR47Protocol.CursorDetail), sdk.Problem);
             await PrivateAsync(JsonSerializer.Serialize(sdk), state.Credential);
             await QueryCursorRequestIdentityR47Current.RequireAsync(root, reader, state, token);

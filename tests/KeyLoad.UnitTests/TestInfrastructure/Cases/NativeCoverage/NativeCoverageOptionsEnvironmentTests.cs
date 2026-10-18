@@ -12,7 +12,7 @@ internal sealed class NativeCoverageOptionsEnvironmentTests
 {
     private const string EnvironmentPrefix = "KeyLoadTests__NativeCoverage__";
     private const string SourceManifestPath = "/coverage/source-manifest.json";
-    private const string FixtureModeEnvironment = "KEYLOAD_NATIVE_COVERAGE_RF3_MODE";
+    private const string FixtureModeEnvironment = "KEYLOAD_NATIVE_COVERAGE_CLUSTER_MODE";
     private const string FixtureSourceEnvironment = "KEYLOAD_NATIVE_COVERAGE_SOURCE_MANIFEST";
     private const string ConfigurationSeparator = ":";
     private const string EnvironmentSeparator = "__";
@@ -29,14 +29,14 @@ internal sealed class NativeCoverageOptionsEnvironmentTests
             Args = []
         });
         var runner = builder.AddExecutable("coverage-options-handoff", "dotnet", ".");
-        NativeCoverageRf3ExecutionEnvironment.Apply(runner, original, SourceManifestPath);
+        NativeCoverageClusterExecutionEnvironment.Apply(runner, original, SourceManifestPath);
         var environment = new Dictionary<string, object>(StringComparer.Ordinal);
         var context = new EnvironmentCallbackContext(builder.ExecutionContext, runner.Resource, environment);
         foreach (var callback in runner.Resource.Annotations.OfType<EnvironmentCallbackAnnotation>())
         {
             await callback.Callback(context);
         }
-        await Assert.That(environment[FixtureModeEnvironment]).IsEqualTo(NativeCoverageRf3Protocol.Mode);
+        await Assert.That(environment[FixtureModeEnvironment]).IsEqualTo(NativeCoverageClusterProtocol.Mode);
         await Assert.That(environment[FixtureSourceEnvironment]).IsEqualTo(SourceManifestPath);
         await Assert.That(environment.Keys.Count(key => key.StartsWith(EnvironmentPrefix, StringComparison.Ordinal))).IsEqualTo(12);
         using var received = new ConfigurationManager();

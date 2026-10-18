@@ -4,7 +4,7 @@ using KeyLoad.IntegrationTests.Features.QueryExecution;
 namespace KeyLoad.IntegrationTests.Features.ClientApi;
 
 /// <summary>AC-MCP-002: concurrent real official callers retain independently persisted tenant authority.</summary>
-/// <param name="fixture">The initialized actual Docker/Aspire RF3 application.</param>
+/// <param name="fixture">The initialized actual Docker/Aspire CLUSTER application.</param>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class McpConcurrentIdentityTests(ClusterFixture fixture)
@@ -47,12 +47,12 @@ internal sealed class McpConcurrentIdentityTests(ClusterFixture fixture)
             .IsEqualTo(OperationCount);
         await McpCallerAssertions.DoesNotDiscloseAsync(calls[FirstDenial], firstIdentity.Secret, McpDocumentProtocol.PrivateValue);
         await McpCallerAssertions.DoesNotDiscloseAsync(calls[SecondDenial], secondIdentity.Secret, McpDocumentProtocol.PrivateValue);
-        await SqlRf3Protocol.EqualAsync(before,
+        await SqlClusterProtocol.EqualAsync(before,
             await global::KeyLoad.IntegrationTests.Features.Authorization.ConcurrentPrincipalAuthorityAssertions.CaptureAsync(
                 fixture, first, second, deadline.Token));
         await global::KeyLoad.IntegrationTests.Features.Authorization.ConcurrentPrincipalAuthorityAssertions.FollowingAsync(
             firstClient, secondClient, first, second, deadline.Token);
-        await SqlRf3Protocol.EqualAsync(before,
+        await SqlClusterProtocol.EqualAsync(before,
             await global::KeyLoad.IntegrationTests.Features.Authorization.ConcurrentPrincipalAuthorityAssertions.CaptureAsync(
                 fixture, first, second, deadline.Token));
         await global::KeyLoad.IntegrationTests.Features.Authorization.ConcurrentPrincipalPolicyContinuation.RunAsync(

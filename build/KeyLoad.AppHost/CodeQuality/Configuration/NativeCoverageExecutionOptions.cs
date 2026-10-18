@@ -26,7 +26,7 @@ internal sealed class NativeCoverageExecutionOptions
     private const int DefaultContainerStopSeconds = 45;
     private const int DefaultApplicationCleanupSeconds = 180;
     private const int MaximumDurationSeconds = 600;
-    private const int Rf3NodeCount = 3;
+    private const int ClusterNodeCount = 3;
 
     public int MaximumDescriptorBytes { get; set; } = DefaultDescriptorBytes;
     public int MaximumFiles { get; set; } = DefaultMaximumFiles;
@@ -55,7 +55,7 @@ internal sealed class NativeCoverageExecutionOptions
         && WholeSeconds(ShutdownTimeout) && WholeSeconds(SettlementTimeout)
         && WholeSeconds(ContainerStopTimeout) && WholeSeconds(ApplicationCleanupTimeout)
         && ShutdownTimeout + SettlementTimeout < ContainerStopTimeout
-        && ApplicationCleanupTimeout.Ticks > Rf3NodeCount * ContainerStopTimeout.Ticks;
+        && ApplicationCleanupTimeout.Ticks > ClusterNodeCount * ContainerStopTimeout.Ticks;
 
     private static bool WholeSeconds(TimeSpan value) => value > TimeSpan.Zero
         && value.Ticks <= MaximumDurationSeconds * TimeSpan.TicksPerSecond

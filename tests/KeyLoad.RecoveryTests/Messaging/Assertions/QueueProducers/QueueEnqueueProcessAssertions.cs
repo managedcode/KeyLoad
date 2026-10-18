@@ -12,7 +12,7 @@ internal static class QueueEnqueueProcessAssertions
     internal static CommitToken Next(DatabaseEngine owner, ZoneTreeStore store)
     {
         var placement = owner.ReadAtomicPartitionPlacement(CrashFixtureValues.Principal,
-            new(QueueEnqueueCrashProtocol.PlacementVersion, QueueEnqueueCrashProtocol.Partition));
+            QueueEnqueueCrashProtocol.Partition);
         return new(placement.Incarnation, QueueEnqueueCrashProtocol.Partition.AtomicPartitionId,
             checked(store.Position + QueueEnqueueCrashProtocol.First), placement.PlacementEpoch);
     }

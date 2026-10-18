@@ -13,7 +13,7 @@ namespace KeyLoad.IntegrationTests.Features.CodeQuality;
 /// <summary>Owns the original collector image prerequisite inside the native TUnit session.</summary>
 internal static class NativeCoverageTUnitSession
 {
-    private const string RunnerName = "tests-rf3";
+    private const string RunnerName = "tests-cluster";
     private const string ArgumentsEnvironment = "KEYLOAD_TUNIT_NATIVE_COVERAGE_ARGUMENTS";
     private static IDistributedApplicationTestingBuilder? testingBuilder;
     private static DistributedApplication? application;
@@ -51,12 +51,12 @@ internal static class NativeCoverageTUnitSession
             builder.Resources.Remove(runner);
             application = await builder.BuildAsync(deadline.Token).ConfigureAwait(false);
             outputLifetime = new();
-            output = TestSuiteOutput.ForwardAsync(application, NativeCoverageRf3Prerequisite.ResourceName, outputLifetime.Token);
-            var exit = await AspireResourceCompletion.RunToExitAsync(application, NativeCoverageRf3Prerequisite.ResourceName,
+            output = TestSuiteOutput.ForwardAsync(application, NativeCoverageClusterPrerequisite.ResourceName, outputLifetime.Token);
+            var exit = await AspireResourceCompletion.RunToExitAsync(application, NativeCoverageClusterPrerequisite.ResourceName,
                 deadline.Token).ConfigureAwait(false);
             if (exit != 0)
             {
-                throw new InvalidOperationException("Original RF3 coverage image preparation failed.");
+                throw new InvalidOperationException("Original CLUSTER coverage image preparation failed.");
             }
             foreach (var (key, value) in configuration.EnvironmentVariables)
             {
@@ -95,8 +95,8 @@ internal static class NativeCoverageTUnitSession
                 {
                     await CollectAsync(() => output, failures).ConfigureAwait(false);
                 }
-                NativeCoverageRf3Cleanup? imageCleanup = null;
-                ServerFailureObserver.Observe(() => imageCleanup = owned.Services.GetRequiredService<NativeCoverageRf3Cleanup>(), failures);
+                NativeCoverageClusterCleanup? imageCleanup = null;
+                ServerFailureObserver.Observe(() => imageCleanup = owned.Services.GetRequiredService<NativeCoverageClusterCleanup>(), failures);
                 await DisposeBuilderAsync(failures).ConfigureAwait(false);
                 if (imageCleanup is not null)
                 {

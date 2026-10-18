@@ -39,7 +39,7 @@ public sealed partial class DatabaseEngine
             body.Request.RetirementId, ResourceRetirementPhase.Begin, operation.Id, lifetime,
             catalog.DefaultShard, position, digest);
         var control = new ResourceRetirementControlV1(body.Request, definition, lifetime, catalog, directory,
-            ReadInventoryPlacementRevision(transaction), principal.Id, principal.PolicyEpoch, receipt, digest)
+            ResourceOwnerInventoryReadValidation.EmptyRevision, principal.Id, principal.PolicyEpoch, receipt, digest)
         {
             WorkOrigins = ResourceRetirementWorkOriginValidation.Capture(body.OwnerStatuses, directory, Limits)
         };

@@ -1,33 +1,28 @@
 # KeyLoad.Abstractions
 
-## Purpose and entry points
+## Purpose, entry points and ownership
+
 - Owns public, implementation-independent contracts shared by KeyLoad clients and services.
 - Main contract sources: `Contracts.cs`, `<SliceName>/Contracts/` (individual request/result records), `QueryExecution/Contracts/QueryAst.cs`, `ChangeFeeds/Contracts/ChangeFeeds.cs`, `EventStreams/Contracts/Subscriptions.cs`, `ResourceExecution/Contracts/Admission.cs`, `ResourceExecution/Contracts/HttpAdmission.cs`; storage contracts and key encoding are under `Storage/Contracts/StorageContracts.cs` and `Storage/Serialization/KeyCodec.cs`.
-
-## Ownership and boundaries
 - Place feature-owned public contracts under `<SliceName>/` using the canonical name in `docs/Features/<SliceName>.md`; keep truly shared primitives here only when multiple slices require them.
-- Contracts define caller-visible shapes, not persistence, authorization decisions, physical placement, Orleans routing, or server implementation.
-- Current root-level contracts are legacy layout debt. Public contract changes require the owning feature specification and ADR where required; do not add compatibility shims or client-supplied trusted roles.
-
-## Commands and evidence
-- GitHub Actions solution build: `dotnet build KeyLoad.slnx --no-restore --configuration Release`.
-- Contract behavior is exercised by the invoking TUnit projects: `tests/KeyLoad.UnitTests`, `tests/KeyLoad.IntegrationTests`, and `tests/KeyLoad.RecoveryTests`, each run only through `.github/workflows/ci.yml`.
-- Tests and qualification run only in GitHub Actions. Do not claim a local build or static review as runtime contract proof.
-
-## Skills and protected risks
+- Contracts define caller-visible shapes, not persistence, authorization decisions, cluster execution, Orleans routing, or server implementation.
 - Applicable skills: none installed; skill installation is prohibited by owner direction.
 - Preserve net10.0/C# 14 and central package pins. Security, serialization, compatibility and trust-boundary changes require explicit contract review.
 
-## Read-first and canonical slice ownership
-- Shared disposable cache limits, reservation interfaces and modeled snapshots belong to `ResourceExecution/` under ADR-058. They grant no database authority and contain no private store signing material; the integration lead alone owns these shared contracts.
-- Owns `RelationalStorage/` immutable schema metadata under ADR-055 and `QueryExecution/` versioned SQL operation-envelope contracts under ADR-054. Null schema metadata preserves existing resource JSON; these contracts do not grant roles or introduce a second storage engine.
-- Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
-- Owned contract slices: `DocumentStorage`, `EventStreams`, `Messaging`, `Authorization`, `Search`, and `GraphTraversal`; target paths are `<SliceName>/` for each named slice.
-- Keep only genuinely shared abstractions at the project root; contract ownership and canonical docs follow the named slice.
-- Shared strict collection/buffer JSON converters belong to `ResourceExecution/` under ADR-041. Delegate array and base64 serialization to System.Text.Json, preserve nullable tombstones and reject invalid required defaults; only the integration lead owns shared JsonDefaults registration.
-- Owns the frozen public `BlobStorage` DTO and integrity format under `BlobStorage/` and ADR-038. Shared enum/capability/resource-definition additions have one integration owner; preserve nonblob wire JSON and existing numeric values.
-- Owns bounded `TimeSeries` read contracts under `TimeSeries/` and ADR-052: latest uses an inclusive timestamp cut, aggregates use half-open UTC ranges, and windows expose an explicit nullable exclusive end at the maximum timestamp. These contracts do not transfer storage ownership or trust caller-supplied roles.
-- Owns `Restore/Contracts/` and feature-local `Serialization/` stable generated native partition-roster entry identities under ADR-008/011. Preserve complete PartitionRef scope, stable alias/field IDs and separate local/applied first-seen positions; these records do not establish catalog completeness or physical ownership.
+## Boundaries and protected risks
 
-## Vertical-slice responsibility folders
-- Keep feature-owned implementation inside its canonical `<SliceName>/` and organize it in populated, feature-local responsibility folders (such as `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Transport/`, `Hosting/`, `Serialization/`, or `Validation/`). Do not leave a flat dump of unrelated responsibilities at the slice root; keep only genuinely shared building blocks and executable/composition entry points outside feature slices. Preserve namespaces and runtime contracts during physical moves.
+Follow the [root policy](../../AGENTS.md) and the owning feature specification. Keep changes in their actual owner, preserve unrelated work, and remove replaced code together with exclusive callers and fixtures. Use native Orleans calls for distributed execution and silo-local ZoneTree owners for files. Preserve persisted authorization, operation correctness, resource bounds, cancellation and joined shutdown. Never turn a static check or focused test into a claim of complete runtime qualification.
+
+## Commands and verification
+
+From the repository root:
+
+```sh
+dotnet build KeyLoad.slnx --no-restore --configuration Release -warnaserror
+```
+
+Use the root's complete solution, native TUnit, real process recovery and Aspire SDK/MCP gates as applicable. Local checks are development evidence; delivered-source qualification and public measurements require exact-source Linux GitHub artifacts. Do not weaken compiler, analyzer, source-identity, coverage or runtime assertions.
+
+## Skills
+
+Use the installed Orleans skill for Orleans design and the relevant installed formatting, Aspire or diagnostics skill when the task needs it. Follow explicit owner scope and dependency-adoption rules.

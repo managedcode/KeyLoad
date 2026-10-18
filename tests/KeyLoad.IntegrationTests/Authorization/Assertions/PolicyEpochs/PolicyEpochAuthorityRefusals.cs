@@ -6,7 +6,7 @@ namespace KeyLoad.IntegrationTests.Features.Authorization;
 
 internal static class PolicyEpochAuthorityRefusals
 {
-    internal static async Task AllAsync(RequestCqrsRf3Callers reader, PolicyEpochPublicState state,
+    internal static async Task AllAsync(RequestCqrsClusterCallers reader, PolicyEpochPublicState state,
         string[] cursors, CancellationToken token)
     {
         for (var route = 0; route < PolicyEpochPublicProtocol.RouteCount; route++)
@@ -23,7 +23,7 @@ internal static class PolicyEpochAuthorityRefusals
         }
     }
 
-    private static async Task SdkAsync(RequestCqrsRf3Callers reader, global::KeyLoad.QueryRequest request,
+    private static async Task SdkAsync(RequestCqrsClusterCallers reader, global::KeyLoad.QueryRequest request,
         int route, string credential, CancellationToken token)
     {
         if (route == PolicyEpochPublicProtocol.Sdk)
@@ -38,10 +38,10 @@ internal static class PolicyEpochAuthorityRefusals
             return;
         }
         await PolicyEpochAuthorityProblem.SdkAsync(await reader.Sdk.ExecuteSqlAsync(
-            SqlRf3Protocol.Call(request.Partition, McpCallerTools.QueryExecute, request), token), credential);
+            SqlClusterProtocol.Call(request.Partition, McpCallerTools.QueryExecute, request), token), credential);
     }
 
-    private static Task OfficialAsync(RequestCqrsRf3Callers reader, global::KeyLoad.QueryRequest request,
+    private static Task OfficialAsync(RequestCqrsClusterCallers reader, global::KeyLoad.QueryRequest request,
         int route, string credential, CancellationToken token)
     {
         if (route == PolicyEpochPublicProtocol.McpAst)
@@ -55,6 +55,6 @@ internal static class PolicyEpochAuthorityRefusals
                 request, token), credential);
         }
         return PolicyEpochAuthorityProblem.OfficialAsync(() => reader.Mcp.CallAsync(SqlOperationProtocol.ToolName,
-            SqlRf3Protocol.Call(request.Partition, McpCallerTools.QueryExecute, request), token), credential);
+            SqlClusterProtocol.Call(request.Partition, McpCallerTools.QueryExecute, request), token), credential);
     }
 }

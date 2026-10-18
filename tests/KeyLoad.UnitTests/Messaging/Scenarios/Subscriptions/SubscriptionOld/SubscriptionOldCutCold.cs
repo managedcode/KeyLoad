@@ -12,8 +12,7 @@ internal static class SubscriptionOldCutCold
         => new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(),
             UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(),
             UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(),
-            UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(),
-            UnavailablePartitionMovementCheckpointVerifier.Instance, state.Clock);
+            UnitExecutionOptions.TimeSeriesExecution(), state.Clock);
 
     internal static async Task RunAsync(string path, SubscriptionOldCutState state, string[] bytes,
         long position, StoreIdentity identity, CancellationToken token)

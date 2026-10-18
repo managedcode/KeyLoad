@@ -1,4 +1,3 @@
-using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
@@ -6,7 +5,7 @@ namespace KeyLoad.IntegrationTests.Features.Authorization;
 
 internal static class EventMessageSensitiveSafeR52Seed
 {
-    internal static async Task<EventMessageSensitiveSafeR52State> RunAsync(RequestCqrsRf3Callers root,
+    internal static async Task<EventMessageSensitiveSafeR52State> RunAsync(RequestCqrsClusterCallers root,
         bool subscription, bool dataAuthority, bool header, CancellationToken token)
     {
         var suffix = Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat);
@@ -29,11 +28,7 @@ internal static class EventMessageSensitiveSafeR52Seed
         await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), worker, token));
         await McpCallerAssertions.SdkStatusAsync(await root.Sdk.ConfigureApiKeyAsync(Guid.NewGuid(),
             KeyLoad.Core.DatabaseEngine.Credential(id, id, key), token));
-        var placementRequest = new AtomicPartitionPlacementReadRequest(EventMessageSensitiveSafeR52Protocol.PlacementSchema, partition);
-        var placement = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ReadAtomicPartitionPlacementAsync(placementRequest, token));
-        await SqlRf3Protocol.EqualAsync(placement, (await McpCallerAssertions.SuccessAsync<AtomicPartitionPlacementResolution>(
-            await root.Mcp.CallAsync(McpCallerTools.AdminPartitionPlacementRead, placementRequest, token))).Value);
-        var state = new EventMessageSensitiveSafeR52State(new(partition, resource, worker, key, subscription, dataAuthority, header), placement);
+        var state = new EventMessageSensitiveSafeR52State(new(partition, resource, worker, key, subscription, dataAuthority, header));
         if (subscription)
         {
             await EventMessageSensitivePublicOperations.GroupAsync(root, state.Model, false, token);
@@ -43,7 +38,7 @@ internal static class EventMessageSensitiveSafeR52Seed
         return state;
     }
 
-    internal static async Task PublishAsync(RequestCqrsRf3Callers root, EventMessageSensitiveSafeR52State state,
+    internal static async Task PublishAsync(RequestCqrsClusterCallers root, EventMessageSensitiveSafeR52State state,
         string id, CancellationToken token)
     {
         Mutation mutation = state.Model.Subscription
@@ -54,13 +49,11 @@ internal static class EventMessageSensitiveSafeR52Seed
         var command = new CommandRequest(Guid.NewGuid(), state.Model.Partition, [mutation]);
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.CommitAsync(command, token));
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
-        await Assert.That(receipt.Token.Incarnation).IsEqualTo(state.Placement.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(state.Model.Partition.AtomicPartitionId);
-        await Assert.That(receipt.Token.OwnershipEpoch).IsEqualTo(state.Placement.PlacementEpoch);
         await Assert.That(receipt.Token.Position).IsGreaterThan((long)EventMessageSensitiveSafeR52Protocol.EmptyCount);
         await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
         var kind = state.Model.Subscription ? EventMessageSensitivePublicProtocol.PublishKind : EventMessageSensitivePublicProtocol.EnqueueKind;
-        await SqlRf3Protocol.EqualAsync<MutationReceipt[]>([new(kind, state.Model.Resource.Name, id,
+        await SqlClusterProtocol.EqualAsync<MutationReceipt[]>([new(kind, state.Model.Resource.Name, id,
             state.Model.Subscription ? state.Published.Count + EventMessageSensitiveSafeR52Protocol.FirstPosition
                 : EventMessageSensitiveSafeR52Protocol.InitialRevision)], receipt.Mutations.ToArray());
         state.Producers.Add((command, receipt));

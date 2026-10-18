@@ -8,11 +8,11 @@ namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 
 internal static class StrongReadSessionResponses
 {
-    internal static async Task ReadAsync(RequestCqrsRf3Callers reader, EntityRef reference, CommitToken minimum,
+    internal static async Task ReadAsync(RequestCqrsClusterCallers reader, EntityRef reference, CommitToken minimum,
         DocumentResult? expected, StrongReadSessionRoute route, CancellationToken token)
     {
         var request = new GetDocumentRequest(reference, minimum);
-        var call = SqlRf3Protocol.Call(reference.Partition, McpCallerTools.DocumentsGet, request);
+        var call = SqlClusterProtocol.Call(reference.Partition, McpCallerTools.DocumentsGet, request);
         if (route == StrongReadSessionRoute.SdkGet)
         {
             await ExactAsync(expected, await McpCallerAssertions.SdkSuccessAsync(await reader.Sdk.GetAsync(reference, minimum, token)));
@@ -20,7 +20,7 @@ internal static class StrongReadSessionResponses
         }
         if (route == StrongReadSessionRoute.SdkCall)
         {
-            await ExactAsync(expected, await SqlRf3Protocol.SdkAsync<DocumentReadResult>(reader.Sdk, call, token));
+            await ExactAsync(expected, await SqlClusterProtocol.SdkAsync<DocumentReadResult>(reader.Sdk, call, token));
             return;
         }
         var reply = route == StrongReadSessionRoute.McpGet
@@ -36,6 +36,6 @@ internal static class StrongReadSessionResponses
     private static async Task ExactAsync(DocumentResult? expected, DocumentReadResult actual)
     {
         await Assert.That(actual).IsNotNull();
-        await SqlRf3Protocol.EqualAsync(new DocumentReadResult(expected), actual);
+        await SqlClusterProtocol.EqualAsync(new DocumentReadResult(expected), actual);
     }
 }

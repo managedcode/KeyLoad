@@ -6,28 +6,28 @@ internal static class NativeTestSelectionProgram
             import { pathToFileURL } from 'node:url';
             const { nativeSelection } = await import(pathToFileURL(process.argv[1]));
             const suite = process.argv[2];
-            for (const bad of [[], ['--KeyLoadTests:Suite=unknown'], ['--KeyLoadTests:Suite=unit','--KeyLoadTests:Suite=rf3'],
+            for (const bad of [[], ['--KeyLoadTests:Suite=unknown'], ['--KeyLoadTests:Suite=unit','--KeyLoadTests:Suite=cluster'],
               ['--KeyLoadTests:Suite=unit-scalar'],
               ['--KeyLoadTests:Suite=unit','--KeyLoadTests:Execution:MaximumParallelTests=51'],
               ['--KeyLoadTests:Suite=unit','--KeyLoadTests:Execution:MaximumParallelTests=0'],
               ['--KeyLoadTests:Suite=unit','--KeyLoadTests:Execution:MaximumParallelTests=1.5'],
               ['--KeyLoadTests:Suite=unit','--KeyLoadTests:Execution:MaximumParallelTests=invalid'],
-              ['--KeyLoadTests:Suite=rf3','--KeyLoadTests:Filter=/*/*/HeavyDocumentLoadRf3Tests/*'],
+              ['--KeyLoadTests:Suite=cluster','--KeyLoadTests:Filter=/*/*/HeavyDocumentLoadClusterTests/*'],
               ['--KeyLoadTests:Suite=unit','--KeyLoadTests:NativeCoverage:ServerMode=wrong']]) {
               let rejected = false; try { nativeSelection(bad, {}); } catch { rejected = true; }
               if (!rejected) throw new Error('Invalid native test selection was accepted.');
             }
-            const heavyArgs = ['--KeyLoadTests:Suite=rf3', '--KeyLoadTests:Filter=/*/*/HeavyDocumentLoadRf3Tests/*', '--KeyLoadTests:HeavyLoad:Enabled=true'];
+            const heavyArgs = ['--KeyLoadTests:Suite=cluster', '--KeyLoadTests:Filter=/*/*/HeavyDocumentLoadClusterTests/*', '--KeyLoadTests:HeavyLoad:Enabled=true'];
             const heavy = nativeSelection(heavyArgs, {});
             if (heavy.args[heavy.args.indexOf('--maximum-parallel-tests') + 1] !== '1'
-              || !nativeSelection(['--KeyLoadTests:Suite=rf3'], {}).args.includes('/*/*/*/*[Category!=HeavyLoad]')) {
+              || !nativeSelection(['--KeyLoadTests:Suite=cluster'], {}).args.includes('/*/*/*/*[Category!=HeavyLoad]')) {
               throw new Error('Exclusive heavy load selection was not preserved.');
             }
             for (const extra of [['--KeyLoadTests:Execution:MaximumParallelTests=20'], ['--KeyLoadTests:CoverageSettings=settings.xml'], ['--KeyLoadTests:NativeCoverage:ServerMode=all']]) {
               let rejected = false; try { nativeSelection([...heavyArgs, ...extra], {}); } catch { rejected = true; }
               if (!rejected) throw new Error('Heavy load was accepted as an ordinary or coverage run.');
             }
-            const ordinaryCovered = nativeSelection(['--KeyLoadTests:Suite=rf3', '--KeyLoadTests:NativeCoverage:ServerMode=all'], {});
+            const ordinaryCovered = nativeSelection(['--KeyLoadTests:Suite=cluster', '--KeyLoadTests:NativeCoverage:ServerMode=all'], {});
             if (!JSON.parse(ordinaryCovered.environment.KEYLOAD_TUNIT_NATIVE_COVERAGE_ARGUMENTS)
               .includes('--KeyLoadTests:Filter=/*/*/*/*[Category!=HeavyLoad]')) {
               throw new Error('Native preparation lost the ordinary heavy-load exclusion.');
@@ -40,40 +40,18 @@ internal static class NativeTestSelectionProgram
               '--KeyLoadTests:Execution:MaximumParallelTests=20'], {});
             const tuned50 = nativeSelection(['--KeyLoadTests:Suite='+suite,
               '--KeyLoadTests:Execution:MaximumParallelTests=50'], {});
-            const localArgs = ['--KeyLoadTests:Suite=rf3',
-              '--KeyLoadTests:Filter=/*/*/TwoRf3MembershipProfileTests/*',
-              '--KeyLoadTests:LocalRf3Image:Enabled=true'];
-            const local = nativeSelection(localArgs, {});
-            const standardArgs = [localArgs[0], "--KeyLoadTests:Filter=/*/*/(PartitionQueryMcpSchemaTests|RelationalSqlRf3JoinTests|RelationalSqlRf3JoinAuthorizationTests|RelationalSqlRf3JoinBudgetTests|RelationalSqlRf3JoinCancellationTests|RelationalSqlRf3JoinReadCutTests)/*", localArgs[2]];
+            const localArgs = ['--KeyLoadTests:Suite=cluster',
+              '--KeyLoadTests:Filter=/*/*/RelationalSqlClusterJoinRejectionTests/*',
+              '--KeyLoadTests:LocalClusterImage:Enabled=true'];
+            const standardArgs = [localArgs[0], "--KeyLoadTests:Filter=/*/*/(PartitionQueryMcpSchemaTests|RelationalSqlClusterJoinTests|RelationalSqlClusterJoinAuthorizationTests|RelationalSqlClusterJoinBudgetTests|RelationalSqlClusterJoinCancellationTests|RelationalSqlClusterJoinReadCutTests)/*", localArgs[2]];
             const standard = nativeSelection(standardArgs, {});
-            const rejectionArgs = [localArgs[0], "--KeyLoadTests:Filter=/*/*/RelationalSqlRf3JoinRejectionTests/*", localArgs[2]];
+            const rejectionArgs = [localArgs[0], "--KeyLoadTests:Filter=/*/*/RelationalSqlClusterJoinRejectionTests/*", localArgs[2]];
             const rejection = nativeSelection(rejectionArgs, {});
-            const connectionArgs = [localArgs[0], "--KeyLoadTests:Filter=/*/*/(ConnectionRf3SequentialTests|ConnectionRf3OverlapTests|ConnectionRf3AuthorizationTests)/*", localArgs[2]];
-            const connection = nativeSelection(connectionArgs, {});
-            const emptySnapshotArgs = [localArgs[0], "--KeyLoadTests:Filter=/*/*/EmptyReplicaSnapshotRf3Tests/*", localArgs[2]];
-            const emptySnapshot = nativeSelection(emptySnapshotArgs, {});
             """ + NativeRetainedSnapshotSelectionProgram.Source + """
-            const nativeTextArgs = [localArgs[0], "--KeyLoadTests:Filter=/*/*/(NativeTextAsyncRf3Tests)|(NativeTextMaintenanceRf3Tests)|(NativeTextRf3LeaderLossTests)|(NativeTextRf3Tests)|(NativeTextWaitRf3Tests)/*", localArgs[2]];
+            const nativeTextArgs = [localArgs[0], "--KeyLoadTests:Filter=/*/*/(NativeTextAsyncClusterTests)|(NativeTextClusterLeaderLossTests)|(NativeTextClusterTests)|(NativeTextWaitClusterTests)/*", localArgs[2]];
             const nativeText = nativeSelection(nativeTextArgs, {});
-            const nativeTextSdkUid = "KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenanceRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.ProtectedNativeTextMaintenanceReplaysBilingualUpdateDeleteAcrossAllPublicPaths(KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenancePath).1.1.0";
-            const nativeTextSdk = nativeSelection([...nativeTextArgs, "--KeyLoadTests:FilterUid="+nativeTextSdkUid], {});
-            let nativeTextSdkRejectedCount = 0;
-            for (const bad of [
-              [nativeTextArgs[0], "--KeyLoadTests:FilterUid="+nativeTextSdkUid, nativeTextArgs[2]],
-              [...nativeTextArgs, "--KeyLoadTests:FilterUid=unknown"],
-              [...nativeTextArgs, "--KeyLoadTests:FilterUid="+nativeTextSdkUid+" "],
-              [...localArgs, "--KeyLoadTests:FilterUid="+nativeTextSdkUid],
-              [nativeTextArgs[0], nativeTextArgs[1], "--KeyLoadTests:FilterUid="+nativeTextSdkUid],
-              [...nativeTextArgs, "--KeyLoadTests:FilterUid="+nativeTextSdkUid, "--KeyLoadTests:CoverageSettings=settings.xml"],
-              [...nativeTextArgs.map(value => value.replace("Suite=rf3", "Suite=unit")), "--KeyLoadTests:FilterUid="+nativeTextSdkUid],
-              [...nativeTextArgs, "--KeyLoadTests:FilterUid="+nativeTextSdkUid, "--Benchmarks:Scenario=read"]]) {
-              try { nativeSelection(bad, {}); } catch { nativeTextSdkRejectedCount++; continue; }
-              throw new Error("Unsupported focused native text UID was accepted.");
-            }
-            const remoteTransferArgs = [localArgs[0], "--KeyLoadTests:Filter=/*/*/RemoteTransferDistinctOwnerTests/ActualDistinctOwnersRetainAcceptReceiptAcrossTwoColdRestartsAndBDoesNotResurrectAcknowledgedMessage", localArgs[2]];
-            const remoteTransfer = nativeSelection(remoteTransferArgs, {});
-            """ + NativeCapabilitySelectionProgram.Declaration + NativePurposeSelectionProgram.Declaration + NativeGraphIncomingSelectionProgram.Source + NativeResourcePolicySelectionProgram.Source + NativeMcpAuthoritySelectionProgram.Source + NativeR33PublicSelectionProgram.Source + NativeR34PublicSelectionProgram.Source + NativeR34PublicSelectionProgram.SuccessorSource + NativePublicCohortSelectionProgram.Source + NativePublicCohortSelectionProgram.SuccessorSource + NativePublicCohortSelectionProgram.FinalSource + NativeCurrentModelSelectionProgram.Source + """
-            for (const selectedLocalArgs of [localArgs, standardArgs, rejectionArgs, connectionArgs, emptySnapshotArgs, retainedSnapshotArgs, nativeTextArgs, [...nativeTextArgs, "--KeyLoadTests:FilterUid="+nativeTextSdkUid], remoteTransferArgs, capabilityArgs, purposeArgs, graphIncomingArgs, resourcePolicyArgs, mcpAuthorityArgs, mcpCredentialArgs, mcpInitialArgs, r33PublicArgs, r34PublicArgs, r35PublicArgs, publicCohortArgs, nextPublicCohortArgs, finalPublicCohortArgs, ...currentModelArgs]) {
+            """ + NativeGraphIncomingSelectionProgram.Source + NativeResourcePolicySelectionProgram.Source + NativeMcpAuthoritySelectionProgram.Source + NativeR33PublicSelectionProgram.Source + NativeR34PublicSelectionProgram.Source + NativeR34PublicSelectionProgram.SuccessorSource + NativePublicCohortSelectionProgram.Source + NativePublicCohortSelectionProgram.SuccessorSource + NativePublicCohortSelectionProgram.FinalSource + NativeCurrentModelSelectionProgram.Source + """
+            for (const selectedLocalArgs of [standardArgs, rejectionArgs, retainedSnapshotArgs, nativeTextArgs, graphIncomingArgs, resourcePolicyArgs, mcpAuthorityArgs, mcpCredentialArgs, mcpInitialArgs, r33PublicArgs, r34PublicArgs, r35PublicArgs, publicCohortArgs, nextPublicCohortArgs, finalPublicCohortArgs, ...currentModelArgs]) {
             for (const [bad, env] of [
               [selectedLocalArgs.filter(value => !value.includes('Filter=')), {}],
               [selectedLocalArgs.map(value => value.includes('Filter=') ? '--KeyLoadTests:Filter=/*/*/OtherCase/*' : value), {}],
@@ -81,82 +59,44 @@ internal static class NativeTestSelectionProgram
               [selectedLocalArgs, { KEYLOAD_IMAGE_RECEIPT: 'github-receipt' }],
               [selectedLocalArgs, { GITHUB_ACTIONS: 'true' }],
               [selectedLocalArgs, { KEYLOAD_TUNIT_NATIVE_COVERAGE_ARGUMENTS: 'coverage' }],
-              [selectedLocalArgs, { KEYLOAD_TUNIT_LOCAL_RF3_IMAGE_ARGUMENTS: 'inherited' }],
+              [selectedLocalArgs, { KEYLOAD_TUNIT_LOCAL_CLUSTER_IMAGE_ARGUMENTS: 'inherited' }],
               [selectedLocalArgs.map(value => value.replace('Enabled=true', 'Enabled=false')), {}],
               [selectedLocalArgs.concat('--KeyLoadTests:CoverageSettings=settings.xml'), {}],
               [selectedLocalArgs.concat('--Benchmarks:Scenario=read'), {}],
               [selectedLocalArgs, { KEYLOAD_IMAGE_PROVENANCE: 'local-development' }],
               [selectedLocalArgs, { KEYLOAD_LOCAL_IMAGE_RECEIPT: 'local-receipt' }],
               [selectedLocalArgs, { KeyLoad__ContainerImages__Server: 'keyload/local-server:local-test' }],
-              [selectedLocalArgs, { KEYLOAD_LOCAL_RF3_IMAGE_CHILD: 'true' }],
+              [selectedLocalArgs, { KEYLOAD_LOCAL_CLUSTER_IMAGE_CHILD: 'true' }],
               [selectedLocalArgs.concat('--KeyLoadTests:NativeCoverage:ServerMode=enabled'), {}],
-              [selectedLocalArgs.map(value => value.replace('Suite=rf3', 'Suite=unit')), {}]]) {
+              [selectedLocalArgs.map(value => value.replace('Suite=cluster', 'Suite=unit')), {}]]) {
               let rejected = false; try { nativeSelection(bad, env); } catch { rejected = true; }
-              if (!rejected) throw new Error('Invalid local RF3 image selection was accepted.');
+              if (!rejected) throw new Error('Invalid local CLUSTER image selection was accepted.');
             }
             }
             let rejectionUnsupportedCount = 0;
-            for (const badFilter of ['/*/*/RelationalSqlRf3JoinRejectionTests/RejectedJoinOnFourPublicPathsPreservesRowsAndCompleteHealthyPage',
-              '/*/*/RelationalSqlRf3JoinRejection*/*',
-              '/*/*/(RelationalSqlRf3JoinRejectionTests|RelationalSqlRf3JoinTests)/*',
-              '/*/*/RelationalSqlRf3JoinRejectionTests/* ']) {
+            for (const badFilter of ['/*/*/RelationalSqlClusterJoinRejectionTests/RejectedJoinOnFourPublicPathsPreservesRowsAndCompleteHealthyPage',
+              '/*/*/RelationalSqlClusterJoinRejection*/*',
+              '/*/*/(RelationalSqlClusterJoinRejectionTests|RelationalSqlClusterJoinTests)/*',
+              '/*/*/RelationalSqlClusterJoinRejectionTests/* ']) {
               try {
                 nativeSelection([rejectionArgs[0], '--KeyLoadTests:Filter='+badFilter, rejectionArgs[2]], {});
               } catch (failure) {
-                if (failure.message !== 'Invalid native local RF3 image selection.') throw failure;
+                if (failure.message !== 'Invalid native local CLUSTER image selection.') throw failure;
                 rejectionUnsupportedCount++; continue;
               }
               throw new Error('Unsupported public12 filter was accepted.');
             }
-            let connectionUnsupportedCount = 0;
-            for (const badFilter of ['/*/*/ConnectionRf3SequentialTests/*',
-              '/*/*/ConnectionRf3*/*',
-              '/*/*/(ConnectionRf3SequentialTests|ConnectionRf3OverlapTests|ConnectionRf3AuthorizationTests|OtherCase)/*',
-              '/*/*/(ConnectionRf3SequentialTests|ConnectionRf3OverlapTests|ConnectionRf3AuthorizationTests)/* ']) {
-              try {
-                nativeSelection([connectionArgs[0], '--KeyLoadTests:Filter='+badFilter, connectionArgs[2]], {});
-              } catch (failure) {
-                if (failure.message !== 'Invalid native local RF3 image selection.') throw failure;
-                connectionUnsupportedCount++; continue;
-              }
-              throw new Error('Unsupported connection RF3 filter was accepted.');
-            }
             let nativeTextUnsupportedCount = 0;
-            for (const badFilter of ['/*/*/NativeTextMaintenanceRf3Tests/*', '/*/*/NativeText*/*',
-              '/*/*/(NativeTextAsyncRf3Tests)|(NativeTextMaintenanceRf3Tests)|(NativeTextRf3LeaderLossTests)|(NativeTextRf3Tests)|(NativeTextWaitRf3Tests)/* ', '/*/*/(NativeTextAsyncRf3Tests)|(NativeTextMaintenanceRf3Tests)|(NativeTextRf3LeaderLossTests)|(NativeTextRf3Tests)|(NativeTextWaitRf3Tests)/*|/*/*/OtherCase/*']) {
+            for (const badFilter of ['/*/*/NativeTextAsyncClusterTests/*', '/*/*/NativeText*/*',
+              '/*/*/(NativeTextAsyncClusterTests)|(NativeTextClusterLeaderLossTests)|(NativeTextClusterTests)|(NativeTextWaitClusterTests)/* ', '/*/*/(NativeTextAsyncClusterTests)|(NativeTextClusterLeaderLossTests)|(NativeTextClusterTests)|(NativeTextWaitClusterTests)/*|/*/*/OtherCase/*']) {
               try { nativeSelection([nativeTextArgs[0], '--KeyLoadTests:Filter='+badFilter, nativeTextArgs[2]], {}); }
               catch (failure) {
-                if (failure.message !== 'Invalid native local RF3 image selection.') throw failure;
+                if (failure.message !== 'Invalid native local CLUSTER image selection.') throw failure;
                 nativeTextUnsupportedCount++; continue;
               }
-              throw new Error('Unsupported native text RF3 filter was accepted.');
+              throw new Error('Unsupported native text CLUSTER filter was accepted.');
             }
-            let emptySnapshotUnsupportedCount = 0;
-            for (const badFilter of ['/*/*/EmptyReplicaSnapshotRf3Tests/* ', '/*/*/EmptyReplicaSnapshot*/*',
-              '/*/*/(EmptyReplicaSnapshotRf3Tests|OtherCase)/*',
-              '/*/*/EmptyReplicaSnapshotRf3Tests/*|/*/*/OtherCase/*']) {
-              try { nativeSelection([emptySnapshotArgs[0], '--KeyLoadTests:Filter='+badFilter, emptySnapshotArgs[2]], {}); }
-              catch (failure) {
-                if (failure.message !== 'Invalid native local RF3 image selection.') throw failure;
-                emptySnapshotUnsupportedCount++; continue;
-              }
-              throw new Error('Unsupported native snapshot RF3 filter was accepted.');
-            }
-            if (JSON.stringify(nativeSelection(emptySnapshotArgs, {})) !== JSON.stringify(emptySnapshot)) {
-              throw new Error('Exact native snapshot selection changed after refused selectors.');
-            }
-            let remoteTransferUnsupportedCount = 0;
-            for (const badFilter of ['/*/*/RemoteTransferDistinctOwnerTests/*',
-              '/*/*/RemoteTransferDistinctOwnerTests/ActualDistinctOwners*',
-              '/*/*/RemoteTransferDistinctOwnerTests/ActualDistinctOwnersRetainAcceptReceiptAcrossTwoColdRestartsAndBDoesNotResurrectAcknowledgedMessage|/*/*/OtherCase/*', '/*/*/RemoteTransferDistinctOwnerTests/ActualDistinctOwnersRetainAcceptReceiptAcrossTwoColdRestartsAndBDoesNotResurrectAcknowledgedMessage ']) {
-              try { nativeSelection([remoteTransferArgs[0], '--KeyLoadTests:Filter='+badFilter, remoteTransferArgs[2]], {}); }
-              catch (failure) {
-                if (failure.message !== 'Invalid native local RF3 image selection.') throw failure;
-                remoteTransferUnsupportedCount++; continue;
-              }
-              throw new Error('Unsupported distinct-owner RF3 filter was accepted.');
-            }
-            console.log(JSON.stringify({ currentModels, selected, explicit20, tuned50, local, standard, rejection,
-              r33Public, r33PublicUnsupportedCount, r34Public, r34PublicUnsupportedCount, r35Public, r35PublicUnsupportedCount, publicCohort, publicCohortUnsupportedCount, publicCohortNoEffects, nextPublicCohort, nextPublicCohortUnsupportedCount, nextPublicCohortNoEffects, finalPublicCohort, finalPublicCohortUnsupportedCount, finalPublicCohortNoEffects, rejectionUnsupportedCount, connection, connectionUnsupportedCount, nativeText, nativeTextUnsupportedCount, nativeTextSdk, nativeTextSdkRejectedCount, remoteTransfer, remoteTransferUnsupportedCount, capability, capabilityUnsupportedCount, purpose, purposeUnsupportedCount, graphIncoming, graphIncomingUnsupportedCount, emptySnapshot, emptySnapshotUnsupportedCount, retainedSnapshot, retainedSnapshotUnsupportedCount, resourcePolicy, resourcePolicyUnsupportedCount, mcpAuthority, mcpCredential, mcpAuthorityUnsupportedCount, mcpCredentialUnsupportedCount, mcpInitial, mcpInitialUnsupportedCount }));
+            console.log(JSON.stringify({ currentModels, selected, explicit20, tuned50, standard, rejection,
+              r33Public, r33PublicUnsupportedCount, r34Public, r34PublicUnsupportedCount, r35Public, r35PublicUnsupportedCount, publicCohort, publicCohortUnsupportedCount, publicCohortNoEffects, nextPublicCohort, nextPublicCohortUnsupportedCount, nextPublicCohortNoEffects, finalPublicCohort, finalPublicCohortUnsupportedCount, finalPublicCohortNoEffects, rejectionUnsupportedCount, nativeText, nativeTextUnsupportedCount, graphIncoming, graphIncomingUnsupportedCount, retainedSnapshot, retainedSnapshotUnsupportedCount, resourcePolicy, resourcePolicyUnsupportedCount, mcpAuthority, mcpCredential, mcpAuthorityUnsupportedCount, mcpCredentialUnsupportedCount, mcpInitial, mcpInitialUnsupportedCount }));
             """;
 }

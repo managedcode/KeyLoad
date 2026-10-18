@@ -5,12 +5,12 @@ namespace KeyLoad.IntegrationTests.Features.Search;
 
 internal static class ProjectionPublicPolicyFlow
 {
-    internal static async Task RunAsync(ClusterFixture fixture, EventProjectionRf3Scenario scenario,
+    internal static async Task RunAsync(ClusterFixture fixture, EventProjectionClusterScenario scenario,
         McpPersistedIdentity reader, CommitReceipt original, CancellationToken token)
     {
-        await EventProjectionRf3Assertions.AssertReceiptAsync(original, scenario);
-        var repaired = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2,
-            fixture.AdminKey, root => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App,
+        await EventProjectionClusterAssertions.AssertReceiptAsync(original, scenario);
+        var repaired = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2,
+            fixture.AdminKey, root => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App,
                 McpCallerProtocol.Node2, reader.Secret,
                 caller => RevokeRepairAsync(fixture, root.Sdk, caller, scenario, reader, token), token), token);
         await ProjectionPublicPolicyCold.ReplayAsync(fixture, scenario, original, token);
@@ -19,7 +19,7 @@ internal static class ProjectionPublicPolicyFlow
     }
 
     private static async Task<McpPersistedIdentity> RevokeRepairAsync(ClusterFixture fixture, global::KeyLoad.Client.KeyLoadClient root,
-        RequestCqrsRf3Callers caller, EventProjectionRf3Scenario scenario,
+        RequestCqrsClusterCallers caller, EventProjectionClusterScenario scenario,
         McpPersistedIdentity reader, CancellationToken token)
     {
         var revoked = reader.Principal with
@@ -29,7 +29,7 @@ internal static class ProjectionPublicPolicyFlow
         };
         await PersistAsync(root, revoked, token);
         var before = await ProjectionPublicPolicyImage.ReadAsync(root, scenario, token);
-        await EventProjectionRf3Assertions.AssertSdkFailureAsync(
+        await EventProjectionClusterAssertions.AssertSdkFailureAsync(
             await caller.Sdk.SearchAsync(scenario.VectorSearch(), token), ErrorCode.Unauthenticated);
         await RefuseMcpAsync(fixture, caller, scenario, reader, token);
         var after = await ProjectionPublicPolicyImage.ReadAsync(root, scenario, token);
@@ -42,7 +42,7 @@ internal static class ProjectionPublicPolicyFlow
             PolicyEpoch = checked(revoked.PolicyEpoch + 1)
         };
         await PersistAsync(root, repaired, token);
-        await EventProjectionRf3Assertions.VerifyVectorBothAsync(caller.Sdk, caller.Mcp,
+        await EventProjectionClusterAssertions.VerifyVectorBothAsync(caller.Sdk, caller.Mcp,
             scenario.VectorSearch(), reader.Secret, ProjectionPublicPolicyProtocol.Healthy(), token);
         await ProjectionPublicPolicyImage.ReadAsync(root, scenario, token);
         return reader with
@@ -51,15 +51,15 @@ internal static class ProjectionPublicPolicyFlow
         };
     }
 
-    private static async Task RefuseMcpAsync(ClusterFixture fixture, RequestCqrsRf3Callers caller,
-        EventProjectionRf3Scenario scenario, McpPersistedIdentity reader, CancellationToken token)
+    private static async Task RefuseMcpAsync(ClusterFixture fixture, RequestCqrsClusterCallers caller,
+        EventProjectionClusterScenario scenario, McpPersistedIdentity reader, CancellationToken token)
     {
         var error = await Assert.ThrowsAsync<global::System.Net.Http.HttpRequestException>(
             () => caller.Mcp.CallAsync(McpCallerTools.SearchExecute, scenario.VectorSearch(), token));
         await Assert.That(error).IsNotNull();
         await Assert.That(error!.StatusCode).IsEqualTo(global::System.Net.HttpStatusCode.Unauthorized);
         await Assert.That(error.Message.Contains(reader.Secret, StringComparison.Ordinal)).IsFalse();
-        await Assert.That(error.Message.Contains(EventProjectionRf3Scenario.Secret, StringComparison.Ordinal)).IsFalse();
+        await Assert.That(error.Message.Contains(EventProjectionClusterScenario.Secret, StringComparison.Ordinal)).IsFalse();
         await McpUnauthorizedProbe.VerifyAsync(fixture, McpCallerProtocol.Node2, reader.Secret, token);
     }
 

@@ -26,7 +26,7 @@ internal static class AdversarialAuthorityRefusals
             cancellationToken: token);
         await McpCallerAssertions.ErrorAsync(rejected, ErrorCode.Validation, dispatched: false);
         await McpCallerAssertions.DoesNotDiscloseAsync(rejected, state.Identity.Secret, McpDocumentProtocol.PrivateValue);
-        await SqlRf3Protocol.EqualAsync(before, await AdversarialAuthorityAssertions.ImageAsync(root, state, token));
+        await SqlClusterProtocol.EqualAsync(before, await AdversarialAuthorityAssertions.ImageAsync(root, state, token));
     }
 
     internal static async Task OwnedAsync(ClusterFixture fixture, KeyLoadClient root, KeyLoadClient reader,
@@ -45,7 +45,7 @@ internal static class AdversarialAuthorityRefusals
             await McpCallerAssertions.ErrorAsync(denied, expected, dispatched: true);
             await McpCallerAssertions.DoesNotDiscloseAsync(denied, state.Identity.Secret, McpDocumentProtocol.PrivateValue);
         }
-        await SqlRf3Protocol.EqualAsync(before, await AdversarialAuthorityAssertions.ImageAsync(root, state, token));
+        await SqlClusterProtocol.EqualAsync(before, await AdversarialAuthorityAssertions.ImageAsync(root, state, token));
     }
 
     private static async Task RevokedAsync(ClusterFixture fixture, McpOfficialClient session,

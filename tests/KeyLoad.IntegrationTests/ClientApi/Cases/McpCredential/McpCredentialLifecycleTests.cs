@@ -5,7 +5,7 @@ using KeyLoad.IntegrationTests.Features.DocumentStorage;
 namespace KeyLoad.IntegrationTests.Features.ClientApi;
 
 /// <summary>AC-MCP-002: real native callers cannot retain authority from an earlier discovery request.</summary>
-/// <param name="fixture">The initialized actual Docker/Aspire RF3 application.</param>
+/// <param name="fixture">The initialized actual Docker/Aspire CLUSTER application.</param>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class McpCredentialLifecycleTests(ClusterFixture fixture)

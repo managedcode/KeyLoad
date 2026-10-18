@@ -7,7 +7,7 @@ namespace KeyLoad.Comparisons;
 [TypeConverter(typeof(ComparisonTopologyConverter))]
 public enum ComparisonTopology
 {
-    /// <summary>Requests a standalone external-engine profile; the KeyLoad target retains its required RF3 topology.</summary>
+    /// <summary>Requests a standalone external-engine profile; the KeyLoad target retains its required CLUSTER topology.</summary>
     [JsonStringEnumMemberName(ComparisonTopologyNames.Single)]
     Standalone,
     /// <summary>Uses a replicated target topology and records its cluster evidence.</summary>

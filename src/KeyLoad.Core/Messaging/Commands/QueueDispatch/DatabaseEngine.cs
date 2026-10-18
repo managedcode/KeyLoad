@@ -17,7 +17,6 @@ public sealed partial class DatabaseEngine
         _ = ResourceLifetimeCatalog.Read(transaction, request.TenantId, request.DatabaseId, request.Queue, current);
         var replacement = QueueDispatchStateUpdates.Apply(current, request.ExpectedSchemaVersion, request.Paused);
         ValidateResource(new(request.TenantId, request.DatabaseId, replacement));
-        RequireResourceMetadataChangeAdmission(transaction, request.TenantId, request.DatabaseId);
         transaction.PutRecord(key, replacement);
         return Result(replacement);
     }

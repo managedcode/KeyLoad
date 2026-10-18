@@ -6,7 +6,7 @@ namespace KeyLoad.IntegrationTests.Features.Authorization;
 
 internal static class EventMessageSensitivePublicReads
 {
-    internal static async Task RedactedAsync(RequestCqrsRf3Callers inspector, EventMessageSensitivePublicState state,
+    internal static async Task RedactedAsync(RequestCqrsClusterCallers inspector, EventMessageSensitivePublicState state,
         bool dlq, CancellationToken token)
     {
         var payload = state.Header ? EventMessageSensitivePublicProtocol.Payload : EventMessageSensitivePublicProtocol.RedactedPayload;

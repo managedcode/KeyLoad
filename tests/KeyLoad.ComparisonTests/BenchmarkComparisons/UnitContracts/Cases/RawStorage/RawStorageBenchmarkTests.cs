@@ -20,7 +20,7 @@ internal sealed class RawStorageBenchmarkTests
     private const int DefaultInvocationCount = 1024;
     private const int DefaultUnrollFactor = 1;
     private const string WrongCaseEngineLabel = "ZoneTree";
-    private const string RemovedEngineLabel = "tsavorite";
+    private const string UnconfiguredEngineLabel = "unconfigured-engine";
     private const string UnsupportedEngineMessage = "The test process has an unsupported raw-storage engine label.";
     private static readonly int[] PayloadSizes = [32, 1024];
     private static readonly string[] ExpectedMethodNames =
@@ -134,11 +134,11 @@ internal sealed class RawStorageBenchmarkTests
     }
 
     [Test]
-    public async Task AcGe004RemovedTsavoriteLabelFailsBeforeBenchmarkSetup()
+    public async Task AcGe004UnconfiguredEngineLabelFailsBeforeBenchmarkSetup()
     {
         using var benchmark = new RawStorageBenchmarks
         {
-            Engine = RemovedEngineLabel,
+            Engine = UnconfiguredEngineLabel,
             PayloadBytes = PayloadSizes[0],
             RecordCount = TestRecordCount
         };

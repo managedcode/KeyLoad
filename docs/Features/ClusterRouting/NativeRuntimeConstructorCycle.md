@@ -1,6 +1,6 @@
 # Native runtime constructors before storage publication
 
-ADR-136 and FoundationDelivery REQ-FOUNDATION-009 require the actual Generic Host
+[ADR-136](../../ADR/ADR-136-native-orleans-partition-ownership.md) requires the actual Generic Host
 and native Orleans providers to construct without borrowing unpublished physical
 storage. This contract uses production ServerConfiguration.BuildAsync, not copied
 composition, a mock resolver, manually opened database or simulated lifecycle.
@@ -8,7 +8,7 @@ composition, a mock resolver, manually opened database or simulated lifecycle.
 REQ-NATIVE-CONSTRUCTOR-001 / AC-NATIVE-CONSTRUCTOR-001: before Start, resolve the
 real hosted services, native ILocalDurableJobManager and named journal provider
 and catalog. Both native journal interfaces identify the same provider. The
-configured three-voter production topology remains unchanged and its fresh data
+configured production topology remains unchanged and its fresh data
 directory must remain absent. Constructors do not prove native Active or Ready.
 
 REQ-NATIVE-CONSTRUCTOR-002 / AC-NATIVE-CONSTRUCTOR-002: the actual named catalog
@@ -22,7 +22,7 @@ admission, start storage, replace tasks or prove an unstarted physical opening.
 Both criteria map to NativeRuntimeConstructorCycleTests.
 ProductionConstructorsAndPendingNativeCatalogCancelBeforePhysicalPublication.
 The separate [native job public operation](../Messaging/NativeRuntimeJobPublication.md)
-exercises genuine SDK/MCP RF3 results. Existing RuntimeJournalNativeStorageTests,
+exercises genuine SDK/MCP results through the replicated cluster. Existing RuntimeJournalNativeStorageTests,
 RuntimeJournalGraphCallerTests and NativeSagaTimeoutRestartTests remain mandatory
 regressions. Their preopened native fixtures are not constructor-publication proof.
 
@@ -30,10 +30,10 @@ The pinned [native LocalDurableJobManager.Start](https://raw.githubusercontent.c
 returns Task.CompletedTask at Active. It does not await initial catalog recovery
 inside that callback. Closed database admission may suspend the background read;
 native shutdown must cancel and join that original work. This source fact does
-not replace actual startup, shutdown or RF3 qualification.
+not replace actual startup, shutdown or replicated-cluster qualification.
 
-Compiler, native constructor test, recovery, Docker/Aspire SDK/official MCP and
-exact-source Linux gates remain OPEN. Public schema, UI and performance are N/A.
+This document does not prove the recovery or Docker/Aspire SDK/official MCP
+gates. Public schema, UI and performance are N/A.
 No package, format, timeout or quota changes are introduced.
 
 ```mermaid

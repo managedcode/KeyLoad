@@ -7,7 +7,7 @@ internal static class NativeR33PublicSelectionAssertions
     private const string SelectedProperty = "r33Public";
     private const string RejectedProperty = "r33PublicUnsupportedCount";
     private const int ExpectedRefusals = 6;
-    private const string Filter = "/*/*/(TypedEndpointJoinRf3Tests|DeclarativeCompositionReverseQuotaRf3Tests|SubscriptionPhasePublicColdTests|BlobSupersessionPublicTests|BlobPartialReadBoundaryPublicTests|NativeTextProtectedPublicColdTests|CurrentOwnershipTokenAfterMovementRf3Tests)/*";
+    private const string Filter = "/*/*/(TypedEndpointJoinClusterTests|DeclarativeCompositionReverseQuotaClusterTests|SubscriptionPhasePublicColdTests|BlobSupersessionPublicTests|BlobPartialReadBoundaryPublicTests|NativeTextProtectedPublicColdTests)/*";
 
     internal static async Task AssertAsync(JsonElement root)
     {

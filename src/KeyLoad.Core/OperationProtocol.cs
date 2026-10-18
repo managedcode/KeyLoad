@@ -6,8 +6,7 @@ public sealed partial class DatabaseEngine
 {
     private const string MismatchedEnvelopeRequestMessage = "The envelope and request IDs differ.";
     private static string CommandFingerprint(ReplicatedOperation operation)
-        => operation.Kind == OperationKind.PartitionMovementPhase ? NativeOperationFingerprint.Compute(operation)
-        : JsonData.Fingerprint(new
+        => JsonData.Fingerprint(new
         {
             operation.Id,
             operation.Kind,

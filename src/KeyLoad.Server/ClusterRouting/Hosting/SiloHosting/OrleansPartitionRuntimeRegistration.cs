@@ -14,8 +14,7 @@ internal static class OrleansPartitionRuntimeRegistration
     {
         services.AddSingleton(provider => new PartitionMovementGrainServiceClient(provider, Host(provider),
             provider.GetRequiredService<IOptions<NodeOptions>>(), provider.GetRequiredService<IOptions<OrleansMembershipOptions>>(),
-            provider.GetRequiredService<IOptions<GrainRoutingOptions>>(), provider.GetRequiredService<ISiloStatusOracle>(),
-            provider.GetRequiredService<ReplicaSiloDiscoveryState>(), provider.GetRequiredService<TimeProvider>()));
+            provider.GetRequiredService<ISiloStatusOracle>()));
         services.AddSingleton(provider => new RemoteModelNativeRuntime(Host(provider),
             provider.GetRequiredService<IOptions<NodeOptions>>(), provider.GetRequiredService<IOptions<OrleansMembershipOptions>>(),
             provider.GetRequiredService<IOptions<GrainRoutingOptions>>(), provider.GetRequiredService<ISiloStatusOracle>(),

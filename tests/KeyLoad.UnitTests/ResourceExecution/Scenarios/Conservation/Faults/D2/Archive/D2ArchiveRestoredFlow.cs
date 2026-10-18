@@ -113,5 +113,5 @@ internal static class D2ArchiveRestoredFlow
 
     private static DatabaseEngine Create(ZoneTreeStore store, PhysicalShardRecord owner)
         => TestDatabaseEngineFactory.Capture(UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.BlobExecution(),
-            UnitExecutionOptions.NativeClaimsExecution(), null, UnitExecutionOptions.MovementCheckpoints(), TimeProvider.System)(store, owner);
+            UnitExecutionOptions.NativeClaimsExecution(), null, TimeProvider.System)(store, owner);
 }

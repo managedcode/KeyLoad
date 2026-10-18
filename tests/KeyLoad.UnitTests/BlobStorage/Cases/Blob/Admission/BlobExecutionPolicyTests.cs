@@ -29,7 +29,7 @@ internal sealed class BlobExecutionPolicyTests
             UnitExecutionOptions.BlobExecution(new()
             {
                 InitialCatalogProofRecords = 2
-            }), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
+            }), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
         var request = new ConfigureResourceRequest(fixture.Partition.TenantId, fixture.Partition.DatabaseId,
             new("blob-policy", ResourceKind.BlobStore, fixture.Partition.TransactionDomainId));
         var operation = new ReplicatedOperation(Guid.NewGuid(), OperationKind.ConfigureResource, "root",

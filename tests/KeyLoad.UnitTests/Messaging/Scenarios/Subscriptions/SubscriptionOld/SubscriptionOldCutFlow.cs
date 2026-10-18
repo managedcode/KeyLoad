@@ -1,4 +1,3 @@
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Server;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -80,7 +79,7 @@ internal static class SubscriptionOldCutFlow
             await Assert.That(store.Identity.DispatchPaused).IsTrue();
             await Assert.That(store.Position).IsEqualTo(restoredPosition);
             var database = SubscriptionOldCutCold.Open(store, state);
-            var placement = database.ReadAtomicPartitionPlacement("root", new(AtomicPartitionPlacementProtocol.CurrentVersion, state.Group.Source.Partition));
+            var placement = database.ReadAtomicPartitionPlacement("root", state.Group.Source.Partition);
             await Assert.That(placement.Incarnation).IsEqualTo(store.Identity.Incarnation);
             await SubscriptionOldCutAssertions.StatusAsync(database, state, 1, 0, 3, 3);
             await SubscriptionOldCutRefusal.RunAsync(database, store, state.OriginalProcessingOperation,

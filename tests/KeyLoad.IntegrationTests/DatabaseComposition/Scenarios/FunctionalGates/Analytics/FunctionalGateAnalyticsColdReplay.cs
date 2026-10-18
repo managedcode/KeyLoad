@@ -38,7 +38,7 @@ internal static class FunctionalGateAnalyticsColdReplay
         await McpCallerAssertions.ErrorAsync(await context.Writer.Mcp.CallAsync(
             McpCallerTools.DocumentsCommit, command, token), ErrorCode.PermissionDenied, dispatched: true);
         await FunctionalGateAnalyticsColdAssertions.VerifyAsync(context, proof, token);
-        var sql = SqlRf3Protocol.Call(command.Partition, McpCallerTools.DocumentsCommit, command) with
+        var sql = SqlClusterProtocol.Call(command.Partition, McpCallerTools.DocumentsCommit, command) with
         {
             CommandId = command.CommandId
         };
@@ -71,27 +71,27 @@ internal static class FunctionalGateAnalyticsColdReplay
     private static async Task ReplayAsync(FunctionalGateContext context, CommandRequest command,
         CommitReceipt expected, MutationReceipt effect, FunctionalGateAnalyticsColdStore proof, CancellationToken token)
     {
-        await FunctionalGateCompositionCalls.ReceiptAsync(context, expected, command.CommandId, [effect], token);
+        await FunctionalGateCompositionCalls.ReceiptAsync(context, expected, command.CommandId, [effect]);
         await ReceiptAsync(context, await context.SdkAsync(
-            context.Writer.Sdk.CommitAsync(FunctionalGateAnalyticsIdentity.Rebuild(command), token)), expected, effect, token);
+            context.Writer.Sdk.CommitAsync(FunctionalGateAnalyticsIdentity.Rebuild(command), token)), expected, effect);
         await ReceiptAsync(context, await context.McpAsync<CommitReceipt>(context.Writer,
-            McpCallerTools.DocumentsCommit, FunctionalGateAnalyticsIdentity.Wire(command), token), expected, effect, token);
+            McpCallerTools.DocumentsCommit, FunctionalGateAnalyticsIdentity.Wire(command), token), expected, effect);
         await ReceiptAsync(context, await FunctionalGateCompositionCalls.CommandAsync(
-            context, FunctionalGateAnalyticsIdentity.Rebuild(command), official: false, token), expected, effect, token);
+            context, FunctionalGateAnalyticsIdentity.Rebuild(command), official: false, token), expected, effect);
         await ReceiptAsync(context, await FunctionalGateCompositionCalls.CommandAsync(
-            context, FunctionalGateAnalyticsIdentity.Rebuild(command), official: true, token), expected, effect, token);
+            context, FunctionalGateAnalyticsIdentity.Rebuild(command), official: true, token), expected, effect);
         await FunctionalGateAnalyticsIdentityConflict.VerifyAsync(context, command,
             () => FunctionalGateAnalyticsColdAssertions.VerifyAsync(context, proof, token), token);
         // A changed-content refusal must not replace the original receipt or prevent its next valid public replay.
         await ReceiptAsync(context, await context.SdkAsync(context.Writer.Sdk.CommitAsync(
-            FunctionalGateAnalyticsIdentity.Rebuild(command), token)), expected, effect, token);
+            FunctionalGateAnalyticsIdentity.Rebuild(command), token)), expected, effect);
     }
 
     private static async Task ReceiptAsync(FunctionalGateContext context, CommitReceipt actual,
-        CommitReceipt expected, MutationReceipt effect, CancellationToken token)
+        CommitReceipt expected, MutationReceipt effect)
     {
         await FunctionalGateUserAnalyticsAssertions.EqualAsync(actual, expected);
-        await FunctionalGateCompositionCalls.ReceiptAsync(context, actual, expected.CommandId, [effect], token);
+        await FunctionalGateCompositionCalls.ReceiptAsync(context, actual, expected.CommandId, [effect]);
     }
 
     private static ImmutableDictionary<string, long> Revisions(params (string Id, long Revision)[] values)

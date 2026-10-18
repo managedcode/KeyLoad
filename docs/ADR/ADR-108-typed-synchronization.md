@@ -40,31 +40,21 @@ flowchart LR
     Compiler[KLD0034] --> Forbidden[Reject object Monitor and grain locks]
 ```
 
-## Ordered implementation and joins
+## Implementation scope
 
-| Task | Owner / scope | Depends on | Output and join condition |
-|---|---|---|---|
-| TASK-CQ-SYNC-001 | Runtime worker: Core, Storage.ZoneTree, Replication, Orleans, Diagnostics | This accepted owner correction | Audited typed gates; no grain-state lock; preserving lifecycle diff |
-| TASK-CQ-SYNC-002 | Server worker: Server and AppHost only | This contract | Typed gates, disposal completion repair and shared-service ownership review |
-| TASK-CQ-SYNC-003 | Analyzer worker: Analyzers and Analyzers.Tests only | Frozen KLD0034 / AC-CQ-025 | Native compiler rule and complete semantic regression flows |
-| TASK-CQ-SYNC-004 | Lead: benchmark/test gate updates, shared docs, review and verification | 001..003 | Integrated diff; formatter/build; Aspire suite evidence; scoped checkpoint |
+| Scope | Owner / paths | Output and join condition |
+|---|---|---|
+| Runtime | Core, Storage.ZoneTree, Orleans, Diagnostics | Audited typed gates; no grain-state lock; preserving lifecycle diff |
+| Server | Server and AppHost only | Typed gates, disposal completion repair and shared-service ownership review |
+| Analyzer | Analyzers and Analyzers.Tests only | Native compiler rule KLD0034 / AC-CQ-025 and complete semantic regression flows |
+| Integration | Benchmark/test gate updates, shared docs | Integrated diff; formatter/build; Aspire suite evidence; scoped checkpoint |
 
-Workers read nearest local policy and preserve unrelated changes; same-file
-OrleansNode edits must preserve its pre-existing diff. No worker owns shared
-configuration or documentation. Use the repository's capable Luna worker policy
-for independent scopes; the lead reviews every diff and runs integration gates.
-No new package, public API, persistence format, topology or trust change occurs.
-Rollout is a coherent source rebuild; rollback reverts the typed-gate change and
-its compiler rule together without deleting persisted data or weakening other
-rules. Focused tests use real lifecycle/cache/replica operations and native Roslyn
-compilations. Full acceptance retains unit/scalar/process recovery and Aspire-owned
-Docker RF3 SDK/MCP suites, Linux CI, coverage and all pre-existing qualification
-gates. A failing unrelated source gate is reported, never hidden or taken over.
+Preserve unrelated changes and nearest local policy; same-file OrleansNode edits preserve its pre-existing diff. No new package, public API, persistence format, topology or trust change occurs. Rollout is a coherent source rebuild; rollback reverts the typed-gate change and its compiler rule together without deleting persisted data or weakening other gates.
 
 ## Evidence
 
 Initial inventory found object gates in shared services and test collectors,
-including OrleansNode, PartitionHost, ReplicaConsensus, ClusterCoordinator and
+including OrleansNode, the silo-local storage owner and
 ZoneTreePointCacheLifecycle, plus Monitor wait/pulse disposal coordination in
 NativeTextProjection. Typed-gate refactoring covers 64 fields and two helper parameters;
 the new real native-reader disposal/reopen regression is authored. Local compiler,

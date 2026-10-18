@@ -1,12 +1,13 @@
 # Comparable native database benchmark methodology
 
-Status: owner-selected session contract, 2026-10-17; implementation and exact-source
-Linux qualification remain open. [ADR-142](../../ADR/ADR-142-shared-live-benchmark-sessions.md)
-and [SessionExecution](SessionExecution.md) supersede the previous active
-per-scenario workers, warmup namespaces and fresh repetition resets. Native
-one-node/three-node topology and the fairness/correctness requirements of
-[ADR-122](../../ADR/ADR-122-native-benchmark-methodology.md) remain applicable.
-Original historical reports retain their actual settings and are never relabelled.
+This methodology is the shared live-session contract of
+[ADR-142](../../ADR/ADR-142-shared-live-benchmark-sessions.md) and
+[SessionExecution](SessionExecution.md): no per-scenario workers, warmup namespaces or
+fresh repetition resets. Native one-node/three-node topology and the
+fairness/correctness requirements of
+[ADR-122](../../ADR/ADR-122-native-benchmark-methodology.md) apply. Implementation and
+exact-source Linux qualification are separate acceptance gates. Original reports retain
+their actual settings and are never relabelled.
 
 ## Execution unit and timing
 
@@ -89,13 +90,13 @@ filtered/concurrent-update and recall requirements where natively supported.
 Native batching, index build and accuracy are declared explicitly. Closed-loop
 request timings do not prove scheduled-arrival/open-loop or endurance behavior.
 
-The existing exclusive functional RF3 million-record ingestion gate remains
+The existing exclusive functional cluster million-record ingestion gate remains
 mandatory and separate from numerical benchmark publication. Its actual .NET
 SDK and official MCP callers operate while ingestion is active. Heavy-load
 admission still requires explicit enabled settings, the exact native class
 filter, one-test parallelism and disabled coverage; missing/false/broad/duplicate
 filters, coverage or wrong parallelism fail before resources are acquired.
-Normal functional concurrency and all process-recovery/RF3 gates are unchanged.
+Normal functional concurrency and all process-recovery/cluster gates are unchanged.
 
 ## Original results, resources and failure
 
@@ -110,9 +111,10 @@ separate. Missing instrumentation is explicit and cannot become a zero result.
 Record exact source/run/attempt/job/artifact identities, Linux/runtime/CPU,
 DLL/PDB hashes, native images, observed membership/data copies, resource limits,
 filesystem, transport, read consistency, index settings and effective ACK/durability.
-A node count alone does not establish equivalent guarantees. RF3 majority remains
-two acknowledgements. The one-node KeyLoad arm is explicitly RF1; production RF3
-is unchanged. Unequal contracts prohibit a performance-winner claim.
+A node count alone does not establish equivalent guarantees. A KeyLoad write is
+acknowledged by a majority of its ReplicaCount copies (two of three by default). The
+one-node KeyLoad arm has a single copy. Unequal contracts prohibit a
+performance-winner claim.
 
 Cancellation stops admission, cancels and joins original calls, then disposes
 native clients and the Aspire deployment. Preserve the primary and shutdown

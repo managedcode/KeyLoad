@@ -4,11 +4,10 @@ using KeyLoad.IntegrationTests.Features.Messaging;
 
 namespace KeyLoad.IntegrationTests.Features.EventStreams;
 
-internal sealed class SharedDomainPublicState(ImmutableArray<SharedDomainScope> scopes, MessagingRf3Identity identity)
+internal sealed class SharedDomainPublicState(ImmutableArray<SharedDomainScope> scopes, MessagingClusterIdentity identity)
 {
     internal ImmutableArray<SharedDomainScope> Scopes { get; } = scopes;
-    internal MessagingRf3Identity Identity { get; set; } = identity;
-    internal Dictionary<string, AtomicPartitionPlacementResolution> Placements { get; } = new(StringComparer.Ordinal);
+    internal MessagingClusterIdentity Identity { get; set; } = identity;
     internal List<(CommandRequest Command, CommitReceipt Receipt)> Originals { get; } = [];
     internal List<(CommandRequest Command, CommitReceipt Receipt)> Healthy { get; } = [];
     internal Dictionary<string, EventRecord[]> RecordedEvents { get; } = new(StringComparer.Ordinal);

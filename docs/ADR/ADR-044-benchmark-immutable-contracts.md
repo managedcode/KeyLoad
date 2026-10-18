@@ -1,8 +1,8 @@
 # ADR-044: immutable comparative harness contracts
 
 Status: Accepted implementation contract; source integration and qualification pending.
-Owner: KeyLoad integration lead, authorized strict-analysis/resource repair goal.
-Related: REQ-BC-020; AC-BCT-001..006; ADR-033/034/035/041/043.
+Owner: KeyLoad, authorized strict-analysis/resource repair goal.
+Related: REQ-BC-020; ADR-033/034/035/041/043.
 
 ## Decision and caller boundary
 
@@ -33,25 +33,7 @@ flowchart LR
 
 ## Implementation contract
 
-Ordered stages and exact task graph are [ADR-044-benchmark-immutable-contracts.md](ADR-044-benchmark-immutable-contracts.md),
-derived from detailed [acceptance](ADR-044-benchmark-immutable-contracts.md) and its
-criterion/test matrix. Author real serializer/configuration/corpus/exception fixture
-inputs first; then one shared contract owner; then disjoint engine consumers and
-single lead shared runner/report join; exact diff/build/formatter review; actual
-delivered-SHA GitHub full suites and honest retained evidence. No local tests/load.
-
-T owns only new immutable/config/exception fixture files plus existing pure report/
-stream fixtures. C owns Contracts.cs and BenchmarkDataset.cs and their source
-files under Features/BenchmarkComparisons/, with new topology/contract-json/exception
-helpers in that same slice. Namespace/assembly stays KeyLoad.Comparisons. P owns
-only engine Targets and engine-prefixed feature helpers. L owns report writer,
-runner/measurement/validation/protocol, host and remaining test/config callers,
-local entry maps/docs/config/build/CI. C waits for authored T packet; P/L callers
-wait for stable C signatures. No concurrent same-file writes or native-owner scope.
-Lead inspects every complete packet and owns combined proof. Economical capable
-workers cannot change architecture/contracts beyond this decision; escalate drift,
-unsupported actual APIs, upstream defects or overlap. Terminal status and evidence
-must be explicit; partial or idle packets do not unblock dependants.
+Verification order: author real serializer/configuration/corpus/exception fixture inputs first; then the shared contract owner (Contracts.cs, BenchmarkDataset.cs and topology/contract-json/exception helpers under Features/BenchmarkComparisons/, namespace/assembly KeyLoad.Comparisons); then the disjoint engine consumers and the shared runner/report join; exact diff/build/formatter review; actual delivered-SHA GitHub full suites and honest retained evidence. No local tests/load. Architecture and contracts do not change beyond this decision; unsupported actual APIs, upstream defects or overlap are escalated.
 
 Exclusively owned arrays may attach with ImmutableCollectionsMarshal.AsImmutableArray
 only when all mutable aliases retire. Caller-owned input freezes once. Build corpus
@@ -76,14 +58,14 @@ extension. Its attribute and external TypeDescriptor fixtures establish the actu
 reflection path; no artificial instance, global provider registration, IVT or
 suppression is introduced to evade CA1812. Its ConvertFrom parameter follows the
 base EnumConverter object contract; valid/malformed input behavior is unchanged.
-This deliberate configuration surface joins AC-BCT-003/006 and existing external
+This deliberate configuration surface joins the existing external
 binder/JSON/TypeDescriptor fixtures. See Microsoft's [CA1812 constructor-call
 analysis](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1812)
 and [TypeConverter attribute/reflection contract](https://learn.microsoft.com/en-us/dotnet/api/system.componentmodel.typeconverter?view=net-10.0).
 
 PostgreSQL DDL/static SQL redesign, registration/topology/receipt changes, generated
 site data and numeric gates are separate contracts. Every existing real engine/
-RF3/.NET/MCP/recovery gate stays mandatory. Fake fixtures and the existing six-engine assertion set cannot qualify this stage.
+cluster/.NET/MCP/recovery gate stays mandatory. Fake fixtures and the existing six-engine assertion set cannot qualify this stage.
 Historical six-engine evidence remains separate from the current required gates.
 
 This is a source-only harness contract; product persistence/API/security are

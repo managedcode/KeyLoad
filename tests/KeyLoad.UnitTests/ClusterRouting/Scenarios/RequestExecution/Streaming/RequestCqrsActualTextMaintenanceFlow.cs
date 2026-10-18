@@ -92,7 +92,7 @@ internal static class RequestCqrsActualTextMaintenanceFlow
         {
             var phases = frames.Where(frame => frame.Kind == CqrsStreamChunkKind.Progress)
                 .Select(frame => frame.ProgressResult!.Value.Value!.TextPhase);
-            await Console.Error.WriteLineAsync($"KL029_ACTUAL_BOUNDARY mode={request.Mode} error={reply.Error} phases={string.Join(',', phases)} detail={reply.SafeDetail}").ConfigureAwait(false);
+            await Console.Error.WriteLineAsync($"ACTUAL_BOUNDARY mode={request.Mode} error={reply.Error} phases={string.Join(',', phases)} detail={reply.SafeDetail}").ConfigureAwait(false);
         }
         if (reply.Error == ErrorCode.Corruption)
         {

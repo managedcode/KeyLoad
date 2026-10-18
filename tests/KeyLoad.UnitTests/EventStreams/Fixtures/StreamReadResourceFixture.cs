@@ -10,7 +10,6 @@ namespace KeyLoad.UnitTests.Features.EventStreams;
 
 internal sealed class StreamReadResourceFixture : IDisposable
 {
-    private const int PlacementReadVersion = 1;
     private const string AdministratorId = "root";
     private const string ReaderId = "event-reader";
     private const string TenantId = "tenant";
@@ -104,15 +103,8 @@ internal sealed class StreamReadResourceFixture : IDisposable
         }));
     }
 
-    internal void BindOriginalPlacement()
-    {
-        var original = database.ReadAtomicPartitionPlacement(AdministratorId, new(PlacementReadVersion, Partition));
-        Submit(OperationKind.BindAtomicPartitionPlacement,
-            new BindAtomicPartitionPlacementRequest(PlacementReadVersion, original.DirectoryRevision, Partition, original.PhysicalShardId));
-    }
-
     internal AtomicPartitionPlacementResolution Placement
-        => database.ReadAtomicPartitionPlacement(AdministratorId, new(PlacementReadVersion, Partition));
+        => database.ReadAtomicPartitionPlacement(AdministratorId, Partition);
 
     internal StreamPage TraverseConfigured(ReadStreamRequest request, PhysicalShardRecord owner)
         => (StreamPage)new KeyLoad.Clustering.GrainCoreReadCapabilities(database).Execute(
@@ -186,7 +178,7 @@ internal sealed class StreamReadResourceFixture : IDisposable
     private void Open(DatabaseLimits limits)
     {
         store = new(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution(), timeProvider: clock);
-        database = new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), eventSourceOptions, UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance, clock);
+        database = new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), eventSourceOptions, UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), clock);
     }
 
     private void ConfigureResource(bool protectedFields)

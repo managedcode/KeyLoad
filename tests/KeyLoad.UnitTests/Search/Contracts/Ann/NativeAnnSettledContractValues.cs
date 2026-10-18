@@ -9,7 +9,6 @@ internal sealed record NativeAnnSettledContractValues(AnnMaintenanceRequest Requ
 {
     private const string ConsumerName = "ann-original-wire";
     private const long Generation = 13;
-    private const int Version = 1;
     private const long StartAfter = 0;
     private const string SuppliedIndexDigest = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
 
@@ -32,7 +31,7 @@ internal sealed record NativeAnnSettledContractValues(AnnMaintenanceRequest Requ
             new ConfigureProjectionConsumerRequest(configureId, consumer, definition, StartAfter),
             AnnProjectionPinTestSupport.Principal, configureId).Get<ProjectionConsumerInfo>();
         var placement = database.Database.ReadAtomicPartitionPlacement(AnnProjectionPinTestSupport.Principal,
-            new(Version, database.Partition));
+            database.Partition);
         var request = new AnnMaintenanceRequest(Guid.NewGuid(), consumer, AnnSeedTestSupport.Collection,
             AnnSeedTestSupport.Field, AnnSeedTestSupport.Space(), Generation, database.Store.Identity.NodeId,
             new(placement.PhysicalShardId, placement.Incarnation, placement.VoterIds, placement.PlacementEpoch),

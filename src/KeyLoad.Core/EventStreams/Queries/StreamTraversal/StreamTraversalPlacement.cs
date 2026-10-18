@@ -20,7 +20,7 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, StreamTraversalProtocol.Owner);
         }
-        var placement = ResolveRegisteredPlacement(view, partition, catalog.DefaultShard);
+        var placement = ResolveRegisteredPlacement(partition, catalog.DefaultShard);
         if (placement.PhysicalShardId != expected.PhysicalShardId || placement.Incarnation != expected.Incarnation
             || placement.PlacementEpoch != expected.PlacementEpoch
             || !placement.VoterIds.SequenceEqual(expected.VoterIds, StringComparer.Ordinal))

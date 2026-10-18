@@ -717,8 +717,8 @@
       "operationOutcomeAndState": "scans canonical document and scalar-index records in a real ZoneTree read callback while an atomic writer blocks at the committed read gate; compares old and new document/index state to an independent model, joins scan and writer, reopens exact committed state, then applies and verifies a healthy command"
     },
     {
-      "suite": "rf3",
-      "className": "KeyLoad.IntegrationTests.Features.QueryExecution.PartitionQueryPublicRf3Tests",
+      "suite": "cluster",
+      "className": "KeyLoad.IntegrationTests.Features.QueryExecution.PartitionQueryPublicClusterTests",
       "methodName": "AcPquery006SdkAndOfficialMcpReturnIndependentFullReferenceOrder",
       "instanceName": "AcPquery006SdkAndOfficialMcpReturnIndependentFullReferenceOrder",
       "requirements": [
@@ -736,10 +736,10 @@
         "KeyLoad.Replication",
         "KeyLoad.Storage.ZoneTree"
       ],
-      "operationOutcomeAndState": "Real AppHost RF3 SDK and official MCP return the same independently ordered full references across explicit, fallback and empty partitions, including equal text IDs in separate partitions, hidden sort fields and ties."
+      "operationOutcomeAndState": "Real AppHost CLUSTER SDK and official MCP return the same independently ordered full references across explicit, fallback and empty partitions, including equal text IDs in separate partitions, hidden sort fields and ties."
     },
     {
-      "suite": "rf3",
+      "suite": "cluster",
       "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.McpDocumentCrudParityTests",
       "methodName": "AcDstore001SdkPatchAndMcpDeleteMatchTheMirroredCrudLifecycle",
       "instanceName": "AcDstore001SdkPatchAndMcpDeleteMatchTheMirroredCrudLifecycle",
@@ -761,7 +761,7 @@
       "operationOutcomeAndState": "The actual SDK and official MCP clients commit mirrored create, replace, patch and delete operations; each terminal receipt and independently read document revision/content (including deletion) matches the expected lifecycle."
     },
     {
-      "suite": "rf3",
+      "suite": "cluster",
       "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.McpDocumentCrudParityTests",
       "methodName": "AcDstore001McpPatchAndSdkDeleteMatchTheMirroredCrudLifecycle",
       "instanceName": "AcDstore001McpPatchAndSdkDeleteMatchTheMirroredCrudLifecycle",
@@ -783,7 +783,7 @@
       "operationOutcomeAndState": "The actual official MCP and SDK clients run the inverse mirrored mutation order; each terminal receipt and independently read document revision/content matches, then the final document is absent."
     },
     {
-      "suite": "rf3",
+      "suite": "cluster",
       "className": "KeyLoad.IntegrationTests.Features.DocumentStorage.McpDocumentCrudParityTests",
       "methodName": "AcDstore001StaleExplicitReplacementIsRejectedWithoutChangingRevisionTwo",
       "instanceName": "AcDstore001StaleExplicitReplacementIsRejectedWithoutChangingRevisionTwo",
@@ -805,10 +805,10 @@
       "operationOutcomeAndState": "SDK and official MCP establish revisions one and two, reject a stale explicit replacement as RevisionConflict without changing persisted revision-two content, then successfully read that same state."
     },
     {
-      "suite": "rf3",
-      "className": "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlRf3JoinTests",
-      "methodName": "Q2JoinReturnsTheSameCommittedPairsToSdkAndOfficialMcpAcrossRf3",
-      "instanceName": "Q2JoinReturnsTheSameCommittedPairsToSdkAndOfficialMcpAcrossRf3",
+      "suite": "cluster",
+      "className": "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlClusterJoinTests",
+      "methodName": "Q2JoinReturnsTheSameCommittedPairsToSdkAndOfficialMcpAcrossCluster",
+      "instanceName": "Q2JoinReturnsTheSameCommittedPairsToSdkAndOfficialMcpAcrossCluster",
       "requirements": [
         "REQ-REL-004",
         "REQ-QUERY-007"
@@ -830,8 +830,8 @@
       "operationOutcomeAndState": "configures the typed right schema and commits a two-pair seed through the SDK; compares direct and unified SQL pages from SDK and official MCP for access path, cut, exact row JSON, pair identities and source revisions"
     },
     {
-      "suite": "rf3",
-      "className": "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlRf3JoinAuthorizationTests",
+      "suite": "cluster",
+      "className": "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlClusterJoinAuthorizationTests",
       "methodName": "RightResourceAndJoinFieldUseDenialsHaveNoEffectsAndHealthyCallersStillRead",
       "instanceName": "RightResourceAndJoinFieldUseDenialsHaveNoEffectsAndHealthyCallersStillRead",
       "requirements": [
@@ -856,8 +856,8 @@
       "operationOutcomeAndState": "uses persisted right-resource and join-field-use policies; asserts SDK and official MCP denials and non-disclosure, unchanged source rows, then equal healthy direct/unified pages through both clients"
     },
     {
-      "suite": "rf3",
-      "className": "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlRf3JoinCancellationTests",
+      "suite": "cluster",
+      "className": "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlClusterJoinCancellationTests",
       "methodName": "CallerCancellationOnSdkAndOfficialMcpJoinPathsIsFollowedByHealthyReads",
       "instanceName": "CallerCancellationOnSdkAndOfficialMcpJoinPathsIsFollowedByHealthyReads",
       "requirements": [
@@ -882,10 +882,10 @@
       "operationOutcomeAndState": "cancels the original token on SDK and official MCP direct/unified join calls, checks their cancellation outcomes, then checks each healthy caller route returns the joined page at or beyond the seed cut"
     },
     {
-      "suite": "rf3",
-      "className": "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlRf3JoinReadCutTests",
-      "methodName": "ConcurrentAtomicPairChangesNeverExposeAMixedRf3Generation",
-      "instanceName": "ConcurrentAtomicPairChangesNeverExposeAMixedRf3Generation",
+      "suite": "cluster",
+      "className": "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlClusterJoinReadCutTests",
+      "methodName": "ConcurrentAtomicPairChangesNeverExposeAMixedClusterGeneration",
+      "instanceName": "ConcurrentAtomicPairChangesNeverExposeAMixedClusterGeneration",
       "requirements": [
         "REQ-REL-004",
         "REQ-QUERY-007"
@@ -908,8 +908,8 @@
       "operationOutcomeAndState": "interleaves atomic pair-generation commits with SDK and official MCP direct/unified reads; each page must represent the complete previous or next pair generation and final pages agree across all four routes"
     },
     {
-      "suite": "rf3",
-      "className": "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlRf3JoinBudgetTests",
+      "suite": "cluster",
+      "className": "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlClusterJoinBudgetTests",
       "methodName": "JoinWorkBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
       "instanceName": "JoinWorkBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
       "requirements": [
@@ -931,11 +931,11 @@
         "KeyLoad.Server",
         "KeyLoad.Storage.ZoneTree"
       ],
-      "operationOutcomeAndState": "applies a real RF3 scan-work limit, checks SDK and official MCP return BudgetExceeded, verifies seeded source documents remain unchanged, then confirms both callers complete an exact healthy joined result"
+      "operationOutcomeAndState": "applies a real CLUSTER scan-work limit, checks SDK and official MCP return BudgetExceeded, verifies seeded source documents remain unchanged, then confirms both callers complete an exact healthy joined result"
     },
     {
-      "suite": "rf3",
-      "className": "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlRf3JoinBudgetTests",
+      "suite": "cluster",
+      "className": "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlClusterJoinBudgetTests",
       "methodName": "JoinReadByteBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
       "instanceName": "JoinReadByteBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
       "requirements": [
@@ -957,11 +957,11 @@
         "KeyLoad.Server",
         "KeyLoad.Storage.ZoneTree"
       ],
-      "operationOutcomeAndState": "applies a real RF3 raw read-byte limit, checks SDK and official MCP return BudgetExceeded, verifies seeded source documents remain unchanged, then confirms both callers complete an exact healthy joined result"
+      "operationOutcomeAndState": "applies a real CLUSTER raw read-byte limit, checks SDK and official MCP return BudgetExceeded, verifies seeded source documents remain unchanged, then confirms both callers complete an exact healthy joined result"
     },
     {
-      "suite": "rf3",
-      "className": "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlRf3JoinBudgetTests",
+      "suite": "cluster",
+      "className": "KeyLoad.IntegrationTests.Features.RelationalStorage.RelationalSqlClusterJoinBudgetTests",
       "methodName": "JoinedPageByteBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
       "instanceName": "JoinedPageByteBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
       "requirements": [
@@ -983,7 +983,7 @@
         "KeyLoad.Server",
         "KeyLoad.Storage.ZoneTree"
       ],
-      "operationOutcomeAndState": "applies a real RF3 serialized joined-page byte limit, checks SDK and official MCP return BudgetExceeded, verifies seeded source documents remain unchanged, then confirms both callers complete an exact healthy joined result"
+      "operationOutcomeAndState": "applies a real CLUSTER serialized joined-page byte limit, checks SDK and official MCP return BudgetExceeded, verifies seeded source documents remain unchanged, then confirms both callers complete an exact healthy joined result"
     },
     {
       "suite": "recovery",

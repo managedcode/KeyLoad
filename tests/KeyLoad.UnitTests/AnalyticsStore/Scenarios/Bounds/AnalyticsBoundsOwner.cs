@@ -13,8 +13,7 @@ internal static class AnalyticsBoundsOwner
     {
         var physical = fixture.Store.Read(view => PhysicalShardCatalogRecordSerialization.Read(view)!.DefaultShard);
         var factory = TestDatabaseEngineFactory.Capture(UnitExecutionOptions.DatabaseLimits(limits),
-            UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), null,
-            fixture.MovementCheckpoints, fixture.Database.EvaluationClock);
+            UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), null, fixture.Database.EvaluationClock);
         return factory(fixture.Store, physical);
     }
 

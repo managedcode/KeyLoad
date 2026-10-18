@@ -5,7 +5,7 @@ param(
     [Parameter(Mandatory = $true)][string] $ResultsRoot,
     [Parameter(Mandatory = $true)][string] $UnitRunStatusPath,
     [Parameter(Mandatory = $true)][int] $RecoveryExitCode,
-    [Parameter(Mandatory = $true)][int] $Rf3ExitCode
+    [Parameter(Mandatory = $true)][int] $ClusterExitCode
 )
 
 Set-StrictMode -Version Latest
@@ -25,8 +25,8 @@ $ErrorActionPreference = 'Stop'
 $script:FcNativeProductDescriptor = [ordered]@{
     Invalid = 'The original functional coverage cohort is incomplete or mismatched.'
     SourceName = 'functional-coverage.production-source-manifest.json'
-    RunName = 'functional-coverage.rf3-run.v1.json'
-    FixtureName = 'functional-coverage.rf3-fixture.v1.json'
+    RunName = 'functional-coverage.cluster-run.v1.json'
+    FixtureName = 'functional-coverage.cluster-fixture.v1.json'
     DescriptorName = 'functional-coverage.native-product-descriptor.v1.json'
     BoundsName = 'functional-coverage.native-options.v1.json'
     OutputDirectory = 'native-merge'
@@ -41,7 +41,7 @@ $script:FcNativeProductDescriptor = [ordered]@{
     ShaPattern = '\A[0-9a-f]{64}\z'
     RevisionPattern = '\A[0-9a-f]{40}\z'
     GuidPattern = '\A[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\z'
-    Rf3Filter = '/*/*/(PartitionQueryPublicRf3Tests|McpDocumentCrudParityTests|RelationalSqlRf3JoinTests|RelationalSqlRf3JoinAuthorizationTests|RelationalSqlRf3JoinBudgetTests|RelationalSqlRf3JoinCancellationTests|RelationalSqlRf3JoinReadCutTests)/*'
+    ClusterFilter = '/*/*/(PartitionQueryPublicClusterTests|McpDocumentCrudParityTests|RelationalSqlClusterJoinTests|RelationalSqlClusterJoinAuthorizationTests|RelationalSqlClusterJoinBudgetTests|RelationalSqlClusterJoinCancellationTests|RelationalSqlClusterJoinReadCutTests)/*'
     UnitCensusReportPattern = '*.tunit-report.json'
     UnitCensusTrxPattern = '*.trx'
     UnitCensusCoverageName = 'coverage.coverage'
@@ -98,7 +98,7 @@ function Assert-DescriptorInputs {
 function Get-PolicyBounds([string] $RunManifestPath) {
     $file = Read-BoundedJson $RunManifestPath $script:FcNativeProductDescriptor.MaximumRunManifestBytes
     $run = $file.value
-    if ($run.schemaVersion -ne 1 -or $run.suite -cne 'rf3' -or $run.filter -cne $script:FcNativeProductDescriptor.Rf3Filter -or
+    if ($run.schemaVersion -ne 1 -or $run.suite -cne 'cluster' -or $run.filter -cne $script:FcNativeProductDescriptor.ClusterFilter -or
         $run.runId -cnotmatch $script:FcNativeProductDescriptor.GuidPattern -or
         $run.sourceRevision -cnotmatch $script:FcNativeProductDescriptor.RevisionPattern -or
         $run.executionPolicy -isnot [Collections.IDictionary] -or
@@ -227,16 +227,16 @@ function Get-AppHostToolMetadata([string] $Root, [object] $Bounds) {
 }
 
 function Get-SuiteRun([string] $Suite, [int] $ExitCode, [object] $Source, [object] $ImageBySuite,
-    [object] $Bounds, [string] $ResultsRoot, [string] $Rf3RunId, [string] $Filter = '', [object] $Status = $null) {
+    [object] $Bounds, [string] $ResultsRoot, [string] $ClusterRunId, [string] $Filter = '', [object] $Status = $null) {
     if ($ExitCode -ne $script:FcNativeProductDescriptor.ExitSuccess) {
         throw "The native $Suite coverage child did not complete successfully; raw outputs are retained."
     }
     $directoryName = if ($null -ne $Status) { [string] $Status.resultsDirectory } else { $Suite }
-    $directory = if ($Suite -ceq 'rf3') { $ResultsRoot } else { Join-Path $ResultsRoot $directoryName }
+    $directory = if ($Suite -ceq 'cluster') { $ResultsRoot } else { Join-Path $ResultsRoot $directoryName }
     $report = Get-UniqueReport $directory $script:FcNativeProductDescriptor.ReportPattern
     $trx = Get-UniqueReport $directory $script:FcNativeProductDescriptor.TrxPattern
     $coverage = Join-Path $directory $script:FcNativeProductDescriptor.CoverageName
-    $runId = if ($Suite -ceq 'rf3') { $Rf3RunId } else { [Guid]::NewGuid().ToString('D').ToLowerInvariant() }
+    $runId = if ($Suite -ceq 'cluster') { $ClusterRunId } else { [Guid]::NewGuid().ToString('D').ToLowerInvariant() }
     $baseSuite = Get-FcNativeBaseSuite $Suite
     $run = [ordered]@{ suite = $Suite; runId = $runId; sourceRevision = $Source.value.sourceRevision
         sourceManifestSha256 = $Source.file.sha256; testImageManifestSha256 = $ImageBySuite[$baseSuite].sha256
@@ -286,13 +286,13 @@ function Get-UnitGroupSuites {
     $suites.ToArray()
 }
 
-function Get-Rf3Fixture([string] $ResultsRoot, [object] $Run, [object] $Source, [object] $Bounds) {
+function Get-ClusterFixture([string] $ResultsRoot, [object] $Run, [object] $Source, [object] $Bounds) {
     $fixtureRead = Read-BoundedJson (Join-Path $ResultsRoot $script:FcNativeProductDescriptor.FixtureName) `
         $Bounds.maximumManifestBytes
     $fixture = $fixtureRead.value
     if ($fixture.schemaVersion -ne 1 -or $fixture.functionalRunId -cne $Run.runId -or
         $fixture.sourceRevision -cne $Source.value.sourceRevision -or
-        $fixture.sourceManifestSha256 -cne $Source.file.sha256 -or $fixture.suite -cne 'rf3' -or
+        $fixture.sourceManifestSha256 -cne $Source.file.sha256 -or $fixture.suite -cne 'cluster' -or
         $fixture.nodes -isnot [array] -or $fixture.nodes.Count -ne 3 -or $fixture.caseIdentities -isnot [array]) {
         throw $script:FcNativeProductDescriptor.Invalid
     }
@@ -321,22 +321,22 @@ function Write-CreateOnly([string] $Path, [byte[]] $Bytes) {
 
 function New-ProductRunEvidence([string] $Root, [string] $Results, [object] $Bounds, [object] $Policy, [object] $Source,
     [object] $ImageBySuite, [string] $StatusPath, [object] $StatusRead, [object] $StatusRuns,
-    [int] $RecoveryExitCode, [int] $Rf3ExitCode) {
+    [int] $RecoveryExitCode, [int] $ClusterExitCode) {
     $groupSuites = [string[]] @(Get-UnitGroupSuites)
     $census = [ordered]@{
         normal = Get-UnitCensusRun 'unit-census' $statusRuns['unit-census'] $source $imageBySuite $bounds $results
     }
-    $codes = @{ recovery = $RecoveryExitCode; rf3 = $Rf3ExitCode }
+    $codes = @{ recovery = $RecoveryExitCode; cluster = $ClusterExitCode }
     $runs = [Collections.Generic.List[object]]::new()
-    foreach ($suite in $groupSuites + @('recovery','rf3')) {
+    foreach ($suite in $groupSuites + @('recovery','cluster')) {
         $statusRow = if ($statusRuns.ContainsKey($suite)) { $statusRuns[$suite] } else { $null }
         $exitCode = if ($null -ne $statusRow) { [int] $statusRow.exitCode } else { $codes[$suite] }
-        $runId = if ($suite -ceq 'rf3') { [string]$policy.run.runId } else { $null }
+        $runId = if ($suite -ceq 'cluster') { [string]$policy.run.runId } else { $null }
         $filter = if ($null -ne $statusRow) { [string] $statusRow.filter } else { '' }
         $runs.Add((Get-SuiteRun $suite $exitCode $source $imageBySuite $bounds $results $runId $filter $statusRow))
     }
-    $rf3Run = @($runs.ToArray() | Where-Object suite -CEQ 'rf3')[0]
-    $fixture = Get-Rf3Fixture $results $rf3Run $source $bounds
+    $clusterRun = @($runs.ToArray() | Where-Object suite -CEQ 'cluster')[0]
+    $fixture = Get-ClusterFixture $results $clusterRun $source $bounds
     $tool = Get-AppHostToolMetadata $root $bounds
     $statusReference = New-EvidenceReference $statusPath $script:FcNativeContributors.UnitRunStatusMaximumBytes
     if ($statusReference.length -ne $statusRead.length -or $statusReference.sha256 -cne $statusRead.sha256) {
@@ -373,15 +373,15 @@ function Invoke-DescriptorProducer {
         $policy.run.sourceManifestSha256
     if ($policy.run.sourceRevision -cne $source.value.sourceRevision -or
         $policy.run.sourceManifestSha256 -cne $source.file.sha256 -or
-        $policy.run.testImageManifestSha256 -cne $imageBySuite['rf3'].sha256) {
+        $policy.run.testImageManifestSha256 -cne $imageBySuite['cluster'].sha256) {
         throw $script:FcNativeProductDescriptor.Invalid
     }
     $runEvidence = New-ProductRunEvidence $root $results $bounds $policy $source $imageBySuite `
-        $statusPath $statusRead $statusRuns $RecoveryExitCode $Rf3ExitCode
+        $statusPath $statusRead $statusRuns $RecoveryExitCode $ClusterExitCode
     $descriptor = [ordered]@{ schemaVersion = 3; invocationId = [Guid]::NewGuid().ToString('D').ToLowerInvariant()
         evidenceRoot = $results; sourceManifest = $sourceRef; unitRunStatus = $runEvidence.statusReference
         tool = $runEvidence.tool; bounds = $bounds; unitCensus = $runEvidence.census
-        suiteRuns = $runEvidence.runs; rf3Fixtures = @($runEvidence.fixture)
+        suiteRuns = $runEvidence.runs; clusterFixtures = @($runEvidence.fixture)
         outputDirectory = $script:FcNativeProductDescriptor.OutputDirectory }
     $descriptorPath = Join-Path $results 'functional-coverage.native-product-descriptor.v1.json'
     $nativeOptionsPath = Join-Path $results 'functional-coverage.native-options.v1.json'

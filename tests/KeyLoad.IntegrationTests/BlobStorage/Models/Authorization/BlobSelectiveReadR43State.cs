@@ -2,10 +2,9 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 namespace KeyLoad.IntegrationTests.Features.BlobStorage;
 
 internal sealed class BlobSelectiveReadR43State(BlobSupersessionPublicTrial.Version[] versions,
-    AtomicPartitionPlacementResolution placement, McpPersistedIdentity identity)
+    McpPersistedIdentity identity)
 {
     internal BlobSupersessionPublicTrial.Version[] Versions { get; } = versions;
-    internal AtomicPartitionPlacementResolution Placement { get; } = placement;
     internal McpPersistedIdentity Identity { get; set; } = identity;
     internal PrincipalRecord Both { get; set; } = identity.Principal;
     internal OutboxStatus Outbox { get; set; } = null!;

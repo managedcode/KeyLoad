@@ -4,7 +4,7 @@ namespace KeyLoad.UnitTests.Features.Authorization;
 internal sealed class AuthorizationTelemetryWholeFlowTests
 {
     [Test]
-    public async Task AcAuthKl015002RealHttpAndLogExportsKeepSafeMetadataAfterDenialThenHealthyCatalog()
+    public async Task RealHttpAndLogExportsKeepSafeMetadataAfterDenialThenHealthyCatalog()
     {
         using var fixture = new AuthorizationTelemetryHttpFixture();
         await fixture.RunAsync(owner => AuthorizationTelemetryFlow.ExecuteAsync(owner,
@@ -18,7 +18,7 @@ internal sealed class AuthorizationTelemetryWholeFlowTests
     [Arguments(AuthorizationUnsafeSpanState.ExcessBaggage)]
     [Arguments(AuthorizationUnsafeSpanState.InheritedParentBaggage)]
     [Arguments(AuthorizationUnsafeSpanState.ExcessParentLinks)]
-    public async Task AcAuthKl015002NativeExporterSuppressesUnsafeServerStateAndExportsHealthyFollowup(AuthorizationUnsafeSpanState state)
+    public async Task NativeExporterSuppressesUnsafeServerStateAndExportsHealthyFollowup(AuthorizationUnsafeSpanState state)
     {
         using var fixture = new AuthorizationTelemetryHttpFixture();
         await fixture.RunAsync(owner => AuthorizationTelemetryFlow.ExecuteAsync(owner, state));

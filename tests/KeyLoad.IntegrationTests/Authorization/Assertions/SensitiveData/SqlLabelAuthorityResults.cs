@@ -11,32 +11,32 @@ internal static class SqlLabelAuthorityResults
         PartitionRef partition, CancellationToken token)
     {
         var expected = new GraphSearchResult([
-            new(new(new(partition, GraphSearchRf3Scenario.Documents, GraphSearchRf3Scenario.Alpha),
+            new(new(new(partition, GraphSearchClusterScenario.Documents, GraphSearchClusterScenario.Alpha),
                 McpCallerProtocol.FirstRevision, "{\"name\":\"alpha\"}", false, []), 1d / SqlLabelAuthorityProtocol.AlphaDenominator),
-            new(new(new(partition, GraphSearchRf3Scenario.Documents, GraphSearchRf3Scenario.Beta),
+            new(new(new(partition, GraphSearchClusterScenario.Documents, GraphSearchClusterScenario.Beta),
                 McpCallerProtocol.FirstRevision, "{\"name\":\"beta\"}", false, []), 1d / SqlLabelAuthorityProtocol.BetaDenominator),
-            new(new(new(partition, GraphSearchRf3Scenario.Documents, GraphSearchRf3Scenario.Gamma),
+            new(new(new(partition, GraphSearchClusterScenario.Documents, GraphSearchClusterScenario.Gamma),
                 McpCallerProtocol.FirstRevision, "{\"name\":\"gamma\"}", false, []), 1d / SqlLabelAuthorityProtocol.GammaDenominator)]);
-        await RoutesAsync(sdk, session, partition, SqlGraphSearchRf3Scenario.LabeledStatement, expected, token);
-        await RoutesAsync(sdk, session, partition, SqlGraphSearchRf3Scenario.EmptyStatement, new([]), token);
+        await RoutesAsync(sdk, session, partition, SqlGraphSearchClusterScenario.LabeledStatement, expected, token);
+        await RoutesAsync(sdk, session, partition, SqlGraphSearchClusterScenario.EmptyStatement, new([]), token);
     }
 
     private static async Task RoutesAsync(KeyLoadClient sdk, McpOfficialClient session, PartitionRef partition,
         string statement, GraphSearchResult expected, CancellationToken token)
     {
-        var request = SqlGraphSearchRf3Scenario.Request(partition, statement);
+        var request = SqlGraphSearchClusterScenario.Request(partition, statement);
         var direct = await McpCallerAssertions.SdkSuccessAsync(await sdk.SearchSqlAsync(request, token));
         var official = await McpCallerAssertions.SuccessAsync<GraphSearchResult>(await session.CallAsync(
-            SqlGraphSearchRf3Scenario.QuerySearchTool, request, token));
-        var q1 = SqlRf3Protocol.Call(partition, SqlGraphSearchRf3Scenario.QuerySearchTool, request);
-        await SqlRf3Protocol.EqualAsync(expected, direct);
-        await SqlRf3Protocol.EqualAsync(expected, official.Value);
-        await SqlRf3Protocol.EqualAsync(expected, await SqlRf3Protocol.SdkAsync<GraphSearchResult>(sdk, q1, token));
-        await SqlRf3Protocol.EqualAsync(expected, await SqlRf3Protocol.McpAsync<GraphSearchResult>(session, q1, token));
-        if (statement == SqlGraphSearchRf3Scenario.EmptyStatement)
+            SqlGraphSearchClusterScenario.QuerySearchTool, request, token));
+        var q1 = SqlClusterProtocol.Call(partition, SqlGraphSearchClusterScenario.QuerySearchTool, request);
+        await SqlClusterProtocol.EqualAsync(expected, direct);
+        await SqlClusterProtocol.EqualAsync(expected, official.Value);
+        await SqlClusterProtocol.EqualAsync(expected, await SqlClusterProtocol.SdkAsync<GraphSearchResult>(sdk, q1, token));
+        await SqlClusterProtocol.EqualAsync(expected, await SqlClusterProtocol.McpAsync<GraphSearchResult>(session, q1, token));
+        if (statement == SqlGraphSearchClusterScenario.EmptyStatement)
         {
             await Assert.That(direct.Hits).IsEmpty();
-            await GraphSearchRf3Assertions.AssertEquivalentAsync(direct, official.Value);
+            await GraphSearchClusterAssertions.AssertEquivalentAsync(direct, official.Value);
         }
     }
 }

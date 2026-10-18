@@ -20,7 +20,7 @@ public sealed partial class DatabaseEngine
                 {
                     throw Errors.Fail(ErrorCode.Corruption, ResourceOwnerInventoryReadValidation.Malformed);
                 }
-                entries.Add(ResolveInventoryEntry(view, control, cut, enrolled.Partition));
+                entries.Add(ResolveInventoryEntry(control, cut, enrolled.Partition));
                 last = key.ToArray();
                 return true;
             }, afterKey: cursor?.AfterKey.ToArray(), cancellationToken: work.Cancellation);

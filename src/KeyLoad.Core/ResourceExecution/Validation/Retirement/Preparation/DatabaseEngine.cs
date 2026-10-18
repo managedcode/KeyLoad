@@ -43,8 +43,7 @@ public sealed partial class DatabaseEngine
             && PhysicalOwnerEntryValidation.SameOwner(status.Reservation.Receiver.Owner, state.Control.Catalog.DefaultShard))
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, ResourceRetirementProtocol.Changed);
         var reservation = ResourceRetirementPreparationStorage.ReadReservation(view, state.Control.Lifetime, Limits);
-        if (!ResourceRetirementValidation.Same(local.Reservation, reservation)
-            || !ResourceRetirementMovementSnapshot.Capture(view, OperationLimitsOptions).IsEmpty)
+        if (!ResourceRetirementValidation.Same(local.Reservation, reservation))
         {
             throw Errors.Fail(ErrorCode.Conflict, ResourceRetirementProtocol.Incomplete);
         }
@@ -61,8 +60,7 @@ public sealed partial class DatabaseEngine
         if (!ResourceRetirementValidation.Same(reservation.Control.Request, control.Request)
             || !ResourceRetirementValidation.Same(reservation.Control.Lifetime, control.Lifetime)
             || !ResourceRetirementValidation.Same(reservation.Control.Catalog, control.Catalog)
-            || !ResourceRetirementValidation.Same(reservation.Control.Directory, control.Directory)
-            || !ResourceRetirementMovementSnapshot.Capture(view, OperationLimitsOptions).IsEmpty)
+            || !ResourceRetirementValidation.Same(reservation.Control.Directory, control.Directory))
         {
             throw Errors.Fail(ErrorCode.Conflict, ResourceRetirementProtocol.Incomplete);
         }

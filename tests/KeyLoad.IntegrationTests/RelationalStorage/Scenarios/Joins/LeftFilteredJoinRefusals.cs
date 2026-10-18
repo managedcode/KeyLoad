@@ -8,7 +8,7 @@ namespace KeyLoad.IntegrationTests.Features.RelationalStorage;
 internal static class LeftFilteredJoinRefusals
 {
     private const string MinimumFieldKey = "minimum";
-    internal static async Task DeniedAsync(RequestCqrsRf3Callers callers, LeftFilteredJoinState state,
+    internal static async Task DeniedAsync(RequestCqrsClusterCallers callers, LeftFilteredJoinState state,
         CancellationToken token)
     {
         var failure = await callers.Sdk.QueryAsync(LeftFilteredJoinProtocol.Query(state.Partition), token);
@@ -18,7 +18,7 @@ internal static class LeftFilteredJoinRefusals
             LeftFilteredJoinProtocol.Request(state.Partition), token), ErrorCode.PermissionDenied, dispatched: true);
     }
 
-    internal static async Task InvalidAsync(RequestCqrsRf3Callers callers, LeftFilteredJoinState state,
+    internal static async Task InvalidAsync(RequestCqrsClusterCallers callers, LeftFilteredJoinState state,
         CancellationToken token)
     {
         var request = LeftFilteredJoinProtocol.Request(state.Partition);
@@ -51,9 +51,9 @@ internal static class LeftFilteredJoinRefusals
         {
             var actual = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(new(state.Partition, collection, id), token))
                 ?? throw new InvalidOperationException("The original typed source row is missing.");
-            await SqlRf3Protocol.EqualAsync(new DocumentResult(new(state.Partition, collection, id), 1, json, false, []), actual);
+            await SqlClusterProtocol.EqualAsync(new DocumentResult(new(state.Partition, collection, id), 1, json, false, []), actual);
         }
-        await SqlRf3Protocol.EqualAsync(state.Receipt,
+        await SqlClusterProtocol.EqualAsync(state.Receipt,
             await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(state.Seed, token)));
     }
 }

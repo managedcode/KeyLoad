@@ -27,7 +27,6 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.Conflict, TableCreationExists);
         }
-        RequireResourceMetadataChangeAdmission(transaction, request.TenantId, request.DatabaseId);
         _ = ResourceLifetimeCatalog.Create(transaction, operation, request.TenantId, request.DatabaseId, request.Definition, Limits);
         transaction.PutRecord(key, request.Definition);
         return Result(request.Definition);

@@ -9,7 +9,7 @@ internal static class BlobActiveUploadSlotPublicRefusal
     private const string Detail = "detail";
     private const string Capacity = "The blob reservation quota is exhausted.";
     private const string SafeCapacity = "The operation exceeds the available resource capacity.";
-    internal static async Task RequireAsync(RequestCqrsRf3Callers callers, BlobActiveUploadSlotPublicState refused,
+    internal static async Task RequireAsync(RequestCqrsClusterCallers callers, BlobActiveUploadSlotPublicState refused,
         BlobActiveUploadSlotPublicState[] states, CancellationToken token)
     {
         var denied = await callers.Sdk.BeginBlobUploadAsync(refused.Original, token);

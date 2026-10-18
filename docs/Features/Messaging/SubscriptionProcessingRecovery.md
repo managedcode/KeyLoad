@@ -6,7 +6,7 @@ The original native child helper owns bounded stdout/stderr capture, the exact m
 
 Recovery checks one literal coherent prefix: unchanged source event1, generation/ownership1, issued1 and checkpoint0 with the original current lease, or checkpoint1 with no window and complete canonical completion/inbox/outcome/document effect. JournalFlushed and later require the committed prefix. Completed inbox and outcome retain the exact canonical document/ACK receipt. The saved typed operation is caller input only and is reapplied unchanged, including its original evaluation time; no sidecar defines persisted truth.
 
-Whole continuation compares original same-GUID result and raw inbox/outcome bytes without store-position changes, verifies fresh input dedup without repeating effects, publishes/claims/ACKs a genuinely new event2, then performs a second actual same-directory cold reopen retaining the complete source, original effect, checkpoint and receipt. Process-kill recovery remains distinct from power-loss/endurance and actual SDK/MCP RF3 qualification. SourceN is not runtime proof; root owns current-source compilation/native execution and Linux acceptance.
+Whole continuation compares original same-GUID result and raw inbox/outcome bytes without store-position changes, verifies fresh input dedup without repeating effects, publishes/claims/ACKs a genuinely new event2, then performs a second actual same-directory cold reopen retaining the complete source, original effect, checkpoint and receipt. Process-kill recovery remains distinct from power-loss/endurance and actual SDK/MCP cluster qualification.
 
 ```mermaid
 flowchart LR

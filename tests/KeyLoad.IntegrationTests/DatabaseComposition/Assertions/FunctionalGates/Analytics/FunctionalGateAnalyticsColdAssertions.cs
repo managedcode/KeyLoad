@@ -17,7 +17,7 @@ internal static class FunctionalGateAnalyticsColdAssertions
         await FunctionalGateUserAnalyticsReads.VerifyAsync(context, state, rows, aggregate, token);
         var request = new ReadAnalyticsEventsRequest(context.Partition, state.Store, state.From, state.Until, P.PageLimit, null);
         var expected = new AnalyticsEventsPage(rows, false, null);
-        var sql = SqlRf3Protocol.Call(context.Partition, AnalyticsStoreProtocol.ReadTool, request);
+        var sql = SqlClusterProtocol.Call(context.Partition, AnalyticsStoreProtocol.ReadTool, request);
         await FunctionalGateUserAnalyticsAssertions.EqualAsync(await FunctionalGateCompositionCalls.SqlAsync<AnalyticsEventsPage>(
             context, sql, official: false, write: false, token), expected);
         await FunctionalGateUserAnalyticsAssertions.EqualAsync(await FunctionalGateCompositionCalls.SqlAsync<AnalyticsEventsPage>(

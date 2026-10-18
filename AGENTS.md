@@ -1,725 +1,231 @@
 # KeyLoad
 
-Implement the architecture in `docs/design/architecture-v0.3.uk.md`. Treat it as the product specification; user instructions control scope and authorization.
-
-Work in this checkout. Preserve unrelated changes. The first server topology is an RF3 cluster; do not replace it with an in-memory or single-node demo. Keep the atomic partition distinct from physical placement. A node-local PartitionHost owns storage, journals, file locks and the apply gate; Orleans grains route commands.
-
-Orleans is the foundation of the database and its cluster. Do not use DotNext.AspNetCore.Cluster or DotNext.Net.Cluster. Enable the distributed grain directory and activation migration/repartitioning. Each request uses a separate Orleans grain which invokes the required database grains. Keep storage ownership in node-local hosts when routing activations migrate.
-
-Use TUnit for all tests. Run the RF3 database in Docker through Aspire and exercise its public operations through the real .NET SDK client and official MCP C# SDK client. Database credentials and authorization policies are persisted in the database; clients cannot supply trusted roles. Provide chunked blob storage and partial reads, a simple agent API, and an integrated official C# SDK MCP server for all database operations, search and storage. Keep frequent progress updates in Ukrainian stating what is ready and what remains.
-
-Use .NET 10 and centrally pinned packages. Do not generate or commit packages.lock.json; ignore build outputs, local data and test artifacts. Required checks: build the solution, TUnit unit tests, real process recovery tests, and Docker/Aspire RF3 tests through the .NET and MCP clients. Keep docs/implementation/status.json and the README honest about qualification gates. Do not claim power-loss durability from process-kill tests or production readiness without the endurance and fault gates.
-
-- Owner correction 2026-10-03 requires unified Aspire AppHost orchestration for test execution and KeyLoad test deployments. The AppHost MUST own the Docker RF3 resources, their readiness, test-runner dependencies, execution and shutdown. Tests MUST start the intended AppHost topology and run against its discovered endpoints; manually starting or leaving three independent Docker nodes running is not an equivalent test deployment. Preserve real .NET SDK and official MCP SDK clients, explicit RF3 membership, scoped fault injection and cleanup of every owned resource. Unit and process-recovery runners MUST use the same Aspire-owned test entry point without pretending they require an RF3 topology; required CI suites and acceptance gates remain mandatory.
-
-ManagedCode packages are our projects. Fix dependency defects in their owning sibling repository, with regression tests, canonical patch release, successful GitHub publication and verified NuGet availability before updating KeyLoad. Preserve unrelated work; never force-push or bypass repository protections. The user authorizes scoped dependency repair commits, pushes and releases, and stable KeyLoad commits and pushes to main.
-
-## Git workflow
-- Never run `git stash` or use automatic stashing through another tool. Keep working-tree changes visible instead of hiding them in a stash.
-- When the user requests committing all current changes, commit the full requested working-tree scope on the currently checked-out branch; do not silently omit existing changes or move them to another branch.
-- Owner correction 2026-10-03 requires a commit immediately when the owner requests all current code and a further commit after each completed implementation stage. Commit the complete requested scope on the current branch, preserve other agents' work, and state the actual verification status of each checkpoint; a commit alone does not satisfy acceptance or authorize bypassing required delivery gates.
-
-## Foundation-first execution order, owner correction 2026-10-15
-
-- Build and qualify the database foundation before expanding model features: native Orleans clustering/membership, discovery, distributed grain directory, activation movement, connection-owned routing and lifecycle; node-local ZoneTree ownership, ordered commit/apply, RF3 startup/readiness/recovery; persisted authentication/authorization and bounded admission. Distinguish Orleans membership from database replication/consistency and retain each required guarantee.
-- Reuse the already selected native Orleans implementations. Inspect actual current registrations and callers before adding infrastructure or removing an adapter; do not duplicate native membership, directories, scheduling or placement. Remove confirmed orphan replacement implementations without introducing legacy or migration paths.
-- OpenTelemetry logs, traces and metrics are part of the initial working foundation through the existing native Orleans, ASP.NET Core, ServiceDefaults and Aspire integrations. Do not postpone instrumentation to a final telemetry audit or replace it with a parallel custom telemetry platform. Keep credentials, payloads and unbounded labels out of telemetry.
-- Review every KL-001..KL-105 task against its actual requirements, current source and dependencies. Maintain an explicit acyclic dependency plan, separate implementation prerequisites from final qualification prerequisites, identify ambiguous or oversized acceptance scopes, and define a concrete completion gate for each foundation stage. A task number or source packet is not its dependency order or acceptance proof.
-- Schedule model composition, advanced distribution and optional capabilities only after their actual foundation prerequisites are ready. Run broad dependency/security/durability audits, comparative benchmarks, measured optimization and release/licensing qualification in the final stages; retain existing licenses and approved dependency pins from the start. This owner-selected order supersedes earlier benchmark/audit-first and SIMD/profiling-first scheduling only; mandatory SIMD execution and every original correctness, recovery, security, performance, licensing and release requirement remain in scope.
-- Keep focused whole-operation correctness and recovery tests, source review and defect repair inside each implementation stage. The final-audit order does not defer a discovered correctness defect, remove a required safety check or allow a failing foundation to be advertised as ready. Preserve completed work when reprioritizing and immediately move available workers to different ready foundation tasks.
-
-## System-critical SMID and operation efficiency
-- Owner direction 2026-10-12 adds mandatory task **KL-105**: install or verify `dotnet-diagnostics-mcp` with `dotnet tool install -g dotnet-diagnostics-mcp`, create and use the `dotnet-diagnostics-profiling` skill, and profile actual .NET processes to find performance bottlenecks before selecting optimizations. Use the tool's native diagnostics for bounded CPU, allocation, GC, contention and ThreadPool evidence, map measured hotspots to the actual source, preserve correctness and resource limits, and repeat matched profiles after repairs. Record tool/source/DLL/PDB/process/topology/workload identities, original captures, sampling loss, diagnostic overhead and before/after results. KeyLoad benchmark execution and published performance qualification remain Linux GitHub Actions only; profiler installation, a hotspot hypothesis or a sampled trace alone MUST NOT count as KL-105 acceptance or a speed claim. Continue the existing tasks while this separate performance scope progresses.
-- Owner direction 2026-10-09 requires promptly publishing every confirmed ZoneTree defect as a detailed issue in https://github.com/ZoneTree/ZoneTree, rather than retaining only a private finding. Include the affected upstream version/source commit, environment, minimal reproducible operation flow, expected and actual results, original bounded failure evidence, impact on KeyLoad and any verified root-cause or proposed fix; distinguish facts from hypotheses and exclude credentials, private caller data and unrelated logs. Check for an existing matching issue and add the new evidence there instead of creating a duplicate. The owner explicitly authorizes these scoped upstream issue publications. Record the public issue URL in the affected feature/task evidence and continue independent KeyLoad implementation immediately. ZoneTree maintainers decide whether and when to accept or fix the report; an issue, proposed patch or upstream acknowledgment does not qualify the affected acceptance gate or authorize a consumer workaround, replacement engine, unpublished package or compatibility fallback. This external reporting policy does not weaken the separate mandatory owning-repository repair/release policy for ManagedCode dependencies.
-- Owner urgent direction 2026-10-15 explicitly authorizes adopting [ZoneTree.Analytics](https://github.com/ZoneTree/ZoneTree.Analytics) after reviewing its actual published version, original license, native API compatibility and meaningful integration. Keep centrally pinned packages, node-local ownership, fresh persisted authorization and RF3 canonical acknowledgement; analytics-derived state must not become a second authority or replace the native OpenTelemetry baseline. Package presence or upstream benchmark figures do not prove delivered analytics behavior or performance.
-- Owner reiteration 2026-10-15 extends mandatory immediate public defect reporting to the whole selected ZoneTree family: [ZoneTree](https://github.com/ZoneTree/ZoneTree), [ZoneTree.FullTextSearch](https://github.com/ZoneTree/ZoneTree.FullTextSearch), and [ZoneTree.Analytics](https://github.com/ZoneTree/ZoneTree.Analytics). For every confirmed upstream defect, search for an existing matching issue, then publish the reproducible evidence in the repository that owns the defect (or add it to the matching issue). Include exact published package/source identity, environment, complete minimal operation flow, expected/actual results, original bounded failure evidence and KeyLoad impact. Separate verified causes from hypotheses and exclude secrets/private caller data. These scoped issue publications are explicitly authorized without another permission question. Record the public URL in task evidence and continue independent KeyLoad work; an issue is neither an acceptance pass nor permission for a hidden consumer workaround, engine replacement or unpublished package.
-- Owner selection 2026-10-03 fixes [ZoneTree](https://github.com/ZoneTree/ZoneTree) as KeyLoad's canonical database storage and [ZoneTree.FullTextSearch](https://github.com/ZoneTree/ZoneTree.FullTextSearch) as its selected full-text index implementation. Integrate their actual native APIs with node-local ownership, canonical committed records, bounded replay/rebuild, persisted authorization and RF3 qualification. Provider selection does not waive correctness, privacy, durability, resource or performance acceptance gates.
-- Owner correction 2026-10-03 removes Garnet from KeyLoad's active engine choices, dependencies, raw-storage experiments and planned migration work. Remove active Garnet/Tsavorite candidate implementation, dispatch paths and obsolete evaluation plans; do not keep comparing or selecting it as a KeyLoad replacement. Preserve truthful immutable historical results as history, with the active decision and canonical package manifests identifying ZoneTree and ZoneTree.FullTextSearch.
-- KeyLoad is one database for AI agents spanning documents, relational tables, graphs, vectors/search, files/blobs, queues and events. SQL MUST be the central versioned language across those capabilities, compiled to the same authorized bounded database operations as SDK/MCP callers; a scalar document-only dialect is an initial stage, not the completed product (owner direction 2026-10-02).
-- Owner selection 2026-10-13 requires T-SQL syntax through the actual Microsoft.SqlServer.TransactSql.ScriptDom library, with centrally pinned version and original license. Replace the handwritten SQL parser and remove its superseded code, syntax-only fixtures and active PostgreSQL grammar plans in the same complete replacement; do not add a legacy fallback or persisted-data migration. Preserve canonical bounded model operations, fresh persisted authorization, connection-owned Orleans execution, ZoneTree and RF3. SQL grammar, executable semantics and native wire protocol remain separate qualification gates; see ADR-130.
-- Full SQL syntax and a defined client connection protocol are mandatory product requirements. Maintain an explicit versioned dialect/conformance inventory and real client interoperability tests; limited SELECT/CALL parsing or an HTTP endpoint alone MUST NOT be advertised as full SQL or SQL-client protocol compatibility. Preserve persisted authorization, RF3, one grain per request, node-local ZoneTree ownership and measured resource bounds across every SQL transport (owner clarification 2026-10-03).
-- The owner clarified on 2026-10-02 that all models run in one server and may be linked to each other; this means unified database/model composition, not a new single-physical-file storage format. Preserve canonical entity references so relational rows can participate in graphs, vectors, events and queued workflows.
-- The owner clarified on 2026-10-03 that the core product is one composable database for AI agents: documents, typed tables, graphs, blobs, queues, events, vectors/search and time series coexist and reference one another within one database. Logical tables, collections and queues MUST NOT become isolated model silos. One authorized bounded SQL request MUST be able to read queue messages, resolve their referenced entities and write derived knowledge-graph relationships, and perform the reverse graph-to-queue flow, with explicit same-partition atomicity, authorization, read-cut, retry and cross-partition contracts. SQL is the familiar shared language for this composition. Keep this purpose explicit in ADRs, feature requirements, architecture, README and website, while distinguishing delivered syntax and qualification from the complete product target.
-- Treat relational integrity and unified SQL as first-class product workstreams alongside SIMD and operation efficiency. Specify typed rows, keys/constraints, joins, atomic boundaries, unsupported diagnostics and measured performance before advertising capability; preserve RF3 and node-local storage ownership. A unified database/file delivery requirement MUST NOT be interpreted as permission to discard replication journals or promise a single physical file without a qualified storage-format ADR.
-- Treat the owner's SIMD work (earlier written as SMID) as a first-priority product workstream and keep it visible in implementation planning and status. On 2026-10-02 the owner confirmed SIMD means vectorized CPU operations and directed .NET intrinsics first, with Rust considered only after profiling. Map its canonical slices, REQ/AC criteria, scalar correctness/portability contract and required ADRs before implementation; never claim acceleration without comparable GitHub measurements.
-- Owner correction 2026-10-11 makes SIMD-enabled execution mandatory in the normal product and qualification path. Use the native .NET vector/intrinsics implementation appropriate to the supported CPU; remove product SIMD disable switches and active forced-no-SIMD execution, qualification and benchmark profiles. Scalar arithmetic may remain only where required for bounded vector tails or an independent correctness oracle, not as an optional product execution mode. Validate required hardware support explicitly rather than silently selecting a full scalar implementation. This rule-specific direction supersedes the earlier scalar portability/disabled-intrinsics profile requirements; preserve their immutable historical receipts without admitting them into current qualification. Measure performance against genuine equivalent competitor workloads and original previous-code benchmarks, with matched source, hardware, topology, resource and durability contracts; no speed claim follows from code review alone.
-- Orleans provides request isolation, cluster routing and activation movement. Keep the one-grain-per-request boundary and RF3 topology; treat Orleans Streams as a first-class architecture workstream to specify and qualify alongside persisted KeyLoad EventStreams. Keep their distinct delivery/restart contracts explicit, and define bounded resource, concurrency, backpressure, recovery and performance behavior for every operation.
-- Owner direction 2026-10-05 requires evaluating and using native Orleans execution/scheduling primitives where their guarantees fit: bounded `[StatelessWorker]` pools for interchangeable independent work, `[OneWay]` only for loss-tolerant advisory signals, durable jobs for persisted at-least-once scheduled work with idempotent effects, and selective `[Reentrant]`, `[AlwaysInterleave]`, `[MayInterleave]` or `[ReadOnly]` scheduling after an await/state-invariant audit. Freeze per-grain/method choices, limits, provider/version maturity, identity isolation and restart/failover contracts in ClusterRouting requirements and an ADR before integration; qualify correctness and resource/performance behavior through Aspire RF3. Preserve the unique request grain, persisted authorization, scoped read cuts, ordered node-local commit/apply ownership and RF3 acknowledgement barriers; these primitives MUST NOT become blanket concurrency attributes or substitutes for durable receipts.
-- Owner clarification 2026-10-05 explicitly includes Orleans Grain Services, silo-local DI services and startup/lifecycle facilities alongside Durable Jobs in native capability selection. Choose them by actual per-activation, per-silo, cluster-partitioned or durable-work ownership; freeze startup dependencies, readiness, admission, cancellation and joined shutdown before integration. A service registered on every silo MUST NOT be treated as a cluster singleton or a durable job queue; retain node-local storage ownership and route every database effect through its separately authorized request grain.
-- Owner reiteration 2026-10-04 requires Orleans to own database execution and coordination, including search/index work and long operations, through the separate grain-per-request boundary and node-local storage owners. Use our centrally pinned ManagedCode.Communication CQRS APIs and their native IAsyncEnumerable result/operation streaming contracts for streamed results and long operations. Freeze typed commands, queries, progress/results, cancellation, bounded buffering, backpressure, authorization, terminal failures and restart/failover semantics in the feature requirements and ADR before implementation; qualify actual SDK/MCP consumption through Aspire RF3. Do not replace these owned CQRS APIs with a parallel dispatcher or unbounded materialization, and repair dependency defects in the owning Communication repository under the mandatory release policy.
-- Owner direction 2026-10-04 selects native Orleans RequestContext for bounded typed request/identity state propagation between grain calls and authorizes adopting our ManagedCode.Orleans.Identity packages for that context path. Reuse the owning native APIs; freeze the exact context contract, trust boundary, registration, cancellation/disposal restoration, concurrent-stream isolation and restart/migration behavior before integration. Verify server-authenticated request identity against the signed request and persisted authorization; propagated context does not authorize caller-supplied roles or replace committed ZoneTree state, node-local storage ownership or RF3 receipts. Keep secrets and user payloads out of diagnostic context, and repair any ManagedCode identity dependency defect in its owning repository under the mandatory release policy.
-- Owner direction 2026-10-05 requires our ManagedCode.MCPGateway as KeyLoad's agent-facing MCP authentication and bounded tool-discovery composition. Agents MUST discover the relevant operation tools on demand instead of receiving the complete large operation catalog by default. Preserve actual official MCP SDK interoperability, server-authenticated signed requests, persisted credentials and authorization, exact operation schemas/effect hints, bounded admission/cancellation, and the separate Orleans request grain for every database execution. Define the native gateway registration, catalog visibility, invocation and trust contracts in ClientApi requirements and an ADR before implementation; dependency defects follow the owning-repository repair/release policy.
-- Owner final correction 2026-10-12 selects standard ASP.NET Core Authentication and Authorization for HTTP/SDK/MCP admission. Resolve credentials through the existing server-owned connection execution and persisted database identity; authentication tickets contain the verified subject identifier only. Every database operation still checks fresh persisted permissions. ManagedCode.Orleans.Identity carries the verified call-local context between grains; it is not an alternative authentication provider. Do not add Azure Identity, duplicate user stores, caller-trusted roles or a parallel authorization dispatcher.
-- Owner direction 2026-10-05 requires our ManagedCode.MarkdownLd.Kb knowledge-graph dependency, owned by the markdown-ld-kb repository, for graph-based MCP tool search. Reuse its native APIs through ManagedCode.MCPGateway for bounded search over canonical tool metadata and relationships; discovery MUST respect current persisted authorization and MUST NOT index credentials or user payloads. Keep tool discovery state disposable and distinct from authoritative ZoneTree database models, freeze privacy, bounds, ranking and rebuild contracts before integration, and qualify the actual gateway/official MCP caller flow through Aspire RF3.
-- Owner direction 2026-10-05 requires a bounded MCP resource and ready-to-use prompt explaining KeyLoad and the actual discovery/schema/invocation workflow. Publish them through the same official MCP server with fresh persisted authentication, keep guidance static and free of credentials, caller data and private inventories, and verify resource/prompt interoperability through the real official SDK without expanding the initial operation-tool catalog.
-- Optimize every operation and its shared serialization, validation, routing and storage execution paths against their correctness and fault contracts, using representative multi-node GitHub qualification to measure latency, throughput, allocations, memory, contention and backlog where applicable. The owner reiterated on 2026-10-03 that high performance and minimum practical memory use are required across the entire implementation, including shared hot paths. Prioritize avoidable allocations, retained memory and repeated work; verify latency, throughput, allocations and memory before/after without weakening correctness, authorization, bounds or durability. Architecture choices or local builds alone do not prove maximum scalability or performance; select further optimization from actual comparable measurements.
-- Use ZoneTree's native storage APIs correctly and Orleans for bounded parallel execution of independent operation work. Preserve node-local storage ownership, the ordered atomic commit/apply gate, scoped read cuts, cancellation and backpressure; qualify the resulting performance in real multi-node GitHub runs (owner direction 2026-10-02).
-- All KeyLoad-owned database models MUST use ZoneTree as their canonical storage foundation, including documents, relational rows, graphs, vectors/search, time series, blobs, queues and events. ZoneTree.FullTextSearch is the selected text-index implementation. Qualify native ZoneTree WAL below the unchanged Orleans RF3, node-local ownership and atomic-commit contracts; retain distinct replication and atomic-commit recovery journals until an explicit storage-format ADR and fault qualification prove any migration safe. Comparison databases retain their own real native storage.
-- Use native generated Orleans binary serialization with stable `[GenerateSerializer]`, `[Id]` and `[Alias]` contracts for all KeyLoad-owned internal typed persistence and inter-grain/replica payloads, including atomic WAL mutations over ZoneTree. Preserve raw-byte native ZoneTree serialization, sortable keys, public HTTP/MCP JSON, exact user document content, frozen canonical identity digests, synchronous durability barriers, checksums, ordered atomic recovery and RF3 authority. Format changes require an explicit upgrade contract; do not retain runtime JSON fallback or claim speed/fault improvements without actual GitHub evidence (owner clarification 2026-10-03).
-- Orleans distribution and Orleans-coordinated caches are mandatory product workstreams. Define bounded memory, admission, eviction, concurrency and backpressure, with cache identity and validation tied to authorized scoped read cuts and policy epochs. Specify invalidation after writes and authorization changes, and recovery after grain migration, failover and restart before implementation; cached state MUST NOT replace persisted authorization, committed ZoneTree state or RF3 durability guarantees (owner direction 2026-10-02).
-- The owner confirmed on 2026-10-02 that memory means the KeyLoad RAM layer and Orleans caches. Deliver a bounded node-local RAM acceleration layer over committed ZoneTree data and its native WAL, coordinated through Orleans; RAM contents are disposable across restart or activation movement and MUST NOT become the authority for acknowledged writes, authorization or RF3 recovery.
-- Model logical shards and cache coordination as Orleans grains behind the separate grain-per-request boundary. Shard-grain identity MUST remain distinct from physical replica placement; activation movement routes to node-local ZoneTree/WAL owners rather than moving open storage handles (owner clarification 2026-10-02).
-- Treat ManagedCode.TimeSeries arithmetic, allocations, SIMD and batch processing as an owning-repository performance workstream. Select improvements from source review and profiling, publish and verify its canonical release before consuming it in KeyLoad, and retain numerical and compatibility regressions.
-- Performance qualification MUST compare both single-node and native multi-node configurations against the complete competitor matrix with equivalent workload and acknowledgement/durability contracts. Retain exact-source measurements and regression evidence; the goal of leading competitors MUST NOT be reported as achieved without those results (owner direction 2026-10-02).
-- Performance qualification MUST cover actual datasets of 100,000 and 1,000,000 records, with at least 100,000 measured operations per applicable workload cell, sequential and deterministic random reads, ordered/range search, indexing and complex queries. Record dataset size separately from BDN iteration/sample counts, validate actual loaded records and caller-visible results, and retain equal topology, durability, resource and workload contracts across supported competitors. Tiny hot-key fixtures remain explicitly labelled microbenchmark controls and MUST NOT substitute for this scale evidence or justify selecting a performance winner. Repeating more reads over the same tiny corpus does not establish performance at the required record counts. When the owner requests serious performance qualification, complete the representative long workloads rather than presenting short controls as the result; local experiments remain development-only and website figures require authenticated original GitHub artifacts (owner repeated correction 2026-10-03).
-- Qualification MUST use Linux runners only; the owner explicitly replaced the three-OS qualification matrix on 2026-10-03. Preserve every required suite, scalar portability check, recovery and RF3 gate while removing redundant macOS/Windows execution.
-- Each comparison database MUST run the same complete workload suite in its own isolated GitHub Actions runner/job agent, with only that database's native topology and load generator. Owner reiteration2026-10-09 requires one canonical shared scenario inventory for all databases, including ingestion at1/10/500 clients: match actual record counts, corpus/seed/payload, operation order/count, concurrency, timing boundaries, correctness oracles and effective resource/acknowledgement/durability contracts. Target adapters MUST execute that shared scenario rather than substitute easier target-specific workloads; unsupported native capabilities remain explicit unavailable cells. KeyLoad RF3 and competitor clusters remain genuine clusters; different databases MUST NOT share a runner, process, containers, volumes or measurement session (owner direction 2026-10-03).
-- Owner correction 2026-10-04 requires a separate named GitHub Actions job group and matrix for each comparison database. Keep each database's checks and workload cells together under its readable database name; do not flatten all databases into shared CRUD/specialized matrix groups. Preserve isolated runners per cell, the complete canonical inventory and one authenticated aggregation after every database group finishes.
-- Each isolated comparison agent MUST retain its own source/run/attempt/target/topology/profile-bound JSON. After all target agents finish, one aggregation job MUST validate completeness, comparable settings and provenance, collect their results and generate the website metrics from those JSON files. Failed, missing, skipped or mixed-cohort measurements MUST NOT refresh published performance evidence (owner direction 2026-10-03).
-- The comparison matrix MUST include actual native one-node and three-node configurations and intensive read/create/update/delete workloads. Owner correction2026-10-09 removes two-node benchmark configurations from every active inventory, planner, dispatch, validation, measurement, aggregation and website comparison; retain immutable historical results with their original identities. Each engine/node-count/scenario measurement MUST run on a separate isolated runner agent; record real membership, acknowledgement, correctness, latency, throughput and resource use. Do not relabel client counts or independent standalone databases as cluster node counts. Unsupported native/community topology remains explicitly unavailable, and benchmark topology changes require a fault/consistency ADR before implementation; the initial production RF3 requirement remains mandatory (owner direction 2026-10-03).
-
-- Owner correction 2026-10-05 reduces every active benchmark scale inventory to exactly 100,000 and 1,000,000 records across all databases and workload families. Remove the 5,000,000-record profile from active planning, dispatch, validation and qualification requirements; preserve immutable historical evidence with its original settings. This rule-specific correction supersedes the earlier three-scale requirement without changing the minimum 100,000 measured operations or any correctness/fairness/provenance gate.
-- Owner direction 2026-10-05 adds SurrealDB and HelixDB to the website-producing native Benchmarks pipeline and extends PostgreSQL + pgvector with exact, HNSW and IVFFlat search, filtered search and concurrent updates at 100,000 and 1,000,000 actual records. Compare every applicable database in one workload family with the same corpus, metric, filter, operation schedule, accuracy target and effective resource/durability contract; report latency, p95/p99, server RAM, index-build time and recall@k from authenticated original GitHub measurements. Review and repair existing workload comparability; unavailable native capabilities/topologies remain explicit without fabricated measurements.
-
-## Licensing
-
-- Owner final scope clarification 2026-10-05 requires permitting application use while reserving third-party hosted/managed database services for separate authorization from ManagedCode. Use the unmodified Elastic License 2.0 for new KeyLoad-owned distributions to implement this requirement without automatic expiry. This rule-specific direction supersedes the earlier BSL 1.1 selection, Apache 2.0 Change License and Change Date requests; those parameters MUST NOT remain active licensing promises.
-- Keep README, website metadata and packaged license files consistent with the root `LICENSE`; describe Elastic License 2.0 distributions as source available, not open source. Preserve every third-party or independently owned dependency's original license and notices.
-- Validate the complete license against its authoritative published text. Identify ManagedCode as KeyLoad's copyright holder and licensor; license names or their authors MUST NOT be presented as database dependencies or ownership of KeyLoad code.
-
-## MCAF repository workflow
-
-Project: KeyLoad
-Stack: C# 14, .NET 10, Orleans, ZoneTree, Aspire, TUnit target, Node-built static Pages site.
-
-Follows [MCAF](https://mcaf.managed-code.com/)
-
----
-
-## Purpose
-
-This file defines how AI agents work in this solution.
-- Root `AGENTS.md` holds the global workflow, shared commands, cross-cutting rules, and global skill catalog.
-- In multi-project solutions, each project or module root MUST have its own local `AGENTS.md`.
-- Local `AGENTS.md` files add project-specific entry points, boundaries, commands, risks, and applicable skills.
-
-## Solution Topology
-- Solution root: `KeyLoad.slnx` and this root AGENTS.md.
-- Repository boundary: all KeyLoad-owned product surfaces are delivered here; independently owned ManagedCode dependencies remain in their owning repositories under the mandatory repair/release policy above.
-- Canonical slice convention: `<project-or-module>/Features/<SliceName>/`, PascalCase slice names, with `docs/Features/<SliceName>.md`.
-- Solution-owned surfaces: backend `src/`; frontend `site/`; shared contracts `src/KeyLoad.Abstractions/`; tests `tests/`; benchmarks `benchmarks/`; infrastructure `build/KeyLoad.AppHost/` and `.github/workflows/`; tooling `scripts/`; durable documentation `docs/`.
-- Every one of the 24 project roots listed in `docs/Architecture.md`, plus `site/`, `.github/workflows/`, `docs/` and `scripts/`, MUST have local AGENTS.md. Every new project/module MUST receive local policy before its implementation begins.
-- Architecture entry point and complete project/slice map: `docs/Architecture.md`. Existing layout migration debt is recorded in ADR-032, with owner and removal date; it is not compliant target structure.
-
-## Mandatory Solution Architecture (`MCAF-ARCH-001`)
-- This solution MUST be delivered as one repository. All solution-owned backend, frontend, contracts, tests, infrastructure, and documentation live here and are versioned together.
-- Vertical-slice architecture is mandatory across the entire repository.
-- Owner correction 2026-10-04 requires responsibility-based structure inside every vertical slice. A `Features/<SliceName>/` directory MUST NOT become a flat dump of unrelated grains, commands, queries, models, contracts, streaming and infrastructure helpers. Keep applicable roles in explicit child folders such as `Grains/`, `Commands/`, `Queries/`, `Models/`, `Contracts/`, `Streaming/`, `Identity/`, `Serialization/` and `Topology/`, all within the owning slice; create only folders with actual owned code. Classify files from their implementation responsibility, not filename tokens; Models and Contracts MUST NOT hide executable readers, codecs, policy checks or lifecycle helpers. Feature-local role folders MUST NOT become repository-wide layers. Preserve stable namespaces, Orleans aliases/field IDs and runtime behavior during structural moves, and update source maps, path-bound checks and local policy in the same change.
-- Every feature MUST use one canonical `<SliceName>` across backend, frontend, contracts, tests, and `docs/Features/`.
-- Every technical root MUST organize feature-owned work under the same `Features/<SliceName>/` convention, or use one fully colocated executable-artifact convention; durable feature docs remain under `docs/Features/<SliceName>.md`.
-- A feature surface that does not apply MUST be recorded as `N/A` with a reason in the feature spec; it must not be silently omitted.
-- Layer-first folders such as repository-level `Controllers`, `Services`, or `Repositories` MUST NOT own feature behaviour.
-- Only genuinely solution-wide entry points, composition roots, building blocks, infrastructure, and global docs may live outside a feature slice.
-- Local `AGENTS.md` files and ADRs may tighten these rules or document time-bounded migration debt, but MUST NOT make split repositories, layer-first feature ownership, or inconsistent slice names compliant.
-- Existing deviations require a migration ADR with affected paths, owner, target layout, verification, and removal date. New work MUST use the target slice structure and MUST NOT expand the deviation.
-
-## Rule Precedence
-1. Read the solution-root `AGENTS.md` first.
-2. Read the nearest local `AGENTS.md` for the area you will edit.
-3. Apply the stricter rule when both files speak to the same topic.
-4. Local `AGENTS.md` files may refine or tighten root rules, but they must not silently weaken them.
-5. A local exception MUST NOT weaken, omit or bypass any existing rule. Record a conflict in the nearest local `AGENTS.md`, ADR or feature doc and require explicit rule-specific owner direction for any actual policy change.
-6. `MCAF-ARCH-001` has no target-architecture exception: a durable doc may record only a time-bounded migration deviation and may not declare that deviation compliant.
-
-## MCAF Update Safety (`MCAF-GOV-001`)
-- Every rule in this customized root `AGENTS.md` and every project-local `AGENTS.md` is mandatory repository policy.
-- An MCAF install or update MUST read all existing root and local `AGENTS.md` files completely before editing them.
-- Update by merging current requirements into the existing files. MUST NOT replace, overwrite, truncate, summarize away, or omit existing rules, sections, commands, boundaries, preferences, or exception records.
-- MUST NOT weaken a rule by changing mandatory wording into optional guidance, narrowing its scope, reducing its priority, or adding a bypass.
-- When incoming guidance overlaps or conflicts, preserve the stricter rule and report the conflict instead of silently rewriting policy.
-- Template-only notes and placeholders may be replaced during first customization; a real rule may change only under explicit, rule-specific owner direction.
-- Before completion, review the full governance diff and verify that every existing rule remains present and equally or more strict.
-
-## Mandatory Feature Requirements and ADR Implementation (`MCAF-REQ-001`)
-- Every non-trivial feature MUST have a real `docs/Features/<SliceName>.md` specification before implementation.
-- The feature spec MUST contain stable `REQ-*` requirements and `AC-*` acceptance criteria with measurable pass/fail conditions, positive/negative/edge/error flows, and one canonical slice map.
-- Every `REQ-*` MUST map to at least one `AC-*`; every `AC-*` MUST map to automated tests or an explicit exception with required manual evidence.
-- The feature spec MUST link each required ADR, or record `ADR: N/A` with a concrete reason why existing architecture and contracts are sufficient.
-- Create or update an ADR before implementing changes to boundaries, public contracts, data, dependencies, security/trust boundaries, deployment topology, cross-cutting standards, or migration architecture.
-- Every required ADR MUST contain an implementation contract: related `REQ-*`/`AC-*`, ordered stages, exact slice/file ownership, dependencies, migration/rollout/rollback, tests, verification, agent roles, and integration/join points.
-- An ADR MUST NOT be marked `Implemented` until its required implementation, migration, tests, docs, and verification evidence exist.
-- Keep a traceability chain from `REQ-*` to `AC-*`, ADR, `TASK-*`, automated test, and final evidence. Update the whole chain before continuing when a requirement changes.
-
-## Conversations (Self-Learning)
-
-Learn the user's stable habits, preferences, and corrections. Record durable rules here instead of relying on chat history.
-
-Before doing any non-trivial task, evaluate the latest user message.
-If it contains a durable rule, correction, preference, or workflow change, update `AGENTS.md` first.
-If it is only task-local scope, do not turn it into a lasting rule.
-
-Update this file when the user gives:
-- a repeated correction
-- a permanent requirement
-- a lasting preference
-- a workflow change
-- a high-signal frustration that indicates a rule was missed
-
-Extract rules aggressively when the user says things equivalent to:
-- "never", "don't", "stop", "avoid"
-- "always", "must", "make sure", "should"
-- "remember", "keep in mind", "note that"
-- "from now on", "going forward"
-- "the workflow is", "we do it like this"
-
-Preferences belong in `## Preferences`:
-- positive preferences go under `Likes`
-- negative preferences go under `Dislikes`
-- comparisons should become explicit rules or preferences
-
-Corrections should update an existing rule when possible instead of creating duplicates.
-
-Treat these as strong signals and record them immediately:
-- anger, swearing, sarcasm, or explicit frustration
-- ALL CAPS, repeated punctuation, or "don't do this again"
-- the same mistake happening twice
-- the user manually undoing or rejecting a recurring pattern
-
-Do not record:
-- one-off instructions for the current task
-- temporary exceptions
-- requirements that are already captured elsewhere without change
-
-Rule format:
-- one instruction per bullet
-- place it in the right section
-- capture the why, not only the literal wording
-- Existing rules MUST remain present and mandatory; change or remove a rule only under explicit rule-specific owner direction, never as framework cleanup.
-
-## Global Skills
-- Owner direction 2026-10-12 explicitly authorizes the selected global `dotnet-diagnostics-mcp` tool and creation/installation/use of the `dotnet-diagnostics-profiling` skill at `/Users/ksemenenko/.codex/skills/dotnet-diagnostics-profiling/SKILL.md` for KL-105. Use [the owning source repository](https://github.com/pedrosakuma/dotnet-diagnostics) and its actual current tool schemas. This rule-specific authorization supersedes earlier tool/skill installation prohibitions only for this tool and skill; preserve all other installation and configuration boundaries. Prefer the supported stdio transport for local diagnostics; do not silently change global MCP configuration or substitute diagnostics for mandatory tests and fair isolated benchmarks.
-- Treat `dotnet-diagnostics-mcp` and Roslynk as regular development tools: Roslynk explains source and semantic diagnostics; `dotnet-diagnostics-profiling` measures actual runtime behavior. Use bounded profiling when investigating slow operations, excess allocations or retained memory, GC pressure, contention, ThreadPool backlog, or a regression found during functional tests. Establish runtime evidence before selecting a performance repair and repeat the same workload after it; include the actual findings and unavailable collectors in the stage review. A documentation-only change or ordinary compiler repair does not require attaching a profiler. Keep KL-105 captures and clean Linux GitHub measurements distinct, preserve the current owning Aspire topology and resource cleanup, and never treat tool setup or an idle-process capture as completed bottleneck analysis.
-- Owner direction 2026-10-09 authorizes installing and using [Roslynk](https://github.com/mrpmorris/Roslynk) in this checkout for live semantic navigation, compiler/analyzer diagnostics and reviewed fixes. Pin its published tool version in the repository, configure project-scoped MCP access, and fix confirmed findings without weakening existing diagnostics. Roslynk supplements the canonical formatter, Release solution build, native TUnit/Aspire suites and exact-source Linux qualification; its workspace diagnostics MUST NOT replace those gates. This scoped tool/configuration authorization supersedes historical bootstrap tool-installation restrictions for Roslynk only and does not authorize installing upstream skills or changing global agent configuration.
-- For C# work, open the absolute `KeyLoad.slnx` through Roslynk `open_solution`, wait for `get_solution_status` to report the complete solution Ready, and use its semantic navigation and available reviewed code fixes. After each completed edit stage, run `get_diagnostics` with errors, warnings and analyzers included; resolve confirmed findings and retain load failures as blockers. Preview broad edits with `checkOnly=true`, preserve unrelated source changes, and report unavailable tools or fixes honestly instead of silently treating an incomplete workspace as clean.
-- Owner direction 2026-10-10 authorizes autonomous implementation and defect-repair choices within the approved KeyLoad tasks and its Orleans-based composable AI database architecture. Do not request repeated approval for code fixes or Roslynk candidates: choose the existing API or repair that preserves the declared contract, preview the concrete change, and verify it. When Roslynk has no registered diagnostic fix, retain its exact refusal and use a reviewed native patch for the scoped repair instead of stopping for another permission question. This explicit tool-workflow exception preserves every architecture, trust, ownership, legacy/migration prohibition, analyzer, test, evidence and delivery requirement; it does not authorize silencing diagnostics or weakening acceptance.
-
-The owner's 2026-10-06 approval to implement the reviewed native DurableJobs path also authorizes its matching native Journaling API (`ORLEANSEXP005`). Confine that opt-in to the journal provider, native jobs integration and their registration/tests under ADR-110; do not use a global NoWarn or suppress unrelated diagnostics. Journal metadata remains RF3-authoritative and distinct from creator-authorized business effects.
-
-The explicit owner instruction to enable Orleans distributed directory and activation repartitioning is consent to those two native experimental APIs. Confine compiler opt-in ORLEANSEXP003/ORLEANSEXP001 to their two configuration calls, with ADR-034 evidence; it does not authorize global NoWarn, suppression of quality diagnostics or changing analyzer severity.
-
-- On 2026-10-05 the owner explicitly authorized installing the Managed Code `quality` bundle from https://skills.managed-code.com/bundles/quality/ and running KeyLoad complexity, CRAP and related code-quality analysis. Use the catalog's current bundle skill names and native installation command; this scoped permission supersedes the historical skill-installation prohibition and older `mcaf-*` naming requirement for this bundle only. Preserve existing quality thresholds and use the Aspire-owned entry point for coverage-producing tests.
-- The authorized quality bundle is installed globally under `/Users/ksemenenko/.codex/skills/<skill>/SKILL.md`: `quality-ci`, `analyzer-config`, `format`, `csharpier`, `code-analysis`, `roslynator`, `meziantou-analyzer`, `stylecop-analyzers`, `complexity` and `crap-score`. These are installed skills; the historical bootstrap and empty repository-local skill inventory remain distinct.
-- On 2026-10-01 the owner explicitly authorized installing the Orleans skill through the `dotnet skills` command. This rule-specific permission applies to the requested Orleans skill; other skill installation remains prohibited unless separately authorized. Read and apply its installed SKILL.md before continuing Orleans implementation.
-- Orleans 3.1.1 is installed globally at `/Users/ksemenenko/.codex/skills/orleans/SKILL.md`, from Managed Code catalog `2026.10.1.0` using `dotnet-skills` 0.1.242. It is applied to Orleans design, lifecycle, transport, routing and failure verification. This is the specifically authorized addition; the historical bootstrap installed no skills.
-- No MCAF or .NET skills are installed for this bootstrap. The owner explicitly instructed: do not install skills. Do not create skill directories, install tools or modify global agent configuration for this task.
-- Catalog links are informational: MCAF `https://mcaf.managed-code.com/skills`; .NET `https://skills.managed-code.com/`. Installed repository skill catalog: empty.
-- If the owner later explicitly authorizes skill installation, source .NET skills from the Managed Code Skills catalog, use `mcaf-dotnet` as the routing entry, keep only current `mcaf-*` skills and exactly the TUnit framework skill `mcaf-dotnet-tunit`. Tool-specific skills MUST match tools actually used. Recheck build/test/format/analyze/complexity/coverage commands after an authorized upgrade.
-- Local AGENTS.md MUST state applicable skill status honestly; a named catalog entry is not an installed skill.
-
-## Rules to Follow (Mandatory)
-
-### Continuous Quality Review (owner direction 2026-10-06)
-
-- Quality review is a mandatory development loop for every code change. Establish the relevant baseline before non-trivial implementation, review each completed implementation stage, and finish the review before committing that stage or declaring the task complete. Apply this rule to changed code and affected shared execution paths so quality improves throughout development.
-- Owner correction 2026-10-11 requires complete feature batches: each available worker continuously owns a distinct direction, reviews its full affected code and operation contracts, fixes the related findings together, and supplies one coherent reviewable implementation. The integration owner combines ready batches before the final build, native analysis, formatter and relevant whole-operation TUnit execution with the configured parallelism50. Do not repeat unchanged suites, rebuild after each individual finding, or turn small checkpoints into the delivery strategy. Rerun checks only for changed inputs, an actual failure or an unresolved acceptance condition; preserve every required final suite, actual failure and exact-source delivery gate. This direction changes batching and development workflow, not correctness, authorization, durability, test quality, evidence or completion requirements.
-- That explicit 2026-10-11 batching direction supersedes the earlier Ralph Loop instructions to execute one implementation step at a time, reproduce/fix findings one by one and repeatedly build/test between those findings. Preserve the complete requirements, review, operation tests and final qualification contract while resolving related findings together in each complete batch.
-- Read the installed `SKILL.md` instructions and review all ten skills sequentially: `quality-ci` → `analyzer-config` → `format` → `csharpier` → `code-analysis` → `roslynator` → `meziantou-analyzer` → `stylecop-analyzers` → `complexity` → `crap-score`. Each applicable skill MUST produce an actual check, finding or improvement; record a concrete reason when a skill or tool is N/A. A checklist alone is not verification.
-- Preserve the repository's selected tools and `.editorconfig`. `dotnet format` remains the canonical formatter; CSharpier execution is N/A while that choice remains in force. Review third-party analyzer findings against repository contracts; skill use does not automatically authorize adding analyzer packages, applying conflicting defaults, suppressing diagnostics, reducing severity or weakening existing limits and gates.
-- Report every confirmed actionable finding with its source location, severity, consequence and verification status. Keep advisory diagnostics distinct from confirmed defects. Fix confirmed problems within the authorized scope, add meaningful regressions where behaviour is affected, and rerun the affected checks after each fix. ManagedCode dependency defects MUST follow the owning-repository repair, release and verified-publication policy.
-- Review actual complexity, coupling, nesting, allocation and maintainability risks. Refactor around cohesive responsibilities and preserve operation contracts; moving branches between helpers alone does not demonstrate a quality improvement. Retain the relevant before/after measurements and obey the existing maintainability limits.
-- CRAP calculations MUST combine actual source-mapped complexity with measured functional-test coverage from the same source/build cohort. Retain original coverage evidence collected through the Aspire-owned entry point; performance, load, stress and comparison runs do not contribute. Missing or stale coverage is unmeasured and MUST NOT become a fabricated zero, a passing CRAP score or a passing coverage gate.
-- Complete the canonical format, analyzer, final solution build and required test/coverage gates after the final code edits. Tests MUST use the Aspire-owned entry point and preserve every required acceptance suite. A failed or blocked required check keeps implementation incomplete; report the exact remaining problems and blockers. For documentation-only changes, run the relevant static governance and diff checks and record code-execution checks as N/A.
-
-### Commands
-- Owner correction 2026-10-03 replaces direct test execution commands here and in local policies with the actual Aspire entry: after restore/build, run `dotnet run --project build/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=<suite>`. The closed suites are `analyzers`, `unit`, `unit-scalar`, `recovery`, `rf3`, `comparison` and `site`. Preserve all required suites, original MTP/TRX/coverage artifacts, native comparison isolation and exact-source Linux qualification. Optional bounded filters select development cases only; they cannot qualify a complete suite. Direct `dotnet test` is the native child process composed by this AppHost, never an alternative caller entry.
-- Owner correction2026-10-03 explicitly authorizes local development tests, recovery checks and performance experiments, using BenchmarkDotNet for .NET microbenchmarks. This rule-specific correction supersedes the historical GitHub-only execution restrictions below and in local AGENTS.md for development verification. Local engine comparisons use separate owned fixtures/processes and sequential measurement sessions on the actual local machine; the different-GitHub-runner rule remains mandatory for global qualification. Keep local evidence clearly labelled with its actual source/settings/machine and do not present it as GitHub qualification. Global comparison measurements published on the website MUST still come exclusively from authenticated GitHub Actions runs and their original artifacts. Required delivered-source CI/fault/topology/endurance gates remain mandatory; local results cannot satisfy the website provenance contract.
-- Owner reiteration2026-10-03 distinguishes purpose as well as provenance: run local BenchmarkDotNet freely within bounded owned experiments to profile and optimize code; use exclusively genuine GitHub-native database comparison measurements for the public website, with matched verified hardware/resource/topology/durability/workload conditions for experimental fairness. Separate runners alone do not prove equivalent hardware; bind actual machine metadata and reject a mismatched cohort. Local results remain development evidence even when useful for choosing the next optimization.
-- The owner reiterated in this serialization review on 2026-10-03 that tests may run locally. Run local TUnit development regressions and bounded recovery/performance experiments when useful; this explicitly supersedes the former local-execution prohibition. Required delivered-source GitHub qualification still retains the exact SHA, run/job URL and original artifacts. Development builds and static source/governance checks are not runtime test results.
-- `restore`: `dotnet restore KeyLoad.slnx` with centrally pinned versions; current root forbids generating/committing package lock files. The historical CI baseline used locked mode; the current workflow is migrating to the no-lock policy.
-- `build`: `dotnet build KeyLoad.slnx --no-restore --configuration Release -warnaserror`; warnings-as-errors and current analyzers are configured in Directory.Build.props.
-- `test`: dispatch `gh workflow run build-and-tests.yml --repo managedcode/KeyLoad --ref main`, inspect `gh run view <run-id> --repo managedcode/KeyLoad`, and retain original required test artifacts. Every test suite enters the actual Aspire AppHost; its native children execute TUnit for unit/scalar, analyzer, process recovery and genuine SDK/MCP RF3. Benchmarks owns native comparison measurement separately. No skipped required suite can count as passing.
-- `format`: `dotnet format KeyLoad.slnx --verify-no-changes --no-restore` is the required formatter command and CI gate; source configuration does not establish a green formatter qualification.
-- `analyze`: solution Release build with TreatWarningsAsErrors=true, AnalysisLevel=latest-all, SDK/style analysis and centrally attached KeyLoad.Analyzers; compiler SARIF reports are retained under artifacts/code-quality.
-- `complexity`: numeric policy limits below are mandatory and are enforced by source-owned KLD0030/KLD0031/KLD0032/KLD0033 during ordinary consumer builds; the analyzer infrastructure has a real compiler source-inventory fixture in CI. Configuration or a scoped build MUST NOT be reported as a passing full gate without the exact-SHA complete build and fixture qualification.
-- `coverage`: owner direction 2026-10-05 requires native MTP/TUnit-compatible code-coverage collection through the Aspire-owned test entry point, retained original reports, and module/file/line/branch gap analysis. Only functional operation tests may contribute; load, stress, performance and database-comparison runs MUST NOT contribute to coverage totals. Until a complete source-bound report exists, report coverage as unmeasured rather than inventing a numeric baseline or claiming the thresholds below pass.
-- `governance`: `node scripts/Features/RepositoryGovernance/verify.mjs` validates the real inventory and policy-preservation record; it is static installation validation, not a runtime test result.
-- Active runner: Microsoft.Testing.Platform in global.json; mandatory framework: TUnit. Existing xUnit/VSTest references are migration debt, not a permitted second framework.
-- .NET target is net10.0. C# 14.0 is explicitly pinned in Directory.Build.props. Root .editorconfig is the source of truth for formatting/style/analyzer severity; nested files require a concrete subtree purpose.
-- Use the Prostir root `.editorconfig` as the owner-selected baseline. Enable .NET static analyzers and build-time code-style checks for every solution project, with warnings treated as errors.
-- Keep repository-owned Roslyn rules in the KeyLoad analyzer project, attach them centrally to consuming projects, and retain compiler diagnostic reports so rules can be authored and verified in code.
-- Canonical Build and Tests: `.github/workflows/build-and-tests.yml`; independent Website qualification and Pages publication: `.github/workflows/website.yml`. Skills installed by this bootstrap: none.
-- The current owner corrections require four workflows: `build-and-tests.yml` builds/tests the project; `benchmarks.yml` runs native load/comparison measurement and ends with the bounded Website dispatch; `website.yml` independently qualifies/builds/publishes the site on trusted main changes or manual dispatch; `release.yml` remains prepared/manual and publishes only after readiness or an explicit owner release request. Actual local Aspire tests are development evidence; delivered-source qualification remains exact-source Linux GitHub evidence. Preserve every required suite, source/run/artifact, privacy, topology, coverage and fault gate.
-
-### Project AGENTS Policy
-- Multi-project solutions MUST keep one root `AGENTS.md` plus one local `AGENTS.md` in each project or module root.
-- Each local `AGENTS.md` MUST document:
-  - project purpose
-  - entry points
-  - boundaries
-  - project-local commands
-  - applicable skills
-  - local risks or protected areas
-- If a project grows enough that the root file becomes vague, add or tighten the local `AGENTS.md` before continuing implementation.
-
-### Agent Orchestration
-- `MCAF-AI-001` is mandatory for non-trivial work: use the strongest suitable large or high-capability model available for planning, architecture, acceptance criteria, decomposition, integration, and final review.
-- Do not begin delegated implementation until the planning model has made the scope, boundaries, contracts, acceptance criteria, test strategy, and ordered plan explicit.
-- Do not begin write-capable delegated implementation until `MCAF-REQ-001` requirements and every required ADR implementation contract are approved.
-- After planning, spawn cost-efficient coding workers for every independent, bounded implementation scope when a suitable cheaper model is available.
-- Choose the least expensive model that is still capable of the language, framework, tools, context size, and risk level. Cost MUST NOT override correctness, security, or verification.
-- Every coding worker MUST receive the goal, acceptance IDs, exact file/module/slice ownership, architecture and contracts to preserve, constraints, forbidden changes, expected artifacts, verification commands, and escalation conditions.
-- Coding workers MUST stop and escalate rather than invent architecture, change public contracts, weaken tests or rules, or expand scope.
-- The planning model MUST inspect every delegated diff, compare it with the plan and acceptance criteria, integrate the results, resolve conflicts, and own final quality gates and completion.
-- Build an explicit task graph before spawning: task ID, requirements/acceptance IDs, owner, model tier/effort, permissions, dependencies, start condition, artifacts, verification, completion state, and join condition.
-- Research and analysis agents SHOULD be read-only and may run in parallel before implementation. Use stronger reasoning for ambiguous architecture/security/review work and cost-efficient capable models for bounded discovery, log/test analysis, and documentation lookup.
-- For large, non-trivial, cross-module, research-heavy, or implementation-heavy tasks, the lead agent's primary job is to plan the work, identify all parallelizable workstreams, split them into independent scopes, and spawn subagents to execute those scopes in parallel.
-- Before writing the implementation plan, explicitly look for parallel tasks across research, code ownership areas, test creation, verification, documentation, and review.
-- Spawn subagents for every independent workstream that can run safely in parallel unless there is a concrete coordination, risk, or ownership reason not to.
-- Give each subagent a concrete responsibility, clear file or module ownership, expected output, and verification duty.
-- Subagents that write code MUST own disjoint write scopes and must not revert or overwrite work from other agents.
-- Shared contracts, solution files, central configuration, migrations, and cross-cutting docs MUST have exactly one integration owner. Same-file edits MUST be serialized.
-- Use platform-native agent status, messaging, and wait controls. Monitor agents needing input or drifting; steer, retry, replace, or escalate them explicitly.
-- Wait for every required dependency and result before integration. `idle`, partial output, a plan, or an unverified worker claim is not `complete`.
-- Every delegated task MUST end as `complete`, `blocked`, `failed`, or `cancelled` with artifacts and evidence appropriate to that state. Blocked or failed tasks MUST NOT unblock dependants.
-- The lead MUST verify the combined repository state after joining worker results; worker-local checks are not integrated proof.
-- The lead agent remains responsible for the final architecture, integration, conflict resolution, quality gates, and completion criteria.
-- Do not serialize independent work when safe parallel execution is available.
-- Keep the orchestration lightweight for simple, short, or obvious tasks; do not create subagents when coordination overhead would be larger than the task.
-- If non-trivial coding cannot be delegated because model-tier routing is unavailable, no cheaper model is capable, or safe ownership cannot be separated, record the concrete reason before the planning model implements it.
-
-### Maintainability Limits
-
-These limits are repo-configured policy values. They live here so the solution can tune them over time.
-- `file_max_loc`: `400`
-- `type_max_loc`: `200`
-- `function_max_loc`: `64`
-- `max_nesting_depth`: `3`
-- `exception_policy`: `Document any justified exception in the nearest ADR, feature doc, or local AGENTS.md with the reason, scope, and removal/refactor plan.`
-
-Local `AGENTS.md` files may tighten these values, but they must not loosen them without an explicit root-level exception.
-
-- Owner correction 2026-10-06 sets the solution-wide executable-unit limit to 64 code lines, replacing the earlier 50-line limit. Keep file400, aggregate type200 and nesting3 limits; verify the exact boundary through real compiler/analyzer operations at64 and65 lines.
-
-### Task Delivery
-- Start from `docs/Architecture.md` and the nearest local `AGENTS.md`.
-- Treat `docs/Architecture.md` as the architecture map for every non-trivial task.
-- If the overview is missing, stale, or diagram-free, update it before implementation.
-- Apply mandatory policy `MCAF-ARCH-001` before choosing implementation paths.
-- Keep each feature in one repository-wide vertical slice, using the same canonical slice name for its backend, frontend, contracts, tests, and documentation.
-- Change all affected surfaces of the owning slice together; do not move one surface into another repository or an unrelated layer folder.
-- Prefer the smallest relevant feature slice over repo-wide scanning so context stays narrow.
-- Define scope before coding:
-  - in scope
-  - out of scope
-- Keep context tight. Do not read the whole repo if the architecture map and local docs are enough.
-- If an already available skill fits the task, follow it; do not install skills for this bootstrap. Record required guidance directly in the feature/ADR contract when no skill is installed.
-- Analyze first:
-  - current state
-  - required change
-  - constraints and risks
-- Before starting design analysis, decide whether the task is actually non-trivial.
-- For non-trivial work, record problem framing, options, trade-offs, risks, open questions and the recommended direction in the owning feature specification and required ADR before code or doc implementation.
-- For simple, short or obvious work, go directly to execution.
-- Keep temporary brainstorms and working checklists in agent context or outside the checkout; do not create separate planning Markdown files in the repository.
-- Think through options before committing to implementation details.
-- Before ordering implementation, define the acceptance contract in the owning feature specification.
-- The acceptance contract MUST be detailed enough that another agent or maintainer can implement and test the task without rereading the conversation.
-- The acceptance contract MUST contain:
-  - task goal and user-visible outcome
-  - in-scope and out-of-scope behaviour
-  - assumptions and open questions
-  - actors, entry points, permissions and affected boundaries
-  - numbered criteria with stable IDs such as `AC-001`, `AC-002` and `AC-003`
-  - clear pass and fail conditions for every criterion
-  - positive flows, negative flows, edge cases and unexpected/error paths
-  - data, contract, API, UI, persistence, performance, security and observability expectations where relevant
-  - migration, compatibility and rollback expectations where relevant
-  - a criterion-to-test matrix mapping each `AC-*` to automated tests, test level, assertions and verification commands
-  - explicit criteria without automated coverage, with the reason and required manual or review evidence
-- Do not start implementation until the acceptance contract exists and the test strategy maps back to it.
-- Derive the ordered execution contract from the accepted criteria and keep it in the feature specification and required ADR, with one canonical source for each fact.
-- The execution contract MUST contain:
-  - the chosen design analysis and acceptance contract
-  - implementation steps derived from the accepted `AC-*` criteria
-  - task goal and scope
-  - detailed ordered implementation steps, constraints and risks
-  - explicit test steps within the ordered implementation, not as a later add-on
-  - a test strategy for every step, covering each `AC-*` with a test or documented exception
-  - the testing methodology: flows, commands and quality bar
-  - a full relevant test baseline before implementation
-  - a tracked list of already failing tests, their failure symptoms, suspected causes and intended fixes
-  - checklist completion conditions
-  - ordered final validation skills and commands, with the reason for each
-- Use the Ralph Loop for every non-trivial task:
-  - analyze the problem and options before implementation
-  - write detailed acceptance criteria in the owning feature specification
-  - map every criterion to automated tests or a documented exception before coding
-  - derive the ordered execution contract in the feature specification and required ADR
-  - include test creation, updates and verification from the start
-  - run the full relevant suite to establish the real baseline once the execution contract is ready
-  - record existing failures, symptoms, suspected causes and fix status in the execution contract
-  - reproduce and fix failures one by one, rerun the tests and update their status
-  - include ordered final validation skills, with each producing a concrete action, artifact or verification outcome
-  - execute one step at a time and track its completion
-  - when criteria change, update the acceptance contract, mapped tests and execution contract before continuing
-  - review findings, apply fixes and rerun relevant verification
-  - repeat until all completion conditions pass; document blockers without weakening an acceptance criterion or mandatory rule
-- Implement code and tests together.
-- Run verification in layers:
-  - changed tests
-  - related suite
-  - broader required regressions
-- If `build` is separate from `test`, run `build` before `test`.
-- After tests pass, run `format`, then the final required verification commands.
-- Run every repo-defined quality gate that is available for the stack and change scope, including analyzers, linters, complexity checks, coverage, architecture checks, security checks, and any other configured tools.
-- The task is complete only when every planned checklist item is done, every acceptance criterion is satisfied, and all relevant tests are green.
-- Summarize the change, risks, and verification before marking the task complete.
-
-### Documentation
-- All durable docs live in `docs/` (or `.wiki/` if the repo already uses it).
-- `docs/Architecture.md` is the required global map and the first stop for agents.
-- `docs/Architecture.md` MUST contain Mermaid diagrams for:
-  - system or module boundaries
-  - interfaces or contracts between boundaries
-  - key classes or types for the changed area
-- Keep one canonical source for each important fact. Link instead of duplicating.
-- Public bootstrap templates are limited to root-level agent files. Authoring scaffolds for architecture, features, ADRs, and other workflows live in skills.
-- Update feature docs when behaviour changes.
-- Update ADRs when architecture, boundaries, or standards change.
-- Every non-trivial feature doc MUST satisfy `MCAF-REQ-001`: stable `REQ-*` and `AC-*`, explicit ADR decision, multi-agent execution contract when applicable, and requirement-to-test evidence traceability.
-- Every architecture-affecting ADR MUST include its implementation contract and MUST remain `Accepted` until implementation and verification are complete.
-- For non-trivial work, the owning feature specification and required ADR MUST document the testing methodology:
-  - what flows are covered
-  - how they are tested
-  - which commands prove them
-  - what quality and coverage requirements must hold
-- Every feature doc under `docs/Features/` MUST contain at least one Mermaid diagram for the main behaviour or flow.
-- Every ADR under `docs/ADR/` MUST contain at least one Mermaid diagram for the decision, boundaries, or interactions.
-- Mermaid diagrams are mandatory in architecture docs, feature docs, and ADRs.
-- Mermaid diagrams must render. Simplify them until they do.
-
-### Testing
-- TDD is the default for new behaviour and bug fixes: write the failing test first, make it pass, then refactor.
-- Bug fixes start with a failing regression test that reproduces the issue.
-- Tests MUST be written from acceptance criteria, not from implementation details.
-- Each `AC-*` criterion in the owning feature specification MUST be covered by one or more automated tests or by an explicit written exception.
-- Test names, display names, or comments should reference the relevant `AC-*` ID when that improves traceability.
-- Every behaviour change needs new or updated automated tests with meaningful assertions. New tests are mandatory for new behaviour and bug fixes.
-- Owner correction 2026-10-05 requires every test to contain a complete real operation or caller-visible workflow: arrange actual preconditions, execute the operation through its real contract, and verify its outcome plus the resulting state or fields changed during that operation. Getter/setter checks, property-only assertions and implementation-mirroring tests do not satisfy this rule or acceptance; a negative flow must execute the rejected operation and verify its error and preserved state.
-- Tests should be as realistic as possible and exercise the system through real flows, contracts, and dependencies.
-- Tests must cover positive flows, negative flows, edge cases, and unexpected paths from multiple relevant angles when the behaviour can fail in different ways.
-- Prefer integration/API/UI tests over isolated unit tests when behaviour crosses boundaries.
-- Integration tests are the default primary proof for feature-slice behaviour that spans multiple components.
-- Do not use mocks, fakes, stubs, or service doubles in verification.
-- Exercise internal and external dependencies through real containers, test instances, or sandbox environments that match the real contract.
-- Flaky tests are failures. Fix the cause.
-- Changed production code MUST reach at least 80% line coverage, and at least 70% branch coverage where branch coverage is available.
-- Critical flows and public contracts MUST reach at least 90% line coverage with explicit success and failure assertions.
-- Repository or module coverage must not decrease without an explicit written exception. Coverage after the change must stay at least at the previous baseline or improve.
-- Coverage is for finding gaps, not gaming a number. Coverage numbers do not replace scenario coverage or user-flow verification.
-- Owner direction 2026-10-05 requires reviewing actual uncovered code when closing each module and adding meaningful complete-flow regressions for the missing success, failure and edge behaviours. Keep load, stress, performance and comparison tests out of the coverage evidence, preserve an explicit contributor inventory, and never add trivial tests solely to raise a percentage.
-- The task is not done until the full relevant test suite is green, not only the newly added tests.
-- If the stack is `.NET`, document the active framework and runner model explicitly so agents do not mix VSTest and Microsoft.Testing.Platform assumptions.
-- If the stack is `.NET`, after changing production code run the repo-defined quality pass: format, build, analyze, focused tests, broader tests, complexity, coverage, and any configured extra gates such as architecture, security, or mutation checks.
-
-### Code and Design
-- Owner direction 2026-10-06 requires `TimeProvider` for all current-time reads, elapsed-time measurements, deadlines, delays and timers in KeyLoad-owned code. Inject or explicitly pass the owning provider; select `TimeProvider.System` only at composition/default boundaries, never inside an operation that already has an owning clock. Replace direct `DateTime.Now`, `DateTime.UtcNow`, `DateTimeOffset.Now`, `DateTimeOffset.UtcNow`, `DateTime.Today`, `Stopwatch` and equivalent clock access. Tests may use a controlled `TimeProvider` to advance time deterministically; this explicitly authorizes a clock test double without replacing database, transport or storage dependencies. Preserve UTC contracts, monotonic elapsed-time checks, cancellation, persisted timestamps and RF3 authority.
-- Owner clarification 2026-10-06 requires the general runtime-literal prohibition, including endpoint routes, function/method names and protocol tokens: use named constants or `nameof` when the actual symbol is available. Migrate existing runtime literals as part of enforcement rather than limiting the rule to selected API arguments.
-- Owner direction 2026-10-06 requires application configuration through typed `IOptions<T>` (or native `IOptionsMonitor<T>` / `IOptionsSnapshot<T>` where their lifetime is required). Bind and validate settings at composition boundaries; feature execution must not read raw `IConfiguration` or environment variables. This is mandatory configuration ownership, not optional style.
-- Owner correction 2026-10-06 requires centrally registered and validated typed options for operational timeouts, deadlines, retry policies, capacities and resource/admission limits. Moving such parameters to arbitrary per-class `const` fields or static readonly defaults is still hardcoding and is prohibited. Constants remain appropriate for immutable protocol/format identities and mathematical structure; configurable policy must flow from `IOptions<T>` to its execution owner.
-- Owner direction 2026-10-05 authorizes adding semantic rules to the owned `KeyLoad.Analyzers` project for confirmed recurring code-quality problems without repeated permission. Enforce named constants for magic strings and numeric policy values, alongside typed synchronization; preserve compiler-valid regression tests, exact diagnostic locations, generated-code boundaries and all existing quality gates. Do not replace semantic analysis with blanket bans on legitimate `object` payloads or mechanically rename literals without their domain meaning.
-- Owner correction 2026-10-05 prohibits `object`/`Monitor` synchronization gates. Use `System.Threading.Lock` for necessary synchronous critical sections outside grain-owned state and keep hot-path sections short; use cancellation-aware `SemaphoreSlim.WaitAsync` when mutual exclusion must span asynchronous work, with release in `finally`.
-- Orleans activation-owned state MUST rely on native turn scheduling rather than redundant locks. Audit reentrancy, interleaving, escaped callbacks and node-local shared services before removing synchronization; retain real storage/apply, lifecycle and resource-ownership invariants without blocking the grain scheduler across asynchronous work.
-- Everything in this solution MUST follow SOLID principles by default.
-- Every class, object, module, and service MUST have a clear single responsibility and explicit boundaries.
-- SOLID is mandatory.
-- SRP and strong cohesion are mandatory for files, types, and functions.
-- Vertical-slice architecture and the single-repository boundary are mandatory under `MCAF-ARCH-001`.
-- Each feature MUST live in one consistently named repository-wide slice with all feature-owned backend, frontend, contracts, tests, and supporting artifacts colocated or mirrored under the documented slice convention and its durable doc mapped by the same name under `docs/Features/`.
-- Local rules and ADRs MUST NOT weaken `MCAF-ARCH-001`; they may only document stricter rules or a time-bounded migration to compliance.
-- Prefer composition over inheritance unless inheritance is explicitly justified.
-- Do not preserve obsolete, dead, duplicate, or replaced legacy code unless the user explicitly asks for a temporary compatibility path.
-- Owner correction 2026-10-06 removes backward compatibility with unreleased development storage formats from the first-release scope. Implement and qualify one current native storage format; remove old-format readers, migration/probe executables, historical-format test preparation and their active acceptance gates instead of developing compatibility for an unfinished product. This explicitly supersedes earlier requirements to migrate native5/native6/native7 development epochs before the first release. Preserve current-format process recovery, backup/restore, RF3 correctness and strict rejection of unsupported or corrupt formats; a later released-format upgrade requires a separate owner-approved contract.
-- When replacing an old implementation, remove the old code, tests, configuration, docs, and routing in the same change once the new path is proven.
-- Do not leave compatibility shims, placeholder implementations, or fallback paths as a substitute for a complete migration.
-- If a temporary transition path is unavoidable, document the reason, owner, scope, verification, and removal plan in the nearest ADR, feature doc, or local `AGENTS.md`.
-- Large files, types, functions, and deep nesting are design smells. Split them or document a justified exception under `exception_policy`.
-- Hardcoded values are forbidden.
-- String literals are forbidden in implementation code. Declare them once as named constants, enums, configuration entries, or dedicated value objects, then reuse those symbols.
-- Avoid magic literals. Extract shared values into constants, enums, configuration, or dedicated types.
-- Design boundaries so real behaviour can be tested through public interfaces.
-- If the stack is `.NET`, the repo-root `.editorconfig` is the source of truth for formatting, naming, style, and analyzer severity. Use nested `.editorconfig` files when they serve a clear subtree-specific purpose. Do not let IDE defaults, pipeline flags, and repo config disagree.
-
-### Critical
-- Never commit secrets, keys, or connection strings.
-- When the owner requests GitHub delivery, checkpoint the complete authorized KeyLoad code, tests, and durable docs at each coherent verified milestone so work is not left as a large uncommitted tree; preserve the existing main protections and never bypass a failing required gate.
-- Never skip tests to make a branch green.
-- Never weaken a test or analyzer without explicit justification.
-- Never introduce mocks, fakes, stubs, or service doubles to hide real behaviour in tests or local flows.
-- Never keep legacy, obsolete, dead, duplicate, shim, placeholder, or fallback code unless an explicit documented exception requires it.
-- Never introduce a non-SOLID design unless the exception is explicitly documented under `exception_policy`.
-- Never spread one feature across unrelated folders when a vertical slice can keep it isolated.
-- Never move solution-owned backend, frontend, tests, infrastructure, or documentation into a separate repository.
-- Never use different names or different internal conventions for the same slice across technical roots.
-- Never overwrite an existing root or local `AGENTS.md` with a downloaded template or a shortened reconstruction.
-- Never delete, omit, or weaken an existing `AGENTS.md` rule during framework installation or update.
-- Never force-push to `main`.
-- Never approve or merge on behalf of a human maintainer.
-
-### Boundaries
-
-Always:
-- Read root and local `AGENTS.md` files before editing code.
-- Read the relevant docs before changing behaviour or architecture.
-- Run the required verification commands yourself.
-
-For changes outside existing owner authorization, obtain direction before changing public API contracts, adding dependencies, modifying database schema or deleting code files. This MUST NOT revoke the existing scoped ManagedCode repair/release authorization, stable KeyLoad main commit/push authorization or already authorized product work. Complete the concrete reviewable work within authorized scope.
-
-## Preferences
-
-### Likes
-- Owner correction 2026-10-09 requires a selected product illustration to be recreated faithfully in native 3D: match its composition, model proportions, smooth geometry and material finish. Do not add duplicate branding or unrelated client blocks to the selected composition; use an explicit bounded polygon budget sufficient for the requested quality and verify the rendered result against the reference.
-- Owner correction 2026-10-04 requires an actual Aspire/AppHost or required topology startup failure to terminate its owned test/workload promptly, retain the original failure and diagnostics, and clean up owned resources instead of waiting for the full workload deadline. Dashboard-disabled warnings alone are not topology failures; planned fault injection and independent database jobs retain their explicit contracts.
-- Owner correction 2026-10-04 requires bounded live benchmark phase and attempt progress in GitHub Actions so a long workload cannot appear idle for tens of minutes. Retain cancellation diagnostics before teardown; keep original failures, required workload sizes, native topology and qualification gates intact.
-- Owner correction 2026-10-04 requires Benchmarks to finish every independent database workload and publish authenticated successful measurements even when another benchmark, including unfinished KeyLoad, fails. Record each failed workload as unavailable with no numeric data and its actual failure/job provenance; never invent results or label a failed job successful. This explicitly supersedes the all-success comparison-cohort publication restriction while preserving complete planned-cell accounting, source/run/attempt identity, native topology, fairness, site qualification and least-privilege deployment. Benchmark repair does not authorize taking over concurrent KeyLoad engine implementation.
-- Owner correction 2026-10-04 separates database measurements from website testing: Benchmarks owns native database preparation, independent workloads, result validation and authenticated JSON aggregation. Chrome, browser/site tests and website qualification MUST NOT be benchmark dependencies. A separate website-build action may run after the JSON is ready or be triggered through CI; the owner explicitly permits static site building at the end of Benchmarks. The selected implementation uses independent CI website jobs on own-main push/manual and completed Benchmarks events. Every website build MUST use the newest completed own-main Benchmarks run and its successful authenticated aggregate, across push/manual producers, rather than blindly using the triggering run or falling back after invalid latest evidence. Preserve exactly three workflows, failed/null cells, original provenance, website gates and predeploy freshness. Website failure cannot block database metrics production. This supersedes earlier integrated qualification placement and the interim static-build prohibition. KeyLoad engine implementation remains owned by the other agent.
-- Complete the coherent task's implementation before executing its runtime tests or benchmarks. Author the mapped tests with the code, then run the required validation after the implementation and self-review; do not let repeated intermediate verification replace implementation progress. This owner correction2026-10-03 supersedes test-first execution for the current work while preserving every final correctness, CI, fault and performance gate.
-- Owner reiteration 2026-10-04 requires concurrent feature implementation with three to five capable Luna coding agents when slots permit. Keep independent pending product tasks moving while the lead integrates and verifies completed stages; a long test run or unfinished qualification of one feature MUST NOT block implementation of unrelated features. Use disjoint write scopes and stable compiled test snapshots, retain every acceptance gate, and close each task as soon as its own complete acceptance evidence exists rather than waiting for the entire plan.
-- Owner correction 2026-10-07 requires parallel batches of complete-operation test creation, execution and fixes across independent acceptance scopes. For this work the owner explicitly authorizes GPT-6.1 Sol workers with low effort in place of the earlier Luna selection. Keep available worker slots occupied with concrete disjoint scopes while the lead reviews, integrates and delivers batches. Read-only execution of already compiled native TUnit suites may run concurrently only with distinct result/temporary paths, independent owned resources and unchanged source/DLL/PDB identities; serialize builds, shared source joins and any conflicting Aspire/image lifecycle. Preserve whole-flow assertions and every existing acceptance, provenance, cleanup and delivery gate.
-- Each agent MUST follow the execution plan for its own user-assigned task and complete only that task; change its scope only when the owner explicitly redirects it (owner correction 2026-10-03).
-- Other chats' plans, progress, requests and concurrent changes MUST NOT expand an agent's task or redirect its implementation. Preserve their work and leave their tasks to their owners (owner correction 2026-10-03).
-- Repairs and verification MUST stay within the assigned task. Report an unrelated failure to the owner without taking over its implementation; direct user instructions remain authoritative (owner correction 2026-10-03).
-- Frequent concise Ukrainian progress stating completed work, remaining work and real blockers.
-- Owner clarification 2026-10-09 requires the root README to open with Managed Code's motivation in a direct, engaging product voice: years of building agents repeatedly reveal that vectors, SQL, hybrid retrieval, graphs, events and files each solve only part of the workload and accumulate separate systems. Explain why this led to one composable AI-native database with native MCP before presenting implementation mechanics. Research suitable public GitHub README references autonomously when the owner asks for repository-of-the-day inspiration. Use original, useful product illustrations; then show the 104-task plan's honest accepted-versus-open status, actionable examples and a distinct closing acknowledgments block naming and thanking the actual dependency projects. Preserve qualification limits and do not turn the opening into a technical inventory or claim the unfinished target is fully delivered.
-- The root README MUST introduce KeyLoad as a product: its purpose, connected data models, agent use cases, getting started, and direct credits to the projects it actually uses. Keep dependency versions in their canonical manifests and link to detailed technical documentation (owner correction 2026-10-03). The README MUST read as an engaging, plain-language product page that a newcomer understands on first read and can act on: a clear problem/pitch, how it works, a runnable quick start, real SDK/SQL/MCP examples, an honest available-versus-in-progress status and a repository map for contributors. Internal specification jargon belongs in the linked docs, not the README. Every rewrite MUST retain all existing credits and add any actually used project that is missing (repeated owner correction 2026-10-04). Owner correction 2026-10-09 requires a compact, visual README: Project status MUST show what each workstream delivers, why it matters, its actual state and what remains in a readable table, with a Mermaid stage flow where helpful. Replace repetitive prose with concise tables or diagrams and links to canonical detail; preserve honest qualification limits and do not invent completion percentages or schedules.
-- Shared-checkout work that preserves unrelated changes and completes authorized delivery.
-- Real Docker/Aspire multi-node comparisons using the same data, oracle and workload contract.
-- All published test results and chart values MUST come from JSON produced by successful GitHub Actions runs. Include raw GitHub JSON links, measured source SHA, options, topology and acknowledgement/read guarantees. Missing or unsupported measurements MUST remain unavailable; never invent winners, zeros or sample performance values.
-- Website publication MUST be the downstream qualification/deployment stages of Benchmarks, consuming the exact same run/attempt/source's complete successful comparison JSON and verifying its job/artifact provenance. Performance figures MUST be read from that evidence; never hardcode them in website or README charts. A failed, skipped, incomplete, expired or unauthenticated comparison cannot refresh the published evidence (explicit owner layout correction 2026-10-03 supersedes the separate-workflow placement).
-- Benchmarks MUST execute all load/performance/comparison suites and aggregate their data before website qualification and deployment. Main/site source changes and manual dispatch use this pipeline; preserve all existing site tests, coverage, browser, freshness and least-privilege publication gates. This owner-authorized workflow integration does not authorize unrelated database implementation or DNS changes (owner correction 2026-10-03).
-- Owner direction on 2026-10-02 resolves the earlier website-source and producer-success policy conflict for REQ-BC-028: qualify the current trusted-main website separately from the measured-source checkout, and require the actual successful comparison job and its measurement steps. Unrelated database jobs or whole-workflow failure MUST NOT block this website-only delivery. Preserve accurate site/measured/control revisions and all website qualification gates. Earlier successful-run and equal-source guidance remains recorded as the superseded task boundary; never label a failed whole run successful.
-- Free community features only for comparison engines. No Enterprise images, license activation or paid cluster features.
-- KeyLoad's visual style is serious, adult Apple-style Liquid Glass in the Managed Code family: editorial off-white surfaces, bold black typography and Managed Code's pastel iridescent accent (peach → lilac → periwinkle), plus Prostir graphite. Do not use green or lime as the brand accent, and do not return to the rejected light-blue look. No Material Design, colour blobs, rainbow logos or playful decoration. The `/admin` console and the public site share it (owner direction 2026-10-02).
-- The public landing must be a radically better product page for KeyLoad as the database for AI agents, on .NET and Orleans. Its Three.js scene must be live and moving as soon as it loads, except under reduced-motion preferences, within the scene lifecycle, budget and honesty contracts.
-- Every public KeyLoad page ends with "Developed by Managed Code" and a normal followed (dofollow) link to https://www.managed-code.com/.
-- The central KeyLoad K MUST use the canonical true SVG outside the bounded 3D raster buffer so it stays sharp on Retina displays. An SVG wrapper around a bitmap or a CanvasTexture logo does not satisfy this requirement (repeated owner correction 2026-10-03).
-### Dislikes
-- Owner correction 2026-10-06: do not create or commit intermediate per-run, per-source-review, checkpoint or development JSON reports in `docs/implementation/`. Keep working reports outside the checkout and generated verification results in CI artifacts; use direct original GitHub links in durable feature/ADR records. Retain only canonical implementation status, documentation traceability, repository installation validation and versioned SQL inventories there. Remove redundant reports and their local links together without fabricating qualification.
-- Owner reiteration 2026-10-03 requires immediate cleanup: delete obsolete, unused, superseded, duplicate and abandoned code, legacy implementations, temporary artifacts and discarded implementation/evaluation plans in the same coherent change. Remove their obsolete tests, configuration, dependencies, routes and documentation references together; do not retain dead branches, compatibility shims or fallback implementations for an unspecified later cleanup. Preserve required behavior with the real replacement and its mapped acceptance tests, unrelated active work and persisted user data. Existing historical migration-debt records do not authorize retaining a replaced implementation.
-- Repeated permission questions for already authorized work.
-- Working `*.plan.md`, `*.brainstorm.md` and `*.acceptance.md` files MUST NOT be created or committed anywhere in this checkout. Remove existing copies and ignore these patterns without exceptions. Keep durable requirements, acceptance criteria and execution/verification contracts in the owning `docs/Features/` specification and required ADR; agent working notes stay outside the repository. This explicit owner correction on 2026-10-03 supersedes every root/local instruction requiring separate planning files without weakening feature, test, architecture or qualification requirements.
-- The root README MUST NOT accumulate CI run histories, test counts, internal implementation receipts, governance procedures, dependency-maintenance instructions, generic dependency-license boilerplate, or package/version dumps. Credits MUST name the projects actually used and explain their contribution. Keep a concise honest development-status statement and link to the canonical status and qualification records instead (repeated owner correction 2026-10-03).
-- GitHub Actions MUST expose exactly three plainly named workflows: CI combines build and ordinary project tests for PR/push/manual checks; Benchmarks runs all load/comparison suites, produces complete authenticated measurements and then qualifies/publishes the website; Release builds the solution, real database images/distribution and packages, then creates a GitHub Release and immutable version tag. Do not split Tests or Website into additional workflows (explicit owner correction 2026-10-03 supersedes the earlier five-workflow layout).
-- Release tags MUST be `v<major>.<minor>.<yyMMdd>.<daily-build>`: major/minor are configured in source, the third component is the UTC date and the fourth starts at 1 each day and increases without tag reuse or overwrite. Build/package/image/manifest identities MUST agree; reruns recover their original reservation. Release automation is authorized to create the corresponding Git tag, GitHub Release and versioned database image/package assets; preserve protections and qualification gates (owner direction 2026-10-03).
-- KeyLoad product release packaging and publication are deferred until the owner explicitly requests a release or confirms product readiness. Keep Release prepared and manual; do not dispatch package/image builds, create release tags or publish releases merely to prove this workflow while the product is unfinished (owner correction 2026-10-03).
-- Repository-rule checks MUST always run inside the standard CI pipeline, never as a separate governance workflow (owner correction 2026-10-03).
-- All comparative performance tests, including TimeSeries image checks, MUST run in one separate Benchmarks pipeline; do not name it Comparisons or create feature-specific comparison workflows. Preserve isolated Linux runners, real native topology, complete workloads and authenticated artifacts (owner clarification 2026-10-03).
-- `benchmarks.yml` MUST contain only end-to-end database comparisons of KeyLoad against other databases, their required preparation/validation, aggregation and website publication. Internal code, serialization, raw storage/cache engine microbenchmarks, phase profiling and KeyLoad-only optimization measurements MUST NOT appear as jobs, dispatch modes or dependencies in that workflow. Run those measurements locally or in a separately authorized internal benchmark context; ordinary correctness tests belong in CI. This owner correction on 2026-10-03 supersedes any earlier instruction that placed internal performance work in the database-comparison pipeline, while preserving the complete database workload suite and public GitHub provenance requirements.
-- TimeSeries MUST be one workload among the complete shared performance suite, never a separate feature-specific branch in the Benchmarks job graph. Qualify its pinned image in the common native-image preparation and retain all other workloads, isolated measurement runners and complete aggregation before publication (repeated owner correction 2026-10-03).
-- Every GitHub Actions job and authored step MUST have a short explicit human-readable name describing its actual action. Name checkout, SDK setup, restore, build, tests and artifact uploads; avoid exposed machine IDs, raw commands and internal qualification/provenance jargon. Update source-bound name validators together when displayed names change (owner correction 2026-10-03).
-- Independent benchmark preparation and measurement jobs MUST run in parallel. Do not chain preflight, CRUD and specialized workload matrices or impose an arbitrary workflow max-parallel cap. Retain only actual input dependencies, isolated runners and bounded native operation resources; complete aggregation waits for every preparation/check/measurement gate before website qualification and publication (owner correction 2026-10-03).
-- Fake production readiness, power-loss claims from process-kill tests, or unsupported performance supremacy.
-- Installing skills when the owner explicitly prohibited it.
-- For bug-fix and optimization requests, do not spend turns on plans/status documentation without promptly making concrete source-level repairs once the scope is clear.
-- Recolouring tokens or restyling the old layout when the owner asks for a redesign. A landing or `/admin` redesign means a complete new layout, information architecture, visual concept and interaction patterns, delivered for both surfaces (repeated owner correction 2026-10-02).
-- Visible disclaimer chrome on the landing or `/admin`, such as "Conceptual illustration · not live data" pills, captions or poster micro-text, or visible scene status pills. The hero illustration is self-evidently illustrative; keep that honesty in alt/aria/live-region text only. Real evidence provenance labels on measured data remain required (owner correction 2026-10-03).
-- Internal process jargon such as "Evidence" as a visible navigation, button, heading or column label on public surfaces. Use plain product words a visitor expects ("Benchmarks", "Methodology", "GitHub run"); provenance links stay, but are named for what they open (owner correction 2026-10-03).
-
-## Current additive project inventory
-
-The original 22-project rule above remains mandatory and preserved. The current inventory additionally contains `tests/KeyLoad.SiteTests` (ADR-040), bringing the project count to 23. Its local AGENTS.md was created before implementation; every original and new project/module remains covered by the same mandatory policy. See `docs/implementation/mcaf-installation.json` for the exact current paths and the preserved installation baseline.
-
-ADR-043 additionally introduces `benchmarks/KeyLoad.ComparisonHost`, bringing the
-current project count to 24. Its local policy preceded implementation; the existing
-KeyLoad.Comparisons public library and every prior mandatory policy remain covered.
-
-ADR-047 additionally introduces `benchmarks/KeyLoad.BenchmarkScenarios`, bringing the shared workspace count to25. Its local policy preceded implementation. Every existing root/local rule remains mandatory and unchanged.
-
-ADR-063 additionally introduces `src/KeyLoad.Diagnostics`, bringing the shared workspace count to26. Its local policy precedes implementation. The BCL-only ResourceExecution project owns fixed callback-free phase diagnostics; every prior root/local policy, preserved installation prefix and native qualification gate remains mandatory.
-
-`src/KeyLoad.Storage.IO` brings the shared workspace count to27. Its local policy precedes implementation. The internal StorageRecovery primitive uses public OS interfaces to open current native files, reject non-regular inputs without blocking and preserve owner-lock interoperability under ADR-011/116. It owns no engine, database state or replication; all current-format, ownership and qualification gates remain mandatory.
-
-A bounded website qualification candidate contains the20-project historical runtime base plus KeyLoad.Analyzers, KeyLoad.Analyzers.Tests and KeyLoad.SiteTests (23projects). Its derived inventory MUST record the shared25-project scope and omitted concurrent projects explicitly, preserve all28 included root/local policy blobs exactly, and qualify only the actual included website/analyzer source. This is an evidence-scope record, never an exception to any solution-wide architecture, project-policy or required product qualification rule.
-
-## Latest completed result eligibility, 2026-10-04
-- Latest benchmark metrics means the newest completed own-main push/manual Benchmarks producer with success/failure conclusion. Pending, skipped and canceled workflows have no completed comparison cohort and MUST NOT displace ready JSON. Exclude them before choosing the latest eligible producer; then reject its missing/corrupt/failed aggregate without older fallback. A canceled workflow_run event still cannot authorize publication. This refines the latest-result rule without accepting incomplete or fabricated measurements.
-
-## Independent website queue, 2026-10-04
-- CI website generation MUST NOT wait for unrelated ordinary CI/RF3 execution from another run. Push/manual CI runs use their own run identity; PR keeps its existing ref-based cancellation. Website qualification and deployment use separate bounded job concurrency groups with cancel-in-progress=false, preserving source/latest-evidence freshness and all gates. This implements the owner-authorized independent website action without canceling database or test work.
-
-## Independent website publication, owner correction 2026-10-06
-- Website source changes MUST independently build, qualify and publish the website in CI without waiting for a benchmark run. Use the newest completed own-main Benchmarks producer whose authenticated aggregate is ready when one exists; a run with no successful aggregate is not available website data. If no ready producer exists, publish the qualified product website with no benchmark figures or synthetic measurement artifacts. New ready benchmark JSON MUST automatically trigger a fresh website build/publication. This rule-specific correction supersedes mandatory benchmark availability and newest-failed-producer blocking in the earlier publication rules; corrupt/expired/unauthenticated evidence, provider errors, website test failures and stale source still fail closed. Preserve exactly three workflows, independent CI website jobs, original metric provenance and full metric/archive/browser/coverage gates whenever metrics are included. The no-metrics route has its own complete asset/browser/source/coverage qualification; measurement-only tests and archive gates are N/A to an artifact which includes no measurements, never reported as passed or replaced with fabricated inputs.
-
-## Behavioural test ownership, owner correction 2026-10-06
-
-- Tests MUST NOT establish behaviour by reading repository source and asserting that particular words, calls, attributes or implementation shapes are present. Execute the real operation and assert its observable result and resulting state instead; remove obsolete source-text checks and their unused helpers. Compiler/analyzer tests must execute the real compiler/analyzer and assert emitted diagnostics, rather than scan source text. Static repository governance remains a CI check, not functional product-test evidence.
-
-## Separate Website workflow, owner correction 2026-10-06
-
-- GitHub Actions MUST expose four plainly named workflows: `Build and Tests` builds the complete solution and runs repository checks and ordinary tests; `Benchmarks` produces authenticated database-comparison JSON; `Website` independently builds, qualifies and deploys the site; `Release` remains the prepared manual product-release workflow. Website jobs and Benchmarks completion triggers MUST NOT be part of Build and Tests. This explicit correction supersedes the earlier three-workflow limit, the CI display name and every placement of website publication inside CI or Benchmarks.
-- Website MUST publish after trusted main source changes or manual dispatch independently of Build and Tests and benchmark success. Consume the newest ready authenticated Benchmarks aggregate when available; otherwise qualify and publish the site without benchmark figures. New ready benchmark data triggers a fresh Website run. Preserve source freshness, original metric provenance, complete applicable website qualification and least-privilege Pages deployment; absence of measurements is not a website failure.
-
-## Final Benchmarks Website trigger, owner clarification 2026-10-06
-
-- Benchmarks MUST finish with only a bounded dispatch of the separate Website workflow; it MUST NOT build, test or deploy the site itself. This supersedes Website's `workflow_run` completion subscription. Confine dispatch permission to that final trigger job, keep main/manual Website publication independent, and authenticate any supplied producer run through GitHub before bounded completion waiting and newest-ready selection. A trigger input is not metric provenance or permission to bypass website qualification.
-
-## Super rule: owner-only migration and legacy authorization
-
-- Owner correction 2026-10-06: KeyLoad is a new product. Do not implement or retain data, schema, storage-format, persisted-record, configuration or prior-KeyLoad-version migrations, legacy readers, compatibility shims, dual paths or fallbacks unless the owner directly requests that specific migration or legacy path.
-- This prohibition is the highest project rule for migration/legacy scope and explicitly supersedes every earlier plan, ADR, feature requirement, acceptance gate, local policy and inferred authorization to maintain unreleased or previous KeyLoad implementations. A generic instruction to finish the product, an agent proposal or a recorded migration contract is not the owner's direct permission.
-- Delete existing KeyLoad-owned migration and legacy implementations now, together with their exclusive tests, helpers, prior-binary/image preparation, configuration, routes, dependencies and active documentation/plan references. Do not preserve them as dead branches or deferred cleanup and do not replace them with a new migration mechanism.
-- Owner clarification 2026-10-06 requires every ADR to describe the current product decision and implementation contract. Remove superseded KeyLoad implementation narratives, old-format preparation and retired-plan references from ADRs; preserve current requirements, strict rejection, authentic qualification limits and independently retained original evidence.
-- Implement and qualify the current product contract. Preserve current-format crash recovery, verified backup/restore, persisted authorization, strict unsupported/corrupt-version rejection and genuine Aspire RF3. Native Orleans activation movement and SQL interoperability with external clients are current product capabilities, not authorization for legacy KeyLoad code or data conversion.
-
-## Build and Tests workflow filename, owner direction 2026-10-06
-
-- The canonical Build and Tests workflow is `.github/workflows/build-and-tests.yml`, renamed from `ci.yml`. Dispatch with `gh workflow run build-and-tests.yml --repo managedcode/KeyLoad --ref main`. This supersedes earlier active filename/dispatch references only; preserve all build/test gates, stable job IDs, permissions and historical evidence.
-
-## Build and Tests scope, owner correction 2026-10-06
-
-- Build and Tests MUST execute only solution builds, repository checks and KeyLoad functional tests, including analyzer, unit/scalar, process recovery and Aspire RF3 SDK/MCP tests. Benchmark/comparison tests, progress/entry/counter checks, load generators and comparison-image preparation MUST NOT execute there, even when stored in the unit-test project. Run them exclusively in the separate Benchmarks workflow; preserve their checks there. This explicit correction supersedes earlier placement of benchmark correctness checks in ordinary CI. Compiling the complete solution remains mandatory.
-
-## Visible functional test progress, owner correction 2026-10-06
-
-- Aspire-owned test execution MUST forward original native TUnit/Microsoft.Testing.Platform Detailed output to GitHub Actions stdout during execution, including available per-test progress, outcomes and native summaries. Do not substitute custom test counters, invented percentages or fabricated outcomes. Preserve native exit codes, original reports and joined cleanup. Additional diagnostics MUST NOT expose credentials, test arguments or user payloads.
-
-## Native test execution boundary, owner reiteration 2026-10-06
-
-- All functional tests and benchmark measurements MUST execute through TUnit tests after Aspire owns infrastructure startup/readiness. The C# test uses the actual C# client to serialize requests and execute database operations; shell/Node CI adapters may forward logs and select suites but MUST NOT replace TUnit execution or implement database workload clients.
-
-## TUnit owns test invocation, owner correction 2026-10-07
-
-- CI MUST invoke native TUnit/Microsoft.Testing.Platform tests directly after build, with native Detailed output. TUnit fixtures own the Aspire testing builder, resource startup/readiness, real C# client requests, benchmark measurements and joined shutdown. Do not put Aspire CLI or an outer test-runner AppHost between CI and TUnit. This explicit correction supersedes earlier prohibitions on direct TUnit entry; all RF3, recovery, scalar, artifact and qualification gates remain mandatory. Benchmarks and their contract tests remain exclusively in Benchmarks.
-
-## Website automatic trigger scope, owner correction 2026-10-08
-
-- Website MUST automatically run on trusted main pushes that change the site or its qualification/build/publication inputs, and after a successful Benchmarks producer. Use an explicit push path filter; unrelated database-only pushes MUST NOT start Website. The final Benchmarks dispatch MUST require every producer prerequisite, database matrix and aggregate to succeed, and Website MUST authenticate that triggering producer's successful terminal conclusion before qualification. This rule-specific correction supersedes unfiltered Website push triggers and dispatch after failed benchmark work; retain manual dispatch, independent site publication, bounded REST admission, original metric provenance, all applicable tests/coverage/freshness gates and least-privilege Pages delivery.
-
-## Parallel task completion, owner correction 2026-10-08
-
-- Use every available agent slot for independent implementation tasks during an implementation wave, including a concrete task owned by the root agent. Give each worker a whole named plan task or coherent acceptance scope, its owned paths and the exact remaining criteria; the worker MUST carry that scope through implementation, meaningful operation tests, fixes and evidence rather than return isolated typo repairs as task completion.
-- Continue independent tasks in parallel while another task is being repaired. A local defect in one task MUST NOT stop unrelated implementation owners or turn every worker into a reviewer of the same small change.
-- After the wave's changes are integrated, freeze the integrated source and compiled images at one explicit verification barrier. Build the coherent solution once, run independent required test lanes together when their native resources do not conflict, and assign every failure back to its task owner. The owner correction2026-10-10 confines this barrier to the integrated image: unrelated workers MUST continue their own implementation and focused verification in isolated source/output lanes. Preserve original failures and resource cleanup; no shared compiler races, concurrent writes to the same files, or weakened tests are allowed.
-- Record actual acceptance outcomes in the canonical plan, commit and push the complete authorized wave, then immediately assign the next independent tasks. Count a task as done only when its complete required acceptance evidence exists; report the real executor limit when the environment cannot run the requested number of agents.
-- Owner selection 2026-10-08 requires GPT-6.1 Sol with medium reasoning for the parallel implementation agents completing this plan, unless the owner explicitly changes that selection. Preserve each task's code, acceptance ownership and handoff when changing its executor.
-- Owner reiteration 2026-10-09 targets five GPT-6.1 Sol medium subagents completing whole tasks from the 104-task plan concurrently. Use the actual available executor slots, immediately reuse completed slots for the next whole task, and report the real capacity when five simultaneous subagents are unavailable; do not report queued or idle agents as executing.
-
-## Continuous independent task execution, owner correction2026-10-10
-
-- Each available worker MUST own a different whole task or coherent acceptance scope, implement its code, run its related operation tests, repair its failures and retain the original evidence. When that scope finishes or waits on an external qualification run, immediately give the worker the next independent implementation scope; one task's failure or long test MUST NOT idle all workers or send every worker to the same defect.
-- Owner reiteration2026-10-10 requires continuous work: while the assigned owner repairs a defect, every other available worker MUST continue a different task. Do not wait for a defect, review packet or external test result when independent authorized implementation or focused verification remains available; immediately reassign a completed worker and retain the original task's acceptance ownership and evidence.
-- Owner reiteration2026-10-15 requires at least ten different whole plan tasks progressing concurrently across the three authorized chats when their actual executor capacity permits. Each chat has at most four executors including its root; use GPT-6.1 Sol medium workers. Every executor owns its task's implementation, whole-operation tests, failures and acceptance evidence. When its current implementation is ready or awaits external qualification, immediately assign the next unowned task while retaining responsibility for the earlier results. Shared verification must not idle unrelated coding; coordinate disjoint paths and freeze only the integrated source/images used by the active run. Never count an idle or merely queued executor as working, or source completion as accepted task completion.
-- Independent builds and focused tests MUST run concurrently in separately owned source snapshots and build/output/intermediate directories when their resource contracts permit. A private snapshot is local development evidence only and MUST carry its actual source hashes and compiled-image identity; after integration, rerun every affected mandatory gate against the integrated delivered source. Do not create Git worktrees, hide changes in a stash, rewrite another owner's files or claim a private draft as delivered code.
-- The root owns integration of reviewed source, shared-checkout build writers, complete authorized commits/pushes and common stage verification. Workers own their isolated build/test lanes and their fixtures' Aspire resources, endpoints, fault injection and joined shutdown. No two lanes may write shared bin/obj, source files, reports, data directories or owned infrastructure; retain the native50-slot default for ordinary independent tests and exclusive scheduling for heavy load cases.
-- Prefer the tests mapped to the current task during iteration, preserve their complete positive/negative/error operation flows and original failures, and keep the mandatory full solution, unit/scalar, process-recovery, RF3 SDK/MCP and coverage qualification gates. Report actual active executors and measured native test concurrency; documentation, configured slots or a successful focused run MUST NOT be reported as full104-task acceptance.
-
-## Parallel GitHub acceptance, owner direction 2026-10-09
-
-- Run independent complete module acceptance scopes concurrently in isolated Linux GitHub Actions jobs so one long RF3 suite does not hold every task's qualification. Keep all mandatory full build, unit/scalar, recovery, RF3 and coverage jobs; a scoped job supplements those gates and proves only its explicitly mapped task criteria.
-- Every scoped job MUST discover its actual native TUnit cases, retain source/DLL/PDB identities and original reports, execute the complete mapped operation flows without retries or skips, and join cleanup of its own Aspire resources. Preserve real .NET and official MCP clients, genuine RF3 membership, bounded execution and truthful caller-versus-server scalar evidence; partial suites MUST NOT become full-suite or coverage qualification.
-- Owner clarification 2026-10-09 permits task iterations and checkpoints to execute only the tests mapped to that task's acceptance scope, locally or through an explicitly selected GitHub task run. Preserve the full mandatory final qualification; a focused run's green result proves its selected task flows only and MUST NOT be reported as the complete solution or coverage gate.
-- Owner reiteration 2026-10-09 requires 50 native TUnit execution slots as the current default for independent ordinary functional tests, rather than substituting parallel CI jobs for test concurrency. This explicit selection supersedes the earlier 20-slot starting default. Set both the native selector and typed test execution options to 50 and remove forced one-test execution from ordinary task lanes. Preserve genuine shared-resource invariants with narrowly justified native scheduling; audit blanket serial attributes and prove actual concurrency from original native execution records rather than fabricated counters.
-- Retain the earlier 20-slot execution evidence and compare actual duration, CPU/resource pressure and complete-flow outcomes with the owner-selected 50-slot runs. The configured slot limit is not evidence that 50 cases overlapped. Preserve original failures, acceptance, timeouts, shared-resource ownership and cleanup; do not weaken a gate to make the increased concurrency pass.
-
-## Functional concurrency and isolated load measurements, owner clarification 2026-10-09
-
-- The owner-selected 50-slot default applies to independent ordinary functional tests. Benchmark measurements MUST execute one test/scenario at a time inside each job so unrelated tests do not contaminate timing, CPU, memory, storage or backlog measurements. Independent benchmark jobs MAY run concurrently only on genuinely isolated Linux runners with their own native database topology, client processes, containers, volumes and cleanup; preserve the complete comparison and provenance gates.
-- Heavy functional load/stress tests, including concurrent ingestion while other database operations are under load, MUST execute exclusively on their owned test resources without overlapping ordinary tests or other heavy cases in the same runner. Keep these correctness scenarios in KeyLoad functional acceptance, separately selected from ordinary parallel cases; they do not contribute performance measurements or coverage totals.
-- Ingestion load qualification MUST include a one-client baseline and concurrent-client cases at 10 and 500 clients. Each case adds exactly 1,000,000 total distinct records across its clients, verifies acknowledged writes and the final stored records through real clients, and records actual client concurrency separately from native TUnit test concurrency. Bound client admission, cancellation and cleanup; retain the existing 100,000/1,000,000 dataset inventory and matched comparison contracts.
-- Owner direction2026-10-09 requires a primary-source-backed benchmark methodology and its actual implemented tests: one canonical comparable scenario set covers isolated individual operations and deterministic mixed operations at native1/3 nodes, with explicit setup/warmup/measurement/validation phases, repetitions, latency distributions, offered/completed load, errors, resource use, acknowledgement/durability and complete stored-result verification. Preserve serial measurement per job and genuine native clients/topologies; a methodology document alone does not finish the benchmark work.
-- Owner correction2026-10-09 requires all benchmark-stage builds, checks, tests and workload execution in GitHub Actions. Do not run benchmark development verification locally on the owner's computer. This scope-specific correction supersedes earlier local-development permission; retain original local failures as history and qualify the delivered source only from original Linux GitHub results.
-
-## Connection and request grain lifetimes, owner clarification 2026-10-09
-
-- Persistent client connections MUST have a distinct Orleans connection/session grain with bounded disposable session state and explicit disconnect/idle-expiry cancellation, joined cleanup and deactivation. Freeze the actual logical connection identity, transport ownership, limits and scheduling in ClientApi/QueryExecution requirements and the native-client ADR before implementation; a connection grain MUST NOT cache trusted roles or replace fresh persisted authorization for each operation. This is a required product target, not a claim that the native connection protocol is delivered.
-- Request and independently keyed read grains MUST retain no persistent operation state or completed request history. Keep request data call-scoped and bounded; after success, failure, cancellation, deadline or early stream disposal, join the original producer/capability cleanup and request native DeactivateOnIdle as part of settlement, without waiting for ordinary idle collection. Bound active work and admission/cleanup backlogs; total historical request count MUST NOT determine retained activation count. Native deactivation and CLR memory reclamation are asynchronous, so requesting deactivation alone MUST NOT be reported as measured activation or RAM recovery.
-
-## Grain per connection, owner decision 2026-10-09
-
-- The owner explicitly rejects creating a grain activation for every request and selects one bounded Orleans grain per actual client connection. This rule-specific decision supersedes every earlier root/local/feature/ADR requirement for a separately activated request grain or independently keyed read grain. Each operation MUST instead retain its own bounded signed request identity, native request/identity context, fresh persisted authorization, cancellation, result/progress and original cleanup within the reused connection owner; connection state MUST NOT become trusted roles, completed-request history or storage ownership.
-- Freeze the actual server-owned transport connection identity and disconnect/idle-expiry signal before integration. Current stateless HTTP/MCP transport MUST NOT be advertised as an implemented native SQL or logical MCP session. Bound admitted connections, concurrent operations, queued work and retained bytes; audit native Orleans scheduling so a connection owner does not accidentally serialize independent work or interleave mutable session invariants. Stable partition/shard grains and node-local ZoneTree/RF3 ownership remain mandatory. Background and authenticated peer calls require an explicit bounded non-client execution owner, never a newly invented grain per operation.
-- Implement and exercise the real connection-owned operation flow, not only its documentation. Measure the former immutable request-grain cohort against the new connection-owned implementation on matching representative isolated Linux GitHub workloads, recording latency distributions, completed throughput, allocations, server RAM, activation count, saturation/errors and actual stored outcomes. Do not retain the rejected per-request production path as a fallback or declare improvement from architecture/configuration alone; preserve all existing test, benchmark isolation/provenance and first-release no-legacy rules.
-
-## Native API repair autonomy, owner direction 2026-10-09
-
-- The owner authorizes routine intent-preserving compiler repairs using the actual existing native API: select its existing namespace/import or canonical constructor argument representation instead of generating duplicate types, new constructors or misplaced methods. Do not repeatedly ask the owner to reconfirm these already selected existing-API choices. Preserve public/persisted contracts, operation semantics, authorization, bounds, meaningful full-flow tests and all required qualification gates. Genuine ambiguity between different valid contracts or a new consequential decision remains subject to the existing scope and permission rules.
-
-## Native Orleans cluster communication, owner correction 2026-10-11
-
-- Database cluster communication, including partition movement, MUST use native Orleans grains or Grain Services and actual Orleans silo discovery. Do not implement custom TCP/socket listeners, HTTP peer RPC, or silo addresses inferred from public HTTP endpoints and fixed ports. Public SDK/SQL/MCP transports retain their defined client contracts; they are not cluster coordination transports.
-- Tests which qualify cluster or partition-movement behavior MUST start the actual Orleans cluster through the existing Aspire-owned topology and exercise its real native calls and public SDK/MCP operations. A manual loopback network, direct journal submission in place of Orleans execution, or a separate substitute cluster cannot qualify that behavior.
-- Replace the custom movement transport and its exclusive network helpers together with the native implementation and meaningful complete operation flows. Preserve server-authenticated peer identity, native MAC/fingerprint bytes, current membership and physical owner checks, node-local storage ownership, RF3 acknowledgement, admission limits, cancellation and joined shutdown. Retain original failures as evidence without keeping a rejected runtime fallback.
-
-## Library reuse and owner approval, owner direction 2026-10-13
-
-- Before implementing infrastructure or a parser ourselves, evaluate existing Microsoft libraries first when their native contracts fit the product. Compare other maintained libraries where they fit better; preserve the explicitly selected Orleans, ZoneTree and ManagedCode ownership boundaries.
-- Every new library adoption requires the owner's explicit approval for that library. Before asking, prepare a concrete reviewable comparison covering purpose, exact package/version and license, dialect/API fit, resource and cancellation contracts, integration scope, existing code it would replace, and meaningful qualification. Research or a link supplied by the owner is not approval to add the dependency or change the product dialect. Existing explicitly approved libraries retain their authorization; this does not revoke the standing scoped ManagedCode repair/release workflow.
-- Reuse syntax parsing or infrastructure without confusing it with delivered database semantics. A parser/AST library does not by itself provide execution, persisted authorization, Orleans coordination, ZoneTree durability or client interoperability. Record performance claims only from the required measured evidence.
-
-## ManagedCode repair batching, owner correction 2026-10-13
-
-- Owner correction 2026-10-13: batch all known confirmed defects in the same owned library/repository within the authorized task before releasing. Inspect the affected scope, collect and fix the defects together, add their focused regressions, self-review the complete change, and run the required checks against the combined batch. One defect may produce one release; several defects in that repository MUST share one release, not a version/release per fix.
-- Increment the version once through the canonical mechanism only when the complete repair batch is ready. Push release-triggering changes and publish once per owning repository for that batch; do not trigger intermediate releases while other known fixes are pending. Verify successful GitHub publication and actual NuGet availability, then update each affected consumer once to that published version and run its focused regressions. Preserve unrelated work and all existing correctness, delivery and repository-protection gates.
-
-
-## Owner correction2026-10-14: Clustering identity and multiline blocks
-- Use `KeyLoad.Clustering` for the project, source directory and root namespace. Update semantic references and current project/build/coverage maps together. This explicit namespace rename supersedes namespace preservation only for this module; preserve native serializer/grain aliases, field IDs, signed identities, persistence formats, scheduling and RF3/node-local ownership. Add no obsolete namespace shim or migration. Keep the distinct `KeyLoad.Core` database domain.
-- Use the Prostir root `.editorconfig` baseline with `csharp_preserve_single_line_blocks = false`, Allman `csharp_new_line_before_open_brace = all` and `dotnet_diagnostic.IDE0055.severity = error`. Executable control-flow, method and lambda brace blocks must span multiple lines. Never compress blocks to evade64code lines; preserve64/200/400/nesting3 limits and extract coherent responsibilities where needed.
-- Canonical full-solution `dotnet format KeyLoad.slnx --no-restore --verify-no-changes` and analyzer-enabled Release build remain required. Add no inline-block exemption or diagnostic suppression and do not substitute another formatter. Preserve genuine original TUnit/Aspire/Linux gates.
-
-## Orleans runtime ownership — owner correction2026-10-15
-
-- Orleans is the KeyLoad application runtime and host for node-local ZoneTree partition owners. Use one configured host and native silo lifecycle/GrainServices for owned startup, readiness, admission, cancellation and joined shutdown; do not retain a second independently managed silo/application host.
-- Reuse native Orleans membership, failure detection, distributed grain directory, placement, activation migration/repartitioning, grain turns, StatelessWorker, GrainServices, timers/reminders, Streams and approved Durable Jobs where their actual guarantees fit. Do not implement parallel membership, activation directories, RPC transports, schedulers or runtime liveness authorities.
-- Every internal node/partition/coordinator communication uses native typed Orleans grain or grain-service calls, native response streaming or the selected native stream provider. HTTP/MCP/SQL transports remain external client boundaries. Preserve existing native transports; a class named Transport or Peer is not evidence of HTTP duplication.
-- All test and benchmark container lifecycle and fault orchestration MUST run through the existing Aspire AppHost-owned resources and native resource commands. Test callers must not invoke engine CLI commands to run, start, restart, stop, kill or remove containers, or create independent cleanup containers. Preserve genuine SIGKILL fault semantics through a bounded command registered on the exact owned ephemeral test resource and invoked through ResourceCommandService; never substitute graceful Stop for an abrupt fault. The AppHost owns the selected resource identity, process and output-reader settlement, readiness, restart and shutdown. Fault commands must remain absent from ordinary product and comparison resources unless a separately authorized test-only composition explicitly selects them. Read-only container inspection may remain bounded identity evidence; it is not lifecycle ownership. Preserve native TUnit fixture entry and all original RF3, receipt, source/image, cancellation and cleanup gates under ADR-034, ADR-117 and ADR-136.
-- Remove the rejected low-level native-clock/ABI probes, generated clock-admission work, exclusive CI job, implementation, tests and active requirements. Use ordinary TimeProvider and original logged timestamps for their respective current-time/budget and deterministic apply contracts; no custom kernel clock service or clock-readiness blocker may be reintroduced.
-- Activation migration is native Orleans behavior. Open ZoneTree handles, file locks and ordered apply remain with the actual node-local owner; database replica transfer and RF3 durable receipts are domain data responsibilities, not a second implementation of Orleans membership or activation movement. Never equate directory replication with durable database replication.
-- Research the official documentation and exact installed package APIs before selecting primitives. Keep the canonical105-task plan foundation-first; first deliver a usable Aspire RF3 SDK/MCP operation with fresh persisted authorization, replay and restart. Advanced models, broad audits, benchmarks and release qualification follow that baseline without removing acceptance criteria.
-- Owner clarification2026-10-15: ZoneTree files are opened and owned by the silo-local Grain Service, with one joined physical lifetime through native silo lifecycle. Logical partition grains route to that service using current physical authority. Storage ownership never migrates with an activation; audit and select native placement/migration separately for each grain type, including a native opt-out when its locality invariant requires it. PreferLocalPlacement alone is not a pin or an authority fence.
-- Evaluate native Orleans Transactions for short multi-grain transactional-state operations. Its provider must participate in the canonical ZoneTree/RF3 contract before claiming database atomicity; arbitrary external writes do not enlist automatically. Preserve existing same-partition atomic batches and do not add a custom transaction runtime, duplicated authoritative state or an unapproved dependency. ADR-136 owns these boundaries and their concrete acceptance gates.
-
-
-## Owner correction: project folders, 2026-10-17
-
-- Every C# project under src/, tests/ and benchmarks/ keeps its named slices directly under the project directory: `<project>/<SliceName>/<Role>/`. Remove the intermediate `Features/` folder from every project. This explicitly supersedes all earlier project-path requirements containing that intermediate folder. Preserve the existing thematic folders inside Cases.
-- Keep namespaces, public and persisted identities, Orleans aliases and field IDs stable. Update live source paths, project items, resources, tooling, workflow inventories and local policies with each move. Scripts, site and durable documentation retain their current module paths; historical receipts retain their original source identities.
-
-- Owner naming correction 2026-10-17: use `Restore/` as the project folder for the backup/restore slice. The existing `docs/Features/BackupRestore.md` specification, namespaces, persisted identities and backup/restore operations keep their names and contracts.
-
-
-## Owner correction: runtime-only src, 2026-10-17
-
-- `src/` owns runtime database, server, SDK/CLI and runtime support only. Compiler analyzers belong in `analyzers/`; Aspire orchestration and shared build targets belong in `build/`. Tests remain under `tests/`, benchmark projects under `benchmarks/`. This supersedes earlier source-root paths and commands for moved infrastructure.
-- Current AppHost: `build/KeyLoad.AppHost/KeyLoad.AppHost.csproj`; current analyzer: `analyzers/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj`; compilation identity producer: `build/CodeQuality/FunctionalCompilationIdentity.targets`. Preserve source qualification, analyzer enforcement and every original RF3 and recovery gate.
-
-
-## Owner correction: visible process entry, 2026-10-17
-- Program.cs must show actual initialization, mode selection, host composition, run and joined shutdown. Do not replace it with a single Application.Run/RunAsync forwarding call or chain general application startup through one model such as TimeSeries.
-- Keep meaningful model operations and reusable resource registration in their owning code. Local process-lifecycle helpers may remain visible in Program.cs. Preserve ordering, CLI arguments, failure aggregation, cancellation, ownership, RF3, persisted identities and cleanup.
-- KLD0020 enforces this visible-entry requirement and supersedes its earlier thin-wrapper-only policy. Keep the rule enabled and regression-tested; this correction does not relax endpoint, authorization, boundedness or resource-safety rules.
-
-
-## Mandatory warnings-as-errors build, owner correction 2026-10-17
-
-- Every `dotnet build` invocation must use `-warnaserror`; warnings are build failures. Preserve central `TreatWarningsAsErrors` and `CodeAnalysisTreatWarningsAsErrors`. Do not disable analyzers, suppress diagnostics or lower severity to obtain a successful build.
-- After source/layout changes, run the canonical `dotnet format KeyLoad.slnx --no-restore` to apply required fixes, verify with `--verify-no-changes`, then build the complete solution in Release with `-warnaserror`. Repair reported compiler, formatting and analyzer failures and repeat the relevant checks. Record actual outcomes separately from the required TUnit, recovery, RF3 and Linux qualification gates.
-
-## Independent silo and replica counts, owner correction 2026-10-17
-
-- Ordinary deployments configure Orleans silo membership independently from the physical replication factor, including counts 1, 2, 3 and 5. Preserve RF3 as the default and all original RF3 qualification suites; the earlier fixed-three default is not a prohibition on independently configured deployments.
-- Replication factors must be positive and cannot exceed available silo nodes. Preserve majority acknowledgement, node-local ZoneTree ownership, persisted authorization and native Orleans membership. Additional coordination-only silos do not own physical replicas or expose database operations. Do not claim live replica resizing or storage-free database execution from startup configuration.
-- See docs/ADR/ADR-143-independent-silo-replica-topology.md. Even replica groups retain true majority semantics; RF2 requires both voters and RF1 has no replica fault tolerance.
-
-## Owner correction: configurable replication, 2026-10-17
-
-The owner rejects RF3 as an active product name or fixed copy-count restriction.
-`KeyLoad:SiloCount` configures cluster participants and `KeyLoad:ReplicaCount`
-independently configures physical copies (positive, no larger than the node count).
-Three is only the default. Product catalogs, routing, validation and restore use
-actual configured group sizes; no product operation may require exactly three
-copies. Preserve majority acknowledgement, native Orleans membership, node-local
-ZoneTree ownership, current credentials and immutable historical receipts. Explicit
-three-copy qualification scenarios remain examples with their true topology.
-
-The owner explicitly rejects `ClusterTopologyLimits` and a KeyLoad-imposed maximum
-silo count. Orleans exclusively owns cluster membership, failure detection,
-directory, placement and activation movement. Do not add a parallel cluster
-manager or reinterpret metadata/RPC byte budgets as a cluster-size restriction.
-
-## Super rule: Orleans is the whole cluster, owner correction 2026-10-18
-
-- Microsoft Orleans does all clustering: membership, silo discovery, failure detection, distributed grain directory, placement, activation migration/repartitioning, internal communication and scaling. Copying data to replicas also happens only through ordinary Orleans grain/Grain Service calls; `KeyLoad:ReplicaCount` is just the number of copies. KeyLoad MUST NOT design, implement or document its own clustering: no own consensus/terms/leaders/votes, membership tables or providers, silo discovery, peer transports, physical owner directories, shard catalogs, placement/packing/capacity managers, partition movement/transfer/split/merge protocols, ownership epochs/session tokens/leases for cluster authority, coordination-only silo roles or topology limits.
-- The whole execution concept is: public API → one Orleans grain per connected client → grains call the silo-local ZoneTree owner on their own node or on other nodes through Orleans, gather the results and return them. Every silo has its own ZoneTree that owns its files (stores, WAL, locks, ordered apply); files never move with activations. Write clear Orleans code for this; nothing more.
-- Documentation (Architecture, ADRs, feature specs, design docs, README) MUST describe only this concept. Delete documents and passages describing self-written cluster mechanisms instead of keeping them as history or open plans. This rule-specific owner direction supersedes every earlier root/local/ADR/feature requirement for KeyLoad-owned replica consensus, physical placement/movement, peer discovery/authentication protocols and coordination-only silos (including the 2026-10-17 coordination-only silo clause); keep persisted authorization, bounded admission, node-local ZoneTree ownership and real Aspire/TUnit SDK/MCP tests.
-- Owner correction 2026-10-18: background work (queue deadlines/due and recurring work, remote queue transfers, ANN projection, time-series chunking and similar) MUST NOT check leadership (`IsLeaderAsync()` or any leader/consensus gate). Use Orleans `[StatelessWorker]` grains: each worker accepts events, buffers them, and on an Orleans timer (for example every 5 seconds; the interval is a typed option) writes the batch to the database through the normal grain → ZoneTree owner path. This is the only accepted pattern for such work.
+## Product and runtime
+
+KeyLoad is one database for AI agents. Documents, typed tables, graphs,
+vectors/search, files/blobs, queues, events and time series share canonical entity
+references and can participate in the same authorized operation. SQL is the
+shared versioned language across these models. The product specification is
+`docs/design/product-specification.md`; `docs/Architecture.md` maps the current
+runtime. User instructions control scope and authorization.
+
+Microsoft Orleans owns the cluster: membership, discovery, failure detection,
+distributed grain directory, placement, activation movement, scheduling, internal
+communication and scaling. Enable the native distributed grain directory and
+activation repartitioner. Do not implement a second cluster runtime.
+
+The execution path is public API -> one server-owned Orleans grain per connected
+client -> database grains -> silo-local ZoneTree owners on the required nodes ->
+aggregate results -> caller. Independent operations on a connection have separate
+request IDs, cancellation and bounded resources. Stable command IDs deduplicate
+retries. Clients cannot choose trusted connection identities or roles.
+
+Every silo owns its own ZoneTree files, native WAL, locks and ordered apply gate.
+A silo-local Grain Service owns storage lifetime; local code borrows it through
+DI. Activations route operations and never move open files or storage handles.
+Replica copies use typed Orleans Grain Service calls to target silos found through
+native Orleans membership. `KeyLoad:SiloCount` and `KeyLoad:ReplicaCount` are
+independent positive startup settings; copies cannot exceed available silos.
+KeyLoad imposes no artificial silo-count limit. Acknowledgements must describe the
+actual persisted copies and tested failure contract.
+
+Background queue, ANN and time-series work uses Orleans `[StatelessWorker]`
+grains. Each activation accepts events, holds a bounded buffer and flushes on a
+native grain timer with a typed interval option. No leadership check gates this
+work. Durable delivery and idempotent effects are separate from an in-memory
+buffer. Grain Services own per-silo resources; workers own activation-local work.
+Choose native timers, reminders, Streams, Journaling and Durable Jobs by their
+actual lifetime and delivery guarantees, with bounded cancellation and shutdown.
+
+Every addressing identifier is created by one shared helper per identity kind.
+Grain and storage keys are case-sensitive; callers must not construct them by
+ad-hoc concatenation. Do not change user entity casing implicitly.
+
+## Data, authorization and integrations
+
+- ZoneTree is the canonical storage engine for every model. Use its native APIs,
+  bounded replay and ordered atomic commit/apply. Keep atomic partition identity
+  separate from Orleans activation placement.
+- Use ZoneTree.FullTextSearch for full-text indexing and ZoneTree.Analytics for
+  approved analytics integration. Derived indexes, caches and analytics never
+  become a second authority for database records or permissions.
+- Use native generated Orleans binary serialization with explicit stable
+  `[GenerateSerializer]`, `[Id]` and `[Alias]` contracts internally. Preserve raw
+  ZoneTree bytes, sortable keys, public JSON and exact user content. Introduce no
+  runtime serializer fallback or persisted-data migration.
+- SQL syntax uses Microsoft.SqlServer.TransactSql.ScriptDom. Compile supported
+  syntax into the same bounded authorized operations as SDK/MCP. Reject valid
+  unsupported ASTs explicitly before effects. Parsing, execution semantics and
+  native SQL-client interoperability are separate qualification gates.
+- ASP.NET Core Authentication and Authorization admit HTTP/SDK/MCP callers.
+  Tickets carry the verified subject only. Every operation checks fresh persisted
+  credentials and permissions. ManagedCode.Orleans.Identity propagates verified
+  call-local context and restores it after asynchronous work.
+- Use ManagedCode.Communication native commands, results and CQRS response streams.
+  Reuse its producer, transport, cancellation and settlement APIs. KeyLoad owns
+  authorization, operation identity, payload validation and resource bounds.
+- Use the official MCP C# SDK and ManagedCode.MCPGateway for on-demand tool
+  discovery. ManagedCode.MarkdownLd.Kb supplies approved graph-based tool search.
+  Discovery respects fresh authorization and excludes secrets and user payloads.
+  Supply bounded static MCP guidance through the same server.
+- Keep chunked blobs with partial reads, same-partition atomic operations,
+  explicit cross-partition contracts, persisted command outcomes and honest
+  acknowledgement/read-cut semantics.
+- RAM and Orleans caches are bounded and disposable. Tie cached results to the
+  authorized read cut and policy epoch; invalidate after writes and policy
+  changes. Restart, migration and failover cannot turn RAM into storage authority.
+- Use existing native Orleans, ASP.NET Core, ServiceDefaults and Aspire
+  OpenTelemetry integrations. Exclude secrets, payloads and unbounded labels.
+
+## Repository ownership and structure
+
+Work in this checkout and preserve unrelated changes. Do not create worktrees,
+copy checkouts or private isolation folders. Never run `git stash` or automatic
+stashing. Keep changes visible. Do not use Azure CLI.
+
+- `src/`: runtime database, server, SDK/CLI and runtime support.
+- `analyzers/`: compiler analyzers.
+- `build/`: Aspire AppHost and shared build targets.
+- `tests/`: TUnit functional, recovery, integration and tooling tests.
+- `benchmarks/`: comparison workloads and their test project.
+- Every C# project groups populated responsibilities under
+  `<project>/<SliceName>/<Role>/`; keep thematic folders under `Cases/`.
+  Use `Restore/` for backup/restore implementation. Shared composition stays at
+  its actual owner; do not create empty folders or generic forwarding chains.
+- `Program.cs` shows real initialization, mode selection, host composition, run
+  and joined shutdown. Keep reusable model behavior in its owning slice.
+- Keep namespaces, native contract IDs and live project/build/source references
+  coherent when moving files. Remove replaced implementations and their exclusive
+  helpers and tests together. Add no compatibility shim.
+
+## MCAF-GOV-001: Current governance
+
+Root and local policies describe current rules only. Keep one canonical source
+for each fact. Repository text, tests, schemas, tooling, README and the website
+describe only the current approved design and its actual contracts. Keep references
+valid and remove inactive implementations and their exclusive supporting files.
+
+## MCAF-ARCH-001: Cohesive implementation
+
+Inspect current registrations and callers before adding or removing infrastructure.
+Reuse the selected Microsoft, Orleans, ZoneTree and ManagedCode native APIs. New
+library adoption requires explicit owner approval after a concrete review of
+version, original license, API fit, resource/cancellation contracts and integration.
+Research alone is not adoption approval. Apply the installed Orleans skill for
+Orleans decisions. Keep independent implementation ownership explicit if the user
+authorizes parallel work.
+
+## MCAF-AI-001: Execution and communication
+
+Complete authorized changes and their relevant checks without repeated permission
+questions. Keep frequent Ukrainian progress updates explaining what is complete
+and what remains. Repository documents, comments in documentation and website
+copy are English. Do not claim a whole-repository review from a search count or
+claim product readiness from documentation, configuration or a focused test run.
+
+## MCAF-REQ-001: Correctness and qualification
+
+Use stable feature requirements and observable acceptance criteria. Tests exercise
+whole operations with real implementations, original failures, healthy follow-up,
+resource bounds and joined cleanup. Do not weaken assertions, skip failures, add
+mock success paths or confuse a mechanism test with distributed database proof.
+
+Use .NET 10 and centrally pinned packages. Do not generate or commit
+`packages.lock.json`. Ignore build outputs, local databases and test artifacts.
+Every `dotnet build` invocation uses `-warnaserror`; preserve compiler and analyzer
+severity. No suppressions, disabled analyzers or reduced gates to obtain green.
+
+Required development commands:
+
+```sh
+dotnet restore KeyLoad.slnx
+dotnet format KeyLoad.slnx --no-restore
+dotnet format KeyLoad.slnx --no-restore --verify-no-changes
+dotnet build KeyLoad.slnx --no-restore --configuration Release -warnaserror
+node scripts/Features/RepositoryGovernance/verify.mjs
+```
+
+Use native TUnit/Microsoft.Testing.Platform entry after build, with Detailed output.
+C# fixtures own Aspire startup, readiness, discovered endpoints, real SDK and
+MCP clients, fault injection and joined cleanup. AppHost owns all container
+lifecycle and resource commands; tests never start independent containers or
+substitute graceful shutdown for an abrupt fault. Unit and process tests use
+only the infrastructure they actually require. Package server containers with
+native .NET SDK `PublishContainer`; do not maintain a product Dockerfile.
+
+Complete solution build, unit tests, real process recovery, actual Aspire cluster
+SDK/MCP operations, coverage and fault/endurance checks remain distinct mandatory
+gates. Run focused tests during implementation and report their exact scope.
+Delivered-source qualification and benchmarks use Linux GitHub Actions and
+original artifacts. `gh workflow run build-and-tests.yml` dispatches functional
+qualification. Process-kill recovery does not prove power-loss durability.
+
+Preserve `.editorconfig`, Allman multiline executable blocks and numeric gates:
+64 code lines per method, 200 per type, 400 per file, nesting depth 3, and the
+configured coverage thresholds (80 line / 70 branch, 90 for critical modules).
+Keep generated-code/source identities, native reports and executable source
+inventories truthful; do not exclude product code to improve coverage.
+
+## Performance and comparisons
+
+Use native .NET SIMD/intrinsics in normal supported execution. Validate required
+hardware; scalar arithmetic is limited to tails and independent correctness
+oracles. Do not add a product SIMD-disable mode.
+
+Use `dotnet-diagnostics-mcp` and the installed profiling skill on actual processes
+before selecting optimizations. Retain source/DLL/PDB/process, workload and
+capture identities, overhead and matched before/after evidence. A trace alone
+proves no performance improvement.
+
+Comparisons use native one-node and three-node topologies, 100,000 and 1,000,000
+actual records, at least 100,000 measured operations per applicable cell, and the
+shared pure/mixed/ingestion/search scenario inventory (including 1/10/500 clients).
+Keep corpus, operation schedule, acknowledgement/durability, resources and result
+oracles equivalent. Each database/topology/scenario has an isolated Linux runner.
+Unsupported capabilities are unavailable cells, never fabricated numbers.
+
+Keep named database job groups and original per-worker JSON. One authenticated
+aggregation validates complete comparable source/run/attempt/topology evidence.
+Only original GitHub Benchmarks artifacts can produce public figures. Website
+publication is independent and can publish product content without figures when
+no qualified measurements exist. Build and Tests, Benchmarks, Website and manual
+Release retain their separate responsibilities and least-privilege permissions.
+
+## Dependency ownership and delivery
+
+`ManagedCode.*` projects and packages are ours. A confirmed defect is fixed in its
+owning sibling repository after reading its policy. Do not replace the dependency,
+copy its implementation or hide the defect with a consumer workaround.
+
+Batch all confirmed defects in that repository, add focused regressions,
+self-review, run its required checks, increment the canonical patch version once,
+commit and push scoped changes, and follow the release workflow until successful.
+Verify actual NuGet availability before updating each consumer once and running
+its focused regressions. These scoped commits, pushes and releases are authorized.
+An unpublished local package or project reference is not delivery. Report exact
+infrastructure, credential or source blockers.
+
+For confirmed ZoneTree, ZoneTree.FullTextSearch or ZoneTree.Analytics defects,
+check for a matching upstream issue and publish bounded reproducible evidence to
+the owning repository. Include exact version/source, environment, operation flow,
+expected/actual results and impact; separate verified causes from hypotheses and
+exclude secrets. This scoped publication is authorized and is not acceptance
+proof or permission for an engine replacement or unpublished workaround.
+
+Commit each completed implementation checkpoint on the current branch, stating
+actual verification. When asked to commit all changes, include the complete
+requested working-tree scope. Stable scoped KeyLoad commits and pushes to main
+are authorized. Never force-push or bypass protections.
+
+## Licensing and documentation
+
+KeyLoad distributions use the unmodified Elastic License 2.0 and are described as
+source available. Application use is permitted; third-party hosted/managed
+services require ManagedCode authorization. Keep README, website and packages
+consistent with the authoritative root `LICENSE`; preserve every dependency's
+original license and notices and validate license text against its publisher.
+
+Keep `docs/implementation/status.json` and README honest about actual source and
+open qualification gates. Documentation presents the current design, valid
+contracts and actual qualification limits. Readiness, demand, savings and
+performance claims require their own evidence.

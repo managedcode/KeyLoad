@@ -7,18 +7,18 @@ namespace KeyLoad.IntegrationTests.Features.BlobStorage;
 
 internal static class BlobBoundedRetirementPublicReplay
 {
-    internal static async Task MatchingAsync<T>(RequestCqrsRf3Callers callers, string tool, object request,
+    internal static async Task MatchingAsync<T>(RequestCqrsClusterCallers callers, string tool, object request,
         T expected, Func<CancellationToken, Task<ManagedCode.Communication.Result<T>>> invoke,
         Func<Task> observe, CancellationToken token)
     {
-        await SqlRf3Protocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(await invoke(token)));
+        await SqlClusterProtocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(await invoke(token)));
         await observe();
-        await SqlRf3Protocol.EqualAsync(expected,
+        await SqlClusterProtocol.EqualAsync(expected,
             (await McpCallerAssertions.SuccessAsync<T>(await callers.Mcp.CallAsync(tool, request, token))).Value);
         await observe();
     }
 
-    internal static async Task PublicationAsync(RequestCqrsRf3Callers callers,
+    internal static async Task PublicationAsync(RequestCqrsClusterCallers callers,
         BlobBoundedRetirementPublicPublication.Published old, Func<Task> observe, CancellationToken token)
     {
         await MatchingAsync(callers, "keyload_blobs_begin_upload", old.Begin, old.Begun,

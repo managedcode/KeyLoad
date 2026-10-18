@@ -121,10 +121,10 @@ internal sealed class RawStorageReportValidatorTests
     }
 
     [Test]
-    public async Task AcGe005RejectsRemovedTsavoriteReportLabel()
+    public async Task AcGe005RejectsUnconfiguredEngineReportLabel()
     {
-        var report = RawStorageReportData.CreateValidReport(engine: "tsavorite");
-        var response = await RawStorageReportNodeProcess.ValidateAsync(report, "tsavorite", [ValidScenario],
+        var report = RawStorageReportData.CreateValidReport(engine: "unconfigured-engine");
+        var response = await RawStorageReportNodeProcess.ValidateAsync(report, "unconfigured-engine", [ValidScenario],
             TestContext.Current!.Execution.CancellationToken);
         await Assert.That(response.ExitCode).IsEqualTo(0);
         await Assert.That(response.Cases.Single().Accepted).IsFalse();

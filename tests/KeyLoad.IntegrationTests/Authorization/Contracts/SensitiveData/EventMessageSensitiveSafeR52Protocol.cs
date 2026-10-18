@@ -6,9 +6,9 @@ internal static class EventMessageSensitiveSafeR52Protocol
     internal const string First = "safe-first";
     internal const string Second = "safe-second";
     internal const string EventType = "SafeSensitiveInput";
-    internal const string Canary = "SAFE_ABSENT_RF3_LITERAL_CANARY";
+    internal const string Canary = "SAFE_ABSENT_CLUSTER_LITERAL_CANARY";
     internal const string MissingPath = "/absent-sensitive";
-    internal const string Payload = "{\"public\":{\"items\":[\"Київ\",null,2]},\"note\":\"SAFE_ABSENT_RF3_LITERAL_CANARY\"}";
+    internal const string Payload = "{\"public\":{\"items\":[\"Київ\",null,2]},\"note\":\"SAFE_ABSENT_CLUSTER_LITERAL_CANARY\"}";
     internal const string Headers = "{\"trace\":[\"α\",null],\"n\":null}";
     internal const string UnavailableDetail = "The credential is unavailable or expired.";
     internal const string ChangedPolicyDetail = "The principal policy changed since this command was evaluated.";

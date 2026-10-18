@@ -22,7 +22,7 @@ internal sealed class PostgresTopology(IOptions<ComparisonLifecycleOptions> life
     private const string Streaming = "streaming";
     private const string Quorum = "quorum";
     private const string SingleState = "single primary, no replicas";
-    private const string ReplicatedState = "primary plus two streaming physical standbys; RF3 one shard; synchronous ANY 1 quorum";
+    private const string ReplicatedState = "primary plus two streaming physical standbys; CLUSTER one shard; synchronous ANY 1 quorum";
     private const string ReplicaFailure = "PostgresReplicationReceiptMissing";
     private const string ReplicatedAcknowledgement = "fsync=on; synchronous_commit=on; primary WAL flush plus one of two standby WAL flushes";
     private const string CopyObservation = "Named standbys flushed and replayed seeded corpus through WAL ";

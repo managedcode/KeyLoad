@@ -21,7 +21,7 @@ internal static class FunctionalGateUserAnalyticsReads
             context.Reader.Sdk.AggregateAnalyticsAsync(query, token)), aggregate);
         await FunctionalGateUserAnalyticsAssertions.EqualAsync(await context.McpAsync<AnalyticsAggregateResult>(context.Reader,
             AnalyticsStoreProtocol.AggregateTool, query, token), aggregate);
-        var sql = SqlRf3Protocol.Call(context.Partition, AnalyticsStoreProtocol.AggregateTool, query);
+        var sql = SqlClusterProtocol.Call(context.Partition, AnalyticsStoreProtocol.AggregateTool, query);
         await FunctionalGateUserAnalyticsAssertions.EqualAsync(await FunctionalGateCompositionCalls.SqlAsync<AnalyticsAggregateResult>(
             context, sql, official: false, write: false, token), aggregate);
         await FunctionalGateUserAnalyticsAssertions.EqualAsync(await FunctionalGateCompositionCalls.SqlAsync<AnalyticsAggregateResult>(
@@ -43,7 +43,7 @@ internal static class FunctionalGateUserAnalyticsReads
             FunctionalGateUserAnalyticsState.Record(state.Third, P.FirstRevision)], false, null);
         await FunctionalGateUserAnalyticsAssertions.EqualAsync(await context.McpAsync<AnalyticsEventsPage>(context.Reader,
             AnalyticsStoreProtocol.ReadTool, request, token), expected);
-        var sql = SqlRf3Protocol.Call(context.Partition, AnalyticsStoreProtocol.ReadTool, request);
+        var sql = SqlClusterProtocol.Call(context.Partition, AnalyticsStoreProtocol.ReadTool, request);
         await FunctionalGateUserAnalyticsAssertions.EqualAsync(await FunctionalGateCompositionCalls.SqlAsync<AnalyticsEventsPage>(
             context, sql, official: false, write: false, token), expected);
         await FunctionalGateUserAnalyticsAssertions.EqualAsync(await FunctionalGateCompositionCalls.SqlAsync<AnalyticsEventsPage>(

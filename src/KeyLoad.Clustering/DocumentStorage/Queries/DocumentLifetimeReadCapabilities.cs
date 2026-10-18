@@ -24,8 +24,6 @@ internal static class DocumentLifetimeReadCapabilities
         {
             GrainReadKind.OwnedDocumentV2 => Owned(database, limits, clock, principal, request.Envelope,
                 GrainNativePayload.Read<OwnedDocumentReadRequestV2>(request.Payload), binding, token),
-            GrainReadKind.ControlledDocumentV2 => Controlled(database, limits, clock, principal, request.Envelope,
-                GrainNativePayload.Read<ControlledDocumentReadRequestV2>(request.Payload), binding, token),
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest)
         };
     }
@@ -41,23 +39,6 @@ internal static class DocumentLifetimeReadCapabilities
         var work = Work(limits, clock, request.MaximumReadBytes, request.MaximumExaminedRecords, request.MaximumResultBytes, token);
         var grant = work.CreateReadGrant(request.MaximumReadBytes, request.MaximumExaminedRecords);
         var result = new OwnedDocumentReadResultV2(database.ReadOwnedDocumentV2Bound(principal.Id, request, work, grant, binding),
-            grant.ReadBytes, grant.ExaminedRecords);
-        work.CheckResult(result);
-        return result;
-    }
-
-    private static ControlledDocumentReadResultV2 Controlled(DatabaseEngine database, IOptions<DatabaseLimits> limits,
-        TimeProvider clock, PrincipalRecord principal, GrainRequestEnvelope envelope,
-        ControlledDocumentReadRequestV2 request, IResourceLifetimeWorkBinding binding, CancellationToken token)
-    {
-        GrainRequestAuthority.RequireAdministrator(principal);
-        if (request.Frame is null || request.Frame.Original is null || request.Frame.Original.ExpiresAt != envelope.ExpiresAt)
-        {
-            throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
-        }
-        var work = Work(limits, clock, request.MaximumReadBytes, request.MaximumExaminedRecords, request.MaximumResultBytes, token);
-        var grant = work.CreateReadGrant(request.MaximumReadBytes, request.MaximumExaminedRecords);
-        var result = new ControlledDocumentReadResultV2(database.ReadControlledDocumentV2Bound(principal.Id, request.Frame, work, grant, binding, token),
             grant.ReadBytes, grant.ExaminedRecords);
         work.CheckResult(result);
         return result;

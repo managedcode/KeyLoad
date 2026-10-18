@@ -21,7 +21,7 @@ internal static class MalformedCredentialAuthorityRefusals
         foreach (var header in new[] { UnsupportedSchemePrefix + state.Identity.Secret, McpCallerProtocol.BearerScheme })
         {
             await RefusedAsync(http, header, state.Identity.Secret, token);
-            await SqlRf3Protocol.EqualAsync(before, await InitialCredentialAuthorityValues.ImageAsync(root, state, token));
+            await SqlClusterProtocol.EqualAsync(before, await InitialCredentialAuthorityValues.ImageAsync(root, state, token));
         }
     }
 

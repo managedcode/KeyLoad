@@ -23,7 +23,7 @@ internal static class FunctionalGateColdScenario
                 : await FunctionalGateFixture.StartColdAsync(nodes, lifetime.Token);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                var state = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, fixture.NodeNames[0], fixture.AdminKey,
+                var state = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, fixture.NodeNames[0], fixture.AdminKey,
                     administrator => FunctionalGateColdProvision.CreateAsync(administrator, lifetime.Token), lifetime.Token);
                 state = await FunctionalGateColdCallers.RunAsync(fixture, state,
                     context => FunctionalGateColdSeed.RunAsync(context, state, lifetime.Token), lifetime.Token);

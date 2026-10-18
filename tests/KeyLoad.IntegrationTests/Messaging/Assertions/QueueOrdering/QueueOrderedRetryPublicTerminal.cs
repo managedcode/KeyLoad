@@ -4,7 +4,7 @@ namespace KeyLoad.IntegrationTests.Features.Messaging;
 
 internal static class QueueOrderedRetryPublicTerminal
 {
-    internal static async Task RunAsync(RequestCqrsRf3Callers callers, QueueOrderedRetryPublicState state, bool healthy, CancellationToken token)
+    internal static async Task RunAsync(RequestCqrsClusterCallers callers, QueueOrderedRetryPublicState state, bool healthy, CancellationToken token)
     {
         await QueueLifecyclePublicAssertions.LiteralAsync(callers, state.Caller, QueueOrderedRetryPublicProtocol.First,
             new(QueueOrderedRetryPublicProtocol.First, MessageState.Acked, QueueOrderedRetryPublicProtocol.One,

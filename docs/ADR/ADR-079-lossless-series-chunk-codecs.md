@@ -1,11 +1,6 @@
 # ADR-079 — Bounded lossless time-series chunk codec qualification
 
-Status: Accepted; codec source and local development verification delivered.
-Exact-source Linux and subsequent canonical layout qualification remain pending.
-Related: KL-078, REQ-SERIES-006/017–020 and AC-CHUNK-001–006 in
-[TimeSeries](../Features/TimeSeries.md), architecture §27.6, ADR-035 and ADR-073.
-The owner authorized completing the implementation plan; root owns this bounded
-contract and the integration review.
+Status: Accepted; codec source and local development verification delivered. Exact-source Linux and subsequent canonical layout qualification remain pending. Related: REQ-SERIES-006/017–020 and AC-CHUNK-001–006 in [TimeSeries](../Features/TimeSeries.md), architecture §27.6, ADR-035 and ADR-073.
 
 ## Decision and boundaries
 
@@ -14,12 +9,12 @@ SampleRecord oracle before choosing a canonical chunk layout. This stage does
 not write chunk records, replace sample keys, change append acceptance, persist
 a second authority, or alter the current native storage contract. Samples, sample-id
 receipts, sequence counters and retention floors remain canonical ZoneTree data.
-PartitionHost keeps all physical ownership; this codec owns only transient
-buffers. Ordinary request grains and RF3 operation contracts remain unchanged.
+The silo-local ZoneTree owner keeps all storage ownership; this codec owns only transient
+buffers. Ordinary connection grains and replicated operation contracts remain unchanged.
 
 Any future canonical chunk layout requires its own storage-layout decision,
 measured codec choice, correction-generation recovery and all reader, retention
-and RF3 joins. Removing the transient candidate is the rollback for this stage;
+and cluster joins. Removing the transient candidate is the rollback for this stage;
 no canonical data conversion is performed and current SampleRecord aliases, IDs
 and native bytes remain unchanged.
 
@@ -128,64 +123,16 @@ Oversized supplied envelope is BudgetExceeded before native parsing.
 Operation cancellation remains OperationCanceledException and deadline/work
 exhaustion remains BudgetExceeded. Failure cannot mutate canonical source data.
 
-## Ordered implementation, ownership and join
+## Implementation and verification
 
-1. TASK-CHUNK-CONTRACT, root: this ADR, TimeSeries requirements, task graph and
-   exact source/qualification boundaries. Start before delegated writes.
-2. TASK-CHUNK-CODEC, lifecycle_wave Luna/high: new Core SampleChunk payload,
-   codec and cohesive bounded column/checksum/validation helpers only. Existing
-   writers, readers, public DTOs, aliases and central configuration are forbidden.
-3. TASK-CHUNK-ORACLE, query_wave Luna/high: new UnitTests TimeSeries SampleChunk
-   roundtrip/content/date-edge/bit/format/corruption/budget tests and independent
-   fixture only. Do not derive expected values from the decoder or use mocks.
-4. TASK-CHUNK-STORE-ORACLE, cluster_wave Luna/high: disjoint new real-ZoneTree
-   SampleChunkStore* tests. Charge/read one actual cut, compare late/equal/dedup
-   source records and exact source invariance after codec failures/reopen; do not
-   invent a production chunk key or claim physical correction recovery.
-5. TASK-CHUNK-MEASURE, root: labelled BenchmarkDotNet encode/decode and retained
-   bytes/sample controls in BenchmarkScenarios `Features/BenchmarkComparisons/`,
-   under the shared BenchmarkComparisons measurement feature, using native
-   per-record persistence as the comparator. Preserve the existing executable's
-   typed switcher and public generated-consumer fixture convention.
-   Add only the exact benchmark friend visibility needed. Each result records
-   source, machine, corpus and actual serialized bytes; these small controls are
-   not database scale/comparison evidence or a public acceleration claim.
-   New UnitTests `Features/BenchmarkComparisons/SampleChunkBenchmark*` own
-   the fixture metadata and real external generated-consumer execution oracle;
-   the existing bounded child/capture owner is reused without changing it.
-   TASK-CHUNK-PROVENANCE, cluster_wave Luna/high, owns only new
-   `scripts/Features/BenchmarkComparisons/sample-chunk-development*.mjs`.
-   A bounded development CLI captures the complete tracked/untracked nonignored
-   source inventory and actual Release benchmark dependency DLLs, including Core,
-   before execution. It sets the frozen manifest environment, awaits the real
-   BenchmarkDotNet child and validates all36 original cases and9 corpus manifests.
-   It refuses changed source/binaries, missing/duplicate cases, failed execution,
-   mismatched source or corpus and substituted artifacts. A new owned output
-   directory holds original reports, bounded logs, inventories and a derived
-   receipt explicitly marked local development only. Default settings match the
-   fixture's1 launch,3 warmups,8 measurements and100ms iteration time, with
-   explicit DontRemove outlier mode retaining every actual measurement; optional
-   Dry mode remains an execution oracle with no performance qualification.
-   No existing public/GitHub evidence module, workflow or website is modified.
-   TASK-CHUNK-PROVENANCE-ORACLE, lifecycle_wave Luna/high, owns only new UnitTests
-   BenchmarkComparisons `SampleChunkBenchmarkRejection*` helpers. After the real
-   Dry consumer completes, validate its receipt and reject independently corrupted
-   copies of its original reports/manifests: missing or duplicated cases, wrong
-   launch/settings/parameters, nonpositive measurements, source-hash mismatch and
-   forbidden qualification flags. Leave all originals byte-exact. Execute the
-   actual checked-in validators in a bounded awaited child inside TUnit/Aspire;
-   supplied parser fixtures never become measured or authenticated evidence.
-6. TASK-CHUNK-JOIN, root: inspect every diff and acceptance mapping, enforce
-   numeric complexity, strict full build/formatter/governance, run actual TUnit
-   through Aspire, retain original reports and commit/push the completed stage.
-   Exact-source normal/scalar Linux CI remains required. Canonical storage,
-   correction recovery, retention rewrite and RF3 stay pending until
-   the separate layout contract and genuine tests exist.
+1. The ADR, TimeSeries requirements and exact source/qualification boundaries come first. Existing writers, readers, public DTOs, aliases and central configuration are not changed.
+2. Do not derive expected values from the decoder or use mocks. Charge/read one actual cut, compare late/equal/dedup source records and exact source invariance after codec failures/reopen; do not invent a production chunk key or claim physical correction recovery.
+3. Labelled BenchmarkDotNet encode/decode and retained bytes/sample controls in BenchmarkScenarios `Features/BenchmarkComparisons/`, under the shared BenchmarkComparisons measurement feature, using native per-record persistence as the comparator. Preserve the existing executable's typed switcher and public generated-consumer fixture convention. Add only the exact benchmark friend visibility needed. Each result records source, machine, corpus and actual serialized bytes; these small controls are not database scale/comparison evidence or a public acceleration claim. New UnitTests `Features/BenchmarkComparisons/SampleChunkBenchmark*` own the fixture metadata and real external generated-consumer execution oracle; the existing bounded child/capture owner is reused without changing it. A bounded development CLI captures the complete tracked/untracked nonignored source inventory and actual Release benchmark dependency DLLs, including Core, before execution. It sets the frozen manifest environment, awaits the real BenchmarkDotNet child and validates all36 original cases and9 corpus manifests. It refuses changed source/binaries, missing/duplicate cases, failed execution, mismatched source or corpus and substituted artifacts. A new owned output directory holds original reports, bounded logs, inventories and a derived receipt explicitly marked local development only. Default settings match the fixture's1 launch,3 warmups,8 measurements and100ms iteration time, with explicit DontRemove outlier mode retaining every actual measurement; optional Dry mode remains an execution oracle with no performance qualification. No existing public/GitHub evidence module, workflow or website is modified. After the real Dry consumer completes, validate its receipt and reject independently corrupted copies of its original reports/manifests: missing or duplicated cases, wrong launch/settings/parameters, nonpositive measurements, source-hash mismatch and forbidden qualification flags. Leave all originals byte-exact. Execute the actual checked-in validators in a bounded awaited child inside TUnit/Aspire; supplied parser fixtures never become measured or authenticated evidence.
+4. Inspect every diff and acceptance mapping, enforce numeric complexity, strict full build/formatter/governance, run actual TUnit through Aspire, and retain original reports. Exact-source normal/scalar Linux CI remains required. Canonical storage, correction recovery, retention rewrite and cluster qualification stay pending until the separate layout contract and genuine tests exist.
 
-Coding workers stop and escalate on contract ambiguity, bound/compatibility
-conflict, shared-file changes or any proposed canonical storage integration.
+Contract ambiguity, bound/compatibility conflict, shared-file changes or any proposed canonical storage integration require escalation.
 Unit/store suites prove codec behavior only. Process-kill, power-loss, endurance,
-database performance and complete KL-078 acceptance are not inferred from them.
+database performance and complete acceptance are not inferred from them.
 
 ## Development evidence
 
@@ -196,5 +143,5 @@ results, Aspire normal/scalar2852/2852 reports, two real36-case Dry consumers an
 control retains all8 measurements,3 warmups,9 actual corpora and original
 encode/decode cost, allocations and native-envelope bytes for1/32/256 samples.
 Both the initial failed validator/settings integration and its originals remain
-recorded. Canonical storage, rewrite/correction recovery, RF3 and delivered-source
+recorded. Canonical storage, rewrite/correction recovery, cluster and delivered-source
 Linux qualification are still open.

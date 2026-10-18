@@ -5,7 +5,7 @@ namespace KeyLoad.Server;
 
 internal static class ConnectionGrainGraphRegistration
 {
-    internal static void Register(ISiloBuilder silo, bool privateProbe)
+    internal static void Register(ISiloBuilder silo)
     {
         silo.AddOrleansGraph(configureGraph: graph =>
         {
@@ -30,12 +30,6 @@ internal static class ConnectionGrainGraphRegistration
                 .AddGrainTransition<IConnectionGrain, ICommandPartitionGrain>()
                 .MethodByName(nameof(IConnectionGrain.ExecuteStreamAsync), nameof(ICommandPartitionGrain.ExecuteAsync))
                 .MethodByName(nameof(IConnectionGrain.ExecuteStreamAsync), nameof(ICommandPartitionGrain.PrepareOriginalCommandAsync)).And();
-            if (privateProbe)
-            {
-                graph.AllowClientCallGrain<IManagementGrain>()
-                    .AddGrainTransition<IConnectionGrain, IManagementGrain>()
-                    .MethodByName(nameof(IConnectionGrain.ExecuteStreamAsync), nameof(IManagementGrain.GetActiveGrains)).And();
-            }
         });
     }
 }

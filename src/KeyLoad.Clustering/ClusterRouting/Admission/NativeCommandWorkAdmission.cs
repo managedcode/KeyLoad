@@ -66,7 +66,6 @@ internal static class NativeCommandWorkAdmission
         => kind == OperationKind.Batch && request.Envelope.Purpose == global::KeyLoad.Core.Features.Messaging.RemoteTransferPeerProtocol.GrainPurpose
             && RemoteTransferRequestScope.Validate(request.Envelope)
             || kind is OperationKind.RemoteGraphSource or OperationKind.RemoteGraphReceive or OperationKind.RemoteGraphComplete
-            or OperationKind.EventFeedControl or OperationKind.EventFeedSourcePhase or OperationKind.PlacementIntentPhase
-            or OperationKind.PartitionMovementPhase or OperationKind.OnlineTextPublicationPhase
+            or OperationKind.EventFeedControl or OperationKind.EventFeedSourcePhase or OperationKind.OnlineTextPublicationPhase
             or OperationKind.Bm25CorpusPublicationPhase or OperationKind.ResourceRetirementPhase;
 }

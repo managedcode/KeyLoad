@@ -13,15 +13,15 @@ internal static class PhysicalShardCatalogStoppedOracle
     private const long InitialPlacementEpoch = 1;
     private const int CurrentCatalogVersion = 1;
 
-    internal static async Task VerifyAsync(string dataRoot, NodeEpochRf3Profile profile,
+    internal static async Task VerifyAsync(string dataRoot, NodeEpochClusterProfile profile,
         CancellationToken cancellationToken)
     {
-        for (var index = 0; index < RequestCqrsRf3Protocol.NodeCount; index++)
+        for (var index = 0; index < RequestCqrsClusterProtocol.NodeCount; index++)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var node = RequestCqrsRf3Protocol.NodeName(index);
+            var node = RequestCqrsClusterProtocol.NodeName(index);
             var nodeRoot = Path.Combine(dataRoot, node);
-            var options = NodeEpochRf3OfflineOptions.Create(nodeRoot, profile, node);
+            var options = NodeEpochClusterOfflineOptions.Create(nodeRoot, profile, node);
             var configured = options.CreateReplicaConfiguration(Path.GetFullPath(nodeRoot));
             await using var host = await PartitionHost.OpenAsync(ServerRuntimeTestOptions.Runtime(options), new AuthorizationPolicy(), new CommandAdmissionGovernor(IntegrationAdmissionOptions.Command(options.CommandAdmission)), TimeProvider.System, NullLogger<ReplicaConsensus>.Instance).ConfigureAwait(false);
             var catalog = host.Database.ReadPhysicalShardCatalog(PartitionStoreProtocol.AdministratorId);

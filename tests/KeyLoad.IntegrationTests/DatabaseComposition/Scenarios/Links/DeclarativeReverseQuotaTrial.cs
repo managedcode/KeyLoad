@@ -12,7 +12,7 @@ internal static class DeclarativeReverseQuotaTrial
     private const string MissingHolder = "The original quota holder is unavailable.";
     private const string MissingClaim = "The quota holder original claim is unavailable.";
 
-    internal static async Task<DeclarativeReverseQuotaState> ReleaseAsync(RequestCqrsRf3Callers callers,
+    internal static async Task<DeclarativeReverseQuotaState> ReleaseAsync(RequestCqrsClusterCallers callers,
         DeclarativeReverseQuotaState state, CancellationToken token)
     {
         var request = new ReceiveRequest(Guid.NewGuid(), new(state.Scenario.Partition, DeclarativeReverseQuotaFlow.Target),
@@ -33,9 +33,9 @@ internal static class DeclarativeReverseQuotaTrial
         var leased = new MessageInspection(new(HolderId, MessageState.Leased, 1, 2L, 1L, null, null,
             inspection.Metadata.LeaseOwner, 1L, delivery.LeaseUntil), Payload, Headers);
         await MessageAsync(callers, request.Lane, leased, token);
-        await SqlRf3Protocol.EqualAsync(claim,
+        await SqlClusterProtocol.EqualAsync(claim,
             await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ReceiveAsync(request, token)));
-        await SqlRf3Protocol.EqualAsync(claim, (await McpCallerAssertions.SuccessAsync<ReceiveResult>(
+        await SqlClusterProtocol.EqualAsync(claim, (await McpCallerAssertions.SuccessAsync<ReceiveResult>(
             await callers.Mcp.CallAsync(McpCallerTools.MessagesReceive, request, token))).Value);
         var ack = new DeliveryCommand(Guid.NewGuid(), request.Lane, delivery.Token, DeliveryAction.Ack);
         var receipt = (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
@@ -52,15 +52,15 @@ internal static class DeclarativeReverseQuotaTrial
         };
     }
 
-    internal static async Task HistoryAsync(RequestCqrsRf3Callers callers,
+    internal static async Task HistoryAsync(RequestCqrsClusterCallers callers,
         DeclarativeReverseQuotaState state, CancellationToken token)
     {
-        await SqlRf3Protocol.EqualAsync(state.Target, await McpCallerAssertions.SdkSuccessAsync(
+        await SqlClusterProtocol.EqualAsync(state.Target, await McpCallerAssertions.SdkSuccessAsync(
             await callers.Sdk.ConfigureResourceAsync(state.ConfigureId,
                 new(state.Scenario.Partition.TenantId, state.Scenario.Partition.DatabaseId, state.Target), token)));
-        await SqlRf3Protocol.EqualAsync(state.HolderReceipt,
+        await SqlClusterProtocol.EqualAsync(state.HolderReceipt,
             await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.CommitAsync(state.Holder, token)));
-        await SqlRf3Protocol.EqualAsync(state.HolderReceipt, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
+        await SqlClusterProtocol.EqualAsync(state.HolderReceipt, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
             await callers.Mcp.CallAsync(McpCallerTools.DocumentsCommit, state.Holder, token))).Value);
         var lane = new QueueLaneRef(state.Scenario.Partition, DeclarativeReverseQuotaFlow.Target);
         if (state.HolderAck is not { } ack || state.HolderAckReceipt is not { } receipt)
@@ -72,14 +72,14 @@ internal static class DeclarativeReverseQuotaTrial
         var originalRequest = state.ClaimRequest ?? throw new InvalidOperationException(MissingClaim);
         await Assert.That(originalClaim.RequestId).IsEqualTo(originalRequest.RequestId);
         await Assert.That(originalClaim.Deliveries).HasSingleItem();
-        await SqlRf3Protocol.EqualAsync(state.ClaimImage ?? throw new InvalidOperationException(MissingClaim),
+        await SqlClusterProtocol.EqualAsync(state.ClaimImage ?? throw new InvalidOperationException(MissingClaim),
             global::System.Text.Json.JsonSerializer.SerializeToElement(originalClaim, JsonDefaults.Options));
         await ReceiptAsync(new(ack.CommandId, lane.Partition, []), receipt, "Ack", 3L);
-        await SqlRf3Protocol.EqualAsync(receipt,
+        await SqlClusterProtocol.EqualAsync(receipt,
             await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.CompleteAsync(ack, token)));
-        await SqlRf3Protocol.EqualAsync(receipt, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
+        await SqlClusterProtocol.EqualAsync(receipt, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
             await callers.Mcp.CallAsync(McpCallerTools.MessagesComplete, ack, token))).Value);
-        await global::KeyLoad.IntegrationTests.Features.Messaging.SagaTimeoutRf3Assertions.AssertSdkErrorAsync(
+        await global::KeyLoad.IntegrationTests.Features.Messaging.SagaTimeoutClusterAssertions.AssertSdkErrorAsync(
             await callers.Sdk.ReceiveAsync(originalRequest, token), ErrorCode.StaleLease);
         await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.MessagesReceive,
             originalRequest, token), ErrorCode.StaleLease, dispatched: true);
@@ -89,18 +89,18 @@ internal static class DeclarativeReverseQuotaTrial
 
     internal static async Task ReceiptAsync(CommandRequest command, CommitReceipt receipt, string kind, long version)
     {
-        await SqlRf3Protocol.EqualAsync(new CommitReceipt(command.CommandId, receipt.Token,
+        await SqlClusterProtocol.EqualAsync(new CommitReceipt(command.CommandId, receipt.Token,
             [new(kind, DeclarativeReverseQuotaFlow.Target, HolderId, version)], DurabilityProfile.QuorumProcessDurable), receipt);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(command.Partition.AtomicPartitionId);
     }
 
-    private static async Task MessageAsync(RequestCqrsRf3Callers callers, QueueLaneRef lane,
+    private static async Task MessageAsync(RequestCqrsClusterCallers callers, QueueLaneRef lane,
         MessageInspection expected, CancellationToken token)
     {
         var request = new InspectMessageRequest(lane, HolderId);
-        await SqlRf3Protocol.EqualAsync(expected,
+        await SqlClusterProtocol.EqualAsync(expected,
             await PublicReadAssertions.MessageAsync(await callers.Sdk.InspectAsync(request, token)));
-        await SqlRf3Protocol.EqualAsync(expected, (await PublicReadAssertions.MessageAsync(
+        await SqlClusterProtocol.EqualAsync(expected, (await PublicReadAssertions.MessageAsync(
             await callers.Mcp.CallAsync(McpCallerTools.MessagesInspect, request, token))).Value);
     }
 }

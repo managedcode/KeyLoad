@@ -19,7 +19,7 @@ internal static class MetamorphicPublicResults
             using var value = JsonDocument.Parse(row.Json);
             using var wanted = JsonDocument.Parse(golden.Json);
             await Assert.That(JsonElement.DeepEquals(value.RootElement, wanted.RootElement)).IsTrue();
-            await SqlRf3Protocol.EqualAsync(golden with
+            await SqlClusterProtocol.EqualAsync(golden with
             {
                 Json = ""
             }, row with

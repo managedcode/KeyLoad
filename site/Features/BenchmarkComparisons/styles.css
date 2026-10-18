@@ -147,7 +147,6 @@ h1 .kl-mark { background-size: 100% .07em; background-position: 0 98%; }
 .engine .eyebrow, .engine .eyebrow::before, .reproduce .eyebrow::before { color: var(--kl-on-graphite-muted); }
 .engine h2 { margin-bottom: 1.4rem; color: #fff; }
 .engine-copy p { color: var(--kl-on-graphite-muted); }
-.engine-copy .engine-note { font: .8rem/1.5 var(--kl-font-mono); }
 .engine .text-link { color: #fff; text-decoration-color: rgba(255, 255, 255, .3); }
 .stack { display: grid; gap: .55rem; margin: 0; padding: 0; list-style: none; counter-reset: layer; }
 .layer { position: relative; display: grid; grid-template-columns: 8.5rem minmax(0, 1fr); align-items: center; gap: 1rem; padding: .95rem 1.1rem; border: 1px solid var(--kl-graphite-line); border-radius: var(--kl-radius); background: rgba(255, 255, 255, .04); color: var(--kl-on-graphite); font-size: .92rem; }

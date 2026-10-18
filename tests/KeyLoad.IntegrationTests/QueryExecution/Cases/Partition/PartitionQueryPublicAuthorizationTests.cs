@@ -13,10 +13,10 @@ internal sealed class PartitionQueryPublicAuthorizationTests(ClusterFixture fixt
     public async Task AcPquery002LaterPersistedLeafDenialReturnsNoSdkOrMcpPageAndLeavesNextReadHealthy()
     {
         using var deadline = McpCallerDeadline.Create();
-        var scenario = await PartitionQueryRf3Scenario.CreateAuthorizationAsync(fixture, deadline.Token)
+        var scenario = await PartitionQueryClusterScenario.CreateAuthorizationAsync(fixture, deadline.Token)
             .ConfigureAwait(false);
         var identity = await McpPersistedIdentity.CreateAsync(fixture, scenario.Partitions[0],
-            PartitionQueryRf3Protocol.Collection, Capability.DocumentsRead | Capability.Query, deadline.Token)
+            PartitionQueryClusterProtocol.Collection, Capability.DocumentsRead | Capability.Query, deadline.Token)
             .ConfigureAwait(false);
         var state = await PartitionAuthorityFlow.WarmAsync(fixture, scenario, identity,
             () => VerifyHealthyReadAsync(fixture, scenario, deadline.Token), deadline.Token);
@@ -24,13 +24,13 @@ internal sealed class PartitionQueryPublicAuthorizationTests(ClusterFixture fixt
     }
 
     private static async Task VerifyHealthyReadAsync(ClusterFixture fixture,
-        PartitionQueryRf3Scenario scenario, CancellationToken cancellationToken)
+        PartitionQueryClusterScenario scenario, CancellationToken cancellationToken)
     {
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node3);
         var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var request = scenario.Request([scenario.Partitions[0]]);
         var result = await McpCallerAssertions.SdkSuccessAsync(await administrator.PartitionQueryAsync(request,
             cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
-        await PartitionQueryRf3Assertions.AssertOracleAsync(result!, scenario, request.Partitions).ConfigureAwait(false);
+        await PartitionQueryClusterAssertions.AssertOracleAsync(result!, scenario, request.Partitions).ConfigureAwait(false);
     }
 }

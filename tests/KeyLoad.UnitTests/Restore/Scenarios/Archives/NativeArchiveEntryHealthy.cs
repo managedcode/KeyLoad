@@ -30,7 +30,7 @@ internal static class NativeArchiveEntryHealthy
         var command = new CommandRequest(Guid.NewGuid(), fixture.Source.Partition,
             [new PutDocument(P.Collection, P.Document, P.After, P.InitialRevision)]);
         var healthy = NativeArchiveEntryFlow.Operation(database, command);
-        var placement = database.ReadAtomicPartitionPlacement(P.Root, new(P.Version, fixture.Source.Partition));
+        var placement = database.ReadAtomicPartitionPlacement(P.Root, fixture.Source.Partition);
         var receipt = database.Apply(healthy).Get<CommitReceipt>();
         await NativeArchiveEntryAssertions.ReceiptAsync(receipt, command, placement,
             position + P.PositionStep, P.HealthyRevision, store.Identity.Durability);

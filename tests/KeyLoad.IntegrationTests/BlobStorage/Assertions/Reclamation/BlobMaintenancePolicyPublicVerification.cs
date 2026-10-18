@@ -5,7 +5,7 @@ namespace KeyLoad.IntegrationTests.Features.BlobStorage;
 
 internal static class BlobMaintenancePolicyPublicVerification
 {
-    internal static async Task FinalAsync(RequestCqrsRf3Callers creator, BlobMaintenancePolicyPublicState state, CancellationToken token)
+    internal static async Task FinalAsync(RequestCqrsClusterCallers creator, BlobMaintenancePolicyPublicState state, CancellationToken token)
     {
         Task Observe() => BlobMaintenancePolicyPublicAssertions.FinalAsync(creator, state, token);
         await Observe();

@@ -10,18 +10,4 @@ internal sealed class NativeProgressAdmissionTests(RequestCqrsClusterFixture fix
     [Test]
     public Task CancelledOnlineFrameDoesNotAdvanceAcceptedShapeBeforeHealthyContinuation()
         => NativeOnlineAdmissionFlow.CancelledAsync(fixture);
-
-    [Test]
-    public Task SignedPlacementFreshResumeZeroReplayAndPartialTerminalKeepStrictNativeAdmission()
-        => NativePlacementAdmissionFlow.GrammarAsync(fixture);
-
-    [Test]
-    [Arguments(false)]
-    [Arguments(true)]
-    public Task RejectedNativeFrameOrAggregateBytesDoNotAdvancePlacementRevisionOrMoveSet(bool aggregate)
-        => NativePlacementAdmissionFlow.BoundContinuationAsync(fixture, aggregate);
-
-    [Test]
-    public Task ExistingTextRejectsMixedPlacementAndStartedRejectsPayloadBeforeHealthyContinuation()
-        => NativeProgressAdmissionSupport.MixedTextAsync(fixture);
 }

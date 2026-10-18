@@ -4,7 +4,7 @@ namespace KeyLoad.IntegrationTests.Features.BlobStorage;
 
 internal static class BlobLiveListR43Replay
 {
-    internal static async Task RunAsync(RequestCqrsRf3Callers callers, BlobLiveListR43State state, CancellationToken token)
+    internal static async Task RunAsync(RequestCqrsClusterCallers callers, BlobLiveListR43State state, CancellationToken token)
     {
         for (var index = 0; index < state.Versions.Length; index++)
         {

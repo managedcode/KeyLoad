@@ -1,6 +1,6 @@
 namespace KeyLoad.IntegrationTests.Features.BlobStorage;
 
-internal sealed class BlobLiveListR43State(PartitionRef partition, AtomicPartitionPlacementResolution placement)
+internal sealed class BlobLiveListR43State(PartitionRef partition)
 {
     internal static string Id(int index) => index switch
     {
@@ -19,7 +19,6 @@ internal sealed class BlobLiveListR43State(PartitionRef partition, AtomicPartiti
         _ => throw new ArgumentOutOfRangeException(nameof(index))
     };
     internal PartitionRef Partition { get; } = partition;
-    internal AtomicPartitionPlacementResolution Placement { get; } = placement;
     internal BlobBoundedRetirementPublicPublication.Published[] Versions { get; } = new BlobBoundedRetirementPublicPublication.Published[4];
     internal int Phase
     {

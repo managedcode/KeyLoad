@@ -18,7 +18,7 @@ internal static class SharedDomainPublicProducer
             {
                 var command = SharedDomainCorpus.Producer(scope, id, item);
                 var receipt = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(command, token));
-                await SharedDomainPublicValues.ProducerAsync(state, command, receipt);
+                await SharedDomainPublicValues.ProducerAsync(command, receipt);
                 history.Add((command, receipt));
                 await ReplayAsync(sdk, official, command, receipt, token);
             }

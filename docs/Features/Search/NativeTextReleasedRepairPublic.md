@@ -6,7 +6,7 @@ REQ-FTS-RELEASE-REPAIR-002 / AC-FTS-RELEASE-REPAIR-002: repair uses a NEW consum
 
 REQ-FTS-RELEASE-REPAIR-003 / AC-FTS-RELEASE-REPAIR-003: close genuine RunOwned callers before two all-three Kill/BeginRestart/Restart waves; repeat old fences, complete original Release/document/fresh Build results and full literal controls. This is public logical evidence, not raw storage/journal no-effects, power-loss, provider throughput or runtime qualification.
 
-All criteria map NativeTextReleasedRepairPublicTests.ReleasedSelectionStaysFencedWhileNewConsumerRestoresLiteralPagesAndOriginalResultsAcrossTwoColdCycles, one noArgs case. Existing NativeTextMaintenanceRf3Release covers completed Release/replay plus old Restore refusal and canonical pages, but no selected-query refusal followed by NEW consumer repair and two subsequent cold continuations. Inventory is bounded to inspected original flows and delivered public subdocs, not global absence proof. Canonical Search Cases/Models/Helpers/Assertions and this subdoc; product/public API/format/provider/clock changes N/A.
+All criteria map NativeTextReleasedRepairPublicTests.ReleasedSelectionStaysFencedWhileNewConsumerRestoresLiteralPagesAndOriginalResultsAcrossTwoColdCycles, one noArgs case. Existing NativeTextMaintenanceClusterRelease covers completed Release/replay plus old Restore refusal and canonical pages, but no selected-query refusal followed by NEW consumer repair and two subsequent cold continuations. Inventory is bounded to inspected original flows and delivered public subdocs, not global absence proof. Canonical Search Cases/Models/Helpers/Assertions and this subdoc; product/public API/format/provider/clock changes N/A.
 
 ```mermaid
 flowchart LR
@@ -18,4 +18,4 @@ flowchart LR
  F --> G[Two joined all3 cold cycles and same old fences]
 ```
 
-Source N only. Compiler, UID census, exact-source Linux RF3 and cleanup/cancellation qualification OPEN. No product defect asserted.
+No product defect asserted.

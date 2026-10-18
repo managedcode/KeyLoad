@@ -9,7 +9,7 @@ internal sealed class AuthorizationTelemetryClientWholeFlowTests
     [Arguments(AuthorizationUnsafeSpanState.ClientTraceStateLink)]
     [Arguments(AuthorizationUnsafeSpanState.ClientExtraLink)]
     [Arguments(AuthorizationUnsafeSpanState.ClientRemoteLink)]
-    public async Task AcAuthKl015002UnsafeNativeClientStateSuppressesOnlyDenialAndExportsHealthyCatalog(AuthorizationUnsafeSpanState state)
+    public async Task UnsafeNativeClientStateSuppressesOnlyDenialAndExportsHealthyCatalog(AuthorizationUnsafeSpanState state)
     {
         using var fixture = new AuthorizationTelemetryHttpFixture();
         await fixture.RunAsync(owner => AuthorizationTelemetryFlow.ExecuteAsync(owner, state,

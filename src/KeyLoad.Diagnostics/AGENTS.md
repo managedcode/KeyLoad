@@ -1,26 +1,32 @@
 # KeyLoad.Diagnostics
 
-## Purpose and entry points
+## Purpose, entry points and ownership
+
 - Owns generic bounded callback-free database phase diagnostics in `ResourceExecution/`, under ADR-063 and its feature contract.
 - Entry points: immutable phase/outcome/quality/snapshot schema, DatabasePhaseBank and root-owned process startup facade.
-
-## Ownership and boundaries
 - BCL-only shared implementation; no ASP.NET/Orleans/provider/product/package dependency except the existing centrally attached analyzer.
 - Keep feature code in ResourceExecution and root-owned assembly friend metadata outside that slice only when solution-wide.
-- Preserve both authorized cuts, physical node ownership, all existing gates/async originals/ACK/WAL. This project owns no database state, file, credential, role or protocol.
+- Preserve both authorized cuts, node-local ZoneTree ownership, all existing gates/async originals/ACK/WAL. This project owns no database state, file, credential, role or protocol.
 - Fixed32/6/16 schema/four stripes, startup bank128KiB, record maximum4 CAS attempts and sticky degradation; no hot callbacks, logging/export, allocations, gates, ambient state, per-request identifiers, reset or live mode changes.
-- Owner correction2026-10-06 applies centralized native IOptions ownership to every operational parameter, including this bank's stripe reservation and CAS retry count. Four remains the default and maximum; permit only1/2/4 stripes and1..4 attempts, preserving the128KiB ceiling and fixed32/6/16 snapshot schema. BCL primitives receive explicit validated scalars projected at startup from the same captured IOptions<DatabasePhaseExecutionOptions>; no primitive constructor/helper may recreate defaults. ADR-113 refines the historical bool-only bank/facade signature for this bounded options join while retaining BCL-only ownership and every hot-path restriction.
 - Only root freezes public shared signatures/project references and mode/export composition; workers may not invent broader telemetry/control architecture.
-
-## Commands and evidence
-- Root may perform enabled Release development build, required formatter and static governance; these are not runtime qualification.
-- TUnit/MTP unit/scalar, genuine process recovery and Docker/Aspire RF3 SDK/official MCP plus profile tests run only in GitHub Actions through ci.yml (CI), which combines build and every project test; Benchmarks owns load/comparison and downstream website qualification/publication.
-- Preserve exact source/run/job/artifact and actual phase/resource scopes. No local tests, allocations qualification, containers or load benchmarks.
-
-## Skills and protected risks
 - No project-local skill installed; do not install tools/skills or modify global configuration. Installed authorized Orleans guidance applies to unchanged producer lifecycles outside this BCL project.
 - Unknown/partial/degraded measurements are unavailable evidence, never zero or a performance winner. Snapshot reads are non-atomic; overlapping phases and whole-process samples are not request attribution.
 - Preserve root400/type200/function50/nesting3 limits, compiler/style diagnostics and all independent ownership. Stop on package/public/wire/security change or scope conflict.
-## Feature-local responsibility folders
 
-- Every populated `<SliceName>/` source area MUST group feature-owned C# files in populated child folders by their actual responsibility (for example `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Serialization/`, `Validation/`, `Recovery/`, `Admission/`, `Lifecycle/`, `Storage/`, or `Execution/` where applicable). Do not leave a flat mix of roles or create empty placeholders. Keep each role local to its owning feature; preserve namespaces, public signatures, serialization aliases/IDs, and source bytes during structural moves. Keep genuine project composition roots and shared cross-feature building blocks outside feature slices.
+## Boundaries and protected risks
+
+Follow the [root policy](../../AGENTS.md) and the owning feature specification. Keep changes in their actual owner, preserve unrelated work, and remove replaced code together with exclusive callers and fixtures. Use native Orleans calls for distributed execution and silo-local ZoneTree owners for files. Preserve persisted authorization, operation correctness, resource bounds, cancellation and joined shutdown. Never turn a static check or focused test into a claim of complete runtime qualification.
+
+## Commands and verification
+
+From the repository root:
+
+```sh
+dotnet build KeyLoad.slnx --no-restore --configuration Release -warnaserror
+```
+
+Use the root's complete solution, native TUnit, real process recovery and Aspire SDK/MCP gates as applicable. Local checks are development evidence; delivered-source qualification and public measurements require exact-source Linux GitHub artifacts. Do not weaken compiler, analyzer, source-identity, coverage or runtime assertions.
+
+## Skills
+
+Use the installed Orleans skill for Orleans design and the relevant installed formatting, Aspire or diagnostics skill when the task needs it. Follow explicit owner scope and dependency-adoption rules.

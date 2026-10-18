@@ -34,6 +34,6 @@ internal static class AdversarialAuthorityContinuation
     private static async Task PersistAsync(KeyLoadClient root, PrincipalRecord expected, CancellationToken token)
     {
         var actual = await McpCallerAssertions.SdkSuccessAsync(await root.ConfigurePrincipalAsync(Guid.NewGuid(), expected, token));
-        await SqlRf3Protocol.EqualAsync(expected, actual);
+        await SqlClusterProtocol.EqualAsync(expected, actual);
     }
 }

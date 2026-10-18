@@ -5,7 +5,7 @@ namespace KeyLoad.IntegrationTests.Features.ChangeFeeds;
 
 internal static class ProjectionPublicOperations
 {
-    internal static async Task<ProjectionBatchResult> CommitBothAsync(RequestCqrsRf3Callers caller,
+    internal static async Task<ProjectionBatchResult> CommitBothAsync(RequestCqrsClusterCallers caller,
         CommitProjectionBatchRequest request, CancellationToken token)
     {
         var result = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.CommitProjectionAsync(request, token));
@@ -14,11 +14,11 @@ internal static class ProjectionPublicOperations
         return result;
     }
 
-    internal static async Task PolicyAsync(RequestCqrsRf3Callers root, PrincipalRecord principal, CancellationToken token)
+    internal static async Task PolicyAsync(RequestCqrsClusterCallers root, PrincipalRecord principal, CancellationToken token)
         => await ProjectionPublicAssertions.ExactAsync(principal, await McpCallerAssertions.SdkSuccessAsync(
             await root.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), principal, token)));
 
-    internal static async Task<OutboxStatus> ImageAsync(RequestCqrsRf3Callers root, ProjectionPublicState state,
+    internal static async Task<OutboxStatus> ImageAsync(RequestCqrsClusterCallers root, ProjectionPublicState state,
         long checkpoint, bool released, bool purged, CancellationToken token)
     {
         var status = await ProjectionPublicAssertions.PhaseAsync(root.Sdk, state, checkpoint, released, purged, token);

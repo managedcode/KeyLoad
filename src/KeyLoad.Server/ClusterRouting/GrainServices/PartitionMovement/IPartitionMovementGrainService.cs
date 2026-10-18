@@ -3,23 +3,13 @@ using Orleans.Services;
 
 namespace KeyLoad.Server.Features.ClusterRouting;
 
-/// <summary>Native directed access to the silo-local partition movement receiver.</summary>
+/// <summary>Native directed access to one silo's authenticated owner probe, inventory, retirement and observation endpoints.</summary>
 [Alias(PartitionMovementGrainServiceProtocol.ServiceAlias), Version(PartitionMovementGrainServiceProtocol.InterfaceVersion)]
 internal interface IPartitionMovementGrainService : IGrainService
 {
-    /// <summary>Dispatches one bounded authenticated movement operation to this silo.</summary>
-    [Alias(PartitionMovementGrainServiceProtocol.ExchangeAlias)]
-    Task<PartitionMovementGrainServiceReply> ExchangeAsync(PartitionMovementGrainServiceRequest request,
-        CancellationToken cancellationToken);
-
     /// <summary>Joins one authenticated original physical-owner probe independently of movement readiness.</summary>
     [Alias(PartitionMovementGrainServiceProtocol.ProbeOwnerAlias)]
     Task<PartitionMovementGrainServiceReply> ProbeOwnerAsync(PartitionMovementGrainServiceRequest request,
-        CancellationToken cancellationToken);
-
-    /// <summary>Reads original bounded authenticated capacity from this actual silo generation.</summary>
-    [Alias(PartitionMovementGrainServiceProtocol.CapacityExchangeAlias)]
-    Task<OwnerCapacityNativeReply> ReadCapacityAsync(OwnerCapacityNativeRequest request,
         CancellationToken cancellationToken);
 
     /// <summary>Reads bounded authoritative inventory through the original authenticated connection path.</summary>

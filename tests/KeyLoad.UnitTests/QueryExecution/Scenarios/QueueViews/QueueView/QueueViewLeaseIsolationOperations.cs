@@ -52,7 +52,7 @@ internal static class QueueViewLeaseIsolationOperations
         System.Collections.Immutable.ImmutableArray<MutationReceipt> mutations)
     {
         var placement = state.Owner.Database.ReadAtomicPartitionPlacement(QueueViewLeaseIsolationProtocol.Root,
-            new(QueueViewLeaseIsolationProtocol.One, state.Partition));
+            state.Partition);
         return new(id, NextToken(state, placement.Incarnation, placement.PlacementEpoch),
             mutations, state.Owner.Database.Durability);
     }
@@ -60,7 +60,7 @@ internal static class QueueViewLeaseIsolationOperations
     internal static CommitToken NextToken(QueueViewLeaseIsolationState state)
     {
         var placement = state.Owner.Database.ReadAtomicPartitionPlacement(QueueViewLeaseIsolationProtocol.Root,
-            new(QueueViewLeaseIsolationProtocol.One, state.Partition));
+            state.Partition);
         return NextToken(state, placement.Incarnation, placement.PlacementEpoch);
     }
 

@@ -16,7 +16,7 @@ AC-ORL-ANCESTRY-001: The genuine signed native streamed Batch writes a literal d
 33 actual local parent links. A passive listener must observe actual Orleans Application Client spans
 with that direct local parent and Recorded=false; those exact SpanIds must not reach the exporter.
 The operation and original command replay both return independently complete receipts using the retained
-native journal entry Index, literal mutations and pre-operation physical placement. Complete literal
+native journal entry Index and literal mutations. Complete literal
 DocumentResult and persisted original outcome are checked after each response; replay preserves store
 position and the entire native journal cut. No store-position/logical-token comparison is used.
 
@@ -41,9 +41,10 @@ flowchart LR
  F --> G[No truncation; join all owners]
 ```
 
-Source-only conditional stage: production MaximumParentLinks option and pre-Baggage hooks are owned
-separately by Root and require Main reservation/adoption. Native TestCluster with node-local ZoneTree
-and retained native journal is not Docker RF3, SDK/MCP qualification or a CPU/DoS/performance measurement.
-The stock Orleans outgoing propagator still injects context and may enumerate baggage independently;
-this contract bounds only KeyLoad's privacy processor. No transport/provider/default/deadline changes.
-Compiler, Linux execution, existing telemetry regression and whole-operation qualification remain OPEN.
+AC-ORL-ANCESTRY-001..003 map to `OrleansTelemetryAncestryTests.RealSignedWriteSuppressesDeepNativeClientTelemetryThenExportsInclusiveAndShallowSpans`.
+
+The MaximumParentLinks option and the pre-Baggage hooks belong to the production telemetry privacy
+processor. A native TestCluster with node-local ZoneTree and the retained native journal is not the Docker
+replicated cluster, SDK/MCP qualification or a CPU/DoS/performance measurement. The stock Orleans outgoing
+propagator still injects context and may enumerate baggage independently; this contract bounds only KeyLoad's
+privacy processor. No transport, provider, default or deadline changes.

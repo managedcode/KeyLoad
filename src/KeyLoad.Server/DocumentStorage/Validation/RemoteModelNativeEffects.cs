@@ -12,10 +12,6 @@ internal static class RemoteModelNativeEffects
         {
             return false;
         }
-        if (channel == RemoteModelNativeChannel.ResourceLifetimeBlobOutcome)
-        {
-            return true;
-        }
         if (channel == RemoteModelNativeChannel.EventVector)
         {
             return NativeSerialization.Deserialize<EventVectorRemoteCall>(original.Span).Action == EventVectorRemoteAction.SourceEffect;

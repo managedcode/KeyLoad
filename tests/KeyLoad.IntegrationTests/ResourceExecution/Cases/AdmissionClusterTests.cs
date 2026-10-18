@@ -55,7 +55,7 @@ internal sealed class AdmissionClusterTests
         finally { await fixture.DisposeAsync(); }
     }
     [Test]
-    public async Task FullDataBudgetRejectsBeforeCommitWhileControlCommandsAndRf3RoutingStayAvailable()
+    public async Task FullDataBudgetRejectsBeforeCommitWhileControlCommandsAndClusterRoutingStayAvailable()
     {
         var fixture = new ClusterFixture(commandBytes: 4_096);
         using var timeoutTimeout = new CancellationTokenSource(TimeSpan.FromMinutes(2), TimeProvider.System);

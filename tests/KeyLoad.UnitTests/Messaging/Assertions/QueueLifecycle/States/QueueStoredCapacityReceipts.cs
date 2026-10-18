@@ -10,7 +10,7 @@ internal static class QueueStoredCapacityReceipts
 {
     internal static async Task<CommitToken> NextAsync(DatabaseEngine owner, ZoneTreeStore store, PartitionRef partition)
     {
-        var placement = owner.ReadAtomicPartitionPlacement(QueueEnqueueColdProtocol.Root, new(QueueEnqueueAuthorityProtocol.First, partition));
+        var placement = owner.ReadAtomicPartitionPlacement(QueueEnqueueColdProtocol.Root, partition);
         await Assert.That(placement.Partition).IsEqualTo(partition);
         return new(placement.Incarnation, partition.AtomicPartitionId, checked(store.Position + QueueEnqueueAuthorityProtocol.First), placement.PlacementEpoch);
     }

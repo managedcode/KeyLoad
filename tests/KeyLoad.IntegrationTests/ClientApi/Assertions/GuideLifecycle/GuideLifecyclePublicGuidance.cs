@@ -32,9 +32,9 @@ internal static class GuideLifecyclePublicGuidance
             NextCursor = null
         };
         var actual = await session.Client.ListResourcesAsync(new ListResourcesRequestParams(), token);
-        await SqlRf3Protocol.EqualAsync(expected, actual);
+        await SqlClusterProtocol.EqualAsync(expected, actual);
         actual.Resources.Single().Name = "mutated-caller-resource";
-        await SqlRf3Protocol.EqualAsync(expected,
+        await SqlClusterProtocol.EqualAsync(expected,
             await session.Client.ListResourcesAsync(new ListResourcesRequestParams(), token));
         var expectedRead = new ReadResourceResult
         {
@@ -46,11 +46,11 @@ internal static class GuideLifecyclePublicGuidance
             }]
         };
         var read = await session.Client.ReadResourceAsync(Resource, cancellationToken: token);
-        await SqlRf3Protocol.EqualAsync(expectedRead, read);
+        await SqlClusterProtocol.EqualAsync(expectedRead, read);
         var content = (TextResourceContents)read.Contents.Single();
         await Assert.That(Encoding.UTF8.GetByteCount(content.Text)).IsLessThanOrEqualTo(GuideLifecyclePublicExpected.MaximumBytes);
         content.Text = "mutated-caller-resource-content";
-        await SqlRf3Protocol.EqualAsync(expectedRead,
+        await SqlClusterProtocol.EqualAsync(expectedRead,
             await session.Client.ReadResourceAsync(Resource, cancellationToken: token));
     }
 
@@ -67,9 +67,9 @@ internal static class GuideLifecyclePublicGuidance
             NextCursor = null
         };
         var actual = await session.Client.ListPromptsAsync(new ListPromptsRequestParams(), token);
-        await SqlRf3Protocol.EqualAsync(expected, actual);
+        await SqlClusterProtocol.EqualAsync(expected, actual);
         actual.Prompts.Single().Name = "mutated-caller-prompt";
-        await SqlRf3Protocol.EqualAsync(expected,
+        await SqlClusterProtocol.EqualAsync(expected,
             await session.Client.ListPromptsAsync(new ListPromptsRequestParams(), token));
         var expectedGet = new GetPromptResult
         {
@@ -81,9 +81,9 @@ internal static class GuideLifecyclePublicGuidance
             }]
         };
         var get = await session.Client.GetPromptAsync(GuideLifecyclePublicExpected.PromptName, cancellationToken: token);
-        await SqlRf3Protocol.EqualAsync(expectedGet, get);
+        await SqlClusterProtocol.EqualAsync(expectedGet, get);
         ((TextContentBlock)get.Messages.Single().Content).Text = "mutated-caller-prompt-content";
-        await SqlRf3Protocol.EqualAsync(expectedGet, await session.Client.GetPromptAsync(
+        await SqlClusterProtocol.EqualAsync(expectedGet, await session.Client.GetPromptAsync(
             GuideLifecyclePublicExpected.PromptName, cancellationToken: token));
     }
 }

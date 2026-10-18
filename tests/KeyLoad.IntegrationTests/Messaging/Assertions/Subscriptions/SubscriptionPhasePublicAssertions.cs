@@ -7,7 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.Messaging;
 internal static class SubscriptionPhasePublicAssertions
 {
     internal static ReceiveSubscriptionRequest Receive(SubscriptionRef group)
-        => new(Guid.NewGuid(), group, MaxEvents: SubscriptionFilterRf3Protocol.Window,
+        => new(Guid.NewGuid(), group, MaxEvents: SubscriptionFilterClusterProtocol.Window,
             LeaseSeconds: new SubscriptionPolicy().MaxLeaseSeconds);
 
     internal static async Task<ReceiveSubscriptionResult> ClaimAsync(KeyLoadClient sdk, McpOfficialClient mcp,
@@ -16,11 +16,11 @@ internal static class SubscriptionPhasePublicAssertions
         var result = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReceiveSubscriptionAsync(request, token));
         var replay = (await McpCallerAssertions.SuccessAsync<ReceiveSubscriptionResult>(
             await mcp.CallAsync(McpCallerTools.SubscriptionsReceive, request, token))).Value;
-        await SubscriptionFilterRf3Assertions.EqualAsync(replay, result);
+        await SubscriptionFilterClusterAssertions.EqualAsync(replay, result);
         await Assert.That(result.Deliveries.Select(d => d.Event.Position)).IsEquivalentTo(positions, CollectionOrdering.Matching);
         foreach (var delivery in result.Deliveries)
         {
-            await SubscriptionFilterRf3Assertions.EqualAsync(delivery.Event, source.Events.Single(e => e.Position == delivery.Event.Position));
+            await SubscriptionFilterClusterAssertions.EqualAsync(delivery.Event, source.Events.Single(e => e.Position == delivery.Event.Position));
             await Assert.That(delivery.LeaseVersion).IsEqualTo(1L);
             await Assert.That(delivery.Attempt).IsEqualTo(1);
             await Assert.That(delivery.Token).IsNotEmpty();
@@ -32,7 +32,7 @@ internal static class SubscriptionPhasePublicAssertions
         SubscriptionDeliveryCommand request, long position, CancellationToken token)
     {
         var result = await McpCallerAssertions.SdkSuccessAsync(await sdk.CompleteSubscriptionAsync(request, token));
-        await SubscriptionFilterRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(
+        await SubscriptionFilterClusterAssertions.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(
             await mcp.CallAsync(McpCallerTools.SubscriptionsComplete, request, token))).Value, result);
         await ReceiptAsync(result, request, position);
         return result;

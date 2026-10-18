@@ -56,7 +56,6 @@ internal static class CompetingInboxPublicProtocol
     internal const int SecondCandidate = 1;
     internal const int Competitors = 2;
     internal const int CurrentReceipts = 2;
-    internal const int PlacementVersion = 1;
     internal const long OriginalOwnershipEpoch = 1L;
     internal const int ColdCycles = 2;
 }

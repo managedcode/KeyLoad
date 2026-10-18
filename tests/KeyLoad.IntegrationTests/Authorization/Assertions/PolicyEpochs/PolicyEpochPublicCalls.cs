@@ -6,7 +6,7 @@ namespace KeyLoad.IntegrationTests.Features.Authorization;
 
 internal static class PolicyEpochPublicCalls
 {
-    internal static async Task<QueryPage> ReadAsync(RequestCqrsRf3Callers callers, QueryRequest request,
+    internal static async Task<QueryPage> ReadAsync(RequestCqrsClusterCallers callers, QueryRequest request,
         int route, CancellationToken token)
     {
         if (route == PolicyEpochPublicProtocol.Sdk)
@@ -27,9 +27,9 @@ internal static class PolicyEpochPublicCalls
             return (await McpCallerAssertions.SuccessAsync<QueryPage>(await callers.Mcp.CallAsync(McpCallerTools.QueryAst,
             PolicyEpochPublicProtocol.Ast(request.Partition, request.Cursor), token))).Value;
         }
-        var sql = SqlRf3Protocol.Call(request.Partition, McpCallerTools.QueryExecute, request);
+        var sql = SqlClusterProtocol.Call(request.Partition, McpCallerTools.QueryExecute, request);
         return route == PolicyEpochPublicProtocol.Q1Sdk
-            ? await SqlRf3Protocol.SdkAsync<QueryPage>(callers.Sdk, sql, token)
-            : await SqlRf3Protocol.McpAsync<QueryPage>(callers.Mcp, sql, token);
+            ? await SqlClusterProtocol.SdkAsync<QueryPage>(callers.Sdk, sql, token)
+            : await SqlClusterProtocol.McpAsync<QueryPage>(callers.Mcp, sql, token);
     }
 }

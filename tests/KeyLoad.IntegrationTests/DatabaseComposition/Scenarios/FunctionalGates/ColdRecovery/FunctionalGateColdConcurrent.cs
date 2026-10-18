@@ -88,7 +88,7 @@ internal static class FunctionalGateColdConcurrent
         FunctionalGateContext? context = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            proof = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, fixture.NodeNames[^1], identity.Secret,
+            proof = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, fixture.NodeNames[^1], identity.Secret,
                 async caller =>
                 {
                     context = new(original.Administrator, caller, caller, original.Partition, original.Anchor, original.ResourceCount)

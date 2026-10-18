@@ -13,7 +13,7 @@ internal static class FunctionalGateColdSearch
         var official = await context.McpAsync<WaitForIndexResult>(context.Reader, WaitForIndexProtocol.Tool, wait, token);
         foreach (var result in new[] { direct, official })
         {
-            await SqlRf3Protocol.EqualAsync(model.Receipt.Token with
+            await SqlClusterProtocol.EqualAsync(model.Receipt.Token with
             {
                 Position = result.AppliedToken.Position
             }, result.AppliedToken);

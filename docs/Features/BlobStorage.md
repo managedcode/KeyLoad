@@ -1,194 +1,76 @@
 # BlobStorage
 
-Accepted TASK-RUNTIME-BLOB-QUOTA-FIXTURE-W refines REQ/AC-BLOB-005 after
-run37005805424. BlobMissingQuotaReopenTests previously deleted a partition-scoped
-key although the actual quota row is resource-scoped. Encode the actual key with
-public KeyCodec using QuotaSpace/tenant/database/domain/resource, exactly matching
-the internal BlobKeys.Quota(blob) format without changing its visibility. Delete it,
-assert the actual row exists before deletion and is absent afterward, then retain
-the existing real reopen Corruption/no-position-change/no-apply assertions.
-Only that test file and its now-unused literal change; no production key encoding,
-quota, missing-state policy or timeout change. Source review and full exact-SHA
-GitHub verification are required; the prior failure is its tests-first baseline.
+Status: contract Accepted; canonical engine/server/MCP and typed SDK source present, exact-SHA runtime qualification pending. Decision: [ADR-038](../ADR/ADR-038-chunked-blob-storage.md). Authority: [root policy](../../AGENTS.md).
 
-Accepted TASK-RUNTIME-ADMISSION-W fixture refinement for REQ/AC-BLOB-003:
-BlobAuthorizationTests.StartActiveUpload supplies RowAccess(OwnerAlice) for the
-persisted restricted Alice principal, matching the existing PublishOwned setup.
-Run37005805424 rejected setup before its intended adversarial reads. Preserve
-all wrong-owner/creator/revoked-principal denials and exact error codes. The worker
-owns this test file only; ADR-038 authority and all product code stay unchanged.
-Lead source review/build and full exact-SHA GitHub tests qualify the correction.
+## Purpose, actors and boundaries
 
-Status: contract Accepted; canonical engine/server/MCP and typed SDK source present, exact-SHA runtime qualification pending. Owner: BlobStorage feature lead, with the KeyLoad integrator owning shared contracts. Decision: [ADR-038](../ADR/ADR-038-chunked-blob-storage.md). Authority: [root policy](../../AGENTS.md). Detailed criteria: [acceptance](BlobStorage.md); execution graph: [plan](BlobStorage.md).
+A user or an agent stores a large binary payload in parts and reads the needed range without loading the whole object. The mandatory server-side identity and row/resource authority do not change; files and the atomic store belong to the silo-local ZoneTree owner.
 
-## Призначення, актори та межі
+The accepted contract defines ten typed operations: begin, write part, complete, abort, delete, reclaim, metadata, upload info, range, list. They pass through the client's connection grain and the grains that call the ZoneTree owner through Orleans; only the silo-local ZoneTree owner owns the atomic store. Parts are stored as raw canonical values; manifests and counters are versioned records. The private snapshot `ReadChunk` and backup pieces have their own authority and lifecycle. Cartograph may serve regenerated backup archives through the ManagedCode provider; transactional user blobs use the existing atomic store.
 
-Користувач або агент зберігає великий binary payload частинами та читає потрібний діапазон без завантаження всього об'єкта. Обов'язкова серверна identity, row/resource authority та фізична node-local ownership не змінюються.
+A raw part and a range are bounded to 65536 bytes; the maximum object is 1 GiB and the default resource object limit is 64 MiB. A full object is never materialized for a range. Complete publishes the manifest through a revision CAS; a partial upload is not a visible complete object. SHA256 verifies every part; `sha256-chain-v1` binds scope/layout/order and is not called a whole-file SHA256. Bounds, quota, identity, retention, error and format semantics are the exact contract of ADR-038, not passing evidence.
 
-Прийнятий контракт визначає десять typed операцій: begin, write part, complete, abort, delete, reclaim, metadata, upload info, range, list. Вони проходять звичайний signed request grain і capability grain; лише node-local PartitionHost володіє atomic store. Частини зберігаються як raw canonical values, manifests і counters — як versioned records. Private snapshot `ReadChunk` і backup pieces мають власну authority/lifecycle. Cartograph може обслуговувати регенеровані backup-архіви через ManagedCode provider; транзакційні user blobs використовують наявний atomic store.
+## Requirements and measurable acceptance
 
-Raw part і range мають межу65536 bytes; maximum object1GiB, default resource object limit64MiB. Повний об'єкт для range не матеріалізується. Complete публікує manifest через revision CAS; partial upload не є видимим complete object. SHA256 перевіряє кожну частину; `sha256-chain-v1` зв'язує scope/layout/order і не називається whole-file SHA256. Bounds/quota/identity/retention/error/format semantics є точним контрактом ADR-038, а не passing evidence.
-
-## Вимоги та measurable acceptance
-
-| Вимога | Критерій поведінки | Автоматизована перевірка |
+| Requirement | Behavior criterion | Automated verification |
 |---|---|---|
-| REQ-BLOB-001: chunked upload має bounded persisted lifecycle і завершений видимий об'єкт | AC-BLOB-001: ordered/retried parts, complete CAS та стабільний command ID; invalid order/bytes/hash/chain і незавершене upload не публікують partial data | Pending genuine TUnit provider lifecycle/CAS/retry та RF3 .NET/MCP tests |
-| REQ-BLOB-002: partial read читає точний authorized range з bounded retained memory | AC-BLOB-002: exact first/last/interior/cross-boundary/zero range at expected revision; validation, corruption, cancellation і здоровий follow-up; <=2 visited parts | Pending real-store та public SDK/official MCP range tests |
-| REQ-BLOB-003: persisted principal/resource scope визначає всі upload/read/delete права | AC-BLOB-003: tenant/resource mismatch, revoked key, forged roles та unauthorized metadata/range requests відхилено без effects/витоку; .NET/MCP дають однакову authority | PLANNED real persisted-policy unit та Docker/Aspire RF3 SDK/official MCP adversarial flows |
-| REQ-BLOB-004: publish/delete/recovery мають явний revision, integrity та retention contract | AC-BLOB-004: перевірений complete object переживає declared process-recovery cut; missing/corrupt part fail closed; concurrent overwrite/read бачить визначений revision; orphan cleanup не видаляє live leased version | PLANNED real-process CrashHost/recovery та RF3 retry/rejoin tests після погодження storage/manifest/cleanup contract |
-| REQ-BLOB-005: quotas охоплюють усі ресурси та активні/retired versions | AC-BLOB-005: persisted resource/store counters атомарно reject overflow; abort/expiry/reclaim звільняють правильні bytes/slots один раз; malformed counters/format fail closed | Pending real-provider quota/reopen/adversarial tests |
-| REQ-BLOB-006: agent discovery і bounded listing мають спільний typed API | AC-BLOB-006: metadata/upload info/list без full bytes; авторизоване bounded listing; усі10 .NET/MCP operations мають однакові identity/error semantics | Pending DTO goldens, provider listing, official RF3 discovery and operation parity |
-| REQ-BLOB-007: integrity/format/compatibility є явним контрактом | AC-BLOB-007: byte/JSON golden vectors, chain binding, незмінні старі enum values/nonblob JSON; unknown format та downgrade boundary | Pending contract goldens/provider checks and documented rollback evidence |
+| REQ-BLOB-001: a chunked upload has a bounded persisted lifecycle and a complete visible object | AC-BLOB-001: ordered/retried parts, complete CAS and a stable command ID; invalid order/bytes/hash/chain and an incomplete upload publish no partial data | Pending genuine TUnit provider lifecycle/CAS/retry and cluster .NET/MCP tests |
+| REQ-BLOB-002: a partial read returns the exact authorized range with bounded retained memory | AC-BLOB-002: exact first/last/interior/cross-boundary/zero range at the expected revision; validation, corruption, cancellation and a healthy follow-up; <=2 visited parts | Pending real-store and public SDK/official MCP range tests |
+| REQ-BLOB-003: the persisted principal/resource scope decides all upload/read/delete rights | AC-BLOB-003: tenant/resource mismatch, revoked key, forged roles and unauthorized metadata/range requests are rejected without effects or leakage; .NET and MCP give the same authority | PLANNED real persisted-policy unit and Docker/Aspire cluster SDK/official MCP adversarial flows |
+| REQ-BLOB-004: publish/delete/recovery have an explicit revision, integrity and retention contract | AC-BLOB-004: a verified complete object survives the declared process-recovery cut; a missing/corrupt part fails closed; a concurrent overwrite/read sees a defined revision; orphan cleanup does not delete a live leased version | PLANNED real-process CrashHost/recovery and cluster retry/rejoin tests once the storage/manifest/cleanup contract is agreed |
+| REQ-BLOB-005: quotas cover all resources and active/retired versions | AC-BLOB-005: persisted resource/store counters atomically reject overflow; abort/expiry/reclaim release the right bytes/slots exactly once; malformed counters/format fail closed | Pending real-provider quota/reopen/adversarial tests |
+| REQ-BLOB-006: agent discovery and bounded listing share one typed API | AC-BLOB-006: metadata/upload info/list without full bytes; authorized bounded listing; all 10 .NET/MCP operations have the same identity/error semantics | Pending DTO goldens, provider listing, official cluster discovery and operation parity |
+| REQ-BLOB-007: integrity/format/compatibility is an explicit contract | AC-BLOB-007: byte/JSON golden vectors, chain binding, unchanged old enum values/nonblob JSON; unknown format and downgrade boundary | Pending contract goldens/provider checks and documented rollback evidence |
 
-Кожен AC ще pending. Acceptance не означає готовий endpoint чи кваліфікований durability profile. Global blob quota є logical payload reservation, не physical disk quota. Provider/replica snapshot limits охоплюють увесь store, включно з іншими ресурсами й outcome metadata;1GiB blob ceiling не обіцяє необмежений database/snapshot.
+Every AC is still pending. Acceptance does not mean a ready endpoint or a qualified durability profile. The global blob quota is a logical payload reservation, not a physical disk quota. Provider/replica snapshot limits cover the whole store, including other resources and outcome metadata; the 1 GiB blob ceiling does not promise an unbounded database/snapshot.
 
 ```mermaid
 flowchart LR
-    Actor[Authorized SDK or MCP caller] --> Request[Fresh signed Orleans request grain]
-    Request --> Capability[Blob capability grain]
-    Capability --> Host[Node local atomic store]
-    Host --> Parts[Ordered staged parts and quota]
-    Parts --> Publish[Revision CAS publication]
-    Publish --> Range[One gated bounded range]
-    Host --> Reclaim[Bounded replicated reclaim]
+ Actor[Authorized SDK or MCP caller] --> Request[Client connection grain]
+ Request --> Capability[Blob capability grain]
+ Capability --> Host[Silo-local ZoneTree owner]
+ Host --> Parts[Ordered staged parts and quota]
+ Parts --> Publish[Revision CAS publication]
+ Publish --> Range[One gated bounded range]
+ Host --> Reclaim[Bounded replicated reclaim]
 ```
 
 ## Canonical slice map
 
-| Surface | Ownership / стан |
+| Surface | Ownership / state |
 |---|---|
-| Public contracts | `src/KeyLoad.Abstractions/BlobStorage/`; інтегратор owns DTO/enums/identity/error semantics за ADR-038 |
-| Engine/storage | Source `src/KeyLoad.Core/BlobStorage/` + node-local provider building blocks; files/locks/apply належать PartitionHost, не grains |
+| Public contracts | `src/KeyLoad.Abstractions/BlobStorage/`; the integrator owns DTO/enums/identity/error semantics under ADR-038 |
+| Engine/storage | Source `src/KeyLoad.Core/BlobStorage/` + node-local provider building blocks; files/locks/apply belong to the silo-local ZoneTree owner, not to grains |
 | Server/.NET SDK | Source matching `Features/BlobStorage/`; feature-owned BlobClientExtensions use shared [ClientApi](ClientApi.md) transport |
-| MCP/agent | Source owning-operation mapping через [ADR-039](../ADR/ADR-039-official-mcp-agent-api.md), ті самі grants та semantics; qualification pending |
-| Tests | Source unit/recovery/blob fixtures and SQL RF3 differential cases; реальні stores/processes/RF3, без doubles; exact-SHA execution remains required |
-| Frontend | N/A: required capability є програмним storage API; окремий UI не запитано |
-| Durable spec | Цей файл, ADR-038, root policy; новий KL-ID не вигадується |
-
-## Dependencies, execution та qualification
-
-Порядок: accepted contract/native review → frozen DTO/goldens → real AC tests → disjoint engine → shared authorization/routing → SDK/MCP → recovery/RF3 parity. Shared contracts, codec та storage lifetime мають одного integration owner; workers stop/escalate на unresolved format, trust boundary або overlap, join тільки reviewed complete evidence.
-
-Product verification: canonical GitHub Actions build/analyze/format, TUnit unit, real process recovery і Docker/Aspire RF3 через .NET та official MCP; exact source SHA/run/jobs/artifacts обов'язкові. Ресурсні metrics беруться з actual CI results; power-loss/endurance та production readiness не випливають із опису чи process-kill. Rollout/rollback для blobs визначаються перед збереженням customer data; зараз дані не мігруються.
+| MCP/agent | Source owning-operation mapping through [ADR-039](../ADR/ADR-039-official-mcp-agent-api.md), the same grants and semantics; qualification pending |
+| Tests | Source unit/recovery/blob fixtures and SQL cluster differential cases; real stores/processes/cluster, no doubles; exact-SHA execution remains required |
+| Frontend | N/A: the required capability is a programmatic storage API; no separate UI is requested |
+| Durable spec | This file, ADR-038, root policy; no new KL-ID is invented |
 
 ## Unified SQL and typed SDK join
 
-ADR-054/AC-AISQL-006 extends the existing canonical blob operations into SQL CALL; no lifecycle/atomicity/authorization/integrity change. Abstractions `Features/BlobStorage/BlobOperationProtocol.cs` owns the route constants and Client `Features/BlobStorage/BlobClient.cs` mirrors all ten HTTP/MCP operations through the existing bounded SDK transport. RF3 SQL/.NET/official MCP published-partial-read differential proof is required; this source is not a passing outcome.
+ADR-054/AC-AISQL-006 extends the existing canonical blob operations into SQL CALL; no lifecycle/atomicity/authorization/integrity change. Abstractions `Features/BlobStorage/BlobOperationProtocol.cs` owns the route constants and Client `Features/BlobStorage/BlobClient.cs` mirrors all ten HTTP/MCP operations through the existing bounded SDK transport. cluster SQL/.NET/official MCP published-partial-read differential proof is required; this source is not a passing outcome.
 
-REQ-BLOB-006 also maps to AC-AISQL-012/TASK-AISQL-012A: feature-owned
+REQ-BLOB-006 also maps to AC-AISQL-012: feature-owned
 BlobClientExtensions retain SDK source call syntax, validate missing client/request
 before HTTP effects and call the same internal Send transport. New public argument
-tests and existing genuine RF3 lifecycle/range/retry cases qualify the pre-delivery
+tests and existing genuine cluster lifecycle/range/retry cases qualify the pre-delivery
 refactor; source spelling changes do not establish published binary compatibility.
 
-
-# Current first-release BlobStorage format operation proof
-
-TASK-BLOB-CURRENT-FORMAT-007 maps REQ-BLOB-007/AC-BLOB-007 and existing ADR-038 to real persisted ConfigureResource → exact current complete JSON (including immutable VectorProfiles[]) → same outer command-ID native result replay with full-store/position invariance → legitimate document write/read. This is current first-release format, not legacy or migration compatibility. Nullable BlobPolicy stays omitted when null; no product omission/fallback change. Existing stable enum/capability numeric identities are asserted inside the completed native configuration/blob operation flows, not standalone getter/metadata tests.
+## Current first-release BlobStorage format operation proof
 
 REQ-BLOB-001/002/005/007 and AC-BLOB-001/002/005/007 also map to native default BlobStore configuration → oversized declared length rejects Validation and leaves target metadata/upload absent (first logged rejection may retain outcome/clock once under ADR-002) → exact same-ID failure bytes plus stable full post-failure image/position → small real upload/write/publish with complete independent metadata and partial bytes → same command-ID publication replay/no extra effect → joined native store close/reopen with full canonical image/position and identical complete metadata/range → healthy full read.
 
-Remove exactly obsolete ordinary identities BlobStorageCompatibilityTests.AcBlob007AppendsBlobEnumsAndCapabilitiesWithoutRenumberingExistingValues and BlobStorageCompatibilityTests.AcBlob007ResourceWithoutBlobPolicyRetainsItsCanonicalJsonBytes. New cases are functional complete native operations; root must reconcile genuine post-build census UID/source ranges/classifications. Do not fabricate IDs/counts/PASS. Existing integrity golden controls remain separate. No production behavior, limits, format decoder, dependencies or authorization changes.
 
+### Implementation contract
 
-### TASK-MCP-CATALOG-COMPLETE-76-001 implementation contract
+AC-MCP-001/003/006/007 and AC-BLOB-006 preserve all ten blob tools and the independent complete public catalog. [ClientApi](ClientApi.md) owns the exact76 tuple/schema/effect and negative→healthy decode contract. Initial gateway discovery remains three tools. No product API, dependency or authorization change; rollback is fixture/docs only.
 
-AC-MCP-001/003/006/007 and AC-BLOB-006 preserve all ten blob tools and the
-independent complete public catalog. [ClientApi](ClientApi.md) owns the exact76
-tuple/schema/effect and negative→healthy decode contract. Original55f normal/scalar
-failures remain immutable; initial gateway discovery remains three tools. Root
-joins docs-first ClientApi Contracts literal inventory and Helpers executable
-assertions, then existing six McpCatalogTests/four BlobAgentCatalogTests identities
-with native normal/scalar metadata and full current-source qualification gates.
-No product API, dependency or authorization change; rollback is fixture/docs only.
-No source-only count or schema review establishes runtime or RF3 acceptance.
+### Blob current literal
 
+REQ/AC-BLOB-001/002/005/007 and ADR-038: keep both original complete real-store operation cases, exact original resource/public JSON, native record image and position, stable success/refusal replay, default limit rejection, genuine upload/publish/full and partial bytes, healthy document, joined close/reopen and full receipts. The literal current default resource image includes accepted queue DLQ sublimits null, CompetingConsumers ordering, Continue parked-head behavior, None jitter and factor2; all original default limits and other resource bytes remain exact. Null InboxPolicy remains omitted by the existing explicit JsonIgnore contract. This updates the independent first-release golden for current approved additions, never a legacy reader/migration/fallback. Preserve original numeric identities; explicitly add QueueCancel bit38 and InboxWrite bit39 and exact All bits0..39. No production-derived expected value/count, authorization/payload/receipt weakening or standalone getter test.
 
-## TASK-KL036-CONTROLLED-BLOB-MOVEMENT-001 — native owning prerequisite
-
-REQ-MOVE-CONTROLLED-BLOB-001 / AC-MOVE-CONTROLLED-BLOB-001 require actual original Begin/Part0/Part1/Complete receipts and new bounded Blob effects through the existing controlled command pipeline after retirement. The unique request grain currently routes only Batch; Blob resource ownership precedes retained outcome selection. Expanding a selector alone is insufficient. The original source StoredOutcome remains authoritative; current destination upload lifetime and native BlobOutcomeAuthority must be verified by an authenticated bounded native read before successful historical result release. Retired observation never reexecutes an old effect.
-
-REQ-MOVE-CONTROLLED-BLOB-OUTCOME-001 / AC-MOVE-CONTROLLED-BLOB-OUTCOME-001 preserve exact source outcome bytes, scope/fingerprint/incarnation/current policy and real destination state. Missing/corrupt/wrong authority/body/owner/epoch fails closed. New controlled target effects capture the actual native pre-effect BlobOutcomeAuthority, bind it to the real effect/ACK digest, and retain it in original control outcome finalization. Existing phases, aliases/IDs, counters, quotas, ordered apply and absolute expiry remain unchanged; additive field IDs and native typed read contracts are frozen in the owning implementation contract before code. No legacy/fallback authority.
-
-REQ-MOVE-CONTROLLED-BLOB-POLICY-001 / AC-MOVE-CONTROLLED-BLOB-POLICY-001 extend the actual restored-policy whole RF3 case: retain all old positive closures; capture the bounded actual typed initial Blob requests/results in fixture memory; prove demotion2 denial and restore3 original epoch1 USER receipt PermissionDenied/null through SDK, official MCP and Q1 without replacing native StoredOutcome bytes. Current admin parent replay must not rebind old USER epochs. A generic OwnershipLost does not qualify policy denial.
-
-REQ-MOVE-CONTROLLED-BLOB-READ-001 / AC-MOVE-CONTROLLED-BLOB-READ-001 require actual current metadata/upload/range/list routing to the real moved owner with native policy, row, lifetime, byte/read/result budgets and full exact blob/cold proof. Unrelated current model routing is not qualified by this Blob prerequisite. ADR-106 owns the control/read boundary; BlobStorage owns actual policy/lifetime/data execution. The native current proof remains separate from an immutable original result.
-
-Whole-flow mapping is the existing protected six-owner parent/restored-policy corpus with actual persisted c1 credentials, complete literal models/receipts and all6/18lock joined cold cuts, SDK/official MCP/Q1 and fresh healthy continuation. All old positive Begin/Part0/Part1/Complete closures remain. Source-only implementation proposals are not compiled/runtime evidence; root-only exact-source Linux UID/PDB/full Unit normal+scalar/recovery/RF3 gates remain OPEN. No strict task selection/count change.
-
-### TASK-KL036-CONTROLLED-BLOB-MOVEMENT-001 — complete source-stage contract
-
-The source-stage implementation extends the existing controlled native command pipeline, not a second dispatcher. Canonical control owner A freshly loads the persisted caller and logical resource policy before outcome/locator diagnostics, captures the complete native request/policy scope, and revalidates that exact scope after the authenticated B read. Current physical owner B freshly authenticates its configured technical administrator, verifies the actual published native owner/placement/moved descriptor and non-policy resource definition, and executes native BlobAuthority/BlobOutcomeValidation over the actual B cut using the full MAC-bound canonical A policy overlay. B's separately configured user mirror is not a second logical policy authority. Source-supplied policy is accepted only inside this authenticated server delegation; caller JSON cannot construct that trust. A missing/conflicting physical scope remains refused. Reverse B→A with current destination A follows the existing ordinary local native Blob path under fresh A policy.
-
-Frozen additive native fields: PartitionControlEffectPayload.BlobAuthority Id2, PartitionControlAcknowledgeBody.BlobAuthority Id6, PartitionControlCommandRecord.BlobAuthority Id15; old fields/aliases/IDs/stages/counters remain unchanged. PartitionControlApplyBody.Command Id3 retains the actual Batch value or is null only for a real native Blob OriginalOperation. The owning grant admission compares the complete actually retained TargetBody bytes to the intended phase bytes, so absence of the Batch-only field does not bypass original body identity. Successful native target effects capture BlobOutcomeAuthority before effects and bind it into actual effect/ACK digest and source StoredOutcome; failed native effects retain a null stamp. The actual existing expired-grant query-only path is unchanged.
-
-ControlledBlobReadFrame alias keyload.core.partition-control-blob-read-frame.v1 has Id0 Version,1 QueryId,2 Control,3 Publication,4 Principal,5 Resource,6 DirectoryRevision,7 ExpiresAt,8 Purpose,9 Original,10 OriginalOutcome,11 NativeRequest. Purpose values are Outcome0/Metadata1/UploadInfo2/Range3/List4. Outcome requires the actual original operation/outcome and empty NativeRequest; data requires both originals null and the exact existing native typed request. ControlledBlobReadRequest alias keyload.orleans.controlled-blob-read-request.v1 has Id0 Frame,1 MaximumReadBytes,2 MaximumExaminedRecords,3 MaximumResultBytes. ControlledBlobReadResult alias keyload.orleans.controlled-blob-read-result.v1 has Id0 NativeValue,1 OutcomeValidated,2 ReadBytes,3 ExaminedRecords. The result flag is produced only after actual destination native validation, never a caller proof flag. Its result type is closed against the requested purpose. GrainReadKind.ControlledBlob appends after WaitForAnnIndex without changing any old ordinal; later KL078 SampleChunkWindow must compose after this actual precursor.
-
-RemoteControlledBlobCall alias keyload.server.remote-controlled-blob-call.v1 has Id0 Version,1 actual ingress RequestId,2 Nonce,3 CallerVoter,4 CallerSiloAddress,5 Source,6 registered Destination,7 Request,8 MaximumReplyBytes. RemoteDocumentTransportEnvelope appends Id2 ControlledBlob; RemoteDocumentReplyV1 appends Id8 ControlledBlob. Exactly one request variant is admitted. Old reply validators reject the new slot; the new reply validator rejects old result/query/control success slots. The existing RemoteDocumentMac request/reply domains authenticate the entire native envelope/reply bytes, including all new fields. No bare-frame signature, new endpoint, unsigned hint or fallback is introduced. Original bounded HTTP client, pins, work/session owner, read/result/record/query budgets, absolute expiry, caller cancellation, original failure ledger and joined runtime disposal are reused.
-
-Source ownership is BlobStorage Authorization/Queries/Validation/Contracts in Core; BlobStorage Contracts/Identity/Queries/Serialization in Orleans; BlobStorage Execution/Transport/Validation/Contracts in Server; the existing ClusterRouting controlled command and DocumentStorage runtime/transport integration points retain their owners. Existing GrainRequestEnvelopeConstruction.MovementRead constructs both controlled read envelopes with the same actual database/clock/lifetime/expiry/payload-copy guard and codec Issue/ValidateScope; the purpose-specific factory methods do not duplicate a codec. GrainBlobReadExecution owns only configured borrowed-router selection versus the original reused native Blob capability after the same fresh read admission; it owns no storage/options/lifetime.
-
-Automated complete-flow mapping extends the existing ActualDemotionDeniesParentThenRestoredAdminReplaysParentButNotOldUserReceiptsAndMovesCold case and preserves every original positive closure, literal model assertion, original ParentDeadline and six-owner Aspire topology. After actual A→B retirement, original Begin/Part0/Part1/Complete receipts replay through SDK, official MCP and Q1 on both; current metadata/upload/full two-part range/list are checked through all four callers. New actual Begin/Part0/Part1/Complete effects have real B incarnation/placement receipts; a genuinely wrong first ordinal reaches native B execution, retains an actual finalized failed Validation outcome with null authority and empty effect mutations, and leaves upload progress unchanged before healthy parts/completion. All four new successful receipts replay after joined all-six/18-lock cold reopen. Changed same-ID original content refuses Conflict. Demotion2 and restore3 deny each epoch1 original receipt through all four callers with exact PermissionDenied/null, preserve native source StoredOutcome raw bytes, and keep parent admin replay separate. Restored current Blob reads and the complete B→A fresh-move/full-model/cold continuation remain genuine operations.
-
-Rollback removes this additive source stage as a coherent unqualified checkpoint; it does not modify immutable original failed reports, old native fields/ordinals or legacy formats. Source review/reconstruction is not qualification. Required gates remain root-only fresh exact-source native build/analyzers, original Linux Source/PDB/UID discovery, complete Unit normal+scalar, process recovery and protected Aspire six-owner SDK/official MCP/Q1/cold flows. No task selector/native UID/count/PASS contract changes are made. Additional forged/mixed-variant/MAC failure matrix and all six mutation-kind fault coverage beyond the four-operation corpus remain explicit unqualified acceptance work; native closed guards are implemented but not credited by property-only tests. Whole KL036 nested failed-detail numeric+1 and other existing OPEN criteria remain OPEN.
-
-
-
-### TASK-KL036-CONTROLLED-BLOB-SIX-KIND-002 / CUT-003 — authored whole-flow successor
-REQ/AC-MOVE-CONTROLLED-BLOB-001 and ADR-106 retain the original A policy / B physical-lifetime trust contract. The existing actual restored-policy RF3 case now executes all six native blob mutation kinds after A→B, through the .NET SDK, official MCP, Q1 SDK and Q1 MCP: Begin/Part/Abort/Reclaim and a distinct Begin/Part/Complete/Delete/Reclaim. Active reclamation must return exact Conflict; wrong-revision deletion must return exact RevisionConflict. All six joined native cuts account only the five actual source technical phases and one actual target phase, their scoped outcome/locator/authority/grant/index records, native Clock/Applied, exact failed original outcome, null failed stamp and empty target mutations. Every other raw row, counter, policy, placement/fence/cursor/parent stays byte-exact. Unknown metadata/entry or an early refusal fails qualification. Cold replay retains actual receipts for valid lifetimes and exact TokenInvalidated after genuine state reclamation; persisted demotion2/restoration3 keep all six historical USER commands PermissionDenied and original native records byte-identical. Existing old receipts/models, independent post-move0x43/0x44 bytes after cold/reverse, unchanged original deadline and full cleanup remain mandatory.
-Mapping: `PartitionMovementPolicyEpochColdRf3Tests.ActualDemotionDeniesParentThenRestoredAdminReplaysParentButNotOldUserReceiptsAndMovesCold`; supporting fixture roles `PartitionMovementControlledBlobLifecycleRf3{Trial,Publication,Calls,Assertions}` and `PartitionMovementControlledBlobFailedCutRf3{Trial,Assertions,Phases}`. No new case/UID/count or runtime PASS is inferred from source. Signed-transport forged-envelope matrix and numeric nested failed-detail legal/+1 remain OPEN; no arbitrary detail cap, fake authority or generic refusal is credited.
-
-
-# Exact native membership control-plane cut accounting
-TASK-KL036-BLOB-COLD-MEMBERSHIP-CUT-005; REQ/AC-MOVE-CONTROLLED-BLOB-001 / ADR-106. Freeze before source.
-Native ReplicaMembershipStore.CompareExchangeAsync submits real OperationKind.Membership through the same native coordinator/database during each original restarted silo's lifecycle. Core ExecuteMembership changes only KeyCodec.Encode(ReplicaMembershipProtocol.StorageSpace, ReplicaMembershipProtocol.TableKey), conditional on the actual ExpectedVersion, and increments its native row Version exactly once only on true. AtomicCommandCommit persists the actual Global StoredOutcome plus native Clock/Applied. Therefore expecting every entry after genuine RestartAsync to be a no-op contradicts the native owner pipeline.
-The fixture may account ONLY actual native Membership operations for that exact existing table key and PartitionStoreProtocol.AdministratorId. It must read the actual before PrincipalRecord/physical catalog, require persisted cluster-admin/current epoch/incarnation, verify actual Global StoredOutcome/fingerprint/null partition/null model stamps and success bool against the exact original mutation's version predicate, carry the actual payload bytes only on actual true, and compare complete final native MembershipRecord bytes. No invented operation/result, general metadata-prefix ignore, copied codec/provider algorithm, arbitrary principal/table or policy fallback. Every additional nonmembership entry must still be the exact existing intended controlled phase or absent for a read/denied replay. Every other raw row including policies, resource/blob quotas/models, owner/placement/fence/cursor/parent/grants stays exact. Actual replica entries remain committed and index-bound; local StorePosition delta is separately exact. Actual Clock is the maximum before/actual admitted evaluations. Membership GlobalOutcome keys are individually bound to their actual native entry IDs and original current principal policy.
-This is test-only correction of control-plane accounting, not relaxed product authorization or a fake no-write claim. Existing failed reports remain immutable. Full native compile/UID/Linux normal/scalar/RF3 evidence remains OPEN; no deadline/limit/profile change. Exact guards include current existing RequireNoEffects helper plus the immutable six-kind successor postimages.
-
-
-### TASK-KL036-CONTROLLED-BLOB-WIRE-004 — actual signed producer borrow (source checkpoint)
-REQ/AC-MOVE-CONTROLLED-BLOB-001; ADR-106. The reviewed internal optional borrowed observer is source-implemented after actual native encoding/signing and before the original first HTTP send, under the same actual request token/work/lifecycle. Ordinary DI never registers an observer service; the null path retains the original send. No alias/Id/public fields, defaults, signatures, deadlines, roles or persisted authority change.
-
-Automated supporting case: `PartitionMovementBlobWireNativeTests.ActualSignedSixKindBlobWireFaultsDenyWithoutEffectsThenOriginalSendAndColdSdkMcpQ1AreHealthy`. Six real native hosts/silos/storage owners use the existing centrally bound parent integration deadline. Genuine six-kind outcome and four read-purpose frames are independently mutated one field while retaining their ORIGINAL MAC; the real endpoint must return Unauthorized/Unauthenticated, then the unchanged original send and SDK/official MCP/Q1 receipts, literal blob bytes, all-six stopped native cuts and same-cohort cold continuation must succeed. This is MAC rejection supporting evidence, not proof that a correctly re-signed semantic forgery passes or fails later scope guards. Docker RF3 mandatory flows remain separate.
-
-The unsigned middleware JSON refusal is read using the existing native HttpContent bounded buffer primitive with the actual original MaximumReplyBytes, followed by exact Problem.ErrorCode validation; it is not passed through the binary signed-reply reader. Existing failed request/response disposal and original failure ledger remain. Full raw cuts account ONLY actual native Membership CAS outcomes/version/payload/root identity, no-op Applied entries and their exact local commit deltas; all other rows remain byte-identical. No global simultaneous read-cut is inferred from six independently gated owner reads.
-
-Qualification: PRIVATE SOURCE ONLY. Root-only compiler/analyzer, actual native UID discovery and exact-source Linux normal/scalar, recovery and Docker RF3 gates remain unqualified. No task count/UID/PASS contract changes. Pregrant universal future nested SafeDetail capacity and the independent numeric nested-error legal/+1 criterion remain OPEN.
-
-
-### TASK-BLOB-CURRENT-LITERAL-641
-
-REQ/AC-BLOB-001/002/005/007 and ADR-038: keep both original complete real-store operation cases, exact original resource/public JSON, native record image and position, stable success/refusal replay, default limit rejection, genuine upload/publish/full and partial bytes, healthy document, joined close/reopen and full receipts. The literal current default resource image includes accepted queue DLQ sublimits null, CompetingConsumers ordering, Continue parked-head behavior, None jitter and factor2; all original default limits and other resource bytes remain exact. Null InboxPolicy remains omitted by the existing explicit JsonIgnore contract. This updates the independent first-release golden for current approved additions, never a legacy reader/migration/fallback. Preserve original numeric identities; explicitly add QueueCancel bit38 and InboxWrite bit39 and exact All bits0..39. No production-derived expected value/count, authorization/payload/receipt weakening or standalone getter test. Original source641 failures remain immutable history; source repair is unqualified until root executes normal/scalar plus mandatory recovery/RF3.
-
-### TASK-BLOB-RECLAIM-WHOLE-001 — partial reclaim, cold cursor and rollback
-
-Existing REQ/AC-BLOB-001/002/004/005/007 and ADR-038 map to two actual native
-operation flows in `BlobReclaimWholeFlowTests`. A multipart active upload is
-aborted; only its unwritten reservation and active slot are released. Bounded
-one-part reclaim releases the exact accepted bytes, preserves the remaining
-cursor/version charge and survives joined close/reopen. Final reclaim releases
-the remaining bytes/version slot once; reuse of that UploadId denies the old
-lifetime's replay without changing the new upload, then healthy publication and
-an exact partial read succeed. Resource/global counters, full native image,
-position and original receipt/replay bytes are independently asserted.
-
-The second flow corrupts only its owned second raw part, calls a two-part reclaim
-and requires Corruption with both original parts, metadata, cursor and counters
-unchanged: deletion staged for the first part must roll back. Repair only the
-injected raw row, then complete bounded reclaim, cold verification and healthy
-reuse/publication/read. No policy, authority, format, quota or deadline changes.
-Blob worker owns new Cases/Helpers/Assertions/Fixtures under the BlobStorage test
-slice; root owns this contract and integrated checks. Existing architecture is
-sufficient (ADR-038); runtime and Linux/RF3 qualification remain pending until
-original reports exist. Rollback removes only the additive tests and mapping.
-
-Development verification on 2026-10-11 passed both native reclaim flows (2/2)
-in the reviewed isolated snapshot. Shared build, affected-suite and qualification
-limits are recorded in [the Messaging development result](Messaging.md#task-msg-counter-debit-001--exact-retained-usage-before-lifecycle-debit).
-Current-source Linux and Aspire RF3 qualification remain open.
-
-### TASK-BLOB-RANGE-INTEGRITY-WHOLE-002 — cold multipart integrity refusal and owned-row repair
+### Cold multipart integrity refusal and owned-row repair
 
 REQ-BLOB-RANGE-INTEGRITY-001 refines existing REQ-BLOB-001/002/004/005/007:
 one published current-format multipart version must preserve its exact independent
@@ -215,19 +97,7 @@ fault/repair commits advance the cut. Join a
 second cold owner and verify the complete payload through bounded first/tail
 reads, the original cross-boundary request and metadata, plus no read/replay effects.
 
-Positive, negative, boundary and repair flows execute against genuine ZoneTree
-through the canonical engine/typed Blob operations. Fixture hashes and expected
-metadata/counters come from declared input and the frozen ADR-038 byte transcript,
-never actual returned product values. Unknown format remains strict rejection;
-there is no migration, fallback, new API, quota/policy or deadline change.
-The Blob worker owns only new BlobStorage Cases/Fixtures/Helpers/Assertions/Models
-and this mapping. Root joins solution/analyzer/format, affected native TUnit with
-normal SIMD enabled, recovery and real SDK/official MCP Aspire RF3. Source stage
-is unqualified until original source-bound reports exist. Existing ADR-038 is
-sufficient; rollback removes only this additive test batch and mapping.
-
-
-## TASK-BLOB-PUBLISHED-LIFETIME-WHOLE-003 — current state ownership through deletion and reuse
+## Current state ownership through deletion and reuse
 
 REQ-BLOB-PUBLISHED-LIFETIME-001 and AC-BLOB-PUBLISHED-LIFETIME-001 refine
 REQ/AC-BLOB-001/004/005/007 and ADR-038. A published two-part head whose current
@@ -238,185 +108,40 @@ owner must preserve the same refusal. Restore exactly the owned state row and
 require the complete original image, original completion receipt replay and
 full independent first/tail payload bytes.
 
-Continue with actual deletion: exact revision-two tombstone, retained charged
-bytes/version and retired state; current-version reclaim before deletion must
-refuse Conflict. Reclaim both retired parts and verify exact result, zero byte
-and version/upload counters, one permanent object-key slot, absent raw/meta/state
-rows and no-effect final reclaim replay. Reuse the same UploadId with a distinct
-BeginCommandId at the tombstone revision for an empty publication. Its H0 is an
-independent SHA256 of the frozen KeyCodec transcript. Old begin/completion/reclaim
-outcomes must be TokenInvalidated without effects; the new publication is exactly
-revision three, with new expiry/lifetime, zero length/parts and independent hash.
-A second joined cold owner preserves complete native image, exact zero-byte
-read/metadata/counters and new receipt replays plus old-lifetime refusal.
+### Blob prior publication process
 
-Source map: additive Unit BlobStorage Cases/Helpers/Assertions/Models published
-lifetime files; existing native engine contracts remain unchanged. No production
-defect is claimed from source review. Private candidate packet only until root
-joins original build/analyzer/formatter/native normal-SIMD reports. Process/RF3
-SDK/MCP/Linux/endurance qualification remains separate and pending. No API,
-format, policy, tolerance, deadline or limit changes. Rollback removes this
-additive batch and mapping together.
+REQ-BLOB-001/002/004/005/007 and AC-BLOB-001/002/004/005/007 and ADR-038: two native Recovery cases (missing current completed BlobState; current completed BlobState with Retired=true) preserve a previously acknowledged four-byte publication across an independent queue-lifecycle HeaderWritten process kill in the same physical ZoneTree store. This is prior-publication survival across an unrelated same-store commit cut, not a Blob Complete commit-cut or complete Blob recovery qualification. The parent first creates the resource catalog; the unchanged child validates that same catalog/tenant and does not reset the store.
 
-### TASK-BLOB-PRIOR-PUBLICATION-PROCESS-001
-
-REQ-BLOB-001/002/004/005/007 and AC-BLOB-001/002/004/005/007 and ADR-038: two native Recovery cases (missing current completed BlobState; current completed BlobState with Retired=true) preserve a previously acknowledged four-byte publication across an independent queue-lifecycle HeaderWritten process kill in the same physical ZoneTree store. This is prior-publication survival across an unrelated same-store commit cut, not a Blob Complete commit-cut or complete Blob recovery qualification. The parent first creates native RF3 catalog authority; the unchanged child validates that same catalog/incarnation/tenant and does not reset the store.
-
-Acceptance: literal complete and partial bytes, metadata, chain hash, raw part/manifest/state and both quotas agree before and after the kill; the uncommitted queue batch has no outcome. Selected-state corruption refuses metadata/range/delete/reclaim and cached completion without any complete-store, cut or identity effect, repeatedly and after cold reopen. Repair restores exactly the one original row and entire pre-fault image at cut+2. The original deletion/reclaim succeeds with exact receipts, counters and owned-row removal; the same upload identifier publishes fresh healthy bytes with revision 3 while old lifetime outcomes invalidate. A second cold owner preserves all final rows, bytes, identity, catalog and replay receipts. Original 90-second trial, 30-second joined cleanup and 4096-row image bounds remain unchanged. Local native process-stop evidence does not establish Linux qualification, RF3 failover or power-loss durability.
-
-Automated map: KeyLoad.RecoveryTests.Features.BlobStorage.BlobPriorPublicationProcessRecoveryTests.PriorAcknowledgedPublicationSurvivesIndependentQueueCutThenLifetimeRepairAndReuse, Arguments(true), Arguments(false).
-
-### TASK-BLOB-RETIRED-PART-PROCESS-001
-
-REQ-BLOB-001/002/004/005/007 and AC-BLOB-001/002/004/005/007, ADR038: three native Recovery cases preserve a previously acknowledged Blob publication and deletion (revision2 tombstone) across the unchanged independent queue-lifecycle HeaderWritten kill in the same physical store. This is prior retired-lifetime survival and reclaim integrity at an unrelated commit cut, not Blob Complete/Delete/Reclaim commit-cut qualification. Parent catalog/root principal/incarnation remain identical to the existing native three-voter authority; the unchanged child never resets the store.
-
-Selected faults are exactly one retired upload ordinal0 row: missing raw part; missing part metadata; shape-valid part metadata with a SHA256 of different literal bytes. Before faults, complete literal retired state, tombstone, raw part/manifest, both quotas and original publication/deletion receipts survive the stop. Original Reclaim(MaxParts1) refuses Corruption with no partial deletion, quota, outcome, full-store, cut or identity effect, repeatedly and after first cold reopen. Repair restores exactly that owned row and complete pre-fault image at cut+2. The same original Reclaim releases4bytes/1version/1part and replays its complete receipt, leaves tombstone and removes state/raw/manifest. Reuse of the same upload identifier publishes fresh literal [9,10,11,12] bytes at revision3, with independent hashes, full/partial/empty-tail reads, exact native state/quotas, fresh receipts and old-lifetime invalidation. A second cold owner preserves final image, identity/catalog and original unrelated queue image/outcome absence.
-
-Original trial90s/cleanup30s/output8192/image4096 and real joined child cleanup remain mandatory; native normal SIMD50, no mocks/shared fixture/protocol/format/bounds changes. Local macOS development results do not establish Linux/full Recovery/RF3 failover or power-loss qualification. Automated map: KeyLoad.RecoveryTests.Features.BlobStorage.BlobRetiredPartProcessRecoveryTests.PriorAcknowledgedDeletionSurvivesIndependentQueueCutThenPartRepairReclaimAndReuse, MissingRaw/MissingManifest/WrongManifestHash.
-
-### TASK-BLOB-RETIRED-PART-BYTES-PROCESS-001
-
-Existing REQ-BLOB-001/002/004/005/007 and AC-BLOB-001/002/004/005/007, ADR-038: two native Recovery cases extend retired-part integrity to an actual equal-length altered raw value and a shape-valid manifest declaring the wrong part length. A previously acknowledged publication and deletion survive the unchanged independent queue-lifecycle HeaderWritten process kill in the same physical store. This is prior retired-lifetime survival at an unrelated commit cut; existing CrashHost controls do not target Blob Complete, Delete or Reclaim commits. The only CompleteBlob child seed precedes movement fault arming, whose input rejects operations other than PartitionMovementPhase. No Blob publication commit-cut qualification is claimed.
-
-The selected ordinal0 raw row originally contains literal [1,2,3,4]; its equal-length alteration becomes [5,6,7,8] while the exact original manifest remains. The alternative changes only the native manifest to format1/length3/the original four-byte SHA256, preserving raw bytes and every other row. Original Reclaim(MaxParts1) must refuse exact Corruption repeatedly and after a cold owner, with no partial deletion, quota, outcome, full-store, cut, identity or authority effect. One-row repair restores the original complete image at cut+2. The same original command then releases exactly4bytes/1part/1version with receipt replay, leaves revision2 tombstone, removes retired state/raw/manifest and permits same-upload-ID reuse with literal [9,10,11,12] publication at revision3. Full/partial/empty-tail reads, independent hash transcript, exact native counters/state/receipts and old-lifetime invalidation survive a second cold owner. The original unrelated queue image and absent outcome remain exact.
-
-Automated map: KeyLoad.RecoveryTests.Features.BlobStorage.BlobRetiredPartBytesProcessRecoveryTests.PriorAcknowledgedDeletionSurvivesIndependentQueueCutThenByteRepairReclaimAndReuse, AlteredRawBytes/WrongManifestLength. Reuses the accepted complete W6/W7 seed/receipt/image/reclaim oracles without modifying them. Original trial90s/cleanup30s/output8192/image4096, joined native child and normal SIMD50 remain unchanged. Candidate source alone is unqualified; local process results do not establish Linux/full Recovery/RF3 or power-loss gates.
-
-### TASK-BLOB-LATER-PART-PROCESS-001
-
-Existing REQ-BLOB-001/002/004/005/007 and AC-BLOB-001/002/004/005/007, ADR038: two actual native process cases preserve an acknowledged two-part publication and revision2 deletion across the unchanged independent same-store queue HeaderWritten cut. This remains prior Blob lifetime survival at an unrelated commit cut, not Blob Complete/Delete/Reclaim commit-cut qualification. Original payload65553 bytes is the deterministic literal byte at index i = i modulo239; ordinal0 has65536 bytes and ordinal1 has17 bytes. Bounded reads independently verify every byte through two legal ranges and a boundary-crossing range.
-
-Original Reclaim(MaxParts2) encounters healthy ordinal0 then a missing or equal-length altered ordinal1 raw row. Existing DeleteParts stages raw0/meta0 deletions before reading ordinal1; quota mutation follows successful completion of that loop. The native refusal must leave every row, raw0/meta0, both quotas, retired state/cursor, tombstone, receipts, outcome absence, authority, identity and cut unchanged, repeatedly and after a first cold owner. Exact damaged-image closure changes exactly selected ordinal1 raw row; one-owned-row repair restores the complete pre-fault image at cut+2. The same original reclaim then removes state/all2 raw/all2 metadata rows and releases65553bytes/2parts/1version exactly once with receipt replay.
-
-Reuse of the same upload identifier publishes literal [9,10,11,12] at revision3, with exact full/partial/tail bytes, independent hashes, native quotas/state, fresh receipts and old-lifetime invalidation. A second cold owner preserves complete final image, catalog/root principal/incarnation, receipts and the original unrelated queue image/outcome absence. Original90s trial/30s cleanup/8192 output/4096 image bound and joined real child remain unchanged; native normal SIMD50. No Core/protocol/shared fixture change. Automated map: KeyLoad.RecoveryTests.Features.BlobStorage.BlobLaterPartProcessRecoveryTests.PriorAcknowledgedTwoPartDeletionSurvivesIndependentQueueCutThenLaterPartRepairReclaimAndReuse, MissingSecondRaw/AlteredSecondRaw. Source is unqualified until original results exist; local process checks do not establish Linux/full Recovery/RF3 or power-loss gates.
-
-### TASK-BLOB-EXTRA-PART-PROCESS-001
-
-Existing REQ/AC-BLOB-001/002/004/005/007 and ADR038: two native process cases extend acknowledged two-part retired-lifetime survival at the unchanged independent same-store queue HeaderWritten cut to unexpected extra owned ordinal2 rows. This is not Blob Complete/Delete/Reclaim commit-cut qualification. Preserve the accepted independent65553-byte body/2-part publication and deletion, native catalog/root/incarnation, exact head/state/manifest/raw/quota and original receipts.
-
-Insert exactly one previously absent owned ordinal2 raw row with literal [77,78,79], or one native part manifest format1/length3/SHA256(literal3). Both original ordinals0/1 remain healthy. Exact whole-store image includes only that one inserted key/value at cut+1. Original Reclaim(MaxParts2) reads both healthy parts, stages all4 raw/manifest deletions and resource/global quota decrement, then ProveEmpty refuses the unexpected raw or manifest row with exact Corruption. Repeated refusal and first cold owner must preserve complete image, both original parts, extra row, quotas65553bytes/1object/1version/0uploads, retired state/cursor, tombstone, original receipts, absence of reclaim outcome, cut/identity/authority. This staged order is the existing actual owning implementation; no fabricated failpoint is used.
-
-Delete-only repair of exactly the injected owned key restores complete original image at cut+2. Same original reclaim then releases65553bytes/2parts/1version exactly once, removes state/all2 raw/all2 manifest with exact quotas and receipt replay, and retains revision2 tombstone. Same-upload reuse publishes literal [9,10,11,12] revision3 with whole/partial/tail bytes, independent hashes, native state/quotas, fresh receipt replay and original lifetime invalidation. Both extra ordinal2 families and old ordinal1 remain absent after healthy reuse and second cold owner; final whole image/cut/authority and unrelated queue image/outcome remain exact.
-
-Automated map: KeyLoad.RecoveryTests.Features.BlobStorage.BlobExtraPartProcessRecoveryTests.PriorAcknowledgedTwoPartDeletionSurvivesIndependentQueueCutThenExtraPartRepairReclaimAndReuse, ExtraRaw/ExtraManifest. Reuses unchanged W6/W7/W9 complete native helpers/oracles; Core0/protocol0. Original90s trial/30s cleanup/8192 output/4096 image and actual joined child/native SIMD50 remain mandatory. Source alone remains unqualified; local process checks do not establish Linux/full Recovery/RF3, actual Blob commit-cut or power-loss qualification.
-
-
-### Blob absence dependency discovered before package join
-
-Native BlobClientExtensions also has two genuine successful nullable reads, independently asserted by the original AllNativeAbsentReads whole operation: BlobMetadata and BlobUploadInfo. REQ/AC-CLIENT-RESULT-001 therefore requires BlobMetadataReadResult(BlobMetadata? Metadata) with alias keyload.blob-metadata-read-result.v1 and BlobUploadInfoReadResult(BlobUploadInfo? Upload), alias keyload.blob-upload-info-read-result.v1, sole field Id0. Preserve native creator/resource authorization, range/list and upload mutation/receipt contracts. The same bounded public gateway shapes both records before current reply admission; eight domain responses total, nine SDK calls counting both document overloads. Official MCP output and SQL CALL stay identical. No generic Optional or absent→failure.
-
-
-### TASK-BLOB-GENUINE-COMMIT-CUT-001 — native Complete and Delete publication cuts
-
-REQ-BLOB-COMMIT-CUT-001 refines existing REQ-BLOB-001/002/003/004/005/007 under ADR-038 and the ADR-117 native TUnit entry. Genuine CompleteBlobUpload and DeleteBlob use their original node-local ZoneTreeStoreOptions.FaultObserver stages, selected exact next commit position, real CrashHost child, persisted RF3 physical-shard authority and joined native store ownership. A previously acknowledged literal four-byte publication and original seed receipts precede the selected command. Complete also acknowledges its new two-part65553-byte upload before the cut; Delete targets the acknowledged published version. No unrelated queue mutation is the selected cut.
+### Native Complete and Delete publication cuts
 
 AC-BLOB-COMMIT-CUT-001 maps to four Complete native wholeflows: HeaderWritten stops after only the frame header, JournalFlushed stops after the entire frame synchronous flush but before materialized apply, a deterministic IOException injected through the existing public native FaultObserver at the selected JournalFlushed stage must yield the actual engine UnknownWriteOutcome, and an explicit ACK path observes the actual returned native receipt before stopping. AC-BLOB-COMMIT-CUT-002 maps the same four flows to Delete. Both require exact prior ACK, command/content/scope authority, same catalog/node incarnation and principal across genuine process stop/reopen. HeaderWritten must preserve the complete pre-command raw image/cut, reject ResolveOutcome with the existing RecoveryRequired missing-durable-outcome result and retain original metadata/chunks/digest/quotas. JournalFlushed and ACK must recover the complete atomic effect and identical durable receipt. A caller whose child stops before ACK has an unobserved write outcome; this is not an assertion that process termination returned an engine UnknownWriteOutcome error. Fabricated domain exceptions/results and relabelled queue cuts are forbidden. The deterministic native-hook IOException is scoped I/O fault injection, not a physical disk or power-loss claim.
 
 AC-BLOB-COMMIT-CUT-003 requires same-original-command retry, exact result and durable receipt replay, full independently expected metadata/state/head/raw chunks/manifests/digests/counters and no replay image/cut effects; persisted unauthorized principal refusal must not reveal bytes or change state. Complete preserves old retained version bytes while publishing the exact new multipart version; Delete publishes the exact revision2 tombstone and retained old version until bounded reclaim. Healthy new work and second joined cold owner preserve exact scoped authority, receipts and independent bytes. All selected child/pipe/native handles settle and owned roots are removed under existing process90s/cleanup30s bounds.
 
-Ordered contract: freeze Main preimages and additive test protocol; shared native child seed/sidecars and exact Complete/Delete dispatch; independent operation assertions; canonical scoped formatting; strict full SDK Release Recovery build with every analyzer; actual native CLI UID census and original native50 run with all four SIMD-enable variables1; retain source/DLL/PDB/TRX/commands/failures/cleanup and read-only current canonical compiled-source binding. Blob Complete owner coordinates the sole private source/build lane; Delete owner writes disjoint Delete role files; CrashHost owner writes native protocol/seed/runner and the minimal owning mode dispatcher only. Root/Main alone join changes.
-
-Baseline: prior immutable W5–10 wholecohort actual13PASS with source8074/images329 is separate supporting evidence; it does not execute these new Blob cuts. No new Core/API/storage format/dependency/provider, migration, fallback, bounds or authorization changes. Existing ADR-038 architecture is sufficient; this is additive process acceptance, not power-loss/Linux/RF3/endurance qualification. Test8 source declarations remain pending until actual native discovery/report. Rollback removes only this additive protocol/tests, dispatcher arms and mapping.
-
-The first actual private native cohort discovered exactly eight cases and refused all eight before the selected publication boundary because the fixture attempted initial-administrator-only Bootstrap for its denied nonadministrator. The original failed source, compiled images and native reports remain immutable. The corrected fixture installs the no-grants principal through the existing root-signed ConfigurePrincipal operation and retains its original operation/result for independent value and replay/no-effect checks. These flows use direct persisted-principal authorization; they do not qualify SDK credential authentication. No Blob product guard, role, boundary, limit or deadline changes; the corrected exact-source native cohort remains pending.
-
-The second original exact-source private native cohort discovered eight cases: all four genuine Complete cut cases passed, while all four Delete cases reached their later reclaimed-lifetime oracle and exposed a fixture corpus classification error. ConfigurePrincipal retains its administrative receipt after Blob reclamation; the corrected continuation compares full original ConfigurePrincipal/ConfigureResource Apply and ResolveOutcome results with no row-image or cut effect, while original Begin/Part/Complete still require TokenInvalidated. Both original cohorts and compiled-source receipts remain evidence; the final joined eight-case cohort remains pending.
-
-Final local development evidence: the repaired private source completed the strict Release Recovery build with zero warnings/errors, and the canonical Aspire-owned runner freshly discovered eight distinct native cases (Complete four, Delete four) and passed all eight with no skip/cancel/timeout/flaky outcomes. Actual CLI UIDs, original TUnit report and TRX agree; all four native SIMD flags were enabled, maximum parallel tests remained50, source7868 and native images330 stayed byte-identical before/after, and all owned child/store roots were removed after joined cleanup. The CURRENT original canonical Read-FcCompiledIdentity observer bound Recovery and Core PE/PDB/MVID/document hashes completely across1147 source rows. Original45/2/1 compiler failures, the first8FAIL fixture-seed cohort and the second4CompletePASS/4DeleteFAIL fixture-oracle cohort remain immutable. This is macOS arm64 local development evidence only; Linux process recovery, RF3, endurance and physical disk/power-loss qualification remain required. The verification source and its documentation were frozen before the native run; this bounded post-run evidence appendix is authored separately and does not modify those source/image receipts.
-
-
-## TASK-BLOB-RANGE-COLD-ADMISSION-001 — complete refusal continuation
+## Complete refusal continuation
 
 REQ-BLOB-002 / AC-BLOB-002 and REQ-BLOB-004 / AC-BLOB-004 require the existing four-argument BlobRangeIntegrityWholeFlowTests.AcBlob002ColdSecondPartIntegrityRefusalRepairAndSecondColdKeepExactVersion to retain its complete original native publication receipts, raw parts, generated metadata, quota rows, fault/repair image, applied cuts and two same-root reopen assertions. At every existing healthy warm, repaired-cold and second-cold stage, the same genuine two-part published version must additionally reject zero revision, negative offset/count, count above the original 65,536-byte range bound, offset past end, nonempty range at end, maximum-long offset and stale revision. Validation and revision failures retain their original exact error code/detail; each refusal preserves the complete raw image and applied cut.
 
-A pre-cancelled cross-chunk request uses the actual original caller token. Its exact OperationCanceledException must retain that token; no successful result or partial prefix is returned, and the original native image/cut remain unchanged. A fresh uncancelled request immediately reads the complete exact original cross-chunk range and metadata. This is pre-admission cancellation evidence, not a claim of mid-copy cancellation or resource performance. Existing bounded read/part integrity, current persisted authorization and typed serialization are unchanged.
-
-Source/test map: BlobReads.Range/CopyParts and BlobRecordReader.Part retain the current owning range/integrity implementation; Assertions/BlobRangeAdmissionAssertions.cs owns the complete refusal/healthy oracle and is called by the existing BlobRangeIntegrityAssertions.Healthy. All four original fault arguments/declarations remain unchanged. No new UID is invented; native discovery must bind changed helper source to the authentic existing cases. Source-only review establishes an acceptance-test gap, not a proven product defect. Compiler, native execution, process, Linux RF3 SDK/MCP and global BlobStorage acceptance remain open until authentic current-image results.
-
-
-## TASK-BLOB-REJECTED-COLD-REPLAY-001 — original failed chunks remain immutable
+## Original failed chunks remain immutable
 
 REQ/AC-BLOB-001 and REQ/AC-BLOB-004 extend the original BlobStorageRejectedCommandTests.AcBlob001InvalidHashChangedDuplicateAndWrongChainNeverPublishPartialData, preserving every original invalid-hash, changed-duplicate, wrong-chain, hidden-publication and healthy byte assertion. Each original rejected typed command is retained with its actual command ID, original typed request under the same canonical JSON serializer/options used by TestDatabase.Submit and complete native OperationResult. Compare the complete blob head/state/raw-part/part-metadata/resource-quota/global-quota bytes before and after each refusal. Actual failed StoredOutcome commits remain genuine; domain no-effects must not be misreported as whole-store no-effects.
 
-After the original authorized healthy publication, independently compare full native head/state/part metadata, raw bytes, quota records and published metadata. Replay the three actual original failed commands with unchanged IDs/body; compare their complete original native outcomes and verify the entire store image/applied cut unchanged. Close the original store, reopen the same physical root, repeat exact model/range/outcome equality, close and reopen a second time and repeat. Published range is the actual four-byte original payload; original Begin, Write and Complete receipts retain their exact command IDs, empty model mutations, partition token, applied position and configured durability.
-
-Canonical owner remains BlobUploadCommands.Write plus existing atomic transaction/outcome commit and BlobPublicationCommands.Complete; no product algorithm defect is asserted from this source review. The new Helpers/BlobRejectedCommandColdFlow.cs owns only genuine ZoneTree/TestDatabase oracle, retained original failure replay and joined same-root cold continuation. The case declaration/UID remains original; its new source/span requires authentic native binding. Compiler, current native execution, process/RF3/Linux and global acceptance remain OPEN; no mock/provider/fallback, invented receipt or power-loss claim.
-
-
-## TASK-BLOB-ORPHAN-RECLAIM-COLD-001 — absence is proved, never presumed
+## Absence is proved, never presumed
 
 REQ/AC-BLOB-001,004,005 preserve both original BlobReclaimWholeFlowTests declarations and all original abort/reservation release, partial cursor, corrupt-second-part rollback/repair, exact quota/parts/receipt/replay and reuse-lifetime assertions. In the original corrupt-part whole operation, after actual successful final reclaim proves the old state and parts absent, introduce exactly one original raw-part row as a scoped native storage fault. Genuine new Reclaim and same-upload Begin must throw the original Corruption/detail through ProveEmpty and ProveNoParts, respectively; both preserve the complete original damaged raw image/applied cut and cannot delete unknown ownership.
 
-Repair deletes only that exact fault-owned key after independent exact raw bytes comparison. Assert original complete row image restored with the two actual fault/repair commit positions retained. A distinct authorized empty Reclaim then returns its real complete typed result/receipt and exact same-ID replay without double release. Existing healthy upload/publication remains original and unchanged. No product cleanup silently deletes an orphan or substitutes missing state/default authority; no GC relaxation or invented failure result.
+## Native published record refusal and repair
 
-Both original whole operations additionally close the first reopened native store and reopen the same physical root again. Compare the complete published metadata, original genuine Complete OperationResult/receipt replay, full/partial/zero ranges, quotas and original Abort/first/final old-lifetime TokenInvalidated refusals; every replay/read/refusal preserves the complete row image and applied cut. Helpers/BlobReclaimHealthyContinuation returns its already-existing original request/result/metadata so the second cold oracle never reconstructs a receipt. Helpers/BlobOrphanReclaimContinuation owns only scoped fault proof/repair and this native cold continuation. Actual production BlobReclaimCommand.ProveEmpty and BlobUploadCommands.ProveNoParts are unchanged. No confirmed product defect is claimed; this closes a previously unexercised whole-operation boundary.
-
-Native reference audit found exactly the two existing case calls for the internal continuation. Their declarations remain unchanged; changed source/span binding and whole runtime must be supplied by authentic native discovery/Root execution. Compiler/native operation/process/Linux/RF3/SDK continuation gates remain OPEN. Direct Core same-root reopening is not a real process-kill or public SDK qualification.
-
-
-### Ordered Blob whole-flow union review
-
-The R58 → R59 → R60 source union retains every original method and fault argument and all three original native chains. Native BlobMetadata.Length and BlobUploadInfo.StoredBytes are Int64; the unchanged independently expected payload length is explicitly widened to Int64 in the rejected-command oracle, including its original retained assertion. This changes no numeric value, quota or bound and does not compare an observed value against itself. Failed StoredOutcome rows remain separate from domain no-effects; both cold reopens preserve the complete original outcome, native row image and cut. Fresh compiler/native discovery/whole-case runtime remain OPEN; no new UID or PASS is manufactured.
-
-## TASK-BLOB-PUBLISHED-INTEGRITY-001 — native published record refusal and repair
-
-REQ-BLOB-PUBLISHED-INTEGRITY-001 refines REQ-BLOB-002/004/007: a genuine two-part publication must fail closed when its actual head or complete state is a scoped malformed committed record. This is a controlled native storage fault, not an authenticated RPC corruption or RF3 claim.
+REQ-BLOB-PUBLISHED-INTEGRITY-001 refines REQ-BLOB-002/004/007: a genuine two-part publication must fail closed when its actual head or complete state is a scoped malformed committed record. This is a controlled native storage fault, not an authenticated RPC corruption or cluster claim.
 
 AC-BLOB-PUBLISHED-INTEGRITY-001 maps to BlobPublishedRecordIntegrityTests.AcBlobPublishedRecordsRefuseThenExactRepairSurvivesTwoColdOwners Arguments0..3: unsupported head format, inconsistent head part count, unsupported complete-state format, and mismatched complete-state integrity hash. Original successful upload receipts, independently expected multipart bytes and full native image precede the fault. Warm and first same-root cold reads repeat exact FormatUnsupported/Corruption code and safe detail, including zero-length reads at the published end; each preserves the complete damaged image and applied position.
 
 AC-BLOB-PUBLISHED-INTEGRITY-002 requires exact original raw-row repair, complete original image equality at the actual repair cut, healthy first/last/cross-part/zero and boundary/cancellation reads, all original successful command/result replay, second same-root cold image/cut parity and literal byte continuation. Body and both store/fixture disposal failures retain their ordered original ledger. Existing scope, revision, quota, checksum and read limits remain unchanged.
 
-```mermaid
-flowchart LR
-  P[Actual multipart publication and receipts] --> F[Scoped committed head or state fault]
-  F --> W[Warm refusal and unchanged full image]
-  W --> C[Joined close and same-root cold refusal]
-  C --> R[Exact original raw-row repair]
-  R --> H[Healthy ranges and original command replay]
-  H --> S[Second joined cold full image and byte parity]
-```
+## Current persisted principal across partial reads
 
-Source joined; current-image execution, compiler, native runtime, Linux and public Aspire SDK/MCP qualification remain OPEN. This additional native store case preserves all existing BlobRangeIntegrity whole cases.
-
-
-## TASK-BLOB-RANGE-POLICY-COLD-001 — current persisted principal across partial reads
-
-REQ-BLOB-RANGE-POLICY-COLD-001 refines REQ-BLOB-002/003/004: every native range, including a zero-length range at the exact published end, resolves the current persisted principal inside its own Store.Read. Original BlobAuthorizationTests warm metadata/row/creator checks remain unchanged. This additional native ZoneTree kernel flow does not qualify public authentication, native replica admission, process kill or RF3.
+REQ-BLOB-RANGE-POLICY-COLD-001 refines REQ-BLOB-002/003/004: every native range, including a zero-length range at the exact published end, resolves the current persisted principal inside its own Store.Read. Original BlobAuthorizationTests warm metadata/row/creator checks remain unchanged. This additional native ZoneTree kernel flow does not qualify public authentication, native replica admission, process kill or cluster.
 
 AC-BLOB-RANGE-POLICY-COLD-001 maps to BlobRangePolicyColdTests.AcBlob003RevokedRangeRemainsDeniedColdThenRestoredPolicyReadsExactVersion: publish the genuine existing two-part object and original receipts, persist a separate authorized BlobRead principal at epoch1, prove literal cross-part/zero ranges and full image invariance, then authorized ConfigurePrincipal epoch2 Revoked. Repeated exact Unauthenticated/safe-detail refusals preserve the complete image and cut AFTER that actual policy commit. Join the store and reopen the same root; repeat exact refusal and complete damaged-policy image/cut equality. A denied read creates no StoredOutcome; it is not a retained issued command failure.
 
 AC-BLOB-RANGE-POLICY-COLD-002 requires a genuine authorized ConfigurePrincipal restore at epoch3 with exact returned principal and actual +1 commit position, literal original range/metadata and no-effect parity, original root publication receipts/result replay, and a second joined same-root cold owner with complete raw image/cut equality and exact healthy byte continuation. All body and owner disposal failures retain their ordered original ledger. No old successful reader command outcome is expected to replay across changed policy epochs; publication belongs to the unchanged original root principal.
-
-```mermaid
-flowchart LR
-  P[Actual multipart publication and persisted reader epoch1] --> H[Exact healthy ranges]
-  H --> R[Actual revoked principal epoch2]
-  R --> D[Repeated read refusal and post-policy unchanged image]
-  D --> C[Joined close and first cold refusal]
-  C --> A[Authorized restore epoch3]
-  A --> B[Exact ranges and original root receipt replay]
-  B --> S[Second joined cold image and healthy parity]
-```
-
-Source joined; compiler, current-image native execution, Linux and Aspire public SDK/MCP gates remain OPEN. Actual owning BlobReads.Cut/DatabaseCredentialValidation.ReadPrincipal reload semantics remain unchanged; no production defect is asserted.
-
-Policy writes use actual CreateNativeOperation with unchanged root, actual EvaluationClock and generated ConfigurePrincipalRequest native bytes, then owning DatabaseEngine.Apply. Caller cancellation is checked before this synchronous operation; this is not async cancellation or a native replica-issued journal claim.
-
-### Numeric responsibility extraction source candidate
-
-Restored blob resource/quota verification is a pure feature-local validation owner; marker progression, exact bounded record pages, atomic commit/finish and all original corruption/fence checks retain their original order. Compiler and full existing operation qualification remain required.
-
-
-## TASK-KL036-CONTROLLED-BLOB-OUTCOME-LIFETIME-008 — selected native lifetime successor
-
-The selected coherent full366, DocV1 closure12 and Outcome72 source composition integrates local lifetime-pair binding, the live six-kind OutcomeV2 flow and its regressions together. Original operation outcomes, policy epochs and all previous required gates remain authoritative. The selected source implements TryCaptureControlledBlobOutcomeV2, ValidateControlledBlobOutcomeV2 and ReadControlledBlobOutcomeV2, their source callers and the nine-file genuine native whole-operation regression component. The same guarded composition removes the obsolete unmapped HTTP observer pipeline and preserves the original case declaration on the genuine native Aspire parent flow. This closes the source-integration blocker; semantic binding, generated serializers, actual budget/deadline fit and whole-flow execution remain unverified. Wire or fault source components alone do not establish runtime delivery. Original-case qualification admission and selector reconciliation remain owned by the main integrator.
-
-The selected internal successor captures the original controlled Blob outcome frame and mandatory source lifetime coverage together in the same charged source storage cut. It returns the exact retained source result only after actual destination native validation, an awaited source RF3 read barrier and fresh comparison of the complete original frame plus coverage. A genuine source principal epoch change continues to deny the old command GUID after policy repair; a healthy follow-up uses a new command. The target freshly authenticates its persisted technical administrator and validates the actual published physical scope and native Blob state. The authenticated source definition and its own lifetime form a pair; a target user mirror or target lifetime is not a substitute for that source authority. Source and target epochs and lifetimes may differ.
-
-The reserved native channel is ResourceLifetimeBlobOutcome=5 and its private read kind is ControlledBlobOutcomeV2=91. Existing channel3/private87 remain DATA-only and read-only. The new call alias is keyload.server.remote-controlled-blob-outcome-call.v2: Id0 is the exact frozen RemoteControlledBlobCall Original and Id1 is mandatory ResourceLifetimeCoverageV1 Coverage. The new reply alias is keyload.server.remote-controlled-blob-outcome-reply.v2: Id0 RequestId, Id1 Nonce, Id2 nullable frozen ControlledBlobReadResult, Id3 nullable ErrorCode, Id4 nullable SafeDetail and Id5 actual endpoint discovery. Existing V1 frame, call, result, envelope and reply aliases and field identities remain unchanged. There is no serving V1 fallback for missing coverage.
-
-The full new wrapper is MAC-bound and tied to actual source/destination owners, caller voter/address, original absolute expiry and current native generation. The existing work owner, replay owner, cancellation, read grants and failure ledger remain in use. Channel5 conserves the existing effect-sensitive outcome boundary: the native receiver begins it immediately before the actual original CQRS execution, preserves known native terminal errors, and retains UnknownWriteOutcome for uncertain failure after the boundary. Moving this flow to the read-only DATA channel would not preserve that contract. Target authorization and cached-result validation use the mandatory paired view over the real target cut; no raw-resource bypass, synthetic lifetime or target-sidecar fallback is permitted.
-
-The native wire qualification retains all thirteen original one-field Outcome mutations across the six operation kinds and all ten existing caller identities with DATA4. The mutations carry the original full-wrapper inner MAC and a fresh outer native signature and nonce; successful rejection proves MAC integrity before typed execution. It does not prove rejection of a valid-MAC semantic forgery. Claims and evidence bind the complete wrapper, including coverage, within the original 8 KiB diagnostic record bound. Correctly signed missing or incompatible coverage, exact native results and receipts, unchanged failure cuts, original-policy denial, cancellation settlement and two genuine cold reopen cycles remain separate whole-operation obligations. Before-send wire observation does not establish after-target final-source revalidation under an in-flight public hold.
-
-Qualification remains OPEN: canonical adoption, semantic build/analyzers, original native test discovery, focused whole-operation TUnit checks, process recovery and actual Aspire-owned RF3 SDK/official MCP flows must be recorded against the integrated source. Prepared bodies, cached syntax/numeric checks and independent source review are not runtime acceptance, power-loss durability, performance evidence or production readiness.

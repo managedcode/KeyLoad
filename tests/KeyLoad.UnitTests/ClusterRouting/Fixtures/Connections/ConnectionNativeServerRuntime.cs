@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
-/// <summary>Reuses the existing six actual Server owners: two RF3 groups, with original joined shutdown.</summary>
+/// <summary>Reuses the existing six actual Server owners: two CLUSTER groups, with original joined shutdown.</summary>
 internal sealed class ConnectionNativeServerRuntime : IAsyncDisposable
 {
     internal const string NotStarted = "The actual native Server cohort is not started.";

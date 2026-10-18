@@ -13,46 +13,46 @@ internal static class SeriesExtremeAggregateSeed
     private const long BeforeSealRevision = 8;
     private const long SealedRevision = 9;
 
-    internal static async Task AppendAsync(RequestCqrsRf3Callers administrator, SeriesExtremeAggregateState state,
+    internal static async Task AppendAsync(RequestCqrsClusterCallers administrator, SeriesExtremeAggregateState state,
         ImmutableArray<SampleData> samples, long sequence, CancellationToken token)
     {
         var command = new CommandRequest(Guid.NewGuid(), state.Scenario.Partition,
-            [new AppendSamples(TimeSeriesRf3Scenario.Set, TimeSeriesRf3Scenario.Series, samples, TimeSeriesRf3Scenario.PublicTags)]);
+            [new AppendSamples(TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series, samples, TimeSeriesClusterScenario.PublicTags)]);
         var actual = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.CommitAsync(command, token));
         await Assert.That(actual.Token.Position).IsGreaterThan(NoPosition);
         var expected = new CommitReceipt(command.CommandId,
-            new(state.Placement.Incarnation, command.Partition.AtomicPartitionId, actual.Token.Position, state.Placement.PlacementEpoch),
-            [new(AppendKind, TimeSeriesRf3Scenario.Set, TimeSeriesRf3Scenario.Series, sequence)], DurabilityProfile.QuorumProcessDurable);
-        await SqlRf3Protocol.EqualAsync(expected, actual);
+            new(actual.Token.Incarnation, command.Partition.AtomicPartitionId, actual.Token.Position, actual.Token.OwnershipEpoch),
+            [new(AppendKind, TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series, sequence)], DurabilityProfile.QuorumProcessDurable);
+        await SqlClusterProtocol.EqualAsync(expected, actual);
         state.Receipts.Add((command, expected));
     }
 
-    internal static async Task OpenAsync(RequestCqrsRf3Callers administrator, SeriesExtremeAggregateState state,
+    internal static async Task OpenAsync(RequestCqrsClusterCallers administrator, SeriesExtremeAggregateState state,
         CancellationToken token)
         => await WindowCommitAsync(administrator, state,
-            new OpenSampleChunkWindow(TimeSeriesRf3Scenario.Set, TimeSeriesRf3Scenario.Series, state.WindowId,
+            new OpenSampleChunkWindow(TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series, state.WindowId,
                 DateTimeOffset.MinValue, DateTimeOffset.MaxValue), "openSampleChunkWindow", OpenRevision, token);
 
-    internal static async Task SealAsync(RequestCqrsRf3Callers administrator, SeriesExtremeAggregateState state,
+    internal static async Task SealAsync(RequestCqrsClusterCallers administrator, SeriesExtremeAggregateState state,
         CancellationToken token)
         => await WindowCommitAsync(administrator, state,
-            new SealSampleChunkWindow(TimeSeriesRf3Scenario.Set, TimeSeriesRf3Scenario.Series, state.WindowId, BeforeSealRevision),
+            new SealSampleChunkWindow(TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series, state.WindowId, BeforeSealRevision),
             "sealSampleChunkWindow", SealedRevision, token);
 
-    private static async Task WindowCommitAsync(RequestCqrsRf3Callers administrator, SeriesExtremeAggregateState state,
+    private static async Task WindowCommitAsync(RequestCqrsClusterCallers administrator, SeriesExtremeAggregateState state,
         Mutation mutation, string kind, long revision, CancellationToken token)
     {
         var command = new CommandRequest(Guid.NewGuid(), state.Scenario.Partition, [mutation]);
         var actual = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.CommitAsync(command, token));
         await Assert.That(actual.Token.Position).IsGreaterThan(NoPosition);
         var expected = new CommitReceipt(command.CommandId,
-            new(state.Placement.Incarnation, command.Partition.AtomicPartitionId, actual.Token.Position, state.Placement.PlacementEpoch),
-            [new(kind, TimeSeriesRf3Scenario.Set, TimeSeriesRf3Scenario.Series, revision)], DurabilityProfile.QuorumProcessDurable);
-        await SqlRf3Protocol.EqualAsync(expected, actual);
+            new(actual.Token.Incarnation, command.Partition.AtomicPartitionId, actual.Token.Position, actual.Token.OwnershipEpoch),
+            [new(kind, TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series, revision)], DurabilityProfile.QuorumProcessDurable);
+        await SqlClusterProtocol.EqualAsync(expected, actual);
         state.Receipts.Add((command, expected));
     }
 
-    internal static async Task CaptureAsync(RequestCqrsRf3Callers administrator, SeriesExtremeAggregateState state,
+    internal static async Task CaptureAsync(RequestCqrsClusterCallers administrator, SeriesExtremeAggregateState state,
         CancellationToken token)
     {
         await SeriesExtremeAggregateCurrent.RowsAsync(administrator, state, token);

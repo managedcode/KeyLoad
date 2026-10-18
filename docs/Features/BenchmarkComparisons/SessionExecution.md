@@ -1,186 +1,168 @@
-# Спільна жива сесія Benchmarks
+# Shared live Benchmarks session
 
-Дата: 2026-10-17. Статус: рішення власника; новий pipeline
-перебуває в реалізації та ще не кваліфікований. Власник відхилив просте перенесення всіх
-1 898 jobs на ручний запуск і попросив новий дизайн.
+The benchmark pipeline runs each database topology as one live session: the same
+database serves every TUnit workload test of its job. The architectural decision is
+[ADR-142](../../ADR/ADR-142-shared-live-benchmark-sessions.md). The pipeline has no
+per-cell planners, report schemas or readers beyond this session shape. Reusable native
+adapters, genuine operations, bounded provider transport and immutable result files
+are kept, and there is no runtime fallback to another producer. Linux qualification of
+the session path is a separate acceptance gate.
 
-Архітектурне рішення: [ADR-142](../../ADR/ADR-142-shared-live-benchmark-sessions.md).
+## Unit of execution
 
-Пряма корекція власника 2026-10-17 вимагає видалити весь замінений benchmark
-pipeline: старі dispatch paths, per-cell planners, report schemas, active readers
-та їхні exclusive fixtures. Reusable native adapters, справжні операції, bounded
-provider transport і незмінні історичні результати зберігаються. Runtime fallback
-до старого покоління не допускається.
+There are exactly **two measurement jobs per database**: one for a single node and one
+for three nodes. Both run the same set of TUnit tests, parameterized by database and
+nodeCount. The initial database contains 1,000,000 records; the set then contains
+separate operation tests and mixed workloads in groups of 100,000. **The load time of
+the initial million is a separate measurement result.** Operation type and operation
+count do not create jobs.
 
-## Одиниця виконання
+The 11 databases give **22 measurement jobs**. One shared preparation, one aggregation
+and a separate Website dispatch give **25 jobs in the comparison flow**. One existing
+functional replicated-cluster heavy-load gate is also kept until it moves to Build and
+Tests; it is a correctness gate, so the measurement jobs stay exactly 22. Real native
+topologies, separate Linux runners between databases/topologies and their resource
+contracts are kept. An unavailable native topology gets an explicit unavailable result.
 
-Пряма корекція власника: **рівно два measurement jobs на базу** — один для одного
-вузла, другий для трьох вузлів. Обидва запускають той самий набір TUnit-тестів із
-параметрами database і nodeCount. Початкова база містить 1 000 000 записів; далі
-набір містить окремі operation tests і змішані навантаження групами по 100 000.
-**Час завантаження початкового мільйона — окремий результат вимірювання.** Тип операції та
-кількість операцій не створюють jobs.
-
-Поточний набір 11 баз дає **22 measurement jobs**. Одна спільна підготовка, одна
-агрегація та окремий Website dispatch дають **25 jobs порівняльного потоку**. Тимчасово зберігається ще один наявний
-functional RF3 heavy-load gate до його погодженого перенесення в Build and Tests;
-це correctness gate, тому measurement jobs залишаються рівно 22. Реальні native
-топології, окремі Linux runners між базами/топологіями та їхні ресурсні контракти
-зберігаються. Недоступна native топологія отримує явний unavailable результат.
-
-Одна жива база працює протягом усього job. Її запускає Aspire, а справжні C# clients
-виконують різні TUnit-тести через одну спільну session fixture. У змішаних тестах
-є паралельні потоки операцій. Між тестами база не перезапускається і не
-відновлюється з початкового corpus. Автоматичного поділу довгого job на нові
-scenario/profile/scale jobs у цьому дизайні немає.
+One live database runs for the whole job. Aspire starts it, and genuine C# clients run
+the different TUnit tests through one shared session fixture. The mixed tests contain
+parallel operation streams. The database is not restarted or restored from the initial
+corpus between tests. A long job is not split automatically into new
+scenario/profile/scale jobs. Physical runner isolation exists between databases and
+topologies; one job holds several TUnit tests on one shared infrastructure: the
+measured load of the million, operation tests and mixed workloads with parallel
+streams of 100,000 operations.
 
 ```mermaid
 flowchart LR
-    Prepare[Одна збірка та перевірки harness] --> Packages[22 jobs: база та 1 або 3 вузли]
-    Packages --> LoadMillion[Завантажити базовий мільйон]
-    LoadMillion --> Reads[Окремі тести читання пошуку індексів та запитів]
-    Reads --> Mixed[Тести одночасних додавання видалення оновлення читання та пошуку]
-    Mixed --> Verify[Перевірити кінцеві записи та результати]
-    Verify --> Results[Зберегти результати та завершити job]
-    Results --> Aggregate[Повний облік та перевірка доказів]
-    Aggregate --> Dispatch[Окремий Website dispatch]
+    Prepare[One build and harness checks] --> Packages[22 jobs: database and 1 or 3 nodes]
+    Packages --> LoadMillion[Load the base million]
+    LoadMillion --> Reads[Separate read search index and query tests]
+    Reads --> Mixed[Concurrent add delete update read and search tests]
+    Mixed --> Verify[Verify final records and results]
+    Verify --> Results[Save results and finish the job]
+    Results --> Aggregate[Complete accounting and evidence check]
+    Aggregate --> Dispatch[Separate Website dispatch]
 ```
 
-## Спільна інфраструктура та різні TUnit-тести
+## Shared infrastructure and separate TUnit tests
 
-Session fixture один раз запускає database topology через Aspire і передає
-доступ до тієї самої бази всім workload tests job. Вона не завантажує мільйон
-приховано в setup: перший native TUnit test виконує й вимірює завантаження.
-Наступні тести мають явні prerequisites та визначений порядок доступу до стану.
-На одному runner виконується один workload test одночасно; паралельні clients
-усередині змішаного тесту є частиною вимірюваного навантаження.
+The session fixture starts the database topology once through Aspire and gives every
+workload test of the job access to the same database. It does not load the million
+silently in setup: the first native TUnit test performs and measures the load. The
+following tests have explicit prerequisites and a defined order of access to the state.
+One workload test runs at a time on a runner; the parallel clients inside a mixed test
+are part of the measured load.
 
-Окремі tests дають окремі native outcomes і measurement reports: початкове
-завантаження, побудова індексів, sequential/random reads, search/range/complex
-queries, updates, змішаний create/delete/read/search та перевірка кінцевого стану.
-Конкретний підтримуваний operation inventory є однаковим для adapters;
-недоступність capability позначається явно. Кілька tests у job не означають
-кілька баз або infrastructure fixtures.
+Separate tests give separate native outcomes and measurement reports: initial load,
+index construction, sequential/random reads, search/range/complex queries, updates,
+mixed create/delete/read/search and final-state verification. The supported operation
+inventory is the same for all adapters; an unavailable capability is marked
+explicitly. Several tests in a job do not mean several databases or infrastructure
+fixtures.
 
-## Спільний план виконання
+## Shared execution plan
 
-1. Запустити обрану native топологію та дочекатися її готовності.
-2. Завантажити базові 1 000 000 записів і перевірити фактичні дані. Виміряти час і
-   throughput завантаження. Побудову потрібних native індексів виміряти окремо.
-3. На завантаженій базі виконати окремі TUnit operation tests. У змішаному тесті
-   через спільний старт запустити паралельні bounded client потоки: додати 100 000
-   нових записів, видалити 100 000 вибраних початкових записів, оновити 100 000
-   інших записів, виконувати читання та пошук/запити на цій самій живій базі.
-   Читання, пошук, діапазони й складні запити мають однакові для всіх баз
-   задекларовані набори та counts; мінімум 100 000 measured operations на
-   застосовний workload зберігається. Змішаний тест справді перекриває в часі
-   create/delete/read/search; окремі operation tests залишаються окремими outcomes.
-4. Дочекатися оригінальних завершень, перевірити ACK, фактичні записи, змінені поля,
-   відсутність видалених записів і правильність результатів пошуку/запитів.
-5. Записати окремі показники завантаження, індексації, create, delete, update,
-   read, search/query та всього змішаного сценарію; завершити job.
+1. Start the selected native topology and wait for its readiness.
+2. Load the base 1,000,000 records and verify the actual data. Measure the load time
+   and throughput. Measure the construction of the required native indexes separately.
+3. Run separate TUnit operation tests on the loaded database. In the mixed test, a
+   shared start launches parallel bounded client streams: add 100,000 new records,
+   delete 100,000 selected base records, update 100,000 other records, and run reads
+   and search/queries on the same live database. Reads, search, ranges and complex
+   queries have the same declared sets and counts for all databases; at least 100,000
+   measured operations per applicable workload are kept. The mixed test genuinely
+   overlaps create/delete/read/search in time; separate operation tests remain
+   separate outcomes.
+4. Wait for the original completions and verify ACKs, the actual records, the changed
+   fields, the absence of deleted records and the correctness of search/query results.
+5. Record separate indicators for load, indexing, create, delete, update, read,
+   search/query and the whole mixed scenario, then finish the job.
 
-Група з 100 000 операцій задає обсяг роботи потоку. Кількість одночасних native
-requests обмежена спільним client-concurrency контрактом; усі 100 000 запитів не
-матеріалізуються як необмежений набір одночасних tasks. Native batching має
-однаковий явний контракт для порівнюваних adapters.
+A group of 100,000 operations defines the amount of work of a stream. The number of
+simultaneous native requests is bounded by the shared client-concurrency contract; all
+100,000 requests are not materialized as an unbounded set of simultaneous tasks.
+Native batching has the same explicit contract for the compared adapters.
 
-Спільний детермінований план розділяє ключі на групи, наприклад: 100 000
-початкових записів для delete, інші 100 000 для update та 800 000 стабільних
-початкових записів. Create використовує окремі 100 000 нових ключів. Отже після
-успішних create/delete залишається рівно 1 000 000 записів: 900 000 початкових та
-100 000 нових. Перевіряються самі ключі й значення, а не лише загальний count.
+The shared deterministic plan splits keys into groups, for example: 100,000 base
+records for delete, another 100,000 for update and 800,000 stable base records. Create
+uses a separate 100,000 new keys. After successful create/delete exactly 1,000,000
+records remain: 900,000 base and 100,000 new. The keys and values themselves are
+verified, not only the total count.
 
-Corpus/seed, payload, групи ключів, queries, counts, concurrency та початкові
-умови однакові для всіх баз. Між потоками не фіксується неможливий точний
-wall-clock порядок завершення: вони реально працюють одночасно. Читання з
-детермінованим oracle використовує стабільну групу; перевірки змінюваних ключів і
-пошукового індексу враховують задекларовані native consistency/read-cut контракти
-та перевіряють кінцевий стан після ACK. Помилкові результати не маскуються
-нескінченними polling або прихованими retries.
+The corpus/seed, payload, key groups, queries, counts, concurrency and initial
+conditions are the same for all databases. An impossible exact wall-clock completion
+order between streams is not fixed: they genuinely run at the same time. Reads with a
+deterministic oracle use the stable group; checks of mutated keys and of the search
+index respect the declared native consistency/read-cut contracts and verify the final
+state after ACK. Wrong results are not masked by endless polling or hidden retries.
 
-Для кожного типу операцій звіт містить actual attempted/completed/error counts,
-elapsed time, throughput, p50/p95/p99, а також спостережені CPU/RAM/allocations,
-де вони справді вимірюються. Загальна тривалість змішаного сценарію не дорівнює
-сумі тривалостей паралельних потоків; read/search результати явно позначаються як
-отримані під одночасним навантаженням create/delete/update.
+For each operation type the report contains the actual attempted/completed/error
+counts, elapsed time, throughput, p50/p95/p99 and the observed CPU/RAM/allocations
+where they are actually measured. The total duration of the mixed scenario is not the
+sum of the durations of the parallel streams; read/search results are explicitly marked
+as obtained under concurrent create/delete/update load.
 
-**Окремого прогріву немає:** немає warmup requests, warmup namespaces чи пропущеної
-першої серії. Усі операції вибраного вимірюваного сценарію враховуються від першої.
-Природний стан runtime, індексів і кешів змінюється разом із живою базою та
-однаковим змішаним навантаженням; цей потік не оголошується cold-cache вимірюванням.
+**There is no separate warmup:** no warmup requests, warmup namespaces or skipped first
+series. All operations of the selected measured scenario count from the first one. The
+natural state of runtime, indexes and caches changes together with the live database
+and the same mixed load; this flow is not declared a cold-cache measurement.
 
-**Окремих фаз очищення між сценаріями та cleanup jobs немає.** Середовище живе в
-межах GitHub job і закінчує роботу разом із ним. Штатне завершення вже наявних
-TUnit/Aspire ресурсів залишається частиною завершення процесу. Cleanup не створює
-додаткової матриці, повторних перезапусків чи окремого benchmark сценарію.
+**There are no separate cleanup phases between scenarios and no cleanup jobs.** The
+environment lives within the GitHub job and ends with it. The normal shutdown of the
+TUnit/Aspire resources stays part of process completion. Cleanup creates no additional
+matrix, restarts or separate benchmark scenario.
 
-## Спільна підготовка й вимірювання
+## Shared preparation and measurement
 
-- Один раз збираються exact-source test runner, AppHost і потрібні образи.
-  Незмінний bundle містить manifest із SHA, DLL/PDB та image digests. Workers
-  перевіряють його перед використанням; повторних solution restore/build у кожному
-  measurement job немає. Потрібні metadata та шляхи Aspire перевіряються справжнім
-  запуском, а не припущенням, що копіювання bin достатньо.
-- До fan-out проходять contract tests, actual matrix-to-C# selection і перевірка
-  native startup. Усередині пакета readiness належить Aspire; setup не входить у
-  latency операцій.
-- Ingestion 1/10/500 clients, мінімальні measured operation counts,
-  recall, RF3 acknowledgement, resource bounds та всі потрібні workload families
-  зберігаються. Число jobs не є числом виміряних сценаріїв.
-- Недоступні native capabilities/topologies мають явні unavailable результати
-  з перевіреною причиною. Native failure робить результат сценарію failed/null;
-  відсутні або пошкоджені докази не можна підмінити unavailable.
+- The exact-source test runner, AppHost and required images are built once. The
+  immutable bundle contains a manifest with SHA, DLL/PDB and image digests. Workers
+  verify it before use; there is no repeated solution restore/build in every
+  measurement job. The required metadata and Aspire paths are verified by a genuine
+  launch, not by assuming that copying bin is enough.
+- Contract tests, the actual matrix-to-C# selection and native startup verification
+  run before the fan-out. Inside a package readiness belongs to Aspire; setup is not
+  part of operation latency.
+- Ingestion at 1/10/500 clients, the minimum measured operation counts, recall,
+  replicated acknowledgement, resource bounds and all required workload families are
+  kept. The number of jobs is not the number of measured scenarios.
+- Unavailable native capabilities/topologies have explicit unavailable results with a
+  verified reason. A native failure makes the scenario result failed/null; missing or
+  corrupt evidence cannot be replaced by unavailable.
 
-## Запуски й результати
+## Runs and results
 
-На push у main автоматично виконується новий повний набір із 22 measurement jobs.
-Ручний запуск дозволяє вибрати повний набір або лише build/harness contracts;
-перший етап реалізації перевіряє весь новий шлях на KeyLoad RF3, після цього
-підключає інші adapters. Це порядок впровадження, не заміна повного фінального
-порівняння однією базою.
+A push to main automatically runs the complete set of 22 measurement jobs. A manual run
+chooses the complete set or only the build/harness contracts. Preflight, cancellation,
+malformed-input, permission and provenance checks are TUnit contracts of Benchmarks
+and do not multiply the measurement matrix. The selected load profiles use the same
+mixed scenario inside the same two jobs per database, with the same contract for all
+adapters.
 
-Preflight, cancellation, malformed-input, permission та provenance checks
-залишаються TUnit контрактами Benchmarks і не утворюють множник вимірювальної
-матриці. Обрані профілі навантаження використовують той самий змішаний сценарій
-всередині тих самих двох jobs на базу, з однаковим контрактом для всіх adapters.
+Each scenario immediately stores its own source/run/attempt-bound JSON and the original
+diagnostic data. After a failure only a scenario for which the actual database state
+and correct prerequisites are known continues; a faulty database ends the job
+explicitly. Data is not reset for a hidden repetition of a failed operation. Earlier
+results and the exact list of what was not executed are stored. Automatic retries of
+measured operations do not improve the statistics. The aggregator verifies all expected
+scenarios and the failed/null and unavailable accounting; mixed, missing or corrupt
+inputs are rejected. Website receives only verified genuine measurements; benchmarks do
+not replace readiness gates.
 
-Кожний сценарій відразу зберігає власний source/run/attempt-bound JSON та оригінальні
-діагностичні дані. Після відмови продовжується лише сценарій, для якого відомі
-фактичний стан бази та коректні prerequisites; несправна база завершує job явно.
-Дані не скидаються для прихованого повторення failed operation. Зберігаються попередні
-результати і точний перелік невиконаного. Автоматичні retries виміряних операцій не
-покращують статистику. Aggregator перевіряє всі очікувані сценарії, failed/null та
-unavailable accounting; mixed, missing або corrupt inputs відхиляються. Website
-отримує лише перевірені справжні вимірювання; benchmarks не замінюють readiness gates.
+Linux qualification uses the genuine one-node and three-node KeyLoad cluster sessions
+through the .NET SDK and official MCP clients first, and the other adapters follow the
+same path; the final comparison is never replaced by one database. README and status
+follow the real results.
 
-## Корекція попереднього правила та межі готовності
+## Requirements and verification
 
-[AGENTS.md](../../../AGENTS.md) зараз вимагає:
-«Each engine/node-count/scenario measurement MUST run on a separate isolated runner agent».
-Пряма вказівка власника 2026-10-16 змінює цю вимогу для нового дизайну: фізична
-ізоляція runner — між базами та топологіями. Один job містить кілька TUnit-тестів
-на одній спільній інфраструктурі: вимірюване завантаження мільйона, operation tests
-та змішані навантаження з паралельними потоками по 100 000 операцій.
-Власник також прибрав окремий прогрів і запропоноване очищення/скидання стану.
-Повторне погодження цих конкретних корекцій не потрібне.
-
-Подальше впровадження: уточнити canonical manifest змішаного сценарію; реалізувати
-один наскрізний RF3 job; перевірити одночасні потоки, результати по типах операцій,
-правильність мільйонного набору після create/delete/update,
-original reports і штатне завершення; підключити повний набір adapters; виконати Linux qualification та
-оновити README/status за справжніми результатами. Старий producer та його exclusive dispatch/report/test код видаляються разом.
-Історична діагностика зберігає фактичні джерела, без твердження про green build чи tests.
-
-## Вимоги та перевірка реалізації
-
-| Вимога | Конкретний completion gate |
+| Requirement | Completion gate |
 | --- | --- |
-| REQ-BSESSION-001: два jobs на database, одна native topology на job. | AC-BSESSION-001: canonical planner формує 22 workers; усі 11 database groups мають лише native 1/3-node rows. |
-| REQ-BSESSION-002: кілька TUnit-тестів ділять одну інфраструктуру. | AC-BSESSION-002: original native discovery/TRX показує окремі load/read/search/mixed cases; ресурсні identities залишаються тими самими між cases; Aspire запускає topology один раз. |
-| REQ-BSESSION-003: початковий мільйон вимірюється. | AC-BSESSION-003: report містить actual attempted/ACKed/verified record counts, elapsed/throughput та original load case outcome; setup не приховує inserts. |
-| REQ-BSESSION-004: окремі operation tests і справжній mixed workload. | AC-BSESSION-004: min 100k measured operations на applicable case; mixed create/delete по 100k реально перекриваються в часі; deterministic final oracle перевіряє записи та результати. |
-| REQ-BSESSION-005: один build, незмінний exact-source bundle. | AC-BSESSION-005: workers перевіряють hashes/source/image identity, запускають compiled tests без повторної збірки; Docker lifecycle належить Aspire. |
-| REQ-BSESSION-006: без warmup та per-case data reset. | AC-BSESSION-006: actual operation accounting починається з першого виклику; між native cases збережено той самий dataset і topology. |
-| REQ-BSESSION-007: повні справжні результати й чесна публікація. | AC-BSESSION-007: aggregator враховує весь planned case inventory, validates source/run/attempt and original artifacts, rejects corrupt/missing/mixed data, preserves failed/null and native unavailable; Website derives metrics only from validated successful measurements. |
-| REQ-BSESSION-008: завершена перевірка. | AC-BSESSION-008: exact-source Linux build/format/governance, focused native regressions та справжні 1-node/RF3 SDK/MCP benchmark sessions із retained reports; жоден local/source-only результат не закриває Linux gate. |
+| REQ-BSESSION-001: two jobs per database, one native topology per job. | AC-BSESSION-001: the canonical planner forms 22 workers; all 11 database groups have only native 1/3-node rows. |
+| REQ-BSESSION-002: several TUnit tests share one infrastructure. | AC-BSESSION-002: the original native discovery/TRX shows separate load/read/search/mixed cases; resource identities stay the same between cases; Aspire starts the topology once. |
+| REQ-BSESSION-003: the initial million is measured. | AC-BSESSION-003: the report contains actual attempted/ACKed/verified record counts, elapsed/throughput and the original load case outcome; setup does not hide inserts. |
+| REQ-BSESSION-004: separate operation tests and a genuine mixed workload. | AC-BSESSION-004: at least 100k measured operations per applicable case; mixed create/delete of 100k each genuinely overlap in time; a deterministic final oracle verifies the records and results. |
+| REQ-BSESSION-005: one build, an immutable exact-source bundle. | AC-BSESSION-005: workers verify hashes/source/image identity and run the compiled tests without rebuilding; Docker lifecycle belongs to Aspire. |
+| REQ-BSESSION-006: no warmup and no per-case data reset. | AC-BSESSION-006: actual operation accounting starts from the first call; the same dataset and topology are kept between native cases. |
+| REQ-BSESSION-007: complete genuine results and honest publication. | AC-BSESSION-007: the aggregator accounts for the whole planned case inventory, validates source/run/attempt and original artifacts, rejects corrupt/missing/mixed data, preserves failed/null and native unavailable; Website derives metrics only from validated successful measurements. |
+| REQ-BSESSION-008: completed verification. | AC-BSESSION-008: exact-source Linux build/format/governance, focused native regressions and genuine 1-node/3-node SDK/MCP benchmark sessions with retained reports; no local/source-only result closes the Linux gate. |

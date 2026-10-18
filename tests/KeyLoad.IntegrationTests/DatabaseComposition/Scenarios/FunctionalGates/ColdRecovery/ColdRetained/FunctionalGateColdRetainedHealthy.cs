@@ -28,11 +28,11 @@ internal static class FunctionalGateColdRetainedHealthy
             [new PutDocument(reference.Collection, reference.Id, json, AbsentRevision)]);
         var originalReceipt = await context.SdkAsync(context.Writer.Sdk.CommitAsync(command, token));
         await FunctionalGateCompositionCalls.ReceiptAsync(context, originalReceipt, command.CommandId,
-            [new(PutKind, reference.Collection, reference.Id, FirstRevision)], token);
+            [new(PutKind, reference.Collection, reference.Id, FirstRevision)]);
         var expected = new DocumentReadResult(new(reference, FirstRevision, json, false, []));
         await FunctionalGateColdRetainedRows.ReadAsync(context, expected, token);
         await unchanged(context);
-        foreach (var route in Enum.GetValues<DropLifecycleRf3Route>())
+        foreach (var route in Enum.GetValues<DropLifecycleClusterRoute>())
         {
             var replay = await FunctionalGateColdRetainedCalls.CommitAsync(context, command, route, token);
             await NativeSubmissionColdAssertions.ReceiptAsync(replay, originalReceipt);

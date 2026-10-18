@@ -7,18 +7,18 @@ internal sealed class BenchmarkTopologyTargetTests
 {
     private const string ApiKey = "topology-test-key";
     private const string RunId = "topology-contract-test";
-    private const string Rf3Topology = "3 voters, RF3, one physical shard; all processes on one host";
+    private const string ClusterTopology = "3 voters, CLUSTER, one physical shard; all processes on one host";
     private const string QuorumBarrier = "strong quorum barrier";
     private const string BenchmarkAcknowledgement = "benchmark";
     private const string QualifiedProcessKill = "process-kill qualified";
     private const string ExpectedNodesParameter = "expectedNodes";
 
     [Test]
-    public async Task AcIso004DefaultTargetRetainsItsRequiredRf3Contract()
+    public async Task AcIso004DefaultTargetRetainsItsRequiredClusterContract()
     {
         using var http = new HttpClient();
         await using var target = new KeyLoadTarget(http, ApiKey, RunId, UnitBenchmarkOptions.Lifecycle(), UnitBenchmarkOptions.Native(), UnitBenchmarkOptions.Diagnostics(), UnitBenchmarkOptions.KeyLoadAdmission(), UnitClientOptions.Execution(), UnitClientOptions.Translation());
-        await Assert.That(target.Profile.Topology).IsEqualTo(Rf3Topology);
+        await Assert.That(target.Profile.Topology).IsEqualTo(ClusterTopology);
         await Assert.That(target.Profile.ReadContract).Contains(QuorumBarrier);
         await Assert.That(target.Profile.Cluster).IsNull();
     }

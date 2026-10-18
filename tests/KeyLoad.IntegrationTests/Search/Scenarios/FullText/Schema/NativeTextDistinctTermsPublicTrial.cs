@@ -8,10 +8,10 @@ internal static class NativeTextDistinctTermsPublicTrial
 {
     internal static async Task RunAsync(ClusterFixture fixture, CancellationToken token)
     {
-        _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
+        _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
             async caller =>
             {
-                var scenario = await NativeTextRf3Scenario.CreateAsync(fixture, token);
+                var scenario = await NativeTextClusterScenario.CreateAsync(fixture, token);
                 var originals = new List<NativeTextDistinctTermsPublicScenario.Original>();
                 var seeded = await SendAsync(caller, NativeTextDistinctTermsPublicScenario.Seed(scenario.Partition), token);
                 originals.Add(seeded);
@@ -28,11 +28,11 @@ internal static class NativeTextDistinctTermsPublicTrial
                 var baseline = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.OutboxStatusAsync(scenario.Partition, token));
                 foreach (var original in originals)
                 {
-                    await SqlRf3Protocol.EqualAsync(original.Receipt, await McpCallerAssertions.SdkSuccessAsync(
+                    await SqlClusterProtocol.EqualAsync(original.Receipt, await McpCallerAssertions.SdkSuccessAsync(
                         await caller.Sdk.CommitAsync(original.Command, token)));
                     await NativeTextDistinctTermsPublicAssertions.RequireAsync(caller, scenario, repaired.Receipt.Token, 3, token);
                     await NativeTextDistinctTermsPublicAssertions.OutboxAsync(caller, scenario.Partition, baseline, token);
-                    await SqlRf3Protocol.EqualAsync(original.Receipt, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
+                    await SqlClusterProtocol.EqualAsync(original.Receipt, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
                         await caller.Mcp.CallAsync(McpCallerTools.DocumentsCommit, original.Command, token))).Value);
                     await NativeTextDistinctTermsPublicAssertions.RequireAsync(caller, scenario, repaired.Receipt.Token, 3, token);
                     await NativeTextDistinctTermsPublicAssertions.OutboxAsync(caller, scenario.Partition, baseline, token);
@@ -41,7 +41,7 @@ internal static class NativeTextDistinctTermsPublicTrial
             }, token);
     }
 
-    private static async Task<NativeTextDistinctTermsPublicScenario.Original> SendAsync(RequestCqrsRf3Callers caller,
+    private static async Task<NativeTextDistinctTermsPublicScenario.Original> SendAsync(RequestCqrsClusterCallers caller,
         CommandRequest command, CancellationToken token)
     {
         var result = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.CommitAsync(command, token));

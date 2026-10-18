@@ -5,7 +5,7 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 internal sealed class ComposedProjectionLineageTests
 {
     [Test]
-    public async Task AcKl048ComposedProjectionMasksSourceFieldsRefusesForgedLineageThenRepairsAndReplaysAcrossTwoColdCuts()
+    public async Task ComposedProjectionMasksSourceFieldsRefusesForgedLineageThenRepairsAndReplaysAcrossTwoColdCuts()
     {
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>

@@ -15,7 +15,7 @@ internal sealed class ScaledRawStorageBenchmarkTests
     private const string EngineEnvironmentVariable = "KEYLOAD_RAW_STORAGE_ENGINE";
     private const string RecordCountEnvironmentVariable = "KEYLOAD_SCALED_STORAGE_RECORD_COUNT";
     private const string ZoneTreeLabel = "zonetree";
-    private const string RemovedEngineLabel = "tsavorite";
+    private const string UnconfiguredEngineLabel = "unconfigured-engine";
     private const int SmallPayloadBytes = 32;
     private const int LargePayloadBytes = 1024;
     private const int ExpectedBenchmarkCaseCount = 4;
@@ -108,11 +108,11 @@ internal sealed class ScaledRawStorageBenchmarkTests
     }
 
     [Test]
-    public async Task AcScale004SetupRejectsRemovedTsavoriteLabelBeforeFixtureAcquisition()
+    public async Task AcScale004SetupRejectsUnconfiguredEngineLabelBeforeFixtureAcquisition()
     {
         using var benchmark = new ScaledStorageReadBenchmarks
         {
-            Engine = RemovedEngineLabel,
+            Engine = UnconfiguredEngineLabel,
             PayloadBytes = SmallPayloadBytes,
             RecordCount = HundredThousandRecords
         };

@@ -69,7 +69,7 @@ internal static class OperationalAnalyticsRootReopenFlow
                     host.Configuration.Incarnation, host.Configuration.VoterIds,
                     PhysicalShardCatalogStartupProtocol.InitialPlacementEpoch)));
         await SafeProjectorOperationSeed.EqualAsync(host.Database.ReadAtomicPartitionPlacement(
-            PartitionStoreProtocol.AdministratorId, new(PhysicalShardCatalogStartupProtocol.Version, Partition)),
+            PartitionStoreProtocol.AdministratorId, Partition),
             new AtomicPartitionPlacementResolution(PhysicalShardCatalogStartupProtocol.Version, Partition,
                 fixture.Options.PhysicalShardId, host.Configuration.Incarnation, host.Configuration.VoterIds,
                 PhysicalShardCatalogStartupProtocol.InitialPlacementEpoch,

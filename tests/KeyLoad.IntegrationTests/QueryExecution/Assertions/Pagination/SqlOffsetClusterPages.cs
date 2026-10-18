@@ -1,0 +1,102 @@
+using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.Features.ClusterRouting;
+
+namespace KeyLoad.IntegrationTests.Features.QueryExecution;
+
+internal static class SqlOffsetClusterPages
+{
+    internal static async Task HealthyAsync(RequestCqrsClusterCallers callers, SqlOffsetClusterState state, CancellationToken token)
+    {
+        foreach (var window in new[] { "OFFSET 1 ROW FETCH FIRST 1 ROW ONLY",
+            "OFFSET 1 ROWS FETCH NEXT 1 ROW ONLY", "OFFSET 1 ROWS FETCH FIRST 1 ROWS ONLY" })
+        {
+            await WindowAsync(callers, state, window, token);
+        }
+    }
+    private static async Task WindowAsync(RequestCqrsClusterCallers callers, SqlOffsetClusterState state,
+        string window, CancellationToken token)
+    {
+        foreach (var official in new[] { false, true })
+        {
+            await ScalarAsync(callers, state, official, ast: false, window, token);
+            await ScalarAsync(callers, state, official, ast: true, window, token);
+            var join = SqlOffsetClusterProtocol.Join(state.Partition);
+            var page = official
+                ? (await McpCallerAssertions.SuccessAsync<QueryPage>(await callers.Mcp.CallAsync(McpCallerTools.QueryAst, join, token))).Value
+                : await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.QueryAstAsync(join, token));
+            await JoinAsync(page);
+            var sql = SqlOffsetClusterProtocol.JoinRequest(state.Partition) with
+            {
+                Sql = SqlOffsetClusterProtocol.JoinSql.Replace("OFFSET 1 ROWS FETCH NEXT 1 ROWS ONLY", window, StringComparison.Ordinal)
+            };
+            page = official
+                ? (await McpCallerAssertions.SuccessAsync<QueryPage>(await callers.Mcp.CallAsync(McpCallerTools.QueryExecute, sql, token))).Value
+                : await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.QueryAsync(sql, token));
+            await JoinAsync(page);
+            var envelope = new SqlOperationRequest(state.Partition, sql.Sql,
+                AllowFullScan: true, QueryDialectVersion: SqlOffsetClusterProtocol.Q2);
+            var plainEnvelope = new SqlOperationRequest(state.Partition,
+                sql.Sql.Replace(" INNER JOIN ", " JOIN ", StringComparison.Ordinal),
+                AllowFullScan: true, QueryDialectVersion: SqlOffsetClusterProtocol.Q2);
+            await JoinAsync(official ? await SqlClusterProtocol.McpAsync<QueryPage>(callers.Mcp, plainEnvelope, token)
+                : await SqlClusterProtocol.SdkAsync<QueryPage>(callers.Sdk, plainEnvelope, token));
+            var implicitEnvelope = new SqlOperationRequest(state.Partition,
+                sql.Sql.Replace(" AS ", " ", StringComparison.Ordinal),
+                AllowFullScan: true, QueryDialectVersion: SqlOffsetClusterProtocol.Q2);
+            await JoinAsync(official ? await SqlClusterProtocol.McpAsync<QueryPage>(callers.Mcp, implicitEnvelope, token)
+                : await SqlClusterProtocol.SdkAsync<QueryPage>(callers.Sdk, implicitEnvelope, token));
+            page = official ? await SqlClusterProtocol.McpAsync<QueryPage>(callers.Mcp, envelope, token)
+                : await SqlClusterProtocol.SdkAsync<QueryPage>(callers.Sdk, envelope, token);
+            await JoinAsync(page);
+        }
+    }
+    private static async Task ScalarAsync(RequestCqrsClusterCallers callers, SqlOffsetClusterState state,
+        bool official, bool ast, string window, CancellationToken token)
+    {
+        string? cursor = null;
+        long? cut = null;
+        foreach (var (id, json, final) in new[]
+        { ("b", """{"title":"second"}""", false), ("c", """{"title":"third"}""", false), ("d", """{"title":"fourth"}""", true) })
+        {
+            var sql = SqlOffsetClusterProtocol.ScalarRequest(state.Partition) with
+            {
+                Cursor = cursor,
+                Sql = SqlOffsetClusterProtocol.ScalarSql.Replace("OFFSET 1 ROWS FETCH NEXT 1 ROWS ONLY", window, StringComparison.Ordinal)
+            };
+            var request = SqlOffsetClusterProtocol.Scalar(state.Partition) with
+            {
+                Cursor = cursor
+            };
+            var page = ast
+                ? official
+                    ? (await McpCallerAssertions.SuccessAsync<QueryPage>(await callers.Mcp.CallAsync(McpCallerTools.QueryAst, request, token))).Value
+                    : await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.QueryAstAsync(request, token))
+                : official
+                    ? (await McpCallerAssertions.SuccessAsync<QueryPage>(await callers.Mcp.CallAsync(McpCallerTools.QueryExecute, sql, token))).Value
+                    : await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.QueryAsync(sql, token));
+            // The original signed cursor binds logical snapshot continuation; physical-owner correlation remains a separate CLUSTER gate.
+            cut ??= page.CutPosition;
+            await Assert.That(page.CutPosition).IsEqualTo(cut.Value);
+            if (final)
+            {
+                await Assert.That(page.Cursor).IsNull();
+            }
+            else
+            {
+                await Assert.That(page.Cursor).IsNotNull();
+            }
+            await SqlClusterProtocol.EqualAsync(new QueryPage(
+                [new(id, SqlOffsetClusterProtocol.InitialRevision, json, false, [])],
+                page.Cursor, cut.Value, "bounded-full-scan"), page);
+            cursor = page.Cursor;
+        }
+    }
+    private static async Task JoinAsync(QueryPage page)
+    {
+        await SqlClusterProtocol.EqualAsync(new QueryPage(
+            [new("b", SqlOffsetClusterProtocol.InitialRevision, """{"title":"second","name":"Bee"}""", false, [],
+                [new(SqlOffsetClusterProtocol.LeftAlias, "b", SqlOffsetClusterProtocol.InitialRevision),
+                 new(SqlOffsetClusterProtocol.RightAlias, "c2", SqlOffsetClusterProtocol.InitialRevision)])],
+            null, page.CutPosition, "bounded-primary-key-inner-join"), page);
+    }
+}

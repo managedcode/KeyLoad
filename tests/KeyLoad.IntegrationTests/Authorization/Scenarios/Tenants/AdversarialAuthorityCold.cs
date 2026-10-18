@@ -42,7 +42,7 @@ internal static class AdversarialAuthorityCold
             await Assert.That(after[node].Applied).IsGreaterThanOrEqualTo(before[node].Applied);
             await Assert.That(after[node].RoutingReady).IsTrue();
         }
-        await SqlRf3Protocol.EqualAsync(image, await ImageAsync(fixture, state, token));
+        await SqlClusterProtocol.EqualAsync(image, await ImageAsync(fixture, state, token));
         await AdversarialAuthorityTrial.WithClientsAsync(fixture, state, false, token);
     }
 

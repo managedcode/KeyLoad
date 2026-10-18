@@ -29,4 +29,4 @@ flowchart LR
     C --> D[Current numeric quality and original Linux qualification]
 ```
 
-Product SQL, storage, authorization and transport behavior are unchanged. Frontend UI, AppHost topology changes and new public database APIs are N/A: this scope only reorganizes existing Site test and comparison implementation responsibilities. No new library is introduced. Code is authored; compiler, original suite and Linux runtime qualification remain pending until their actual results are retained.
+Product SQL, storage, authorization and transport behavior are unchanged. Frontend UI, AppHost topology changes and new public database APIs are N/A: this scope only reorganizes existing Site test and comparison implementation responsibilities. No new library is introduced. Compiler, original suite and Linux runtime qualification are separate gates whose actual results must be retained.

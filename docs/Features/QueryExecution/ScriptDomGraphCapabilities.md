@@ -1,6 +1,6 @@
 # ScriptDOM GraphSearch capability profile
 
-Canonical slice: `QueryExecution`. This focused correction extends [QueryExecution](../QueryExecution.md) and [ADR-130](../../ADR/ADR-130-microsoft-scriptdom-tsql.md). Current status: complete source proposal; native admission, source integration, compilation and runtime qualification are pending.
+Canonical slice: `QueryExecution`. This focused correction extends [QueryExecution](../QueryExecution.md) and [ADR-130](../../ADR/ADR-130-microsoft-scriptdom-tsql.md).
 
 ## Contract and scope
 
@@ -12,8 +12,8 @@ The current native ScriptDOM `GRAPH_SEARCH` table-valued function lowers to the 
 |---|---|---|
 | REQ-SDGC-001: advertise the implemented typed GraphSearch v1 read capability | AC-SDGC-001: `QueryEngine.Capabilities.ReadProfiles` contains `graph-search-v1`; the catalog declares and uses this named constant exactly once | `SqlGraphSearchParityTests.CapabilityManifestAdvertisesSearchProfileWithoutChangingQ1Dialect`, with the dialect literal independently updated by the owning ScriptDOM consumer scope |
 | REQ-SDGC-002: preserve the rest of the capability contract | AC-SDGC-002: `SqlDialect` remains `TSQL.ScriptDOM180.v1`, `AstVersion` remains 1, both supported version arrays remain `[1,2]`, all previous read profiles, surfaces, predicates and injected database limits remain unchanged | The same genuine manifest test checks dialect, AST/version arrays and `Q2.InnerJoin.v1`; complete before/after native-type review checks the unchanged catalog fields |
-| REQ-SDGC-003: report actual native operations without admitting obsolete syntax or hiding refusals | AC-SDGC-003: the canonical GraphSearch SQL operations retain direct-operation parity, multiple seeds, scope, retrieval, expansion, text/vector weights and empty selectors; wrong parameters, budgets, authority and cancellation retain their existing refusal and healthy-retry oracles | `SqlGraphSearchParityTests`, `SqlGraphSearchRejectionTests`, the existing RF3 GraphSearch and three-way hybrid SDK/official MCP scenarios owned by the graph consumer scope |
-| REQ-SDGC-004: qualify the integrated source rather than the proposal | AC-SDGC-004: exact-source compilation, native TUnit unit/recovery/Aspire RF3 and required Linux evidence are retained before claiming acceptance; a native check-only result or profile entry alone does not pass these gates | Main integration owner retains original build/test/source identities and reports; currently OPEN |
+| REQ-SDGC-003: report actual native operations without admitting obsolete syntax or hiding refusals | AC-SDGC-003: the canonical GraphSearch SQL operations retain direct-operation parity, multiple seeds, scope, retrieval, expansion, text/vector weights and empty selectors; wrong parameters, budgets, authority and cancellation retain their existing refusal and healthy-retry oracles | `SqlGraphSearchParityTests`, `SqlGraphSearchRejectionTests`, the existing cluster GraphSearch and three-way hybrid SDK/official MCP scenarios owned by the graph consumer scope |
+| REQ-SDGC-004: qualify the integrated source rather than the proposal | AC-SDGC-004: exact-source compilation, native TUnit unit/recovery/Aspire cluster and required Linux evidence are retained before claiming acceptance; a native check-only result or profile entry alone does not pass these gates | Main integration owner retains original build/test/source identities and reports |
 
 ## Positive, negative and error flows
 
@@ -35,9 +35,9 @@ flowchart LR
 | Backend contract | `src/KeyLoad.Query/QueryExecution/Contracts/QueryCapabilityCatalog.cs` |
 | Native parser | Existing `src/KeyLoad.Query/QueryExecution/Parsing/ScriptDomGraph*.cs`; unchanged by this correction |
 | Unit tests | Existing `tests/KeyLoad.UnitTests/QueryExecution/Cases/SqlGraph/SqlGraphSearchParityTests.cs` and rejection/support roles; separate graph consumer owner |
-| RF3 tests | Existing QueryExecution GraphSearch and Search three-way hybrid scopes; separate graph consumer owner |
+| cluster tests | Existing QueryExecution GraphSearch and Search three-way hybrid scopes; separate graph consumer owner |
 | SDK/MCP/CLI | N/A for new code: the existing query capability contract and graph operation transports are reused |
 | Frontend/benchmark/infrastructure | N/A: no UI, measurement, orchestration or topology change |
 | Documentation | `docs/Features/QueryExecution/ScriptDomGraphCapabilities.md` |
 
-No persistence format, authorization, operation dispatch, resource limit, profile alias, parser compatibility branch or new dependency is introduced. Runtime and deadline results remain open until the current integrated barrier produces their original evidence.
+No persistence format, authorization, operation dispatch, resource limit, profile alias, parser compatibility branch or new dependency is introduced.

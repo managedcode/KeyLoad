@@ -1,6 +1,6 @@
 namespace KeyLoad.UnitTests.Features.AnalyticsStore;
 
-/// <summary>Actual canonical ordered native apply plus disposable native analytics; not public RF3 qualification.</summary>
+/// <summary>Actual canonical ordered native apply plus disposable native analytics; not public CLUSTER qualification.</summary>
 internal sealed class AnalyticsStoreNativeTests
 {
     [Test]

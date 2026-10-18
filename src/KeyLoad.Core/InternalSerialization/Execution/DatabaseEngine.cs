@@ -34,10 +34,6 @@ public sealed partial class DatabaseEngine
         {
             PhysicalShardCatalogValidation.ValidateEncodedRequestLength(payload.Length);
         }
-        if (kind == OperationKind.BindAtomicPartitionPlacement)
-        {
-            AtomicPartitionPlacementValidation.ValidateEncodedRequestLength(payload.Length);
-        }
         if (kind == OperationKind.RegisterPhysicalOwner
             && payload.Length > KeyLoad.Core.Features.ClusterRouting.Contracts.PhysicalOwnerDirectoryProtocol.MaximumRegistrationBytes)
         {
@@ -46,7 +42,6 @@ public sealed partial class DatabaseEngine
         payload = payload.ToArray();
         var identity = kind switch
         {
-            OperationKind.ConfigurePlacementPolicy => Identity<ConfigurePlacementPolicyRequest>(payload),
             OperationKind.Batch => BatchIdentity(payload, work),
             OperationKind.Receive => Identity<ReceiveRequest>(payload),
             OperationKind.Delivery => Identity<DeliveryCommand>(payload),
@@ -56,7 +51,6 @@ public sealed partial class DatabaseEngine
             OperationKind.CreateTable => Identity<CreateTableRequest>(payload),
             OperationKind.SetQueueDispatch => Identity<QueueDispatchControlRequest>(payload),
             OperationKind.BootstrapPhysicalShardCatalog => Identity<BootstrapPhysicalShardCatalogRequest>(payload),
-            OperationKind.BindAtomicPartitionPlacement => Identity<BindAtomicPartitionPlacementRequest>(payload),
             OperationKind.RegisterPhysicalOwner => Identity<RegisterPhysicalOwnerV1>(payload),
             OperationKind.ConfigurePrincipal => Identity<ConfigurePrincipalRequest>(payload),
             OperationKind.ConfigureApiKey => Identity<ConfigureApiKeyRequest>(payload),

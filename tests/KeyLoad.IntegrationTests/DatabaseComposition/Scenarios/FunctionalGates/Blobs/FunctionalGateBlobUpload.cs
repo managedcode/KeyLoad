@@ -35,8 +35,8 @@ internal static class FunctionalGateBlobUpload
         var initial = BlobIntegrity.InitialHash(begun.Receipt.Token.Incarnation, blob, begin.UploadId, bytes.Length);
         var current = new BlobUploadInfo(blob, begin.UploadId, bytes.Length, 0L, 0, 0L,
             begun.Value.ExpiresAt, BlobUploadStatus.Active, initial);
-        await SqlRf3Protocol.EqualAsync(current, begun.Value);
-        await SqlRf3Protocol.EqualAsync(begun, await context.McpAsync<BlobCommitResult<BlobUploadInfo>>(
+        await SqlClusterProtocol.EqualAsync(current, begun.Value);
+        await SqlClusterProtocol.EqualAsync(begun, await context.McpAsync<BlobCommitResult<BlobUploadInfo>>(
             context.Writer, "keyload_blobs_begin_upload", begin, token));
         for (var ordinal = 0; ordinal < 2; ordinal++)
         {
@@ -48,11 +48,11 @@ internal static class FunctionalGateBlobUpload
         await FunctionalGateBlobAssertions.ReceiptAsync(published.Receipt, complete.CommandId, blob);
         var expected = new BlobMetadata(blob, 1L, begin.UploadId, bytes.Length, 2, current.IntegrityHash,
             new RowAccess(), published.Value.UpdatedAt);
-        await SqlRf3Protocol.EqualAsync(expected, published.Value);
-        await SqlRf3Protocol.EqualAsync(published,
+        await SqlClusterProtocol.EqualAsync(expected, published.Value);
+        await SqlClusterProtocol.EqualAsync(published,
             await context.SdkAsync(context.Writer.Sdk.CompleteBlobUploadAsync(complete, token)));
         var info = new BlobUploadInfoRequest(blob, begin.UploadId);
-        await SqlRf3Protocol.EqualAsync(current with
+        await SqlClusterProtocol.EqualAsync(current with
         {
             Status = BlobUploadStatus.Complete
         },
@@ -75,9 +75,9 @@ internal static class FunctionalGateBlobUpload
             StoredBytes = offset + part.Length,
             IntegrityHash = BlobIntegrity.NextHash(previous.IntegrityHash, ordinal, part.Length, hash)
         };
-        await SqlRf3Protocol.EqualAsync(expected, written.Value);
+        await SqlClusterProtocol.EqualAsync(expected, written.Value);
         await FunctionalGateBlobAssertions.ReceiptAsync(written.Receipt, request.CommandId, begin.Blob);
-        await SqlRf3Protocol.EqualAsync(written,
+        await SqlClusterProtocol.EqualAsync(written,
             await context.SdkAsync(context.Writer.Sdk.WriteBlobPartAsync(request, token)));
         return expected;
     }

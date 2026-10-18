@@ -33,9 +33,9 @@ internal static class RequestCqrsCaptureCancellationDiagnostics
 
     private static string ClosedNode(string node) => node switch
     {
-        RequestCqrsRf3Protocol.Node1 => RequestCqrsRf3Protocol.Node1,
-        RequestCqrsRf3Protocol.Node2 => RequestCqrsRf3Protocol.Node2,
-        RequestCqrsRf3Protocol.Node3 => RequestCqrsRf3Protocol.Node3,
+        RequestCqrsClusterProtocol.Node1 => RequestCqrsClusterProtocol.Node1,
+        RequestCqrsClusterProtocol.Node2 => RequestCqrsClusterProtocol.Node2,
+        RequestCqrsClusterProtocol.Node3 => RequestCqrsClusterProtocol.Node3,
         _ => OtherNode
     };
 }

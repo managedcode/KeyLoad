@@ -34,7 +34,7 @@ internal static class AuthenticationExecutionResourcePolicy
             {
                 ExpectedSchemaVersion = current.SchemaVersion
             }, token));
-        await SqlRf3Protocol.EqualAsync(definition with
+        await SqlClusterProtocol.EqualAsync(definition with
         {
             SchemaVersion = RestrictedVersion,
             FieldPolicies = [new(McpDocumentProtocol.ProtectedPath, McpDocumentProtocol.ProtectedClassification)]
@@ -58,7 +58,7 @@ internal static class AuthenticationExecutionResourcePolicy
             {
                 ExpectedSchemaVersion = protectedDefinition.SchemaVersion
             }, token));
-        await SqlRf3Protocol.EqualAsync(definition with
+        await SqlClusterProtocol.EqualAsync(definition with
         {
             SchemaVersion = RepairedVersion
         }, repaired);
@@ -73,7 +73,7 @@ internal static class AuthenticationExecutionResourcePolicy
             Redacted = true,
             RedactedFields = [McpDocumentProtocol.ProtectedPath]
         };
-        await SqlRf3Protocol.EqualAsync(expected.Reference, actual!.Reference);
+        await SqlClusterProtocol.EqualAsync(expected.Reference, actual!.Reference);
         await Assert.That(actual.Revision).IsEqualTo(expected.Revision);
         await Assert.That(actual.Redacted).IsEqualTo(expected.Redacted);
         await Assert.That(actual.RedactedFields.SequenceEqual(expected.RedactedFields)).IsTrue();

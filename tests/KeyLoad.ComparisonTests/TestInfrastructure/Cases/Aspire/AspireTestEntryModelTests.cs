@@ -25,7 +25,7 @@ internal sealed class AspireTestEntryModelTests
         ("analyzers", "KeyLoad.Analyzers.Tests"),
         ("unit", "KeyLoad.UnitTests"),
         ("recovery", "KeyLoad.RecoveryTests"),
-        ("rf3", "KeyLoad.IntegrationTests"),
+        ("cluster", "KeyLoad.IntegrationTests"),
         ("comparison", "KeyLoad.ComparisonTests"),
         ("site", "KeyLoad.SiteTests")
     ];
@@ -44,7 +44,7 @@ internal sealed class AspireTestEntryModelTests
                 var executables = model.Resources.OfType<ExecutableResource>().ToArray();
                 var expectedResources = new[] { $"tests-{suite}" };
                 await Assert.That(executables.Select(resource => resource.Name)).IsEquivalentTo(expectedResources);
-                await Assert.That(model.Resources.OfType<ContainerResource>().Where(IsRf3Node)).IsEmpty();
+                await Assert.That(model.Resources.OfType<ContainerResource>().Where(IsClusterNode)).IsEmpty();
                 await Assert.That(model.Resources.Count).IsEqualTo(expectedResources.Length);
 
                 var configuration = await ReadConfigurationAsync(executables.Single(resource => resource.Name == $"tests-{suite}"));
@@ -193,7 +193,7 @@ internal sealed class AspireTestEntryModelTests
             Args = args
         });
 
-    private static bool IsRf3Node(ContainerResource resource)
+    private static bool IsClusterNode(ContainerResource resource)
         => resource.Name is "node1" or "node2" or "node3";
 
     private static string RepositoryRoot()

@@ -7,7 +7,7 @@ internal static class GraphLabelFrontierPublicTrial
 {
     internal static async Task RunAsync(ClusterFixture fixture, CancellationToken token)
     {
-        var state = new GraphLabelFrontierPublicState(await GraphIncomingRf3Scenario.CreateAsync(fixture, token));
+        var state = new GraphLabelFrontierPublicState(await GraphIncomingClusterScenario.CreateAsync(fixture, token));
         await OwnedAsync(fixture, state, async (admin, reader) =>
         {
             await GraphLabelFrontierPublicCommands.SeedAsync(admin, state, token);
@@ -22,7 +22,7 @@ internal static class GraphLabelFrontierPublicTrial
         await ColdAsync(fixture, state, token);
     }
 
-    private static async Task VerifyAsync(RequestCqrsRf3Callers admin, RequestCqrsRf3Callers reader,
+    private static async Task VerifyAsync(RequestCqrsClusterCallers admin, RequestCqrsClusterCallers reader,
         GraphLabelFrontierPublicState state, CancellationToken token)
     {
         await GraphLabelFrontierPublicBounds.VerifyAsync(admin, reader, state, token);
@@ -37,8 +37,8 @@ internal static class GraphLabelFrontierPublicTrial
     }
 
     private static async Task OwnedAsync(ClusterFixture fixture, GraphLabelFrontierPublicState state,
-        Func<RequestCqrsRf3Callers, RequestCqrsRf3Callers, Task> operation, CancellationToken token)
-        => _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
-            async admin => await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2,
+        Func<RequestCqrsClusterCallers, RequestCqrsClusterCallers, Task> operation, CancellationToken token)
+        => _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
+            async admin => await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2,
                 state.Seed.Reader.Secret, async reader => { await operation(admin, reader); return true; }, token), token);
 }

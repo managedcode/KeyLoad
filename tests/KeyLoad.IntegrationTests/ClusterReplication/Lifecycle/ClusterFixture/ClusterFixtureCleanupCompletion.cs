@@ -3,7 +3,7 @@ using KeyLoad.IntegrationTests.Features.CodeQuality;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 
-internal sealed class ClusterFixtureCleanupCompletion(Func<NativeCoverageRf3FixtureOwner?> readCoverage,
+internal sealed class ClusterFixtureCleanupCompletion(Func<NativeCoverageClusterFixtureOwner?> readCoverage,
     Action<Exception> rethrow)
 {
     internal async Task CompleteAsync(bool appStopped,

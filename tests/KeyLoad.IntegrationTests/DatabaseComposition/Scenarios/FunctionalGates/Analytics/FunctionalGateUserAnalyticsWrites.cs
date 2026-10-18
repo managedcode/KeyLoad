@@ -29,7 +29,7 @@ internal static class FunctionalGateUserAnalyticsWrites
         await Assert.That(effect.Id).IsEqualTo(lastId);
         await Assert.That(effect.Revision).IsEqualTo(checked(previousGeneration + P.FirstRevision));
         await FunctionalGateCompositionCalls.ReceiptAsync(context, original, command.CommandId,
-            [new(kind, mutation.Resource, lastId, effect.Revision)], token);
+            [new(kind, mutation.Resource, lastId, effect.Revision)]);
         await FunctionalGateUserAnalyticsAssertions.EqualAsync(await context.McpAsync<CommitReceipt>(context.Writer,
             McpCallerTools.DocumentsCommit, FunctionalGateAnalyticsIdentity.Wire(command), token), original);
         await FunctionalGateUserAnalyticsAssertions.EqualAsync(await FunctionalGateCompositionCalls.CommandAsync(

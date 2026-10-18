@@ -9,15 +9,15 @@ internal static class FunctionalGateUserAssertions
 {
     private const string McpPermissionDenied = "The authenticated principal is not permitted to perform this operation.";
 
-    internal static async Task EqualDocumentAsync(FunctionalGateContext context, RequestCqrsRf3Callers caller,
+    internal static async Task EqualDocumentAsync(FunctionalGateContext context, RequestCqrsClusterCallers caller,
         EntityRef reference, DocumentReadResult expected, CancellationToken token)
     {
-        await SqlRf3Protocol.EqualAsync(expected, await context.SdkAsync(caller.Sdk.GetAsync(reference, token)));
-        await SqlRf3Protocol.EqualAsync(expected, await context.McpAsync<DocumentReadResult>(caller,
+        await SqlClusterProtocol.EqualAsync(expected, await context.SdkAsync(caller.Sdk.GetAsync(reference, token)));
+        await SqlClusterProtocol.EqualAsync(expected, await context.McpAsync<DocumentReadResult>(caller,
             McpCallerTools.DocumentsGet, new GetDocumentRequest(reference), token));
     }
 
-    internal static async Task RefusedReadAsync(RequestCqrsRf3Callers caller, EntityRef reference, CancellationToken token)
+    internal static async Task RefusedReadAsync(RequestCqrsClusterCallers caller, EntityRef reference, CancellationToken token)
     {
         var sdk = await caller.Sdk.GetAsync(reference, token);
         await Assert.That(sdk.IsFailed).IsTrue();
@@ -27,7 +27,7 @@ internal static class FunctionalGateUserAssertions
             new GetDocumentRequest(reference), token), ErrorCode.PermissionDenied, dispatched: true);
     }
 
-    internal static async Task RefusedWriteAsync(RequestCqrsRf3Callers caller, CommandRequest command,
+    internal static async Task RefusedWriteAsync(RequestCqrsClusterCallers caller, CommandRequest command,
         string? detail, CancellationToken token)
     {
         var sdk = await caller.Sdk.CommitAsync(command, token);

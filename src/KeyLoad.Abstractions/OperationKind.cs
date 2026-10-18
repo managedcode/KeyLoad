@@ -54,10 +54,8 @@ public enum OperationKind
     ReclaimBlob,
     /// <summary>Commits the initial physical shard placement catalog.</summary>
     BootstrapPhysicalShardCatalog,
-    /// <summary>Commits an explicit atomic-partition assignment to its physical shard.</summary>
-    BindAtomicPartitionPlacement,
     /// <summary>Changes private native runtime journal infrastructure through replicated.</summary>
-    RuntimeJournal,
+    RuntimeJournal = 27,
     /// <summary>Composes independent queue receives through request grains; never replicated as one command.</summary>
     ReceiveAcrossLanes,
     /// <summary>Commits server-confirmed physical owner registration at the stable control authority.</summary>
@@ -66,10 +64,6 @@ public enum OperationKind
     MaintainAnnIndex,
     /// <summary>Runs protected native text generation maintenance through independently authorized child requests.</summary>
     MaintainTextIndex,
-    /// <summary>Applies one receiver-verified private physical movement phase through replicated.</summary>
-    PartitionMovementPhase,
-    /// <summary>Coordinates protected partition movement through separately authorized child requests.</summary>
-    MovePartition,
     /// <summary>Maintains an administrator-authorized online text generation through separate request grains.</summary>
     MaintainOnlineTextIndex = 34,
     /// <summary>Commits one freshly verified private online text publication; excluded from public operation factories.</summary>
@@ -94,14 +88,6 @@ public enum OperationKind
     DeliverRemoteGraphEdge = 44,
     /// <summary>Commits a freshly verified private BM25 corpus publication; excluded from generic public factories.</summary>
     Bm25CorpusPublicationPhase = 45,
-    /// <summary>Persists an authorized capacity placement policy at Control replicated.</summary>
-    ConfigurePlacementPolicy = 46,
-    /// <summary>Persists one original signed complete placement plan.</summary>
-    PersistPlacementIntent = 47,
-    /// <summary>Applies an intent through its immutable original native Move requests.</summary>
-    ApplyPlacementIntent = 48,
-    /// <summary>Commits one private freshly authenticated placement phase.</summary>
-    PlacementIntentPhase = 49,
     /// <summary>Changes one existing queue pause state through an explicit schema-version CAS.</summary>
     SetQueueDispatch = 50,
     /// <summary>Atomically creates one absent canonical typed table with an original caller identity.</summary>

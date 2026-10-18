@@ -7,27 +7,22 @@ namespace KeyLoad.Core;
 
 public sealed partial class DatabaseEngine
 {
-    private const int FallbackRevisionEmptyCount = 0;
-
+    private const long DefaultPlacementRevision = 0;
     private const string PlacementAdminRequired = "Cluster administration is required.";
-    private const string OrphanPlacement = "An atomic partition placement row exists without its directory header.";
 
-    /// <summary>Reads a committed placement witness through persisted cluster-administrator authority.</summary>
+    /// <summary>Reads the committed placement witness through persisted cluster-administrator authority.</summary>
     /// <param name="principalId">The current persisted principal selected by the trusted request boundary.</param>
-    /// <param name="request">The versioned full atomic-partition identity.</param>
-    /// <returns>The same-view default or explicit physical-owner witness.</returns>
-    public AtomicPartitionPlacementResolution ReadAtomicPartitionPlacement(string principalId,
-        AtomicPartitionPlacementReadRequest request)
-        => Store.Read(view => ReadAtomicPartitionPlacement(view, principalId, request));
+    /// <param name="partition">The complete atomic-partition identity.</param>
+    /// <returns>The same-view committed physical-owner witness.</returns>
+    public AtomicPartitionPlacementResolution ReadAtomicPartitionPlacement(string principalId, PartitionRef partition)
+        => Store.Read(view => ReadAtomicPartitionPlacement(view, principalId, partition));
 
     internal AtomicPartitionPlacementResolution ReadAtomicPartitionPlacement(IKeyValueView view,
-        string principalId, AtomicPartitionPlacementReadRequest request)
+        string principalId, PartitionRef partition)
     {
         const string ReadAtomicPartitionPlacementDetailText = "The physical shard catalog is not initialized.";
 
         ArgumentNullException.ThrowIfNull(view);
-        AtomicPartitionPlacementValidation.ValidateReadRequest(request);
-        var partition = request.Partition;
         ValidatePartition(partition);
         var principal = Principal(view, principalId, Clock.GetUtcNow());
         if (!principal.ClusterAdministrator)
@@ -38,7 +33,7 @@ public sealed partial class DatabaseEngine
         var catalog = PhysicalShardCatalogRecordSerialization.Read(view)
             ?? throw Errors.Fail(ErrorCode.NotFound, ReadAtomicPartitionPlacementDetailText);
         PhysicalShardCatalogValidation.ValidateCatalog(catalog);
-        return ResolveRegisteredPlacement(view, partition, catalog.DefaultShard);
+        return ResolveRegisteredPlacement(partition, catalog.DefaultShard);
     }
 
     internal static AtomicPartitionPlacementResolution ReadPlacementWitness(IKeyValueView view,
@@ -51,63 +46,12 @@ public sealed partial class DatabaseEngine
         var catalog = PhysicalShardCatalogRecordSerialization.Read(view)
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, ReadPlacementWitnessDetailText);
         PhysicalShardCatalogValidation.ValidateCatalog(catalog);
-        var placement = ResolveRegisteredPlacement(view, partition, catalog.DefaultShard);
-        if (placement.PhysicalShardId != catalog.DefaultShard.PhysicalShardId)
-        {
-            throw Errors.Fail(ErrorCode.OwnershipLost, ForeignPlacementExecution);
-        }
-        return placement;
-    }
-
-    private static AtomicPartitionPlacementResolution ResolvePlacement(IKeyValueView view,
-        PartitionRef partition, PhysicalShardRecord defaultShard)
-    {
-        var directory = AtomicPartitionPlacementSerialization.ReadDirectory(view);
-        var row = AtomicPartitionPlacementSerialization.ReadRow(view, partition);
-        defaultShard = ResolveMovementPlacementOwner(view, partition, defaultShard, row);
-        return ResolvePlacement(partition, defaultShard, directory, row);
+        return ResolveRegisteredPlacement(partition, catalog.DefaultShard);
     }
 
     private static AtomicPartitionPlacementResolution ResolvePlacement(PartitionRef partition,
-        PhysicalShardRecord defaultShard, AtomicPartitionPlacementDirectoryV1? directory,
-        AtomicPartitionPlacementV1? row)
-    {
-        const int DirectoryRevisionValidationBoundary = 0;
-
-        if (directory is null && row is not null)
-        {
-            throw Errors.Fail(ErrorCode.Corruption, OrphanPlacement);
-        }
-
-        if (directory is not null)
-        {
-            AtomicPartitionPlacementValidation.ValidateDirectory(directory);
-        }
-
-        var directoryRevision = directory?.Revision ?? DirectoryRevisionValidationBoundary;
-        return row is null ? Fallback(partition, defaultShard, directoryRevision)
-            : Explicit(partition, row, directory!, defaultShard, directoryRevision);
-    }
-
-    private static AtomicPartitionPlacementResolution Fallback(PartitionRef partition,
-        PhysicalShardRecord defaultShard, long directoryRevision)
-        => new(AtomicPartitionPlacementProtocol.CurrentVersion, partition, defaultShard.PhysicalShardId,
-            defaultShard.Incarnation, defaultShard.VoterIds, defaultShard.PlacementEpoch, directoryRevision, FallbackRevisionEmptyCount, true);
-
-    private static AtomicPartitionPlacementResolution Explicit(PartitionRef partition,
-        AtomicPartitionPlacementV1 row, AtomicPartitionPlacementDirectoryV1 directory,
-        PhysicalShardRecord defaultShard, long directoryRevision)
-    {
-        const string ExplicitDetailText = "A placement row revision exceeds its directory revision.";
-
-        AtomicPartitionPlacementValidation.ValidateRow(row, partition, defaultShard);
-        if (row.Revision > directory.Revision)
-        {
-            throw Errors.Fail(ErrorCode.Corruption, ExplicitDetailText);
-        }
-
-        return new(AtomicPartitionPlacementProtocol.CurrentVersion, partition, row.PhysicalShardId,
-            defaultShard.Incarnation, defaultShard.VoterIds, defaultShard.PlacementEpoch, directoryRevision,
-            row.Revision, false);
-    }
+        PhysicalShardRecord owner)
+        => new(AtomicPartitionPlacementProtocol.CurrentVersion, partition, owner.PhysicalShardId,
+            owner.Incarnation, owner.VoterIds, owner.PlacementEpoch, DefaultPlacementRevision,
+            DefaultPlacementRevision, true);
 }

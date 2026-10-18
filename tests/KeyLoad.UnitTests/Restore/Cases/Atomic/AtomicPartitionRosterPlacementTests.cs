@@ -1,4 +1,3 @@
-using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Core.Features.GraphTraversal.Serialization;
 using KeyLoad.Storage;
 
@@ -11,14 +10,9 @@ internal sealed class AtomicPartitionRosterPlacementTests
     private const string EdgeId = "roster-edge";
     private const string EdgeLabel = "links";
     private const long FirstRevision = 1;
-    private const int PlacementVersion = 1;
-    private const long InitialPlacementRevision = 0;
-    private const string EmptyPlacementPartitionKey = "empty-placement";
-    private const string ShardIdText = "11223344-5566-7788-99aa-bbccddeeff00";
-    private static readonly Guid ShardId = Guid.Parse(ShardIdText);
 
     [Test]
-    public async Task AcBackup004EmptyPlacementAndCrossPartitionDestinationWritesRemainRegisteredAfterDelete()
+    public async Task AcBackup004CrossPartitionDestinationWritesRemainRegisteredAfterDelete()
     {
         using var fixture = new AtomicPartitionRosterFixture();
         fixture.ConfigureGraph();
@@ -50,27 +44,14 @@ internal sealed class AtomicPartitionRosterPlacementTests
         await Assert.That(completed.Error).IsNull();
         await Assert.That(fixture.ReadEntry(AtomicPartitionRosterFixture.Destination)).IsEqualTo(targetEntry);
 
-        var placementPartition = new PartitionRef(AtomicPartitionRosterFixture.Source.TenantId,
-            AtomicPartitionRosterFixture.Source.DatabaseId, AtomicPartitionRosterFixture.Source.TransactionDomainId,
-            EmptyPlacementPartitionKey);
-        var placement = fixture.Submit(OperationKind.BindAtomicPartitionPlacement,
-            new BindAtomicPartitionPlacementRequest(PlacementVersion, InitialPlacementRevision, placementPartition, ShardId));
-        var placementEntry = fixture.ReadEntry(placementPartition);
-        await Assert.That(placement.Error).IsNull();
-        await Assert.That(placementEntry).IsNotNull();
-        await Assert.That(fixture.Store.Read(view => AtomicPartitionPlacementSerialization.ReadRow(view, placementPartition)))
-            .IsNotNull();
-
         var sourceEntry = fixture.ReadEntry(AtomicPartitionRosterFixture.Source)!;
         var delete = fixture.Batch(AtomicPartitionRosterFixture.Source,
             new DeleteEdge(AtomicPartitionRosterFixture.Graph, EdgeId, FirstRevision));
         await Assert.That(delete.Error).IsNull();
         await Assert.That(fixture.ReadEntry(AtomicPartitionRosterFixture.Source)).IsEqualTo(sourceEntry);
         await Assert.That(fixture.ReadEntry(AtomicPartitionRosterFixture.Destination)).IsEqualTo(targetEntry);
-        await Assert.That(fixture.ReadEntry(placementPartition)).IsEqualTo(placementEntry);
         fixture.Reopen();
         await Assert.That(fixture.ReadEntry(AtomicPartitionRosterFixture.Destination)).IsEqualTo(targetEntry);
-        await Assert.That(fixture.ReadEntry(placementPartition)).IsEqualTo(placementEntry);
     }
 
 }

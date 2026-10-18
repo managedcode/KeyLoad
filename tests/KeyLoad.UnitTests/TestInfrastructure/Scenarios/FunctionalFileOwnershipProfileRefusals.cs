@@ -1,5 +1,4 @@
 using KeyLoad.AppHost.Features.ClusterReplication;
-using KeyLoad.AppHost.Features.ClusterRouting;
 using KeyLoad.AppHost.Features.StorageRecovery;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Hosting;
@@ -13,12 +12,7 @@ internal static class FunctionalFileOwnershipProfileRefusals
     private const string InvalidOption = "invalid";
     private const string SingleVoter = "1";
     private const string InvalidVoters = "2";
-    private const string TwoRf3 = "two-rf3";
     private const string UnitSuite = "unit";
-    private const string ProbeEnabled = ":Enabled";
-    private const string ProbeRoot = ":Root";
-    private const string ProbeSession = ":SessionId";
-    private const string SessionFormat = "N";
 
     internal static async Task RunAsync()
     {
@@ -35,10 +29,6 @@ internal static class FunctionalFileOwnershipProfileRefusals
             _ = Assert.ThrowsExactly<InvalidOperationException>(() => KeyLoadResources.AddKeyLoad(builder));
             await Assert.That(builder.Resources.Count).IsEqualTo(original);
             await Assert.That(Directory.Exists(root) || File.Exists(root)).IsFalse();
-            foreach (var probe in changes.Where(value => value.Key == RequestCqrsProbeProfile.Section + ProbeRoot))
-            {
-                await Assert.That(Directory.Exists(probe.Value) || File.Exists(probe.Value)).IsFalse();
-            }
         }
         await FunctionalFileOwnershipProfileModel.VerifyAsync();
     }
@@ -57,11 +47,7 @@ internal static class FunctionalFileOwnershipProfileRefusals
         yield return [new(P.Nodes, InvalidVoters)];
         yield return [new(P.Nodes + P.Nested, P.True)];
         yield return [new(P.Benchmark, P.True)];
-        yield return [new(P.TwoRf3, TwoRf3)];
         yield return [new(P.Suite, UnitSuite)];
         yield return [new(P.LoggerControl, P.True)];
-        yield return [new(RequestCqrsProbeProfile.Section + ProbeEnabled, P.True),
-            new(RequestCqrsProbeProfile.Section + ProbeRoot, P.NewRoot()),
-            new(RequestCqrsProbeProfile.Section + ProbeSession, Guid.NewGuid().ToString(SessionFormat))];
     }
 }

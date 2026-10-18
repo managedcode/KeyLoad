@@ -206,7 +206,7 @@ function Get-FcNativeBaseSuite([string] $Suite) {
 
 function Get-FcNativeExpectedSuiteCases([string] $Suite, [object] $Contributors, [object] $Inventory) {
     $base = Get-FcNativeBaseSuite $Suite
-    if ($base -cin @('recovery','rf3')) { return @($Contributors[$base]) }
+    if ($base -cin @('recovery','cluster')) { return @($Contributors[$base]) }
     if ($base -cne 'unit') { throw $script:FcNativeContributors.Invalid }
     $prefix = $script:FcNativeContributors.UnitGroupPrefix
     if (-not $Suite.StartsWith($prefix, [StringComparison]::Ordinal)) {

@@ -47,7 +47,7 @@ internal static class RequestCqrsAnnTestData
         var journal = database.ReadJournalCut();
         var receipt = await RequestCqrsHostedMaintenanceData.ExecuteAsync<CommitReceipt>(database, OperationKind.Batch, command, id, token);
         await RequestCqrsAnnAssertions.SeedReceiptAsync(database, command, receipt, journal.LastIndex + OneStep);
-        var placement = database.Database.ReadAtomicPartitionPlacement(Principal, new(Version, database.Partition));
+        var placement = database.Database.ReadAtomicPartitionPlacement(Principal, database.Partition);
         return new(Guid.NewGuid(), new(database.Partition, Consumer), Collection, Field, Space, Generation,
             database.Store.Identity.NodeId, new(placement.PhysicalShardId, placement.Incarnation,
                 placement.VoterIds, placement.PlacementEpoch), AnnMaintenanceMode.Build)

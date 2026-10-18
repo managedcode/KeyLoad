@@ -14,13 +14,13 @@ internal static class FunctionalGateColdConcurrentPrimary
         var model = state.Models.Single(value => value.Index == index);
         if (index == WriterIndex)
         {
-            await SqlRf3Protocol.EqualAsync(model.Receipt,
+            await SqlClusterProtocol.EqualAsync(model.Receipt,
                 await context.SdkAsync(context.Writer.Sdk.CommitAsync(model.Command, token)));
-            await SqlRf3Protocol.EqualAsync(model.Receipt,
+            await SqlClusterProtocol.EqualAsync(model.Receipt,
                 await context.McpAsync<CommitReceipt>(context.Writer, McpCallerTools.DocumentsCommit, model.Command, token));
-            await SqlRf3Protocol.EqualAsync(model.TableReceipt,
+            await SqlClusterProtocol.EqualAsync(model.TableReceipt,
                 await FunctionalGateRelationalCalls.SqlSdkAsync<CommitReceipt>(context, context.Writer, model.TableInsert, token));
-            await SqlRf3Protocol.EqualAsync(model.TableReceipt,
+            await SqlClusterProtocol.EqualAsync(model.TableReceipt,
                 await FunctionalGateRelationalCalls.SqlMcpAsync<CommitReceipt>(context, context.Writer, model.TableInsert, token));
         }
         await FunctionalGateColdReadAssertions.VerifyAsync(context, model, token);

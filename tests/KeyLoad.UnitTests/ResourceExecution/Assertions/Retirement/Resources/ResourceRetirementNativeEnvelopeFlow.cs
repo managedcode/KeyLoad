@@ -1,6 +1,7 @@
+using System.Security.Cryptography;
+using System.Text;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.ResourceExecution;
-using KeyLoad.UnitTests.Features.ClusterRouting;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
@@ -93,27 +94,35 @@ internal static class ResourceRetirementNativeEnvelopeFlow
         {
             Signature = string.Empty
         });
-        await Assert.That(request.Signature).IsEqualTo(RequestCqrsProbeNativeWireValues.Digest(fixture.Options.Secret.Span,
+        await Assert.That(request.Signature).IsEqualTo(Digest(fixture.Options.Secret.Span,
             requestBytes, ResourceRetirementNativeEnvelopeData.RequestPurpose));
-        await Assert.That(reply.Signature).IsEqualTo(RequestCqrsProbeNativeWireValues.Digest(fixture.Options.Secret.Span,
+        await Assert.That(reply.Signature).IsEqualTo(Digest(fixture.Options.Secret.Span,
             replyBytes, ResourceRetirementNativeEnvelopeData.ReplyPurpose));
         foreach (var purpose in new[] { ResourceRetirementNativeEnvelopeData.ReplyPurpose, ResourceRetirementNativeEnvelopeData.InventoryPurpose })
         {
             var wrong = request with
             {
-                Signature = RequestCqrsProbeNativeWireValues.Digest(fixture.Options.Secret.Span, requestBytes, purpose)
+                Signature = Digest(fixture.Options.Secret.Span, requestBytes, purpose)
             };
             await ResourceRetirementNativeEnvelopeData.RefusalAsync(() =>
                 ResourceRetirementNativeEnvelopeData.RequireRequest(mac, wrong, clock), ErrorCode.Unauthenticated);
         }
         var wrongReply = reply with
         {
-            Signature = RequestCqrsProbeNativeWireValues.Digest(fixture.Options.Secret.Span,
+            Signature = Digest(fixture.Options.Secret.Span,
             replyBytes, ResourceRetirementNativeEnvelopeData.RequestPurpose)
         };
         await ResourceRetirementNativeEnvelopeData.RefusalAsync(() =>
             ResourceRetirementNativeEnvelopeData.RequireReply(mac, request, wrongReply, clock), ErrorCode.Unauthenticated);
         ResourceRetirementNativeEnvelopeData.RequireRequest(mac, request, clock);
         ResourceRetirementNativeEnvelopeData.RequireReply(mac, request, reply, clock);
+    }
+
+    private static string Digest(ReadOnlySpan<byte> key, byte[] bytes, string purpose)
+    {
+        using var hash = IncrementalHash.CreateHMAC(HashAlgorithmName.SHA256, key);
+        hash.AppendData(Encoding.ASCII.GetBytes(purpose));
+        hash.AppendData(bytes);
+        return Convert.ToHexStringLower(hash.GetHashAndReset());
     }
 }

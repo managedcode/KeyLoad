@@ -116,5 +116,5 @@ internal static class NativeChecksumProfileScenario
     private static DatabaseEngine Open(ZoneTreeStore store) => new(store, new AuthorizationPolicy(), CrashExecutionOptions.DatabaseLimits(),
         CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource(), CrashExecutionOptions.Messaging(), CrashExecutionOptions.GraphExecution(),
         CrashExecutionOptions.ChangeFeedExecution(), CrashExecutionOptions.BlobExecution(), CrashExecutionOptions.NativeClaimsExecution(),
-        CrashExecutionOptions.TimeSeriesExecution(), CrashExecutionOptions.MovementCheckpoints(), UnavailablePartitionMovementCheckpointVerifier.Instance);
+        CrashExecutionOptions.TimeSeriesExecution());
 }

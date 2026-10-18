@@ -21,9 +21,6 @@ internal static class PartitionStorageRegistration
             var borrowed = provider.GetRequiredService<PartitionHostApplicationOwner>();
             return () => borrowed;
         });
-        services.TryAddSingleton<ReplicaTransportLifecycle>();
-        services.AddSingleton<ILifecycleParticipant<ISiloLifecycle>>(provider =>
-            provider.GetRequiredService<ReplicaTransportLifecycle>());
         services.TryAddSingleton<PartitionStorageLifecycle>();
         services.AddSingleton<ILifecycleParticipant<ISiloLifecycle>>(provider =>
             provider.GetRequiredService<PartitionStorageLifecycle>());

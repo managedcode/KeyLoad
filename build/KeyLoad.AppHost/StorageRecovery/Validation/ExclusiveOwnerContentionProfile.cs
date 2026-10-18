@@ -3,13 +3,13 @@ using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.AppHost.Features.StorageRecovery;
 
-/// <summary>Selects only explicit cold RF3 functional competing-owner refusal resources.</summary>
+/// <summary>Selects only explicit cold CLUSTER functional competing-owner refusal resources.</summary>
 [ConfigurationBinding]
 internal static class ExclusiveOwnerContentionProfile
 {
     internal const string Setting = "KeyLoadTests:ExclusiveOwnerContention";
     internal const string EnabledArgument = "--KeyLoadTests:ExclusiveOwnerContention=true";
-    internal const string Invalid = "Exclusive owner contention requires an explicit ephemeral cold RF3 functional topology.";
+    internal const string Invalid = "Exclusive owner contention requires an explicit ephemeral cold CLUSTER functional topology.";
     private const string Enabled = "true";
     private const int ThreeVoters = 3;
     private const int SectionPresence = 1;
@@ -25,12 +25,9 @@ internal static class ExclusiveOwnerContentionProfile
         }
         if (selected != Enabled || nested || !options.Ephemeral || options.FunctionalNodeCount != ThreeVoters
             || !options.FunctionalColdReopen || !options.ContainerFaults || options.Tests is not null
-            || options.TwoRf3 || options.BenchmarksEnabled || options.TargetSelected
+            || options.BenchmarksEnabled || options.TargetSelected
             || options.ComparisonSelectorsPresent
-            || options.ProtocolCohortEnabled || options.ProtocolCohortConfigured || options.LoggerModelControl
-            || options.RequestProbe is not null || options.MovementFrameObservation is not null
-            || options.NativeDiscoveryOmission is not null || options.EventVectorReservedProbe
-            || options.NativeBlobWireProbe is not null || options.ProtectedMovementProbe)
+            || options.ProtocolCohortEnabled || options.ProtocolCohortConfigured || options.LoggerModelControl)
         {
             throw new InvalidOperationException(Invalid);
         }

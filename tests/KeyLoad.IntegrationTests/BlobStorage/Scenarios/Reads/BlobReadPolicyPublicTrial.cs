@@ -8,7 +8,7 @@ internal static class BlobReadPolicyPublicTrial
 {
     internal static async Task RunAsync(ClusterFixture fixture, CancellationToken token)
     {
-        _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
+        _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
             fixture.AdminKey, async administrator =>
             {
                 var published = await BlobReadPolicyPublicPublication.CreateAsync(administrator, token);
@@ -16,7 +16,7 @@ internal static class BlobReadPolicyPublicTrial
                 var identity = await McpPersistedIdentity.CreateAsync(fixture, blob.Partition, blob.Resource,
                     Capability.BlobRead, token);
                 await Assert.That(identity.Principal.PolicyEpoch).IsEqualTo(1L);
-                return await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2,
+                return await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2,
                     identity.Secret, async reader =>
                     {
                         await BlobReadPolicyPublicAssertions.HealthyAsync(reader, published, token);
@@ -42,11 +42,11 @@ internal static class BlobReadPolicyPublicTrial
         await BlobSelectiveReadR43Trial.RunAsync(fixture, token);
     }
 
-    private static async Task PersistAsync(RequestCqrsRf3Callers administrator,
+    private static async Task PersistAsync(RequestCqrsClusterCallers administrator,
         PrincipalRecord expected, CancellationToken token)
     {
         var actual = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.ConfigurePrincipalAsync(
             Guid.NewGuid(), expected, token));
-        await SqlRf3Protocol.EqualAsync(expected, actual);
+        await SqlClusterProtocol.EqualAsync(expected, actual);
     }
 }

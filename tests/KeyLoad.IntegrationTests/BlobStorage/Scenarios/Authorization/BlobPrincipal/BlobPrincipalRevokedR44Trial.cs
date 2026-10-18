@@ -9,11 +9,11 @@ internal static class BlobPrincipalRevokedR44Trial
 {
     internal static async Task RunAsync(ClusterFixture fixture, CancellationToken token)
     {
-        var state = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
+        var state = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
             fixture.AdminKey, async admin =>
         {
             var created = await BlobPrincipalRevokedR44Seed.CreateAsync(fixture, admin, token);
-            await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, created.Identity.Secret,
+            await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, created.Identity.Secret,
                 async reader =>
             {
                 await BlobPrincipalRevokedR44Pages.HealthyAsync(admin, reader, created, token);
@@ -25,7 +25,7 @@ internal static class BlobPrincipalRevokedR44Trial
             return created;
         }, token);
         await NativeTextProtectedPublicColdRestart.RunAsync(fixture, token);
-        await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
+        await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
             async admin =>
         {
             await ColdDeniedAsync(fixture, admin, state, token);
@@ -34,10 +34,10 @@ internal static class BlobPrincipalRevokedR44Trial
             return true;
         }, token);
         await NativeTextProtectedPublicColdRestart.RunAsync(fixture, token);
-        await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
+        await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
             async admin => { await RepairedAsync(fixture, admin, state, token); return true; }, token);
     }
-    private static async Task ColdDeniedAsync(ClusterFixture fixture, RequestCqrsRf3Callers admin,
+    private static async Task ColdDeniedAsync(ClusterFixture fixture, RequestCqrsClusterCallers admin,
         BlobPrincipalRevokedR44State state, CancellationToken token)
     {
         var failures = new List<Exception>();
@@ -50,9 +50,9 @@ internal static class BlobPrincipalRevokedR44Trial
         ServerFailureObserver.ThrowIfAny(failures);
         await BlobPrincipalRevokedR44Refusals.InitializeAsync(fixture, admin, state, token);
     }
-    private static async Task RepairedAsync(ClusterFixture fixture, RequestCqrsRf3Callers admin,
+    private static async Task RepairedAsync(ClusterFixture fixture, RequestCqrsClusterCallers admin,
         BlobPrincipalRevokedR44State state, CancellationToken token)
-        => await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, state.Identity.Secret,
+        => await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, state.Identity.Secret,
             async reader =>
         {
             await BlobPrincipalRevokedR44Pages.HealthyAsync(admin, reader, state, token);

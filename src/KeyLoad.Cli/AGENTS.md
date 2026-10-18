@@ -1,26 +1,28 @@
 # KeyLoad.Cli
 
-## Purpose and entry points
+## Purpose, entry points and ownership
+
 - Owns the command-line client executable.
 - Entry point: `Program.cs`; project definition: `KeyLoad.Cli.csproj`.
-
-## Ownership and boundaries
 - CLI workflows belong under their canonical `<SliceName>/` paths and matching feature specs. Keep `Program.cs` as composition/dispatch only.
-- The CLI is an untrusted client: it cannot supply trusted roles or bypass persisted database credentials and authorization policies. It does not own server persistence, replication, or physical placement.
-- Existing root-level executable layout is migration debt; do not add duplicate SDK behavior or undocumented fallback paths.
-
-## Commands and evidence
-- GitHub Actions solution build: `dotnet build KeyLoad.slnx --no-restore --configuration Release`.
-- Public client flows are invoked by `.github/workflows/ci.yml` suites, especially `dotnet test --project tests/KeyLoad.IntegrationTests --no-build --no-restore --configuration Release`; tests run only in GitHub Actions.
-
-## Skills and protected risks
+- The CLI is an untrusted client: it cannot supply trusted roles or bypass persisted database credentials and authorization policies. It does not own server persistence or replication.
 - Applicable skills: none installed; skill installation is prohibited by owner direction.
 - Preserve centrally pinned packages and net10.0/C# 14. Never put credentials in source, logs, sample arguments or committed configuration.
 
-## Read-first and canonical slice ownership
-- Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
-- Owned slices: `ClientApi` and `BackupRestore`; target paths: `ClientApi/` and `Restore/`.
-- Keep `Program.cs` as the CLI composition/dispatch entry point; feature command behavior belongs in its named slice.
+## Boundaries and protected risks
 
-## Vertical-slice responsibility folders
-- Keep feature-owned implementation inside its canonical `<SliceName>/` and organize it in populated, feature-local responsibility folders (such as `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Transport/`, `Hosting/`, `Serialization/`, or `Validation/`). Do not leave a flat dump of unrelated responsibilities at the slice root; keep only genuinely shared building blocks and executable/composition entry points outside feature slices. Preserve namespaces and runtime contracts during physical moves.
+Follow the [root policy](../../AGENTS.md) and the owning feature specification. Keep changes in their actual owner, preserve unrelated work, and remove replaced code together with exclusive callers and fixtures. Use native Orleans calls for distributed execution and silo-local ZoneTree owners for files. Preserve persisted authorization, operation correctness, resource bounds, cancellation and joined shutdown. Never turn a static check or focused test into a claim of complete runtime qualification.
+
+## Commands and verification
+
+From the repository root:
+
+```sh
+dotnet build KeyLoad.slnx --no-restore --configuration Release -warnaserror
+```
+
+Use the root's complete solution, native TUnit, real process recovery and Aspire SDK/MCP gates as applicable. Local checks are development evidence; delivered-source qualification and public measurements require exact-source Linux GitHub artifacts. Do not weaken compiler, analyzer, source-identity, coverage or runtime assertions.
+
+## Skills
+
+Use the installed Orleans skill for Orleans design and the relevant installed formatting, Aspire or diagnostics skill when the task needs it. Follow explicit owner scope and dependency-adoption rules.

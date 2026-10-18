@@ -5,15 +5,15 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
 internal static class QueueViewLeaseIsolationHistory
 {
-    internal static async Task RunAsync(RequestCqrsRf3Callers root, QueueViewLeaseIsolationState state, CancellationToken token)
+    internal static async Task RunAsync(RequestCqrsClusterCallers root, QueueViewLeaseIsolationState state, CancellationToken token)
     {
         await CommitAsync(root, state, state.Scenario.Original, state.Scenario.Receipt, token);
         foreach (var retained in state.Receipts)
         {
             await CompareAsync(root, state, retained.Receipt, async () => await McpCallerAssertions.SdkSuccessAsync(
                 await root.Sdk.CompleteAsync(retained.Command, token)), token);
-            await CompareAsync(root, state, retained.Receipt, () => SqlRf3Protocol.McpAsync<CommitReceipt>(root.Mcp,
-                SqlRf3Protocol.Call(state.Scenario.Partition, McpCallerTools.MessagesComplete, retained.Command), token), token);
+            await CompareAsync(root, state, retained.Receipt, () => SqlClusterProtocol.McpAsync<CommitReceipt>(root.Mcp,
+                SqlClusterProtocol.Call(state.Scenario.Partition, McpCallerTools.MessagesComplete, retained.Command), token), token);
         }
         var request = state.Claim ?? throw new InvalidOperationException(QueueViewLeaseIsolationProtocol.Absent);
         await QueueViewLeaseIsolationImages.ObserveAsync(root, state, async () =>
@@ -27,21 +27,21 @@ internal static class QueueViewLeaseIsolationHistory
         }
     }
 
-    private static async Task CommitAsync(RequestCqrsRf3Callers root, QueueViewLeaseIsolationState state,
+    private static async Task CommitAsync(RequestCqrsClusterCallers root, QueueViewLeaseIsolationState state,
         CommandRequest command, CommitReceipt receipt, CancellationToken token)
     {
         await CompareAsync(root, state, receipt, async () => await McpCallerAssertions.SdkSuccessAsync(
             await root.Sdk.CommitAsync(command, token)), token);
         await CompareAsync(root, state, receipt, async () => (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
             await root.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token))).Value, token);
-        await CompareAsync(root, state, receipt, () => SqlRf3Protocol.SdkAsync<CommitReceipt>(root.Sdk,
-            SqlRf3Protocol.Call(state.Scenario.Partition, McpCallerTools.DocumentsCommit, command), token), token);
-        await CompareAsync(root, state, receipt, () => SqlRf3Protocol.McpAsync<CommitReceipt>(root.Mcp,
-            SqlRf3Protocol.Call(state.Scenario.Partition, McpCallerTools.DocumentsCommit, command), token), token);
+        await CompareAsync(root, state, receipt, () => SqlClusterProtocol.SdkAsync<CommitReceipt>(root.Sdk,
+            SqlClusterProtocol.Call(state.Scenario.Partition, McpCallerTools.DocumentsCommit, command), token), token);
+        await CompareAsync(root, state, receipt, () => SqlClusterProtocol.McpAsync<CommitReceipt>(root.Mcp,
+            SqlClusterProtocol.Call(state.Scenario.Partition, McpCallerTools.DocumentsCommit, command), token), token);
     }
 
-    private static Task CompareAsync<T>(RequestCqrsRf3Callers root, QueueViewLeaseIsolationState state,
+    private static Task CompareAsync<T>(RequestCqrsClusterCallers root, QueueViewLeaseIsolationState state,
         T expected, Func<Task<T>> operation, CancellationToken token)
         => QueueViewLeaseIsolationImages.ObserveAsync(root, state,
-            async () => await SqlRf3Protocol.EqualAsync(expected, await operation()), token);
+            async () => await SqlClusterProtocol.EqualAsync(expected, await operation()), token);
 }

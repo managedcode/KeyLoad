@@ -47,7 +47,6 @@ public static class ClusterBackupNativeCutVerification
             || !PhysicalOwnerEntryValidation.SameOwner(cut.Owner, catalog.DefaultShard)
             || cut.Catalog.DefaultShard is null || cut.Catalog.DefaultShard.VoterIds.IsDefault
             || !PhysicalOwnerEntryValidation.SameOwner(cut.Catalog.DefaultShard, catalog.DefaultShard)
-            || cut.Directory != AtomicPartitionPlacementSerialization.ReadDirectory(admitted)
             || !ClusterBackupMetadataEquality.Registered(cut.RegisteredOwners,
                 PhysicalOwnerDirectorySerialization.Read(admitted)))
         {
@@ -55,7 +54,7 @@ public static class ClusterBackupNativeCutVerification
         }
         var entries = ClusterBackupRosterCapture.Read(admitted, identity.Incarnation, position, applied, limits.Value);
         var census = ClusterBackupCanonicalCensus.Require(admitted, entries, limits.Value, work.Cancellation);
-        RequirePartitions(admitted, cut, entries, census, work);
+        RequirePartitions(cut, entries, census, work);
         if (!string.Equals(cut.CanonicalDigest, census.Digest, StringComparison.Ordinal))
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidCut);
@@ -64,7 +63,7 @@ public static class ClusterBackupNativeCutVerification
         return cut;
     }
 
-    private static void RequirePartitions(IKeyValueView view, ClusterBackupOwnerCut cut,
+    private static void RequirePartitions(ClusterBackupOwnerCut cut,
         Dictionary<PartitionRef, ClusterBackupRosterCapture.CapturedEntry> entries,
         ClusterBackupCanonicalCensus.Census census, ReadExecutionBudget work)
     {
@@ -86,7 +85,7 @@ public static class ClusterBackupNativeCutVerification
                 || !string.Equals(partition.CanonicalDigest, scope.Digest, StringComparison.Ordinal)
                 || partition.Roster != actual.Entry || !string.Equals(partition.RosterDigest, actual.Digest, StringComparison.Ordinal)
                 || !ClusterBackupMetadataEquality.Placement(partition.Placement,
-                    DatabaseEngine.ReadClusterBackupPlacement(view, partition.Roster.Partition, cut.Owner)))
+                    DatabaseEngine.ReadClusterBackupPlacement(partition.Roster.Partition, cut.Owner)))
             {
                 throw Errors.Fail(ErrorCode.Corruption, InvalidCut);
             }

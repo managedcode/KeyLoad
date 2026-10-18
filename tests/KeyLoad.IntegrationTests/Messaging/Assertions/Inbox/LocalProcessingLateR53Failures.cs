@@ -9,7 +9,7 @@ internal static class LocalProcessingLateR53Failures
     {
         await Assert.That(result.IsFailed).IsTrue();
         await Assert.That(result.Value).IsNull();
-        await InboxProcessingRf3Assertions.EqualAsync(result.Problem, Errors.Problem(code, detail));
+        await InboxProcessingClusterAssertions.EqualAsync(result.Problem, Errors.Problem(code, detail));
     }
 
     internal static async Task McpAsync(ModelContextProtocol.Protocol.CallToolResult reply, ErrorCode code)

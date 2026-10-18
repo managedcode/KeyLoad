@@ -34,7 +34,7 @@ public sealed partial class DatabaseEngine
                 throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphProtocol.MissingAuthority);
             }
             var actualTarget = destination is null ? null : RouteRemoteGraphOwner(directory,
-                ResolveRegisteredPlacement(bounded, destination.Partition, configuredControl));
+                ResolveRegisteredPlacement(destination.Partition, configuredControl));
             if (actualTarget is not null
                 && PhysicalOwnerEntryValidation.SameOwner(actualSource.Owner, actualTarget.Owner))
             {
@@ -68,7 +68,7 @@ public sealed partial class DatabaseEngine
                 target.Partition.TransactionDomainId, target.Collection, ResourceKind.Collection, work);
             var directory = ReadRemoteGraphControlDirectory(bounded, configuredControl);
             return new RemoteGraphIncomingRouteV1(RouteRemoteGraphOwner(directory,
-                ResolveRegisteredPlacement(bounded, target.Partition, configuredControl)), directory);
+                ResolveRegisteredPlacement(target.Partition, configuredControl)), directory);
         });
         work.CheckResult(result);
         return result;

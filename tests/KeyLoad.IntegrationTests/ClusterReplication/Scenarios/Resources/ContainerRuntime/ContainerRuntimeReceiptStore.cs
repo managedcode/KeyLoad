@@ -15,10 +15,10 @@ internal static class ContainerRuntimeReceiptStore
         string? LocalImageInvocationId, string? LocalImageConfigId);
 
     internal static async Task<SourceIdentity> ReadSourceIdentityAsync(string repositoryRoot,
-        ContainerRuntimeInspection before, ContainerRuntimeInspection after, LocalRf3ImageSelection.Selection? selection,
+        ContainerRuntimeInspection before, ContainerRuntimeInspection after, LocalClusterImageSelection.Selection? selection,
         CancellationToken cancellationToken)
     {
-        var local = await LocalRf3ImageIdentity.ReadVerifiedAsync(repositoryRoot, selection, cancellationToken);
+        var local = await LocalClusterImageIdentity.ReadVerifiedAsync(repositoryRoot, selection, cancellationToken);
         if (local is null)
         {
             return new(await ReadSourceShaAsync(repositoryRoot, cancellationToken), null, null, null);

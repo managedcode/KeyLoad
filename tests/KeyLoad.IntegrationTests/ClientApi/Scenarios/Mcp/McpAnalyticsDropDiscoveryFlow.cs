@@ -7,7 +7,7 @@ internal static class McpAnalyticsDropDiscoveryFlow
 {
     internal static async Task RunAsync(ClusterFixture fixture, CancellationToken token)
     {
-        await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
+        await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
             async caller =>
             {
                 foreach (var name in new[] { AnalyticsStoreProtocol.ReadTool, AnalyticsStoreProtocol.AggregateTool, P.DropTool })

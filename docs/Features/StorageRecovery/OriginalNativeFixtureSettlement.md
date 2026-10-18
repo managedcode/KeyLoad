@@ -3,7 +3,7 @@
 This test-infrastructure correction preserves the original runtime-journal,
 scoped-range and transactional-read operations. It changes neither the product
 storage contract nor the test declarations. See [StorageRecovery](../StorageRecovery.md)
-and [ClusterRouting](../ClusterRouting.md). [ADR-046](../../ADR/ADR-046-storage-private-owners.md) defines native private storage ownership; [ADR-117](../../ADR/ADR-117-native-tunit-ci-entry.md) preserves actual test resource and execution ownership.
+and [ADR-136](../../ADR/ADR-136-native-orleans-partition-ownership.md). [ADR-046](../../ADR/ADR-046-storage-private-owners.md) defines native private storage ownership; [ADR-117](../../ADR/ADR-117-native-tunit-ci-entry.md) preserves actual test resource and execution ownership.
 
 ```mermaid
 flowchart TD
@@ -50,18 +50,16 @@ receipt replay and two actual cold-store reopen operations.
 
 ## Verification boundary and remaining owner criterion
 
-Source inspection and the cached native numeric/nesting preflight do not prove
-compiler binding, execution, a native failed-close outcome or Linux qualification.
-The original selected operations must execute after integration. No synthetic
-constructor/dispose failure or test-only fault counter has been added.
+The selected operations run against the real native store. No synthetic
+constructor/dispose failure or test-only fault counter is added, and a native
+failed-close outcome or Linux qualification is not claimed.
 
-**OPEN — HostRecovery original async owner settlement:**
+**Remaining criterion — HostRecovery original async owner settlement:**
 `PartitionHostRecoveryFixture.OpenHost` returns the real async-disposable
 `PartitionHost` to several external `await using` callers. Its synchronous outer
-cleanup has no exposed original-shutdown witness. The nested `HostReplicaStores`
-constructor/disposal can also mask independent failures. These are concrete owning
-criteria requiring a separate coherent lifecycle correction. This packet does not
-change their API, treat root retention as success, infer a close from lock availability,
+cleanup has no exposed original-shutdown witness. This is a concrete owning
+criterion requiring a separate coherent lifecycle correction. This packet does not
+change its API, treat root retention as success, infer a close from lock availability,
 or add a synchronous wait. Directory-only fixtures (`CurrentStorageFixture`,
 `RuntimeJournalReaderFixture`, `WalFileFixture`) expose paths/options or native owners
 to external scopes; this bounded inventory does not qualify their entire caller

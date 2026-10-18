@@ -10,10 +10,6 @@ internal static class C1OutcomeInspectionProcess
         ReadOnlyMemory<byte> input, string outerOwnerLockPath, CancellationToken cancellationToken = default)
         => RunOwnedAsync(input, outerOwnerLockPath, C1OutcomeInspectionProtocol.Mode, cancellationToken);
 
-    internal static Task<C1OutcomeInspectionProcessResult> RunFrameAsync(
-        ReadOnlyMemory<byte> input, string outerOwnerLockPath, CancellationToken cancellationToken)
-        => RunOwnedAsync(input, outerOwnerLockPath, NativeInstallFrameInspectionProtocol.Mode, cancellationToken);
-
     internal static Task<C1OutcomeInspectionProcessResult> RunSubmissionOutcomeAsync(
         ReadOnlyMemory<byte> input, string outerOwnerLockPath, CancellationToken cancellationToken)
         => RunOwnedAsync(input, outerOwnerLockPath, C1SubmissionOutcomeInspectionProtocol.Mode, cancellationToken);

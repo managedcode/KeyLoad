@@ -6,7 +6,6 @@ namespace KeyLoad.Core.Features.Search;
 
 internal static partial class NativeTextSeedCollector
 {
-    private const int PlacementVersion = 1;
     private const long EmptyPosition = 0;
     private const string InvalidScope = "The text projection source scope is inconsistent.";
     private const string OwnerLost = "The text projection owner no longer matches the canonical placement.";
@@ -146,7 +145,7 @@ internal static partial class NativeTextSeedCollector
     private static void RequireOwner(DatabaseEngine database, IKeyValueView view,
         string principalId, NativeTextSeedPin pin)
     {
-        var actual = database.ReadAtomicPartitionPlacement(view, principalId, new(PlacementVersion, pin.Consumer.Partition));
+        var actual = database.ReadAtomicPartitionPlacement(view, principalId, pin.Consumer.Partition);
         var expected = pin.Placement;
         if (database.Store.Identity.NodeId != pin.NodeId
             || database.Store.Identity.Incarnation != expected.Incarnation

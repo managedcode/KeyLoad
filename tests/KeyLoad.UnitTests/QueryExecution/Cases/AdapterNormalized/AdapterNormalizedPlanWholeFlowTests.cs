@@ -17,7 +17,7 @@ internal sealed class AdapterNormalizedPlanWholeFlowTests
     private const string StatusProperty = "status";
 
     [Test]
-    public async Task AcKl051Plan001TypedSqlJsonAndCSharpReturnSameCompletePlanRowsAndDeniedErrors()
+    public async Task TypedSqlJsonAndCSharpReturnSameCompletePlanRowsAndDeniedErrors()
     {
         using var database = new TestDatabase();
         AdapterPlanWholeFlowFixture.Seed(database);

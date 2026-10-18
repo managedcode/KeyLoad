@@ -1,45 +1,29 @@
 # KeyLoad.CrashHost
 
-## Purpose and entry points
+## Purpose, entry points and ownership
+
 - Owns the helper process used by real-process recovery qualification.
 - Executable entry point: `Program.cs`; reusable pause protocol: `StorageRecovery/Fixtures/CrashFixtureValues.cs` and `StorageRecovery/Execution/Processes/CrashHostPause.cs`.
-
-## Ownership and boundaries
 - This helper is test infrastructure invoked by `RecoveryTests`; it does not own production storage or declare a durability guarantee.
 - Feature-specific scenarios should be colocated under `<SliceName>/` when moved, while reusable process-host infrastructure remains shared test infrastructure. Preserve the exact crash scenario contract used by the invoking recovery tests.
 - Process termination is not power-loss testing. Do not label these cases as power-loss durability proof, add mocks/fakes, or weaken cleanup and recovery assertions.
-
-## Commands and evidence
-- The helper is built as part of the GitHub Actions solution build: `dotnet build KeyLoad.slnx --no-restore --configuration Release`.
-- Owner correction2026-10-03 requires invocation only by the native child of `dotnet run --project build/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=recovery` (or the mapped guarded-store unit suite). AppHost owns the runner, prerequisites, artifacts, execution and shutdown. Local development is authorized; exact-source Linux GitHub qualification remains mandatory.
-
-## Skills and protected risks
 - Applicable skills: none installed; skill installation is prohibited by owner direction.
 - Preserve real process boundaries and artifacts. Report exact Actions run/SHA/artifacts for qualification; local Aspire process checks remain development evidence and do not qualify power-loss or endurance.
 
-## Read-first and canonical slice ownership
-- Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
-- This project is shared real-process recovery infrastructure; it has no independently owned product slice. Recovery feature scenarios use `StorageRecovery/` in their owning test project.
-- `Program.cs` is the executable entry point. Storage-recovery and replica-crash scenarios live under `StorageRecovery/` and `ClusterReplication/`; preserve their exact process/pipe and filesystem contracts.
+## Boundaries and protected risks
 
-## SG009P guarded-store process qualification
-- Also owns the additive private existing-store-inspect test-helper mode under
-  StorageRecovery/ for real-file UnitTests, with AC-SG009P in the
-  isolated-timeseries acceptance and ADR-059. Preserve every existing recovery
-  mode and CLI; this mode provides original child facts, never native cluster copy
-  or power-loss evidence.
-- Its strict bounded private stdin carries the canonical storage path needed for
-  the approved guarded open, but no signing keys or credentials. The safe receipt
-  contains no storage paths or exception diagnostics; every guarded native open
-  happens in this child.
-  The UnitTests parent owns the existing outer lock through actual exit and both
-  pipe drains. Run only as part of GitHub normal/scalar and full recovery gates.
-## Feature slice responsibility folders
-- Place every feature-owned source file under `<SliceName>/<Role>/`, using populated feature-local roles such as `Cases/`, `Fixtures/`, `Assertions/`, `Models/`, `Processes/`, `Contracts/`, `Serialization/` or `Helpers/` according to the file's actual responsibility. Preserve an existing nested scenario/domain folder and add the role beneath it. Create only roles that own files.
-- Keep genuinely shared test infrastructure and project composition entry points at their existing shared ownership paths; do not duplicate them into a feature.
-- Structural moves preserve every source byte, namespace, type/serializer identity and test assertion. Do not change behavior, test logic or path references as part of a layout-only move; report source-path-sensitive joins to the solution integrator.
+Follow the [root policy](../../AGENTS.md) and the owning feature specification. Keep changes in their actual owner, preserve unrelated work, and remove replaced code together with exclusive callers and fixtures. Use native Orleans calls for distributed execution and silo-local ZoneTree owners for files. Preserve persisted authorization, operation correctness, resource bounds, cancellation and joined shutdown. Never turn a static check or focused test into a claim of complete runtime qualification.
 
+## Commands and verification
 
-## Explicit entry point, owner correction 2026-10-17
-- Program.cs owns process initialization, special-mode selection, argument decoding and the canonical store lifetime. Do not hide this composition behind Application.RunAsync forwarding wrappers or make the general entry point belong to one model such as TimeSeries.
-- Individual scenarios own their actual model operations. StorageRecovery/Execution/CrashScenarioDispatcher.cs owns only canonical mode dispatch. Preserve original selection order, short-circuit behavior, fault boundaries, process/pipe contracts and joined cleanup.
+From the repository root:
+
+```sh
+dotnet test --project tests/KeyLoad.CrashHost/KeyLoad.CrashHost.csproj --no-build --no-restore --configuration Release --output Detailed
+```
+
+Use the root's complete solution, native TUnit, real process recovery and Aspire SDK/MCP gates as applicable. Local checks are development evidence; delivered-source qualification and public measurements require exact-source Linux GitHub artifacts. Do not weaken compiler, analyzer, source-identity, coverage or runtime assertions.
+
+## Skills
+
+Use the installed Orleans skill for Orleans design and the relevant installed formatting, Aspire or diagnostics skill when the task needs it. Follow explicit owner scope and dependency-adoption rules.

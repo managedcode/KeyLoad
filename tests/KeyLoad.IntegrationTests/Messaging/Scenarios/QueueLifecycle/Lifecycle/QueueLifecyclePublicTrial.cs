@@ -11,11 +11,11 @@ internal static class QueueLifecyclePublicTrial
         using var deadline = McpCallerDeadline.Create();
         var state = await SeedAsync(fixture, route, deadline.Token);
         var failures = new List<Exception>();
-        RequestCqrsRf3Callers? callers = null;
+        RequestCqrsClusterCallers? callers = null;
         NodeStatus? before = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            callers = await RequestCqrsRf3Callers.ConnectAsync(fixture.App, McpCallerProtocol.Node1, state.OperatorKey, deadline.Token);
+            callers = await RequestCqrsClusterCallers.ConnectAsync(fixture.App, McpCallerProtocol.Node1, state.OperatorKey, deadline.Token);
             await QueueLifecyclePublicPhase.BeginAsync(callers, state, deadline.Token);
             await DeniedAsync(fixture, state, deadline.Token);
             await QueueLifecyclePublicAssertions.InitialAsync(callers, state, deadline.Token);
@@ -33,11 +33,11 @@ internal static class QueueLifecyclePublicTrial
     private static async Task<QueueLifecyclePublicState> SeedAsync(ClusterFixture fixture, int route, CancellationToken token)
     {
         var failures = new List<Exception>();
-        RequestCqrsRf3Callers? root = null;
+        RequestCqrsClusterCallers? root = null;
         QueueLifecyclePublicState? state = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            root = await RequestCqrsRf3Callers.ConnectAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, token);
+            root = await RequestCqrsClusterCallers.ConnectAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, token);
             state = await QueueLifecyclePublicSeed.RunAsync(root, route, token);
         }, failures);
         if (root is not null)
@@ -51,10 +51,10 @@ internal static class QueueLifecyclePublicTrial
     private static async Task DeniedAsync(ClusterFixture fixture, QueueLifecyclePublicState state, CancellationToken token)
     {
         var failures = new List<Exception>();
-        RequestCqrsRf3Callers? denied = null;
+        RequestCqrsClusterCallers? denied = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            denied = await RequestCqrsRf3Callers.ConnectAsync(fixture.App, McpCallerProtocol.Node1, state.DeniedKey, token);
+            denied = await RequestCqrsClusterCallers.ConnectAsync(fixture.App, McpCallerProtocol.Node1, state.DeniedKey, token);
             var command = new CommandRequest(Guid.NewGuid(), state.Partition,
                 [new CancelQueueMessage(state.Lane.Queue, QueueLifecyclePublicProtocol.Parked, QueueLifecyclePublicProtocol.Three, QueueLifecyclePublicProtocol.One)]);
             await QueueLifecyclePublicRoutes.RefusedAsync(denied, state, command, ErrorCode.PermissionDenied, token);

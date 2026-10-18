@@ -1,5 +1,4 @@
 using System.Text.Json;
-using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
 using P = KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalGateRelationalProtocol;
@@ -10,14 +9,13 @@ internal static class FunctionalGateRelationalMutations
 {
     internal static async Task AddAsync(FunctionalGateContext ctx, string id, CancellationToken token)
     {
-        var placement = await ctx.SdkAsync(ctx.Administrator.Sdk.ReadAtomicPartitionPlacementAsync(new(P.PlacementVersion, ctx.Partition), token));
         var commandId = Guid.NewGuid();
         var request = new SqlOperationRequest(ctx.Partition, P.Insert, FunctionalGateRelationalRows.InsertParameters(ctx, id),
-            CommandId: commandId, OwnershipEpoch: placement.PlacementEpoch);
+            CommandId: commandId);
         var receipt = await FunctionalGateRelationalCalls.SqlSdkAsync<CommitReceipt>(ctx, ctx.Writer, request, token);
         await FunctionalGateRelationalAssertions.ReceiptAsync(receipt, commandId, ctx.Partition,
             [new(P.PutKind, P.Parent, id, P.Initial)]);
-        await SqlRf3Protocol.EqualAsync(receipt,
+        await SqlClusterProtocol.EqualAsync(receipt,
             await FunctionalGateRelationalCalls.SqlMcpAsync<CommitReceipt>(ctx, ctx.Writer, request, token));
         await FunctionalGateRelationalAssertions.AnchorAsync(ctx, id, receipt.Token, token);
         var children = new CommandRequest(Guid.NewGuid(), ctx.Partition,

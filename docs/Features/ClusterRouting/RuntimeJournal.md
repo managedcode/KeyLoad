@@ -1,256 +1,68 @@
 # ClusterRouting: replicated runtime journal
 
-Status: accepted implementation contract, unqualified. Related decision:
-[ADR-110](../../ADR/ADR-110-native-orleans-execution-primitives.md),
-[runtime adoption](RuntimeAdoption.md), REQ/AC-ORL-013.
+Decision: [ADR-110](../../ADR/ADR-110-native-orleans-execution-primitives.md); cluster concept: [ADR-136](../../ADR/ADR-136-native-orleans-partition-ownership.md). Related: [runtime adoption](RuntimeAdoption.md), [journal lifetime](NativeRuntimeJournalLifetime.md), REQ/AC-ORL-013.
 
 ## Authority and execution
 
-Use the native Orleans10.4.0 Journaling and DurableJobs APIs with their matching
-10.4.0-alpha.1 packages and explicit `orleans-binary` journal format. A named
-KeyLoad provider implements native storage and catalog interfaces. Every read and
-write uses a freshly signed, separately keyed IRequestGrain through the existing
-native CQRS executor; canonical records are applied by the unchanged node-local
-ZoneTree owner and RF3 commit path. No provider directly commits storage.
+KeyLoad uses the native Orleans Journaling and DurableJobs APIs from the centrally pinned packages with the explicit `orleans-binary` journal format. A named KeyLoad provider implements the native storage and catalog interfaces. Every journal read and write is a freshly signed request through the connection grain's native CQRS stream (`IConnectionGrain.ExecuteStreamAsync`). The silo-local ZoneTree owner applies the canonical records; writes are replicated through ordinary Orleans calls to the ZoneTree owners on `ReplicaCount` silos and acknowledged after a majority of copies confirm durable local apply. No provider commits storage directly.
 
-The journal is infrastructure state in the initial single RF3 authority group,
-distinct from logical user partitions. A protected persisted
-`keyload-internal-runtime-journal` identity has no public credentials, user grants,
-administrator role or SchedulerManage. It can execute only the closed journal
-commands and reads. A private RF3 bootstrap command under a freshly revalidated
-existing persisted administrator creates that identity; missing or inconsistent
-identity after bootstrap is a recovery failure. Public principal/API-key changes
-and normal request purposes cannot configure or invoke this identity. Journal
-metadata authority never authorizes saga effects: those use the persisted creator.
-
-## Frozen canonical storage contract
-
-Append one internal `RuntimeJournal` OperationKind without renumbering values.
-Its generated attributed mutation has closed actions BootstrapIdentity, Create,
-UpdateMetadata, Append, Replace and Delete. Private reads return a header, one
-bounded opaque byte page or the complete bounded catalog. No new public SDK/MCP
-tool, SQL opcode or parallel dispatcher is introduced.
-
-Generated header/chunk/capacity records use stable new v1 aliases and field IDs.
-Exact user content, storage codec, RF3 log and recovery journal retain their
-current contracts. The private journal key family uses a version1 marker under
-the sole current native format in [CurrentFormat](../StorageRecovery/CurrentFormat.md).
-Cross-authority-group native-job adoption remains unqualified and unavailable.
-
-Both exclusively owned server stores are created with StoreIdentity Id8
-MinimumReaderContract=1 and current identity magic `0x364449444C4B`; data epoch7
-and key bytes remain exact. Startup validates both stores before snapshot
-recovery, consensus or silo admission, without modifying their reader identity.
-Missing, zero or unknown capabilities and unsupported magic reject before file
-mutation. Checkpoint, backup, restore and reopen preserve the required capability;
-snapshot installation into a non-current store rejects. A fresh authenticated
-all-voter reader1/transport-ready gate precedes first bootstrap. Existing-catalog
-RF3 quorum recovery retains its one-fault contract and current-capability check.
-
-Current JSON and generated native identity round-trips retain contract1 and Id8.
-A physically absent native field decodes as unsupported0; it must not inherit a
-permissive default. Actual rejection, unchanged-file and healthy current-store
-flows prove this boundary. No alternate reader, automatic promotion or conversion
-is part of native journal startup.
-
-Native startup begins background catalog discovery without awaiting it; async
-provider calls await a separate cancellable readiness gate. After silo and physical
-catalog startup, a dedicated signed request bootstraps and verifies journal identity
-and catalog, then opens that gate. Shutdown closes public/due scheduling first,
-leaves private journal routing and RF3 transport alive, and decorates only the
-native manager's exact public Active lifecycle subscription. Its observer completes
-native cleanup before joining NativeRequestWorkOwner, before grain deactivation.
-Forward the native start and every lifecycle property unchanged; fail closed on
-an unexpected descriptor, subscription or stage. No reserved lifecycle stage is
-repurposed and the native receiver remains registered unchanged.
-
-Each journal has a nonempty instance GUID, owner generation, independent content
-revision and metadata ETag. Create is atomic and idempotent; delete/recreate has
-a new instance. Append/replace/delete compare the captured instance, owner
-generation and content revision under the atomic apply gate. Metadata writes use
-full ETag CAS; mismatches return null through the native metadata API.
-An explicitly null metadata ETag preserves the native unconditional-update
-contract under the same atomic gate; it never refreshes a stale body-writer fence.
-Metadata reads return a fresh snapshot without replacing that captured fence.
-Body fencing failures map to native InconsistentStateException. Changes to
-the tagged native `DurableJobsOwner` property increment owner generation, including
-release/reclaim, and poison transitions also advance this fence. Same-owner `DurableJobsClosed`, adoption bookkeeping and format
-updates do not fence the current writer. Every successful content write advances
-its captured revision; an old handle cannot refresh itself into a new owner.
-Reads pin the header/content revision across bounded pages and fail on change.
-One native ArcBufferWriter retains incomplete binary entries across page boundaries
-until the consumer reports completion; retained bytes are bounded by journal capacity.
-Stable command identity resolves unknown write outcomes through existing receipts.
-
-Native payload bytes remain opaque and never use JSON fallback. The centrally
-validated RuntimeJournalOptions admits at most32 journals,2MiB per journal,
-64MiB total data,64KiB chunks/read pages and8KiB UTF8 metadata per journal.
-Journal names and metadata keys/values have explicit byte limits. Admission and
-catalog reads enforce those limits on actual committed state, not only callers.
-The provider owns a bounded striped asynchronous gate set sized by the validated
-maximum journal count. Handles for the same journal borrow the same gate; each
-retains its own captured instance, owner generation and content revision. Native
-`IJournalStorage` has no disposal contract, so handles must not allocate an owned
-disposable gate. Provider disposal follows native shutdown and joined work, and
-idempotently releases the gate set without retaining every created handle.
-The native catalog materializes all selected entries before its claim budget,
-so the provider returns the whole bounded catalog or a terminal error; truncation
-must never pretend recovery completeness. Delete releases capacity atomically.
-
-## Native jobs consumer and recovery
-
-The first consumer hands already-due sagas to native jobs. The existing canonical
-Waiting saga record is the persistent pending-work intent. The leader-fenced
-fixed-tail due sweep schedules at most one attempt per hint per cycle, with its
-existing one-page/sequential bounds. It leaves the saga Waiting until expiry.
-Lost schedule acknowledgements may produce duplicate native jobs on later sweeps;
-there is no immediate unbounded retry. Strict journal quotas bound retained work
-and fail explicitly under pressure. Configure native snapshot compaction so
-completed jobs can shrink the journal. Existing due discovery recovers work after
-restart. Immediate future-deadline registration and single persisted job handles
-remain a separate stage requiring an atomic wake-intent/uncertainty contract.
-Job metadata contains only canonical IDs, revision and deadline; no roles,
-credentials, signed envelopes, user JSON or timeout message content.
-Each schedule request supplies a fresh valid unsampled W3C trace parent and an
-empty trace state, independent of the ambient activity. In Orleans v10.4.0 an
-empty trace parent triggers ambient inheritance, so empty strings cannot opt out.
-The actual native returned job must prove that caller trace state was not retained.
-
-The native-mechanism regression schedules one held job and records its actual
-native job/shard identity and persisted owner fence. Stop and dispose the first
-Orleans runtime through its native lifecycle, preserving the genuine canonical
-store, then create a fresh runtime and request-work owner. The new manager must
-claim the existing shard, advance its owner fence, recover the same job without
-rescheduling, and commit exactly one timeout effect. Every restart and wait is
-bounded and cleanup joins both runtimes. This in-process runtime restart is unit
-evidence only; it does not replace the required real-process and Aspire RF3 proof.
-
-The existing RecurringDueCoordinatorGrain also implements native IDurableJobHandler.
-The native receiver extension may AlwaysInterleave. Handler state is invocation
-local; after leadership/quorum checks it reloads canonical saga/creator state and
-creates the existing creator-authorized expiry request through native CQRS.
-Expected saga revision, phase/deadline checks and timeout-message identity are
-the effect fence. Stale, canceled, completed and revoked jobs have no effect.
-Transient no-quorum/unknown results retry only within explicit bounded policy.
-
-Keep current default-deny ManagedCode.Graph rules and native Orleans-call tracking
-configuration. Extend the existing public DirectedGraph/GrainTransitionManager
-descriptor by copying every existing edge unchanged and adding the provider's
-exact ReadCoreAsync→IRequest.ExecuteStreamAsync and
-SendCommandAsync→IRequest.ExecuteStreamAsync transitions. The native background
-journal loop establishes the actual RuntimeJournalClient caller identity through
-the supported scoped Graph API, independently of scheduling-grain context. Keep
-the concrete coordinator's exact ExecuteJobAsync→IRequest.ExecuteStreamAsync
-edge for its actual saga effect, with no AnyMethod coordinator allowance.
-Native receiver dispatch is handled by the unchanged native-call policy; never
-turn on AllowAll, replace the receiver extension or impersonate a GrainService.
-
-## Requirements, stages and acceptance
-
-REQ-ORL-013 requires bounded native journal-backed jobs through RF3/request/native
-CQRS authority, owner fencing and creator-authorized idempotent saga expiry.
-AC-ORL-013 requires real canonical create/append/replace/read/reopen/delete,
-metadata CAS and same-owner updates, stale/recreated-handle failures, capacity
-exhaustion without partial writes, complete catalog, identity/credential denial,
-unknown-outcome receipt resolution and actual native job execution. Process
-restart/adoption, no-quorum, creator revocation, schedule-ACK uncertainty and
-single timeout effect must pass through Aspire RF3 and real SDK/official MCP.
-No source or native local fixture closes those gates.
-
-The root join owns [RuntimeJournalStartupRequests](../../../src/KeyLoad.Clustering/ClusterRouting/Hosting/RuntimeJournalStartupRequests.cs),
-[RuntimeJournalStartup](../../../src/KeyLoad.Server/ClusterRouting/Hosting/RuntimeJournalStartup.cs),
-[OrleansNodeRequestExecutor](../../../src/KeyLoad.Server/ClusterRouting/Execution/OrleansNodeRequestExecutor.cs),
-the exact native lifecycle registration/observer, and both store reader fences.
-The executor retains the existing cohort check, catalog admission, execution
-deadline and complete native CQRS stream; it adds no dispatch or storage owner.
-
-Authored AC-ORL-013 development cases are mapped to
-[native storage and binary DurableGrain replay across confirmed new activations](../../../tests/KeyLoad.UnitTests/ClusterRouting/Cases/RuntimeJournal/RuntimeJournalNativeStorageTests.cs),
-[canonical quota and protected identity](../../../tests/KeyLoad.UnitTests/ClusterRouting/Cases/RuntimeJournal/RuntimeJournalQuotaAndIdentityTests.cs),
-[journal reopen](../../../tests/KeyLoad.UnitTests/ClusterRouting/Cases/RuntimeJournal/RuntimeJournalReopenTests.cs),
-[reader backup/checkpoint/reopen lifecycle](../../../tests/KeyLoad.UnitTests/StorageRecovery/Cases/RuntimeJournal/RuntimeJournalReaderLifecycleTests.cs),
-[reader rejection](../../../tests/KeyLoad.UnitTests/StorageRecovery/Cases/RuntimeJournal/RuntimeJournalReaderFenceTests.cs),
-and [actual native saga expiry, stale completion and creator revocation](../../../tests/KeyLoad.UnitTests/Messaging/Cases/NativeSaga/NativeSagaTimeoutFunctionalTests.cs),
-plus [native runtime restart and retained-shard reclaim](../../../tests/KeyLoad.UnitTests/Messaging/Cases/NativeSaga/NativeSagaTimeoutRestartTests.cs).
-The latter preserves the genuine store across two native runtimes and asserts
-the actual recovered shard, stable canonical journal instance, changed owner/fence,
-settled native work and exact timeout effect. It makes no process-restart claim.
-Retained-job process restart/adoption, schedule-ACK uncertainty and complete
-Aspire SDK/MCP RF3 fault/resource qualification remain required before acceptance.
-Current local development evidence is recorded honestly in
-[status.json](../../implementation/status.json); a focused native operation, build
-or formatter pass does not qualify those complete gates.
-
-TASK-ORL-JOURNAL-GRAPH-014 maps native provider caller identity to REQ/AC-ORL-013.
-JournaledStateManager starts a context-suppressed background work loop; its
-storage callbacks must not be classified as the scheduling grain's method.
-RuntimeJournalClient establishes its actual provider type and exact ReadCoreAsync
-or SendCommandAsync method through ManagedCode.Orleans.Graph's native
-RunWithCurrentCallerAsync API around the complete request-stream drain. The
-helper restores prior context on success, error and cancellation. Pair those
-identities with exact IRequestGrain.ExecuteStreamAsync graph transitions; copy
-all existing policy edges and retain default-deny. Remove the unused native
-manager wildcard and speculative concrete ProcessDueAsync allowance. Keep the
-concrete ExecuteJobAsync edge for the handler's actual separately authorized
-saga effect. Do not impersonate a coordinator or propagate a causal method
-which the native background loop does not preserve.
-
-Current source ownership is Orleans Execution/RuntimeJournalClient.cs and
-Server Hosting/NativeJobGraphRegistration.cs. Use closed method identities from
-the client rather than duplicated literals; root owns integration and evidence.
-Preserve signed protected journal identity, fresh request grains, persisted
-authorization, cancellation/deadline, native CQRS backpressure and RF3 receipts.
-NativeJobExpiresCanonicalSagaAndEnqueuesExactlyOneStableTimeout must execute real
-scheduling, journal callbacks, duplicate dispatch and one canonical timeout and
-message effect. Full native saga, restart, identity/quota and stale/revoked/future
-controls run through Aspire after build/format; native caller restoration and
-denied wrong-method/target flows must preserve state and permit a healthy native
-follow-up. Add only genuine operation regressions where existing cases lack
-these outcomes. Process/RF3/Linux gates remain distinct. Rollback is the scoped
-source change, never an alternate journal route or data conversion.
-
-TASK-ORL-JOURNAL-GRAPH-014's real operation regression additionally owns the
-UnitTests ClusterRouting Fixtures/RuntimeJournalNativeFixture.cs graph join,
-Cases/RuntimeJournalGraphCallerTests.cs, Fixtures/RuntimeJournalGraphCallerProbe.cs,
-Contracts/RuntimeJournalGraphCallerContracts.cs and
-Helpers/RuntimeJournalGraphCallerSupport.cs, with actual activation construction
-in Helpers/RuntimeJournalReplayActivatorConfiguration.cs. Use the real native Orleans runtime,
-signed request stream and canonical ZoneTree journal. The probe observes bounded
-caller identities during actual journal operations and actual wrong-method or
-wrong-target calls; it must not replace a client, storage provider or graph filter.
-Verify unchanged committed content after rejection, restored prior context and
-real append/reopen/read follow-up. Register only the exact provider methods and
-required probe ingress; retire unused fixture caller allowances after checking
-their actual callers. No broad policy, fabricated exception or source-text test
-qualifies this contract. Root reviews the private packet and owns all live joins.
-
-| Task | Ownership and dependency | Required join/evidence |
-|---|---|---|
-| TASK-ORL-JOURNAL-CONTRACT / root | Shared generated DTOs/enums, options, auth/request/codec/dispatch joins, private format/rollout and docs. | Review every closed inventory and preserve existing identities. |
-| TASK-ORL-JOURNAL-CORE / Luna high | New Core ClusterRouting journal commands/queries/records/validation and new real-store tests; starts after these contracts. No existing shared dispatch/auth/serialization/composition edits. | Atomic bounded backend and self-review; root owns runtime gates. |
-| TASK-ORL-JOURNAL-PROVIDER / Luna high | Native provider/storage/catalog and genuine native journal tests after Core joins. No shared request/schema/Git edits. | Exact native API behavior, captured-version fencing and cancellation; root joins configuration. |
-| TASK-ORL-JOBS / Luna high | Native saga wake consumer plus owned intent/reconciliation tests after provider/authority readiness. | Real schedule/restart/revocation/unknown-outcome/single-effect evidence. |
-| TASK-ORL-ROOT-JOIN / root | All final format/analyzer/build, Aspire unit/scalar/recovery/RF3, functional coverage and original Linux evidence. | Remains open until every mandatory acceptance gate passes. |
+The journal is internal infrastructure state, distinct from logical user partitions. A protected persisted `keyload-internal-runtime-journal` identity has no public credentials, user grants, administrator role or SchedulerManage, and can execute only the closed journal commands and reads. A private identity-creation command, run under a freshly revalidated persisted administrator, creates it; a missing or inconsistent identity afterwards is a recovery failure. Public principal/API-key changes and normal request purposes cannot configure or invoke this identity. Journal metadata authority never authorizes saga effects, which use the persisted creator.
 
 ```mermaid
 flowchart LR
-  Native[Native Journaling and DurableJobs] --> Request[Fresh signed request grain]
-  Request --> Replica[Existing RF3 command or read grain]
-  Replica --> Owner[Node-local canonical ZoneTree owner]
-  Native --> Wake[Saga deadline wake]
-  Wake --> Creator[Reload canonical saga and creator]
-  Creator --> Due[Existing due coordinator]
-  Due --> Request
+  Due[StatelessWorker due batch] --> Jobs[Native DurableJobs]
+  Jobs --> Journal[Native Journaling provider]
+  Journal --> Conn[Signed request via connection grain]
+  Conn --> Owner[Silo-local ZoneTree owner]
+  Owner --> Copies[ReplicaCount copies majority ack]
+  Jobs --> Handler[Job handler reloads saga and creator]
+  Handler --> Conn
 ```
 
-## Bounded original-bootstrap transport settlement
+## Canonical storage contract
 
-REQ-ORL-JOURNAL-STARTUP-015 / AC-ORL-JOURNAL-STARTUP-015: retain one deterministic existing BootstrapCommandId for this physical owner and incarnation throughout its original startup lifetime. On the native OwnershipLost plus exact ReplicaTransportProtocol.TransportUnavailable or ReplicaProtocol.NoLeader refusal, or an UnknownWriteOutcome from the original private bootstrap, re-enter canonical verification after the configured bootstrap poll interval under the SAME linked deadline and shutdown token. Do not retry incompatible capability, credential, corruption, quota, scope, catalog or arbitrary OwnershipLost errors. Every attempt starts with the original canonical protected-identity read and current quorum barrier; if the identity already exists, verify its complete native catalog and compatible quorum before opening admission. If absent, the original authenticated all-voter native-journal prerequisite precedes the same deterministic bootstrap command. A lost verification response after a committed bootstrap must not invent a new command, identity, principal or storage authority. Cancellation and terminal failures keep admission closed.
+One internal `RuntimeJournal` OperationKind is appended without renumbering existing values. Its generated mutation has closed actions for identity creation, Create, UpdateMetadata, Append, Replace and Delete. Private reads return a header, one bounded opaque byte page or the complete bounded journal catalog. No public SDK/MCP tool, SQL opcode or parallel dispatcher is introduced. Generated header/chunk/capacity records use stable v1 aliases and field IDs. Exact user content, the storage codec and recovery journals keep their current contracts. The private journal key family uses a version-1 marker under the sole current native format in [CurrentFormat](../StorageRecovery/CurrentFormat.md).
 
-The original R33 ControlledPartitionMovementNativeRetireTests.OriginalNativeRetireCallerCancellationAndHostStopRetainAuthorityThenResumeReplayMixedModelsAndTwoColdOwners failed during RuntimeJournalStartupRequests.TryVerifyAsync called AFTER BootstrapAsync, with the exact native interrupted-transport refusal. Its existing whole real native operation, original cancellation/host stop, authority conservation, same-ID resume, mixed models and two cold owners is the regression scope. Pair it with the unchanged Bm25PortableMovementTests.ActualServerPublicationMovesExactNativeHeadAndStrictValidatorsRefuseWithoutEffects complete six-owner flow and the existing native journal identity, quota, graph, reopen and reader-fence suites. Preserve the R33 original failure rather than interpreting physical-owner cleanup refusals as a proved catalog-tuple defect. No public retry/fallback, new journal provider, format, migration or longer execution bound is introduced. Source and a focused local pass do not close process, RF3, Linux, fault, endurance, coverage or full REQ/AC-ORL-013 qualification.
+Both exclusively owned server stores carry a store identity whose minimum reader contract is `StoreReaderContract.RuntimeJournal`. Startup validates both stores before snapshot recovery or silo admission without modifying that identity. Missing, zero or unknown capabilities and unsupported identity magic are rejected before any file mutation. Checkpoint, backup, restore and reopen preserve the required capability, and installing a snapshot into a non-current store is rejected. A physically absent native field decodes as unsupported and never inherits a permissive default. No alternate reader, automatic promotion or conversion exists.
 
-### R41 original majority-transition regression and bounded repair
+Each journal has a nonempty instance GUID, owner generation, independent content revision and metadata ETag. Create is atomic and idempotent; delete and recreate produce a new instance. Append, replace and delete compare the captured instance, owner generation and content revision under the atomic apply gate. Metadata writes use full ETag compare-and-swap, and mismatches return null through the native metadata API. An explicitly null metadata ETag keeps the native unconditional-update contract under the same gate and never revalidates a stale content writer. Metadata reads return a fresh snapshot without replacing the captured version, and content version mismatches map to native `InconsistentStateException`.
 
-The preserved R41 native Prepare, Retire and Bm25PortableMovement whole flows all fail in RuntimeJournalStartupRequests.BootstrapAsync/SendAsync after initial physical catalog readiness. The native read/submit paths encode NoLeader as OwnershipLost with the exact public ReplicaProtocol.NoLeader detail; there is no separate NoCurrentLeader enum. Extend AC-ORL-JOURNAL-STARTUP-015 to this exact transient refusal and to the uncertain acknowledgement of the same private bootstrap. Retain the deterministic physical-shard/incarnation command ID, identical native mutation, fresh signed attempt GUID, one stable server-owned connection, persisted administrator revalidation, quorum barrier and full native catalog/cohort verification before admission. A positive local catalog observation alone does not bypass a quorum barrier.
+Changes to the tagged native `DurableJobsOwner` property, including release, reclaim and poison transitions, increment owner generation. Same-owner `DurableJobsClosed`, adoption bookkeeping and format updates do not invalidate the current writer. Every successful content write advances its captured revision, so an old handle cannot refresh itself into a new owner. Reads pin the header and content revision across bounded pages and fail on change. One native ArcBufferWriter retains incomplete binary entries across page boundaries until the consumer reports completion, bounded by journal capacity. Stable command identity resolves unknown write outcomes through existing receipts.
 
-Execution contract: preserve the original three failed native UIDs as regressions; run them with existing native journal identity, quota, graph, reopen and reader-fence classes after one coherent build. Also retain original process recovery and cancellation cases. Do not retry authentication, permission, corruption, format, budget, quota or arbitrary OwnershipLost failures; do not extend any deadline or open admission on expiry. Local passes do not close Linux/RF3, coverage, fault, endurance or performance qualification.
+Native payload bytes stay opaque and never use JSON fallback. The centrally validated `RuntimeJournalOptions` admits at most 32 journals, 2 MiB per journal, 64 MiB total data, 64 KiB chunks/read pages and 8 KiB UTF-8 metadata per journal; journal names and metadata keys/values have explicit byte limits. Admission and catalog reads enforce these limits on committed state, not only on callers. The provider owns a bounded striped asynchronous gate set sized by the validated maximum journal count. Handles for the same journal borrow the same gate and each keeps its own captured instance, owner generation and content revision. Native `IJournalStorage` has no disposal contract, so handles never allocate an owned disposable gate; provider disposal follows native shutdown and joined work and idempotently releases the gate set. The native catalog materializes all selected entries before its claim budget, so the provider returns the whole bounded catalog or a terminal error and never a truncated one. Delete releases capacity atomically.
+
+## Startup and shutdown
+
+Native startup begins journal catalog discovery without awaiting it; asynchronous provider calls await a separate cancellable readiness gate. After silo startup, a dedicated signed request creates the journal identity if it is absent, verifies the identity and the journal catalog, then opens that gate. Shutdown closes public and due scheduling first, keeps private journal routing alive and decorates only the native manager's exact public Active lifecycle subscription. Its observer completes native cleanup and joins `NativeRequestWorkOwner` before grain deactivation. The native start and every lifecycle property are forwarded unchanged; an unexpected descriptor, subscription or stage fails closed, no reserved lifecycle stage is repurposed and the native receiver stays registered unchanged.
+
+REQ-ORL-JOURNAL-STARTUP-015 / AC-ORL-JOURNAL-STARTUP-015: journal identity creation keeps one deterministic command ID for its whole startup lifetime. After an `UnknownWriteOutcome` it waits the configured poll interval and re-enters canonical verification under the same linked deadline and shutdown token: the protected-identity read comes first, and an existing identity is verified together with its complete journal catalog before admission opens. A lost response after a committed creation never produces a new command, identity, principal or storage authority. Credential, permission, corruption, format, quota and capability failures are not retried, no deadline is extended, and cancellation or terminal failure keeps admission closed. Automated regression: pending.
+
+## Native jobs consumer and recovery
+
+The first consumer hands already-due sagas to native jobs, and the canonical Waiting saga record is the persistent pending-work intent. Due discovery uses the accepted background pattern: Orleans `[StatelessWorker]` grains accept due-saga events, buffer them in memory and, on an Orleans timer whose interval is a typed option, write the batch through the normal grain → ZoneTree owner path, scheduling at most one native job attempt per due saga per cycle. No leadership check gates this work. The saga stays Waiting until expiry. A lost schedule acknowledgement may produce a duplicate native job on a later cycle, without immediate unbounded retry, and strict journal quotas bound retained work and fail explicitly under pressure. Native snapshot compaction lets completed jobs shrink the journal, and due discovery recovers work after restart. Immediate future-deadline registration and single persisted job handles need a separate atomic wake-intent/uncertainty contract.
+
+Job metadata contains only canonical IDs, revision and deadline: no roles, credentials, signed envelopes, user JSON or timeout message content. Each schedule request supplies a fresh valid unsampled W3C trace parent and an empty trace state, independent of the ambient activity. In the pinned Orleans version an empty trace parent triggers ambient inheritance, so empty strings cannot opt out; the returned native job must prove that caller trace state was not retained.
+
+The native `IDurableJobHandler` grain that receives saga expiry jobs keeps only invocation-local state, and its native receiver extension may AlwaysInterleave. It reloads canonical saga and creator state and creates the existing creator-authorized expiry request through the connection grain's native CQRS stream. Expected saga revision, phase/deadline checks and timeout-message identity guard the effect; stale, canceled, completed and revoked jobs have no effect. Transient unknown or no-majority outcomes retry only within an explicit bounded policy.
+
+## Graph caller identity
+
+Default-deny ManagedCode.Orleans.Graph rules and native Orleans call tracking stay. The existing DirectedGraph/GrainTransitionManager descriptor is extended by copying every existing edge and adding the exact `RuntimeJournalClient` ReadCoreAsync → `IConnectionGrain.ExecuteStreamAsync` and SendCommandAsync → `IConnectionGrain.ExecuteStreamAsync` transitions, plus the job handler's `ExecuteJobAsync` → `IConnectionGrain.ExecuteStreamAsync` edge for its saga effect. JournaledStateManager runs a context-suppressed background loop, so `RuntimeJournalClient` establishes its provider caller identity through Graph's `RunWithCurrentCallerAsync` around the complete request-stream drain and restores prior context on success, error and cancellation. `NativeJobGraphRegistration` uses the client's closed method identities instead of duplicated literals. No AllowAll, AnyMethod allowance, manager wildcard or replaced receiver extension is used, and no grain or Grain Service identity is impersonated.
+
+## Requirements and acceptance
+
+REQ-ORL-013 requires bounded native journal-backed jobs whose state flows through the connection grain's native CQRS path into the replicated ZoneTree owners, with owner-generation checks and creator-authorized idempotent saga expiry. AC-ORL-013 requires real canonical create/append/replace/read/reopen/delete, metadata CAS and same-owner updates, stale and recreated-handle failures, capacity exhaustion without partial writes, a complete catalog, identity and credential denial, unknown-outcome receipt resolution and actual native job execution. Process restart and shard adoption, loss of a write majority, creator revocation, schedule-acknowledgement uncertainty and a single timeout effect must pass through the Aspire replicated cluster with the real .NET SDK and official MCP client.
+
+Source owners are [RuntimeJournalStartupRequests](../../../src/KeyLoad.Clustering/ClusterRouting/Hosting/RuntimeJournalStartupRequests.cs), [RuntimeJournalStartup](../../../src/KeyLoad.Server/ClusterRouting/Hosting/RuntimeJournalStartup.cs), [OrleansNodeRequestExecutor](../../../src/KeyLoad.Server/ClusterRouting/Execution/OrleansNodeRequestExecutor.cs), the exact native lifecycle registration/observer and both store reader checks. The executor keeps its execution deadline and the complete native CQRS stream and adds no dispatch or storage owner.
+
+Automated AC-ORL-013 cases:
+
+- [native storage and binary DurableGrain replay across new activations](../../../tests/KeyLoad.UnitTests/ClusterRouting/Cases/RuntimeJournal/RuntimeJournalNativeStorageTests.cs);
+- [canonical quota and protected identity](../../../tests/KeyLoad.UnitTests/ClusterRouting/Cases/RuntimeJournal/RuntimeJournalQuotaAndIdentityTests.cs);
+- [journal reopen](../../../tests/KeyLoad.UnitTests/ClusterRouting/Cases/RuntimeJournal/RuntimeJournalReopenTests.cs);
+- [reader backup/checkpoint/reopen lifecycle](../../../tests/KeyLoad.UnitTests/StorageRecovery/Cases/RuntimeJournal/RuntimeJournalReaderLifecycleTests.cs) and [reader rejection](../../../tests/KeyLoad.UnitTests/StorageRecovery/Cases/RuntimeJournal/RuntimeJournalReaderFenceTests.cs);
+- [Graph caller identity](../../../tests/KeyLoad.UnitTests/ClusterRouting/Cases/RuntimeJournal/RuntimeJournalGraphCallerTests.cs): RuntimeJournalGraphCallerProbe observes caller identities during real journal operations and wrong-method/wrong-target calls; rejected calls leave committed content unchanged, prior context is restored and an append/reopen/read follow-up succeeds;
+- [native saga expiry, stale completion and creator revocation](../../../tests/KeyLoad.UnitTests/Messaging/Cases/NativeSaga/NativeSagaTimeoutFunctionalTests.cs), including NativeJobExpiresCanonicalSagaAndEnqueuesExactlyOneStableTimeout (duplicate dispatch, exactly one canonical timeout and message effect);
+- [native runtime restart and retained-shard reclaim](../../../tests/KeyLoad.UnitTests/Messaging/Cases/NativeSaga/NativeSagaTimeoutRestartTests.cs): after the first Orleans runtime stops through its native lifecycle with the canonical store kept, a fresh runtime claims the same shard, advances owner generation, recovers the held job without rescheduling and commits exactly one timeout effect; waits are bounded and both runtimes are joined.
+
+The in-process restart case is unit evidence only; real-process restart, schedule-acknowledgement uncertainty and the complete Aspire SDK/MCP fault and resource gates are still required before AC-ORL-013 is accepted. Rollback is the scoped source change, never an alternate journal route or data conversion.

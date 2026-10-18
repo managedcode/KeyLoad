@@ -5,8 +5,8 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
 internal static class QueryCursorRequestIdentityR47Pages
 {
-    internal static async Task<QueryPage[]> FreshAsync(RequestCqrsRf3Callers root,
-        RequestCqrsRf3Callers reader, QueryCursorRequestIdentityR47State state, CancellationToken token)
+    internal static async Task<QueryPage[]> FreshAsync(RequestCqrsClusterCallers root,
+        RequestCqrsClusterCallers reader, QueryCursorRequestIdentityR47State state, CancellationToken token)
     {
         var pages = new QueryPage[2];
         for (var route = 0; route < pages.Length; route++)
@@ -21,8 +21,8 @@ internal static class QueryCursorRequestIdentityR47Pages
         return pages;
     }
 
-    internal static async Task ContinueAsync(RequestCqrsRf3Callers root,
-        RequestCqrsRf3Callers reader, QueryCursorRequestIdentityR47State state,
+    internal static async Task ContinueAsync(RequestCqrsClusterCallers root,
+        RequestCqrsClusterCallers reader, QueryCursorRequestIdentityR47State state,
         QueryPage original, int route, CancellationToken token)
     {
         var cursor = original.Cursor;
@@ -47,7 +47,7 @@ internal static class QueryCursorRequestIdentityR47Pages
         }
     }
 
-    private static async Task<QueryPage> ReadAsync(RequestCqrsRf3Callers reader,
+    private static async Task<QueryPage> ReadAsync(RequestCqrsClusterCallers reader,
         QueryRequest request, int route, CancellationToken token)
         => route == 0 ? await McpCallerAssertions.SdkSuccessAsync(await reader.Sdk.QueryAsync(request, token))
             : (await McpCallerAssertions.SuccessAsync<QueryPage>(await reader.Mcp.CallAsync(
@@ -55,7 +55,7 @@ internal static class QueryCursorRequestIdentityR47Pages
 
     private static async Task RowsAsync(QueryPage page, QueryRow[] expected, string accessPath)
     {
-        await SqlRf3Protocol.EqualAsync(expected, page.Rows.ToArray());
+        await SqlClusterProtocol.EqualAsync(expected, page.Rows.ToArray());
         await Assert.That(page.AccessPath).IsEqualTo(accessPath);
         await Assert.That(page.CutPosition).IsGreaterThan(0L);
     }

@@ -13,10 +13,9 @@ namespace KeyLoad.Server;
 [ConfigurationBinding]
 internal static class ServerConfiguration
 {
-    internal static async Task<WebApplication> BuildAsync(string[] args, IGrainPartitionMovementSealedOperationObserver? sealedObserver = null,
+    internal static async Task<WebApplication> BuildAsync(string[] args,
         NativeLocalhostClusteringOptions? localhostClustering = null,
         IDatabaseAuthenticationExecutionObserver? authenticationExecutionObserver = null,
-        IPartitionMovementNativeObserver? partitionMovementNativeObserver = null,
         Func<IServiceProvider, ILifecycleParticipant<ISiloLifecycle>>? lifecycleParticipantFactory = null,
         IGrainRequestPhaseObserver? phaseObserver = null, IGrainRequestPurposeObserver? purposeObserver = null,
         Action<IServiceCollection, NodeOptions>? configureServices = null,
@@ -25,16 +24,6 @@ internal static class ServerConfiguration
         startupCancellation.ThrowIfCancellationRequested();
         var builder = WebApplication.CreateBuilder(args);
         builder.AddServiceDefaults();
-        var participation = builder.Configuration.GetSection(ServerProtocol.ConfigurationSection).Get<CoordinationSiloOptions>()
-            ?? new CoordinationSiloOptions();
-        if (participation.CoordinationOnly)
-        {
-            if (!participation.IsValid())
-            {
-                throw new InvalidOperationException(CoordinationSiloOptions.InvalidSettings);
-            }
-            return await CoordinationSiloHosting.BuildAsync(builder, participation, startupCancellation).ConfigureAwait(false);
-        }
         builder.Services.AddRuntimeOptions(builder.Configuration);
         var node = ServerNodeOptionsComposition.Read(builder.Configuration);
         var address = await OrleansNodeAddressResolver.ResolveAsync(node.Value, startupCancellation).ConfigureAwait(false);
@@ -43,8 +32,7 @@ internal static class ServerConfiguration
         ConfigureTransportOptions(builder);
         Register(builder.Services, localhostClustering);
         PostgresNativeComposition.Register(builder.Services, builder.Configuration);
-        RegisterObservers(builder.Services, sealedObserver, authenticationExecutionObserver,
-            partitionMovementNativeObserver, phaseObserver, purposeObserver);
+        RegisterObservers(builder.Services, authenticationExecutionObserver, phaseObserver, purposeObserver);
         OrleansSiloConfiguration.Register(builder, node, address, localhostClustering);
         if (lifecycleParticipantFactory is not null)
         {
@@ -74,22 +62,12 @@ internal static class ServerConfiguration
     }
 
     private static void RegisterObservers(IServiceCollection services,
-        IGrainPartitionMovementSealedOperationObserver? sealedObserver,
         IDatabaseAuthenticationExecutionObserver? authenticationExecutionObserver,
-        IPartitionMovementNativeObserver? partitionMovementNativeObserver,
         IGrainRequestPhaseObserver? phaseObserver, IGrainRequestPurposeObserver? purposeObserver)
     {
-        if (sealedObserver is not null)
-        {
-            services.AddSingleton(sealedObserver);
-        }
         if (authenticationExecutionObserver is not null)
         {
             services.AddSingleton(authenticationExecutionObserver);
-        }
-        if (partitionMovementNativeObserver is not null)
-        {
-            services.AddSingleton(partitionMovementNativeObserver);
         }
         if (phaseObserver is not null)
         {
@@ -121,7 +99,6 @@ internal static class ServerConfiguration
         app.MapDefaultEndpoints();
         ReplicaReadinessEndpoints.Map(app);
         ReplicaMembershipHealthEndpoints.Map(app);
-        NativeSiloDiscoveryDiagnosticEndpoints.Map(app);
         AdminStaticAssets.Map(app);
         app.MapKeyLoadApi();
         app.MapMcp(McpFramingProtocol.Path);
@@ -206,7 +183,7 @@ internal static class ServerConfiguration
         services.AddSingleton<INodeAdministration>(provider => ActivatorUtilities.CreateInstance<NodeAdministration>(provider,
             provider.GetRequiredService<PartitionHostApplicationOwner>().Borrow()));
         PhysicalOwnerRegistrationServices.Add(services);
-        services.AddSingleton(NativeDiscoveryOmissionComposition.CreateNode);
+        services.AddSingleton(provider => ActivatorUtilities.CreateInstance<OrleansNode>(provider));
     }
 
 }

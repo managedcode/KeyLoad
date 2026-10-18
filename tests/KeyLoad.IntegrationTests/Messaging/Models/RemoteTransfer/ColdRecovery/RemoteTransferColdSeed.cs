@@ -1,8 +1,8 @@
 
 namespace KeyLoad.IntegrationTests.Features.Messaging;
 
-internal sealed record RemoteTransferColdSeed(MessagingRf3Scenario Scenario,
-    MessagingRf3Identity Identity, Guid TransferId, CommandRequest Create, EnqueueMessage Message)
+internal sealed record RemoteTransferColdSeed(MessagingClusterScenario Scenario,
+    MessagingClusterIdentity Identity, Guid TransferId, CommandRequest Create, EnqueueMessage Message)
 {
     internal InspectQueueTransferRequest SourceRequest => new(Scenario.SourceQueue, TransferId);
     internal InspectQueueTransferReceiptRequest ReceiptRequest => new(Scenario.DestinationQueue,

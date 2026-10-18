@@ -1,22 +1,12 @@
 # NativeReadCuts within StorageRecovery
 
-KL-039 L2-A delivers a provider-owned, runtime-only native snapshot lease under
-[ADR-097](../../ADR/ADR-097-native-read-cut-leases.md). The existing synchronous
-`IAtomicStore.Read` view and borrowed bytes still cannot escape their callback.
-This stage supplies the capture/lifetime primitive; online index delta retention,
-catalog publication and restart recovery remain subsequent required KL-039 work.
+A provider-owned, runtime-only native snapshot lease ([ADR-097](../../ADR/ADR-097-native-read-cut-leases.md)). The existing synchronous `IAtomicStore.Read` view and borrowed bytes still cannot escape their callback. This primitive supplies capture and lifetime only; online index delta retention, catalog publication and restart recovery are outside it.
 
-The current native index builder scans while the canonical read gate is held.
-Copying an entire database would add unbounded retained memory. ZoneTree 1.9.8
-supports a native snapshot iterator which excludes later writes and pins its
-segments, but the current runtime shutdown does not track escaped iterators.
-Choose one finite provider-owned lease with copied callback bytes and explicit
-shutdown joining. Do not introduce another database or move storage ownership.
+The native index builder scans while the canonical read gate is held, and copying an entire database would add unbounded retained memory. ZoneTree 1.9.8 supports a native snapshot iterator which excludes later writes and pins its segments, but the runtime shutdown does not track escaped iterators. The chosen design is one finite provider-owned lease with copied callback bytes and explicit shutdown joining. It introduces no other database and does not move storage ownership.
 
-## TASK-CUT-DOCUMENT-INDEX-SCAN (2026-10-07)
+## Concurrent document and index scan
 
-REQ-CUT-005 and **AC-CUT-DOCUMENT-INDEX-SCAN-001** strengthen the original
-KL-004 concurrent-scan criterion. One real native ZoneTree/TestDatabase read
+REQ-CUT-005 and **AC-CUT-DOCUMENT-INDEX-SCAN-001** strengthen the concurrent-scan criterion. One real native ZoneTree/TestDatabase read
 callback must scan canonical document records and their declared scalar index
 under the existing committed read gate while an actual independent database
 writer attempts one atomic replacement/delete/insert batch. A bounded real
@@ -36,65 +26,18 @@ native write bypass, assertion weakening or unbounded materialization is allowed
 No borrowed view/span or native iterator may escape its callback. Keep persisted
 authorization and the production document/index mutation path intact.
 
-Root owns this freeze, review, integration and native unit/scalar, recovery and
-exact-source Linux/RF3 evidence. Luna unpack_atomicity owns only one new
-`UnitTests/Features/StorageRecovery/Cases/DocumentIndexCommittedScanTests.cs`
-and necessary cohesive `Helpers/` and `Assertions/` in the same slice, prepared
-as a private guarded packet without live edits or build/test/Docker execution.
-Reuse actual fixture/store/serialization APIs and respect all code-size bounds.
-Implement the deterministic independent model and scan; add real writer overlap;
-then failure-safe joining, reopen and healthy follow-up. ADR-004 and ADR-097
-already define this unchanged committed-view/lifetime boundary; no new persisted
-format, public API, dependency or topology is introduced. Frontend/SDK/MCP
-additions are N/A for this provider concurrency gap. Rollback removes only the
-new test and helpers. Snapshot/segment-movement overhead at the required scales,
-full task-local RF3 and complete KL-004 acceptance remain separate open gates;
-this one concurrency flow must not be used to claim those measurements.
-
-This whole-operation scan is now joined. Final local R291/R292 owning normal
-and scalar cohorts each pass 606/606, including the literal old/new document and
-index state, real pending atomic writer, original task/barrier cleanup, exact
-receipt and reopened identity plus a healthy follow-up. R290 full Release and
-R294 native formatter pass with no source drift; both native test cohorts also
-retain unchanged DLL/PDB identities and zero skips. Exact original hashes are
-under KL-004 and TEST-PIPELINE-001 in the status tracker. This is development
-evidence for AC-CUT-DOCUMENT-INDEX-SCAN-001 only. Required snapshot/segment
-overhead, full KL-004 acceptance and current-source Linux/RF3 remain open.
+The overlap flow is the unchanged committed-view/lifetime boundary of ADR-004 and ADR-097: no new persisted format, public API, dependency or topology, and frontend/SDK/MCP additions are N/A. It does not measure snapshot/segment-movement overhead at the required scales; those remain separate measurements.
 
 | Requirement | Acceptance and mapped real-provider TUnit tests |
 |---|---|
 | REQ-CUT-001: capture one exact canonical cut | AC-CUT-001: capture only from this runtime's live `Read` callback while its read gate is held; lease captures Position and scalar format/key-codec/node/incarnation/durability/pause/read-generation fields from that cut, excluding signing material. Later committed insert/update/delete leaves the old snapshot exact while a fresh ordinary read sees all changes. `NativeReadCutConsistencyTests`. |
 | REQ-CUT-002: finite admission and work | AC-CUT-002: one native snapshot lease per runtime; a second capture fails ResourceExhausted without opening a native iterator. Positive finite record/byte/duration limits are validated before capture. Each native advance, examined key/value and delivered callback is charged before copying/delivery; cancellation and elapsed checks precede and follow native calls. Exact record/byte saturation, cancellation and a following healthy lease are covered by `NativeReadCutBudgetTests`. |
 | REQ-CUT-003: owned bytes and runtime lifetime | AC-CUT-003: native CurrentKey/CurrentValue are immediately copied before user callbacks; logical values retain existing native header stripping. No view/native iterator/native memory/signing key is returned. Only one active traversal uses a lease; concurrent/reentrant traversal fails explicitly. Sequential prefix visits preserve the same snapshot and cumulative limits. Dispose closes admission and joins actual traversal/leases before tree shutdown, releases iterator before its slot, and preserves primary plus cleanup failures. Repeated disposal never releases a live iterator's slot or closes a settled handle again. Whole-tree snapshot installation rejects ResourceExhausted before mutation while a lease is active; ordinary compaction preserves the leased tree. Actual callback overlap, store shutdown, cancellation, replacement rejection and reopen are covered by `NativeReadCutLifetimeTests` and `NativeReadCutReplacementTests`. |
-| REQ-CUT-004: exact provider limitations and unchanged authority | AC-CUT-004: capture uses pinned ZoneTree `IteratorType.Snapshot`, not a durable checkpoint or replica image. It is not restartable or a token authority. No WAL, canonical record, native format, public wire, cache authorization or replication acknowledgement changes. Complete Aspire unit/scalar/recovery/RF3 and exact-source Linux gates remain required. |
+| REQ-CUT-004: exact provider limitations and unchanged authority | AC-CUT-004: capture uses pinned ZoneTree `IteratorType.Snapshot`, not a durable checkpoint image. It is not restartable or a token authority. No WAL, canonical record, native format, public wire, cache authorization or write acknowledgement changes. Complete Aspire unit/scalar/recovery/cluster and exact-source Linux gates remain required. |
 
-TASK-CUT-SHUTDOWN-STATE strengthens the existing AC-CUT-003 shutdown/reopen
-oracle as supporting KL-008 lifetime evidence. The existing real traversal,
-cancellation and original-task joining already execute; a non-null reopened
-value alone does not establish exact state preservation. Root owns integration
-and evidence; ci_failure_evidence Luna owns only
-`UnitTests/Features/StorageRecovery/Cases/NativeReadCutLifetimeTests.cs` and, if
-needed for the existing200-line type bound, one new cohesive
-`Assertions/NativeReadCutStoreStateAssertions.cs` in the same slice. Preserve
-every original callback, task, cancellation, deadline and cleanup assertion.
-Capture the actual committed bytes, position and complete StoreIdentity before
-shutdown; after joined disposal/reopen assert those exact values, including
-signing-key bytes. Commit and read a distinct healthy value, then reopen again
-and assert the updated value/position with unchanged identity. No fake native
-failure, new hook or added duplicate shutdown scenario. Root builds, runs native
-normal/scalar and the owning real storage flows, then retains original Linux
-normal/scalar/recovery evidence. No format, dependency, public API or RF3 contract
-change; rollback removes only this stronger oracle. This does not qualify the
-helper-only aggregate-exception test as a product-operation contributor.
+## Shutdown, reopen and state preservation
 
-The strengthened five-case lifetime class passes the original local native TUnit
-normal and scalar runs,5/5 in each with zero skipped/failed cases or source and
-UnitTests/CrashHost DLL/PDB drift. The shutdown case now proves the original
-committed bytes, position and all identity fields after joined reopen, then an
-independent healthy record write/read and exact second reopen. The full Release
-build and native formatter pass. Exact report/source hashes are retained under
-KL-008 in `docs/implementation/status.json`; current-source Linux identity and
-recovery qualification and the remaining KL-008 maintainer/pool criteria stay open.
+The AC-CUT-003 shutdown/reopen oracle captures the actual committed bytes, position and complete StoreIdentity before shutdown. After joined disposal and reopen it asserts those exact values, including signing-key bytes; a non-null reopened value alone does not establish state preservation. It then commits and reads a distinct healthy value, reopens again and asserts the updated value and position with unchanged identity. Every original callback, task, cancellation, deadline and cleanup assertion is preserved, and there is no fake native failure, new hook or duplicate shutdown scenario. The helper-only aggregate-exception test is not a product-operation contributor.
 
 Capture is synchronous and native snapshot freeze/rotation and `Next` have no
 cancellation API. Elapsed checks detect and reject overruns after those calls;
@@ -113,29 +56,9 @@ An elapsed-budget error reported after successful cleanup must not retain a
 closed handle. Scalar cut construction precedes native iterator creation, so a
 failed allocation cannot lose an iterator created just before attachment.
 
-TASK-CUT-ELAPSED-IDENTITY preserves AC-CUT-002/003 after the original Aspire
-read-cut69 run (12/13 passed). An elapsed limit is one lease-lifetime failure;
-observing that same expired limit during traversal and joined disposal must
-retain the same exception identity instead of manufacturing two independent
-failures. Independent native, callback and cleanup failures remain separate.
-Root owns the minimal Work helper repair and the unchanged idle-expiry test;
-the required oracle remains exactly BudgetExceeded, released admission and a
-healthy following real native lease. No timeout, bound or assertion is weakened.
+An elapsed limit is one lease-lifetime failure (AC-CUT-002/003): observing that same expired limit during traversal and joined disposal retains the same exception identity instead of manufacturing two independent failures. Independent native, callback and cleanup failures remain separate. The required oracle is exactly BudgetExceeded, released admission and a healthy following real native lease; no timeout, bound or assertion is weakened.
 
-TASK-CUT-R2-FAILURE-JOIN refines AC-CUT-003 before joining the private L2-A
-packet. Luna query_wave owns only read-cut Lifecycle cleanup/disposal and new
-StorageRecovery test helpers/cases in its private overlay. A synchronous cleanup
-wrapper rethrows a single outer aggregate around the original exception; capture
-retains its direct inner exception object without Flatten, including an empty or
-nested original aggregate. Native disposal counts that retained failure before
-clearing the actual iterator or slot. A new real-exception retention regression
-tests this helper only and must not claim an injected native provider failure.
-Every concurrent traversal fixture releases its real barrier and explicitly
-joins its original task even when an assertion fails; retain both observation
-and cleanup failures. Reuse the existing test failure observer and update fixture
-cleanup without broad swallowed catches. Root reviews the revised exact hashes
-and runs all integrated gates; no fake iterator, diagnostic suppression or
-original assertion/timing reduction is permitted.
+A synchronous cleanup wrapper rethrows a single outer aggregate around the original exception (AC-CUT-003); capture retains its direct inner exception object without Flatten, including an empty or nested original aggregate. Native disposal counts that retained failure before clearing the actual iterator or slot. A real-exception retention regression tests this helper only and does not claim an injected native provider failure. Every concurrent traversal fixture releases its real barrier and explicitly joins its original task even when an assertion fails, retaining both observation and cleanup failures through the existing test failure observer, without broad swallowed catches. No fake iterator, diagnostic suppression or reduction of original assertions or timing is permitted.
 
 Runtime shutdown joins these leases before cache closing or native tree disposal.
 Failed lease cleanup closes only new lease admission and leaves the actual tree,
@@ -169,49 +92,9 @@ the lease permits the same verified snapshot to install. `Compact` uses
 survives compaction and later writes, as well as rejected and successful snapshot
 installation. No state monitor spans native operations, callbacks or joining.
 
-Root freezes this contract, owns shared docs/configuration/integration and gates.
-Luna query_wave owns a private patch against the current exact runtime files:
-new Storage.ZoneTree `Features/StorageRecovery/{Models,Validation,Queries,Lifecycle}`
-read-cut helpers, an internal `ZoneTreeStore.CaptureNativeReadCut(view, limits,
-cancellationToken)` join, and `ZoneTreeStoreRuntime` lease shutdown joins; new
-UnitTests `Features/StorageRecovery/{Cases,Helpers,Assertions}` only. Internal
-`ZoneTreeCheckpointManager` is additionally owned for the minimal pre-mutation
-`InstallSnapshot` admission join above; other checkpoint publication stays intact.
-`ZoneTreeReadCutLimits` is pure data; its validation belongs in Validation.
-`ZoneTreeNativeReadCut` is pure scalar data; `ZoneTreeReadCutLease` owns capture,
-bounded forward prefix visitation and disposal. Keep the IAtomicStore/IKeyValueView
-public contracts unchanged. Root reviews exact base/post hashes before joining.
-The visitor delegate belongs to Queries, never Models. Split lease lifetime state
-into Lifecycle helpers when required by the existing 200-code-line type ceiling.
+Layout: the read-cut helpers live under Storage.ZoneTree `StorageRecovery/{Models,Validation,Queries,Lifecycle}` with an internal `ZoneTreeStore.CaptureNativeReadCut(view, limits, cancellationToken)` join and `ZoneTreeStoreRuntime` lease shutdown joins; `ZoneTreeCheckpointManager` carries the minimal pre-mutation `InstallSnapshot` admission join. `ZoneTreeReadCutLimits` is pure data validated in Validation; `ZoneTreeNativeReadCut` is pure scalar data; `ZoneTreeReadCutLease` owns capture, bounded forward prefix visitation and disposal. The IAtomicStore/IKeyValueView public contracts are unchanged, the visitor delegate belongs to Queries (never Models), and lease lifetime state is split into Lifecycle helpers when the 200-code-line type ceiling requires it. Delivery order is finite admission and capture validation, exact native snapshot and scalar cut capture under the existing gate, off-gate copied bounded visitation, then joined disposal for normal and guarded runtimes.
 
-Implement in order: finite admission and capture validation; exact native snapshot
-and scalar cut capture under the existing gate; off-gate copied bounded visitation;
-joined disposal for normal and guarded runtimes; real provider tests and source
-self-review. Run no gates in the worker's private overlay. Root builds the solution,
-runs canonical format/governance, then serialized Aspire unit/scalar/recovery/RF3.
-Baseline Unit44b has 3197/3204 passing, four native ANN deadline failures and three
-independently owned benchmark process failures; Recovery44 has 284/295 passing,
-ten repaired receipt/prior-reader oracles awaiting rerun and one unresolved native
-owner-lock EAGAIN. Do not weaken or take over those gates to qualify this stage.
-
-The next L2 stage must capture applied/source/policy/schema and outbox head in the
-same callback, establish a bounded retention pin before writes/purge proceed,
-replay contiguous deltas, validate a new cut, atomically publish the catalog and
-recover or retire interrupted generations. A native snapshot alone proves none
-of those joins and cannot close KL-039. Frontend/SDK/MCP additions are N/A here:
-no new caller operation. Rollback stops and drains runtime-only leases before
-removing the helper; persisted user data and format remain unchanged.
-
-TASK-CUT-L2B-DISCOVERY is a read-only dependency of the next accepted contract.
-Luna query_wave traces actual persisted projection-consumer pins, canonical
-outbox before/after images, source/policy/schema reads, native generation manifests
-and production search calls. Its private source-bound packet must identify the
-minimum real path from L2-A to an off-gate build, contiguous delta replay, validated
-catalog publication and crash reconciliation with finite pins/work/storage. Root
-freezes exact REQ/AC, file ownership, authorization, format and rollback before
-write-capable work. Existing synchronous ITextProjection callers, administration
-and canonical records cannot silently change under this discovery; copying the
-entire corpus or claiming a snapshot alone completes online indexing is rejected.
+A native snapshot alone does not provide online indexing. That requires capturing applied/source/policy/schema and outbox head in the same callback, a bounded retention pin before writes/purge proceed, contiguous delta replay, validation of a new cut, atomic catalog publication and recovery or retirement of interrupted generations. Existing synchronous ITextProjection callers, administration and canonical records cannot silently change, and copying the entire corpus or claiming that a snapshot alone completes online indexing is rejected. Frontend/SDK/MCP additions are N/A here: no new caller operation. Rollback stops and drains runtime-only leases before removing the helper; persisted user data and format remain unchanged.
 
 ```mermaid
 flowchart LR
@@ -223,30 +106,12 @@ flowchart LR
   Join --> Stop[Joined store shutdown]
 ```
 
+## Public retained-reader storage ownership
 
-### TASK-KL039-PUBLIC-RETAINED-READER Storage ownership
-Original REQ/AC-CUT-001..004 additionally map to the exact [public retained-reader flow](../Search/OnlineGenerationLifetime.md#task-kl039-public-retained-reader-finite-original-public-reader-overlap) under ADR-097/095/125. ZoneTreeReadCutLease adds internal point lookup and borrowed callback visitation only while its original native traversal is active; existing copied VisitPrefix callers remain unchanged. Storage-owned bounded captured scopes distinguish actual absence from unadmitted keys and admit every owned key/value/capacity before copying. The fully owned read-only closure may outlive its joined snapshot; no live view/native snapshot remains after slot release. Its same selected FTS reader remains independently leased through the real caller operation. Original one-snapshot/default budget/deadline/format and node-local ownership remain exact. This is a runtime-only adapter, no migration/public API or production readiness claim.
+Original REQ/AC-CUT-001..004 additionally map to the public retained-reader flow in [OnlineGenerationLifetime](../Search/OnlineGenerationLifetime.md) under ADR-097/095/125. ZoneTreeReadCutLease adds internal point lookup and borrowed callback visitation only while its original native traversal is active; existing copied VisitPrefix callers remain unchanged. Storage-owned bounded captured scopes distinguish actual absence from unadmitted keys and admit every owned key/value/capacity before copying. The fully owned read-only closure may outlive its joined snapshot; no live view or native snapshot remains after slot release, while its same selected FTS reader stays independently leased through the real caller operation. The original one-snapshot/default budget/deadline/format and node-local ownership are exact. This is a runtime-only adapter with no migration or public API.
 
-### TASK-CUT-CAPTURED-OPERATION-001 — owned frozen scope and point admission
+## Captured scope and point admission
 
-REQ/AC-CUT-001..004 and the existing ADR-097 map to two additive real-ZoneTree
-operation regressions in `NativeCapturedReadScopeTests`: capture present values,
-an observed absent key and a prefix, then commit live update/delete/insert, join
-the snapshot and original owner, and retain the exact original captured bytes
-and absence through a cold live open. Unadmitted point/range access must return
-HistoryUnavailable without changing the current store; fresh live reads and a
-healthy write must succeed. The second flow exhausts exact point-byte admission
-before callback delivery, joins the lease, opens a healthy lease and verifies
-the unchanged cold records. These tests exercise the accepted runtime adapter;
-they add no storage, authorization, format or public contract.
+REQ/AC-CUT-001..004 and ADR-097 map to two real-ZoneTree operation regressions in `NativeCapturedReadScopeTests`. The first captures present values, an observed absent key and a prefix, then commits live update/delete/insert, joins the snapshot and original owner, and retains the exact original captured bytes and absence through a cold live open; unadmitted point/range access returns HistoryUnavailable without changing the current store, and fresh live reads and a healthy write succeed. The second exhausts exact point-byte admission before callback delivery, joins the lease, opens a healthy lease and verifies the unchanged cold records. They exercise the accepted runtime adapter and add no storage, authorization, format or public contract. Source review identifies a coverage gap, not an upstream ZoneTree defect.
 
-Storage worker owns only new StorageRecovery Cases/Helpers test files. Root owns
-this map and combined build/analyzer/formatter plus native TUnit unit/recovery/RF3
-verification at the integration barrier. Source review identifies a coverage gap,
-not an upstream ZoneTree defect or a passing runtime gate. Existing reports and
-qualification limits remain exact; removal rolls back only these additive tests.
-
-Development verification on 2026-10-11 passed both native captured-scope flows
-(2/2) in the reviewed isolated snapshot. Shared build, affected-suite and
-qualification limits are recorded in [the Messaging development result](../Messaging.md#task-msg-counter-debit-001--exact-retained-usage-before-lifecycle-debit).
-Current-source Linux and Aspire RF3 qualification remain open.
+Complete Aspire unit/scalar/recovery/replicated-cluster and exact-source Linux qualification remain separate gates.

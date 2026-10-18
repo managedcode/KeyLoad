@@ -21,24 +21,24 @@ No KeyLoad parser or unpublished local package is authorized. Generic long-opera
 
 ## Implementation contract
 
-TASK-NCQRS-HTTP-OWNER-BOUNDS: root owns planning, integration and release; lifecycle_wave Luna/high stages the narrowly scoped patch under /private/tmp after explicit write release. Exact owning paths are ManagedCode.Communication/Cqrs/CqrsStreamClientOptions.cs, CqrsHttpClientExtensions.cs and directly required bounded client helpers/constants; ManagedCode.Communication.Tests/CQRS native transport/API regressions; README.md examples. Existing server writers, normalizer, Graph, reliability and unrelated packages are outside scope. Root alone applies outside-checkout writes, runs commands, changes Directory.Build.props canonical patch values and performs Git/publication.
+Exact owning paths are ManagedCode.Communication/Cqrs/CqrsStreamClientOptions.cs, CqrsHttpClientExtensions.cs and directly required bounded client helpers/constants; ManagedCode.Communication.Tests/CQRS native transport/API regressions; README.md examples. Existing server writers, normalizer, Graph, reliability and unrelated packages are outside scope.
 
 Ordered stages: freeze contract; implement/review finite physical guard and failure decode; actual positive/negative/edge/cancel/dispose tests; full owning build/TUnit/coverage and bounded hot-path measurement; canonical patch commit/push/release/feed proof; centrally update all three consuming pins; restore/build/focused native CQRS via Aspire and required complete consumer gates. Never skip a failing stage or treat a green release workflow as all-package availability.
 
-Related joins: C0 Graph/native runtime tests use the current centrally pinned packages. C2 public HTTP adoption requires the verified package release and its separate product contract. C1 signed cohort/RPC and C3 long-work durability are unchanged. Workers do not modify shared KeyLoad files, version, Git, source cohorts or run commands during root runtime qualification.
+Related joins: C0 Graph/native runtime tests use the current centrally pinned packages. C2 public HTTP adoption requires the verified package release and its separate product contract. C1 signed request/RPC and C3 long-work durability are unchanged.
 
 ## Rollout, rollback and evidence
 
-This is an additive configuration contract plus intentional safe plain-text failure behavior; valid bounded RFC7807 remains compatible. Document both in the owning README. No stored-data, node-local ownership, public SQL protocol or RF3 membership change. Keep rollback within the verified package release path; never restore an unsafe raw-body fallback as a workaround.
+This is an additive configuration contract plus intentional safe plain-text failure behavior; valid bounded RFC7807 remains compatible. Document both in the owning README. No stored-data, node-local ownership, public SQL protocol or cluster membership change. Keep rollback within the verified package release path; never restore an unsafe raw-body fallback as a workaround.
 
 Tests and original source/run/attempt/feed evidence must establish every CHB AC. Source presence alone is not implemented status. Frontend N/A: transport library work. No acceleration, public readiness or durable-operation claim follows from this repair.
 
 
-## TASK-CLIENT-RESULT-001 — successful typed absence
+## Successful typed absence
 
 # Exact current absence response boundary
 
-REQ-CLIENT-RESULT-001 / AC-CLIENT-RESULT-001 preserves successful absence with fresh persisted authorization, original cancellation, unchanged storage state and exact positive document/message/schedule/transfer/saga values. TASK-CLIENT-RESULT-001 is one coherent producer/API/consumer package join; partial wrappers are not deployable.
+REQ-CLIENT-RESULT-001 / AC-CLIENT-RESULT-001 preserves successful absence with fresh persisted authorization, original cancellation, unchanged storage state and exact positive document/message/schedule/transfer/saga values. The change is one coherent producer/API/consumer package join; partial wrappers are not deployable.
 
 Native proof: GrainCoreReadCapabilities has exactly six nullable domain branches: Document, Message, QueueTransfer, QueueTransferReceipt, RecurringSchedule, Saga. SDK GetAsync(two overloads), InspectAsync, QueueTransferClient(two extensions), RecurringSagaClientExtensions(two extensions) all use allowNullResult:true. McpReadCatalog independently declares these exact six output schemas nullable. Other domain reads remain unchanged. Existing OwnedDocumentReadResultV1 private identity data cannot be exposed as a public response.
 
@@ -53,11 +53,11 @@ Recommended current named responses (each sealed record, GenerateSerializer, sol
 | RecurringScheduleReadResult | RecurringScheduleInspection? Schedule | keyload.recurring-schedule-read-result.v1 |
 | SagaReadResult | SagaInspection? Saga | keyload.saga-read-result.v1 |
 
-The native storage/capability observations remain unchanged and nullable. The existing CanonicalOperationGateway, after successful original GrainValue decode and before its existing McpBoundedJson serialization, produces the named current public response for these six public read kinds. This single gateway already owns SDK HTTP, official MCP and SQL CALL reply shaping. No native peer response or underlying private transfer/receipt authority is restamped or wrapped; no changed grain kind, operation ordinal, storage family or request fields. The exact outer wrapper is included in the same MaximumDataReplyBytes check; no response-size exemption. Null native value yields nullable field, exact expected native type yields its unchanged record, and any other actual native type fails closed using existing RecoveryRequired/InvalidRequest. Original error paths never fabricate a successful outer value.
+The native storage/capability observations remain unchanged and nullable. The existing CanonicalOperationGateway, after successful original GrainValue decode and before its existing McpBoundedJson serialization, produces the named current public response for these six public read kinds. This single gateway already owns SDK HTTP, official MCP and SQL CALL reply shaping. No underlying private transfer/receipt authority is restamped or wrapped; no changed grain kind, operation ordinal, storage family or request fields. The exact outer wrapper is included in the same MaximumDataReplyBytes check; no response-size exemption. Null native value yields nullable field, exact expected native type yields its unchanged record, and any other actual native type fails closed using existing RecoveryRequired/InvalidRequest. Original error paths never fabricate a successful outer value.
 
 Update SDK generic signatures, remove allowNullResult plumbing, and require every successfully decoded response to be nonnull. Update the six official MCP output schemas to their named nonnullable outer response; preserve field/body privacy and schema validation. Existing SQL CALL output is the same canonical response from this gateway; SQL SELECT domain rows and core query composition remain unchanged. No dual reader or compatibility route for prior unreleased JSON null shape. All current client examples/tests/actual typed CQRS consumers must use the nullable domain field deliberately, preserving prior successful absence versus failures. Native/core direct reads retain their existing APIs.
 
-All three Communication pins10.3.7 join only after the complete affected source/test chain compiles; actual published payloads are verified. Root owns the shared package/config/docs/source join. Focused original HTTP null/healthy/retry/cancellation tests, genuine official MCP absent/present/privacy tests, current SQL CALL full output and unchanged native/no-effect/replay/cold receipts prove only their actual scope. Required integrated Linux RF3/process and whole solution gates stay open. No new public status-only generic wrapper is introduced; status operations use nongeneric native Result where their actual meaning is status only.
+All three Communication pins10.3.7 join only after the complete affected source/test chain compiles; actual published payloads are verified. Focused original HTTP null/healthy/retry/cancellation tests, genuine official MCP absent/present/privacy tests, current SQL CALL full output and unchanged native/no-effect/replay/cold receipts prove only their actual scope. Required integrated Linux cluster/process and whole solution gates stay open. No new public status-only generic wrapper is introduced; status operations use nongeneric native Result where their actual meaning is status only.
 
 
 ### Blob absence dependency discovered before package join
@@ -65,7 +65,7 @@ All three Communication pins10.3.7 join only after the complete affected source/
 Native BlobClientExtensions also has two genuine successful nullable reads, independently asserted by the original AllNativeAbsentReads whole operation: BlobMetadata and BlobUploadInfo. REQ/AC-CLIENT-RESULT-001 therefore requires BlobMetadataReadResult(BlobMetadata? Metadata) with alias keyload.blob-metadata-read-result.v1 and BlobUploadInfoReadResult(BlobUploadInfo? Upload), alias keyload.blob-upload-info-read-result.v1, sole field Id0. Preserve native creator/resource authorization, range/list and upload mutation/receipt contracts. The same bounded public gateway shapes both records before current reply admission; eight domain responses total, nine SDK calls counting both document overloads. Official MCP output and SQL CALL stay identical. No generic Optional or absent→failure.
 
 
-## TASK-CLIENT-STATUS-ACK-001 — nongeneric credential acknowledgement
+## Nongeneric credential acknowledgement
 
 Recommended next status-only public boundary (not part of sealed Result189)
 
@@ -78,42 +78,4 @@ Server status projection must run only after the same CanonicalOperationGateway 
 Required complete existing operations: credential revoke/expiry refuses actual SDK/official MCP request without effects, exact same credential repair command succeeds, replay has no additional database effects and returns genuine nongeneric success; two same-volume cold cuts retain original credential/command authority. Update each original bool control to its exact declared status/no-data assertion, preserving the independent complete database images and original native acknowledgement evidence; do not delete controls wholesale. Transport controls cover exact204, unexpected success shape, bounded original RFC7807, mid-body/caller cancellation mapped to original-write UnknownWriteOutcome, lost response and same-ID reconciliation. No retries/timeouts/defaults change.
 
 
-Implementation order: public projection validates the original native true ACK; Authorization HTTP returns the genuine nongeneric Communication Result through its native endpoint filter; SDK admits only 204 in the existing bounded transport; MCP/SQL retain null-data envelopes and explicit output schema; complete credential repair/replay/cold and transport controls retain original receipt evidence. No persisted layout changes. This private successor depends on sealed Result189. Runtime and delivered Linux/RF3 gates remain open.
-
-
-## TASK-RESULT-CONSUMER-JOIN-003 — complete existing comparison and live-cut consumers
-
-REQ/AC-CLIENT-STATUS-ACK-001 and the named successful-absence contract apply to the existing isolated public regression and live-query-cut workflows. ConfigureApiKey observes the genuine non-generic success with no Problem; the original persisted principal and grants remain independently checked. Invalid blob-part/completion operations retain complete original upload-state equality and both SDK/official MCP successful metadata absence, by checking the existing Upload/Metadata fields. The live query compares its independently literal full DocumentResult or null to DocumentReadResult.Document and preserves every owner, receipt, query-page and before/after read-cut assertion.
-
-No persisted receipt, alias, field, command, clock, bound or public route changes. Three actual Main CS0411 code-fix preflights returned NotSupported; the exact native consumer correction preview returned applied=N. Root owns integrated compiler/runtime qualification. The ongoing private credential RF3 cohort remains source/image-frozen and is not changed by this proposal.
-
-
-## TASK-CLIENT005-COMMITTED-RESPONSE-001 — committed write interrupted during decode
-
-REQ/AC-CLIENT-002/005, AC-MP-009 and ADR083/125: `CommittedResponseInterruptionTests.OriginalCommittedWriteSurvivesInterruptedBodyThenExactReplayConflictAndHealthyRevision` retains two explicit caller-cancel/connection-abort instances. Unlike existing read interruption and predetermined write-response controls, its actual signed ConnectionGrain Batch commits and disposes the original producer before a real Kestrel socket flushes one byte of that canonical receipt. Both interrupted SDK decodes must remain UnknownWriteOutcome. Persisted credential authentication occurs on every test-adapter request and the signed grain freshly validates persisted authority. Same-ID/body returns full original receipt/native result bytes with complete bounded store image and position unchanged; changed body refuses Conflict/no effects; a fresh revision2 operation and its exact replay complete with independent literal models/receipts. Original caller, first handler, HTTP host and native connection are joined with ordered primary/cleanup retention under unchanged native completion bound. This is a test-only real-network/native-owner composition, not public middleware, official MCP, RF3 or Linux qualification. Those existing mandatory long-operation/current-policy/disconnect gates remain open. No product dispatcher, ACK, timing, limit, schema or persistence changes; new compiled UIDs/runtime/coverage remain OPEN.
-
-## CLIENT005 existing network owner startup and expected-interruption boundary (2026-10-12)
-
-REQ/AC-CLIENT-005/006 with ADR083/125 preserves SAME original CommittedResponseInterruptionTests bool cases, all original signed native command/full receipt/replay/changed-content Conflict/noeffects/healthy operations and DeniedCommandReplayClockTests persisted repair/cold. Existing test-owned Kestrel startup must retain the actual original Start failure and join Stop/Dispose; normal disposal attempts every original ordered Client.Dispose→app.Stop→app.Dispose even if a prior stage fails, preserving all primary/cleanup errors through existing ServerFailureObserver. Expected first body cancellation requires actual FirstChunk completion after committed native original/producerjoin/one-byte flush; early native/start/read cancellation remains an initiating failure in the existing ledger. No synthetic provider/counter/logger, Test/Args/UID, product/auth/API/clock/limit/deadline/retry change. Native compiler/previews and exact-source native50 normal SIMD full operation/runtime/Linux gates remain OPEN.
-
-```mermaid
-flowchart LR
- A[Owned real Kestrel Start] --> B[Actual native commit and producer join]
- B --> C[First byte flushed]
- C --> D[Expected body interruption]
- D --> E[Same-ID full replay / conflict / healthy]
- A --> F[Original startup failure retained]
- F --> G[All original Stop / Dispose joined]
- E --> G
-```
-
-## TASK-CLIENT005-LATE-HANDLER-FAILURE-001 — original handler after joined HTTP ownership
-
-REQ/AC-CLIENT-005 and ADR083/125 preserve both original committed-response cases and all literal receipt/native-byte/model/no-effect/replay/conflict/healthy assertions. The existing endpoint Failure signal must be sampled after the actual awaited test-owned Kestrel shutdown scope, before native connection close, so a handler exception recorded during cancellation or host teardown is retained alongside original body and all Stop/Dispose failures. Move only that same completed-signal sample; no additional logger, provider, wait, retry, timeout, scheduling or trusted authority. Genuine producerDisposed remains before every replay response and before the first committed/flushed FirstChunk. Original source/UID/runtime/Linux gates remain independent; source review is not runtime completion.
-
-Actual Unit Release CA1849 source rows at original 48:144 and 68:75 require async retrieval of the same existing completed Failure task value. The conditional remains guarded by IsCompletedSuccessfully; await preserves the original exception object. No new validation, blocking, failure signal, wait bound or changed case. Native fix-first responses and compiler/runtime receipts remain separate.
-
-
-## TASK-CLIENT005-PERSISTED-CREDENTIAL-001 — genuine native credential identity
-
-REQ/AC-CLIENT-005/006 retain both original complete committed-response interruption flows. Their credential must use the existing native `credentialId.secret` format: the prefix exactly names the committed ApiKeyRecord, and the complete token is hashed and sent as the standard Bearer value. The authentic R8 native run discovered ten instances across eight selected methods and executed eight passes/two failures; both interruption cases rejected the previous separator-free fixture credential before any database command. Repair only that fixture token using its existing ApiKeyId. Preserve per-request persisted authentication, every signed command, literal original receipt, unknown response, exact replay, changed-content refusal, healthy revision and joined network/native owners. No production format fallback, authentication relaxation, trusted role, deadline or case/UID change. Fresh compiled runtime and Linux gates remain required.
+Implementation order: public projection validates the original native true ACK; Authorization HTTP returns the genuine nongeneric Communication Result through its native endpoint filter; SDK admits only 204 in the existing bounded transport; MCP/SQL retain null-data envelopes and explicit output schema; complete credential repair/replay/cold and transport controls retain original receipt evidence. No persisted layout changes. This private successor depends on sealed Result189. Runtime and delivered Linux/cluster gates remain open.

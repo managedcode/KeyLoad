@@ -18,7 +18,7 @@ internal static class McpDiscoveryAssertions
     }
 
     /// <summary>Requires the actual tool's canonical required fields, wrapper schema and explicit effect hints.</summary>
-    /// <param name="tool">The real native tool decoded from a real RF3 response.</param>
+    /// <param name="tool">The real native tool decoded from a real CLUSTER response.</param>
     /// <returns>The completed observable contract assertions.</returns>
     internal static async Task VerifyAsync(Tool tool)
     {
@@ -31,10 +31,6 @@ internal static class McpDiscoveryAssertions
         {
             await McpGraphPathSchemaAssertions.VerifyAsync(tool.Name, tool.InputSchema, tool.OutputSchema!.Value,
                 expected.ResultFields);
-        }
-        if (tool.Name is McpCallerProtocol.AdminPartitionPlacementBind or McpCallerProtocol.AdminPartitionPlacementRead)
-        {
-            await McpPartitionPlacementSchemaAssertions.VerifyAsync(tool.Name, tool.InputSchema, tool.OutputSchema!.Value);
         }
         await Assert.That(tool.Annotations is not null).IsTrue();
         await Assert.That(tool.Annotations!.ReadOnlyHint).IsEqualTo(expected.ReadOnly);

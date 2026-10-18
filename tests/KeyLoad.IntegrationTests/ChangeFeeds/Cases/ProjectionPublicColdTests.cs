@@ -7,7 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.ChangeFeeds;
 internal sealed class ProjectionPublicColdTests(ClusterFixture fixture)
 {
     [Test]
-    public async Task PersistedAdministratorProjectionEffectsEpochFencesReleasePurgeAndOriginalReceiptsSurviveTwoColdRf3ThenHealthyGenerationTwo()
+    public async Task PersistedAdministratorProjectionEffectsEpochFencesReleasePurgeAndOriginalReceiptsSurviveTwoColdClusterThenHealthyGenerationTwo()
     {
         using var deadline = McpCallerDeadline.Create();
         await ProjectionPublicTrial.RunAsync(fixture, deadline.Token);

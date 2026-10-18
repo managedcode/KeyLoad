@@ -1,6 +1,6 @@
-# Blob cancellation owned local RF3 image lifetime
+# Blob cancellation owned local cluster image lifetime
 
-REQ-BLOB-CANCEL-IMAGE-001 refines REQ-BLOB-004/006: the custom probed RF3 scenario owns genuine LocalRf3ImageTestSession.StartIfSelectedAsync before image verification and retains the SAME immutable Selection through RequestCqrsRf3ImageProof.ReadAsync and StartProbedAsync. When local selection is absent, retain the original authenticated GitHub receipt path. No proof synthesis, environment/selector widening or fallback authority is permitted.
+REQ-BLOB-CANCEL-IMAGE-001 refines REQ-BLOB-004/006: the custom probed cluster scenario owns genuine LocalClusterImageTestSession.StartIfSelectedAsync before image verification and retains the SAME immutable Selection through RequestCqrsClusterImageProof.ReadAsync and StartProbedAsync. When local selection is absent, retain the original authenticated GitHub receipt path. No proof synthesis, environment/selector widening or fallback authority is permitted.
 
 AC-BLOB-CANCEL-IMAGE-001 maps to BOTH original Arguments(false/true) of BlobPublicCancellationTests.BeforeSubmitPartAndCompleteCancellationJoinsOriginalProducerThenExactRetryPublishesHealthyBlob. Keep original case/UID/body, authentic BeforeSubmit holds, original SDK/official MCP tasks, ProducerDisposed correlation, same-command retry, full original receipts and healthy revision2 literal state. Genuine image preparation uses the original bounded scenario token and preserves initiating failure plus its native cleanup.
 
@@ -18,4 +18,4 @@ sequenceDiagram
  Owner->>Root: delete only after successful original joins
 ```
 
-The two original R34 failures stopped in FaultImages before any node/caller/arm admission. Their immutable failures do not prove a database command error. Corrective source N is not yet joined; compiler, current-image original two-case runtime and exact-source Linux RF3 remain OPEN. Root/Main owns other packed-wave session omission separately. Only Blob Owner/Setup and this spec are changed; no product guard, protocol, signer, shared fixture/session helper, replicated outcome or trusted role change.
+Compiler, current-image two-case runtime and exact-source Linux cluster qualification remain OPEN. Only Blob Owner/Setup and this spec are changed; no product guard, protocol, signer, shared fixture/session helper, replicated outcome or trusted role change.

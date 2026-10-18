@@ -55,7 +55,7 @@ internal static class FunctionalGateColdAnalytics
     }
 
     private static Task<AdminNodeSnapshot> ReadAsync(FunctionalGateFixture fixture, string node, CancellationToken token)
-        => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, node, fixture.AdminKey, async administrator =>
+        => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, node, fixture.AdminKey, async administrator =>
         {
             var sdk = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.DashboardAsync(token));
             var official = await McpCallerAssertions.SuccessAsync<AdminNodeSnapshot>(

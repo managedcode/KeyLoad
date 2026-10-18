@@ -19,7 +19,7 @@ internal static class FunctionalGateAnalyticsIdentityConflict
         await McpCallerAssertions.ErrorAsync(await context.Writer.Mcp.CallAsync(McpCallerTools.DocumentsCommit,
             FunctionalGateAnalyticsIdentity.Wire(changed), token), ErrorCode.Conflict, dispatched: true);
         await unchanged();
-        var sql = SqlRf3Protocol.Call(context.Partition, McpCallerTools.DocumentsCommit,
+        var sql = SqlClusterProtocol.Call(context.Partition, McpCallerTools.DocumentsCommit,
             FunctionalGateAnalyticsIdentity.Wire(changed)) with
         {
             CommandId = original.CommandId

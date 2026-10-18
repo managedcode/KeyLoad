@@ -20,7 +20,6 @@ internal sealed class RemoteDocumentLifetimeReceiver(OrleansNode node, Partition
         return call.Kind switch
         {
             RemoteResourceLifetimeReadKindV2.Document => OwnedAsync(call, binding, token),
-            RemoteResourceLifetimeReadKindV2.ControlledDocument => ControlledAsync(call, binding, token),
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteDocumentProtocol.InvalidProof)
         };
     }
@@ -69,27 +68,6 @@ internal sealed class RemoteDocumentLifetimeReceiver(OrleansNode node, Partition
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof, error);
         }
-    }
-
-    private async Task<ReadOnlyMemory<byte>> ControlledAsync(RemoteResourceLifetimeReadCallV2 call, IResourceLifetimeWorkBinding binding,
-        CancellationToken token)
-    {
-        var request = NativeSerialization.Deserialize<ControlledDocumentReadRequestV2>(call.Payload.Span);
-        var frame = request.Frame?.Original;
-        if (frame is null || frame.ExpiresAt != call.ExpiresAt || frame.Publication is null || frame.Reference is null || frame.Control is null
-            || !PhysicalOwnerEntryValidation.SameOwner(frame.Publication.Destination, call.Destination.Owner)
-            || frame.Control.Partition != frame.Reference.Partition || request.MaximumResultBytes > call.MaximumReplyBytes)
-        {
-            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof);
-        }
-        var principal = partition.Database.Store.Read(view => partition.Database.Principal(view, PartitionStoreProtocol.AdministratorId, clock.GetUtcNow()));
-        GrainRequestAuthority.RequireAdministrator(principal);
-        var id = Guid.NewGuid();
-        var signed = node.CatalogRequestCodec().CreateControlledDocumentReadV2(id, principal.Id, request);
-        var result = await NativeLifetimeReadChildExecution.ExecuteAsync<ControlledDocumentReadResultV2>(node,
-            principal, id, signed, null, binding, token).ConfigureAwait(false);
-        token.ThrowIfCancellationRequested();
-        return Encode(result, call.MaximumReplyBytes);
     }
 
     private static byte[] Encode<T>(T result, int maximumBytes)

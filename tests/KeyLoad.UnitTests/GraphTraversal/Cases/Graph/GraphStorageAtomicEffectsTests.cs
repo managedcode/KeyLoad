@@ -11,7 +11,7 @@ internal sealed class GraphStorageAtomicEffectsTests
     private const string RejectedMessage = "rejected-message";
 
     [Test]
-    public async Task Kl022EntityEdgeEventQueueAtomicCommitRetryAndLateEdgeConflictLeaveExactModelState()
+    public async Task EntityEdgeEventQueueAtomicCommitRetryAndLateEdgeConflictLeaveExactModelState()
     {
         using var database = new TestDatabase();
         GraphStorageReferenceFixture.Configure(database);
@@ -69,7 +69,7 @@ internal sealed class GraphStorageAtomicEffectsTests
     }
 
     [Test]
-    public async Task Kl022MissingEndpointRejectsTheWholeEntityEdgeBatchAndFollowingMutationSucceeds()
+    public async Task MissingEndpointRejectsTheWholeEntityEdgeBatchAndFollowingMutationSucceeds()
     {
         using var database = new TestDatabase();
         GraphStorageReferenceFixture.Configure(database);

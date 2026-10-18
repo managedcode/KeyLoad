@@ -6,10 +6,10 @@ namespace KeyLoad.IntegrationTests.Features.Messaging;
 
 internal static class QueueLifecyclePublicSeed
 {
-    internal static Task<QueueLifecyclePublicState> RunAsync(RequestCqrsRf3Callers root, int route, CancellationToken token)
+    internal static Task<QueueLifecyclePublicState> RunAsync(RequestCqrsClusterCallers root, int route, CancellationToken token)
         => RunAsync(root, route, false, token);
 
-    internal static async Task<QueueLifecyclePublicState> RunAsync(RequestCqrsRf3Callers root, int route,
+    internal static async Task<QueueLifecyclePublicState> RunAsync(RequestCqrsClusterCallers root, int route,
         bool byteSublimit, CancellationToken token)
     {
         var suffix = Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat);
@@ -49,7 +49,7 @@ internal static class QueueLifecyclePublicSeed
         return new(partition, key, deniedKey, route);
     }
 
-    private static async Task ConfigureAsync(RequestCqrsRf3Callers root, PrincipalRecord principal, string key, CancellationToken token)
+    private static async Task ConfigureAsync(RequestCqrsClusterCallers root, PrincipalRecord principal, string key, CancellationToken token)
     {
         await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), principal, token));
         var saved = await McpCallerAssertions.SdkStatusAsync(await root.Sdk.ConfigureApiKeyAsync(Guid.NewGuid(),

@@ -7,7 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.Search;
 
 internal static class ProjectionPublicPolicyCold
 {
-    internal static async Task RunAsync(ClusterFixture fixture, EventProjectionRf3Scenario scenario,
+    internal static async Task RunAsync(ClusterFixture fixture, EventProjectionClusterScenario scenario,
         McpPersistedIdentity reader, CommitReceipt original, CancellationToken token)
     {
         var before = await CaptureAsync(fixture, scenario, reader, token);
@@ -21,10 +21,10 @@ internal static class ProjectionPublicPolicyCold
             await Assert.That(after[node].Node.Applied).IsGreaterThanOrEqualTo(before[node].Node.Applied);
             await Assert.That(after[node].PhysicalCut).IsGreaterThanOrEqualTo(before[node].PhysicalCut);
         }
-        await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2,
+        await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2,
             reader.Secret, async caller =>
             {
-                await EventProjectionRf3Assertions.VerifyVectorBothAsync(caller.Sdk, caller.Mcp,
+                await EventProjectionClusterAssertions.VerifyVectorBothAsync(caller.Sdk, caller.Mcp,
                     scenario.VectorSearch(), reader.Secret, ProjectionPublicPolicyProtocol.Healthy(), token);
                 return true;
             }, token);
@@ -32,10 +32,10 @@ internal static class ProjectionPublicPolicyCold
         await CaptureAsync(fixture, scenario, reader, token);
     }
 
-    internal static async Task ReplayAsync(ClusterFixture fixture, EventProjectionRf3Scenario scenario,
+    internal static async Task ReplayAsync(ClusterFixture fixture, EventProjectionClusterScenario scenario,
         CommitReceipt original, CancellationToken token)
     {
-        await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2,
+        await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2,
             scenario.WorkerSecret, async worker =>
             {
                 var sdk = await McpCallerAssertions.SdkSuccessAsync(
@@ -44,13 +44,13 @@ internal static class ProjectionPublicPolicyCold
                 var mcp = await McpCallerAssertions.SuccessAsync<CommitReceipt>(response);
                 await Assert.That(global::KeyLoad.JsonDefaults.Serialize(sdk).AsSpan().SequenceEqual(global::KeyLoad.JsonDefaults.Serialize(original))).IsTrue();
                 await Assert.That(global::KeyLoad.JsonDefaults.Serialize(mcp.Value).AsSpan().SequenceEqual(global::KeyLoad.JsonDefaults.Serialize(original))).IsTrue();
-                await McpCallerAssertions.DoesNotDiscloseAsync(response, scenario.WorkerSecret, EventProjectionRf3Scenario.Secret);
+                await McpCallerAssertions.DoesNotDiscloseAsync(response, scenario.WorkerSecret, EventProjectionClusterScenario.Secret);
                 return true;
             }, token);
     }
 
     private static async Task<(NodeStatus Node, long PhysicalCut)[]> CaptureAsync(ClusterFixture fixture,
-        EventProjectionRf3Scenario scenario, McpPersistedIdentity reader, CancellationToken token)
+        EventProjectionClusterScenario scenario, McpPersistedIdentity reader, CancellationToken token)
     {
         var tasks = ProjectionPublicPolicyProtocol.Nodes
             .Select(node => CaptureNodeAsync(fixture, node, scenario, reader, token)).ToArray();
@@ -70,16 +70,16 @@ internal static class ProjectionPublicPolicyCold
     }
 
     private static Task<(NodeStatus Node, long PhysicalCut)> CaptureNodeAsync(ClusterFixture fixture,
-        string node, EventProjectionRf3Scenario scenario, McpPersistedIdentity reader, CancellationToken token)
+        string node, EventProjectionClusterScenario scenario, McpPersistedIdentity reader, CancellationToken token)
     {
-        return RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, node, fixture.AdminKey,
+        return RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, node, fixture.AdminKey,
             async root =>
             {
                 var image = await ProjectionPublicPolicyImage.ReadAsync(root.Sdk, scenario, token);
-                await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, node, reader.Secret,
+                await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, node, reader.Secret,
                     async caller =>
                     {
-                        await EventProjectionRf3Assertions.VerifyVectorBothAsync(caller.Sdk, caller.Mcp,
+                        await EventProjectionClusterAssertions.VerifyVectorBothAsync(caller.Sdk, caller.Mcp,
                             scenario.VectorSearch(), reader.Secret, ProjectionPublicPolicyProtocol.Healthy(), token);
                         return true;
                     }, token);

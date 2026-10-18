@@ -13,8 +13,8 @@ internal static class CompetingInboxPublicValues
     internal static async Task ReceiptAsync(CompetingInboxPublicState state, CommitReceipt actual, Guid id,
         ImmutableArray<MutationReceipt> mutations)
     {
-        var expected = new CommitReceipt(id, new(state.Placement.Incarnation, state.Partition.AtomicPartitionId,
-            actual.Token.Position, state.Placement.PlacementEpoch), mutations, DurabilityProfile.QuorumProcessDurable);
+        var expected = new CommitReceipt(id, new(actual.Token.Incarnation, state.Partition.AtomicPartitionId,
+            actual.Token.Position, actual.Token.OwnershipEpoch), mutations, DurabilityProfile.QuorumProcessDurable);
         await Assert.That(actual.Token.Position).IsGreaterThan(0L);
         await EqualAsync(expected, actual);
     }

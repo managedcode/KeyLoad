@@ -20,10 +20,10 @@ internal static class CredentialVerifierR53Replay
         await StatusAsync(root, administrator, state.First.Scenario.Partition, verifier.ReplaceId,
             verifier.Replacement, verifier.ReplaceResult, afterResult, token);
         var first = await McpCallerAssertions.SdkSuccessAsync(await root.CommitAsync(state.FirstSeedCommand, token));
-        await SqlRf3Protocol.EqualAsync(state.FirstSeedReceipt, first);
+        await SqlClusterProtocol.EqualAsync(state.FirstSeedReceipt, first);
         await afterResult();
         var second = await McpCallerAssertions.SdkSuccessAsync(await root.CommitAsync(state.SecondSeedCommand, token));
-        await SqlRf3Protocol.EqualAsync(state.SecondSeedReceipt, second);
+        await SqlClusterProtocol.EqualAsync(state.SecondSeedReceipt, second);
         await afterResult();
     }
 
@@ -36,7 +36,7 @@ internal static class CredentialVerifierR53Replay
             throw new InvalidOperationException(CredentialVerifierR53Protocol.MissingState);
         }
         var sdk = await McpCallerAssertions.SdkStatusAsync(await root.ConfigureApiKeyAsync(id, credential, token));
-        await SqlRf3Protocol.EqualAsync(original, sdk);
+        await SqlClusterProtocol.EqualAsync(original, sdk);
         await afterResult();
         var request = new ConfigureApiKeyRequest(credential);
         var arguments = McpOfficialClient.Arguments(request);
@@ -44,7 +44,7 @@ internal static class CredentialVerifierR53Replay
         await McpCallerAssertions.StatusAsync(await administrator.Client.InvokeKeyLoadToolAsync(
             McpCallerTools.CredentialsConfigure, arguments, token));
         await afterResult();
-        var call = SqlRf3Protocol.Call(partition, McpCallerTools.CredentialsConfigure, request, id);
+        var call = SqlClusterProtocol.Call(partition, McpCallerTools.CredentialsConfigure, request, id);
         var sql = await McpCallerAssertions.SdkSuccessAsync(await root.ExecuteSqlAsync(call, token));
         await Assert.That(sql.ValueKind).IsEqualTo(JsonValueKind.Null);
         await afterResult();

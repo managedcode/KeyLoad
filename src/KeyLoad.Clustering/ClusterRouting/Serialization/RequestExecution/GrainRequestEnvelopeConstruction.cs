@@ -8,7 +8,7 @@ internal static class GrainRequestEnvelopeConstruction
     internal static GrainRequestEnvelope Read(Guid requestId, Guid incarnation, string? principalId,
         GrainReadKind kind, ReadOnlyMemory<byte> payload, DateTimeOffset expiry)
     {
-        if (kind == GrainReadKind.OwnerCapacity || ResourceOwnerInventoryReadScope.Handles(kind)
+        if (ResourceOwnerInventoryReadScope.Handles(kind)
             || ResourceRetirementReadScope.Handles(kind)
             || EventVectorRequestScope.HandlesRead(kind) || AnnProjectionObservationScope.Handles(kind)
             || AnnProjectionLifetimeObservationScope.Handles(kind))
@@ -30,7 +30,7 @@ internal static class GrainRequestEnvelopeConstruction
     internal static GrainRequestEnvelope Command(Guid requestId, Guid incarnation, string principalId,
         OperationKind kind, Guid commandId, ReadOnlyMemory<byte> payload, DateTimeOffset expiry)
     {
-        if (kind is OperationKind.PlacementIntentPhase or OperationKind.ResourceRetirementPhase)
+        if (kind is OperationKind.ResourceRetirementPhase)
         {
             throw Errors.Fail(ErrorCode.PermissionDenied, GrainRoutingProtocol.AdministrationRequired);
         }

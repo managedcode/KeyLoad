@@ -3,7 +3,6 @@ using KeyLoad.Query;
 using KeyLoad.Query.Features.Search;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.Search;
-using KeyLoad.UnitTests.Features.ClusterRouting;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
@@ -28,7 +27,7 @@ internal sealed class NativeTextCapturedCommitAuthorityHarness : IDisposable
         SearchRequest request, CancellationToken token)
     {
         this.request = request;
-        database = ControlledMovementUnconfiguredEngine.Create(fixture.Store);
+        database = KeyLoad.UnitTests.Features.Messaging.QueueWholeFlowStorage.Open(fixture.Store);
         var options = UnitExecutionOptions.QueryExecution();
         execution = options.Value;
         execution.Validate();

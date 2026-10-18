@@ -8,7 +8,7 @@ namespace KeyLoad.IntegrationTests.Features.Search;
 internal sealed class NativeTextProtectedPublicColdTests(ClusterFixture fixture)
 {
     [Test]
-    public async Task ProtectedPatchDeleteAndFieldUseRepairPreservePublicPagesAndOriginalReceiptsAcrossTwoRf3ColdCycles()
+    public async Task ProtectedPatchDeleteAndFieldUseRepairPreservePublicPagesAndOriginalReceiptsAcrossTwoClusterColdCycles()
     {
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>

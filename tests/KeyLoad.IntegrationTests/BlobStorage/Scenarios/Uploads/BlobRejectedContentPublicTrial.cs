@@ -14,17 +14,17 @@ internal static class BlobRejectedContentPublicTrial
 
     internal static async Task RunAsync(ClusterFixture fixture, CancellationToken token)
     {
-        _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
+        _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
             fixture.AdminKey, async callers =>
             {
-                var scenario = await RelationalSqlRf3Scenario.CreateAsync(callers.Sdk, token);
-                var blob = new BlobRef(scenario.Partition, RelationalSqlRf3Tokens.Blobs, "rejected-content-public");
+                var scenario = await RelationalSqlClusterScenario.CreateAsync(callers.Sdk, token);
+                var blob = new BlobRef(scenario.Partition, RelationalSqlClusterTokens.Blobs, "rejected-content-public");
                 await ExecuteAsync(callers, blob, token);
                 return true;
             }, token);
     }
 
-    private static async Task ExecuteAsync(RequestCqrsRf3Callers callers, BlobRef blob, CancellationToken token)
+    private static async Task ExecuteAsync(RequestCqrsClusterCallers callers, BlobRef blob, CancellationToken token)
     {
         var upload = Guid.NewGuid();
         var begin = new BeginBlobUploadRequest(Guid.NewGuid(), blob, upload, OriginalBytes.Length, 0L);

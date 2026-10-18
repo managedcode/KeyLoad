@@ -29,13 +29,11 @@ internal static class SharedDomainPublicWholeFlow
         await SharedDomainPublicRefusals.ProducerAsync(fixture, state, token);
         await SharedDomainPublicRefusals.BindingAsync(fixture, state, token);
         await SharedDomainPublicCold.RestartAsync(fixture, token);
-        await SharedDomainPublicSeed.PlacementAsync(fixture, state, token);
         await SharedDomainPublicProducer.ReplayAllAsync(fixture, state, token);
         await SharedDomainPublicModels.AllAsync(fixture, state, token);
         await SharedDomainPublicProcessing.RunAsync(fixture, state, token);
         await SharedDomainPublicAuthority.RunAsync(fixture, state, token);
         await SharedDomainPublicCold.RestartAsync(fixture, token);
-        await SharedDomainPublicSeed.PlacementAsync(fixture, state, token);
         await SharedDomainPublicProducer.ReplayAllAsync(fixture, state, token);
         await SharedDomainPublicSession.RunAsync(fixture, state.Identity.Secret,
             (sdk, official) => SharedDomainPublicProcessing.ReplayAsync(sdk, official, state, token), token);

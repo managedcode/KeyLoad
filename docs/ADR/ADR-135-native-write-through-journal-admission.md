@@ -1,6 +1,6 @@
 # ADR-135: Native write-through journal admission
 
-Status: Proposed, conditional SourceN. Integration owner: Main; source author: B. No active source change or executed acceptance.
+Status: Proposed; no active source change or executed acceptance.
 
 Retain existing [ADR-003](ADR-003-durability-ack-barrier.md), [ADR-011](ADR-011-current-native-format.md), [ADR-046](ADR-046-storage-private-owners.md) and [ADR-116](ADR-116-first-release-current-format.md). The native file owner opens existing regular journals with original identity/type/flock protections AND the same platform O_SYNC used by .NET10 FileOptions.WriteThrough. Only Linux/macOS little-endian x64/arm64 existing support is in scope; other platforms stay unsupported. No new provider, library, native struct, System.Native internal export or fallback engine.
 
@@ -20,4 +20,4 @@ flowchart TD
  New --> Journal
 ```
 
-Acceptance requires genuine same-OS original BCL/native F_GETFL O_SYNC observations, unchanged native defaults and invalid-entry refusal, full canonical Commit/replay/two native cold cuts, actual bounded CrashHost FIFO/symlink/missing refusal/repair, compiler/style and Linux recovery/RF3/fault evidence. No source review, process-kill or fsync promise claims power-loss durability.
+Acceptance requires genuine same-OS original BCL/native F_GETFL O_SYNC observations, unchanged native defaults and invalid-entry refusal, full canonical Commit/replay/two native cold cuts, actual bounded CrashHost FIFO/symlink/missing refusal/repair, compiler/style and Linux recovery/cluster/fault evidence. No source review, process-kill or fsync promise claims power-loss durability.

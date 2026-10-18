@@ -12,7 +12,7 @@ internal static class FunctionalGateAnalyticsProvision
     private const int Step = 1;
     private const Capability AnalyticsCapabilities = Capability.AnalyticsRead | Capability.AnalyticsWrite | Capability.Query;
 
-    internal static async Task<FunctionalGateColdState> RunAsync(RequestCqrsRf3Callers administrator,
+    internal static async Task<FunctionalGateColdState> RunAsync(RequestCqrsClusterCallers administrator,
         FunctionalGateColdState state, CancellationToken token)
     {
         var original = new[] { state.Writer, state.Reader, state.QueueOperator }.Concat(state.AdditionalIdentities).ToArray();

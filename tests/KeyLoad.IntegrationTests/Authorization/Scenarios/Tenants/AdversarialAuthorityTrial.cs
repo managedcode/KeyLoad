@@ -88,7 +88,7 @@ internal static class AdversarialAuthorityTrial
             async root => await McpCallerAssertions.SdkSuccessAsync(await root.CommitAsync(command, token)));
         MutationReceipt[] expected = [new(AdversarialAuthorityProtocol.PutKind, McpDocumentProtocol.Collection,
             McpDocumentProtocol.Entity, McpCallerProtocol.FirstRevision)];
-        await SqlRf3Protocol.EqualAsync(expected, receipt.Mutations.ToArray());
+        await SqlClusterProtocol.EqualAsync(expected, receipt.Mutations.ToArray());
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
         return new(scenario, command, receipt);
     }

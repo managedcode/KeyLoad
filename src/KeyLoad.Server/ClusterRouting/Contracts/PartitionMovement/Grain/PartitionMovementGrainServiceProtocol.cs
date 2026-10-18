@@ -4,23 +4,15 @@ internal static class PartitionMovementGrainServiceProtocol
 {
     internal const ushort InterfaceVersion = 1;
     internal const string ServiceAlias = "keyload.partition-movement-grain-service.v1";
-    internal const string ExchangeAlias = "exchange";
     internal const string DiscoverAlias = "discover";
     internal const string ProbeOwnerAlias = "probe-owner";
-    internal const string CapacityExchangeAlias = "keyload.cluster-routing.owner-capacity.exchange.v1";
     internal const string ChannelAlias = "keyload.partition-movement-grain-service-channel.v1";
     internal const string RequestAlias = "keyload.partition-movement-grain-service-request.v1";
     internal const string ReplyAlias = "keyload.partition-movement-grain-service-reply.v1";
     internal const string DiscoveryAlias = "keyload.partition-movement-grain-service-discovery.v1";
     internal const string NativeRequestPurpose = "keyload-partition-movement-native-request-v1";
     internal const string NativeReplyPurpose = "keyload-partition-movement-native-reply-v1";
-    internal const int PhaseChannel = 0;
-    internal const int OutcomeChannel = 1;
-    internal const int ReceiverIssueChannel = 2;
-    internal const int RetireCancellationChannel = 3;
-    internal const int TransferDataChannel = 4;
     internal const int PhysicalOwnerProbeChannel = 5;
-    internal const int ControlledLifetimeChannel = 6;
     internal const uint RequestChannel = 0;
     internal const uint RequestQuery = 1;
     internal const uint RequestPayload = 2;

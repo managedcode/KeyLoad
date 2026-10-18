@@ -15,7 +15,7 @@ public sealed partial class DatabaseEngine
             var original = CaptureRemoteAnnRead(view, principalId, consumer, collection, field, space,
                 generation, configuredLocal, budget, (principal, resource) =>
                 {
-                    var definitions = PartitionMoveResources.Capture(budget.CreateView(view), consumer.Partition, Limits);
+                    var definitions = PartitionResourceCatalog.Capture(budget.CreateView(view), consumer.Partition, Limits);
                     var coverage = PartitionControlLifetimeCoverage.Capture(budget.CreateView(view),
                         consumer.Partition, definitions, Limits.MaxBatchBytes);
                     metadata = new(resource, coverage, principal, definitions);

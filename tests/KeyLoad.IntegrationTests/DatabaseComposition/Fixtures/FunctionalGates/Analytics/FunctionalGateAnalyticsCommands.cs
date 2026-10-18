@@ -9,7 +9,7 @@ internal static class FunctionalGateAnalyticsCommands
     {
         var receipt = await context.SdkAsync(context.Writer.Sdk.CommitAsync(command, token));
         await FunctionalGateCompositionCalls.ReceiptAsync(context, receipt, command.CommandId,
-            [new(kind, store, lastId, generation)], token);
+            [new(kind, store, lastId, generation)]);
         await FunctionalGateUserAnalyticsAssertions.EqualAsync(await context.McpAsync<CommitReceipt>(context.Writer,
             McpCallerTools.DocumentsCommit, FunctionalGateAnalyticsIdentity.Wire(command), token), receipt);
         await FunctionalGateUserAnalyticsAssertions.EqualAsync(await FunctionalGateCompositionCalls.CommandAsync(

@@ -11,7 +11,7 @@ internal static class EventMessageSensitivePublicOperations
             ? new ReceiveSubscriptionRequest(id, healthy ? state.HealthyGroup : state.OriginalGroup, LeaseSeconds: new SubscriptionPolicy().MaxLeaseSeconds)
             : new ReceiveRequest(id, state.Lane, LeaseSeconds: state.Resource.QueuePolicy.MaxLeaseSeconds);
 
-    internal static async Task<object> ReceiveAsync(RequestCqrsRf3Callers callers, EventMessageSensitivePublicState state,
+    internal static async Task<object> ReceiveAsync(RequestCqrsClusterCallers callers, EventMessageSensitivePublicState state,
         object request, int route, CancellationToken token)
     {
         if (request is ReceiveSubscriptionRequest subscription)
@@ -24,7 +24,7 @@ internal static class EventMessageSensitivePublicOperations
             queue, () => callers.Sdk.ReceiveAsync(queue, token), token);
     }
 
-    internal static async Task GroupAsync(RequestCqrsRf3Callers root, EventMessageSensitivePublicState state,
+    internal static async Task GroupAsync(RequestCqrsClusterCallers root, EventMessageSensitivePublicState state,
         bool healthy, CancellationToken token)
     {
         var id = Guid.NewGuid();
@@ -32,7 +32,7 @@ internal static class EventMessageSensitivePublicOperations
         await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigureSubscriptionAsync(request, token));
     }
 
-    internal static async Task PolicyAsync(RequestCqrsRf3Callers root, EventMessageSensitivePublicState state,
+    internal static async Task PolicyAsync(RequestCqrsClusterCallers root, EventMessageSensitivePublicState state,
         bool required, CancellationToken token)
     {
         var policy = new SensitiveFieldPolicy(EventMessageSensitivePublicProtocol.Path,
@@ -51,7 +51,7 @@ internal static class EventMessageSensitivePublicOperations
         state.Resource = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigureResourceAsync(Guid.NewGuid(), request, token));
     }
 
-    internal static async Task<CommitReceipt> CompleteAsync(RequestCqrsRf3Callers caller, EventMessageSensitivePublicState state,
+    internal static async Task<CommitReceipt> CompleteAsync(RequestCqrsClusterCallers caller, EventMessageSensitivePublicState state,
         object received, DeliveryAction action, CancellationToken token)
     {
         var id = Guid.NewGuid();

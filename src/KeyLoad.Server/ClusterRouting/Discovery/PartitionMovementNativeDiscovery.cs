@@ -63,16 +63,13 @@ internal sealed class PartitionMovementNativeDiscovery(PartitionHost partition, 
         return found;
     }
 
-    internal Task RequireCallerAsync(string voter, string address, CancellationToken token,
-        Action<PartitionMovementNativeObservationStage>? observeStage = null)
+    internal Task RequireCallerAsync(string voter, string address, CancellationToken token)
         => RequireCallerAsync(PhysicalOwnerConfiguredTuples.Control(settings, partition.Configuration),
-            voter, address, token, observeStage);
+            voter, address, token);
 
     internal async Task RequireCallerAsync(RegisteredPhysicalOwnerV1 expectedOwner, string voter,
-        string address, CancellationToken token,
-        Action<PartitionMovementNativeObservationStage>? observeStage = null)
+        string address, CancellationToken token)
     {
-        observeStage?.Invoke(PartitionMovementNativeObservationStage.CallerIdentity);
         token.ThrowIfCancellationRequested();
         if (!PhysicalOwnerEntryValidation.Valid(expectedOwner)
             || !PhysicalOwnerEntryValidation.SameOwner(expectedOwner.Owner, RequireDestination(voter).Owner)
@@ -82,25 +79,20 @@ internal sealed class PartitionMovementNativeDiscovery(PartitionHost partition, 
             throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
         }
         var actual = SiloAddress.FromParsableString(address);
-        observeStage?.Invoke(PartitionMovementNativeObservationStage.CallerActive);
         if (!Active().ContainsKey(actual))
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
         }
         var nonce = Guid.NewGuid();
-        observeStage?.Invoke(PartitionMovementNativeObservationStage.CallerDiscovery);
         var reply = await discover(actual, nonce, token).ConfigureAwait(false);
-        observeStage?.Invoke(PartitionMovementNativeObservationStage.DiscoveryShape);
         var identity = PartitionMovementNativeDiscoveryIdentity.ReadOwned(reply);
-        observeStage?.Invoke(PartitionMovementNativeObservationStage.DiscoveryVoter);
         if (identity.VoterId != voter)
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);
         }
         PartitionMovementNativeDiscoveryIdentity.Require(settings, partition.Configuration, expectedOwner,
-            actual, nonce, reply, identity, membership, observeStage);
+            actual, nonce, reply, identity, membership);
         token.ThrowIfCancellationRequested();
-        observeStage?.Invoke(PartitionMovementNativeObservationStage.CallerActiveAfterDiscovery);
         if (oracle.GetApproximateSiloStatus(actual) != SiloStatus.Active)
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, PartitionMovementProtocol.InvalidProof);

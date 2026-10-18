@@ -11,7 +11,7 @@ internal static class ReplicaIsolationAdmissionDiagnostics
     private const int SingleCapability = 1;
     private const string PrefixedNetAdmin = "CAP_NET_ADMIN";
     private const int FirstIndex = 0;
-    private const string DiagnosticKind = "OwnedRf3NamespaceAdmission";
+    private const string DiagnosticKind = "OwnedClusterNamespaceAdmission";
     private const string FailureMessage = "The inspected namespace is not the exact admitted non-root fault cohort.";
 
     internal static void Throw(ReplicaIsolationAdmissionMismatch mismatch, JsonElement value, JsonProperty[] networks)

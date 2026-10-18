@@ -25,7 +25,7 @@ internal static class SensitiveAuthorityRefusals
         await Assert.That(result.Contains(identity.Secret, StringComparison.Ordinal)).IsFalse();
         await Assert.That(result.Contains(McpDocumentProtocol.PrivateValue, StringComparison.Ordinal)).IsFalse();
         await Assert.That(result.Contains(McpDocumentProtocol.ConflictValue, StringComparison.Ordinal)).IsFalse();
-        await SqlRf3Protocol.EqualAsync(before,
+        await SqlClusterProtocol.EqualAsync(before,
             await SensitiveAuthorityAssertions.ImageAsync(root, scenario, patched, token));
     }
 }

@@ -20,7 +20,7 @@ internal static class CredentialSubjectReplacementCold
         {
             await RestartAsync(fixture, state.ColdNamespace + Separator
                 + cold.ToString(System.Globalization.CultureInfo.InvariantCulture), token);
-            await SqlRf3Protocol.EqualAsync(before, await AdversarialAuthorityTrial.WithRootAsync(fixture,
+            await SqlClusterProtocol.EqualAsync(before, await AdversarialAuthorityTrial.WithRootAsync(fixture,
                 McpCallerProtocol.Node1, root => CredentialSubjectReplacementAssertions.ImageAsync(root, state, token)));
             await CredentialSubjectReplacementClients.RunAsync(fixture, state, warm: false, token);
         }

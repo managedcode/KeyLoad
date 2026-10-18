@@ -1,4 +1,3 @@
-using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
@@ -8,7 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.Search;
 internal static class EventProjectionLineageR41Seed
 {
     internal static async Task<EventProjectionLineageR41State> CreateAsync(ClusterFixture fixture,
-     RequestCqrsRf3Callers admin, CancellationToken token)
+     RequestCqrsClusterCallers admin, CancellationToken token)
     {
         var p = new PartitionRef("lineage-r41-" + Guid.NewGuid().ToString("N"), "lineage-db", "lineage-domain", Guid.NewGuid().ToString("N"));
         var resource = new ResourceDefinition(EventProjectionLineageR41Protocol.Collection, ResourceKind.Collection, p.TransactionDomainId)
@@ -18,27 +17,24 @@ internal static class EventProjectionLineageR41Seed
     new(EventProjectionLineageR41Protocol.Vector, EventProjectionLineageR41Protocol.Class,
      RawUseGrant: EventProjectionLineageR41Protocol.VectorUse, WriteGrant: EventProjectionLineageR41Protocol.VectorWrite)]
         };
-        await SqlRf3Protocol.EqualAsync(resource, await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ConfigureResourceAsync(
+        await SqlClusterProtocol.EqualAsync(resource, await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ConfigureResourceAsync(
          Guid.NewGuid(), new(p.TenantId, p.DatabaseId, resource), token)));
         var events = new ResourceDefinition(EventProjectionLineageR41Protocol.Events, ResourceKind.StreamSet, p.TransactionDomainId);
-        await SqlRf3Protocol.EqualAsync(events, await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ConfigureResourceAsync(
+        await SqlClusterProtocol.EqualAsync(events, await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ConfigureResourceAsync(
          Guid.NewGuid(), new(p.TenantId, p.DatabaseId, events), token)));
-        var placement = await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ReadAtomicPartitionPlacementAsync(new(1, p), token));
-        await SqlRf3Protocol.EqualAsync(placement, (await McpCallerAssertions.SuccessAsync<AtomicPartitionPlacementResolution>(
-         await admin.Mcp.CallAsync(McpCallerTools.AdminPartitionPlacementRead, new AtomicPartitionPlacementReadRequest(1, p), token))).Value);
-        var worker = await NativeTextRf3Scenario.ConfigureIdentityAsync(fixture, new("lineage-worker-" + Guid.NewGuid().ToString("N"), p.TenantId,
+        var worker = await NativeTextClusterScenario.ConfigureIdentityAsync(fixture, new("lineage-worker-" + Guid.NewGuid().ToString("N"), p.TenantId,
          [new(p.DatabaseId, resource.Name, Capability.DocumentsRead | Capability.DocumentsWrite), new(p.DatabaseId, events.Name, Capability.EventsRead)],
          [EventProjectionLineageR41Protocol.InputUse, EventProjectionLineageR41Protocol.VectorUse, EventProjectionLineageR41Protocol.VectorWrite])
         {
             PolicyEpoch = 1L
         }, token);
-        var reader = await NativeTextRf3Scenario.ConfigureIdentityAsync(fixture, new("lineage-reader-" + Guid.NewGuid().ToString("N"), p.TenantId,
+        var reader = await NativeTextClusterScenario.ConfigureIdentityAsync(fixture, new("lineage-reader-" + Guid.NewGuid().ToString("N"), p.TenantId,
          [new(p.DatabaseId, resource.Name, Capability.Query | Capability.DocumentsRead | Capability.VectorSearch)],
          [EventProjectionLineageR41Protocol.InputUse, EventProjectionLineageR41Protocol.VectorUse])
         {
             PolicyEpoch = 1L
         }, token);
-        var state = new EventProjectionLineageR41State(p, placement, worker, reader);
+        var state = new EventProjectionLineageR41State(p, worker, reader);
         var seed = Seed(p);
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.CommitAsync(seed, token));
         await EventProjectionLineageR41Operations.ReceiptAsync(state, seed, receipt,

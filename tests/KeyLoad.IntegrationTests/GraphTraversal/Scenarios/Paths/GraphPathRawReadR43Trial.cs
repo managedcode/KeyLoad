@@ -7,7 +7,7 @@ internal static class GraphPathRawReadR43Trial
 {
     internal static async Task RunAsync(ClusterFixture fixture, CancellationToken token)
     {
-        var state = new GraphPathRawReadR43State(await GraphPathRf3Scenario.CreateAsync(fixture, token));
+        var state = new GraphPathRawReadR43State(await GraphPathClusterScenario.CreateAsync(fixture, token));
         await Assert.That(state.Identity.Principal.PolicyEpoch).IsEqualTo(1L);
         await OwnedAsync(fixture, state, async (admin, reader) =>
         {
@@ -22,7 +22,7 @@ internal static class GraphPathRawReadR43Trial
         await ColdAsync(fixture, state, token);
     }
 
-    private static async Task PolicyAsync(RequestCqrsRf3Callers admin, RequestCqrsRf3Callers reader,
+    private static async Task PolicyAsync(RequestCqrsClusterCallers admin, RequestCqrsClusterCallers reader,
         GraphPathRawReadR43State state, bool allowed, long epoch, CancellationToken token)
     {
         await GraphPathRawReadR43Commands.PolicyAsync(admin, state, allowed, token);
@@ -40,8 +40,8 @@ internal static class GraphPathRawReadR43Trial
     }
 
     private static async Task OwnedAsync(ClusterFixture fixture, GraphPathRawReadR43State state,
-        Func<RequestCqrsRf3Callers, RequestCqrsRf3Callers, Task> operation, CancellationToken token)
-        => _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
-            async admin => await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2,
+        Func<RequestCqrsClusterCallers, RequestCqrsClusterCallers, Task> operation, CancellationToken token)
+        => _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
+            async admin => await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2,
                 state.Identity.Secret, async reader => { await operation(admin, reader); return true; }, token), token);
 }

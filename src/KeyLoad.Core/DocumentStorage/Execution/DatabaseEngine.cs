@@ -1,4 +1,3 @@
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.DocumentStorage;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.ResourceExecution.Execution;
@@ -40,14 +39,5 @@ public sealed partial class DatabaseEngine
         ArgumentNullException.ThrowIfNull(binding);
         work.AttachResourceLifetimeBinding(binding);
         return ReadOwnedDocumentV2(principalId, request, work, grant);
-    }
-
-    internal DocumentResult? ReadControlledDocumentV2Bound(string localPrincipalId, PartitionControlDocumentReadFrameV2 frame,
-        ReadExecutionBudget work, ReadExecutionBudgetReadGrant grant, IResourceLifetimeWorkBinding binding,
-        CancellationToken cancellationToken)
-    {
-        ArgumentNullException.ThrowIfNull(binding);
-        work.AttachResourceLifetimeBinding(binding);
-        return ReadControlledDocumentV2(localPrincipalId, frame, work, grant, cancellationToken);
     }
 }

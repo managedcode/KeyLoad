@@ -88,7 +88,7 @@ internal sealed class CompositionPrefixPrepareOwner
 
     internal CommitToken NextToken()
     {
-        var placement = Database.ReadAtomicPartitionPlacement(D.Root, new(D.FirstRevision, Source.Partition));
+        var placement = Database.ReadAtomicPartitionPlacement(D.Root, Source.Partition);
         return new(placement.Incarnation, Source.Partition.AtomicPartitionId,
             checked(Cut().LastIndex + D.FirstRevision), placement.PlacementEpoch);
     }

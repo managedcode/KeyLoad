@@ -9,13 +9,13 @@ internal static class QueueScheduledCancelPublicAssertions
     internal const string Replacement = "scheduled-cancel-replacement";
     internal const string Witness = "scheduled-cancel-witness";
 
-    internal static Task MessageAsync(RequestCqrsRf3Callers callers, QueueScheduledCancelPublicState state,
+    internal static Task MessageAsync(RequestCqrsClusterCallers callers, QueueScheduledCancelPublicState state,
         string id, MessageMetadata metadata, bool body, CancellationToken token)
         => QueueLeasedCancelPublicAssertions.MessageAsync(callers, state.Owner, id,
             new(metadata, body ? QueueLifecyclePublicProtocol.CanonicalPayload : null,
                 body ? QueueLifecyclePublicProtocol.Headers : null), token);
 
-    internal static async Task CutAsync(RequestCqrsRf3Callers callers, QueueScheduledCancelPublicState state,
+    internal static async Task CutAsync(RequestCqrsClusterCallers callers, QueueScheduledCancelPublicState state,
         bool cancelled, CancellationToken token)
     {
         var metadata = cancelled
@@ -32,7 +32,7 @@ internal static class QueueScheduledCancelPublicAssertions
         await Assert.That(saved.Json).IsEqualTo(QueueLifecyclePublicProtocol.Payload);
     }
 
-    internal static async Task OriginalsAsync(RequestCqrsRf3Callers callers,
+    internal static async Task OriginalsAsync(RequestCqrsClusterCallers callers,
         QueueScheduledCancelPublicState state, CancellationToken token)
     {
         await QueueLifecyclePublicRoutes.ReplayAsync(callers, state.Owner, token);
@@ -44,14 +44,14 @@ internal static class QueueScheduledCancelPublicAssertions
         }
     }
 
-    internal static async Task FailureAsync(RequestCqrsRf3Callers callers, QueueScheduledCancelPublicState state,
+    internal static async Task FailureAsync(RequestCqrsClusterCallers callers, QueueScheduledCancelPublicState state,
         CommandRequest request, ErrorCode code, CancellationToken token)
     {
         var problem = await QueueLeasedCancelPublicAssertions.RefusedAsync(callers, state.Owner, request, code, token);
         state.Failures.Add((request, code, problem));
     }
 
-    internal static async Task TerminalAsync(RequestCqrsRf3Callers callers, QueueScheduledCancelPublicState state,
+    internal static async Task TerminalAsync(RequestCqrsClusterCallers callers, QueueScheduledCancelPublicState state,
         string id, long sequence, CancellationToken token)
         => await MessageAsync(callers, state, id,
             new(id, MessageState.Acked, 1, 3L, sequence, null, null, LeaseVersion: 1L), false, token);

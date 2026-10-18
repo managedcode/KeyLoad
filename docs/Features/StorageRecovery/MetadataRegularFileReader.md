@@ -22,4 +22,4 @@ flowchart LR
  D --> E[Original caller codec checksum identity and context]
 ```
 
-Dependency: selected R107 restore-slot owner's IO-owned OfflineNativeErrors.IsInvalidEntry predicate. Do not silently overwrite its other factory predicates; Main composes exact current IO body. No dependency on R106 Name override or its new tests. SourceN only; native/compiler/format/Linux original recovery and full BackupRestore qualification OPEN. UI/SDK/MCP N/A: private node-local metadata admission. No original failed-open cleanup masking claim.
+Dependency: the restore-slot owner's IO-owned OfflineNativeErrors.IsInvalidEntry predicate; its other factory predicates are not overwritten. Linux recovery and full BackupRestore qualification are separate gates. UI/SDK/MCP N/A: private node-local metadata admission. No failed-open cleanup masking claim.

@@ -6,7 +6,7 @@
     <InternalsVisibleTo Include="KeyLoad.IntegrationTests" />
     <InternalsVisibleTo Include="KeyLoad.ComparisonTests" />
     <InternalsVisibleTo Include="KeyLoad.Clustering" />
-    <PackageReference Include="Microsoft.Orleans.Sdk" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Orleans.Server" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <ProjectReference Include="../KeyLoad.Core/KeyLoad.Core.csproj" />
     <ProjectReference Include="../KeyLoad.Diagnostics/KeyLoad.Diagnostics.csproj" />

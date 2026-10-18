@@ -2,12 +2,10 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.BlobStorage;
 
-internal sealed class BlobActivePolicyPublicState(BlobRef blob, McpPersistedIdentity identity,
-    AtomicPartitionPlacementResolution placement)
+internal sealed class BlobActivePolicyPublicState(BlobRef blob, McpPersistedIdentity identity)
 {
     internal BlobRef Blob { get; } = blob;
     internal McpPersistedIdentity Identity { get; } = identity;
-    internal AtomicPartitionPlacementResolution Placement { get; } = placement;
     internal byte[] Bytes { get; } = [11, 23, 37, 53];
     internal BeginBlobUploadRequest Begin { get; } = new(Guid.NewGuid(), blob, Guid.NewGuid(), 4L, 0L);
     internal BlobCommitResult<BlobUploadInfo> Begun { get; set; } = null!;

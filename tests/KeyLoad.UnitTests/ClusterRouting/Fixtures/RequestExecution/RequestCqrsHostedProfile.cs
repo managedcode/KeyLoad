@@ -29,8 +29,7 @@ internal sealed class RequestCqrsHostedProfile(TimeProvider clock, IOptions<Grai
     internal DatabaseEngine CreateDatabase(ZoneTreeStore store, ReplicaConfiguration configuration)
     {
         var create = TestDatabaseEngineFactory.Capture(UnitExecutionOptions.DatabaseLimits(limits),
-            UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), null,
-            UnitExecutionOptions.MovementCheckpoints(), Clock);
+            UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), null, Clock);
         var original = create(store, null);
         TestDatabaseEngineFactory.Bootstrap(original, Root, Credential, physicalCatalog: false);
         PhysicalShardTestBootstrap.Bootstrap(original, Root, configuration.VoterIds);

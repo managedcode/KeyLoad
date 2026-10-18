@@ -1,6 +1,6 @@
 # BenchmarkComparisons — website discovery and shared icons
 
-Owner request 2026-10-03. ADR040/051/053 retain the site build, finite console asset shell and one canonical visual source. The additive ADR053 implementation contract covers this presentation standard. The task acceptance/plan are local scaffolding; this document retains the durable requirements, acceptance and verification contract.
+ADR-040/051/053 own the site build, the finite console asset shell and one canonical visual source. The ADR-053 implementation contract covers this presentation standard; this document holds the durable requirements, acceptance and verification contract.
 
 Scope: recognizable shared icons for the public landing and operational console, accurate static search/social metadata, and a readable link-preview card. The existing canonical is `https://www.keyload.cloud/`; copy remains English. No logo redesign, dependency, DNS, service worker, analytics, persisted data, public database API or topology change.
 
@@ -10,8 +10,8 @@ Scope: recognizable shared icons for the public landing and operational console,
 | REQ-SEO-002 accurate static search/social discovery | 002–003 | BenchmarkComparisons index.html, assets/site.webmanifest and existing builder robots/sitemap; emitted HTML/JSON-LD TUnit |
 | REQ-SEO-003 readable factual share card | 004 | BenchmarkComparisons assets/og-image.svg/png; PNG output assertions and manual artwork review |
 | REQ-SEO-004 safe complete static output | 005 | BenchmarkComparisons build-site.mjs; real clean/rejection builds |
-| REQ-SEO-005 operational console icon/indexing boundary | 006 | AdminDashboard index/AdminStaticAssets and real RF3 AdminFaviconAssertions |
-| REQ-SEO-006 honest qualification/publication | 007 | exact-SHA site/runtime GitHub receipts, lead review |
+| REQ-SEO-005 operational console icon/indexing boundary | 006 | AdminDashboard index/AdminStaticAssets and real cluster AdminFaviconAssertions |
+| REQ-SEO-006 honest qualification/publication | 007 | exact-SHA site/runtime GitHub receipts, source review |
 
 ## Acceptance and test matrix
 
@@ -22,28 +22,25 @@ Scope: recognizable shared icons for the public landing and operational console,
 | AC-SEO-003 | Valid schema.org JSON-LD describes WebSite and SoftwareSourceCode with stable IDs, actual name/URL/GitHub/C#/Elastic License 2.0 with the canonical root license URL. Invented offers, ratings, reviews and search actions are absent. Generated robots/sitemap use the same canonical, allow icon/card fetches, and exclude admin. | Real-output HTML/JSON-LD/robots/sitemap assertions in `SiteMetadataTests`. |
 | AC-SEO-004 | Editable `assets/og-image.svg` and real PNG1200×630 under300KiB use the existing K/palette and readable product message. No measurements or screenshot artifacts. Root `og-image.png` is the exact source PNG. Every manifest/head asset exists. | Signature/IHDR/size/exact-byte assertions; subjective full-size and reduced composition is a manual ADR040/053 exception. |
 | AC-SEO-005 | Builder checks every added source as a regular confined asset before output. Missing/symlink icon or card is rejected without partial output. Existing immutable report/vendor hashes, output confinement and JS/CSS budgets remain mandatory. | `SiteMetadataRejectionTests` mutates isolated source copies and invokes the real builder with authentic reports; existing SiteBuildTests remain. |
-| AC-SEO-006 | Console uses shared icons/theme and `noindex,nofollow`. Only six exact additional embedded public GET/HEAD routes exist, with PNG/ICO MIME, no-store/nosniff and unchanged CSP/referrer policy. Credential-free GET returns valid bytes; HEAD is empty. Unknown assets, POST and database routes gain no public access. Console has no marketing canonical/schema/OG claims. | `AdminFaviconAssertions` joins the existing genuine RF3 `AdminDashboardRf3Tests` shell flow; prior authentication/method/unknown-path assertions remain. |
-| AC-SEO-007 | Preserve unrelated changes, normal current-branch delivery and exact-SHA GitHub run/job/artifact receipts. Source push, local rendering, failed/pending cohorts and skipped suites do not establish publication/indexing/coverage. | Lead review plus real Website/Tests provider results and live asset confirmation after successful deployment. |
+| AC-SEO-006 | Console uses shared icons/theme and `noindex,nofollow`. Only six exact additional embedded public GET/HEAD routes exist, with PNG/ICO MIME, no-store/nosniff and unchanged CSP/referrer policy. Credential-free GET returns valid bytes; HEAD is empty. Unknown assets, POST and database routes gain no public access. Console has no marketing canonical/schema/OG claims. | `AdminFaviconAssertions` joins the existing genuine cluster `AdminDashboardClusterTests` shell flow; prior authentication/method/unknown-path assertions remain. |
+| AC-SEO-007 | Preserve unrelated changes, normal current-branch delivery and exact-SHA GitHub run/job/artifact receipts. Source push, local rendering, failed/pending cohorts and skipped suites do not establish publication/indexing/coverage. | Source review plus real Website/Tests provider results and live asset confirmation after successful deployment. |
 
 ## Implementation and delivery contract
 
-The lead freezes scope/criteria before three disjoint scopes:
-
-- Exports: six icon files under `src/KeyLoad.Server/AdminDashboard/Assets/`
+- Exports: six icon files under `src/KeyLoad.Server/AdminDashboard/Assets/Icons/`
   and exact site-root mirrors; `site/Features/BenchmarkComparisons/assets/og-image.svg/png`
   and `site.webmanifest`.
 - Production: only `site/Features/BenchmarkComparisons/index.html` head and
-  `build-site.mjs`, plus console `Assets/index.html` head and `AdminStaticAssets.cs`.
-- Regressions: new `SiteMetadata*` files under the existing SiteTests slice,
-  new `AdminFaviconAssertions` helpers in IntegrationTests/AdminDashboard, and one
-  invocation in `AdminShellAssertions`.
+  `build-site.mjs`, plus console `Assets/index.html` head and
+  `AdminDashboard/Transport/AdminStaticAssets.cs`.
+- Regressions: `SiteMetadata*` files under `tests/KeyLoad.SiteTests/BenchmarkComparisons/`,
+  `AdminFaviconAssertions` in `tests/KeyLoad.IntegrationTests/AdminDashboard/Assertions/`,
+  and one invocation in `AdminShellAssertions`.
 
-The lead owns shared docs, reviews every result and joins all three
-before development/static/manual checks, normal scoped main commit/push, and
-exact-SHA GitHub qualification. A blocked worker does not unblock integration.
-The sequence and boundaries extend ADR053 rather than introducing another
-identity or crawl-file owner. No migration is needed; rollback coherently reverts
-the head, exports, builder copies and finite route additions.
+Delivery uses normal scoped main commits and exact-SHA GitHub qualification. The
+sequence and boundaries extend ADR-053 rather than introducing another identity or
+crawl-file owner. No migration is needed; rollback coherently reverts the head,
+exports, builder copies and finite route additions.
 
 Public DTOs, SDK/MCP, persistence, schema migrations, RAM/SIMD and measured operation performance: N/A; static presentation writes none of them. Canonical names remain BenchmarkComparisons for the public site and AdminDashboard for the console, sharing existing identity assets under ADR053. No analytics or service worker is introduced.
 
@@ -56,11 +53,11 @@ flowchart LR
     Head[Static SEO OG Twitter JSON-LD] --> Build
     Mirror --> Build
     Build --> Pages[Existing qualified Pages publication]
-    Tests[Real builder and RF3 tests] --> Build
+    Tests[Real builder and cluster tests] --> Build
     Tests --> Console
 ```
 
-Acceptance explicitly covers missing/symlink files, invalid dimensions, metadata conflicts, long-text preview readability and unauthorized/unknown routes. Qualification remains GitHub-only. Local development builds and visual inspection are manual/design evidence and do not prove provider cache refresh, indexing, full tests, coverage or publication. The full relevant baseline is recorded in the plan; isolated cohort absence remains a publication blocker.
+Acceptance explicitly covers missing/symlink files, invalid dimensions, metadata conflicts, long-text preview readability and unauthorized/unknown routes. Qualification remains GitHub-only. Local development builds and visual inspection are manual/design evidence and do not prove provider cache refresh, indexing, full tests, coverage or publication.
 
 The canonical ICO contains three PNG-backed frames. Its file header type is1;
 entry byte2 is color count0 and byte3 is reserved0. The native generated entries
@@ -69,5 +66,5 @@ fields, frame boundaries, dimensions and exact bytes across all three surfaces.
 The [Microsoft directory structure](https://devblogs.microsoft.com/oldnewthing/20101018-00/?p=12513),
 [PNG icon format](https://devblogs.microsoft.com/oldnewthing/20101022-00/?p=12473)
 and [Pillow native ICO writer](https://github.com/python-pillow/Pillow/blob/main/src/PIL/IcoImagePlugin.py)
-support the format distinction. ADR-080/REQ-BC-FAIL-016 repairs the assertion;
-canonical icon assets remain byte-identical.
+support the format distinction. REQ-BC-FAIL-016 (ADR-080) defines the assertion; canonical icon assets remain
+byte-identical.

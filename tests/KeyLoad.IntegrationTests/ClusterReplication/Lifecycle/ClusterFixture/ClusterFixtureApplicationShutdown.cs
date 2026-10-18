@@ -8,7 +8,7 @@ internal static class ClusterFixtureApplicationShutdown
 {
     internal static async Task<(bool Stopped, IReadOnlyDictionary<string, ContainerRuntimeInspection>? Nodes)> CollectAsync(
         DistributedApplication? owned, NativeCoverageCleanupDeadline? deadline,
-        NativeCoverageRf3FixtureOwner? coverage, bool hasRuntime, List<Exception> failures, CancellationToken token)
+        NativeCoverageClusterFixtureOwner? coverage, bool hasRuntime, List<Exception> failures, CancellationToken token)
     {
         var failurePosition = failures.Count;
         var pending = RunAsync(owned, deadline, coverage, hasRuntime, failures, token);
@@ -37,7 +37,7 @@ internal static class ClusterFixtureApplicationShutdown
 
     internal static async Task<(bool Stopped, IReadOnlyDictionary<string, ContainerRuntimeInspection>? Nodes)> RunAsync(
         DistributedApplication? owned, NativeCoverageCleanupDeadline? deadline,
-        NativeCoverageRf3FixtureOwner? coverage, bool hasRuntime, List<Exception> failures, CancellationToken token)
+        NativeCoverageClusterFixtureOwner? coverage, bool hasRuntime, List<Exception> failures, CancellationToken token)
     {
         if (owned is null)
         {

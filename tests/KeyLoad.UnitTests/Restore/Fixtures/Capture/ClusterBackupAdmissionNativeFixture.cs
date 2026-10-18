@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.BackupRestore;
 
-/// <summary>Owns supporting administration over a borrowed registered physical host; no RF3 capture claim.</summary>
+/// <summary>Owns supporting administration over a borrowed registered physical host; no CLUSTER capture claim.</summary>
 internal sealed class ClusterBackupAdmissionNativeFixture : IAsyncDisposable
 {
     internal const int AcceptedCaptures = 4;

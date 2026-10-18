@@ -12,7 +12,7 @@ internal static class GraphVertexPublicAssertions
     private const int MaximumVertices = 4;
     private const int MaximumEdges = 3;
 
-    internal static async Task Models(RequestCqrsRf3Callers callers, GraphVertexPublicState state, CancellationToken token)
+    internal static async Task Models(RequestCqrsClusterCallers callers, GraphVertexPublicState state, CancellationToken token)
     {
         foreach (var start in new[] { state.Seed.LocalSource, state.NewVertex, state.Seed.Target })
         {
@@ -25,7 +25,7 @@ internal static class GraphVertexPublicAssertions
                 await callers.Mcp.CallAsync(McpCallerTools.GraphTraverse, request, token))).Value;
             await Assert.That(sdk.Edges.SequenceEqual(expectedEdges)).IsTrue();
             await Assert.That(sdk.Vertices.SequenceEqual(expectedVertices)).IsTrue();
-            await SqlRf3Protocol.EqualAsync(sdk, mcp);
+            await SqlClusterProtocol.EqualAsync(sdk, mcp);
             var incomingRequest = new ReadIncomingGraphEdgesRequestV1(Version, start, state.Seed.Graph, MaximumEdges);
             var incoming = await McpCallerAssertions.SdkSuccessAsync(await global::KeyLoad.Client.GraphIncomingEdgesClient.IncomingEdgesAsync(callers.Sdk, incomingRequest, token));
             var expectedIncoming = state.Edges.Where(edge => edge.To == start).OrderBy(edge => edge.From.Collection, StringComparer.Ordinal)
@@ -34,29 +34,29 @@ internal static class GraphVertexPublicAssertions
             await Assert.That(incoming.Rows.SequenceEqual(expectedIncoming)).IsTrue();
             var mcpIncoming = (await McpCallerAssertions.SuccessAsync<GraphIncomingEdgesPageV1>(
                 await callers.Mcp.CallAsync(McpCallerTools.GraphIncomingEdges, incomingRequest, token))).Value;
-            await SqlRf3Protocol.EqualAsync(incoming.Rows, mcpIncoming.Rows);
+            await SqlClusterProtocol.EqualAsync(incoming.Rows, mcpIncoming.Rows);
             await Assert.That(incoming.Version).IsEqualTo(Version);
             await Assert.That(incoming.CutPosition).IsGreaterThan(0L);
         }
     }
 
-    internal static async Task Originals(RequestCqrsRf3Callers callers, GraphVertexPublicState state, CancellationToken token)
+    internal static async Task Originals(RequestCqrsClusterCallers callers, GraphVertexPublicState state, CancellationToken token)
     {
         foreach (var original in state.Original)
         {
-            await SqlRf3Protocol.EqualAsync(original.Receipt, await McpCallerAssertions.SdkSuccessAsync(
+            await SqlClusterProtocol.EqualAsync(original.Receipt, await McpCallerAssertions.SdkSuccessAsync(
                 await callers.Sdk.CommitAsync(original.Command, token)));
-            await SqlRf3Protocol.EqualAsync(original.Receipt, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
+            await SqlClusterProtocol.EqualAsync(original.Receipt, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
                 await callers.Mcp.CallAsync(McpCallerTools.DocumentsCommit, original.Command, token))).Value);
         }
         foreach (var refused in state.Refusals)
         {
             var sdk = await callers.Sdk.CommitAsync(refused.Command, token);
-            await SagaTimeoutRf3Assertions.AssertSdkErrorAsync(sdk, refused.Code);
+            await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(sdk, refused.Code);
             await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(
                 McpCallerTools.DocumentsCommit, refused.Command, token), refused.Code, dispatched: true);
         }
         await Assert.That(await PublicReadAssertions.DocumentAsync(await callers.Sdk.GetAsync(
-            new(state.Seed.TargetPartition, GraphIncomingRf3Scenario.Collection, GraphVertexPublicState.WitnessId), token))).IsNull();
+            new(state.Seed.TargetPartition, GraphIncomingClusterScenario.Collection, GraphVertexPublicState.WitnessId), token))).IsNull();
     }
 }

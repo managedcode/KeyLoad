@@ -6,7 +6,7 @@ internal static class SeriesFiniteOverflowPublicExpected
     internal const string McpOverflowDetail = "The database operation could not be completed.";
     internal const string Series = "finite-overflow-public";
     internal const string Tags = "{\"visible\":17}";
-    internal static DateTimeOffset FirstAt => TimeSeriesRf3Scenario.Start;
+    internal static DateTimeOffset FirstAt => TimeSeriesClusterScenario.Start;
     internal static DateTimeOffset SecondAt => FirstAt.AddTicks(1);
     internal static DateTimeOffset End => FirstAt.AddTicks(2);
     internal static SampleData First() => new("finite-first", FirstAt, double.MaxValue);
@@ -25,16 +25,16 @@ internal static class SeriesFiniteOverflowPublicExpected
     internal static SampleAggregateWindowsResult RepairedWideWindow()
         => new([new(FirstAt, End, Finite())]);
     internal static AggregateSampleWindowsRequest Windows(SeriesFiniteOverflowPublicState state, bool wide)
-        => new(state.Scenario.Partition, TimeSeriesRf3Scenario.Set, Series, FirstAt, End,
+        => new(state.Scenario.Partition, TimeSeriesClusterScenario.Set, Series, FirstAt, End,
             TimeSpan.FromTicks(wide ? 2 : 1), 2, 2);
     internal static ReadSamplesRequest Range(SeriesFiniteOverflowPublicState state)
-        => new(state.Scenario.Partition, TimeSeriesRf3Scenario.Set, Series, FirstAt, SecondAt, 2);
+        => new(state.Scenario.Partition, TimeSeriesClusterScenario.Set, Series, FirstAt, SecondAt, 2);
     internal static ReadLatestSampleRequest LatestRequest(SeriesFiniteOverflowPublicState state)
-        => new(state.Scenario.Partition, TimeSeriesRf3Scenario.Set, Series);
+        => new(state.Scenario.Partition, TimeSeriesClusterScenario.Set, Series);
     internal static ReadSampleRetentionRequest RetentionRequest(SeriesFiniteOverflowPublicState state)
-        => new(state.Scenario.Partition, TimeSeriesRf3Scenario.Set, Series);
+        => new(state.Scenario.Partition, TimeSeriesClusterScenario.Set, Series);
     internal static AggregateSamplesRequest Whole(SeriesFiniteOverflowPublicState state)
-        => new(state.Scenario.Partition, TimeSeriesRf3Scenario.Set, Series, FirstAt, End, 2);
+        => new(state.Scenario.Partition, TimeSeriesClusterScenario.Set, Series, FirstAt, End, 2);
     internal static AggregateSamplesRequest Narrow(SeriesFiniteOverflowPublicState state)
-        => new(state.Scenario.Partition, TimeSeriesRf3Scenario.Set, Series, SecondAt, End, 1);
+        => new(state.Scenario.Partition, TimeSeriesClusterScenario.Set, Series, SecondAt, End, 1);
 }

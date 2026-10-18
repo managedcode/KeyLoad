@@ -63,7 +63,7 @@ internal sealed class PostgresSessionLoop(IServiceProvider services, global::Mic
             {
                 var simple = frame.Type == PostgresMessageProtocol.SimpleQuery;
                 draining = !simple;
-                await FailureAsync(error, simple, owner, identity, context.ConnectionClosed).ConfigureAwait(false);
+                await FailureAsync(error, simple, context.ConnectionClosed).ConfigureAwait(false);
             }
         }
     }
@@ -78,12 +78,10 @@ internal sealed class PostgresSessionLoop(IServiceProvider services, global::Mic
         }
     }
 
-    private async Task FailureAsync(Exception original, bool simple, ServerConnectionFeature owner,
-        PostgresSessionIdentity identity, CancellationToken closed)
+    private async Task FailureAsync(Exception original, bool simple, CancellationToken closed)
     {
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(catalog.ClearMutationIdentity, failures);
-        var probe = global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetService<PostgresErrorDeliveryProbe>(services);
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             PostgresErrorReply.Write(writer, original);
@@ -91,13 +89,11 @@ internal sealed class PostgresSessionLoop(IServiceProvider services, global::Mic
             {
                 writer.Ready();
             }
-            await PostgresControlFlush.RunAsync(services, writer, closed,
-                probe?.BeforeFlush(owner, identity, original, closed)).ConfigureAwait(false);
+            await PostgresControlFlush.RunAsync(services, writer, closed).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         if (failures.Count != PostgresProtocol.AllRows)
         {
             failures.Insert(PostgresProtocol.FirstField, original);
-            ServerFailureObserver.Observe(() => probe?.Ledger(owner.Id, failures), failures);
             ServerFailureObserver.ThrowIfAny(failures);
         }
     }

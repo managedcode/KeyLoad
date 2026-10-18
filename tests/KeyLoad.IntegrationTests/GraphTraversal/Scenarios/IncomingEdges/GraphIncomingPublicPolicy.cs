@@ -18,8 +18,8 @@ internal static class GraphIncomingPublicPolicy
     private const long RevokedEpoch = 5;
     private const long FinalRepairEpoch = 6;
 
-    internal static async Task RunAsync(ClusterFixture fixture, KeyLoadClient administrator, RequestCqrsRf3Callers callers,
-        GraphIncomingRf3Seed seed, CancellationToken token)
+    internal static async Task RunAsync(ClusterFixture fixture, KeyLoadClient administrator, RequestCqrsClusterCallers callers,
+        GraphIncomingClusterSeed seed, CancellationToken token)
     {
         var original = seed.Reader.Principal;
         var sourceReduced = original with
@@ -33,7 +33,7 @@ internal static class GraphIncomingPublicPolicy
         {
             PolicyEpoch = TargetReducedEpoch,
             Grants = [.. original.Grants.Where(
-            grant => grant.Database != seed.TargetPartition.DatabaseId || grant.Resource != GraphIncomingRf3Scenario.Collection)]
+            grant => grant.Database != seed.TargetPartition.DatabaseId || grant.Resource != GraphIncomingClusterScenario.Collection)]
         };
         await ConfigureAsync(administrator, targetReduced, token);
         await UnchangedAsync(fixture, administrator, callers, seed, ErrorCode.NotFound, sourceHidden: false, token);
@@ -56,11 +56,11 @@ internal static class GraphIncomingPublicPolicy
     }
 
     private static async Task ConfigureAsync(KeyLoadClient administrator, PrincipalRecord principal, CancellationToken token)
-        => await SqlRf3Protocol.EqualAsync(principal, await McpCallerAssertions.SdkSuccessAsync(
+        => await SqlClusterProtocol.EqualAsync(principal, await McpCallerAssertions.SdkSuccessAsync(
             await administrator.ConfigurePrincipalAsync(Guid.NewGuid(), principal, token)));
 
-    private static async Task UnchangedAsync(ClusterFixture fixture, KeyLoadClient administrator, RequestCqrsRf3Callers callers,
-        GraphIncomingRf3Seed seed, ErrorCode? code, bool sourceHidden, CancellationToken token)
+    private static async Task UnchangedAsync(ClusterFixture fixture, KeyLoadClient administrator, RequestCqrsClusterCallers callers,
+        GraphIncomingClusterSeed seed, ErrorCode? code, bool sourceHidden, CancellationToken token)
     {
         var before = await GraphIncomingPublicImages.CaptureAsync(administrator, seed, token);
         if (code is { } failure)

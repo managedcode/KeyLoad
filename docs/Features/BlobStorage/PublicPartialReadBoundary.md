@@ -4,7 +4,7 @@ REQ-BLOB-PARTIAL-PUBLIC-001 supplements existing BlobStorage REQ002/AC002. One g
 
 REQ-BLOB-PARTIAL-PUBLIC-002 / AC-BLOB-PARTIAL-PUBLIC-002 require repeatedly safe Validation for three structurally valid requests: exactly-end+count1, one-over-end+count0, and Int64.MaxValue offset+count1. Expectedrevision1/currentpublication is otherwise valid. SDK value must be null and official MCP records authentic dispatched request identity. After each refusal pair, require every exact healthy range/metadata. Replay all four complete original publication results through both clients and repeat healthy assertions. Public metadata/range parity is not raw canonical/physical-position no-effects or atomic cross-client cut; the kernel integrity cases retain those gates.
 
-REQ-BLOB-PARTIAL-PUBLIC-003 / AC-BLOB-PARTIAL-PUBLIC-003 map one original complete Test/noArguments: BlobPartialReadBoundaryPublicTests.ExactEndZeroAndBeyondLengthRefusalsPreserveHealthyPublicRangesAndOriginalReceipts. A dedicated keyed instance of existing ClusterFixture owns actual Aspire Docker RF3; existing RequestCqrsRf3Callers.RunOwnedAsync joins SDK/officialMCP and preserves body+cleanup failure ordering. No new fixture, transport, roles, serializer, product code or config. Corruption/cancellation/cold qualification remains existing separate cases; this scenario has no injected canonical corruption or restart claim.
+REQ-BLOB-PARTIAL-PUBLIC-003 / AC-BLOB-PARTIAL-PUBLIC-003 map one original complete Test/noArguments: BlobPartialReadBoundaryPublicTests.ExactEndZeroAndBeyondLengthRefusalsPreserveHealthyPublicRangesAndOriginalReceipts. A dedicated keyed instance of existing ClusterFixture owns actual Aspire Docker cluster; existing RequestCqrsClusterCallers.RunOwnedAsync joins SDK/officialMCP and preserves body+cleanup failure ordering. No new fixture, transport, roles, serializer, product code or config. Corruption/cancellation/cold qualification remains existing separate cases; this scenario has no injected canonical corruption or restart claim.
 
 ```mermaid
 flowchart LR
@@ -16,4 +16,4 @@ flowchart LR
  H2 --> J[Original callers joined by existing owner]
 ```
 
-Canonical roles: Integration BlobStorage Cases/BlobPartialReadBoundaryPublicTests; Helpers/BlobPartialReadBoundaryPublicTrial; Assertions/BlobPartialReadBoundaryPublicAssertions. Product/sharedFixture/config changes N/A. Source proposal only; current compiled census/runtime/Linux/RF3/public partial-read qualification OPEN. Existing supersession R6 and R32 runtime source inputs remain unchanged.
+Canonical roles: Integration BlobStorage Cases/BlobPartialReadBoundaryPublicTests; Helpers/BlobPartialReadBoundaryPublicTrial; Assertions/BlobPartialReadBoundaryPublicAssertions. Product/sharedFixture/config changes N/A. Source proposal only; current compiled census/runtime/Linux/cluster/public partial-read qualification OPEN. Existing supersession runtime inputs remain unchanged.

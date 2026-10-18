@@ -1,4 +1,3 @@
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
 using KeyLoad.Core.Features.ResourceExecution;
@@ -23,17 +22,6 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.OwnershipLost, ResourceOwnerInventoryReadValidation.Changed);
         }
         return catalog;
-    }
-
-    private static long ReadInventoryPlacementRevision(IKeyValueView view)
-    {
-        var directory = AtomicPartitionPlacementSerialization.ReadDirectory(view);
-        if (directory is null)
-        {
-            return ResourceOwnerInventoryReadValidation.EmptyRevision;
-        }
-        AtomicPartitionPlacementValidation.ValidateDirectory(directory);
-        return directory.Revision;
     }
 
     private ResourceOwnerInventoryOwnerCutV1 CaptureInventoryOwnerCut(IKeyValueView view,
@@ -63,14 +51,13 @@ public sealed partial class DatabaseEngine
         return new(ResourceOwnerInventoryReadValidation.Version, identity.NodeId, identity.Incarnation,
             identity.ReadGeneration, catalog.DefaultShard, enrollment, catalog.Revision,
             directory?.Revision ?? ResourceOwnerInventoryReadValidation.EmptyRevision,
-            ReadInventoryPlacementRevision(view), Store.Position, applied);
+            ResourceOwnerInventoryReadValidation.EmptyRevision, Store.Position, applied);
     }
 
-    private ResourceOwnerInventoryEntryV1 ResolveInventoryEntry(IKeyValueView view,
-        ResourceOwnerInventoryControlV1 control, ResourceOwnerInventoryOwnerCutV1 cut, PartitionRef partition)
+    private static ResourceOwnerInventoryEntryV1 ResolveInventoryEntry(ResourceOwnerInventoryControlV1 control,
+        ResourceOwnerInventoryOwnerCutV1 cut, PartitionRef partition)
     {
-        RequireInventorySettledPartition(view, partition);
-        var placement = ResolveRegisteredPlacement(view, partition, cut.ObservedOwner);
+        var placement = ResolveRegisteredPlacement(partition, cut.ObservedOwner);
         var route = control.Directory.Owners.SingleOrDefault(entry => entry.Owner.PhysicalShardId == placement.PhysicalShardId);
         if (route is null || route.Owner.Incarnation != placement.Incarnation
             || !route.Owner.VoterIds.SequenceEqual(placement.VoterIds, StringComparer.Ordinal))
@@ -78,30 +65,5 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.RecoveryRequired, ResourceOwnerInventoryReadValidation.Missing);
         }
         return new(control.Lifetime, partition, cut.ObservedOwner, placement, route);
-    }
-
-    private void RequireInventorySettledPartition(IKeyValueView view, PartitionRef partition)
-    {
-        if (view.ReadOwnedValue(PartitionMoveParentKeys.Active(partition)) is not null)
-        {
-            throw Errors.Fail(ErrorCode.RecoveryRequired, ResourceOwnerInventoryReadValidation.Missing);
-        }
-        var control = PartitionMoveControlStorage.Read(view, partition, Limits.MaxBatchBytes);
-        if (control is not null && control.Phase is not (PartitionMovePhase.Retired or PartitionMovePhase.Aborted))
-        {
-            throw Errors.Fail(ErrorCode.RecoveryRequired, ResourceOwnerInventoryReadValidation.Missing);
-        }
-        var stage = PartitionMoveTargetStorage.Read<PartitionMoveTargetStage>(view,
-            PartitionMoveTargetStorage.Key(partition), Limits.MaxBatchBytes);
-        if (stage is not null && (stage.Version != PartitionMoveProtocol.Version || stage.Control is null
-            || stage.Control.Partition != partition))
-        {
-            throw Errors.Fail(ErrorCode.Corruption, ResourceOwnerInventoryReadValidation.Malformed);
-        }
-        var fence = PartitionMoveSourceFenceStorage.Read(view, partition, Limits.MaxBatchBytes);
-        if (stage is not null && !stage.Published || fence is not null && control is null)
-        {
-            throw Errors.Fail(ErrorCode.RecoveryRequired, ResourceOwnerInventoryReadValidation.Missing);
-        }
     }
 }

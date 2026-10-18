@@ -8,7 +8,7 @@ AC-BLOB-KEY-SLOT-002 requires Abort and zero-part MaxParts1 Reclaim of the first
 
 AC-BLOB-KEY-SLOT-003 requires a NEW upload under the SAME first blob name to publish empty revision1 after cleanup, with independent zero length/part count/deletedfalse/EOF bytes and full authentic server metadata/receipt binding. Original and fresh refused second-name IDs stay ResourceExhausted after that healthy publication. Every successful Begin/Complete original receipt replay is immediately followed by BOTH-client whole public states and literal current head/EOF, before another receipt could conceal mutation. Resource B Abort/Reclaim preserves resource A head.
 
-AC-BLOB-KEY-SLOT-004 retains native RequestCqrsRf3Callers.RunOwnedAsync original SDK/official sessions and failure ledger and existing Aspire ClusterFixture ownership. One no-argument whole-flow case; no current UID inferred. Source/compiler/runtime/exact-source Linux RF3 remain OPEN. Existing native BlobConfigurationCounterTests covers repeated configuration while active, not this public post-reclaim key-only flow. Existing upload-only/version-only previews remain unchanged.
+AC-BLOB-KEY-SLOT-004 retains native RequestCqrsClusterCallers.RunOwnedAsync original SDK/official sessions and failure ledger and existing Aspire ClusterFixture ownership. One no-argument whole-flow case; no current UID inferred. Source/compiler/runtime/exact-source Linux cluster remain OPEN. Existing native BlobConfigurationCounterTests covers repeated configuration while active, not this public post-reclaim key-only flow. Existing upload-only/version-only previews remain unchanged.
 
 ```mermaid
 flowchart LR

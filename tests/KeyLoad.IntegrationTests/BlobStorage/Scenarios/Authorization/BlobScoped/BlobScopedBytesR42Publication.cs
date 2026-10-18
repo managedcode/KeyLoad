@@ -6,11 +6,11 @@ namespace KeyLoad.IntegrationTests.Features.BlobStorage;
 
 internal static class BlobScopedBytesR42Publication
 {
-    internal static async Task WriteAsync(RequestCqrsRf3Callers callers, BlobScopedBytesR42State state, BlobScopedBytesR42State[] states, CancellationToken token)
+    internal static async Task WriteAsync(RequestCqrsClusterCallers callers, BlobScopedBytesR42State state, BlobScopedBytesR42State[] states, CancellationToken token)
     {
         state.Begun = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.BeginBlobUploadAsync(state.Begin, token));
         state.Current = new(state.Blob, state.Begin.UploadId, BlobScopedBytesR42Corpus.Length, 0L, 0, 0L, state.Begun.Value.ExpiresAt, BlobUploadStatus.Active, state.Begun.Value.IntegrityHash);
-        await SqlRf3Protocol.EqualAsync(state.Current, state.Begun.Value);
+        await SqlClusterProtocol.EqualAsync(state.Current, state.Begun.Value);
         await BlobScopedBytesR42Assertions.ReceiptAsync(state.Begun.Receipt, state.Begin.CommandId, state);
         await BlobScopedBytesR42Assertions.CurrentAsync(callers, states, token);
         var hash = state.Begun.Value.IntegrityHash;
@@ -28,17 +28,17 @@ internal static class BlobScopedBytesR42Publication
                 StoredBytes = ordinal == 0 ? 65536L : 65553L,
                 IntegrityHash = hash
             };
-            await SqlRf3Protocol.EqualAsync(state.Current, state.Written[ordinal].Value);
+            await SqlClusterProtocol.EqualAsync(state.Current, state.Written[ordinal].Value);
             await BlobScopedBytesR42Assertions.ReceiptAsync(state.Written[ordinal].Receipt, state.Parts[ordinal].CommandId, state);
             await BlobScopedBytesR42Assertions.CurrentAsync(callers, states, token);
         }
     }
-    internal static async Task CompleteAsync(RequestCqrsRf3Callers callers, BlobScopedBytesR42State state, BlobScopedBytesR42State[] states, CancellationToken token)
+    internal static async Task CompleteAsync(RequestCqrsClusterCallers callers, BlobScopedBytesR42State state, BlobScopedBytesR42State[] states, CancellationToken token)
     {
         state.Complete = new(Guid.NewGuid(), state.Blob, state.Begin.UploadId, state.Written[1].Value.IntegrityHash);
         state.Published = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.CompleteBlobUploadAsync(state.Complete, token));
         var expected = new BlobMetadata(state.Blob, 1L, state.Begin.UploadId, 65553L, 2, state.Written[1].Value.IntegrityHash, new RowAccess(), state.Published.Value.UpdatedAt);
-        await SqlRf3Protocol.EqualAsync(expected, state.Published.Value);
+        await SqlClusterProtocol.EqualAsync(expected, state.Published.Value);
         state.Current = state.Written[1].Value with
         {
             Status = BlobUploadStatus.Complete

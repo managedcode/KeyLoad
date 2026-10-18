@@ -13,12 +13,12 @@ internal static class NativeTextNonStringTransitionsPublicTrial
     internal static async Task RunAsync(ClusterFixture fixture, CancellationToken token)
     {
         var originals = new List<Original>();
-        var prepared = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
+        var prepared = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
             fixture.AdminKey, async caller =>
             {
-                var partition = NativeTextMaintenanceRf3Scenario.CreatePartition();
+                var partition = NativeTextMaintenanceClusterScenario.CreatePartition();
                 var resource = new ResourceDefinition(Collection, ResourceKind.Collection, partition.TransactionDomainId);
-                await SqlRf3Protocol.EqualAsync(resource, await McpCallerAssertions.SdkSuccessAsync(
+                await SqlClusterProtocol.EqualAsync(resource, await McpCallerAssertions.SdkSuccessAsync(
                     await caller.Sdk.ConfigureResourceAsync(Guid.NewGuid(), new(partition.TenantId, partition.DatabaseId, resource), token)));
                 originals.Add(await CommitAsync(caller, new(Guid.NewGuid(), partition,
                     [new PutDocument(Collection, "a", "{\"text\":\"needle\"}", 0L),
@@ -38,7 +38,7 @@ internal static class NativeTextNonStringTransitionsPublicTrial
         for (var cycle = 0; cycle < 2; cycle++)
         {
             await NativeTextProtectedPublicColdRestart.RunAsync(fixture, token);
-            _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
+            _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
                 fixture.AdminKey, async caller =>
                 {
                     var current = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.StatusAsync(token));
@@ -51,7 +51,7 @@ internal static class NativeTextNonStringTransitionsPublicTrial
                     return true;
                 }, token);
         }
-        _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, async caller =>
+        _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, async caller =>
         {
             originals.Add(await CommitAsync(caller, new(Guid.NewGuid(), prepared.Partition,
                 [new PutDocument(Collection, "a", "{\"text\":0}", 1L)]), [new("putDocument", Collection, "a", 2L)], token));
@@ -63,7 +63,7 @@ internal static class NativeTextNonStringTransitionsPublicTrial
         }, token);
     }
 
-    private static async Task<Original> CommitAsync(RequestCqrsRf3Callers caller, CommandRequest command,
+    private static async Task<Original> CommitAsync(RequestCqrsClusterCallers caller, CommandRequest command,
         MutationReceipt[] expected, CancellationToken token)
     {
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.CommitAsync(command, token));
@@ -71,7 +71,7 @@ internal static class NativeTextNonStringTransitionsPublicTrial
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(command.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsGreaterThan(0L);
         await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
-        await SqlRf3Protocol.EqualAsync(expected, receipt.Mutations.ToArray());
+        await SqlClusterProtocol.EqualAsync(expected, receipt.Mutations.ToArray());
         var request = new WaitForIndexRequest(command.Partition, Collection, "/text", receipt.Token);
         foreach (var wait in new[] { await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.WaitForIndexAsync(request, token)),
             (await McpCallerAssertions.SuccessAsync<WaitForIndexResult>(await caller.Mcp.CallAsync(WaitForIndexProtocol.Tool, request, token))).Value })

@@ -1,9 +1,19 @@
 # Time-series HTTP read working-set admission
 
-REQ-RESOURCE-001 / AC-RESOURCE-001 and KL-076 apply the existing node-wide heavy-read reservation to the canonical chunk-window and rollup HTTP read routes. Both routes execute bounded series reads and can retain decoded records; treating them as an ordinary request omitted the configured heavy-read reservation. This is a source-confirmed accounting gap, without a measured RSS or latency claim.
+REQ-RESOURCE-001 / AC-RESOURCE-001 apply the existing node-wide heavy-read reservation to the canonical chunk-window and rollup HTTP read routes. Both routes execute bounded series reads and can retain decoded records; treating them as an ordinary request omitted the configured heavy-read reservation. This is a source-confirmed accounting gap, without a measured RSS or latency claim.
 
 `HttpAdmissionGovernor` classifies `SampleChunkProtocol.ReadRoute` and `SampleRollupProtocol.ReadRoute` alongside the existing series read routes. It uses the existing exact case-insensitive route comparison and trailing-slash normalization. The authenticated scope binding, independent control reserve, body framing, cancellation and once-only release remain unchanged. This is modeled request capacity, not a physical memory ceiling or a replacement for the operation's own read budget.
 
 The existing complete `QuerySearchAndGraphRequestsShareOneWorkingSetReservationBudget` operation additionally exercises both canonical routes and their normalized variants. A retained heavy request prevents another heavy read, including these series routes, from exceeding the unchanged shared byte ceiling. After release, each route admits and binds a real verified scope, independently rejects a competing heavy read, then releases its complete node/scope reservation twice without retained scopes. A following healthy heavy request still admits. No test declaration, UID, quota, deadline or product execution switch changes.
 
-Frontend, persisted format and migrations are N/A for this node-local ingress accounting correction. Full SDK/MCP sustained overload, actual CPU/RSS/disk bounds, exact-source Linux RF3 qualification and whole KL-076 acceptance remain separate open gates.
+Frontend, persisted format and migrations are N/A for this node-local ingress accounting correction. Full SDK/MCP sustained overload, actual CPU/RSS/disk bounds, exact-source Linux cluster qualification remain separate open gates.
+
+```mermaid
+flowchart TD
+    A[Chunk window or rollup HTTP read] --> B[Heavy read classification with normalized route]
+    B --> C{Shared byte ceiling}
+    C -->|Within ceiling| D[Verified scope bound and bounded series read]
+    C -->|Exceeded| E[Rejected before storage work]
+    D --> F[Node and scope reservation released once]
+    F --> G[Following healthy heavy request admits]
+```

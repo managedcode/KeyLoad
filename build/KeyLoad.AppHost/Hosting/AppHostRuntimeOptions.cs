@@ -1,6 +1,5 @@
 using KeyLoad.AppHost.Features.BenchmarkComparisons;
 using KeyLoad.AppHost.Features.ClusterReplication;
-using KeyLoad.AppHost.Features.ClusterRouting;
 using KeyLoad.AppHost.Features.CodeQuality;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using Microsoft.Extensions.Options;
@@ -13,8 +12,8 @@ internal sealed record AppHostRuntimeOptions(IOptions<TestExecutionOptions> Test
     IOptions<ContainerImageExecutionOptions> ImageExecution, IOptions<LocalImageOptions> LocalImage,
     IOptions<ClusterDeploymentOptions> Cluster, IOptions<CommandAdmissionLimits> CommandAdmission,
     IOptions<HttpAdmissionLimits> HttpAdmission, IOptions<KeyLoad.Clustering.ReplicaReplayLimits> ReplayAdmission, IOptions<ClusterProfileExecutionOptions> Profile, IOptions<BenchmarkDeploymentOptions> Deployment,
-    IOptions<BenchmarkRelayOptions> BenchmarkRelay, IOptions<RequestProbeFileOptions> RequestProbeFiles,
+    IOptions<BenchmarkRelayOptions> BenchmarkRelay,
     IOptions<KeyLoad.Clustering.ReplicaReplayLimits> IsolatedReplayAdmission,
     IOptions<KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions> IsolatedAdmission,
     IOptions<NativeCoverageExecutionOptions> NativeCoverage,
-    IOptions<NativeCoverageRf3ImageOptions> NativeCoverageRf3Image);
+    IOptions<NativeCoverageClusterImageOptions> NativeCoverageClusterImage);

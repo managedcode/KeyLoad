@@ -13,28 +13,28 @@ internal static class PartitionAuthorityResults
         var request = state.Scenario.Request();
         var direct = await McpCallerAssertions.SdkSuccessAsync(await sdk.PartitionQueryAsync(request, token));
         var official = await McpCallerAssertions.SuccessAsync<PartitionQueryPageV1>(await session.CallAsync(
-            PartitionQueryRf3Protocol.ToolName, request, token));
-        var call = SqlRf3Protocol.Call(state.Scenario.Partitions[PartitionAuthorityProtocol.FirstLeaf],
-            PartitionQueryRf3Protocol.ToolName, request);
+            PartitionQueryClusterProtocol.ToolName, request, token));
+        var call = SqlClusterProtocol.Call(state.Scenario.Partitions[PartitionAuthorityProtocol.FirstLeaf],
+            PartitionQueryClusterProtocol.ToolName, request);
         await PageAsync(direct, state, epoch);
         await PageAsync(official.Value, state, epoch);
-        await PageAsync(await SqlRf3Protocol.SdkAsync<PartitionQueryPageV1>(sdk, call, token), state, epoch);
-        await PageAsync(await SqlRf3Protocol.McpAsync<PartitionQueryPageV1>(session, call, token), state, epoch);
+        await PageAsync(await SqlClusterProtocol.SdkAsync<PartitionQueryPageV1>(sdk, call, token), state, epoch);
+        await PageAsync(await SqlClusterProtocol.McpAsync<PartitionQueryPageV1>(session, call, token), state, epoch);
     }
 
     private static async Task PageAsync(PartitionQueryPageV1 actual, PartitionAuthorityState state, long epoch)
     {
-        await PartitionQueryRf3Assertions.AssertOracleAsync(actual, state.Scenario, state.Scenario.Partitions);
-        await Assert.That(actual.Version).IsEqualTo(PartitionQueryRf3Protocol.Version);
+        await PartitionQueryClusterAssertions.AssertOracleAsync(actual, state.Scenario, state.Scenario.Partitions);
+        await Assert.That(actual.Version).IsEqualTo(PartitionQueryClusterProtocol.Version);
         await Assert.That(actual.Complete).IsTrue();
         ImmutableArray<PartitionQueryRowV1> rows = [
-            new(new(state.Scenario.Partitions[PartitionAuthorityProtocol.FirstLeaf], PartitionQueryRf3Protocol.Collection,
+            new(new(state.Scenario.Partitions[PartitionAuthorityProtocol.FirstLeaf], PartitionQueryClusterProtocol.Collection,
                 PartitionAuthorityProtocol.FirstId), new(PartitionAuthorityProtocol.FirstId,
-                PartitionQueryRf3Protocol.RowRevision, PartitionAuthorityProtocol.FirstProjection, false, [])),
-            new(new(state.Scenario.Partitions[PartitionAuthorityProtocol.SecondLeaf], PartitionQueryRf3Protocol.Collection,
+                PartitionQueryClusterProtocol.RowRevision, PartitionAuthorityProtocol.FirstProjection, false, [])),
+            new(new(state.Scenario.Partitions[PartitionAuthorityProtocol.SecondLeaf], PartitionQueryClusterProtocol.Collection,
                 PartitionAuthorityProtocol.SecondId), new(PartitionAuthorityProtocol.SecondId,
-                PartitionQueryRf3Protocol.RowRevision, PartitionAuthorityProtocol.SecondProjection, false, []))];
-        await SqlRf3Protocol.EqualAsync(rows, actual.Rows);
+                PartitionQueryClusterProtocol.RowRevision, PartitionAuthorityProtocol.SecondProjection, false, []))];
+        await SqlClusterProtocol.EqualAsync(rows, actual.Rows);
         await Assert.That(actual.Leaves.Length).IsEqualTo(PartitionAuthorityProtocol.LeafCount);
         for (var index = PartitionAuthorityProtocol.FirstLeaf; index < PartitionAuthorityProtocol.LeafCount; index++)
         {

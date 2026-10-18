@@ -42,8 +42,7 @@ internal static class SampleRangeBudgetWholeFlow
             UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(),
             UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(),
             UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(),
-            UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(),
-            UnavailablePartitionMovementCheckpointVerifier.Instance, timeProvider: fixture.Owner.EvaluationClock);
+            UnitExecutionOptions.TimeSeriesExecution(), timeProvider: fixture.Owner.EvaluationClock);
 
     internal static SampleRecord[] ReadPair(SampleRawIntegrityFixture fixture, DatabaseEngine owner,
         DateTimeOffset? from = null, DateTimeOffset? until = null, int? limit = null)

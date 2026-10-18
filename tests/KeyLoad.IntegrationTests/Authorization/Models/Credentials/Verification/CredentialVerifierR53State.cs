@@ -39,14 +39,6 @@ internal sealed class CredentialVerifierR53State(CredentialSubjectReplacementSta
     {
         get; set;
     }
-    internal AtomicPartitionPlacementResolution? FirstPlacement
-    {
-        get; set;
-    }
-    internal AtomicPartitionPlacementResolution? SecondPlacement
-    {
-        get; set;
-    }
     internal bool Active
     {
         get; set;

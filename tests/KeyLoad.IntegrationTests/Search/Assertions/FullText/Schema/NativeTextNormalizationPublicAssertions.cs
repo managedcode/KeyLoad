@@ -7,11 +7,11 @@ namespace KeyLoad.IntegrationTests.Features.Search;
 
 internal static class NativeTextNormalizationPublicAssertions
 {
-    internal static async Task RequireAsync(RequestCqrsRf3Callers caller, NativeTextRf3Scenario scenario,
+    internal static async Task RequireAsync(RequestCqrsClusterCallers caller, NativeTextClusterScenario scenario,
         CommitToken minimum, int stage, CancellationToken token)
     {
-        var wait = new WaitForIndexRequest(scenario.Partition, NativeTextRf3Scenario.Collection,
-            NativeTextRf3Scenario.TextField, minimum);
+        var wait = new WaitForIndexRequest(scenario.Partition, NativeTextClusterScenario.Collection,
+            NativeTextClusterScenario.TextField, minimum);
         foreach (var result in new[]
         {
             await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.WaitForIndexAsync(wait, token)),
@@ -47,22 +47,22 @@ internal static class NativeTextNormalizationPublicAssertions
                 NativeTextNormalizationPublicScenario.PlainJson, 1d / 61d)], token);
     }
 
-    private static RankedDocument Row(NativeTextRf3Scenario scenario, string id, long revision, string json, double score)
-        => new(new(new(scenario.Partition, NativeTextRf3Scenario.Collection, id), revision, json, false, []), score, null);
+    private static RankedDocument Row(NativeTextClusterScenario scenario, string id, long revision, string json, double score)
+        => new(new(new(scenario.Partition, NativeTextClusterScenario.Collection, id), revision, json, false, []), score, null);
 
-    private static async Task PageAsync(RequestCqrsRf3Callers caller, SearchRequest request,
+    private static async Task PageAsync(RequestCqrsClusterCallers caller, SearchRequest request,
         RankedDocument[] expected, CancellationToken token)
     {
-        await SqlRf3Protocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.SearchAsync(request, token)));
-        await SqlRf3Protocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<RankedDocument[]>(
+        await SqlClusterProtocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.SearchAsync(request, token)));
+        await SqlClusterProtocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<RankedDocument[]>(
             await caller.Mcp.CallAsync(McpCallerTools.SearchExecute, request, token))).Value);
     }
 
-    internal static async Task OutboxAsync(RequestCqrsRf3Callers caller, PartitionRef partition,
+    internal static async Task OutboxAsync(RequestCqrsClusterCallers caller, PartitionRef partition,
         OutboxStatus baseline, CancellationToken token)
     {
-        await SqlRf3Protocol.EqualAsync(baseline, await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.OutboxStatusAsync(partition, token)));
-        await SqlRf3Protocol.EqualAsync(baseline, (await McpCallerAssertions.SuccessAsync<OutboxStatus>(
+        await SqlClusterProtocol.EqualAsync(baseline, await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.OutboxStatusAsync(partition, token)));
+        await SqlClusterProtocol.EqualAsync(baseline, (await McpCallerAssertions.SuccessAsync<OutboxStatus>(
             await caller.Mcp.CallAsync(McpCallerTools.OutboxStatus, new GetOutboxStatusRequest(partition), token))).Value);
     }
 }

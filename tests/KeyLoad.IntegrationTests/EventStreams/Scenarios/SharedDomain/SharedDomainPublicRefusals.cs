@@ -24,7 +24,7 @@ internal static class SharedDomainPublicRefusals
         {
             foreach (var command in refused)
             {
-                await EventAppendRf3Assertions.RejectedAsync(sdk, official, command, ErrorCode.Conflict,
+                await EventAppendClusterAssertions.RejectedAsync(sdk, official, command, ErrorCode.Conflict,
                     DomainDetail, state.Identity.Secret, token);
             }
         }, token);

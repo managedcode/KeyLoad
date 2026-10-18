@@ -7,7 +7,7 @@ using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
-/// <summary>Borrows the actual source journal and canonical database; all setup writes use its RF3 coordinator.</summary>
+/// <summary>Borrows the actual source journal and canonical database; all setup writes use its CLUSTER coordinator.</summary>
 internal sealed class ConnectionNativeServerDatabase(Func<ControlledPartitionMovementNativeHost> source,
     Func<CancellationToken> originalToken)
 {

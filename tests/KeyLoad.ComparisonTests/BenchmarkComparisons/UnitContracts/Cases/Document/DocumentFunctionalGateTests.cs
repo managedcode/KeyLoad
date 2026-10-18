@@ -2,7 +2,7 @@ using System.Text.Json.Nodes;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
-/// <summary>AC-METH-004: native original TRX and ZIP evidence bind the exclusive RF3 functional gate.</summary>
+/// <summary>AC-METH-004: native original TRX and ZIP evidence bind the exclusive CLUSTER functional gate.</summary>
 internal sealed class DocumentFunctionalGateTests
 {
     private const string Passed = "passed";

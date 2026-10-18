@@ -6,7 +6,7 @@ namespace KeyLoad.IntegrationTests.Features.GraphTraversal;
 
 internal static class GraphCycleFrontierPublicReads
 {
-    internal static async Task MatrixAsync(RequestCqrsRf3Callers admin, RequestCqrsRf3Callers reader,
+    internal static async Task MatrixAsync(RequestCqrsClusterCallers admin, RequestCqrsClusterCallers reader,
         GraphCycleFrontierPublicState state, CancellationToken token)
     {
         for (var depth = 1; depth <= 3; depth++)
@@ -14,13 +14,13 @@ internal static class GraphCycleFrontierPublicReads
             var vertices = VertexLimit(depth, state.Hidden);
             var edges = EdgeLimit(depth, state.Hidden);
             var request = state.Request(depth, vertices, edges);
-            await SqlRf3Protocol.EqualAsync(state.Expected(depth, state.Hidden), await McpCallerAssertions.SdkSuccessAsync(
+            await SqlClusterProtocol.EqualAsync(state.Expected(depth, state.Hidden), await McpCallerAssertions.SdkSuccessAsync(
                 await reader.Sdk.TraverseAsync(request, token)));
             await GraphCycleFrontierPublicCurrent.ObserveAsync(admin, state, token);
             var reply = await reader.Mcp.CallAsync(McpCallerTools.GraphTraverse, request, token);
-            await SqlRf3Protocol.EqualAsync(state.Expected(depth, state.Hidden),
+            await SqlClusterProtocol.EqualAsync(state.Expected(depth, state.Hidden),
                 (await McpCallerAssertions.SuccessAsync<global::KeyLoad.GraphTraversal>(reply)).Value);
-            await McpCallerAssertions.DoesNotDiscloseAsync(reply, state.Seed.Reader.Secret, GraphIncomingRf3Scenario.PrivateMarker);
+            await McpCallerAssertions.DoesNotDiscloseAsync(reply, state.Seed.Reader.Secret, GraphIncomingClusterScenario.PrivateMarker);
             await GraphCycleFrontierPublicCurrent.ObserveAsync(admin, state, token);
         }
         foreach (var vertex in state.Vertices.Where(vertex => !state.Hidden || vertex != state.A))
@@ -51,7 +51,7 @@ internal static class GraphCycleFrontierPublicReads
         return hidden ? 5 : 7;
     }
 
-    private static async Task IncomingAsync(RequestCqrsRf3Callers admin, RequestCqrsRf3Callers reader,
+    private static async Task IncomingAsync(RequestCqrsClusterCallers admin, RequestCqrsClusterCallers reader,
         GraphCycleFrontierPublicState state, EntityRef vertex, CancellationToken token)
     {
         var request = new ReadIncomingGraphEdgesRequestV1(1, vertex, state.Seed.Graph, 7);
@@ -64,15 +64,15 @@ internal static class GraphCycleFrontierPublicReads
         await GraphCycleFrontierPublicCurrent.ObserveAsync(admin, state, token);
         var reply = await reader.Mcp.CallAsync(McpCallerTools.GraphIncomingEdges, request, token);
         await PageAsync((await McpCallerAssertions.SuccessAsync<GraphIncomingEdgesPageV1>(reply)).Value, expected);
-        await McpCallerAssertions.DoesNotDiscloseAsync(reply, state.Seed.Reader.Secret, GraphIncomingRf3Scenario.PrivateMarker);
+        await McpCallerAssertions.DoesNotDiscloseAsync(reply, state.Seed.Reader.Secret, GraphIncomingClusterScenario.PrivateMarker);
         await GraphCycleFrontierPublicCurrent.ObserveAsync(admin, state, token);
     }
 
     private static async Task PageAsync(GraphIncomingEdgesPageV1 page, GraphIncomingEdgeRowV1[] rows)
     {
-        await SqlRf3Protocol.EqualAsync(rows, page.Rows.ToArray());
+        await SqlClusterProtocol.EqualAsync(rows, page.Rows.ToArray());
         await Assert.That(page.Version).IsEqualTo(1);
         await Assert.That(page.CutPosition).IsGreaterThan(0L);
-        await Assert.That(page.Projection).IsEqualTo(GraphIncomingRf3Scenario.Projection);
+        await Assert.That(page.Projection).IsEqualTo(GraphIncomingClusterScenario.Projection);
     }
 }

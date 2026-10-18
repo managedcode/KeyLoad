@@ -19,12 +19,12 @@ internal static class QueueReferenceSelectFlow
             else
             {
                 await QueueReferenceSelectAssertions.PageAsync(callers, state, masked, token);
-                var empty = await SqlRf3Protocol.SdkAsync<QueryPage>(callers.Sdk,
+                var empty = await SqlClusterProtocol.SdkAsync<QueryPage>(callers.Sdk,
                     QueueReferenceSelectProtocol.Operation(state.Partition, QueueReferenceSelectProtocol.EmptyQueue), token);
                 await Assert.That(empty.Rows).IsEmpty();
                 await Assert.That(empty.Cursor).IsNull();
-                await RelationalSqlRf3JoinPageAssertions.SameRowsAsync(empty,
-                    await SqlRf3Protocol.McpAsync<QueryPage>(callers.Mcp,
+                await RelationalSqlClusterJoinPageAssertions.SameRowsAsync(empty,
+                    await SqlClusterProtocol.McpAsync<QueryPage>(callers.Mcp,
                         QueueReferenceSelectProtocol.Operation(state.Partition, QueueReferenceSelectProtocol.EmptyQueue), token));
                 await FailureAsync(callers, QueueReferenceSelectProtocol.Operation(state.Partition) with
                 {
@@ -35,7 +35,7 @@ internal static class QueueReferenceSelectFlow
         }, token);
 
     internal static Task AdminAsync(ClusterFixture fixture, QueueReferenceSelectState state, CancellationToken token)
-        => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, async admin =>
+        => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, async admin =>
         {
             await FailureAsync(admin, QueueReferenceSelectProtocol.Operation(state.Partition, QueueReferenceSelectProtocol.InvalidQueue),
                 ErrorCode.Validation, token);
@@ -44,14 +44,14 @@ internal static class QueueReferenceSelectFlow
         }, token);
 
     private static async Task WithReaderAsync(ClusterFixture fixture, QueueReferenceSelectState state,
-        Func<RequestCqrsRf3Callers, Task> operation, CancellationToken token)
+        Func<RequestCqrsClusterCallers, Task> operation, CancellationToken token)
     {
-        await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, state.Identity.Secret,
+        await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, state.Identity.Secret,
             async callers => { await operation(callers); return true; }, token);
         await AdminAsync(fixture, state, token);
     }
 
-    private static async Task FailureAsync(RequestCqrsRf3Callers callers, SqlOperationRequest request,
+    private static async Task FailureAsync(RequestCqrsClusterCallers callers, SqlOperationRequest request,
         ErrorCode code, CancellationToken token)
     {
         var result = await callers.Sdk.ExecuteSqlAsync(request, token);

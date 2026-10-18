@@ -1,19 +1,17 @@
 # AnalyticsStore
 
-Status: reviewed implementation adopted into canonical source in R638; combined
-compilation and runtime qualification remain open. This is an independently named
-user resource, separate from the existing node operational analytics report.
+AnalyticsStore is an independently named user resource, separate from the existing node operational analytics report.
 
 | Requirement | Acceptance | Completion gate |
 |---|---|---|
 | REQ-ANALYTICS-001 | AC-ANALYTICS-001 | Configure three independent AnalyticsStore resources with immutable declared dimensions and numeric metrics. SDK and official MCP callers ingest and independently query each store. Resource kind, schema, generated Orleans aliases and IDs remain stable. |
-| REQ-ANALYTICS-002 | AC-ANALYTICS-002 | Existing authorized Batch commits canonical event replacement/deletion, expected revisions, row metadata and links to node-local ZoneTree through ordered RF3 acknowledgement. Failed CAS changes neither event nor generation. Same operation replay returns the original receipt. |
+| REQ-ANALYTICS-002 | AC-ANALYTICS-002 | Existing authorized Batch commits canonical event replacement/deletion, expected revisions, row metadata and links to node-local ZoneTree through majority acknowledgement across the `KeyLoad:ReplicaCount` copies. Failed CAS changes neither event nor generation. Same operation replay returns the original receipt. |
 | REQ-ANALYTICS-003 | AC-ANALYTICS-003 | Bounded event reads enforce current persisted scope, row and field policies. Aggregate inputs contain only currently visible rows, with raw-use authorization for selected dimensions and metrics. Fresh persisted subject/policy, resource lifetime, read generation and store generation are revalidated before publishing native output. |
 | REQ-ANALYTICS-004 | AC-ANALYTICS-004 | Native ZoneTree.Analytics 1.0.0 executes each aggregate from a complete authorized canonical capture in a fresh derived generation. Native accepted/processed/dropped/error counters and complete query plan are checked. Limits refuse incomplete results rather than returning a partial aggregate. |
-| REQ-ANALYTICS-005 | AC-ANALYTICS-005 | The existing physical PartitionHost owns derived directories, engines and shutdown. Original generations are bounded by the existing MaxConcurrentQueries allowance without a waiting queue. Cancellation joins the actual native operation and disposal; a failed join blocks subsequent generation acquisition and physical owner release. |
-| REQ-ANALYTICS-006 | AC-ANALYTICS-006 | Both canonical key families participate in partition roster/export/import/cleanup and D2 inventory. D1 effect capture includes the store and every linked resource through the existing observed resource binder; retirement prevents new effects. |
+| REQ-ANALYTICS-005 | AC-ANALYTICS-005 | The silo-local ZoneTree owner (the node's Orleans Grain Service) owns derived directories, engines and shutdown. Original generations are bounded by the existing MaxConcurrentQueries allowance without a waiting queue. Cancellation joins the actual native operation and disposal; a failed join blocks subsequent generation acquisition and physical owner release. |
+| REQ-ANALYTICS-006 | AC-ANALYTICS-006 | Both canonical key families participate in partition export/import and cleanup. Effect capture includes the store and every linked resource through the existing observed resource binder; a retired resource prevents new effects. |
 | REQ-ANALYTICS-007 | AC-ANALYTICS-007 | HTTP/SDK, official MCP and versioned T-SQL EXEC catalog calls share the same typed operations and connection-owned Orleans execution. A public functional scenario proves three independent stores through create, ingest, replacement, deletion, raw read and complete aggregate. |
-| REQ-ANALYTICS-008 | AC-ANALYTICS-008 | Full solution build, meaningful TUnit operations, real process recovery and Aspire-owned Docker RF3 SDK/MCP gates pass on their recorded exact source. Linux GitHub qualification remains separate. No performance, endurance, production-readiness or full-SQL claim follows from source presence. |
+| REQ-ANALYTICS-008 | AC-ANALYTICS-008 | Full solution build, meaningful TUnit operations, real process recovery and Aspire-owned cluster SDK/MCP gates pass. No performance, endurance, production-readiness or full-SQL claim follows from source presence. |
 
 The schema declares ordinally sorted unique dimension and metric names. Events have an ID,
 UTC timestamp, string dimensions, finite numeric metrics, optional persisted row
@@ -47,19 +45,19 @@ capture, without a second authoritative database or a stale rollup fallback.
 Public schema names map to ordinal native keys; public names are never truncated
 to fit native identifier bounds.
 
-The generation lives under the actual physical host's
+The generation lives under the silo-local ZoneTree owner's
 `derived-user-analytics/<lifetime-digest>/<generation>` directory. Its identity is
 resource/lifetime-specific; three stores are not three Site aliases in one shared
 engine. Core captures immutable authorized data under its read cut and releases
-the gated view before any native await. The physical runtime retains the original
+the gated view before any native await. The silo-local owner retains the original
 task and native engine, joins disposal, then removes the disposable directory.
 The connection operation holds the shared analytical admission through the native
-join, a final actual RF3 read barrier and fresh source/authorization validation
-before output publication. The final barrier uses the remaining original read
-budget; it does not renew the deadline. The internal same-process native result
+join and fresh source/authorization validation before output publication. The
+final validation uses the remaining original read budget; it does not renew the
+deadline. The internal same-process native result
 and snapshot never become an extra public or inter-grain payload. The raw native
 files are never read as authority, do not acknowledge a database mutation and are
-excluded from canonical movement/backup authority. Interrupted disposable
+excluded from canonical backup authority. Interrupted disposable
 generations are removed at the next opening under the acquired physical lock;
 they are never reused as trusted projections.
 
@@ -68,31 +66,28 @@ User analytics events and dimensions are not telemetry labels or diagnostic
 payloads. The operational node report and its independent qualification remain
 unchanged. Measured performance is a separate Linux GitHub gate.
 
-Implementation owners: Core owns the canonical AnalyticsStore feature and its
-native adapter; Server owns physical generation lifetime; Clustering reuses the
+Core owns the canonical AnalyticsStore feature and its native adapter; Server
+owns generation lifetime on the silo-local ZoneTree owner; Clustering reuses the
 existing connection read capability path; Abstractions, Client and ClientApi own
-typed public contracts and existing transport composition. The dependency order
-is contracts → canonical authorization/state → native projection and lifecycle →
-public operations → focused correctness/recovery → Aspire RF3 → Linux acceptance.
+typed public contracts and existing transport composition.
 
 
 Applicable decisions are [ADR-071](../ADR/ADR-071-canonical-zonetree-providers.md)
 for canonical storage, [ADR-125](../ADR/ADR-125-connection-owned-execution.md)
 for connection execution, [ADR-130](../ADR/ADR-130-microsoft-scriptdom-tsql.md)
 for catalog-driven T-SQL EXEC, and
-[ADR-136](../ADR/ADR-136-native-orleans-partition-ownership.md) for the physical
-owner. [ADR-134](../ADR/ADR-134-node-owned-derived-analytics.md) continues to own
+[ADR-136](../ADR/ADR-136-native-orleans-partition-ownership.md) for the silo-local
+ZoneTree owner. [ADR-134](../ADR/ADR-134-node-owned-derived-analytics.md) continues to own
 the separate operational report; its operational-only API is not reclassified as
-user analytics. Remote lifetime-read qualification in
-[ADR-139](../ADR/ADR-139-resource-lifetime-read-fence.md) remains separately open.
+ user analytics.
 
 ```mermaid
 flowchart LR
     Caller[SDK, official MCP, T-SQL EXEC] --> Connection[Existing connection grain]
     Connection --> Canonical[Fresh authorization and bounded canonical cut]
-    Canonical --> Rows[ZoneTree events and RF3 mutations]
+    Canonical --> Rows[ZoneTree events and replicated mutations]
     Canonical --> Capture[Owned authorized aggregate inputs]
-    Capture --> Native[Physical host bounded native generation]
+    Capture --> Native[Silo-local owner bounded native generation]
     Native --> Join[Actual query and joined disposal]
     Join --> Recheck[Fresh policy, lifetime and store generation]
     Recheck --> Result[Complete caller result]
@@ -101,7 +96,7 @@ flowchart LR
 AC-ANALYTICS-001/002/007 map to the added real FunctionalGateUserAnalytics
 scenario. AC-ANALYTICS-002/003/004 map to AnalyticsStoreNativeTests and the
 additional policy-publication tests. AC-ANALYTICS-006 maps to
-AnalyticsSharedIntegrationTests, including actual native family pages, roster and
+AnalyticsSharedIntegrationTests, including actual native family pages, family inventory and
 D2 enrollment. AC-ANALYTICS-005 maps to physical-host lifecycle tests, and
-AC-ANALYTICS-008 requires the integrator's actual build/TUnit/process/Aspire RF3
-and Linux receipts. These are test-source mappings; none is an execution result.
+AC-ANALYTICS-008 requires the build, TUnit, process-recovery and Aspire cluster
+runs.

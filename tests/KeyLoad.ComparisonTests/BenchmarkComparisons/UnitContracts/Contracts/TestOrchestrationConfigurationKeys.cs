@@ -25,5 +25,5 @@ internal static class TestOrchestrationConfigurationKeys
     internal const string BenchmarksWarmup = "Benchmarks:Warmup";
     internal const string BenchmarksScaleProfileEnvironment = "Benchmarks__ScaleProfile";
     internal const string BenchmarksVectorProfileEnvironment = "Benchmarks__VectorProfile";
-    internal const string KeyLoadTestsLocalRf3ImageEnabled = "KeyLoadTests:LocalRf3Image:Enabled";
+    internal const string KeyLoadTestsLocalClusterImageEnabled = "KeyLoadTests:LocalClusterImage:Enabled";
 }

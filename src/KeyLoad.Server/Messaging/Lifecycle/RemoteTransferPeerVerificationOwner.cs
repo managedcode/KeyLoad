@@ -114,8 +114,7 @@ internal sealed class RemoteTransferPeerVerificationOwner : IDisposable
         }
         var envelope = RemoteDocumentWire.DecodeCall(bytes.Span);
         var call = envelope.QueueTransfer;
-        if (call is null || !RemoteTransferPeerNonce.Valid(call.Nonce) || envelope.Document is not null || envelope.Controlled is not null
-            || envelope.ControlledBlob is not null
+        if (call is null || !RemoteTransferPeerNonce.Valid(call.Nonce) || envelope.Document is not null
             || !source.Owner.VoterIds.Contains(call.CallerVoter, StringComparer.Ordinal))
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, RemoteTransferPeerProtocol.Invalid);

@@ -4,7 +4,7 @@ namespace KeyLoad.IntegrationTests.Features.Messaging;
 
 internal static class QueueOrderedRetryPublicInitial
 {
-    internal static async Task RunAsync(RequestCqrsRf3Callers callers, QueueOrderedRetryPublicState state, CancellationToken token)
+    internal static async Task RunAsync(RequestCqrsClusterCallers callers, QueueOrderedRetryPublicState state, CancellationToken token)
     {
         await QueueLifecyclePublicRoutes.CommitAsync(callers, state.Caller, new(Guid.NewGuid(), state.Caller.Partition,
             [QueueOrderedRetryPublicOperations.Literal(QueueOrderedRetryPublicProtocol.First),
@@ -21,7 +21,7 @@ internal static class QueueOrderedRetryPublicInitial
             new(QueueOrderedRetryPublicProtocol.First, MessageState.Scheduled, QueueOrderedRetryPublicProtocol.One,
                 QueueOrderedRetryPublicProtocol.Four, QueueOrderedRetryPublicProtocol.One, retryAt, null,
                 LeaseVersion: QueueOrderedRetryPublicProtocol.One, SafeFailureCode: "RetryRequested"), true, token);
-        await DueRecurringRf3Assertions.WaitForDueTimeAsync(retryAt, token);
+        await DueRecurringClusterAssertions.WaitForDueTimeAsync(retryAt, token);
         var second = await QueueOrderedRetryPublicOperations.ClaimAsync(callers, state, QueueOrderedRetryPublicProtocol.First, token);
         await QueueOrderedRetryPublicOperations.CompleteAsync(callers, state, second, DeliveryAction.Nack, token);
         await QueueLifecyclePublicAssertions.LiteralAsync(callers, state.Caller, QueueOrderedRetryPublicProtocol.First,

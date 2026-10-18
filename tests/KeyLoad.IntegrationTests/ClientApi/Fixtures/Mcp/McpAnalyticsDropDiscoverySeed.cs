@@ -8,7 +8,7 @@ namespace KeyLoad.IntegrationTests.Features.ClientApi;
 
 internal static class McpAnalyticsDropDiscoverySeed
 {
-    internal static async Task<McpAnalyticsDropDiscoveryState> CreateAsync(RequestCqrsRf3Callers caller, CancellationToken token)
+    internal static async Task<McpAnalyticsDropDiscoveryState> CreateAsync(RequestCqrsClusterCallers caller, CancellationToken token)
     {
         var partition = new PartitionRef("mcp-model-" + Guid.NewGuid().ToString("N"), "agents", "knowledge",
             Guid.NewGuid().ToString("N"));
@@ -19,7 +19,7 @@ internal static class McpAnalyticsDropDiscoverySeed
         var anchorDefinition = new ResourceDefinition(P.Anchor, ResourceKind.Collection, partition.TransactionDomainId);
         foreach (var definition in new[] { analytics, anchorDefinition })
         {
-            await SqlRf3Protocol.EqualAsync(definition, await McpCallerAssertions.SdkSuccessAsync(
+            await SqlClusterProtocol.EqualAsync(definition, await McpCallerAssertions.SdkSuccessAsync(
                 await caller.Sdk.ConfigureResourceAsync(Guid.NewGuid(),
                     new(partition.TenantId, partition.DatabaseId, definition), token)));
         }
@@ -28,7 +28,7 @@ internal static class McpAnalyticsDropDiscoverySeed
         {
             RelationalSchema = new(P.Id, [new(P.Id, RelationalColumnType.Text), new(P.Value, RelationalColumnType.WholeNumber)])
         };
-        await SqlRf3Protocol.EqualAsync(table, await SqlRf3Protocol.SdkAsync<ResourceDefinition>(caller.Sdk,
+        await SqlClusterProtocol.EqualAsync(table, await SqlClusterProtocol.SdkAsync<ResourceDefinition>(caller.Sdk,
             new(partition, P.CreateSql, CommandId: Guid.NewGuid()), token));
         var anchor = await SeedAnchorAsync(caller, partition, token);
         var command = new CommandRequest(Guid.NewGuid(), partition,
@@ -36,19 +36,19 @@ internal static class McpAnalyticsDropDiscoverySeed
                 new UpsertAnalyticsEvents(P.Store, [P.Event(P.First, 2, anchor), P.Event(P.Second, 6, anchor)],
                     ImmutableDictionary<string, long>.Empty.Add(P.First, 0).Add(P.Second, 0))]);
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.CommitAsync(command, token));
-        await A.ReceiptAsync(caller, command, receipt,
-            [new("putDocument", P.Table, P.OldId, 1), new(AnalyticsStoreProtocol.UpsertKind, P.Store, P.Second, 1)], token);
-        await SqlRf3Protocol.EqualAsync(receipt, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
+        await A.ReceiptAsync(command, receipt,
+            [new("putDocument", P.Table, P.OldId, 1), new(AnalyticsStoreProtocol.UpsertKind, P.Store, P.Second, 1)]);
+        await SqlClusterProtocol.EqualAsync(receipt, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
             await caller.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token))).Value);
         var old = await A.CaptureAsync(caller, new(partition, P.Table, P.OldId), P.OldJson, token);
         return new(partition, table, anchor, old);
     }
 
-    private static async Task<EntityRef> SeedAnchorAsync(RequestCqrsRf3Callers caller, PartitionRef partition, CancellationToken token)
+    private static async Task<EntityRef> SeedAnchorAsync(RequestCqrsClusterCallers caller, PartitionRef partition, CancellationToken token)
     {
         var command = new CommandRequest(Guid.NewGuid(), partition, [new PutDocument(P.Anchor, P.AnchorId, P.AnchorJson, 0)]);
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.CommitAsync(command, token));
-        await A.ReceiptAsync(caller, command, receipt, [new("putDocument", P.Anchor, P.AnchorId, 1)], token);
+        await A.ReceiptAsync(command, receipt, [new("putDocument", P.Anchor, P.AnchorId, 1)]);
         return await A.CaptureAsync(caller, new(partition, P.Anchor, P.AnchorId), P.AnchorJson, token);
     }
 }

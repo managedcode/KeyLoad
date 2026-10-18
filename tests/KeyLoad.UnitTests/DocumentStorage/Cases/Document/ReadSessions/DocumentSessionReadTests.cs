@@ -18,7 +18,7 @@ internal sealed class DocumentSessionReadTests
     private const int SnapshotBound = 128;
 
     [Test]
-    public async Task Kl021MinimumTokenRejectsInvalidAuthorityWithoutEffectsAndHealthyReadContinues()
+    public async Task MinimumTokenRejectsInvalidAuthorityWithoutEffectsAndHealthyReadContinues()
     {
         using var db = new TestDatabase();
         db.Configure(Collection, ResourceKind.Collection);
@@ -64,7 +64,7 @@ internal sealed class DocumentSessionReadTests
     }
 
     [Test]
-    public async Task Kl021CancelledMinimumReadReturnsNoResultAndFreshNativeReadSucceeds()
+    public async Task CancelledMinimumReadReturnsNoResultAndFreshNativeReadSucceeds()
     {
         using var db = new TestDatabase();
         db.Configure(Collection, ResourceKind.Collection);
@@ -83,7 +83,7 @@ internal sealed class DocumentSessionReadTests
     }
 
     [Test]
-    public async Task Kl021MinimumTokenUsesFreshPersistedAuthorizationAndHealthyGrantRestoration()
+    public async Task MinimumTokenUsesFreshPersistedAuthorizationAndHealthyGrantRestoration()
     {
         using var db = new TestDatabase();
         db.Configure(Collection, ResourceKind.Collection);
@@ -117,7 +117,7 @@ internal sealed class DocumentSessionReadTests
     }
 
     [Test]
-    public async Task Kl021MissingAppliedAuthorityFailsClosedAndRestoredNativeReadContinues()
+    public async Task MissingAppliedAuthorityFailsClosedAndRestoredNativeReadContinues()
     {
         using var db = new TestDatabase();
         db.Configure(Collection, ResourceKind.Collection);
@@ -140,7 +140,7 @@ internal sealed class DocumentSessionReadTests
     [Test]
     [Arguments(false)]
     [Arguments(true)]
-    public async Task Kl021CorruptAppliedAuthorityFailsClosedWithoutEffectsAndRestoredReadContinues(bool truncated)
+    public async Task CorruptAppliedAuthorityFailsClosedWithoutEffectsAndRestoredReadContinues(bool truncated)
     {
         using var db = new TestDatabase();
         db.Configure(Collection, ResourceKind.Collection);

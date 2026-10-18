@@ -14,10 +14,10 @@ import { runBounded } from './image-process.mjs';
 import { exactKeys, AGGREGATE } from './aggregate-contracts.mjs';
 
 export const FUNCTIONAL = Object.freeze({
-  job: 'KeyLoad functional RF3 million-record ingestion', artifact: 'keyload-functional-heavy-load',
+  job: 'KeyLoad functional CLUSTER million-record ingestion', artifact: 'keyload-functional-heavy-load',
   steps: Object.freeze(['Test exclusive heavy-load admission', 'Test ingestion while SDK and MCP reads are active', 'Save original functional load results and image receipts']),
   archive: 'archives/keyload-functional-heavy-load.zip',
-  className: 'KeyLoad.IntegrationTests.Features.DocumentStorage.HeavyDocumentLoadRf3Tests',
+  className: 'KeyLoad.IntegrationTests.Features.DocumentStorage.HeavyDocumentLoadClusterTests',
   methodName: 'MillionAcknowledgedDocumentsRemainCorrectDuringSdkAndOfficialMcpReads',
   files: Object.freeze(['github/functional/original.trx', 'github/functional/images/image-receipt.json',
     'github/functional/images/server-manifest.json', 'github/functional/images/comparisons-manifest.json']),
@@ -67,7 +67,7 @@ export async function parseDocumentFunctionalTrx(trx, workspace) {
   requireGitHub(result.success);
   let value;
   try { value = JSON.parse(result.stdout); } catch { requireGitHub(false); }
-  requireGitHub(value.suite === 'rf3-heavy-load' && value.testCount === 1 && Array.isArray(value.cases) && value.cases.length === 1);
+  requireGitHub(value.suite === 'cluster-heavy-load' && value.testCount === 1 && Array.isArray(value.cases) && value.cases.length === 1);
   const test = value.cases[0];
   requireGitHub(test.className === FUNCTIONAL.className && test.methodName === FUNCTIONAL.methodName
     && test.instanceName === FUNCTIONAL.methodName);
@@ -75,7 +75,7 @@ export async function parseDocumentFunctionalTrx(trx, workspace) {
 }
 
 function originalEntries(entries) {
-  const predicates = [entry => /(?:^|\/)rf3-heavy-load\/.+\.trx$/u.test(entry),
+  const predicates = [entry => /(?:^|\/)cluster-heavy-load\/.+\.trx$/u.test(entry),
     ...['image-receipt.json', 'server-manifest.json', 'comparisons-manifest.json']
       .map(name => entry => entry.endsWith('/keyload-images/' + name) || entry === 'keyload-images/' + name)];
   return predicates.map(predicate => {

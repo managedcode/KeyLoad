@@ -3,9 +3,8 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.TimeSeries;
 
-internal sealed record SeriesExtremeAggregateState(TimeSeriesRf3Scenario Scenario,
-    ImmutableArray<SampleData> Initial, ImmutableArray<SampleData> Late, ImmutableArray<SampleData> Extrema,
-    AtomicPartitionPlacementResolution Placement)
+internal sealed record SeriesExtremeAggregateState(TimeSeriesClusterScenario Scenario,
+    ImmutableArray<SampleData> Initial, ImmutableArray<SampleData> Late, ImmutableArray<SampleData> Extrema)
 {
     internal McpPersistedIdentity? Reader
     {

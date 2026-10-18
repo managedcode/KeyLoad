@@ -23,10 +23,9 @@ internal sealed partial class ControlledPartitionMovementNativeHost : IAsyncDisp
     private readonly Func<OrleansNode> silo;
     private bool joined;
 
-    internal ControlledPartitionMovementNativeHost(WebApplication application, ControlledPartitionMovementNativeObservationWitness nativeObservation)
+    internal ControlledPartitionMovementNativeHost(WebApplication application)
     {
         Application = application;
-        NativeObservation = nativeObservation;
         Runtime = application.Services.GetRequiredService<ServerRuntimeOptions>();
         Clock = application.Services.GetRequiredService<TimeProvider>();
         connections = application.Services.GetRequiredService<ServerConnectionRegistry>();
@@ -37,21 +36,15 @@ internal sealed partial class ControlledPartitionMovementNativeHost : IAsyncDisp
         storageOwner = () => originalStorageOwner;
     }
 
-    internal ControlledPartitionMovementNativeObservationWitness NativeObservation
-    {
-        get;
-    }
-
     internal static Task<ControlledPartitionMovementNativeHost> CreateAsync(string[] arguments,
         NativeLocalhostClusteringOptions localhostClustering,
-        IGrainPartitionMovementSealedOperationObserver? sealedObserver = null,
         IDatabaseAuthenticationExecutionObserver? authenticationObserver = null,
         Func<IServiceProvider, ILifecycleParticipant<ISiloLifecycle>>? lifecycleParticipantFactory = null,
         IGrainRequestPhaseObserver? phaseObserver = null, IGrainRequestPurposeObserver? purposeObserver = null,
         Action<IServiceCollection, NodeOptions>? configureServices = null,
         CancellationToken startupCancellation = default)
         => ControlledPartitionMovementNativeApplicationFactory.CreateAsync(arguments, localhostClustering,
-            sealedObserver, authenticationObserver, lifecycleParticipantFactory, phaseObserver, purposeObserver, configureServices, startupCancellation);
+            authenticationObserver, lifecycleParticipantFactory, phaseObserver, purposeObserver, configureServices, startupCancellation);
 
     internal WebApplication Application
     {
@@ -75,9 +68,6 @@ internal sealed partial class ControlledPartitionMovementNativeHost : IAsyncDisp
         ?? throw Errors.Fail(ErrorCode.OwnershipLost, PartitionMovementProtocol.Unavailable);
     internal PartitionMovementGrainServiceClient NativeSender => Silo.BorrowPartitionMovementTransport();
     internal bool IsJoined => Volatile.Read(ref joined);
-
-    internal PartitionMovementTransportOwner BorrowTransport()
-        => new(Runtime.Node, Silo, Partition, Runtime.Membership, Clock);
 
     internal Task StartAsync(CancellationToken cancellationToken)
     {

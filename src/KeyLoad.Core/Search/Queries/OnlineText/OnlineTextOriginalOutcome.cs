@@ -108,8 +108,7 @@ public sealed partial class DatabaseEngine
             Capability.Query | Capability.DocumentsRead);
         var resource = BindAuthorizedReadResource(view, request.Consumer.Partition, request.Collection, ResourceKind.Collection);
         Authorization.RequireFieldUse(principal, resource, request.Field);
-        var current = ReadAtomicPartitionPlacement(view, principal.Id,
-            new(AtomicPartitionPlacementProtocol.CurrentVersion, request.Consumer.Partition));
+        var current = ReadAtomicPartitionPlacement(view, principal.Id, request.Consumer.Partition);
         if (current.PhysicalShardId != request.Placement.PhysicalShardId
             || current.Incarnation != request.Placement.Incarnation
             || current.PlacementEpoch != request.Placement.PlacementEpoch

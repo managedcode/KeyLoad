@@ -19,9 +19,9 @@ internal sealed class RequestCqrsLifecycleEvidence
     private RequestCqrsLifecycleStage scenarioPhase = RequestCqrsLifecycleStage.Scenario;
     private RequestCqrsLifecycleStage? firstScenarioPhase;
     private RequestCqrsLifecycleSnapshot? terminal;
-    private RequestCqrsRf3Diagnostics? diagnostics;
-    private RequestCqrsRf3DiagnosticsSubscriberObserver? observer;
-    private RequestCqrsRf3DiagnosticsIndependentConsumer? consumer;
+    private RequestCqrsClusterDiagnostics? diagnostics;
+    private RequestCqrsClusterDiagnosticsSubscriberObserver? observer;
+    private RequestCqrsClusterDiagnosticsIndependentConsumer? consumer;
     private CancellationToken callerToken;
     private CancellationToken parentToken;
     private CancellationToken waveToken;
@@ -38,9 +38,9 @@ internal sealed class RequestCqrsLifecycleEvidence
         parentToken = parent;
         waveToken = wave;
     }
-    internal void BindDiagnostics(RequestCqrsRf3Diagnostics value) => diagnostics = value;
-    internal void BindObserver(RequestCqrsRf3DiagnosticsSubscriberObserver value) => observer = value;
-    internal void BindConsumer(RequestCqrsRf3DiagnosticsIndependentConsumer value) => consumer = value;
+    internal void BindDiagnostics(RequestCqrsClusterDiagnostics value) => diagnostics = value;
+    internal void BindObserver(RequestCqrsClusterDiagnosticsSubscriberObserver value) => observer = value;
+    internal void BindConsumer(RequestCqrsClusterDiagnosticsIndependentConsumer value) => consumer = value;
     internal void MarkHeldWriteObserved() => heldWriteObserved = true;
     internal void MarkPersistedRevocationEntered() => persistedRevocationEntered = true;
 
@@ -52,9 +52,9 @@ internal sealed class RequestCqrsLifecycleEvidence
     {
         var index = node switch
         {
-            RequestCqrsRf3Protocol.Node1 => 0,
-            RequestCqrsRf3Protocol.Node2 => 1,
-            RequestCqrsRf3Protocol.Node3 => 2,
+            RequestCqrsClusterProtocol.Node1 => 0,
+            RequestCqrsClusterProtocol.Node2 => 1,
+            RequestCqrsClusterProtocol.Node3 => 2,
             _ => throw new ArgumentOutOfRangeException(nameof(node))
         };
         readiness[index] = outcome;

@@ -16,8 +16,7 @@ internal static class BlobCommitCutNativeProof
     internal static DatabaseEngine Database(ZoneTreeStore store) => new(store, new AuthorizationPolicy(),
         CrashExecutionOptions.DatabaseLimits(), CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource(),
         CrashExecutionOptions.Messaging(), CrashExecutionOptions.GraphExecution(), CrashExecutionOptions.ChangeFeedExecution(),
-        CrashExecutionOptions.BlobExecution(), CrashExecutionOptions.NativeClaimsExecution(), CrashExecutionOptions.TimeSeriesExecution(),
-        CrashExecutionOptions.MovementCheckpoints(), UnavailablePartitionMovementCheckpointVerifier.Instance);
+        CrashExecutionOptions.BlobExecution(), CrashExecutionOptions.NativeClaimsExecution(), CrashExecutionOptions.TimeSeriesExecution());
 
     internal static string Image(ZoneTreeStore store) => store.Read(view =>
     {

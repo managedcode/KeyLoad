@@ -10,7 +10,7 @@ internal sealed class IndexedReferenceWholeFlowTests
     [Arguments(false, 2)]
     [Arguments(true, 1)]
     [Arguments(true, 2)]
-    public async Task Kl013IndexedAndReferencePagesAgreeAndRejectedCursorsPreserveState(bool descending, int limit)
+    public async Task IndexedAndReferencePagesAgreeAndRejectedCursorsPreserveState(bool descending, int limit)
     {
         using var db = new TestDatabase();
         IndexedReferenceWholeFlowFixture.Seed(db);

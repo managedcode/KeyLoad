@@ -11,29 +11,29 @@ namespace KeyLoad.IntegrationTests.Features.GraphTraversal;
 
 internal static class GraphIncomingPublicRoutes
 {
-    internal static async Task HealthyAsync(RequestCqrsRf3Callers callers, GraphIncomingRf3Seed seed,
+    internal static async Task HealthyAsync(RequestCqrsClusterCallers callers, GraphIncomingClusterSeed seed,
         bool sourceHidden, CancellationToken token)
     {
-        var request = GraphIncomingRf3Scenario.Request(seed);
+        var request = GraphIncomingClusterScenario.Request(seed);
         var direct = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.IncomingEdgesAsync(request, token));
         await LiteralAsync(direct, seed, sourceHidden);
-        var reply = await callers.Mcp.CallAsync(GraphIncomingRf3Scenario.Tool, request, token);
+        var reply = await callers.Mcp.CallAsync(GraphIncomingClusterScenario.Tool, request, token);
         await LiteralAsync((await McpCallerAssertions.SuccessAsync<GraphIncomingEdgesPageV1>(reply)).Value, seed, sourceHidden);
-        await GraphIncomingRf3Assertions.AssertNoPrivatePayloadAsync(reply, seed.Reader.Secret);
-        var sql = SqlRf3Protocol.Call(seed.TargetPartition, GraphIncomingRf3Scenario.Tool, request);
-        await LiteralAsync(await SqlRf3Protocol.SdkAsync<GraphIncomingEdgesPageV1>(callers.Sdk, sql, token), seed, sourceHidden);
+        await GraphIncomingClusterAssertions.AssertNoPrivatePayloadAsync(reply, seed.Reader.Secret);
+        var sql = SqlClusterProtocol.Call(seed.TargetPartition, GraphIncomingClusterScenario.Tool, request);
+        await LiteralAsync(await SqlClusterProtocol.SdkAsync<GraphIncomingEdgesPageV1>(callers.Sdk, sql, token), seed, sourceHidden);
         reply = await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token);
         await LiteralAsync((await McpCallerAssertions.SuccessAsync<GraphIncomingEdgesPageV1>(reply)).Value, seed, sourceHidden);
-        await GraphIncomingRf3Assertions.AssertNoPrivatePayloadAsync(reply, seed.Reader.Secret);
+        await GraphIncomingClusterAssertions.AssertNoPrivatePayloadAsync(reply, seed.Reader.Secret);
     }
 
-    internal static async Task DeniedAsync(ClusterFixture fixture, RequestCqrsRf3Callers callers, GraphIncomingRf3Seed seed,
+    internal static async Task DeniedAsync(ClusterFixture fixture, RequestCqrsClusterCallers callers, GraphIncomingClusterSeed seed,
         ErrorCode code, CancellationToken token)
     {
-        var request = GraphIncomingRf3Scenario.Request(seed);
+        var request = GraphIncomingClusterScenario.Request(seed);
         await SdkDeniedAsync(await callers.Sdk.IncomingEdgesAsync(request, token), code, seed.Reader.Secret);
-        await McpDeniedAsync(callers, GraphIncomingRf3Scenario.Tool, request, code, seed.Reader.Secret, token);
-        var sql = SqlRf3Protocol.Call(seed.TargetPartition, GraphIncomingRf3Scenario.Tool, request);
+        await McpDeniedAsync(callers, GraphIncomingClusterScenario.Tool, request, code, seed.Reader.Secret, token);
+        var sql = SqlClusterProtocol.Call(seed.TargetPartition, GraphIncomingClusterScenario.Tool, request);
         await SdkDeniedAsync(await callers.Sdk.ExecuteSqlAsync(sql, token), code, seed.Reader.Secret);
         await McpDeniedAsync(callers, SqlOperationProtocol.ToolName, sql, code, seed.Reader.Secret, token);
         if (code == ErrorCode.Unauthenticated)
@@ -56,10 +56,10 @@ internal static class GraphIncomingPublicRoutes
         }
         var text = Encoding.UTF8.GetString(JsonDefaults.Serialize(result.Problem));
         await Assert.That(text.Contains(credential, StringComparison.Ordinal)).IsFalse();
-        await Assert.That(text.Contains(GraphIncomingRf3Scenario.PrivateMarker, StringComparison.Ordinal)).IsFalse();
+        await Assert.That(text.Contains(GraphIncomingClusterScenario.PrivateMarker, StringComparison.Ordinal)).IsFalse();
     }
 
-    private static async Task McpDeniedAsync<T>(RequestCqrsRf3Callers callers, string tool, T request,
+    private static async Task McpDeniedAsync<T>(RequestCqrsClusterCallers callers, string tool, T request,
         ErrorCode code, string credential, CancellationToken token)
     {
         if (code == ErrorCode.Unauthenticated)
@@ -67,23 +67,23 @@ internal static class GraphIncomingPublicRoutes
             var failure = await Assert.ThrowsAsync<HttpRequestException>(() => callers.Mcp.CallAsync(tool, request, token));
             await Assert.That(failure!.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
             await Assert.That(failure.Message.Contains(credential, StringComparison.Ordinal)).IsFalse();
-            await Assert.That(failure.Message.Contains(GraphIncomingRf3Scenario.PrivateMarker, StringComparison.Ordinal)).IsFalse();
+            await Assert.That(failure.Message.Contains(GraphIncomingClusterScenario.PrivateMarker, StringComparison.Ordinal)).IsFalse();
             return;
         }
         var reply = await callers.Mcp.CallAsync(tool, request, token);
         await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true);
-        await GraphIncomingRf3Assertions.AssertNoPrivatePayloadAsync(reply, credential);
+        await GraphIncomingClusterAssertions.AssertNoPrivatePayloadAsync(reply, credential);
     }
 
-    private static async Task LiteralAsync(GraphIncomingEdgesPageV1 page, GraphIncomingRf3Seed seed, bool hidden)
+    private static async Task LiteralAsync(GraphIncomingEdgesPageV1 page, GraphIncomingClusterSeed seed, bool hidden)
     {
         if (hidden)
         {
-            await GraphIncomingRf3Assertions.AssertSourceHiddenAsync(page, seed);
+            await GraphIncomingClusterAssertions.AssertSourceHiddenAsync(page, seed);
         }
         else
         {
-            await GraphIncomingRf3Assertions.AssertThreeRowsAsync(page, seed);
+            await GraphIncomingClusterAssertions.AssertThreeRowsAsync(page, seed);
         }
         await Assert.That(page.Version).IsEqualTo(GraphIncomingPublicPolicy.Version);
         await Assert.That(page.CutPosition).IsGreaterThan(GraphIncomingPublicPolicy.EmptyPosition);

@@ -11,4 +11,4 @@ flowchart LR
  DisposeAndRepair --> ReopenOriginalRows --> HealthyCheckpoint --> TwoColdOpens
 ```
 
-This conditional source contribution is not compiler, Linux, process-crash, RF3 or power-loss evidence. Recovery and fault qualification remain mandatory. A failure during outer temporary-file deletion could still mask an earlier error and requires a separate genuine producer; this narrow repair does not claim to fix that path or ambiguous filesystem rename failures. See [StorageRecovery](../StorageRecovery.md).
+This is not process-crash, replicated-cluster or power-loss evidence; recovery and fault qualification remain mandatory. A failure during outer temporary-file deletion could still mask an earlier error and requires a separate genuine producer; this narrow repair does not claim to fix that path or ambiguous filesystem rename failures. See [StorageRecovery](../StorageRecovery.md).

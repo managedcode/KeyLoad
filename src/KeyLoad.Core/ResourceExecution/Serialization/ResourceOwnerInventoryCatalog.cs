@@ -23,14 +23,8 @@ internal static class ResourceOwnerInventoryCatalog
         {
             throw Errors.Fail(ErrorCode.RecoveryRequired, ResourceOwnerInventoryProtocol.Unknown);
         }
-        RequireSettledImports(view);
         return origin.Revision;
     }
-
-    internal static void RequireSettledImports(IKeyValueView view)
-        => view.VisitRange(KeyCodec.Encode(ResourceOwnerInventoryMovementProtocol.ImportSpace),
-            ResourceOwnerInventoryMovementProtocol.ActiveImportProbeCount, (key, value) =>
-                throw Errors.Fail(ErrorCode.RecoveryRequired, ResourceOwnerInventoryProtocol.Unknown));
 
     internal static byte[] Prefix(ResourceLifetimeV1 lifetime)
     {

@@ -20,7 +20,7 @@ internal static class SubscriptionCachedEmptyPolicyAssertions
         await Assert.That(failure.Value).IsNull();
         var reply = await mcp.CallAsync(McpCallerTools.SubscriptionsReceive, request, token);
         await DetailAsync(reply, detail);
-        await SubscriptionFilterRf3Assertions.EqualAsync(
+        await SubscriptionFilterClusterAssertions.EqualAsync(
             await McpCallerAssertions.SdkSuccessAsync(await sdk.SubscriptionStatusAsync(request.Subscription, token)), before);
         return global::System.Text.Json.JsonSerializer.Serialize(failure.Problem, JsonDefaults.Options);
     }
@@ -38,7 +38,7 @@ internal static class SubscriptionCachedEmptyPolicyAssertions
         await Assert.That(publish.Problem.Detail).IsEqualTo(EpochChanged);
         await Assert.That(publish.Value).IsNull();
         await DetailAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, state.Original.Publish, token), EpochChanged);
-        await SubscriptionFilterRf3Assertions.HistoryAsync(sdk, mcp, state.Original.Empty.Subscription.Source,
+        await SubscriptionFilterClusterAssertions.HistoryAsync(sdk, mcp, state.Original.Empty.Subscription.Source,
             state.Original.Source, token);
     }
 

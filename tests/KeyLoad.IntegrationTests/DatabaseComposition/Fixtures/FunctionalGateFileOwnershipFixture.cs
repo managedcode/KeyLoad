@@ -1,6 +1,6 @@
 namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
-/// <summary>Selects only an ephemeral negative ownership probe beside the original RF3 owners.</summary>
+/// <summary>Selects only an ephemeral negative ownership probe beside the original CLUSTER owners.</summary>
 internal sealed partial class FunctionalGateFixture
 {
     private readonly FunctionalGateFileContenderSettlement fileContenders;

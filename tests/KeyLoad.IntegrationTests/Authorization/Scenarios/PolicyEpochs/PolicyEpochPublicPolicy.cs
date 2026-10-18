@@ -17,7 +17,7 @@ internal static class PolicyEpochPublicPolicy
             PolicyEpoch = checked(identity.Principal.PolicyEpoch + 1)
         };
         var actual = await McpCallerAssertions.SdkSuccessAsync(await root.ConfigurePrincipalAsync(Guid.NewGuid(), principal, token));
-        await SqlRf3Protocol.EqualAsync(principal, actual);
+        await SqlClusterProtocol.EqualAsync(principal, actual);
         return identity with
         {
             Principal = principal
@@ -28,7 +28,7 @@ internal static class PolicyEpochPublicPolicy
     {
         await PolicyEpochPublicAssertions.ImageAsync(root, state.Scenario, token);
         var replay = await McpCallerAssertions.SdkSuccessAsync(await root.CommitAsync(state.Seed, token));
-        await SqlRf3Protocol.EqualAsync(state.Receipt, replay);
+        await SqlClusterProtocol.EqualAsync(state.Receipt, replay);
         await PolicyEpochPublicAssertions.ImageAsync(root, state.Scenario, token);
     }
 }

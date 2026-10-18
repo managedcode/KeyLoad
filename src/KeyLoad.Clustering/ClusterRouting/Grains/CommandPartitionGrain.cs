@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Orleans.Placement;
-using Orleans.Runtime.Placement;
 
 namespace KeyLoad.Clustering;
 
@@ -24,7 +23,7 @@ public sealed class CommandPartitionGrain(GrainRequestCodec codec, DatabaseEngin
     : Grain, ICommandPartitionGrain
 {
     private readonly GrainCommandExecutor commands = new(database, borrowCoordinator(), clock, options, codec, borrowWorkOwner(), services.GetService<IPhysicalRequestPlacement>(),
-        services.GetService<IGrainPartitionMovementSealedOperationObserver>(), services.GetService<Func<INativeOnlineTextMaintenance>>()?.Invoke(), services.GetService<IPlacementIntentPersistence>(), () => services.GetRequiredService<INativeDropTableExecution>());
+        services.GetService<Func<INativeOnlineTextMaintenance>>()?.Invoke(), () => services.GetRequiredService<INativeDropTableExecution>());
 
     /// <inheritdoc />
     /// <param name="signedRequest">The signed request whose partition key must match this actor.</param>
@@ -46,16 +45,6 @@ public sealed class CommandPartitionGrain(GrainRequestCodec codec, DatabaseEngin
             {
                 GrainFailureDiagnostics.Log(diagnostics, Errors.Fail(code, GrainRoutingProtocol.InvalidRequest),
                     requestId, stage, code);
-            }
-            if (reply.Error is null && context is not null
-                && services.GetService<IGrainActivationMigrationObserver>() is { } migration)
-            {
-                var target = await migration.PrepareMigrationAsync(GrainRequestProbeIdentity.From(request.Envelope),
-                    context, cancellationToken).ConfigureAwait(true);
-                if (target is not null)
-                {
-                    MigrateTo(target, cancellationToken);
-                }
             }
             return reply;
         }
@@ -79,51 +68,13 @@ public sealed class CommandPartitionGrain(GrainRequestCodec codec, DatabaseEngin
             var reply = await NativeCommandObservationPreparation.ExecuteAsync(database, borrowCoordinator(),
                 clock, options, codec, borrowWorkOwner(), services.GetService<IPhysicalRequestPlacement>(),
                 services.GetService<ReplicaSiloDiscoveryState>(), request, this.GetPrimaryKeyString(),
-                context, () => MigratePreparedAsync(request, context, cancellationToken),
-                cancellationToken).ConfigureAwait(true);
+                context, cancellationToken).ConfigureAwait(true);
             return reply;
         }
         catch (Exception error) when (GrainBoundaryErrors.Handles(error))
         {
             return GrainReplyFactory.Failure(error: error, command: false, diagnostics: diagnostics,
                 options: options, requestId: requestId, stage: stage, cancellationToken: cancellationToken);
-        }
-    }
-
-    private async Task MigratePreparedAsync(DecodedGrainRequest request, IGrainContext? context,
-        CancellationToken cancellationToken)
-    {
-        if (context is not null && services.GetService<IGrainActivationMigrationObserver>() is { } migration)
-        {
-            var target = await migration.PrepareMigrationAsync(GrainRequestProbeIdentity.From(request.Envelope),
-                context, cancellationToken).ConfigureAwait(true);
-            if (target is not null)
-            {
-                MigrateTo(target, cancellationToken);
-            }
-        }
-    }
-
-    private void MigrateTo(SiloAddress target, CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
-        var previous = RequestContext.Entries.FirstOrDefault(
-            static entry => entry.Key == IPlacementDirector.PlacementHintKey);
-        try
-        {
-            RequestContext.Set(IPlacementDirector.PlacementHintKey, target);
-            MigrateOnIdle();
-        }
-        finally
-        {
-            if (previous.Key is not null)
-            {
-                RequestContext.Set(IPlacementDirector.PlacementHintKey, previous.Value);
-            }
-            else
-            {
-                RequestContext.Remove(IPlacementDirector.PlacementHintKey);
-            }
         }
     }
 }

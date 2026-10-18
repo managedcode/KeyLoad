@@ -8,57 +8,29 @@ internal sealed class NativeTUnitSelectionTests
     private const string ArgumentsProperty = "args";
     private const string EnvironmentProperty = "environment";
     private const string SelectionProperty = "selected";
-    private const string LocalProperty = "local";
     private const string RejectionProperty = "rejection";
     private const string UnsupportedRejectionCountProperty = "rejectionUnsupportedCount";
-    private const string RejectionFilter = "/*/*/RelationalSqlRf3JoinRejectionTests/*";
+    private const string RejectionFilter = "/*/*/RelationalSqlClusterJoinRejectionTests/*";
     private const string StandardProperty = "standard";
-    private const string ConnectionProperty = "connection";
-    private const string ConnectionUnsupportedCountProperty = "connectionUnsupportedCount";
-    private const string ConnectionFilter = "/*/*/(ConnectionRf3SequentialTests|ConnectionRf3OverlapTests|ConnectionRf3AuthorizationTests)/*";
-    private const int ExpectedConnectionRejectionCount = 4;
-    private const string EmptySnapshotProperty = "emptySnapshot";
-    private const string EmptySnapshotUnsupportedProperty = "emptySnapshotUnsupportedCount";
-    private const string EmptySnapshotFilter = "/*/*/EmptyReplicaSnapshotRf3Tests/*";
-    private const int ExpectedEmptySnapshotRejections = 4;
+    private const int ExpectedRetainedSnapshotRejections = 4;
     private const string RetainedSnapshotProperty = "retainedSnapshot";
     private const string RetainedSnapshotUnsupportedProperty = "retainedSnapshotUnsupportedCount";
     private const string RetainedSnapshotFilter = "/*/*/ClusterTests/RetainedReplicaCatchesUpThroughNativeSnapshotAndKeepsCommandOutcomes";
     private const string NativeTextProperty = "nativeText";
     private const string NativeTextUnsupportedCountProperty = "nativeTextUnsupportedCount";
     private const int ExpectedNativeTextRejectionCount = 4;
-    private const string NativeTextFilter = "/*/*/(NativeTextAsyncRf3Tests)|(NativeTextMaintenanceRf3Tests)|(NativeTextRf3LeaderLossTests)|(NativeTextRf3Tests)|(NativeTextWaitRf3Tests)/*";
-    private const string NativeTextSdkProperty = "nativeTextSdk";
-    private const string NativeTextSdkRejectedProperty = "nativeTextSdkRejectedCount";
-    private const int ExpectedNativeTextSdkRejections = 8;
-    private const string NativeUidArgument = "--filter-uid";
-    private const string MinimumExpectedTestsArgument = "--minimum-expected-tests";
-    private const string SingleExpectedTest = "1";
-    private const string NativeTextSdkUid = "KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenanceRf3Tests(KeyLoad.IntegrationTests.ClusterFixture).1.1.ProtectedNativeTextMaintenanceReplaysBilingualUpdateDeleteAcrossAllPublicPaths(KeyLoad.IntegrationTests.Features.Search.NativeTextMaintenancePath).1.1.0";
-    private const string RemoteTransferProperty = "remoteTransfer";
-    private const string RemoteTransferUnsupportedCountProperty = "remoteTransferUnsupportedCount";
-    private const int ExpectedRemoteTransferRejectionCount = 4;
-    private const string RemoteTransferFilter = "/*/*/RemoteTransferDistinctOwnerTests/ActualDistinctOwnersRetainAcceptReceiptAcrossTwoColdRestartsAndBDoesNotResurrectAcknowledgedMessage";
-    private const string PurposeProperty = "purpose";
-    private const string PurposeUnsupportedProperty = "purposeUnsupportedCount";
-    private const string PurposeFilter = "/*/*/NativeSignedPurposeRf3Tests/ForegroundSdkOrOfficialMcpSignedPurposeRefusesThenExactRepairReplayAndTwoColdCuts";
-    private const int ExpectedPurposeRejections = 4;
-    private const string CapabilityProperty = "capability";
-    private const string CapabilityUnsupportedProperty = "capabilityUnsupportedCount";
-    private const string CapabilityFilter = "/*/*/NativeCapabilityOmissionRf3Tests/ForegroundSdkOrOfficialMcpOmittedCapabilityRefusesThenSameOwnerRepairAndColdReplay";
-    private const int ExpectedCapabilityRejections = 4;
+    private const string NativeTextFilter = "/*/*/(NativeTextAsyncClusterTests)|(NativeTextClusterLeaderLossTests)|(NativeTextClusterTests)|(NativeTextWaitClusterTests)/*";
     private const string GraphIncomingProperty = "graphIncoming";
     private const string GraphIncomingUnsupportedProperty = "graphIncomingUnsupportedCount";
-    private const string GraphIncomingFilter = "/*/*/GraphIncomingRf3Tests/PersistedSourceGrantHidesCrossRowsAndTargetGraphDenialIsExplicit";
+    private const string GraphIncomingFilter = "/*/*/GraphIncomingClusterTests/PersistedSourceGrantHidesCrossRowsAndTargetGraphDenialIsExplicit";
     private const int ExpectedGraphIncomingRejections = 4;
-    private const string LocalArgumentsEnvironment = "KEYLOAD_TUNIT_LOCAL_RF3_IMAGE_ARGUMENTS";
-    private const string LocalEnabledEnvironment = "KeyLoadTests__LocalRf3Image__Enabled";
+    private const string LocalArgumentsEnvironment = "KEYLOAD_TUNIT_LOCAL_CLUSTER_IMAGE_ARGUMENTS";
+    private const string LocalEnabledEnvironment = "KeyLoadTests__LocalClusterImage__Enabled";
     private const string LocalProvenanceEnvironment = "KEYLOAD_IMAGE_PROVENANCE";
     private const string LocalReceiptEnvironment = "KEYLOAD_LOCAL_IMAGE_RECEIPT";
     private const string LocalReferenceEnvironment = "KeyLoad__ContainerImages__Server";
-    private const string LocalChildEnvironment = "KEYLOAD_LOCAL_RF3_IMAGE_CHILD";
-    private const string LocalFilter = "/*/*/TwoRf3MembershipProfileTests/*";
-    private const string StandardFilter = "/*/*/(PartitionQueryMcpSchemaTests|RelationalSqlRf3JoinTests|RelationalSqlRf3JoinAuthorizationTests|RelationalSqlRf3JoinBudgetTests|RelationalSqlRf3JoinCancellationTests|RelationalSqlRf3JoinReadCutTests)/*";
+    private const string LocalChildEnvironment = "KEYLOAD_LOCAL_CLUSTER_IMAGE_CHILD";
+    private const string StandardFilter = "/*/*/(PartitionQueryMcpSchemaTests|RelationalSqlClusterJoinTests|RelationalSqlClusterJoinAuthorizationTests|RelationalSqlClusterJoinBudgetTests|RelationalSqlClusterJoinCancellationTests|RelationalSqlClusterJoinReadCutTests)/*";
     private const string RevisionEnvironment = "GITHUB_SHA";
     private const string SuiteEnvironment = "KeyLoadTests__Suite";
     private const string IntrinsicEnvironment = "DOTNET_EnableHWIntrinsic";
@@ -73,7 +45,7 @@ internal sealed class NativeTUnitSelectionTests
     [Arguments("unit", "KeyLoad.UnitTests")]
     [Arguments("analyzers", "KeyLoad.Analyzers.Tests")]
     [Arguments("recovery", "KeyLoad.RecoveryTests")]
-    [Arguments("rf3", "KeyLoad.IntegrationTests")]
+    [Arguments("cluster", "KeyLoad.IntegrationTests")]
     public async Task NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections(string suite, string project)
     {
         using var selection = JsonDocument.Parse(await NativeTestSelectionProcess.ReadAsync(suite).ConfigureAwait(false));
@@ -96,15 +68,12 @@ internal sealed class NativeTUnitSelectionTests
         await Assert.That(environment.TryGetProperty(SuiteEnvironment, out _)).IsFalse();
         await Assert.That(environment.TryGetProperty(LocalArgumentsEnvironment, out _)).IsFalse();
         await Assert.That(environment.TryGetProperty(IntrinsicEnvironment, out _)).IsFalse();
-        if (suite == "rf3")
+        if (suite == "cluster")
         {
-            await AssertLocalSelectorAsync(selection.RootElement.GetProperty(LocalProperty), LocalFilter).ConfigureAwait(false);
             await AssertLocalSelectorAsync(selection.RootElement.GetProperty(StandardProperty), StandardFilter).ConfigureAwait(false);
             await AssertLocalSelectorAsync(selection.RootElement.GetProperty(RejectionProperty), RejectionFilter).ConfigureAwait(false);
-            await AssertLocalSelectorAsync(selection.RootElement.GetProperty(ConnectionProperty), ConnectionFilter).ConfigureAwait(false);
             await AssertLocalSelectorAsync(selection.RootElement.GetProperty(NativeTextProperty), NativeTextFilter).ConfigureAwait(false);
-            await AssertNativeTextSdkAsync(selection.RootElement).ConfigureAwait(false);
-            await AssertEmptySnapshotAsync(selection.RootElement).ConfigureAwait(false);
+            await AssertRetainedSnapshotAsync(selection.RootElement).ConfigureAwait(false);
             await NativeResourcePolicySelectionAssertions.AssertAsync(selection.RootElement).ConfigureAwait(false);
             await NativeMcpAuthoritySelectionAssertions.AssertAsync(selection.RootElement).ConfigureAwait(false);
             await NativeR33PublicSelectionAssertions.AssertAsync(selection.RootElement).ConfigureAwait(false);
@@ -115,51 +84,17 @@ internal sealed class NativeTUnitSelectionTests
             await AssertLocalSelectorAsync(selection.RootElement.GetProperty(GraphIncomingProperty), GraphIncomingFilter).ConfigureAwait(false);
             await Assert.That(selection.RootElement.GetProperty(GraphIncomingUnsupportedProperty).GetInt32())
                 .IsEqualTo(ExpectedGraphIncomingRejections);
-            await AssertLocalSelectorAsync(selection.RootElement.GetProperty(CapabilityProperty), CapabilityFilter).ConfigureAwait(false);
-            await Assert.That(selection.RootElement.GetProperty(CapabilityUnsupportedProperty).GetInt32())
-                .IsEqualTo(ExpectedCapabilityRejections);
-            await AssertLocalSelectorAsync(selection.RootElement.GetProperty(RemoteTransferProperty), RemoteTransferFilter).ConfigureAwait(false);
-            await Assert.That(selection.RootElement.GetProperty(RemoteTransferUnsupportedCountProperty).GetInt32())
-                .IsEqualTo(ExpectedRemoteTransferRejectionCount);
             await Assert.That(selection.RootElement.GetProperty(NativeTextUnsupportedCountProperty).GetInt32())
                 .IsEqualTo(ExpectedNativeTextRejectionCount);
-            await Assert.That(selection.RootElement.GetProperty(ConnectionUnsupportedCountProperty).GetInt32())
-                .IsEqualTo(ExpectedConnectionRejectionCount);
             await Assert.That(selection.RootElement.GetProperty(UnsupportedRejectionCountProperty).GetInt32()).IsEqualTo(4);
         }
     }
 
-    private static async Task AssertEmptySnapshotAsync(JsonElement root)
+    private static async Task AssertRetainedSnapshotAsync(JsonElement root)
     {
-        await AssertPurposeAsync(root).ConfigureAwait(false);
-        await AssertLocalSelectorAsync(root.GetProperty(EmptySnapshotProperty), EmptySnapshotFilter).ConfigureAwait(false);
-        await Assert.That(root.GetProperty(EmptySnapshotUnsupportedProperty).GetInt32())
-            .IsEqualTo(ExpectedEmptySnapshotRejections);
         await AssertLocalSelectorAsync(root.GetProperty(RetainedSnapshotProperty), RetainedSnapshotFilter).ConfigureAwait(false);
         await Assert.That(root.GetProperty(RetainedSnapshotUnsupportedProperty).GetInt32())
-            .IsEqualTo(ExpectedEmptySnapshotRejections);
-    }
-
-    private static async Task AssertPurposeAsync(JsonElement root)
-    {
-        await AssertLocalSelectorAsync(root.GetProperty(PurposeProperty), PurposeFilter).ConfigureAwait(false);
-        await Assert.That(root.GetProperty(PurposeUnsupportedProperty).GetInt32()).IsEqualTo(ExpectedPurposeRejections);
-    }
-
-    private static async Task AssertNativeTextSdkAsync(JsonElement root)
-    {
-        var selected = root.GetProperty(NativeTextSdkProperty);
-        var args = selected.GetProperty(ArgumentsProperty).EnumerateArray().Select(value => value.GetString()).ToArray();
-        await Assert.That(args).DoesNotContain("--treenode-filter");
-        await Assert.That(args[Array.IndexOf(args, NativeUidArgument) + 1]).IsEqualTo(NativeTextSdkUid);
-        await Assert.That(args[Array.IndexOf(args, MinimumExpectedTestsArgument) + 1]).IsEqualTo(SingleExpectedTest);
-        await Assert.That(args[Array.IndexOf(args, ParallelismArgument) + 1]).IsEqualTo(ExpectedDefaultParallelism);
-        using var prepared = JsonDocument.Parse(selected.GetProperty(EnvironmentProperty)
-            .GetProperty(LocalArgumentsEnvironment).GetString()!);
-        await Assert.That(prepared.RootElement.EnumerateArray().Select(value => value.GetString()!).ToArray())
-            .IsEquivalentTo(["--KeyLoadTests:Suite=rf3", "--KeyLoadTests:Filter=" + NativeTextFilter,
-                "--KeyLoadTests:LocalRf3Image:Enabled=true"], CollectionOrdering.Matching);
-        await Assert.That(root.GetProperty(NativeTextSdkRejectedProperty).GetInt32()).IsEqualTo(ExpectedNativeTextSdkRejections);
+            .IsEqualTo(ExpectedRetainedSnapshotRejections);
     }
 
     private static async Task AssertParallelismAsync(JsonElement selection, string expected)
@@ -181,8 +116,8 @@ internal sealed class NativeTUnitSelectionTests
         await Assert.That(localTUnitArguments[filterIndex + 1]).IsEqualTo(expectedFilter);
         var localArgs = arguments.RootElement.EnumerateArray().Select(value => value.GetString()!).ToArray();
         await Assert.That(localArgs).IsEquivalentTo([
-            "--KeyLoadTests:Suite=rf3", "--KeyLoadTests:Filter=" + expectedFilter,
-            "--KeyLoadTests:LocalRf3Image:Enabled=true"], CollectionOrdering.Matching);
+            "--KeyLoadTests:Suite=cluster", "--KeyLoadTests:Filter=" + expectedFilter,
+            "--KeyLoadTests:LocalClusterImage:Enabled=true"], CollectionOrdering.Matching);
         await Assert.That(environment.TryGetProperty(RevisionEnvironment, out _)).IsFalse();
         await Assert.That(environment.TryGetProperty(LocalArgumentsEnvironment, out _)).IsTrue();
         await Assert.That(environment.TryGetProperty(LocalEnabledEnvironment, out _)).IsFalse();

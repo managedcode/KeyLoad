@@ -18,7 +18,7 @@ internal sealed class PartitionQueryPublicValidationTests(ClusterFixture fixture
     public async Task AcPquery001InvalidVersionAndLeafOverflowAreValidationWithHealthyFollowup()
     {
         using var deadline = McpCallerDeadline.Create();
-        var scenario = await PartitionQueryRf3Scenario.CreateAsync(fixture, deadline.Token).ConfigureAwait(false);
+        var scenario = await PartitionQueryClusterScenario.CreateAsync(fixture, deadline.Token).ConfigureAwait(false);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
         var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
@@ -42,14 +42,14 @@ internal sealed class PartitionQueryPublicValidationTests(ClusterFixture fixture
         await AssertFailureAsync(sdk, mcp, overflow, ErrorCode.Validation, deadline.Token).ConfigureAwait(false);
         var resultLimit = scenario.Request(query: scenario.Query with
         {
-            Limit = PartitionQueryRf3Protocol.MaxResults + 1
+            Limit = PartitionQueryClusterProtocol.MaxResults + 1
         });
         await AssertFailureAsync(sdk, mcp, resultLimit, ErrorCode.BudgetExceeded, deadline.Token)
             .ConfigureAwait(false);
         var valid = scenario.Request([scenario.Partitions[0]]);
         var page = await McpCallerAssertions.SdkSuccessAsync(await sdk.PartitionQueryAsync(valid, deadline.Token)
             .ConfigureAwait(false)).ConfigureAwait(false);
-        await PartitionQueryRf3Assertions.AssertOracleAsync(page!, scenario, valid.Partitions).ConfigureAwait(false);
+        await PartitionQueryClusterAssertions.AssertOracleAsync(page!, scenario, valid.Partitions).ConfigureAwait(false);
         await AssertHealthyMcpAsync(mcp, scenario, deadline.Token).ConfigureAwait(false);
     }
 
@@ -57,7 +57,7 @@ internal sealed class PartitionQueryPublicValidationTests(ClusterFixture fixture
     public async Task AcPquery005OversizedRequestAndCancelledSdkAndMcpCallsHaveHealthyFollowups()
     {
         using var deadline = McpCallerDeadline.Create();
-        var scenario = await PartitionQueryRf3Scenario.CreateAsync(fixture, deadline.Token).ConfigureAwait(false);
+        var scenario = await PartitionQueryClusterScenario.CreateAsync(fixture, deadline.Token).ConfigureAwait(false);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
         var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var oversized = CreateOversizedRequest(scenario);
@@ -75,7 +75,7 @@ internal sealed class PartitionQueryPublicValidationTests(ClusterFixture fixture
         await Assert.That(cancelled.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.Cancelled));
         using var mcpCancellation = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token);
         await mcpCancellation.CancelAsync().ConfigureAwait(false);
-        await Assert.ThrowsAsync<OperationCanceledException>(() => mcp.CallAsync(PartitionQueryRf3Protocol.ToolName,
+        await Assert.ThrowsAsync<OperationCanceledException>(() => mcp.CallAsync(PartitionQueryClusterProtocol.ToolName,
             scenario.Request(), mcpCancellation.Token));
         await AssertHealthySdkAsync(sdk, scenario, deadline.Token).ConfigureAwait(false);
         await AssertHealthyMcpAsync(mcp, scenario, deadline.Token).ConfigureAwait(false);
@@ -88,26 +88,26 @@ internal sealed class PartitionQueryPublicValidationTests(ClusterFixture fixture
         await Assert.That(result.IsSuccess).IsFalse();
         await Assert.That(result.Value).IsNull();
         await Assert.That(result.Problem?.ErrorCode).IsEqualTo(expected.ToString());
-        var reply = await mcp.CallAsync(PartitionQueryRf3Protocol.ToolName, request, cancellationToken)
+        var reply = await mcp.CallAsync(PartitionQueryClusterProtocol.ToolName, request, cancellationToken)
             .ConfigureAwait(false);
         await McpCallerAssertions.ErrorAsync(reply, expected, dispatched: true).ConfigureAwait(false);
     }
 
     private static ImmutableArray<PartitionRef> CreateTooManyPartitions(ImmutableArray<PartitionRef> known)
-        => known.AddRange(Enumerable.Range(0, PartitionQueryRf3Protocol.MaxPartitions - known.Length + 1)
+        => known.AddRange(Enumerable.Range(0, PartitionQueryClusterProtocol.MaxPartitions - known.Length + 1)
             .Select(index => known[0] with { PartitionKey = "overflow-" + index.ToString(System.Globalization.CultureInfo.InvariantCulture) }));
 
-    private static PartitionQueryRequestV1 CreateOversizedRequest(PartitionQueryRf3Scenario scenario)
+    private static PartitionQueryRequestV1 CreateOversizedRequest(PartitionQueryClusterScenario scenario)
     {
         var largeText = new string('x', OversizedValueChars);
         var parameters = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
         {
-            [PartitionQueryRf3Protocol.ValueAlias] = JsonSerializer.SerializeToElement(largeText, JsonDefaults.Options)
+            [PartitionQueryClusterProtocol.ValueAlias] = JsonSerializer.SerializeToElement(largeText, JsonDefaults.Options)
         };
         var query = scenario.Query with
         {
-            Filter = new Comparison(new FieldOperand(PartitionQueryRf3Protocol.ValueField), "=",
-                new ParameterOperand(PartitionQueryRf3Protocol.ValueAlias))
+            Filter = new Comparison(new FieldOperand(PartitionQueryClusterProtocol.ValueField), "=",
+                new ParameterOperand(PartitionQueryClusterProtocol.ValueAlias))
         };
         return scenario.Request([scenario.Partitions[0]], query) with
         {
@@ -115,22 +115,22 @@ internal sealed class PartitionQueryPublicValidationTests(ClusterFixture fixture
         };
     }
 
-    private static async Task AssertHealthySdkAsync(KeyLoadClient sdk, PartitionQueryRf3Scenario scenario,
+    private static async Task AssertHealthySdkAsync(KeyLoadClient sdk, PartitionQueryClusterScenario scenario,
         CancellationToken cancellationToken)
     {
         var request = scenario.Request([scenario.Partitions[0]]);
         var page = await McpCallerAssertions.SdkSuccessAsync(await sdk.PartitionQueryAsync(request, cancellationToken)
             .ConfigureAwait(false)).ConfigureAwait(false);
-        await PartitionQueryRf3Assertions.AssertOracleAsync(page!, scenario, request.Partitions).ConfigureAwait(false);
+        await PartitionQueryClusterAssertions.AssertOracleAsync(page!, scenario, request.Partitions).ConfigureAwait(false);
     }
 
-    private static async Task AssertHealthyMcpAsync(McpOfficialClient mcp, PartitionQueryRf3Scenario scenario,
+    private static async Task AssertHealthyMcpAsync(McpOfficialClient mcp, PartitionQueryClusterScenario scenario,
         CancellationToken cancellationToken)
     {
         var request = scenario.Request([scenario.Partitions[1]]);
         var receipt = await McpCallerAssertions.SuccessAsync<PartitionQueryPageV1>(await mcp.CallAsync(
-            PartitionQueryRf3Protocol.ToolName, request, cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
-        await PartitionQueryRf3Assertions.AssertOracleAsync(receipt.Value, scenario, request.Partitions)
+            PartitionQueryClusterProtocol.ToolName, request, cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
+        await PartitionQueryClusterAssertions.AssertOracleAsync(receipt.Value, scenario, request.Partitions)
             .ConfigureAwait(false);
     }
 }

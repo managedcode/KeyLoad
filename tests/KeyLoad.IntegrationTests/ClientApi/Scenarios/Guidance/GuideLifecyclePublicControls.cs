@@ -28,8 +28,8 @@ internal static class GuideLifecyclePublicControls
             new Dictionary<string, object?> { [UnexpectedArgument] = true }, cancellationToken: token).AsTask()
     ];
 
-    internal static async Task RefusalsAndCancellationAsync(RequestCqrsRf3Callers administrator,
-        RequestCqrsRf3Callers reader, GuideLifecyclePublicState state, CancellationToken token)
+    internal static async Task RefusalsAndCancellationAsync(RequestCqrsClusterCallers administrator,
+        RequestCqrsClusterCallers reader, GuideLifecyclePublicState state, CancellationToken token)
     {
         foreach (var call in Invalid(reader.Mcp))
         {
@@ -47,8 +47,8 @@ internal static class GuideLifecyclePublicControls
         }
     }
 
-    private static async Task FollowingAsync(RequestCqrsRf3Callers administrator,
-        RequestCqrsRf3Callers reader, GuideLifecyclePublicState state, CancellationToken token)
+    private static async Task FollowingAsync(RequestCqrsClusterCallers administrator,
+        RequestCqrsClusterCallers reader, GuideLifecyclePublicState state, CancellationToken token)
     {
         await GuideLifecyclePublicValues.CurrentAsync(administrator, state, token);
         await GuideLifecyclePublicGuidance.HealthyAsync(reader.Mcp, token);
@@ -56,8 +56,8 @@ internal static class GuideLifecyclePublicControls
         await GuideLifecyclePublicValues.SeedReplayAsync(administrator, state, token);
     }
 
-    internal static async Task RevokedAsync(RequestCqrsRf3Callers administrator,
-        RequestCqrsRf3Callers reader, GuideLifecyclePublicState state, CancellationToken token)
+    internal static async Task RevokedAsync(RequestCqrsClusterCallers administrator,
+        RequestCqrsClusterCallers reader, GuideLifecyclePublicState state, CancellationToken token)
     {
         foreach (var call in Valid(reader.Mcp))
         {
@@ -84,7 +84,7 @@ internal static class GuideLifecyclePublicControls
         var actual = await reader.GetAsync(state.Scenario.Reference, state.SeedReceipt.Token, token);
         await Assert.That(actual.IsFailed).IsTrue();
         await Assert.That(actual.Value).IsNull();
-        await SqlRf3Protocol.EqualAsync(Errors.Problem(ErrorCode.Unauthenticated,
+        await SqlClusterProtocol.EqualAsync(Errors.Problem(ErrorCode.Unauthenticated,
             "The credential is unavailable or expired."), actual.Problem);
     }
 }

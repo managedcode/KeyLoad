@@ -83,10 +83,8 @@ public enum GrainReadKind
     GraphShortestPath,
     /// <summary>Execute bounded SQL graph-path syntax through the canonical path reader.</summary>
     SqlGraphPath,
-    /// <summary>Read a persisted administrator-authorized atomic-partition placement witness.</summary>
-    AtomicPartitionPlacement,
     /// <summary>Read one complete bounded query over same-owner atomic partitions.</summary>
-    PartitionQuery,
+    PartitionQuery = 41,
     /// <summary>Read the bounded eventual reverse-adjacency projection for one visible graph target.</summary>
     GraphIncomingEdges,
     /// <summary>Reads a private native runtime journal header.</summary>
@@ -109,32 +107,14 @@ public enum GrainReadKind
     PartitionQueryLeaf,
     /// <summary>Reads one provisioned vector-only native ANN generation under current policy.</summary>
     ApproximateSearch,
-    /// <summary>A privately authenticated movement source image capability.</summary>
-    PartitionMovementCapture,
-    /// <summary>Read the immutable original outcome of one privately authenticated movement phase.</summary>
-    PartitionMovementOutcome,
-    /// <summary>Read one authenticated A-authority document on its protected physical destination.</summary>
-    ControlledDocument,
     /// <summary>Read one explicitly bounded follower snapshot under fresh persisted authority.</summary>
-    FollowerDocument,
-    /// <summary>Fresh bounded canonical control authority for an original acknowledged Capture.</summary>
-    PartitionMovementTransferAuthority,
-    /// <summary>Fresh authenticated source transfer-data session; never a Capture effect.</summary>
-    PartitionMovementTransferData,
-    /// <summary>Read bounded actual canonical parent state without manufacturing an original phase outcome.</summary>
-    PartitionMovementParentState,
-    /// <summary>Observe actual receiver first issuance under fresh persisted same-subject administrator authority.</summary>
-    PartitionMovementReceiverIssuance,
-    /// <summary>Observe the actual distinct expired-Retire cancellation outcome under fresh native administrator authority.</summary>
-    PartitionMovementRetireCancellationOutcome,
+    FollowerDocument = 56,
     /// <summary>Captures or verifies one stable actual native owner archive under current persisted credentials.</summary>
-    ClusterBackupOwner,
+    ClusterBackupOwner = 62,
     /// <summary>Requires an actual provisioned native ANN generation to cover an acknowledged minimum prefix.</summary>
     WaitForAnnIndex,
-    /// <summary>Read a bounded server-delegated Blob result or current data at its published owner.</summary>
-    ControlledBlob,
     /// <summary>Read one authorized bounded sample-chunk window at its committed cut.</summary>
-    SampleChunkWindow,
+    SampleChunkWindow = 65,
     /// <summary>Executes one privately authenticated online text-maintenance phase at its exact native owner.</summary>
     OnlineTextMaintenance,
     /// <summary>Read complete globally ranked canonical text/vector results over explicit authorized physical owners.</summary>
@@ -165,28 +145,14 @@ public enum GrainReadKind
     RemoteGraphIncomingFinalize = 79,
     /// <summary>Composes explicit remote incoming graph reads over distinct authorized owner cuts.</summary>
     RemoteGraphIncomingParent = 80,
-    /// <summary>Privately reads original signed current-cohort native capacity.</summary>
-    OwnerCapacity = 81,
-    /// <summary>Reads current persisted administrator placement policy.</summary>
-    PlacementPolicy = 82,
-    /// <summary>Plans complete supplied whole partitions from six genuine owner samples.</summary>
-    PlacementPlan = 83,
-    /// <summary>Reads an authorized durable placement intent.</summary>
-    PlacementIntent = 84,
     /// <summary>Privately reads an owned document under exact authenticated D1 coverage.</summary>
     OwnedDocumentV2 = 85,
-    /// <summary>Privately reads a controlled document under exact authenticated D1 coverage.</summary>
-    ControlledDocumentV2 = 86,
-    /// <summary>Privately reads controlled blob data under exact authenticated D1 coverage.</summary>
-    ControlledBlobV2 = 87,
     /// <summary>Privately executes a partition query leaf under mandatory exact metadata and principal proof.</summary>
     PartitionQueryLeafV2 = 88,
     /// <summary>Privately executes one distributed search phase under mandatory exact metadata and principal proof.</summary>
     DistributedSearchLeafV2 = 89,
     /// <summary>Privately observes native ANN publication and data under mandatory lifetime coverage.</summary>
     AnnProjectionObservationV2 = 90,
-    /// <summary>Privately validates an original blob command outcome under mandatory lifetime coverage.</summary>
-    ControlledBlobOutcomeV2 = 91,
     /// <summary>Privately reads bounded canonical resource-owner inventory under current administrator authority.</summary>
     ResourceOwnerInventory = 92,
     /// <summary>Privately reads exact durable resource retirement state under current authority.</summary>

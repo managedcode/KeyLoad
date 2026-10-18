@@ -5,12 +5,6 @@ namespace KeyLoad.Clustering;
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(GrainRoutingProtocol.ProgressAlias)]
 public sealed record GrainRequestProgress([property: global::Orleans.Id(0)] Guid RequestId)
 {
-    /// <summary>Gets an actual committed intent phase after an original retired Move receipt.</summary>
-    [global::Orleans.Id(6), System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public PlacementIntentProgressV1? PlacementIntent
-    {
-        get; init;
-    }
     /// <summary>Gets one complete original persisted offer observed by a read-only event feed tail.</summary>
     [global::Orleans.Id(5), System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public EventFeedTailProgress? EventFeedTail
@@ -26,12 +20,6 @@ public sealed record GrainRequestProgress([property: global::Orleans.Id(0)] Guid
     /// <summary>Gets the completed bounded native text-maintenance phase, when applicable.</summary>
     [global::Orleans.Id(2), System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
     public TextIndexMaintenancePhase? TextPhase
-    {
-        get; init;
-    }
-    /// <summary>Gets the actual completed durable movement phase, when applicable.</summary>
-    [global::Orleans.Id(3), System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)]
-    public PartitionMovePhase? MovePhase
     {
         get; init;
     }

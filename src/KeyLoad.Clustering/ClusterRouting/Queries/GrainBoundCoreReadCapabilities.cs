@@ -14,8 +14,6 @@ internal static class GrainBoundCoreReadCapabilities
         budget.Check();
         return kind switch
         {
-            GrainReadKind.AtomicPartitionPlacement => database.ReadAtomicPartitionPlacement(principal,
-                GrainNativePayload.ReadPublicInput<AtomicPartitionPlacementReadRequest>(payload)),
             GrainReadKind.Document => database.GetDocumentBound(principal, GrainNativePayload.Read<GetDocumentRequest>(payload), budget, binding),
             GrainReadKind.Stream => database.ReadStreamBound(principal, GrainNativePayload.Read<ReadStreamRequest>(payload),
                 streamOwner ?? throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest), budget, binding),

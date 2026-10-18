@@ -33,7 +33,7 @@ internal static class TestSuiteSettingsReader
     private static TestSuiteSettings? ReadWithoutSuite(IConfiguration configuration, string? suite, string? filter)
     {
         NativeCoverageSelection.RejectWithoutSuite(configuration);
-        _ = LocalRf3ImageRequest.ReadEnabled(configuration, suite, filter);
+        _ = LocalClusterImageRequest.ReadEnabled(configuration, suite, filter);
         return null;
     }
 
@@ -48,13 +48,13 @@ internal static class TestSuiteSettingsReader
         }
         ValidateBoundedValue(filter, execution.MaximumFilterCharacters,
             InvalidTestFilterMessage, allowBlank: true);
-        var localRf3ImageEnabled = LocalRf3ImageRequest.ReadEnabled(configuration, suite, filter);
-        return CreateSettings(configuration, execution, coverage, suite, project, filter, localRf3ImageEnabled);
+        var localClusterImageEnabled = LocalClusterImageRequest.ReadEnabled(configuration, suite, filter);
+        return CreateSettings(configuration, execution, coverage, suite, project, filter, localClusterImageEnabled);
     }
 
     private static TestSuiteSettings CreateSettings(IConfiguration configuration, TestExecutionOptions execution,
         IOptions<NativeCoverageExecutionOptions> coverage,
-        string suite, string project, string? filter, bool localRf3ImageEnabled)
+        string suite, string project, string? filter, bool localClusterImageEnabled)
     {
         var resultsDirectory = configuration[ResultsDirectorySetting];
         var coverageSettings = configuration[CoverageSettingsSetting];
@@ -70,19 +70,19 @@ internal static class TestSuiteSettingsReader
             throw new InvalidOperationException(IncompleteCoverageSettingsMessage);
         }
         var coverageFormat = NativeCoverageSelection.Read(configuration, suite, coverageSettings, coverageOutput);
-        var nativeCoverageRf3 = NativeCoverageRf3Selection.Read(configuration, suite, filter,
+        var nativeCoverageCluster = NativeCoverageClusterSelection.Read(configuration, suite, filter,
             coverageSettings, coverageOutput, coverageFormat, coverage);
-        if (nativeCoverageRf3 is not null && localRf3ImageEnabled)
+        if (nativeCoverageCluster is not null && localClusterImageEnabled)
         {
-            throw new InvalidOperationException(NativeCoverageRf3Protocol.InvalidSelection);
+            throw new InvalidOperationException(NativeCoverageClusterProtocol.InvalidSelection);
         }
         var timeout = ReadTimeout(configuration, execution, suite);
         var parallelTests = TestSuiteParallelism.Read(configuration, execution, suite);
         return new(suite, project, filter, timeout, parallelTests, resultsDirectory,
-            configuration.GetValue<bool>(ReportTrxSetting), coverageSettings, coverageOutput, localRf3ImageEnabled)
+            configuration.GetValue<bool>(ReportTrxSetting), coverageSettings, coverageOutput, localClusterImageEnabled)
         {
             CoverageFormat = coverageFormat,
-            NativeCoverageRf3 = nativeCoverageRf3
+            NativeCoverageCluster = nativeCoverageCluster
         };
     }
 
@@ -90,7 +90,7 @@ internal static class TestSuiteSettingsReader
     {
         var timeout = configuration[TestSuiteSettings.TimeoutSetting] is not null
             ? TimeSpan.FromMinutes(configuration.GetValue<int>(TestSuiteSettings.TimeoutSetting))
-            : suite is TestSuiteProtocol.Rf3Suite or TestSuiteProtocol.ComparisonSuite
+            : suite is TestSuiteProtocol.ClusterSuite or TestSuiteProtocol.ComparisonSuite
                 ? execution.ClusterTimeout : execution.OrdinaryTimeout;
         return ValidateTimeout(timeout);
     }

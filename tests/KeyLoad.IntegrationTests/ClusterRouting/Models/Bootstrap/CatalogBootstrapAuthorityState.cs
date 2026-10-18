@@ -3,7 +3,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 internal sealed record CatalogBootstrapAuthorityState(
     PartitionRef Partition, PrincipalRecord Administrator, string AdministratorKey,
     PrincipalRecord Reader, string ReaderKey, CommandRequest Original,
-    CommitReceipt Receipt, AtomicPartitionPlacementResolution Placement)
+    CommitReceipt Receipt)
 {
     internal Guid ReaderDeniedCommandId { get; } = Guid.NewGuid();
     internal Dictionary<string, string> PhysicalOwners { get; } = new(StringComparer.Ordinal);

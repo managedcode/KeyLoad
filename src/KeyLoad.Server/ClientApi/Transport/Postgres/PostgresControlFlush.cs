@@ -4,8 +4,7 @@ namespace KeyLoad.Server;
 
 internal static class PostgresControlFlush
 {
-    internal static async Task RunAsync(IServiceProvider services, PostgresWireWriter writer, CancellationToken closed,
-        Func<CancellationToken, Task>? beforeFlush = null)
+    internal static async Task RunAsync(IServiceProvider services, PostgresWireWriter writer, CancellationToken closed)
     {
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -15,10 +14,6 @@ internal static class PostgresControlFlush
                 services.GetRequiredService<TimeProvider>(), closed);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                if (beforeFlush is not null)
-                {
-                    await beforeFlush(deadline.Token).ConfigureAwait(false);
-                }
                 await writer.FlushAsync(deadline.Token).ConfigureAwait(false);
             },
                 failures).ConfigureAwait(false);

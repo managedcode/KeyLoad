@@ -10,9 +10,9 @@ internal static class GraphIncomingPublicContinuation
     private const string PutKind = "putDocument";
 
     internal static async Task RunAsync(ClusterFixture fixture, KeyLoadClient administrator,
-        GraphIncomingRf3Seed seed, CancellationToken token)
+        GraphIncomingClusterSeed seed, CancellationToken token)
     {
-        _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, seed.Reader.Secret,
+        _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, seed.Reader.Secret,
             async callers =>
             {
                 await GraphIncomingPublicRoutes.HealthyAsync(callers, seed, false, token);
@@ -37,27 +37,27 @@ internal static class GraphIncomingPublicContinuation
         await LiteralReceiptAsync(following, await McpCallerAssertions.SdkSuccessAsync(
             await fresh.CommitAsync(following, token)), GraphIncomingPublicPolicy.FollowingRevision);
         await GraphIncomingPublicImages.LiteralDocumentsAsync(fresh, seed, GraphIncomingPublicPolicy.FollowingRevision, token);
-        _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node3, seed.Reader.Secret,
+        _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node3, seed.Reader.Secret,
             async callers => { await GraphIncomingPublicRoutes.HealthyAsync(callers, seed, false, token); return true; }, token);
     }
 
-    private static CommandRequest Write(GraphIncomingRf3Seed seed, long expectedRevision)
-        => new(Guid.NewGuid(), seed.TargetPartition, [new PutDocument(GraphIncomingRf3Scenario.Collection,
-            seed.LocalSource.Id, GraphIncomingRf3Scenario.EmptyJson, ExpectedRevision: expectedRevision)]);
+    private static CommandRequest Write(GraphIncomingClusterSeed seed, long expectedRevision)
+        => new(Guid.NewGuid(), seed.TargetPartition, [new PutDocument(GraphIncomingClusterScenario.Collection,
+            seed.LocalSource.Id, GraphIncomingClusterScenario.EmptyJson, ExpectedRevision: expectedRevision)]);
 
     private static async Task ReplayAsync(ClusterFixture fixture,
         CommandRequest command, CommitReceipt receipt, CancellationToken token)
     {
-        _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
+        _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
             async callers =>
             {
-                await SqlRf3Protocol.EqualAsync(receipt, await McpCallerAssertions.SdkSuccessAsync(
+                await SqlClusterProtocol.EqualAsync(receipt, await McpCallerAssertions.SdkSuccessAsync(
                     await callers.Sdk.CommitAsync(command, token)));
-                await SqlRf3Protocol.EqualAsync(receipt, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
+                await SqlClusterProtocol.EqualAsync(receipt, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
                     await callers.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token))).Value);
-                var sql = SqlRf3Protocol.Call(command.Partition, McpCallerTools.DocumentsCommit, command);
-                await SqlRf3Protocol.EqualAsync(receipt, await SqlRf3Protocol.SdkAsync<CommitReceipt>(callers.Sdk, sql, token));
-                await SqlRf3Protocol.EqualAsync(receipt, await SqlRf3Protocol.McpAsync<CommitReceipt>(callers.Mcp, sql, token));
+                var sql = SqlClusterProtocol.Call(command.Partition, McpCallerTools.DocumentsCommit, command);
+                await SqlClusterProtocol.EqualAsync(receipt, await SqlClusterProtocol.SdkAsync<CommitReceipt>(callers.Sdk, sql, token));
+                await SqlClusterProtocol.EqualAsync(receipt, await SqlClusterProtocol.McpAsync<CommitReceipt>(callers.Mcp, sql, token));
                 return true;
             }, token);
     }
@@ -72,7 +72,7 @@ internal static class GraphIncomingPublicContinuation
         await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
         await Assert.That(receipt.Mutations.Length).IsEqualTo(GraphIncomingPublicPolicy.Version);
         var mutation = (PutDocument)command.Mutations.Single();
-        await KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.EqualAsync(
+        await KeyLoad.IntegrationTests.Features.QueryExecution.SqlClusterProtocol.EqualAsync(
             new MutationReceipt(PutKind, mutation.Collection, mutation.Id, revision), receipt.Mutations.Single());
     }
 }

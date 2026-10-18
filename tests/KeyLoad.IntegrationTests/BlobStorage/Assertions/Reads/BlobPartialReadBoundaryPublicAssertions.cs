@@ -7,13 +7,13 @@ namespace KeyLoad.IntegrationTests.Features.BlobStorage;
 
 internal static class BlobPartialReadBoundaryPublicAssertions
 {
-    internal static async Task HealthyAsync(RequestCqrsRf3Callers callers,
+    internal static async Task HealthyAsync(RequestCqrsClusterCallers callers,
         BlobPartialReadBoundaryPublicTrial.Publication publication, CancellationToken token)
     {
         var metadata = publication.Completed.Value;
-        await SqlRf3Protocol.EqualAsync(metadata, await PublicReadAssertions.MetadataAsync(
+        await SqlClusterProtocol.EqualAsync(metadata, await PublicReadAssertions.MetadataAsync(
             await callers.Sdk.GetBlobMetadataAsync(new(metadata.Blob), token)));
-        await SqlRf3Protocol.EqualAsync(metadata, (await PublicReadAssertions.RequiredMetadataAsync(
+        await SqlClusterProtocol.EqualAsync(metadata, (await PublicReadAssertions.RequiredMetadataAsync(
             await callers.Mcp.CallAsync("keyload_blobs_metadata", new BlobMetadataRequest(metadata.Blob), token))).Value);
         foreach (var (offset, count) in new (long, int)[]
         {
@@ -26,14 +26,14 @@ internal static class BlobPartialReadBoundaryPublicAssertions
                 checked((byte)((offset + index) % BlobPartialReadBoundaryPublicTrial.PatternModulo))).ToArray();
             var request = new BlobReadRequest(metadata.Blob, 1, offset, count);
             var result = new BlobReadResult(metadata, offset, expected);
-            await SqlRf3Protocol.EqualAsync(result,
+            await SqlClusterProtocol.EqualAsync(result,
                 await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ReadBlobRangeAsync(request, token)));
-            await SqlRf3Protocol.EqualAsync(result, (await McpCallerAssertions.SuccessAsync<BlobReadResult>(
+            await SqlClusterProtocol.EqualAsync(result, (await McpCallerAssertions.SuccessAsync<BlobReadResult>(
                 await callers.Mcp.CallAsync("keyload_blobs_read_range", request, token))).Value);
         }
     }
 
-    internal static async Task RefusalsAsync(RequestCqrsRf3Callers callers,
+    internal static async Task RefusalsAsync(RequestCqrsClusterCallers callers,
         BlobPartialReadBoundaryPublicTrial.Publication publication, CancellationToken token)
     {
         var metadata = publication.Completed.Value;
@@ -57,23 +57,23 @@ internal static class BlobPartialReadBoundaryPublicAssertions
         }
     }
 
-    internal static async Task ReplayAsync(RequestCqrsRf3Callers callers,
+    internal static async Task ReplayAsync(RequestCqrsClusterCallers callers,
         BlobPartialReadBoundaryPublicTrial.Publication publication, CancellationToken token)
     {
-        await SqlRf3Protocol.EqualAsync(publication.Begun, await McpCallerAssertions.SdkSuccessAsync(
+        await SqlClusterProtocol.EqualAsync(publication.Begun, await McpCallerAssertions.SdkSuccessAsync(
             await callers.Sdk.BeginBlobUploadAsync(publication.Begin, token)));
-        await SqlRf3Protocol.EqualAsync(publication.Begun, (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobUploadInfo>>(
+        await SqlClusterProtocol.EqualAsync(publication.Begun, (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobUploadInfo>>(
             await callers.Mcp.CallAsync("keyload_blobs_begin_upload", publication.Begin, token))).Value);
         for (var index = 0; index < publication.Parts.Length; index++)
         {
-            await SqlRf3Protocol.EqualAsync(publication.Written[index], await McpCallerAssertions.SdkSuccessAsync(
+            await SqlClusterProtocol.EqualAsync(publication.Written[index], await McpCallerAssertions.SdkSuccessAsync(
                 await callers.Sdk.WriteBlobPartAsync(publication.Parts[index], token)));
-            await SqlRf3Protocol.EqualAsync(publication.Written[index], (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobUploadInfo>>(
+            await SqlClusterProtocol.EqualAsync(publication.Written[index], (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobUploadInfo>>(
                 await callers.Mcp.CallAsync("keyload_blobs_write_part", publication.Parts[index], token))).Value);
         }
-        await SqlRf3Protocol.EqualAsync(publication.Completed, await McpCallerAssertions.SdkSuccessAsync(
+        await SqlClusterProtocol.EqualAsync(publication.Completed, await McpCallerAssertions.SdkSuccessAsync(
             await callers.Sdk.CompleteBlobUploadAsync(publication.Complete, token)));
-        await SqlRf3Protocol.EqualAsync(publication.Completed, (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobMetadata>>(
+        await SqlClusterProtocol.EqualAsync(publication.Completed, (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobMetadata>>(
             await callers.Mcp.CallAsync("keyload_blobs_complete_upload", publication.Complete, token))).Value);
         await Assert.That(publication.Begun.Receipt.CommandId).IsEqualTo(publication.Begin.CommandId);
         for (var index = 0; index < publication.Parts.Length; index++)

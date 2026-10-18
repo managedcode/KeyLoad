@@ -8,11 +8,11 @@ internal static class NativeTextNestedWildcardPublicTrial
 {
     internal static async Task RunAsync(ClusterFixture fixture, CancellationToken token)
     {
-        _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
+        _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
             fixture.AdminKey, async administrator =>
             {
                 var state = await NativeTextNestedWildcardPublicScenario.CreateAsync(fixture, administrator, token);
-                return await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2,
+                return await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2,
                     state.Identity.Secret, async reader =>
                     {
                         await NativeTextNestedWildcardPublicAssertions.PhaseAsync(reader, administrator, state, 0, token);
@@ -48,8 +48,8 @@ internal static class NativeTextNestedWildcardPublicTrial
             }, token);
     }
 
-    private static async Task PersistAsync(RequestCqrsRf3Callers administrator, PrincipalRecord expected,
+    private static async Task PersistAsync(RequestCqrsClusterCallers administrator, PrincipalRecord expected,
         CancellationToken token)
-        => await SqlRf3Protocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(
+        => await SqlClusterProtocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(
             await administrator.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), expected, token)));
 }

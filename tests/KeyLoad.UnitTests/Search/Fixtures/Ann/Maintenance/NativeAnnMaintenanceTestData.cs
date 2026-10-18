@@ -17,7 +17,7 @@ internal static class NativeAnnMaintenanceTestData
         var id = Guid.NewGuid();
         _ = database.Submit(OperationKind.ConfigureProjectionConsumer,
             new ConfigureProjectionConsumerRequest(id, consumer, new(Generation, [], [.. Kinds]), StartAfter: 0), id: id).Get<ProjectionConsumerInfo>();
-        var actual = database.Database.ReadAtomicPartitionPlacement(AnnProjectionPinTestSupport.Principal, new(Version, database.Partition));
+        var actual = database.Database.ReadAtomicPartitionPlacement(AnnProjectionPinTestSupport.Principal, database.Partition);
         var placement = new PhysicalShardRecord(actual.PhysicalShardId, actual.Incarnation, actual.VoterIds, actual.PlacementEpoch);
         return new(Guid.NewGuid(), consumer, AnnSeedTestSupport.Collection, AnnSeedTestSupport.Field,
             AnnSeedTestSupport.Space(), Generation, database.Store.Identity.NodeId, placement, AnnMaintenanceMode.Build);

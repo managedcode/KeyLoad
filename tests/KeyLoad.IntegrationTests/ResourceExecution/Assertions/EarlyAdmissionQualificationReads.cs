@@ -8,7 +8,7 @@ namespace KeyLoad.IntegrationTests.Features.ResourceExecution;
 
 internal static class EarlyAdmissionQualificationReads
 {
-    internal static async Task WaveAsync(RequestCqrsRf3Callers root, RequestCqrsRf3Callers reader,
+    internal static async Task WaveAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers reader,
         EarlyAdmissionQualificationState state, bool malformed, ErrorCode? error, bool held, CancellationToken token)
     {
         var query = new QueryRequest(state.Partition, malformed ? InvalidQuery : EarlyAdmissionQualificationProtocol.Query, AllowFullScan: true);
@@ -24,7 +24,7 @@ internal static class EarlyAdmissionQualificationReads
                     {
                         await Assert.That(result.IsFailed).IsTrue();
                         await Assert.That(result.Value).IsNull();
-                        await SqlRf3Protocol.EqualAsync(Errors.Problem(code, Detail(code)), result.Problem);
+                        await SqlClusterProtocol.EqualAsync(Errors.Problem(code, Detail(code)), result.Problem);
                     }
                     else
                     {
@@ -39,7 +39,7 @@ internal static class EarlyAdmissionQualificationReads
                     {
                         await Assert.That(result.IsFailed).IsTrue();
                         await Assert.That(result.Value.ValueKind).IsEqualTo(JsonValueKind.Undefined);
-                        await SqlRf3Protocol.EqualAsync(Errors.Problem(code, Detail(code)), result.Problem);
+                        await SqlClusterProtocol.EqualAsync(Errors.Problem(code, Detail(code)), result.Problem);
                     }
                     else
                     {

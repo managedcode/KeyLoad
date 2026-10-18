@@ -44,7 +44,7 @@ internal static class CanonicalOperationGateway
             (global::KeyLoad.Server.Features.GraphTraversal.RemoteGraphGatewaySigning.HandlesCommand(commandKind)
                 && NativeCqrsBoundaryErrors.IsNonFatal(failure))
             || (commandKind is OperationKind.ReceiveAcrossLanes or OperationKind.MaintainAnnIndex
-                or OperationKind.MaintainTextIndex or OperationKind.MaintainOnlineTextIndex or OperationKind.MovePartition or OperationKind.ApplyPlacementIntent
+                or OperationKind.MaintainTextIndex or OperationKind.MaintainOnlineTextIndex
                 && failure is KeyLoadException or System.Text.Json.JsonException or ArgumentException))
         {
             GrainFailureDiagnostics.Log(context.RequestServices.GetRequiredService<ILogger<OrleansNode>>(),
@@ -70,7 +70,6 @@ internal static class CanonicalOperationGateway
     {
         var actual = CanonicalOperationRequestPreparation.Create(context, readKind, commandKind,
             commandId, payload, cancellationToken);
-        TenantPlacementPublicAdmission.Require(context, readKind, commandKind);
         if (progress is not null && !actual.ReceivingOnly)
         {
             throw Errors.Fail(ErrorCode.Validation, GrainRoutingProtocol.InvalidRequest);
@@ -109,8 +108,6 @@ internal static class CanonicalOperationGateway
     {
         OperationKind.UpsertRemoteGraphEdge or OperationKind.DeleteRemoteGraphEdge
             or OperationKind.DeliverRemoteGraphEdge => global::KeyLoad.Server.Features.GraphTraversal.RemoteGraphGatewaySigning.Interrupted,
-        OperationKind.ApplyPlacementIntent => TenantPlacementPublicProtocol.Interrupted,
-        OperationKind.MovePartition => PartitionMovePublicProtocol.Interrupted,
         OperationKind.MaintainTextIndex => TextIndexMaintenanceProtocol.Interrupted,
         OperationKind.MaintainOnlineTextIndex => TextIndexMaintenanceProtocol.Interrupted,
         OperationKind.MaintainAnnIndex => AnnMaintenanceProtocol.Interrupted,

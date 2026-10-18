@@ -1,8 +1,8 @@
 # KeyLoad Linux x64 distribution
 
 This archive contains the self-contained server and CLI, the exact release version,
-and a three-node RF3 Docker Compose configuration. Each node owns a separate
-persistent volume; node identities and authorization credentials survive restart.
+and a three-node Docker Compose configuration (an Orleans cluster with three copies
+of the data). Each node owns a separate persistent volume with its own ZoneTree files; node identities and authorization credentials survive restart.
 Release packaging does not establish production, endurance or power-loss qualification.
 
 Verify the published SHA256SUMS before extracting. Docker Compose, Python 3 and
@@ -28,7 +28,7 @@ volume into multiple nodes is unsafe. Follow qualified backup/recovery procedure
 for data transfer; a volume copy alone is not a consistency-qualified backup.
 
 The `server/KeyLoad.Server` and `cli/KeyLoad.Cli` executables include their .NET
-runtime. The server needs the same RF3 membership and credential settings as the
-Compose file. The CLI exposes its actual commands through `cli/KeyLoad.Cli`.
-The standard CI qualifies the real Docker/Aspire RF3 topology through SDK/MCP;
+runtime. The server needs the same Orleans cluster, replica count and credential
+settings as the Compose file. The CLI exposes its actual commands through `cli/KeyLoad.Cli`.
+The standard CI qualifies the real Docker/Aspire cluster through SDK/MCP;
 this packaged Compose deployment has no independent qualification claim.

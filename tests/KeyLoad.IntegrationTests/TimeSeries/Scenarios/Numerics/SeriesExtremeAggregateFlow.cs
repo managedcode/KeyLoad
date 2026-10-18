@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 
@@ -10,27 +9,24 @@ internal static class SeriesExtremeAggregateFlow
     private const long InitialSequence = 5;
     private const long LateSequence = 6;
     private const long ExtremaSequence = 8;
-    private const int PlacementVersion = 1;
     private const int ColdOwners = 2;
     private const int FirstIndex = 0;
 
     internal static async Task RunAsync(ClusterFixture fixture, ImmutableArray<SampleData> initial,
         ImmutableArray<SampleData> late, ImmutableArray<SampleData> extrema, SeriesExtremeAggregateRead read, CancellationToken token)
     {
-        var state = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
+        var state = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
             async administrator =>
             {
-                var scenario = await TimeSeriesRf3Scenario.CreateAsync(fixture, token);
-                var placement = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.ReadAtomicPartitionPlacementAsync(
-                    new(PlacementVersion, scenario.Partition), token));
-                var current = new SeriesExtremeAggregateState(scenario, initial, late, extrema, placement);
+                var scenario = await TimeSeriesClusterScenario.CreateAsync(fixture, token);
+                var current = new SeriesExtremeAggregateState(scenario, initial, late, extrema);
                 await SeriesExtremeAggregateSeed.OpenAsync(administrator, current, token);
                 await SeriesExtremeAggregateSeed.AppendAsync(administrator, current, initial, InitialSequence, token);
                 await SeriesExtremeAggregateSeed.AppendAsync(administrator, current, late, LateSequence, token);
                 current.Reader = await McpPersistedIdentity.CreateAsync(fixture, scenario.Partition,
-                    TimeSeriesRf3Scenario.Set, Capability.SeriesRead, token);
-                return await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, current.Reader.Secret,
-                    reader => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, current.Reader.Secret,
+                    TimeSeriesClusterScenario.Set, Capability.SeriesRead, token);
+                return await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, current.Reader.Secret,
+                    reader => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, current.Reader.Secret,
                     async official =>
                     {
                         await SeriesExtremeAggregateSeed.CaptureAsync(administrator, current, token);
@@ -58,9 +54,9 @@ internal static class SeriesExtremeAggregateFlow
 
     private static Task<bool> VerifyAsync(ClusterFixture fixture, SeriesExtremeAggregateState state,
         SeriesExtremeAggregateRead read, CancellationToken token)
-        => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
-            administrator => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, state.Reader!.Secret,
-                reader => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, state.Reader.Secret,
+        => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
+            administrator => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, state.Reader!.Secret,
+                reader => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, state.Reader.Secret,
                 async official =>
                 {
                     await SeriesExtremeAggregateWave.ReadAsync(administrator, reader, official, state, read, token);

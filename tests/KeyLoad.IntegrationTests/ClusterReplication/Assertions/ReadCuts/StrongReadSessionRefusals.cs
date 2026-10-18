@@ -8,19 +8,19 @@ namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 
 internal static class StrongReadSessionRefusals
 {
-    internal static async Task CallAsync(RequestCqrsRf3Callers reader, StrongReadSessionState state,
+    internal static async Task CallAsync(RequestCqrsClusterCallers reader, StrongReadSessionState state,
         EntityRef reference, CommitToken minimum, ErrorCode code, string detail, StrongReadSessionRoute route,
         CancellationToken token)
     {
         var request = new GetDocumentRequest(reference, minimum);
-        var call = SqlRf3Protocol.Call(state.Partition, McpCallerTools.DocumentsGet, request);
+        var call = SqlClusterProtocol.Call(state.Partition, McpCallerTools.DocumentsGet, request);
         var expected = Errors.Problem(code, detail);
         if (route == StrongReadSessionRoute.SdkGet)
         {
             var actual = await reader.Sdk.GetAsync(reference, minimum, token);
             await Assert.That(actual.IsFailed).IsTrue();
             await Assert.That(actual.Value).IsNull();
-            await SqlRf3Protocol.EqualAsync(expected, actual.Problem);
+            await SqlClusterProtocol.EqualAsync(expected, actual.Problem);
             return;
         }
         if (route == StrongReadSessionRoute.SdkCall)
@@ -28,7 +28,7 @@ internal static class StrongReadSessionRefusals
             var actual = await reader.Sdk.ExecuteSqlAsync(call, token);
             await Assert.That(actual.IsFailed).IsTrue();
             await Assert.That(actual.Value.ValueKind).IsEqualTo(JsonValueKind.Undefined);
-            await SqlRf3Protocol.EqualAsync(expected, actual.Problem);
+            await SqlClusterProtocol.EqualAsync(expected, actual.Problem);
             return;
         }
         var reply = route == StrongReadSessionRoute.McpGet

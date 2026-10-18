@@ -47,7 +47,7 @@ internal static class DeclaredResponseEofFlow
             await DeclaredResponseEofAssertions.EmptyAsync(scenario);
             endpoint = new(scenario, principal, tasks);
             var placement = scenario.Fixture.Database.Database.ReadAtomicPartitionPlacement(Root,
-                new(PlacementVersion, endpoint.Command.Partition));
+                endpoint.Command.Partition);
             transportUncertain = true;
             server = await KeyLoadClientKestrelServer.StartAsync(endpoint.HandleAsync);
             transportUncertain = false;

@@ -1,6 +1,4 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.ClusterRouting.Serialization;
-using KeyLoad.Core.Features.ClusterRouting.Validation;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -47,22 +45,14 @@ public sealed partial class DatabaseEngine
         var storeCut = Store.Position;
         var roster = EventVectorRosterRead.Read(bounded, request.ControlPartition, request.Scope.Domain,
             identity.Incarnation, storeCut, applied, OperationLimitsOptions, cancellationToken);
-        var directory = EventVectorCoverageRows.Optional(bounded,
-            AtomicPartitionPlacementSerialization.DirectoryKey(), inventory);
-        if (directory is not null)
-        {
-            AtomicPartitionPlacementValidation.ValidateDirectory(
-            AtomicPartitionPlacementSerialization.ReadDirectory(bounded));
-        }
         var entries = ImmutableArray.CreateBuilder<EventVectorEntry>();
-        var placements = ImmutableArray.CreateBuilder<EventVectorCoverageRow>();
         var heads = ImmutableArray.CreateBuilder<EventVectorCoverageRow>();
         CaptureEventVectorRoster(bounded, principal, request, sourceOwner, catalog.Catalog.DefaultShard,
-            roster, work, inventory, applied, entries, placements, heads, cancellationToken);
+            roster, work, applied, entries, heads, cancellationToken);
         var admission = new EventVectorAdmissionPolicy(OperationLimitsOptions);
         var encoded = EventVectorEntryEncoding.Encode(entries.ToImmutable(), admission);
         var result = EventVectorCaptureResult(request, groupOrdinal, sourceOwner, principal, identity,
-            storeCut, applied, catalog, roster, directory, placements, heads, encoded);
+            storeCut, applied, catalog, roster, heads, encoded);
         result = EventVectorCoverageLifetimeValidation.Capture(bounded, result, admission);
         new EventVectorReadLifetimeBinding(this, bounded, work).Capture(result);
         admission.RequireEncodedBytes(NativeSerialization.Measure(result));

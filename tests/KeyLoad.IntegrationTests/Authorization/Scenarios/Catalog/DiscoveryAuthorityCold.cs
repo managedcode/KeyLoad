@@ -43,7 +43,7 @@ internal static class DiscoveryAuthorityCold
             await Assert.That(after[node].Applied).IsGreaterThanOrEqualTo(before[node].Applied);
             await Assert.That(after[node].RoutingReady).IsTrue();
         }
-        await SqlRf3Protocol.EqualAsync(image, await AdversarialAuthorityTrial.WithRootAsync(fixture, McpCallerProtocol.Node1,
+        await SqlClusterProtocol.EqualAsync(image, await AdversarialAuthorityTrial.WithRootAsync(fixture, McpCallerProtocol.Node1,
             root => DiscoveryAuthorityValues.ImageAsync(root, state, token)));
         await DiscoveryAuthorityClients.RunAsync(fixture, state, changePolicy: false, token);
     }

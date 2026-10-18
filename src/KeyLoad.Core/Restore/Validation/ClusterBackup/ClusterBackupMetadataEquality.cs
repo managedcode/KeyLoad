@@ -39,7 +39,7 @@ internal static class ClusterBackupMetadataEquality
         && !expected.Catalog.DefaultShard.VoterIds.IsDefault
         && expected.Catalog.Version == actual.Catalog.Version && expected.Catalog.Revision == actual.Catalog.Revision
         && PhysicalOwnerEntryValidation.SameOwner(expected.Catalog.DefaultShard, actual.Catalog.DefaultShard)
-        && expected.Directory == actual.Directory && Registered(expected.RegisteredOwners, actual.RegisteredOwners)
+        && Registered(expected.RegisteredOwners, actual.RegisteredOwners)
         && !expected.Partitions.IsDefault && expected.Partitions.Length == actual.Partitions.Length
         && expected.Partitions.Zip(actual.Partitions).All(pair => Partition(pair.First, pair.Second));
 

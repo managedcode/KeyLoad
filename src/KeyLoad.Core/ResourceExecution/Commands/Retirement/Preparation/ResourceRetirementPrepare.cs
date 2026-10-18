@@ -33,12 +33,11 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, ResourceRetirementProtocol.Changed);
         }
-        var moves = ResourceRetirementMovementSnapshot.Capture(transaction, OperationLimitsOptions);
         var digest = NativeOperationFingerprint.Compute(operation);
         var receipt = new ResourceRetirementPhaseReceiptV1(ResourceRetirementProtocol.Version, body.Request.RetirementId,
             phase.Phase, operation.Id, lifetime, catalog.DefaultShard, position, digest);
         var control = new ResourceRetirementPreparationControlV1(body.Request, definition, lifetime, catalog, directory,
-            principal.Id, principal.PolicyEpoch, moves, receipt, digest);
+            principal.Id, principal.PolicyEpoch, [], receipt, digest);
         var state = new ResourceRetirementPreparationStateV1(control, ImmutableArray<ResourceRetirementOwnerReservationV1>.Empty, null)
         {
             OwnerAttempts = []

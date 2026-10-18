@@ -24,13 +24,12 @@ internal static class ColdBootstrapSdkAssertions
     }
 
     internal static async Task NativeReceiptAsync(CommitReceipt actual, CommandRequest command,
-        AtomicPartitionPlacementResolution placement, long revision, long previousPosition)
+        long revision, long previousPosition)
     {
-        await Assert.That(placement.Partition).IsEqualTo(command.Partition);
         await Assert.That(actual.Token.Position).IsGreaterThan(previousPosition);
         var expected = new CommitReceipt(command.CommandId,
-            new(placement.Incarnation, command.Partition.AtomicPartitionId, actual.Token.Position,
-                placement.PlacementEpoch),
+            new(actual.Token.Incarnation, command.Partition.AtomicPartitionId, actual.Token.Position,
+                actual.Token.OwnershipEpoch),
             [new(PutKind, ColdBootstrapSdkFlow.Collection, ColdBootstrapSdkFlow.Document, revision)],
             DurabilityProfile.QuorumProcessDurable);
         await Assert.That(JsonDefaults.Serialize(actual).SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();

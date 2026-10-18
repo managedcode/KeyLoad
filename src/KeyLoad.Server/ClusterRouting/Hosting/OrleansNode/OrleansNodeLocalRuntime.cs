@@ -1,5 +1,4 @@
 using KeyLoad.Clustering;
-using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.DocumentStorage;
 using KeyLoad.Server.Features.GraphTraversal;
@@ -12,28 +11,21 @@ internal sealed class OrleansNodeLocalRuntime(IServiceProvider services, ServerR
     TimeProvider clock) : IAsyncDisposable
 {
     private const int NoCloseFailures = 0;
-    private readonly TenantPlacementNodeOwner placement = new();
     private readonly Lock closing = new();
     private readonly List<Exception> closeFailures = [];
     private Task? shutdown;
     private RemoteDocumentRuntime? documents;
-    private PartitionMovementRuntime? movement;
     private RemoteModelNativeRuntime? receiver;
     private RemoteModelNativeClient? client;
-    private NativeBlobWireProbeObserver? blobObserver;
     private RuntimeJournalAdmission? journal;
     private ReplicaSiloDiscoveryState? discovery;
     private ReplicaEnvelopeAuthenticator? authentication;
     private ReplicaSiloDiscoveryClient? discoveryClient;
     private IAsyncDisposable? administration;
-    private RequestCqrsProbeNativeRelay? relay;
-    private RequestCqrsProbeObserver? observer;
     private ResourceOwnerInventoryNativeRuntime? resourceInventory;
 
     internal RemoteGraphNodeResources Graphs { get; } = new();
     internal RemoteDocumentRuntime? Documents => Volatile.Read(ref documents);
-    internal PartitionMovementRuntime? Movement => Volatile.Read(ref movement);
-    internal TenantPlacementNativeRuntime? TenantPlacement => placement.Runtime;
     internal ResourceOwnerInventoryNativeRuntime? ResourceInventory => Volatile.Read(ref resourceInventory);
     internal RuntimeJournalAdmission? Journal => Volatile.Read(ref journal);
     internal ReplicaSiloDiscoveryState? Discovery => Volatile.Read(ref discovery);
@@ -53,9 +45,6 @@ internal sealed class OrleansNodeLocalRuntime(IServiceProvider services, ServerR
         Volatile.Write(ref documents, await RemoteDocumentRuntime.CreateAsync(node, partition,
             options, clock).ConfigureAwait(false));
         await Graphs.InitializeAsync(node, partition, options, clock).ConfigureAwait(false);
-        Volatile.Write(ref movement, await PartitionMovementRuntime.CreateAsync(node, partition,
-            options, work, clock).ConfigureAwait(false));
-        await placement.InitializeAsync(node, partition, options, Movement, clock, token).ConfigureAwait(false);
         // Native local composition precedes publication of the public routing factory.
         var movementClient = services.GetRequiredService<PartitionMovementGrainServiceClient>();
         // Retain ownership before release publication; later initialization failures join DisposeCoreAsync.
@@ -73,12 +62,9 @@ internal sealed class OrleansNodeLocalRuntime(IServiceProvider services, ServerR
         lock (lifecycle)
         {
             Volatile.Write(ref receiver, services.GetRequiredService<RemoteModelNativeRuntime>());
-            Volatile.Write(ref blobObserver, services.GetService<NativeBlobWireProbeObserver>());
             Volatile.Write(ref client, services.GetRequiredService<RemoteModelNativeClient>());
             Volatile.Write(ref authentication, services.GetRequiredService<ReplicaEnvelopeAuthenticator>());
             Volatile.Write(ref discoveryClient, services.GetRequiredService<ReplicaSiloDiscoveryClient>());
-            Volatile.Write(ref relay, services.GetService<RequestCqrsProbeNativeRelay>());
-            Volatile.Write(ref observer, services.GetService<RequestCqrsProbeObserver>());
             Volatile.Write(ref administration, services.GetRequiredService<INodeAdministration>() as IAsyncDisposable);
             Graphs.Capture(services);
         }
@@ -98,11 +84,8 @@ internal sealed class OrleansNodeLocalRuntime(IServiceProvider services, ServerR
                     || bootstrap.OwnerRegistration?.Observe().Verified == true))
             && catalogReady && Journal?.IsReady == true;
 
-    internal void StartPlacement() => placement.Start();
-
     internal Task JoinHostAsync(NativeRequestWorkOwner work, List<Exception> failures)
-        => OrleansNodeHostShutdown.JoinAsync(work, Volatile.Read(ref administration),
-            Volatile.Read(ref relay), Volatile.Read(ref observer), failures);
+        => OrleansNodeHostShutdown.JoinAsync(work, Volatile.Read(ref administration), failures);
 
     internal async Task JoinResourcesAsync(OrleansNodeRequestLifetime requestLifetime,
         OrleansNodeDatabaseBootstrap bootstrap, PhysicalOwnerProbeWorkOwner? physicalOwnerWork,
@@ -118,7 +101,7 @@ internal sealed class OrleansNodeLocalRuntime(IServiceProvider services, ServerR
         await JoinAsync(failures).ConfigureAwait(false);
         await PhysicalOwnerRegistrationRuntime.StopAndJoinAsync(bootstrap.OwnerRegistration,
             physicalOwnerWork, failures).ConfigureAwait(false);
-        if (OrleansNodeClosure.KnownOwnersJoined(requestLifetime.Work, Documents, Movement, Graphs)
+        if (OrleansNodeClosure.KnownOwnersJoined(requestLifetime.Work, Documents, Graphs)
             && (ResourceInventory is null || ResourceInventory.IsJoined))
         {
             ServerFailureObserver.Observe(() => Journal?.Close(), failures);
@@ -138,7 +121,7 @@ internal sealed class OrleansNodeLocalRuntime(IServiceProvider services, ServerR
         failures.AddRange(closeFailures.Count > NoCloseFailures ? closeFailures : terminalFailures);
     }
 
-    /// <summary>Returns the original local-runtime shutdown; placement disposal follows the original movement join.</summary>
+    /// <summary>Returns the original local-runtime shutdown.</summary>
     public ValueTask DisposeAsync()
     {
         lock (closing)
@@ -160,7 +143,6 @@ internal sealed class OrleansNodeLocalRuntime(IServiceProvider services, ServerR
         {
             await ServerFailureObserver.ObserveAsync(() => inventory.DisposeAsync().AsTask(), closeFailures).ConfigureAwait(false);
         }
-        await ServerFailureObserver.ObserveAsync(placement.CloseAdmissionAsync, closeFailures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(() => Graphs.JoinAsync(closeFailures), closeFailures).ConfigureAwait(false);
         if (Volatile.Read(ref receiver) is { } originalReceiver)
         {
@@ -169,42 +151,6 @@ internal sealed class OrleansNodeLocalRuntime(IServiceProvider services, ServerR
         if (Volatile.Read(ref client) is { } originalClient)
         {
             await ServerFailureObserver.ObserveAsync(originalClient.StopAsync, closeFailures).ConfigureAwait(false);
-        }
-        if (Volatile.Read(ref blobObserver) is { } originalBlobObserver)
-        {
-            await ServerFailureObserver.ObserveAsync(originalBlobObserver.StopAsync, closeFailures).ConfigureAwait(false);
-        }
-        if (Movement is { } originalMovement)
-        {
-            await ServerFailureObserver.ObserveAsync(() => originalMovement.DisposeAsync().AsTask(), closeFailures).ConfigureAwait(false);
-        }
-        Task? placementClose = null;
-        try
-        {
-            placementClose = placement.DisposeAsync().AsTask();
-            await placementClose.ConfigureAwait(false);
-        }
-        catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            if (placementClose?.Exception is { } terminalFailure)
-            {
-                closeFailures.AddRange(terminalFailure.InnerExceptions);
-            }
-            else
-            {
-                closeFailures.Add(error);
-            }
-        }
-        catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
-        {
-            if (placementClose?.Exception is { } terminalFailure)
-            {
-                closeFailures.AddRange(terminalFailure.InnerExceptions);
-            }
-            else
-            {
-                closeFailures.Add(error);
-            }
         }
         if (Documents is { } originalDocuments)
         {

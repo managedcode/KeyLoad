@@ -2,9 +2,10 @@
 
 The node-local ownership boundary in [StorageRecovery](../StorageRecovery.md)
 keeps the original native acquisition, rollback and shutdown outcomes. This
-correction does not change storage bytes, canonical authority, journals, RF3,
-transport schemas. It follows the physical-owner contract
-in [ClusterRouting](../ClusterRouting.md), [ADR-046](../../ADR/ADR-046-storage-private-owners.md)
+correction does not change storage bytes, canonical authority, journals or
+transport schemas. It follows the silo-local owner contract in
+[ADR-136](../../ADR/ADR-136-native-orleans-partition-ownership.md),
+[ADR-046](../../ADR/ADR-046-storage-private-owners.md)
 and the native test entry in [ADR-117](../../ADR/ADR-117-native-tunit-ci-entry.md).
 
 ```mermaid
@@ -42,9 +43,7 @@ flowchart TD
 - **REQ-NATIVE-OWNER-004:** `PartitionHost.OpenAsync` owns asynchronous construction
   and actual awaited rollback. The old synchronous internal construction entry and
   its blocking async-cleanup joins are removed. Known returned stores and every
-  independent derived owner remain in their original cleanup order. Failed or
-  unknown materializer disposal never permits transfer-verifier disposal as if the
-  materializer were absent.
+  independent derived owner remain in their original cleanup order.
 - **REQ-NATIVE-OWNER-005:** The existing application owns one original opening task
   and one original shutdown task. It initializes the same telemetry providers before
   physical allocation. DI borrows only the already-published original host and fails
@@ -67,11 +66,10 @@ provide a new readiness capability. Unknown ownership remains a failed/open gate
 
 | Criterion | Genuine existing operation and preserved oracle |
 | --- | --- |
-| AC-NATIVE-OWNER-001 — refused bootstrap and healthy recovery | `PartitionHostRecoveryTests` keeps all original missing/modified/valid protected-principal cases, verified incoming native snapshot interruption, original applied/log cuts and persisted node/read-generation identities across recovery attempts. The staging source and target owners now retain independent failures. |
+| AC-NATIVE-OWNER-001 — refused bootstrap and healthy recovery | `PartitionHostRecoveryTests` keeps all original missing/modified/valid protected-principal cases, original applied/log cuts and persisted node/read-generation identities across recovery attempts. The staging source and target owners now retain independent failures. |
 | AC-NATIVE-OWNER-002 — actual same-volume refusal, repair and reopen | `PartitionRootAdmissionTests` and `PartitionRootAdmissionSpecialEntryTests` retain original unknown file/directory/link, wrong-kind, non-directory root, foreign target, held regular owner and native FIFO refusals, exact bytes/Unix modes, and healthy native writes/reopen. |
-| AC-NATIVE-OWNER-003 — paired native preflight authority | `PartitionPairedIdentityPreflightTrial` keeps original capability refusal, unchanged full inventory/torn journal prefix, actual released owner-lock observation, exact original identity repair, healthy native write and cold continuation. Both direct `PartitionStores` opens now use the same registered original ownership ledger. |
 | AC-NATIVE-OWNER-004 — real concurrent shutdown and reentrant refusal | `NativeReadCutLifetimeTests.AcCut003ShutdownCancelsAndJoinsTraversalBeforeReopen` waits on the actual original lease cancellation, calls reentrant `Store.Dispose` from that still-active original visitor and requires the existing native refusal. The original traversal/disposer tasks must then join, the original record/identity/cut survive, and the healthy write survives the original second cold reopen. Its original ten-second join observation and original tasks remain unchanged. No private hold, clock, synthetic fault or counter is added. |
-| AC-NATIVE-OWNER-005 — all current application owner paths | Normal `ServerApplication`, CrashHost `ControlledPartitionMovementNativeHost`, Integration `PartitionMovementLateNativeNode` including stopped cold owners, and `PhysicalShardCatalogStoppedOracle` use the actual asynchronous opening boundary. Original signed/public operations, source identities, shutdown deadlines and RF3 oracles remain separate mandatory execution gates. |
+| AC-NATIVE-OWNER-005 — all current application owner paths | Normal `ServerApplication` and its stopped cold owners use the actual asynchronous opening boundary. Original signed/public operations, source identities, shutdown deadlines and replicated-cluster oracles remain separate mandatory execution gates. |
 
 The test-owned native cut fixture also registers acquisition before native open,
 rolls back a known returned owner if list publication fails, refuses another open
@@ -82,11 +80,9 @@ method/type limits.
 
 ## Verification boundary
 
-This candidate is SourceN. Cached native Roslyn numeric/nesting checks and full
-source peers are not compilation or runtime proof. Strict full solution build,
-formatting, the original focused Unit/native recovery operations, actual native
-application/SDK/MCP RF3 and exact-source Linux qualification remain OPEN until their
-original executions complete. No constructor or disposal failure was fabricated,
-no power-loss or performance claim is made, and earlier source cohorts do not
-qualify these postimages. The new real reentrant operation can expose a deadlock in
-an incorrect implementation; retaining its original tasks remains mandatory.
+Strict full solution build, formatting, the focused Unit/native recovery operations,
+native application/SDK/MCP replicated-cluster tests and exact-source Linux
+qualification are separate gates. No constructor or disposal failure is
+fabricated and no power-loss or performance claim is made. The real reentrant
+operation can expose a deadlock in an incorrect implementation; retaining its
+original tasks remains mandatory.

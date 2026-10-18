@@ -16,15 +16,15 @@ internal static class TypedEndpointJoinReverseFlow
 
     internal static Task<TypedEndpointJoinState> WarmAsync(ClusterFixture fixture,
         TypedEndpointJoinState state, CancellationToken token)
-        => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, async admin =>
+        => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, async admin =>
     {
         var identity = await CreateIdentityAsync(fixture, admin, state.Seed, token);
-        return await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node3, identity.Secret,
+        return await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node3, identity.Secret,
             callers => ExecuteAsync(fixture, admin, callers, state, identity, token), token);
     }, token);
 
-    private static async Task<TypedEndpointJoinState> ExecuteAsync(ClusterFixture fixture, RequestCqrsRf3Callers admin,
-        RequestCqrsRf3Callers callers, TypedEndpointJoinState state, global::KeyLoad.IntegrationTests.Features.ClientApi.McpPersistedIdentity identity, CancellationToken token)
+    private static async Task<TypedEndpointJoinState> ExecuteAsync(ClusterFixture fixture, RequestCqrsClusterCallers admin,
+        RequestCqrsClusterCallers callers, TypedEndpointJoinState state, global::KeyLoad.IntegrationTests.Features.ClientApi.McpPersistedIdentity identity, CancellationToken token)
     {
         var mutation = new GraphToQueueMutation(TypedEndpointJoinProtocol.EmptyQueue,
             TypedEndpointJoinProtocol.Graph, TypedEndpointJoinProtocol.From(state.Seed.Partition), Prefix);
@@ -38,7 +38,7 @@ internal static class TypedEndpointJoinReverseFlow
         {
             CommandId = Guid.NewGuid()
         };
-        var receipt = await SqlRf3Protocol.McpAsync<CommitReceipt>(callers.Mcp,
+        var receipt = await SqlClusterProtocol.McpAsync<CommitReceipt>(callers.Mcp,
             DeclarativeCompositionSql.Reverse(command, mutation), token);
         var reverse = new TypedEndpointJoinReverseState(identity, principal, denied, originalProblem,
             deniedProblem, command, receipt);
@@ -64,7 +64,7 @@ internal static class TypedEndpointJoinReverseFlow
             CommandId = Guid.NewGuid(),
             Mutations = [mutation with { MessageIdPrefix = RepairedPrefix }]
         };
-        var currentReceipt = await SqlRf3Protocol.McpAsync<CommitReceipt>(callers.Mcp,
+        var currentReceipt = await SqlClusterProtocol.McpAsync<CommitReceipt>(callers.Mcp,
             DeclarativeCompositionSql.Reverse(current, (GraphToQueueMutation)current.Mutations[0]), token);
         state = state with
         {
@@ -81,7 +81,7 @@ internal static class TypedEndpointJoinReverseFlow
     }
 
     private static async Task<global::KeyLoad.IntegrationTests.Features.ClientApi.McpPersistedIdentity> CreateIdentityAsync(ClusterFixture fixture,
-        RequestCqrsRf3Callers admin, TypedEndpointJoinSeed seed, CancellationToken token)
+        RequestCqrsClusterCallers admin, TypedEndpointJoinSeed seed, CancellationToken token)
     {
         var identity = await global::KeyLoad.IntegrationTests.Features.ClientApi.McpPersistedIdentity.CreateAsync(fixture, seed.Partition,
             TypedEndpointJoinProtocol.Graph, Capability.GraphRead | Capability.GraphWrite | Capability.Query, token);
@@ -92,14 +92,14 @@ internal static class TypedEndpointJoinReverseFlow
         };
         var actual = await McpCallerAssertions.SdkSuccessAsync(
             await admin.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), expected, token));
-        await SqlRf3Protocol.EqualAsync(expected, actual);
+        await SqlClusterProtocol.EqualAsync(expected, actual);
         return identity with
         {
             Principal = actual
         };
     }
 
-    private static async Task<PrincipalRecord> PolicyAsync(RequestCqrsRf3Callers admin,
+    private static async Task<PrincipalRecord> PolicyAsync(RequestCqrsClusterCallers admin,
         PrincipalRecord current, bool enabled, CancellationToken token)
     {
         var expected = current with
@@ -114,11 +114,11 @@ internal static class TypedEndpointJoinReverseFlow
         };
         var actual = await McpCallerAssertions.SdkSuccessAsync(
             await admin.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), expected, token));
-        await SqlRf3Protocol.EqualAsync(expected, actual);
+        await SqlClusterProtocol.EqualAsync(expected, actual);
         return actual;
     }
 
-    internal static async Task<JsonElement> FencedAsync(RequestCqrsRf3Callers callers,
+    internal static async Task<JsonElement> FencedAsync(RequestCqrsClusterCallers callers,
         CommandRequest command, CancellationToken token)
     {
         var problem = await RefusedAsync(callers, command, ErrorCode.PermissionDenied, token, EpochChanged);
@@ -126,7 +126,7 @@ internal static class TypedEndpointJoinReverseFlow
         return problem;
     }
 
-    internal static async Task<JsonElement> RefusedAsync(RequestCqrsRf3Callers callers,
+    internal static async Task<JsonElement> RefusedAsync(RequestCqrsClusterCallers callers,
         CommandRequest command, ErrorCode code, CancellationToken token, string? expectedDetail = null)
     {
         var sql = DeclarativeCompositionSql.Reverse(command, (GraphToQueueMutation)command.Mutations[0]);

@@ -9,7 +9,6 @@ internal static class TargetInboxCapacityAuthorityCompletion
 {
     private const int OutputCount = 2;
     private const int FirstReadySequence = 1;
-    private const int PlacementContractVersion = 1;
     private const int NextCommitPosition = 1;
     private const int PresenceLimit = 1;
     private const long EmptyUsage = 0L;
@@ -88,7 +87,7 @@ internal static class TargetInboxCapacityAuthorityCompletion
 
     private static CommitToken NextToken(DatabaseEngine database, ZoneTreeStore store, QueueLaneRef output)
     {
-        var placement = database.ReadAtomicPartitionPlacement(TargetInboxUnitProtocol.Root, new(PlacementContractVersion, output.Partition));
+        var placement = database.ReadAtomicPartitionPlacement(TargetInboxUnitProtocol.Root, output.Partition);
         return new(placement.Incarnation, output.Partition.AtomicPartitionId,
             checked(store.Position + NextCommitPosition), placement.PlacementEpoch);
     }

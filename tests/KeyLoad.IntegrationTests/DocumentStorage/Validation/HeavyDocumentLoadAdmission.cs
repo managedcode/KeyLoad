@@ -9,7 +9,7 @@ namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
 internal static class HeavyDocumentLoadAdmission
 {
     internal const string FilterArgument = "--treenode-filter";
-    internal const string ExactFilter = "/*/*/HeavyDocumentLoadRf3Tests/*";
+    internal const string ExactFilter = "/*/*/HeavyDocumentLoadClusterTests/*";
     internal const string ParallelismArgument = "--maximum-parallel-tests";
     internal const string ExclusiveParallelism = "1";
     internal const string CoveragePreparationEnvironment = "KEYLOAD_TUNIT_NATIVE_COVERAGE_ARGUMENTS";
@@ -34,7 +34,7 @@ internal static class HeavyDocumentLoadAdmission
             || !ExactlyOne(arguments, ParallelismArgument, ExclusiveParallelism)
             || arguments.Any(argument => argument.StartsWith(CoverageArgumentPrefix, StringComparison.Ordinal))
             || configuration[CoveragePreparationEnvironment] is not null
-            || configuration[NativeCoverageRf3FixtureProtocol.ModeEnvironment] is not null
+            || configuration[NativeCoverageClusterFixtureProtocol.ModeEnvironment] is not null
             || configuration.GetSection(CoverageSection).GetChildren().Any())
         {
             throw new InvalidOperationException(HeavyDocumentLoadExecutionOptions.ValidationMessage);

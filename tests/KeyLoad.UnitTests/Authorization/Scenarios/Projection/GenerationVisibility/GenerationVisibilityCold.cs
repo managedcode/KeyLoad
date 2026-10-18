@@ -26,8 +26,7 @@ internal static class GenerationVisibilityCold
             try
             {
                 var create = TestDatabaseEngineFactory.Capture(UnitExecutionOptions.DatabaseLimits(),
-                    UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), null,
-                    db.MovementCheckpoints, db.Database.EvaluationClock);
+                    UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), null, db.Database.EvaluationClock);
                 var database = create(cold, null);
                 using var cache = database.ConfigureRowVisibility(memory);
                 await Assert.That(memory.GetSnapshot().RetainedEntries).IsEqualTo(EmptyCacheEntries);

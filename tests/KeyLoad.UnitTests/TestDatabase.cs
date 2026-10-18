@@ -43,7 +43,6 @@ internal sealed class TestDatabase : IDisposable
     {
         get;
     }
-    internal IOptions<PartitionMovementCheckpointOptions> MovementCheckpoints { get; } = UnitExecutionOptions.MovementCheckpoints();
     public PartitionRef Partition { get; } = new(TenantId, DatabaseId, TransactionDomainId, PartitionKey);
     public TestDatabase(DatabaseLimits? limits = null, string? directory = null,
         bool bootstrapPhysicalShardCatalog = true, BlobExecutionOptions? blobExecution = null,
@@ -70,7 +69,7 @@ internal sealed class TestDatabase : IDisposable
             Store = acquired = new(new(Directory), StorageExecution, UnitExecutionOptions.PointCacheExecution(), timeProvider: clock);
             this.limits = UnitExecutionOptions.DatabaseLimits(limits);
             createDatabase = TestDatabaseEngineFactory.Capture(this.limits, blobOptions, claimsOptions,
-                timeSeriesExecution, MovementCheckpoints, clock);
+                timeSeriesExecution, clock);
             Database = createDatabase(Store, null);
             TestDatabaseEngineFactory.Bootstrap(Database, RootPrincipalId, RootCredential, bootstrapPhysicalShardCatalog);
             if (nativeReplicaAdmission)

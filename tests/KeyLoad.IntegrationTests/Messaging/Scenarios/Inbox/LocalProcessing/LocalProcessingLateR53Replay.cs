@@ -40,10 +40,10 @@ internal static class LocalProcessingLateR53Replay
         CommitReceipt expected, KeyLoadClient sdk, McpOfficialClient mcp,
         KeyLoadClient admin, McpOfficialClient official, CancellationToken token)
     {
-        await InboxProcessingRf3Assertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
+        await InboxProcessingClusterAssertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
             await sdk.CommitProcessingAsync(request, token)), expected);
         await LocalProcessingLateR53Current.RunAsync(state, sdk, mcp, admin, official, token);
-        await InboxProcessingRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(
+        await InboxProcessingClusterAssertions.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(
             await mcp.CallAsync(McpCallerTools.MessagesProcess, request, token))).Value, expected);
         await LocalProcessingLateR53Current.RunAsync(state, sdk, mcp, admin, official, token);
     }

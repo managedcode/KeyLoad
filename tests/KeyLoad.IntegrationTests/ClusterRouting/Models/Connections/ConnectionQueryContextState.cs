@@ -1,3 +1,0 @@
-namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
-
-internal sealed record ConnectionQueryContextState(ConnectionQueryContextSeed First, ConnectionQueryContextSeed Second);

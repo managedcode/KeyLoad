@@ -23,26 +23,25 @@ public sealed partial class DatabaseEngine
             _ => new Mutation[] { mutation }
         };
 
-    private (string FromPrimaryKey, string ToPrimaryKey)? AuthorizeComposition(IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation mutation,
-        BatchResourceAdmission admission = BatchResourceAdmission.CurrentPhysicalOwner)
+    private (string FromPrimaryKey, string ToPrimaryKey)? AuthorizeComposition(IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation mutation)
     {
         if (mutation is QueueToGraph forward)
         {
             ValidateForward(forward);
             RequireCompositionCapabilities(principal, partition, forward);
-            var source = BatchResource(view, partition, forward.Queue, admission, ResourceKind.WorkQueue);
-            var target = BatchResource(view, partition, forward.Graph, admission, ResourceKind.Graph);
+            var source = BatchResource(view, partition, forward.Queue, ResourceKind.WorkQueue);
+            var target = BatchResource(view, partition, forward.Graph, ResourceKind.Graph);
             RequireRawSource(principal, source);
             RequireTargetWrites(principal, target);
-            return AuthorizeTypedEndpointJoin(view, principal, partition, forward, admission);
+            return AuthorizeTypedEndpointJoin(view, principal, partition, forward);
         }
         else if (mutation is GraphToQueueMutation reverse)
         {
             ValidateReverse(partition, reverse);
             RequireCompositionCapabilities(principal, partition, reverse);
-            var source = BatchResource(view, partition, reverse.Graph, admission, ResourceKind.Graph);
-            var target = BatchResource(view, partition, reverse.Queue, admission, ResourceKind.WorkQueue);
-            BatchResource(view, partition, reverse.Start.Collection, admission, ResourceKind.Collection);
+            var source = BatchResource(view, partition, reverse.Graph, ResourceKind.Graph);
+            var target = BatchResource(view, partition, reverse.Queue, ResourceKind.WorkQueue);
+            BatchResource(view, partition, reverse.Start.Collection, ResourceKind.Collection);
             RequireRawSource(principal, source);
             RequireTargetWrites(principal, target);
         }

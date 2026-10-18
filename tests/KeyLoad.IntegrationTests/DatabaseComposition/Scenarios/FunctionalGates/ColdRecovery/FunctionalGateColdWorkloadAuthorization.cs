@@ -17,14 +17,14 @@ internal static class FunctionalGateColdWorkloadAuthorization
             PolicyEpoch = checked(proof.Identity.Principal.PolicyEpoch + 1),
             Grants = []
         };
-        await SqlRf3Protocol.EqualAsync(revoked, await context.SdkAsync(
+        await SqlClusterProtocol.EqualAsync(revoked, await context.SdkAsync(
             context.Administrator.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), revoked, token)));
         await DeniedAsync(context, proof.Command, proof.Expected.Document!.Reference, token);
         var restored = proof.Identity.Principal with
         {
             PolicyEpoch = checked(revoked.PolicyEpoch + 1)
         };
-        await SqlRf3Protocol.EqualAsync(restored, await context.SdkAsync(
+        await SqlClusterProtocol.EqualAsync(restored, await context.SdkAsync(
             context.Administrator.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), restored, token)));
         await HealthyAsync(context, proof, token);
         foreach (var model in state.Models)
@@ -61,17 +61,17 @@ internal static class FunctionalGateColdWorkloadAuthorization
         var receipt = await context.SdkAsync(context.Writer.Sdk.CommitAsync(command, token));
         await FunctionalGateRelationalAssertions.ReceiptAsync(receipt, command.CommandId, reference.Partition,
             [new("putDocument", reference.Collection, reference.Id, 1)]);
-        await SqlRf3Protocol.EqualAsync(receipt, await context.McpAsync<CommitReceipt>(context.Writer,
+        await SqlClusterProtocol.EqualAsync(receipt, await context.McpAsync<CommitReceipt>(context.Writer,
             McpCallerTools.DocumentsCommit, command, token));
         var expected = new DocumentReadResult(original with
         {
             Reference = reference
         });
-        await SqlRf3Protocol.EqualAsync(expected, await context.SdkAsync(context.Reader.Sdk.GetAsync(reference, token)));
-        await SqlRf3Protocol.EqualAsync(expected, await context.McpAsync<DocumentReadResult>(context.Reader,
+        await SqlClusterProtocol.EqualAsync(expected, await context.SdkAsync(context.Reader.Sdk.GetAsync(reference, token)));
+        await SqlClusterProtocol.EqualAsync(expected, await context.McpAsync<DocumentReadResult>(context.Reader,
             McpCallerTools.DocumentsGet, new GetDocumentRequest(reference), token));
-        await SqlRf3Protocol.EqualAsync(proof.Expected, await context.SdkAsync(context.Reader.Sdk.GetAsync(original.Reference, token)));
-        await SqlRf3Protocol.EqualAsync(proof.Expected, await context.McpAsync<DocumentReadResult>(context.Reader,
+        await SqlClusterProtocol.EqualAsync(proof.Expected, await context.SdkAsync(context.Reader.Sdk.GetAsync(original.Reference, token)));
+        await SqlClusterProtocol.EqualAsync(proof.Expected, await context.McpAsync<DocumentReadResult>(context.Reader,
             McpCallerTools.DocumentsGet, new GetDocumentRequest(original.Reference), token));
     }
 }

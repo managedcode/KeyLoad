@@ -13,7 +13,7 @@ internal static class OrleansTelemetryAncestryOperation
             [new PutDocument(OrleansTelemetryAncestryProtocol.Collection, documentId,
                 OrleansTelemetryAncestryProtocol.Json)]);
         var placement = fixture.Database.Database.ReadAtomicPartitionPlacement(OrleansTelemetryAncestryProtocol.Root,
-            new(OrleansTelemetryAncestryProtocol.PlacementVersion, fixture.Database.Partition));
+            fixture.Database.Partition);
         var reply = await RequestCqrsNativeCommandStream.InvokeAsync(fixture, principal, requestId, commandId, command);
         await Assert.That(reply.Error).IsNull();
         var receipt = NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as CommitReceipt

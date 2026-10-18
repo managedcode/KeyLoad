@@ -1,10 +1,9 @@
 namespace KeyLoad.IntegrationTests.Features.GraphTraversal;
 
-internal sealed class GraphCrossAuthorityR41State(GraphIncomingRf3Seed seed)
+internal sealed class GraphCrossAuthorityR41State(GraphIncomingClusterSeed seed)
 {
-    internal GraphIncomingRf3Seed Seed { get; } = seed;
-    internal EntityRef Collision => new(Seed.TargetPartition, GraphIncomingRf3Scenario.Collection, Seed.FirstSource.Id);
-    internal AtomicPartitionPlacementResolution Placement { get; set; } = null!;
+    internal GraphIncomingClusterSeed Seed { get; } = seed;
+    internal EntityRef Collision => new(Seed.TargetPartition, GraphIncomingClusterScenario.Collection, Seed.FirstSource.Id);
     internal OutboxStatus[] Outbox { get; set; } = [];
     internal List<(CommandRequest Command, CommitReceipt Receipt)> Originals { get; } = [];
     internal bool Hidden

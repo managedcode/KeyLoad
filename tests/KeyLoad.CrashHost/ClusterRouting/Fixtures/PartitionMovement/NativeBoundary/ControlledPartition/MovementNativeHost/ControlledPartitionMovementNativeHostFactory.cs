@@ -8,9 +8,8 @@ namespace KeyLoad.CrashHost.Features.ClusterRouting;
 internal static class ControlledPartitionMovementNativeHostFactory
 {
     private const int FirstOwner = 0;
-    internal static Task<ControlledPartitionMovementNativeHosts> CreateAsync(
-        Func<int, IGrainPartitionMovementSealedOperationObserver>? observerFactory, CancellationToken cancellationToken)
-        => CreateAsync(observerFactory, null, null, null, null, null, null, null, cancellationToken);
+    internal static Task<ControlledPartitionMovementNativeHosts> CreateAsync(CancellationToken cancellationToken)
+        => CreateAsync(null, null, null, null, null, null, null, cancellationToken);
 
     internal static Task<ControlledPartitionMovementNativeHosts> CreateWithRoutingAsync(
         IOptions<GrainRoutingOptions> routingOptions, Func<int, IGrainRequestPhaseObserver> observerFactory,
@@ -20,12 +19,11 @@ internal static class ControlledPartitionMovementNativeHostFactory
     {
         ArgumentNullException.ThrowIfNull(routingOptions);
         ArgumentNullException.ThrowIfNull(observerFactory);
-        return CreateAsync(null, null, observerFactory,
+        return CreateAsync(null, observerFactory,
             null, routingOptions, purposeObserver, configureServices, beforeStart, cancellationToken);
     }
 
     internal static async Task<ControlledPartitionMovementNativeHosts> CreateAsync(
-        Func<int, IGrainPartitionMovementSealedOperationObserver>? observerFactory,
         Func<int, IDatabaseAuthenticationExecutionObserver>? authenticationObserverFactory,
         Func<int, IGrainRequestPhaseObserver>? phaseObserverFactory, int? maximumBatchBytes,
         IOptions<GrainRoutingOptions>? routingOptions, IGrainRequestPurposeObserver? purposeObserver,
@@ -39,7 +37,7 @@ internal static class ControlledPartitionMovementNativeHostFactory
         var failures = new List<Exception>();
         try
         {
-            owner = new ControlledPartitionMovementNativeHosts(settings, new(endpoints.Primary), observerFactory, authenticationObserverFactory, phaseObserverFactory, purposeObserver);
+            owner = new ControlledPartitionMovementNativeHosts(settings, new(endpoints.Primary), authenticationObserverFactory, phaseObserverFactory, purposeObserver);
             await owner.CreateNodesAsync(configureServices, cancellationToken).ConfigureAwait(false);
             if (beforeStart is not null)
             {

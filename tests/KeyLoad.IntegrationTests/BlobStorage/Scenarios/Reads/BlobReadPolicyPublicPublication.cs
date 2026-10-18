@@ -8,10 +8,10 @@ namespace KeyLoad.IntegrationTests.Features.BlobStorage;
 internal static class BlobReadPolicyPublicPublication
 {
     internal static async Task<BlobSupersessionPublicTrial.Version> CreateAsync(
-        RequestCqrsRf3Callers administrator, CancellationToken token)
+        RequestCqrsClusterCallers administrator, CancellationToken token)
     {
-        var scenario = await RelationalSqlRf3Scenario.CreateAsync(administrator.Sdk, token);
-        var blob = new BlobRef(scenario.Partition, RelationalSqlRf3Tokens.Blobs, "public-read-policy");
+        var scenario = await RelationalSqlClusterScenario.CreateAsync(administrator.Sdk, token);
+        var blob = new BlobRef(scenario.Partition, RelationalSqlClusterTokens.Blobs, "public-read-policy");
         var upload = Guid.NewGuid();
         var begin = new BeginBlobUploadRequest(Guid.NewGuid(), blob, upload, 4, 0);
         var begun = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.BeginBlobUploadAsync(begin, token));

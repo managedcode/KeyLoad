@@ -6,8 +6,8 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 internal static class QueueViewLeaseIsolationWarm
 {
     internal static Task<bool> RunAsync(ClusterFixture fixture, QueueViewLeaseIsolationState state, CancellationToken token)
-        => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, root =>
-            RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, state.Reader.Secret, async reader =>
+        => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, root =>
+            RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, state.Reader.Secret, async reader =>
             {
                 await QueueViewLeaseIsolationSeed.ClaimAsync(root, state, token);
                 await QueueViewLeaseIsolationReads.RunAsync(root, reader, state, token);

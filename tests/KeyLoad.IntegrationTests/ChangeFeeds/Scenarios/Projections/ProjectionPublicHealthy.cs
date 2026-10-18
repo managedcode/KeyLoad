@@ -5,7 +5,7 @@ namespace KeyLoad.IntegrationTests.Features.ChangeFeeds;
 
 internal static class ProjectionPublicHealthy
 {
-    internal static async Task RunAsync(RequestCqrsRf3Callers root, RequestCqrsRf3Callers caller,
+    internal static async Task RunAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers caller,
         ProjectionPublicSettlement settled, CancellationToken token)
     {
         var state = settled.Original;

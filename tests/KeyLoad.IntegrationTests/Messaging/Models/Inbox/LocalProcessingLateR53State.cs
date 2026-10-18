@@ -1,11 +1,11 @@
 namespace KeyLoad.IntegrationTests.Features.Messaging;
 
-internal sealed class LocalProcessingLateR53State(QueueLaneRef lane, MessagingRf3Identity identity)
+internal sealed class LocalProcessingLateR53State(QueueLaneRef lane, MessagingClusterIdentity identity)
 {
     internal QueueLaneRef Lane { get; } = lane;
-    internal MessagingRf3Identity Identity { get; } = identity;
-    internal QueueLaneRef Output => new(Lane.Partition, InboxProcessingRf3Protocol.Output);
-    internal EntityRef Document => new(Lane.Partition, InboxProcessingRf3Protocol.Collection, LocalProcessingLateR53Protocol.Document);
+    internal MessagingClusterIdentity Identity { get; } = identity;
+    internal QueueLaneRef Output => new(Lane.Partition, InboxProcessingClusterProtocol.Output);
+    internal EntityRef Document => new(Lane.Partition, InboxProcessingClusterProtocol.Collection, LocalProcessingLateR53Protocol.Document);
     internal ProcessingRequest Failed { get; set; } = null!;
     internal ManagedCode.Communication.Result<CommitReceipt> OriginalFailure
     {
@@ -26,7 +26,6 @@ internal sealed class LocalProcessingLateR53State(QueueLaneRef lane, MessagingRf
         get; set;
     }
     internal OutboxStatus Outbox { get; set; } = null!;
-    internal AtomicPartitionPlacementResolution Placement { get; set; } = null!;
     internal bool OriginalAllowed { get; set; } = true;
     internal ProcessingRequest? OutputProcessing
     {

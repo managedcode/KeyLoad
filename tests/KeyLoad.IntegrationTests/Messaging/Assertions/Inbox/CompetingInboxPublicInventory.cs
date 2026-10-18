@@ -7,7 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.Messaging;
 internal static class CompetingInboxPublicInventory
 {
     private const string QueueScanPath = "model-scan:queue-messages";
-    internal static async Task RunAsync(CompetingInboxPublicState state, RequestCqrsRf3Callers root, CancellationToken token)
+    internal static async Task RunAsync(CompetingInboxPublicState state, RequestCqrsClusterCallers root, CancellationToken token)
     {
         var failures = new List<Exception>();
         foreach (var resource in new[]
@@ -21,7 +21,7 @@ internal static class CompetingInboxPublicInventory
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
-    private static async Task ResourceAsync(CompetingInboxPublicState state, RequestCqrsRf3Callers root,
+    private static async Task ResourceAsync(CompetingInboxPublicState state, RequestCqrsClusterCallers root,
         string resource, CancellationToken token)
     {
         var queue = resource != CompetingInboxPublicProtocol.Documents;

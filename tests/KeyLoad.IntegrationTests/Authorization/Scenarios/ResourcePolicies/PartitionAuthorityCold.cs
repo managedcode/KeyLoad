@@ -43,7 +43,7 @@ internal static class PartitionAuthorityCold
             await Assert.That(after[node].Applied).IsGreaterThanOrEqualTo(before[node].Applied);
             await Assert.That(after[node].RoutingReady).IsTrue();
         }
-        await SqlRf3Protocol.EqualAsync(image, await ImageAsync(fixture, state, token));
+        await SqlClusterProtocol.EqualAsync(image, await ImageAsync(fixture, state, token));
         await PartitionAuthorityClients.RunAsync(fixture, state.Identity.Secret,
             (root, sdk, session) => PartitionAuthorityFlow.HealthyAsync(root, sdk, session, state, token), token);
     }

@@ -6,8 +6,8 @@ namespace KeyLoad.IntegrationTests.Features.TimeSeries;
 
 internal static class SeriesRetentionAtomicPublicCurrent
 {
-    internal static async Task AssertAsync(RequestCqrsRf3Callers administrator,
-        RequestCqrsRf3Callers reader, SeriesRetentionAtomicPublicState state, CancellationToken token)
+    internal static async Task AssertAsync(RequestCqrsClusterCallers administrator,
+        RequestCqrsClusterCallers reader, SeriesRetentionAtomicPublicState state, CancellationToken token)
     {
         var range = SeriesRetentionAtomicPublicExpected.Range(state);
         await BothAsync(reader, McpCallerTools.SeriesRead, range, SeriesRetentionAtomicPublicExpected.Rows(state),
@@ -29,11 +29,11 @@ internal static class SeriesRetentionAtomicPublicCurrent
             ct => administrator.Sdk.OutboxStatusAsync(state.Scenario.Partition, ct), token);
     }
 
-    private static async Task BothAsync<T>(RequestCqrsRf3Callers caller, string tool, object request,
+    private static async Task BothAsync<T>(RequestCqrsClusterCallers caller, string tool, object request,
         T expected, Func<CancellationToken, Task<ManagedCode.Communication.Result<T>>> read, CancellationToken token)
     {
-        await SqlRf3Protocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(await read(token)));
-        await SqlRf3Protocol.EqualAsync(expected,
+        await SqlClusterProtocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(await read(token)));
+        await SqlClusterProtocol.EqualAsync(expected,
             (await McpCallerAssertions.SuccessAsync<T>(await caller.Mcp.CallAsync(tool, request, token))).Value);
     }
 }

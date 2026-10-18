@@ -17,7 +17,7 @@ semantics and silently dropping failures are rejected. Separate commits expose
 OutputPending; external side effects remain outside database guarantees.
 
 Implementation contract: [RemoteTransfers](../Features/Messaging/RemoteTransfers.md),
-REQ/AC-XFER-001–005; original KL-094 and dependencies KL-016/020/086/090.
+REQ/AC-XFER-001–005.
 The linked contract contains ordered stages, exact ownership, baseline, tests,
 native serialization, retained payload, resource/retention limits and rollout/
 rollback. ADR-002/003/024/026/028/029/030/036/082/125/136 remain mandatory.

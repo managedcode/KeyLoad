@@ -46,7 +46,7 @@ internal static class SlowBodyAdmissionReturnFlow
                     await ServerFailureObserver.ObserveAsync(async () =>
                     {
                         using var phase = McpCallerDeadline.Create();
-                        await ModelSqlRf3Cold.RunAsync(fixture, phase.Token);
+                        await ModelSqlClusterCold.RunAsync(fixture, phase.Token);
                         _ = await RootAsync(fixture, async root =>
                         {
                             await HealthyAsync(fixture, root, state, phase.Token);
@@ -58,15 +58,15 @@ internal static class SlowBodyAdmissionReturnFlow
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
-    private static Task<bool> HealthyAsync(ClusterFixture fixture, RequestCqrsRf3Callers root,
+    private static Task<bool> HealthyAsync(ClusterFixture fixture, RequestCqrsClusterCallers root,
         EarlyAdmissionQualificationState state, CancellationToken token)
-        => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, state.Identity.Secret, async reader =>
+        => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, state.Identity.Secret, async reader =>
         {
             await EarlyAdmissionQualificationReads.WaveAsync(root, reader, state, true, ErrorCode.Validation, false, token);
             await EarlyAdmissionQualificationReads.WaveAsync(root, reader, state, false, null, false, token);
             await EarlyAdmissionQualificationReplay.RunAsync(root, state, token);
             return true;
         }, token);
-    private static Task<T> RootAsync<T>(ClusterFixture fixture, Func<RequestCqrsRf3Callers, Task<T>> operation, CancellationToken token)
-        => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, operation, token);
+    private static Task<T> RootAsync<T>(ClusterFixture fixture, Func<RequestCqrsClusterCallers, Task<T>> operation, CancellationToken token)
+        => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, operation, token);
 }

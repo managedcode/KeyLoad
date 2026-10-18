@@ -9,16 +9,9 @@ internal static class ClusterFixtureApplicationStartup
     internal static ClusterFixtureColdStartObservation ObserveColdStart(string root)
         => new(root, Directory.Exists(root), File.Exists(root));
 
-    internal static Task StartOwnedAsync(DistributedApplication application, string repository,
-        IReadOnlyDictionary<string, string> containerNames, NativeCoverageRf3FixtureOwner? coverage,
-        LocalRf3ImageSelection.Selection? selection, ReplicaIsolationOwner? isolationOwner, CancellationToken token)
-        => isolationOwner is null
-            ? StartAsync(application, repository, containerNames, coverage, selection, token)
-            : isolationOwner.StartAsync(application, token);
-
     internal static async Task StartAsync(DistributedApplication application, string repository,
-        IReadOnlyDictionary<string, string> containerNames, NativeCoverageRf3FixtureOwner? coverage,
-        LocalRf3ImageSelection.Selection? selection, CancellationToken token)
+        IReadOnlyDictionary<string, string> containerNames, NativeCoverageClusterFixtureOwner? coverage,
+        LocalClusterImageSelection.Selection? selection, CancellationToken token)
     {
         var identity = coverage is null
             ? await ReadLocalIdentityAsync(application, repository, selection, token).ConfigureAwait(false)
@@ -37,7 +30,7 @@ internal static class ClusterFixtureApplicationStartup
         await AspireStartupReadiness.WaitForHealthyAsync(application, readinessNodes, token).ConfigureAwait(false);
         if (identity is not null)
         {
-            await LocalRf3ImageIdentity.VerifyStartedContainersAsync(identity, containerNames,
+            await LocalClusterImageIdentity.VerifyStartedContainersAsync(identity, containerNames,
                 ClusterFixtureLocalImageLifecycle.ExpectedNames, token).ConfigureAwait(false);
         }
         if (coverage is not null)
@@ -46,10 +39,10 @@ internal static class ClusterFixtureApplicationStartup
         }
     }
 
-    private static async Task<LocalRf3ImageIdentity.Identity?> ReadLocalIdentityAsync(DistributedApplication application,
-        string repository, LocalRf3ImageSelection.Selection? selection, CancellationToken token)
+    private static async Task<LocalClusterImageIdentity.Identity?> ReadLocalIdentityAsync(DistributedApplication application,
+        string repository, LocalClusterImageSelection.Selection? selection, CancellationToken token)
         => selection is null
-            ? await LocalRf3ImageIdentity.VerifyBeforeStartAsync(application, repository, token).ConfigureAwait(false)
-            : await LocalRf3ImageIdentity.VerifyBeforeStartAsync(application, repository, selection,
+            ? await LocalClusterImageIdentity.VerifyBeforeStartAsync(application, repository, token).ConfigureAwait(false)
+            : await LocalClusterImageIdentity.VerifyBeforeStartAsync(application, repository, selection,
                 ClusterFixtureLocalImageLifecycle.ExpectedNames, token).ConfigureAwait(false);
 }

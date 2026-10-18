@@ -5,8 +5,8 @@ namespace KeyLoad.IntegrationTests.Features.ChangeFeeds;
 
 internal static class ProjectionPublicPolicy
 {
-    internal static async Task<ProjectionPublicSettlement> RunAsync(RequestCqrsRf3Callers root,
-        RequestCqrsRf3Callers caller, ProjectionPublicState state, CancellationToken token)
+    internal static async Task<ProjectionPublicSettlement> RunAsync(RequestCqrsClusterCallers root,
+        RequestCqrsClusterCallers caller, ProjectionPublicState state, CancellationToken token)
     {
         var before = await ProjectionPublicOperations.ImageAsync(root, state, 2L, false, false, token);
         var denied = state.Identity.Principal with

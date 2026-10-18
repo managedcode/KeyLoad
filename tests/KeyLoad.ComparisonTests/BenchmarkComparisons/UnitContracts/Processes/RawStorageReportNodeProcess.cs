@@ -67,7 +67,7 @@ internal static class RawStorageReportNodeProcess
             case 'missing-entry': report.Benchmarks.pop(); break;
             case 'extra-entry': report.Benchmarks.push({...structuredClone(first), Method: 'Extra'}); break;
             case 'duplicate-entry': report.Benchmarks[report.Benchmarks.length - 1] = structuredClone(first); break;
-            case 'wrong-engine': parameters(first, 'Engine', 'tsavorite'); break;
+            case 'wrong-engine': parameters(first, 'Engine', 'unconfigured-engine'); break;
             case 'wrong-payload': parameters(first, 'PayloadBytes', '64'); break;
             case 'wrong-count': parameters(first, 'RecordCount', '4095'); break;
             case 'null-statistics': first.Statistics = null; break;

@@ -18,4 +18,4 @@ flowchart LR
  Healthy --> Cold[Two native cold complete cuts]
 ```
 
-No test/build/process/native check was executed by this source author. Main alone owns existing seams/adoption/compiler/actual tests. Native/Linux ABI/filesystem/recovery/RF3/coverage and all full-task qualification remain OPEN. No current parent README/status/workflow change.
+Native/Linux ABI, filesystem, recovery, replicated-cluster and coverage qualification are separate gates.

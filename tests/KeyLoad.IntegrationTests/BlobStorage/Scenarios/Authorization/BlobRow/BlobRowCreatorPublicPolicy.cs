@@ -7,7 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.BlobStorage;
 internal static class BlobRowCreatorPublicPolicy
 {
     internal static async Task<McpPersistedIdentity> CreateAsync(ClusterFixture fixture,
-        RequestCqrsRf3Callers administrator, BlobRef blob, CancellationToken token)
+        RequestCqrsClusterCallers administrator, BlobRef blob, CancellationToken token)
     {
         var identity = await McpPersistedIdentity.CreateAsync(fixture, blob.Partition, blob.Resource,
             Capability.BlobRead | Capability.BlobWrite, token);
@@ -25,12 +25,12 @@ internal static class BlobRowCreatorPublicPolicy
         };
     }
 
-    internal static async Task<PrincipalRecord> PersistAsync(RequestCqrsRf3Callers administrator,
+    internal static async Task<PrincipalRecord> PersistAsync(RequestCqrsClusterCallers administrator,
         PrincipalRecord expected, CancellationToken token)
     {
         var actual = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.ConfigurePrincipalAsync(
             Guid.NewGuid(), expected, token));
-        await SqlRf3Protocol.EqualAsync(expected, actual);
+        await SqlClusterProtocol.EqualAsync(expected, actual);
         return actual;
     }
 }

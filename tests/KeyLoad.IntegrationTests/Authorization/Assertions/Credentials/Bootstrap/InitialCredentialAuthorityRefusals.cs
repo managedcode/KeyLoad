@@ -28,6 +28,6 @@ internal static class InitialCredentialAuthorityRefusals
         }
         await McpUnauthorizedProbe.VerifyAsync(fixture, McpCallerProtocol.Node1, invalidKey, token);
         await MalformedCredentialAuthorityRefusals.VerifyAsync(fixture, root, state, token);
-        await SqlRf3Protocol.EqualAsync(before, await InitialCredentialAuthorityValues.ImageAsync(root, state, token));
+        await SqlClusterProtocol.EqualAsync(before, await InitialCredentialAuthorityValues.ImageAsync(root, state, token));
     }
 }

@@ -5,7 +5,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 
 internal static class ClusterFixtureLocalImageLifecycle
 {
-    private const string ShutdownFailure = "Owned local RF3 image cleanup requires joined node shutdown.";
+    private const string ShutdownFailure = "Owned local CLUSTER image cleanup requires joined node shutdown.";
     private const string NodeOwnerLock = "node.owner.lock";
     private const string DatabaseDirectory = "database";
     private const string ReplicaDirectory = "replica";
@@ -13,7 +13,7 @@ internal static class ClusterFixtureLocalImageLifecycle
     internal static readonly string[] ExpectedNames = Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber,
         ClusterFixtureProtocol.NodeCount).Select(ClusterFixtureProtocol.NodeName).ToArray();
 
-    internal static async Task JoinAsync(LocalRf3ImageTestSession session, string root, bool stopped,
+    internal static async Task JoinAsync(LocalClusterImageTestSession session, string root, bool stopped,
         bool neverBuilt, List<Exception> failures)
     {
         if (!neverBuilt && (!stopped || failures.Count > 0))
@@ -35,9 +35,9 @@ internal static class ClusterFixtureLocalImageLifecycle
     {
         foreach (var node in ExpectedNames)
         {
-            NodeEpochRf3OfflineFiles.AssertExclusive(Path.Combine(root, node, NodeOwnerLock));
-            NodeEpochRf3OfflineFiles.AssertExclusive(Path.Combine(root, node, DatabaseDirectory, StoreOwnerLock));
-            NodeEpochRf3OfflineFiles.AssertExclusive(Path.Combine(root, node, ReplicaDirectory, StoreOwnerLock));
+            NodeEpochClusterOfflineFiles.AssertExclusive(Path.Combine(root, node, NodeOwnerLock));
+            NodeEpochClusterOfflineFiles.AssertExclusive(Path.Combine(root, node, DatabaseDirectory, StoreOwnerLock));
+            NodeEpochClusterOfflineFiles.AssertExclusive(Path.Combine(root, node, ReplicaDirectory, StoreOwnerLock));
         }
     }
 }

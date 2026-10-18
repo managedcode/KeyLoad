@@ -10,16 +10,16 @@ internal static class QueueScheduledCancelPublicFlow
     internal static async Task RunAsync(ClusterFixture fixture, bool mcpFirst)
     {
         using var deadline = McpCallerDeadline.Create();
-        var owner = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
+        var owner = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
             root => QueueLifecyclePublicSeed.RunAsync(root, mcpFirst ? QueueLifecyclePublicProtocol.Mcp : QueueLifecyclePublicProtocol.Sdk,
                 deadline.Token), deadline.Token);
-        var state = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, owner.OperatorKey,
+        var state = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, owner.OperatorKey,
             callers => StartAsync(fixture, callers, owner, deadline.Token), deadline.Token);
-        await ModelSqlRf3Cold.RunAsync(fixture, deadline.Token);
-        await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node3, owner.OperatorKey,
+        await ModelSqlClusterCold.RunAsync(fixture, deadline.Token);
+        await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node3, owner.OperatorKey,
             callers => FirstColdAsync(fixture, callers, state, deadline.Token), deadline.Token);
-        await ModelSqlRf3Cold.RunAsync(fixture, deadline.Token);
-        await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, owner.OperatorKey,
+        await ModelSqlClusterCold.RunAsync(fixture, deadline.Token);
+        await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, owner.OperatorKey,
             callers => SecondColdAsync(fixture, callers, state, deadline.Token), deadline.Token);
     }
 
@@ -33,7 +33,7 @@ internal static class QueueScheduledCancelPublicFlow
                 MessageState.Scheduled, 1L, 0L, state.Due, QueueDeadlineKind.PromoteScheduled)]);
 
     private static async Task<QueueScheduledCancelPublicState> StartAsync(ClusterFixture fixture,
-        RequestCqrsRf3Callers callers, QueueLifecyclePublicState owner, CancellationToken token)
+        RequestCqrsClusterCallers callers, QueueLifecyclePublicState owner, CancellationToken token)
     {
         var state = new QueueScheduledCancelPublicState(owner, TimeProvider.System.GetUtcNow().AddHours(FutureHours));
         await QueueLifecyclePublicRoutes.CommitAsync(callers, owner, new(Guid.NewGuid(), owner.Partition,
@@ -62,7 +62,7 @@ internal static class QueueScheduledCancelPublicFlow
         return state;
     }
 
-    private static async Task<bool> FirstColdAsync(ClusterFixture fixture, RequestCqrsRf3Callers callers,
+    private static async Task<bool> FirstColdAsync(ClusterFixture fixture, RequestCqrsClusterCallers callers,
         QueueScheduledCancelPublicState state, CancellationToken token)
     {
         await DeniedAsync(fixture, state, token);
@@ -83,7 +83,7 @@ internal static class QueueScheduledCancelPublicFlow
         return true;
     }
 
-    private static async Task<bool> SecondColdAsync(ClusterFixture fixture, RequestCqrsRf3Callers callers,
+    private static async Task<bool> SecondColdAsync(ClusterFixture fixture, RequestCqrsClusterCallers callers,
         QueueScheduledCancelPublicState state, CancellationToken token)
     {
         await DeniedAsync(fixture, state, token);
@@ -102,7 +102,7 @@ internal static class QueueScheduledCancelPublicFlow
         return true;
     }
 
-    private static async Task SettleAsync(RequestCqrsRf3Callers callers, QueueScheduledCancelPublicState state,
+    private static async Task SettleAsync(RequestCqrsClusterCallers callers, QueueScheduledCancelPublicState state,
         string[] ids, CancellationToken token)
     {
         var request = new ReceiveRequest(Guid.NewGuid(), state.Owner.Lane, MaxMessages: ids.Length,
@@ -126,12 +126,12 @@ internal static class QueueScheduledCancelPublicFlow
             await Assert.That(receipt.Mutations).IsEquivalentTo(new MutationReceipt[] {
                 new("Ack", state.Owner.Lane.Queue, delivery.Id, 3L) }, CollectionOrdering.Matching);
         }
-        await SagaTimeoutRf3Assertions.AssertSdkErrorAsync(await callers.Sdk.ReceiveAsync(request, token), ErrorCode.StaleLease);
+        await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(await callers.Sdk.ReceiveAsync(request, token), ErrorCode.StaleLease);
         await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.MessagesReceive, request, token),
             ErrorCode.StaleLease, true);
     }
 
-    private static async Task FinalAsync(RequestCqrsRf3Callers callers, QueueScheduledCancelPublicState state,
+    private static async Task FinalAsync(RequestCqrsClusterCallers callers, QueueScheduledCancelPublicState state,
         bool healthy, CancellationToken token)
     {
         await QueueScheduledCancelPublicAssertions.MessageAsync(callers, state, QueueScheduledCancelPublicAssertions.Target,
@@ -151,7 +151,7 @@ internal static class QueueScheduledCancelPublicFlow
     }
 
     private static Task<bool> DeniedAsync(ClusterFixture fixture, QueueScheduledCancelPublicState state, CancellationToken token)
-        => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, state.Owner.DeniedKey, async callers =>
+        => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, state.Owner.DeniedKey, async callers =>
     {
         state.Denied ??= new(Guid.NewGuid(), state.Owner.Partition,
             [new CancelQueueMessage(state.Owner.Lane.Queue, QueueScheduledCancelPublicAssertions.Target, 1L, 1L)]);

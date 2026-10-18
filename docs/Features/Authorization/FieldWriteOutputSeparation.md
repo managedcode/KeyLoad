@@ -1,4 +1,4 @@
-# Fresh field-write and raw-output separation (KL062)
+# Fresh field-write and raw-output separation
 
 REQ/AC-AUTH-006 and DocumentStorage REQ/AC-DSTORE-003 require persisted protected-field writes and omitted raw output to remain separate capabilities. ADR-014/015/093 supply the existing scoped identity, classification and native catalog contracts. This is new whole-operation coverage of an existing guard; no product defect, new grant, catalog, provider or dispatcher is asserted.
 
@@ -22,4 +22,4 @@ flowchart LR
   Replay --> Cold[Two actual joined same-root cold owners]
 ```
 
-This native test owns one real node-local ZoneTree store, existing System clock/options and actual ordered embedded commit/apply semantics. It does not start Orleans transport, RF3 quorum, public SDK or official MCP, and does not qualify public cold restart, query expression lineage, cache/index authority, process-kill durability, power loss or performance. Field-output read/use grants, catalog registration and native50 policies remain unchanged. Full compiler/analyzer/discovery, actual native execution, Linux recovery/RF3 SDK+MCP and all task acceptance gates remain OPEN. No SDK/build/test/SourceY/Git operation was performed by the SourceN author. Frontend is N/A for this programmable authorization operation.
+This native test owns one real node-local ZoneTree store, existing System clock/options and actual ordered embedded commit/apply semantics. It does not start Orleans transport, cluster quorum, public SDK or official MCP, and does not qualify public cold restart, query expression lineage, cache/index authority, process-kill durability, power loss or performance. Field-output read/use grants, catalog registration and native50 policies remain unchanged. Frontend is N/A for this programmable authorization operation.

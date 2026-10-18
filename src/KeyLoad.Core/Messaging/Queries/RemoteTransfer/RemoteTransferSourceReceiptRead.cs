@@ -74,7 +74,6 @@ public sealed partial class DatabaseEngine
         {
             return BindAuthorizedReadResource(view, destination.Partition, destination.Queue, ResourceKind.WorkQueue);
         }
-        RequireNoUnpublishedPartitionMoveTarget(view, destination.Partition);
         var pair = ReadBoundResourcePair(view, destination.Partition, destination.Queue, ResourceKind.WorkQueue);
         BindAuthenticatedReadResourceLifetime(view, destination.Partition, pair.Definition, pair.Lifetime);
         return pair.Definition;

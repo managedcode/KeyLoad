@@ -100,7 +100,6 @@ internal static class OutcomeStoreOracle
             OperationKind.ConfigurePrincipal => IsNonNull<ConfigurePrincipalRequest>(operation),
             OperationKind.ConfigureApiKey => IsNonNull<ConfigureApiKeyRequest>(operation),
             OperationKind.BootstrapPhysicalShardCatalog => IsNonNull<BootstrapPhysicalShardCatalogRequest>(operation),
-            OperationKind.BindAtomicPartitionPlacement => IsNonNull<BindAtomicPartitionPlacementRequest>(operation),
             OperationKind.SetDispatch => IsBoolean(operation.PayloadJson),
             _ => false
         };
@@ -109,7 +108,7 @@ internal static class OutcomeStoreOracle
     {
         try
         {
-            var normalized = new DatabaseEngine(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance).NormalizeOperation(operation);
+            var normalized = new DatabaseEngine(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution()).NormalizeOperation(operation);
             var payload = NativeSerialization.Deserialize<NativeCommandPayload>(normalized.NativePayload.Span);
             return payload.Error is null && !payload.Value.IsEmpty;
         }

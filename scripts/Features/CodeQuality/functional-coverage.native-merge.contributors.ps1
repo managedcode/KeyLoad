@@ -1,5 +1,5 @@
 $script:FcNativeContributors = [ordered]@{
-    Suites = @('unit','recovery','rf3')
+    Suites = @('unit','recovery','cluster')
     Invalid = 'The canonical native contributor inventory is invalid or incomplete.'
     UnitInventoryName = 'functional-coverage.unit-test-inventory.json'
     UnitGroupCount = 5

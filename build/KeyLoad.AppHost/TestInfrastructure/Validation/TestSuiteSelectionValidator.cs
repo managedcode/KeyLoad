@@ -59,7 +59,7 @@ internal static class TestSuiteSelectionValidator
             TestSuiteProtocol.AnalyzersSuite => TestSuiteProtocol.AnalyzerTestProjectName,
             TestSuiteProtocol.UnitSuite => TestSuiteProtocol.UnitTestProjectName,
             TestSuiteProtocol.RecoverySuite => TestSuiteProtocol.RecoveryTestProjectName,
-            TestSuiteProtocol.Rf3Suite => TestSuiteProtocol.IntegrationTestProjectName,
+            TestSuiteProtocol.ClusterSuite => TestSuiteProtocol.IntegrationTestProjectName,
             TestSuiteProtocol.ComparisonSuite => TestSuiteProtocol.ComparisonTestProjectName,
             TestSuiteProtocol.SiteSuite => TestSuiteProtocol.SiteTestProjectName,
             _ => throw new InvalidOperationException(InvalidSuite)

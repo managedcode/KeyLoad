@@ -79,9 +79,7 @@ public sealed partial class DatabaseEngine
         var authority = current.MaintenanceAuthority
             ?? throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidMaintenanceAuthority);
         var principal = Principal(bounded, authority.PrincipalId, EvaluationClock.GetUtcNow());
-        var placement = ReadAtomicPartitionPlacement(bounded, principal.Id,
-            new(global::KeyLoad.Core.Features.ClusterRouting.Contracts.AtomicPartitionPlacementProtocol.CurrentVersion,
-                consumer.Partition));
+        var placement = ReadAtomicPartitionPlacement(bounded, principal.Id, consumer.Partition);
         var physical = new PhysicalShardRecord(placement.PhysicalShardId, placement.Incarnation,
             placement.VoterIds, placement.PlacementEpoch);
         if (physical.Incarnation != Store.Identity.Incarnation)

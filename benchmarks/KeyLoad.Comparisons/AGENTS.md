@@ -1,27 +1,28 @@
 # KeyLoad.Comparisons
 
-## Purpose and entry points
+## Purpose, entry points and ownership
+
 - Owns the reusable comparative benchmark harness library and its database targets under ADR-043; the sole executable belongs to KeyLoad.ComparisonHost in this repository.
 - Library entry point: `BenchmarkComparisons/Session/Execution/BenchmarkSession.cs`; native target adapters and shared corpora remain in the same feature slice. Native TUnit test composition belongs to KeyLoad.ComparisonHost.
-
-## Ownership and boundaries
 - Own comparative workload definitions, target adapters, sampling and report serialization. Product semantics remain owned by their product slices; CI callers own qualification and publication decisions.
-- Target feature path is `BenchmarkComparisons/`, aligned with `docs/Features/BenchmarkComparisons.md` when that feature spec is established. The current flat files are recorded migration debt; do not expand it.
-- Keep the corpus and measurement contract stable and reproducible. Do not substitute an in-memory/single-node KeyLoad target for the required RF3 topology.
-
-## Commands and evidence
-- GitHub Actions builds the solution with `dotnet build KeyLoad.slnx --no-restore --configuration Release` and invokes comparison qualification through `tests/KeyLoad.ComparisonTests`.
-- Do not run comparisons or load benchmarks locally. Only GitHub Actions artifacts are publishable performance evidence; preserve the exact run, SHA, URLs and artifacts.
-
-## Skills and protected risks
+- Keep the corpus and measurement contract stable and reproducible. Do not substitute an in-memory/single-node KeyLoad target for the required cluster topology.
 - Applicable skills: none installed; skill installation is prohibited by owner direction.
 - Never infer durability or production readiness from benchmark results. Keep all target credentials external and preserve centrally pinned packages and no `packages.lock.json` files.
 
-## Read-first and canonical slice ownership
-- Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
-- Owned slice: `BenchmarkComparisons`; target feature path: `BenchmarkComparisons/`, matching `docs/Features/BenchmarkComparisons.md`.
-- The sole executable entry point is now KeyLoad.ComparisonHost/Program.cs under ADR-043; all comparison behavior retains the same named slice. Do not restore a duplicate entry or internalize the public library API.
-- Owner correction2026-10-17 and ADR-142 retire the former per-cell runners, selectors and report producers. All measured tests in a database/node-count job share one live database, with measured initial loading and no warmup, reset or reseed. Keep genuine native adapters and correctness oracles; do not reintroduce a legacy execution path. Source completion does not establish GitHub runtime qualification.
+## Boundaries and protected risks
 
-## Vertical-slice responsibility folders
-- Keep feature-owned implementation inside its canonical `<SliceName>/` and organize it in populated, feature-local responsibility folders (such as `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Transport/`, `Hosting/`, `Serialization/`, or `Validation/`). Do not leave a flat dump of unrelated responsibilities at the slice root; keep only genuinely shared building blocks and executable/composition entry points outside feature slices. Preserve namespaces and runtime contracts during physical moves.
+Follow the [root policy](../../AGENTS.md) and the owning feature specification. Keep changes in their actual owner, preserve unrelated work, and remove replaced code together with exclusive callers and fixtures. Use native Orleans calls for distributed execution and silo-local ZoneTree owners for files. Preserve persisted authorization, operation correctness, resource bounds, cancellation and joined shutdown. Never turn a static check or focused test into a claim of complete runtime qualification.
+
+## Commands and verification
+
+From the repository root:
+
+```sh
+dotnet build KeyLoad.slnx --no-restore --configuration Release -warnaserror
+```
+
+Use the root's complete solution, native TUnit, real process recovery and Aspire SDK/MCP gates as applicable. Local checks are development evidence; delivered-source qualification and public measurements require exact-source Linux GitHub artifacts. Do not weaken compiler, analyzer, source-identity, coverage or runtime assertions.
+
+## Skills
+
+Use the installed Orleans skill for Orleans design and the relevant installed formatting, Aspire or diagnostics skill when the task needs it. Follow explicit owner scope and dependency-adoption rules.

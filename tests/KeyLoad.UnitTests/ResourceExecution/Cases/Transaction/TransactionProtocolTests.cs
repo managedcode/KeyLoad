@@ -55,7 +55,7 @@ internal sealed class TransactionProtocolTests
                 MaxFrameBytes = 4_096
             }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
             {
-                var database = new DatabaseEngine(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
+                var database = new DatabaseEngine(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
                 database.Bootstrap(new("root", "system", [new("*", "*", Capability.All)], ["*"])
                 {
                     ClusterAdministrator = true
@@ -83,7 +83,7 @@ internal sealed class TransactionProtocolTests
             {
                 MaxFrameBytes = 4_096
             }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-            var recovered = new DatabaseEngine(reopened, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
+            var recovered = new DatabaseEngine(reopened, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
             PhysicalShardTestBootstrap.RequireExisting(recovered);
             await Assert.That(recovered.LastApplied).IsEqualTo(4);
             await Assert.That(OutcomeStoreOracle.ReadPartition(reopened, new PartitionRef("tenant", "database", "orders", PartitionId), "root", rejectedId)!.Error).IsEqualTo(ErrorCode.ResourceExhausted);

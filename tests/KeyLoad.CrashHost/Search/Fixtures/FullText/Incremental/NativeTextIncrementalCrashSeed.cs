@@ -27,7 +27,7 @@ internal static class NativeTextIncrementalCrashSeed
                 new(NativeTextIncrementalCrashProtocol.Generation, [NativeTextIncrementalCrashProtocol.Collection],
                     [PutDocumentKind, PatchDocumentKind, DeleteDocumentKind])), configureId, token);
         var placement = runtime.Database.ReadAtomicPartitionPlacement(CrashFixtureValues.Principal,
-            new(NativeTextIncrementalCrashProtocol.PlacementVersion, partition));
+            partition);
         var request = new TextIndexMaintenanceRequest(Guid.NewGuid(), consumer,
             NativeTextIncrementalCrashProtocol.Collection, NativeTextIncrementalCrashProtocol.Field,
             NativeTextIncrementalCrashProtocol.Generation, runtime.Database.Store.Identity.NodeId,

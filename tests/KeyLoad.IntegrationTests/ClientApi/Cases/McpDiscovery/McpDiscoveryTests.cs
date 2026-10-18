@@ -8,7 +8,7 @@ using ModelContextProtocol.Protocol;
 namespace KeyLoad.IntegrationTests.Features.ClientApi;
 
 /// <summary>AC-MCPGW-001/002/004: compact discovery resolves canonical capabilities through the genuine official client.</summary>
-/// <param name="fixture">The initialized actual Docker/Aspire RF3 application.</param>
+/// <param name="fixture">The initialized actual Docker/Aspire CLUSTER application.</param>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class McpDiscoveryTests(ClusterFixture fixture)
@@ -88,7 +88,7 @@ internal sealed class McpDiscoveryTests(ClusterFixture fixture)
             throw new InvalidOperationException(McpCallerProtocol.MissingClient);
         }
         await Assert.That(rejected.StatusCode).IsEqualTo(HttpStatusCode.BadRequest);
-        await using var callers = await RequestCqrsRf3Callers.ConnectAsync(fixture.App, McpCallerProtocol.Node2,
+        await using var callers = await RequestCqrsClusterCallers.ConnectAsync(fixture.App, McpCallerProtocol.Node2,
             fixture.AdminKey, deadline.Token);
         var expected = await callers.Sdk.QueryCapabilitiesAsync(deadline.Token);
         await Assert.That(expected.IsSuccess).IsTrue();
@@ -121,7 +121,7 @@ internal sealed class McpDiscoveryTests(ClusterFixture fixture)
         await cancellation.CancelAsync();
         await Assert.ThrowsAsync<OperationCanceledException>(() => session.Client.InvokeKeyLoadToolAsync(
             McpCallerTools.QueryCapabilities, cancellationToken: cancellation.Token).AsTask());
-        await SqlRf3Protocol.EqualAsync(before,
+        await SqlClusterProtocol.EqualAsync(before,
             await global::KeyLoad.IntegrationTests.Features.Authorization.CanceledCredentialAuthorityAssertions.CaptureAsync(
                 reader, scenario, deadline.Token));
         var next = await McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(await session.Client.InvokeKeyLoadToolAsync(

@@ -6,7 +6,7 @@ namespace KeyLoad.IntegrationTests.Features.BlobStorage;
 
 internal static class BlobScopedBytesR42Replay
 {
-    internal static async Task RunAsync(RequestCqrsRf3Callers callers, BlobScopedBytesR42State[] states, CancellationToken token)
+    internal static async Task RunAsync(RequestCqrsClusterCallers callers, BlobScopedBytesR42State[] states, CancellationToken token)
     {
         Task Observe() => BlobScopedBytesR42Assertions.CurrentAsync(callers, states, token);
         foreach (var state in states.Skip(1).Take(3))
@@ -24,7 +24,7 @@ internal static class BlobScopedBytesR42Replay
         await BlobBoundedRetirementPublicReplay.MatchingAsync(callers, "keyload_blobs_reclaim", final, removed.Reclaimed[1], ct => callers.Sdk.ReclaimBlobAsync(final, ct), Observe, token);
         await RemovedAsync(callers, removed, states, token);
     }
-    private static async Task RemovedAsync(RequestCqrsRf3Callers callers, BlobScopedBytesR42State state, BlobScopedBytesR42State[] states, CancellationToken token)
+    private static async Task RemovedAsync(RequestCqrsClusterCallers callers, BlobScopedBytesR42State state, BlobScopedBytesR42State[] states, CancellationToken token)
     {
         await RefuseAsync(callers, state, state.Begin.CommandId, "keyload_blobs_begin_upload", state.Begin, ct => callers.Sdk.BeginBlobUploadAsync(state.Begin, ct), states, token);
         foreach (var part in state.Parts)
@@ -35,17 +35,17 @@ internal static class BlobScopedBytesR42Replay
         var partial = state.Reclaims[0];
         await RefuseAsync(callers, state, partial.CommandId, "keyload_blobs_reclaim", partial, ct => callers.Sdk.ReclaimBlobAsync(partial, ct), states, token);
     }
-    private static async Task RefuseAsync<T>(RequestCqrsRf3Callers callers, BlobScopedBytesR42State state, Guid id, string tool, object request,
+    private static async Task RefuseAsync<T>(RequestCqrsClusterCallers callers, BlobScopedBytesR42State state, Guid id, string tool, object request,
      Func<CancellationToken, Task<ManagedCode.Communication.Result<T>>> invoke, BlobScopedBytesR42State[] states, CancellationToken token)
     {
         var result = await invoke(token);
         await Assert.That(result.IsFailed).IsTrue();
         await Assert.That(result.Value).IsNull();
         var closed = Errors.Problem(ErrorCode.TokenInvalidated, "The selected upload lifetime is unavailable.");
-        await SqlRf3Protocol.EqualAsync(closed, result.Problem);
+        await SqlClusterProtocol.EqualAsync(closed, result.Problem);
         if (state.Refusals.TryGetValue(id, out var original))
         {
-            await SqlRf3Protocol.EqualAsync(original, result.Problem);
+            await SqlClusterProtocol.EqualAsync(original, result.Problem);
         }
         else
         {

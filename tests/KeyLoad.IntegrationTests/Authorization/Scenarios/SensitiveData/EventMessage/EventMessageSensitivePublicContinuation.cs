@@ -6,8 +6,8 @@ namespace KeyLoad.IntegrationTests.Features.Authorization;
 
 internal static class EventMessageSensitivePublicContinuation
 {
-    internal static async Task RepairAsync(RequestCqrsRf3Callers root,
-        RequestCqrsRf3Callers caller, EventMessageSensitivePublicState state, CancellationToken token)
+    internal static async Task RepairAsync(RequestCqrsClusterCallers root,
+        RequestCqrsClusterCallers caller, EventMessageSensitivePublicState state, CancellationToken token)
     {
         await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(),
             state.Worker with
@@ -24,8 +24,8 @@ internal static class EventMessageSensitivePublicContinuation
         }, token));
     }
 
-    internal static async Task HealthyAsync(RequestCqrsRf3Callers root, RequestCqrsRf3Callers worker,
-        RequestCqrsRf3Callers inspector, EventMessageSensitivePublicState state, CancellationToken token)
+    internal static async Task HealthyAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers worker,
+        RequestCqrsClusterCallers inspector, EventMessageSensitivePublicState state, CancellationToken token)
     {
         if (!state.Subscription)
         {
@@ -45,7 +45,7 @@ internal static class EventMessageSensitivePublicContinuation
         await EventMessageSensitivePublicAssertions.FullAsync(state.Healthy, state);
     }
 
-    internal static async Task FinishAsync(RequestCqrsRf3Callers root, RequestCqrsRf3Callers caller,
+    internal static async Task FinishAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers caller,
         EventMessageSensitivePublicState state, CancellationToken token)
     {
         await EventMessageSensitivePublicOperations.CompleteAsync(caller, state, state.Healthy, DeliveryAction.Ack, token);

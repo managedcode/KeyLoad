@@ -17,7 +17,7 @@ internal static class FunctionalGateQueueGraph
         var returnedId = returnPrefix + edgeId;
         var source = new QueueLaneRef(ctx.Partition, FunctionalGateQueues.Queue(P.SourceQueue));
         var target = new QueueLaneRef(ctx.Partition, FunctionalGateQueues.Queue(P.TargetQueue));
-        var payload = DatabaseCompositionRf3Payload.OrdinalGolden(link);
+        var payload = DatabaseCompositionClusterPayload.OrdinalGolden(link);
         await SeedAsync(ctx, link, source, sourceId, payload, token);
         var original = await FunctionalGateQueueGraphQueue.ReadyAsync(ctx, source, sourceId, payload, token);
         await ForwardAsync(ctx, source, edgePrefix, edgeId, token);
@@ -46,7 +46,7 @@ internal static class FunctionalGateQueueGraph
             new(P.PutKind, link.From.Collection, link.From.Id, P.Created),
             new(P.PutKind, link.To.Collection, link.To.Id, P.Created),
             new(P.EnqueueKind, source.Queue, id, P.Created)
-        ], token);
+        ]);
         await FunctionalGateQueueGraphAssertions.DocumentAsync(ctx, link.From, present: true, token);
         await FunctionalGateQueueGraphAssertions.DocumentAsync(ctx, link.To, present: true, token);
     }
@@ -63,7 +63,7 @@ internal static class FunctionalGateQueueGraph
         var actual = await FunctionalGateCompositionCalls.SqlAsync<CommitReceipt>(ctx, sql, false, true, token);
         var replay = await FunctionalGateCompositionCalls.SqlAsync<CommitReceipt>(ctx, sql, true, true, token);
         await FunctionalGateCompositionCalls.ReceiptAsync(ctx, actual, command.CommandId,
-            [new(P.EdgeKind, P.Graph, edgeId, P.Created)], token);
+            [new(P.EdgeKind, P.Graph, edgeId, P.Created)]);
         await FunctionalGateQueues.EqualAsync(actual, replay);
     }
 
@@ -80,7 +80,7 @@ internal static class FunctionalGateQueueGraph
         var actual = await FunctionalGateCompositionCalls.SqlAsync<CommitReceipt>(ctx, sql, true, true, token);
         var replay = await FunctionalGateCompositionCalls.SqlAsync<CommitReceipt>(ctx, sql, false, true, token);
         await FunctionalGateCompositionCalls.ReceiptAsync(ctx, actual, command.CommandId,
-            [new(P.EnqueueKind, target.Queue, id, P.Created)], token);
+            [new(P.EnqueueKind, target.Queue, id, P.Created)]);
         await FunctionalGateQueues.EqualAsync(actual, replay);
     }
 
@@ -90,7 +90,7 @@ internal static class FunctionalGateQueueGraph
         var unlink = new CommandRequest(Guid.NewGuid(), ctx.Partition, [new DeleteEdge(P.Graph, edgeId, P.Created)]);
         await FunctionalGateCompositionCalls.ReceiptAsync(ctx,
             await ctx.SdkAsync(ctx.Writer.Sdk.CommitAsync(unlink, token)), unlink.CommandId,
-            [new(P.UnlinkKind, P.Graph, edgeId, P.Deleted)], token);
+            [new(P.UnlinkKind, P.Graph, edgeId, P.Deleted)]);
         await FunctionalGateQueueGraphAssertions.EdgeAsync(ctx, link, edgeId, present: false, token);
         var cleanup = new CommandRequest(Guid.NewGuid(), ctx.Partition,
         [
@@ -102,7 +102,7 @@ internal static class FunctionalGateQueueGraph
         [
             new(P.DeleteKind, link.From.Collection, link.From.Id, P.Deleted),
             new(P.DeleteKind, link.To.Collection, link.To.Id, P.Deleted)
-        ], token);
+        ]);
         await FunctionalGateQueueGraphAssertions.DocumentAsync(ctx, link.From, present: false, token);
         await FunctionalGateQueueGraphAssertions.DocumentAsync(ctx, link.To, present: false, token);
     }

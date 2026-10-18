@@ -13,7 +13,7 @@ internal static class TypedEndpointJoinRefusals
     private const string RollbackJson = "{\"id\":\"rollback-marker\",\"title\":\"rolled-back\"}";
     private const int BelowSourceCount = 2;
 
-    internal static async Task RunAsync(RequestCqrsRf3Callers admin, RequestCqrsRf3Callers callers,
+    internal static async Task RunAsync(RequestCqrsClusterCallers admin, RequestCqrsClusterCallers callers,
         TypedEndpointJoinState state, CancellationToken token)
     {
         var partition = state.Seed.Partition;
@@ -44,7 +44,7 @@ internal static class TypedEndpointJoinRefusals
         await RollbackAsync(admin, state, token);
     }
 
-    private static async Task RollbackAsync(RequestCqrsRf3Callers admin,
+    private static async Task RollbackAsync(RequestCqrsClusterCallers admin,
         TypedEndpointJoinState state, CancellationToken token)
     {
         var command = new CommandRequest(Guid.NewGuid(), state.Seed.Partition,
@@ -61,7 +61,7 @@ internal static class TypedEndpointJoinRefusals
         await UnchangedAsync(admin, state, token);
     }
 
-    private static async Task RefusedAsync(RequestCqrsRf3Callers callers, CommandRequest command,
+    private static async Task RefusedAsync(RequestCqrsClusterCallers callers, CommandRequest command,
         ErrorCode expected, bool sql, CancellationToken token)
     {
         if (sql)
@@ -85,7 +85,7 @@ internal static class TypedEndpointJoinRefusals
         }
     }
 
-    private static async Task UnchangedAsync(RequestCqrsRf3Callers admin, TypedEndpointJoinState state, CancellationToken token)
-        => await SqlRf3Protocol.EqualAsync(state.Models,
+    private static async Task UnchangedAsync(RequestCqrsClusterCallers admin, TypedEndpointJoinState state, CancellationToken token)
+        => await SqlClusterProtocol.EqualAsync(state.Models,
             await TypedEndpointJoinAssertions.CaptureAsync(admin, state.Seed.Partition, token));
 }

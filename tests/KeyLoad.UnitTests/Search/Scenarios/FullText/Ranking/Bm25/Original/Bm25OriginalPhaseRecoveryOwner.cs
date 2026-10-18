@@ -111,8 +111,7 @@ internal sealed class Bm25OriginalPhaseRecoveryOwner
         var owner = store.Read(view => PhysicalShardCatalogRecordSerialization.Read(view)?.DefaultShard)
             ?? throw new InvalidOperationException("The original committed native catalog owner is missing.");
         var create = TestDatabaseEngineFactory.Capture(UnitExecutionOptions.DatabaseLimits(configuredLimits),
-            UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), null,
-            Source.MovementCheckpoints, Source.Database.EvaluationClock);
+            UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), null, Source.Database.EvaluationClock);
         return create(store, owner);
     }
 

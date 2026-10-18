@@ -13,8 +13,7 @@ internal static class RemoteModelNativeDispatch
         RemoteModelNativeEffectBoundary? effectBoundary, IResourceLifetimeWorkBinding? binding,
         CancellationToken token)
     {
-        if (request.Channel is RemoteModelNativeChannel.DocumentEnvelope or RemoteModelNativeChannel.ResourceLifetimeRead
-            or RemoteModelNativeChannel.ResourceLifetimeBlobOutcome)
+        if (request.Channel is RemoteModelNativeChannel.DocumentEnvelope or RemoteModelNativeChannel.ResourceLifetimeRead)
         {
             return (runtime.Endpoint ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteModelNativeProtocol.Unavailable))
             .ExecuteAsync(request, effectBoundary, token, binding);

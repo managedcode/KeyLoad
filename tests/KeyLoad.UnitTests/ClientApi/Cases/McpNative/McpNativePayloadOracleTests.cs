@@ -22,21 +22,6 @@ internal sealed class McpNativePayloadOracleTests
     }
 
     [Test]
-    public async Task AcPmap003BindAndReadPreserveTypedPublicAndNativeBodies()
-    {
-        foreach (var item in McpCanonicalTestData.Commands().Where(value =>
-            value.Name == McpCatalogExpectations.AdminPartitionPlacementBind))
-        {
-            var decoded = await McpNativePayloadAssertions.DecodeCanonical(item);
-            await McpNativePayloadAssertions.AssertNativeWritersAgree(item, decoded);
-        }
-        var read = McpCanonicalTestData.Reads().Single(value =>
-            value.Name == McpCatalogExpectations.AdminPartitionPlacementRead);
-        var readDecoded = await McpNativePayloadAssertions.DecodeCanonical(read);
-        await McpNativePayloadAssertions.AssertNativeWritersAgree(read, readDecoded);
-    }
-
-    [Test]
     public async Task AcMcp001BothShortestPathRequestsPreserveTypedPublicAndNativeBodies()
     {
         foreach (var item in McpCanonicalTestData.Reads().Where(value =>

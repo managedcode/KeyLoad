@@ -11,11 +11,11 @@ internal static class BlobBoundedRetirementPublicTrial
 {
     internal static async Task RunAsync(ClusterFixture fixture, CancellationToken token)
     {
-        _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
+        _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
             fixture.AdminKey, async callers =>
             {
-                var scenario = await RelationalSqlRf3Scenario.CreateAsync(callers.Sdk, token);
-                var blob = new BlobRef(scenario.Partition, RelationalSqlRf3Tokens.Blobs, "bounded-retirement");
+                var scenario = await RelationalSqlClusterScenario.CreateAsync(callers.Sdk, token);
+                var blob = new BlobRef(scenario.Partition, RelationalSqlClusterTokens.Blobs, "bounded-retirement");
                 var bytes = Enumerable.Range(0, BlobLimits.RawPartBytes + 1).Select(i => (byte)(i % 239)).ToArray();
                 var old = await BlobBoundedRetirementPublicPublication.CreateAsync(callers, blob, 0L, bytes, token);
                 await Assert.That(old.Completed.Value.PartCount).IsEqualTo(2);
@@ -29,7 +29,7 @@ internal static class BlobBoundedRetirementPublicTrial
             }, token);
     }
 
-    private static async Task RetireAsync(RequestCqrsRf3Callers callers,
+    private static async Task RetireAsync(RequestCqrsClusterCallers callers,
         BlobBoundedRetirementPublicPublication.Published old, ReclaimBlobRequest live, CancellationToken token)
     {
         var blob = old.Begin.Blob;
@@ -46,12 +46,12 @@ internal static class BlobBoundedRetirementPublicTrial
             Deleted = true,
             UpdatedAt = deleted.Value.UpdatedAt
         };
-        await SqlRf3Protocol.EqualAsync(tombstone, deleted.Value);
+        await SqlClusterProtocol.EqualAsync(tombstone, deleted.Value);
         await Assert.That(deleted.Receipt.CommandId).IsEqualTo(delete.CommandId);
         await Assert.That(deleted.Receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
         var first = new ReclaimBlobRequest(Guid.NewGuid(), blob, old.Begin.UploadId, 1);
         var reclaimed = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ReclaimBlobAsync(first, token));
-        await SqlRf3Protocol.EqualAsync(new BlobReclaimResult(old.Begin.UploadId, 1, 1, (long)BlobLimits.RawPartBytes, false), reclaimed.Value);
+        await SqlClusterProtocol.EqualAsync(new BlobReclaimResult(old.Begin.UploadId, 1, 1, (long)BlobLimits.RawPartBytes, false), reclaimed.Value);
         await Assert.That(reclaimed.Receipt.CommandId).IsEqualTo(first.CommandId);
         await Assert.That(reclaimed.Receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
         var remaining = old.Written[1].Value with
@@ -73,11 +73,11 @@ internal static class BlobBoundedRetirementPublicTrial
         var final = new ReclaimBlobRequest(Guid.NewGuid(), blob, old.Begin.UploadId, 1);
         var finished = (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobReclaimResult>>(
             await callers.Mcp.CallAsync("keyload_blobs_reclaim", final, token))).Value;
-        await SqlRf3Protocol.EqualAsync(new BlobReclaimResult(old.Begin.UploadId, 1, 0, 1L, true), finished.Value);
+        await SqlClusterProtocol.EqualAsync(new BlobReclaimResult(old.Begin.UploadId, 1, 0, 1L, true), finished.Value);
         await ContinueAsync(callers, old, live, first, final, finished, tombstone, token);
     }
 
-    private static async Task ContinueAsync(RequestCqrsRf3Callers callers,
+    private static async Task ContinueAsync(RequestCqrsClusterCallers callers,
         BlobBoundedRetirementPublicPublication.Published old, ReclaimBlobRequest live, ReclaimBlobRequest first,
         ReclaimBlobRequest final, BlobCommitResult<BlobReclaimResult> finished, BlobMetadata tombstone, CancellationToken token)
     {

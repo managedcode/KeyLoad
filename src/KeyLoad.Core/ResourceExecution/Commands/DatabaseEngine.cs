@@ -1,7 +1,5 @@
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Core.Features.BlobStorage;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
 
@@ -31,7 +29,6 @@ public sealed partial class DatabaseEngine
         _ = ResourceLifetimeCatalog.Read(transaction, request.TenantId, request.DatabaseId, request.Definition.Name, previous);
         ResourcePolicyUpdates.Validate(previous, request.Definition, request.ExpectedSchemaVersion);
         RequireQueueDeliveryPolicyChange(transaction, request, previous);
-        RequireResourceMetadataChangeAdmission(transaction, request.TenantId, request.DatabaseId);
         if (previous is null)
         {
             _ = ResourceLifetimeCatalog.Create(transaction, operation, request.TenantId, request.DatabaseId, request.Definition, Limits);
@@ -40,16 +37,6 @@ public sealed partial class DatabaseEngine
             BlobExecution.InitialCatalogProofRecords);
         transaction.PutRecord(key, request.Definition);
         return Result(request.Definition);
-    }
-
-    private static void RequireResourceMetadataChangeAdmission(IAtomicTransaction transaction,
-        string tenantId, string databaseId)
-    {
-        if (PartitionMoveGrantStorage.Outstanding(transaction,
-            PartitionMoveGrantStorage.DatabaseKey(tenantId, databaseId)) > PartitionMoveProtocol.EmptyCount)
-        {
-            throw Errors.Fail(ErrorCode.Conflict, PartitionMoveProtocol.PolicyBusy);
-        }
     }
 
     private static void ValidateResource(ConfigureResourceRequest request)

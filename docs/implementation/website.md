@@ -7,11 +7,13 @@ The domain uses GitHub's four apex A records (`185.199.108.153`, `.109.153`, `.1
 ## Publication and evidence
 
 The separate [Website workflow](../../.github/workflows/website.yml) owns static
-site qualification, generation and Pages deployment. It runs on trusted main
-pushes, manual dispatch and completed own-main Benchmarks events. Build and Tests
-(`build-and-tests.yml`) builds the complete solution and runs ordinary project tests; its
-result is not a dependency of Website. Benchmarks produces authenticated JSON.
-Release remains the prepared manual product-release workflow.
+site qualification, generation and Pages deployment. It runs on trusted main pushes
+that change the site or its build, qualification and publication inputs (an explicit
+path filter, so database-only pushes do not start it) and on manual dispatch. The
+final job of Benchmarks dispatches it after a successful producer run. Build and
+Tests (`build-and-tests.yml`) builds the complete solution and runs ordinary project
+tests; its result is not a dependency of Website. Benchmarks produces authenticated
+JSON. Release remains the prepared manual product-release workflow.
 
 Website selects the latest ready authenticated Benchmarks aggregate. With data,
 it preserves original measured/control/website revisions, immutable archives,
@@ -24,7 +26,8 @@ provider/authentication errors remain failures; absent data is not a failure.
 
 The canonical HTML/modules/styles live in `site/Features/BenchmarkComparisons/`;
 `site/scripts/build.mjs` is the thin build entry. Actual TUnit/MTP tests run through
-the Aspire-owned `site` entry and exercise real Node/Chrome operations. Official
+the TestInfrastructure `site` suite (`scripts/Features/TestInfrastructure/run-tests.mjs`)
+and exercise real Node/Chrome operations. Official
 Three.js bytes and license remain pinned and verified. Original measurements
 retain their own workload/topology/resource contracts; no historical or local
 result qualifies current database behavior.

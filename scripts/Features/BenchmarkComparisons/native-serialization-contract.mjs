@@ -21,7 +21,7 @@ export const PROFILE = Object.freeze({
   launchCount: NATIVE.launches, warmupCount: NATIVE.warmups, iterationCount: NATIVE.iterations,
   iterationTimeMs: NATIVE.iterationMs, memoryDiagnoser: true, generatedExternalProcess: true,
   scope: 'Warm typed codec diagnostics; distinct native and historical JSON validation/format contracts.',
-  limits: 'No RF3, database throughput, security equivalence, cold-start or website comparison claim.',
+  limits: 'No CLUSTER, database throughput, security equivalence, cold-start or website comparison claim.',
 });
 
 export function requireNative(condition, field) {

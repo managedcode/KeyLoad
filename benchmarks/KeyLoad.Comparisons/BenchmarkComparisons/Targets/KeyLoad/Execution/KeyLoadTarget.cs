@@ -16,7 +16,7 @@ namespace KeyLoad.Comparisons.Targets;
 /// <param name="translationOptions">Centrally validated SDK expression budgets.</param>
 /// <param name="image">Optional database image reference included in the initial target profile.</param>
 /// <param name="peers">Optional peer HTTP clients used to observe replica copies; the target disposes distinct clients.</param>
-/// <param name="expectedNodes">Actual fixed benchmark voter count; the default retains the required RF3 contract.</param>
+/// <param name="expectedNodes">Actual fixed benchmark voter count; the default retains the required CLUSTER contract.</param>
 /// <param name="provider">Borrowed clock; defaults to the system provider.</param>
 public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string runId,
     IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<NativeComparisonExecutionOptions> nativeExecutionOptions,
@@ -83,7 +83,7 @@ public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string
         var status = KeyLoadClientResults.Success(await client.StatusAsync(cancellationToken), InitializeAsyncStatusText);
         if (status.Voters != expectedNodeCount || status.Durability != DurabilityProfile.QuorumProcessDurable)
         {
-            throw new ComparisonFailureException(expectedNodeCount == ExpectedNodesDefault ? Rf3Required : BenchmarkTopologyMismatch);
+            throw new ComparisonFailureException(expectedNodeCount == ExpectedNodesDefault ? ClusterRequired : BenchmarkTopologyMismatch);
         }
 
         var scaled = dataset.Settings is ScaledComparisonProfile || dataset is DocumentComparisonCorpus;

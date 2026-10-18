@@ -6,9 +6,9 @@ namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 internal sealed class ClusterFailureReceipts
 {
     private const int MaximumReceipts = 32;
-    private const string FilePrefix = "rf3-failure-";
-    private const string RestartFilePrefix = "rf3-restart-failure-";
-    private const string RestartLatestFileName = "rf3-restart-failure.log";
+    private const string FilePrefix = "cluster-failure-";
+    private const string RestartFilePrefix = "cluster-restart-failure-";
+    private const string RestartLatestFileName = "cluster-restart-failure.log";
     private const string FileSuffix = ".log";
     private const string SequenceFormat = "D4";
     private readonly Lock writeGate = new();

@@ -9,30 +9,30 @@ namespace KeyLoad.IntegrationTests.Features.ClientApi;
 
 internal static class McpAnalyticsDropDiscoveryRetirement
 {
-    internal static async Task VerifyAsync(RequestCqrsRf3Callers caller,
+    internal static async Task VerifyAsync(RequestCqrsClusterCallers caller,
         McpAnalyticsDropDiscoveryState state, CancellationToken token)
     {
         var parent = Guid.NewGuid();
         var request = new DropTableRequest(state.Partition.TenantId, state.Partition.DatabaseId, P.Table);
         var original = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.DropTableAsync(parent, request, token));
         await PublicShapeAsync(request, parent, original);
-        await SqlRf3Protocol.EqualAsync(state.Table, await SqlRf3Protocol.SdkAsync<ResourceDefinition>(caller.Sdk,
+        await SqlClusterProtocol.EqualAsync(state.Table, await SqlClusterProtocol.SdkAsync<ResourceDefinition>(caller.Sdk,
             new(state.Partition, P.CreateSql, CommandId: Guid.NewGuid()), token));
         var command = new CommandRequest(Guid.NewGuid(), state.Partition,
             [new PutDocument(P.Table, P.FreshId, P.FreshJson, 0)]);
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.CommitAsync(command, token));
-        await A.ReceiptAsync(caller, command, receipt, [new("putDocument", P.Table, P.FreshId, 1)], token);
+        await A.ReceiptAsync(command, receipt, [new("putDocument", P.Table, P.FreshId, 1)]);
         var fresh = await A.CaptureAsync(caller, new(state.Partition, P.Table, P.FreshId), P.FreshJson, token);
         await Assert.That(fresh.Lifetime!.Incarnation).IsNotEqualTo(state.OldRow.Lifetime!.Incarnation);
-        foreach (var route in Enum.GetValues<DropLifecycleRf3Route>())
+        foreach (var route in Enum.GetValues<DropLifecycleClusterRoute>())
         {
-            var replay = await DropLifecycleRf3Calls.InvokeAsync(caller, parent, request, state.Partition, route, token);
-            await SqlRf3Protocol.EqualAsync(original, replay);
+            var replay = await DropLifecycleClusterCalls.InvokeAsync(caller, parent, request, state.Partition, route, token);
+            await SqlClusterProtocol.EqualAsync(original, replay);
             await UnchangedAsync(caller, state, fresh, command, receipt, token);
         }
     }
 
-    private static async Task UnchangedAsync(RequestCqrsRf3Callers caller, McpAnalyticsDropDiscoveryState state,
+    private static async Task UnchangedAsync(RequestCqrsClusterCallers caller, McpAnalyticsDropDiscoveryState state,
         EntityRef fresh, CommandRequest command, CommitReceipt receipt, CancellationToken token)
     {
         await A.RowAsync(caller, fresh, P.FreshJson, token);
@@ -46,9 +46,9 @@ internal static class McpAnalyticsDropDiscoveryRetirement
         {
             Lifetime = null
         };
-        await SqlRf3Protocol.EqualAsync(new DocumentReadResult(null), await McpCallerAssertions.SdkSuccessAsync(
+        await SqlClusterProtocol.EqualAsync(new DocumentReadResult(null), await McpCallerAssertions.SdkSuccessAsync(
             await caller.Sdk.GetAsync(name, token)));
-        await SqlRf3Protocol.EqualAsync(receipt, await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.CommitAsync(command, token)));
+        await SqlClusterProtocol.EqualAsync(receipt, await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.CommitAsync(command, token)));
         await A.ReadsAsync(caller, state, token);
         await A.RowAsync(caller, fresh, P.FreshJson, token);
     }

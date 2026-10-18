@@ -10,7 +10,7 @@ internal static class SharedDomainPublicValues
         => await Assert.That(JsonSerializer.Serialize(actual, JsonDefaults.Options))
             .IsEqualTo(JsonSerializer.Serialize(expected, JsonDefaults.Options));
 
-    internal static async Task ProducerAsync(SharedDomainPublicState state, CommandRequest command, CommitReceipt receipt)
+    internal static async Task ProducerAsync(CommandRequest command, CommitReceipt receipt)
     {
         var mutations = command.Mutations.Select(effect => effect switch
         {
@@ -19,25 +19,24 @@ internal static class SharedDomainPublicValues
             EnqueueMessage enqueue => new MutationReceipt(EnqueueKind, enqueue.Queue, enqueue.MessageId, FirstRevision),
             _ => throw new InvalidOperationException(UnexpectedMutation)
         });
-        await ReceiptAsync(state, command.Partition, command.CommandId, receipt, mutations);
+        await ReceiptAsync(command.Partition, command.CommandId, receipt, mutations);
     }
 
     internal static async Task ProcessingAsync(SharedDomainPublicState state, ProcessingRequest request, CommitReceipt receipt)
     {
         var scope = state.Scopes[FirstIndex];
-        await ReceiptAsync(state, scope.Partition, request.CommandId, receipt,
+        await ReceiptAsync(scope.Partition, request.CommandId, receipt,
             [new(PutKind, scope.Documents!, Processed, FirstRevision),
              new(AppendKind, scope.Streams!, Item, SecondRevision),
              new(EnqueueKind, scope.Queue!, Processed, FirstRevision),
              new(nameof(DeliveryAction.Ack), scope.Queue!, Item, AckVersion)]);
     }
 
-    private static async Task ReceiptAsync(SharedDomainPublicState state, PartitionRef partition, Guid id,
+    private static async Task ReceiptAsync(PartitionRef partition, Guid id,
         CommitReceipt receipt, IEnumerable<MutationReceipt> mutations)
     {
-        var placement = state.Placements[partition.AtomicPartitionId];
         await Assert.That(receipt.Token.Position).IsGreaterThan(NoRevision);
-        await EqualAsync(receipt, new CommitReceipt(id, new(placement.Incarnation, partition.AtomicPartitionId,
-            receipt.Token.Position, placement.PlacementEpoch), [.. mutations], DurabilityProfile.QuorumProcessDurable));
+        await EqualAsync(receipt, new CommitReceipt(id, new(receipt.Token.Incarnation, partition.AtomicPartitionId,
+            receipt.Token.Position, receipt.Token.OwnershipEpoch), [.. mutations], DurabilityProfile.QuorumProcessDurable));
     }
 }

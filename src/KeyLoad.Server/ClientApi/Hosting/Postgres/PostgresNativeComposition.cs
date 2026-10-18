@@ -20,7 +20,6 @@ internal static class PostgresNativeComposition
         services.AddSingleton(provider => new PostgresServerCertificate(
             provider.GetRequiredService<global::Microsoft.Extensions.Options.IOptions<PostgresSessionOptions>>()));
         services.AddSingleton<PostgresConnectionHandler>();
-        PostgresErrorDeliveryComposition.Register(services, configuration);
         services.AddSingleton<IConfigureOptions<KestrelServerOptions>, PostgresEndpointConfiguration>();
     }
 }

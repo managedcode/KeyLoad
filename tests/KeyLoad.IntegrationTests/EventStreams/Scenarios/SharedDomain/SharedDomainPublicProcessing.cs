@@ -46,11 +46,8 @@ internal static class SharedDomainPublicProcessing
         await Assert.That(delivery.LeaseUntil).IsLessThanOrEqualTo(after.AddSeconds(LeaseSeconds));
         await SharedDomainPublicValues.EqualAsync(delivery, new Delivery(Item, state.Scopes[FirstIndex].Payload,
             Headers, delivery.Token, FirstRevision, delivery.LeaseUntil, FirstAttempt, Generation));
-        var placement = state.Placements[request.Lane.Partition.AtomicPartitionId];
         await Assert.That(result.Token.Position).IsGreaterThan(state.Originals[FirstIndex].Receipt.Token.Position);
-        await Assert.That(result.Token.Incarnation).IsEqualTo(placement.Incarnation);
         await Assert.That(result.Token.AtomicPartitionId).IsEqualTo(request.Lane.Partition.AtomicPartitionId);
-        await Assert.That(result.Token.OwnershipEpoch).IsEqualTo(placement.PlacementEpoch);
     }
 
     private static async Task ForeignAsync(ClusterFixture fixture, KeyLoadClient sdk, McpOfficialClient official,

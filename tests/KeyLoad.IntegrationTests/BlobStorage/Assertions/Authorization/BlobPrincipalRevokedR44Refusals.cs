@@ -11,7 +11,7 @@ internal static class BlobPrincipalRevokedR44Refusals
 {
     private const string MetadataTool = "keyload_blobs_metadata";
     private const string UnavailableDetail = "The credential is unavailable or expired.";
-    internal static async Task LiveAsync(RequestCqrsRf3Callers admin, RequestCqrsRf3Callers reader,
+    internal static async Task LiveAsync(RequestCqrsClusterCallers admin, RequestCqrsClusterCallers reader,
         BlobPrincipalRevokedR44State state, CancellationToken token)
     {
         var metadata = new BlobMetadataRequest(state.Published.Begin.Blob);
@@ -24,7 +24,7 @@ internal static class BlobPrincipalRevokedR44Refusals
             await McpAsync(async () => { _ = await reader.Mcp.CallAsync(BlobPrincipalRevokedR44Pages.RangeTool, request, token); }, admin, state, token);
         }
     }
-    internal static async Task SdkOnlyAsync(KeyLoadClient sdk, RequestCqrsRf3Callers admin,
+    internal static async Task SdkOnlyAsync(KeyLoadClient sdk, RequestCqrsClusterCallers admin,
         BlobPrincipalRevokedR44State state, CancellationToken token)
     {
         await SdkAsync(sdk.GetBlobMetadataAsync(new(state.Published.Begin.Blob), token), admin, state, token);
@@ -33,16 +33,16 @@ internal static class BlobPrincipalRevokedR44Refusals
             await SdkAsync(sdk.ReadBlobRangeAsync(new(state.Published.Begin.Blob, 1L, range.Offset, range.Count), token), admin, state, token);
         }
     }
-    private static async Task SdkAsync<T>(Task<Result<T>> operation, RequestCqrsRf3Callers admin,
+    private static async Task SdkAsync<T>(Task<Result<T>> operation, RequestCqrsClusterCallers admin,
         BlobPrincipalRevokedR44State state, CancellationToken token)
     {
         var result = await operation;
         await Assert.That(result.IsSuccess).IsFalse();
         await Assert.That(result.Value).IsNull();
-        await SqlRf3Protocol.EqualAsync(Errors.Problem(ErrorCode.Unauthenticated, UnavailableDetail), result.Problem);
+        await SqlClusterProtocol.EqualAsync(Errors.Problem(ErrorCode.Unauthenticated, UnavailableDetail), result.Problem);
         await BlobPrincipalRevokedR44Pages.CurrentAsync(admin, state, token);
     }
-    private static async Task McpAsync(Func<Task> operation, RequestCqrsRf3Callers admin,
+    private static async Task McpAsync(Func<Task> operation, RequestCqrsClusterCallers admin,
         BlobPrincipalRevokedR44State state, CancellationToken token)
     {
         var error = await Assert.ThrowsAsync<HttpRequestException>(operation);
@@ -50,7 +50,7 @@ internal static class BlobPrincipalRevokedR44Refusals
         await Assert.That(error!.Message.Contains(state.Identity.Secret, StringComparison.Ordinal)).IsFalse();
         await BlobPrincipalRevokedR44Pages.CurrentAsync(admin, state, token);
     }
-    internal static async Task InitializeAsync(ClusterFixture fixture, RequestCqrsRf3Callers admin,
+    internal static async Task InitializeAsync(ClusterFixture fixture, RequestCqrsClusterCallers admin,
         BlobPrincipalRevokedR44State state, CancellationToken token)
     {
         var failures = new List<Exception>();

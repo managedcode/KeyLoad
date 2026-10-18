@@ -1,206 +1,54 @@
-# ADR-110: native Orleans execution and scheduling primitives
+# ADR-110: Orleans primitives used by KeyLoad
 
-Status: Accepted for per-method selection and audit; runtime/provider adoption
-pending. Date: 2026-10-05. Integration owner: KeyLoad lead.
-Requirements and acceptance: REQ/AC-ORL-001..013 in
-[ClusterRouting ExecutionPrimitives](../Features/ClusterRouting/ExecutionPrimitives.md).
+Status: Accepted (rewritten 2026-10-18 from the Orleans 10.4.0 source and documentation). Implementation in progress. Requirements: REQ/AC-ORL-001..013 in [ExecutionPrimitives](../Features/ClusterRouting/ExecutionPrimitives.md). Related: [ADR-136](ADR-136-native-orleans-partition-ownership.md), [ADR-125](ADR-125-connection-owned-execution.md), [ADR-036](ADR-036-orleans-foundation.md).
 
-## Context and decision
+Source basis: Orleans 10.4.0 (commit `d114d7522a53b8cce4c6b97d44293e5c7273d766`), Microsoft.Orleans.DurableJobs and Microsoft.Orleans.Journaling 10.4.0-alpha.1, and the official documentation at learn.microsoft.com/dotnet/orleans. Where the documentation and the 10.4 source disagree, the source wins.
 
-The owner asks KeyLoad to use Orleans' StatelessWorker, OneWay, durable jobs and
-reentrancy/interleaving facilities where their guarantees fit. The connection-owned
-execution grain ([ADR-125](ADR-125-connection-owned-execution.md)) already allows
-independent operations; partition commands and background work carry stronger
-ordered-effect and reliable-outcome contracts.
-Increasing grain concurrency without auditing awaits, identity, storage lifetime
-and admission can violate those contracts while multiplying retained work.
+## Decision
 
-The owner's follow-up explicitly includes local Orleans services and a broad
-documentation review, including messaging/pub-sub and transactions. Extend the
-selection inventory before choosing new providers or contracts; preserve the
-silo-local ZoneTree owner Grain Service and its lifecycle
-([ADR-136](ADR-136-native-orleans-partition-ownership.md)).
-The canonical reviewed capability inventory and proposed priorities are in
-[CapabilityReview](../Features/ClusterRouting/CapabilityReview.md).
+Each KeyLoad responsibility uses exactly one native Orleans primitive:
 
-Adopt a per-grain/method selection contract rather than enabling attributes
-globally. The owning feature contains the canonical source audit, candidate
-matrix, bounds, REQ/AC, planned tests and execution joins. Its decisions preserve
-ADR-125's connection-owned execution, ADR-082's native CQRS lifetime/identity, the
-majority acknowledgement receipt and ADR-094's canonical recurring/saga due state.
-
-Background workers are the one accepted use of `[StatelessWorker]` for state-changing
-work: queue deadlines, due recurring and saga work, remote queue transfers, ANN
-projection and time-series chunking run in bounded StatelessWorker pools that accept
-events, buffer them in memory and, on an Orleans timer (typed interval option), write
-the batch to the database through the ordinary connection grain -> partition grain ->
-ZoneTree owner path ([ADR-094](ADR-094-orleans-due-coordination.md)). These workers
-never check leadership, elect a coordinator or run as singletons; duplicates are
-absorbed by deterministic command identities and canonical compare-and-set.
-
-Use bounded StatelessWorker pools for proven interchangeable computation;
-loss-tolerant OneWay for advisory hints with an independent recovery path; narrow
-AlwaysInterleave/MayInterleave control when waits prevent useful progress; and
-ReadOnly only for an actually pure compatible read method. Whole-grain Reentrant
-requires all-method invariant review and measured justification. None of these
-attributes grants CPU parallelism within one Orleans turn or moves file ownership.
-
-Evaluate native Durable Jobs for one-time persistent wake-ups with idempotent
-canonical effects. The repository pins Orleans 10.4.0, whose matching Durable
-Jobs package remains `10.4.0-alpha.1`. The owner implementation approval now selects the bounded native journal
-provider frozen in [RuntimeJournal](../Features/ClusterRouting/RuntimeJournal.md),
-including quotas and already-due saga handoff. Runtime qualification remains pending. Canonical ZoneTree schedule/saga
-state and creator-authorized effects remain authoritative.
-
-Retain native GrainServices for per-silo/partitioned runtime support, borrowed
-silo-local DI owners and precise silo/activation lifecycle hooks. New loops
-require explicit ownership, readiness/admission and joined shutdown; registration
-alone never establishes a cluster singleton. Evaluate native Streams as a bounded
-post-commit delivery path with canonical outbox/catch-up, and native transactions
-through a dedicated ZoneTree/RF3 transactional storage/visibility contract.
-Provider selection, distributed transaction guarantees and new runtime settings
-remain separate implementation joins; the review does not enable them.
-
-## Alternatives and consequences
-
-Blanket Reentrant/AlwaysInterleave would admit turns beside mutable operations
-and weaken the existing partition/due serialization. ReadOnly on the generic
-read dispatcher would include heterogeneous backup/admin lifecycle work. Marking
-the connection or partition grains StatelessWorker would multiply identities/pools and
-change the signed operation boundary without a demonstrated benefit. Those options
-are rejected for the inspected methods.
-
-Converting command/due RPCs to OneWay loses callee errors and terminal receipts.
-Using a timer as persistent work loses the schedule on activation failure;
-reminders persist recurring definitions but do not retain every missed tick.
-Neither supplies the selected one-time at-least-once job semantics. Existing
-canonical due sweeps remain the recovery authority until a real native adapter
-passes its provider/fault gates.
-
-The selected approach can improve independent computation and responsive
-operation control while retaining ordered effects. It adds explicit resource and
-fault tests and may add native prerelease/provider maintenance. Performance,
-durability and production readiness remain unproven by this decision.
+| Responsibility | Primitive | Why this one |
+|---|---|---|
+| A connected client | `ConnectionGrain` (ADR-125), `[Immovable]`, `[PreferLocalPlacement]` | One activation per connection on the silo that accepted the transport; default non-reentrant turns protect session invariants; `[AlwaysInterleave]` only on close/cancel |
+| A logical partition | Partition grain keyed by the canonical partition id | Serializes commands of one partition; holds no files; migration moves only in-memory values |
+| A node's ZoneTree | One DI singleton storage host per silo plus one Grain Service as its remote surface | A Grain Service is one per silo, never collected, and can be called on a specific silo with `GrainServiceClient<T>.GetGrainService(SiloAddress)` |
+| Copies of a write | The writer calls the storage Grain Service on each target silo | Orleans replicates no application data; target silos come from native membership |
+| Finding silos | `IClusterMembershipService.CurrentSnapshot` / `MembershipUpdates` (or `ISiloStatusOracle.GetActiveSilos()`) | Native, public, per-silo view of Active silos; `IManagementGrain.GetHosts` is for clients and diagnostics |
+| Buffered background work (queue deadlines, due and recurring work, ANN projection, time-series chunks) | `[StatelessWorker]` grain with a grain timer flush | Local-first pool; buffers events and writes them on a `RegisterGrainTimer` tick; no leadership check |
+| Durable periodic work of a minute or more | Reminders (`IRemindable`, `RegisterOrUpdateReminder`) | Definition is persisted and reactivates the grain; minimum period 1 minute; missed ticks are skipped |
+| One-time due work | Durable Jobs (`ILocalDurableJobManager.ScheduleJobAsync`, `IDurableJobHandler`) | Persisted, at-least-once, handlers must be idempotent; alpha package |
+| Per-request context | `RequestContext` through ManagedCode.Orleans.Identity | Small values flow down the call chain, never back; carries the verified subject only |
+| Streaming results | Grain methods returning `IAsyncEnumerable<T>` | Batched, backpressured, cancellable, scoped to the call |
+| Placement and balancing | Default resource-optimized placement, `AddDistributedGrainDirectory()` (`ORLEANSEXP003`), `AddActivationRepartitioner()` (`ORLEANSEXP001`) | Native; `[Immovable]` opts a grain out of automatic migration |
 
 ```mermaid
-flowchart TD
-    Method[Actual grain method and invariant] --> Audit[Identity state awaits effects completion]
-    Audit --> Pure[Interchangeable bounded computation]
-    Pure --> Workers[StatelessWorker pool]
-    Audit --> Loss[Recoverable advisory signal]
-    Loss --> OneWay[OneWay hint]
-    Audit --> Wait[Bounded operation control during awaits]
-    Wait --> Selective[Audited selective interleaving]
-    Audit --> Future[Persistent one-time invocation]
-    Future --> Provider[Durable Jobs provider and idempotency gate]
-    Audit --> Ordered[Ordered effect or durable receipt]
-    Ordered --> Serial[Serial reliable canonical path]
+flowchart LR
+    Client[Connected client] --> Conn[ConnectionGrain]
+    Conn --> Part[Partition grain]
+    Part -->|GetGrainService SiloAddress| Svc[Storage Grain Service on target silo]
+    Membership[IClusterMembershipService] --> Part
+    Svc --> Host[Storage host singleton]
+    Host --> Files[(ZoneTree files)]
+    Events[Background events] --> Worker[StatelessWorker buffer]
+    Worker -->|timer flush| Part
 ```
 
-Owner implementation approval, 2026-10-06: [RuntimeAdoption](../Features/ClusterRouting/RuntimeAdoption.md)
-freezes the first concrete native-service and telemetry stages, REQ/AC-ORL-011/012. Reuse the
-coalesced node-local post-apply notification with a bounded clock fallback;
-retain known-target awaited due RPC. Root owns shared contracts/gates and Luna
-owns the disjoint runtime/test files; native provider/transaction stages remain
-subject to their exact storage and trust joins.
+## Rules taken from the Orleans source
 
-## Implementation contract
+1. **Grain Service lifetime.** `Init` runs at `ServiceLifecycleStage.RuntimeGrainServices` (8000) and `Start` at `Active` (20000). `Stop` runs at `Active` stop, before `GrainDeactivation` (19998), and is skipped entirely on a cancelled shutdown or a crash. Therefore ZoneTree is opened and closed by the storage host singleton through `ILifecycleParticipant<ISiloLifecycle>` (open before workload admission, close at `ApplicationServices` stop), never in `GrainService.Stop()`.
+2. **Grain Service scheduling.** Every request to a Grain Service starts its own task on one single-threaded scheduler, so requests always interleave at `await`. Keep ZoneTree calls short and asynchronous; never block a turn.
+3. **Exposing ZoneTree locally.** `AddGrainService<T>()` registers only an `IGrainService` singleton. ZoneTree lives in its own DI singleton; local grains and workers inject it directly (no hop, no serialization) and the Grain Service is the remote surface.
+4. **Calling a specific silo.** Use the protected `GetGrainService(SiloAddress)` through a public wrapper on the client. The `GrainId` and `uint` overloads route by the consistent ring, which changes on every membership change, and are not used for data ownership. A restarted silo has a new `SiloAddress`.
+5. **Messages.** Grain calls are at-most-once with no ordering guarantee. Replication calls carry a per-partition sequence number, apply is idempotent and retries are explicit; a write is acknowledged after a majority of copies confirm durable apply.
+6. **Single activation is not a storage fence.** The directory may briefly allow a duplicate activation; correctness of persisted effects comes from idempotent, sequence-checked apply at the storage owner.
+7. **StatelessWorker identity.** All activations of a stateless worker share one `GrainId`; each has only an ephemeral, non-addressable `ActivationId`. Up to `MaxLocal` activations per silo (default: processor count). A stable worker identity comes from the grain key (one key per queue, index, series or silo), produced by the shared ID helper. Use `[StatelessWorker(maxLocalWorkers, removeIdleWorkers: false)]` for buffering workers.
+8. **Buffered events are disposable.** A worker's buffer is in memory and is lost on a silo crash (`OnDeactivateAsync` does not run then). Buffer only work that can be rebuilt from committed ZoneTree records from a persisted watermark, and never acknowledge a client before the authoritative commit.
+9. **Timers.** `RegisterGrainTimer` with `GrainTimerCreationOptions { DueTime, Period, Interleave, KeepAlive }`; the period counts from callback completion, ticks never overlap, and timers stop on deactivation. The flush interval is a typed option (for example 5 seconds).
+10. **Keys are case-sensitive.** String grain keys are compared as raw UTF-8 bytes with no normalization, so "Tenant" and "tenant" are different grains. Every key is produced by one shared helper per identity kind that sanitizes user input, strictly validates at every routing and storage boundary (an id is valid only if sanitizing it changes nothing), compares ordinally and encodes order-preserving storage keys — the same pattern ZoneTree.Analytics uses (`Text.Name`, `Text.ValidateStoredName`, `RollupDefinition.Id`, `KeyCodec`, `Text.StableHash`).
+11. **Caches.** Per-entity hot state lives in grain activation memory; per-silo shared caches live in the storage host singleton, bounded and tagged with the policy/commit epoch they were built from. Broadcast channels reach one grain per subscribing type, not every silo, and observers are best-effort, so per-silo invalidation is a Grain Service call to each Active silo or validation on read.
+12. **Transactions.** Only `ITransactionalState<T>` participates in Orleans transactions; ZoneTree writes do not enlist. KeyLoad's atomicity is the same-partition atomic batch.
 
-1. TASK-ORL-AUDIT joins disjoint read-only native API and current grain reviews;
-   root owns shared contracts, configuration, docs and integration. The reviews
-   make no source/dependency/test changes.
-2. TASK-ORL-CONTRACT records the owner rule first, freezes the feature's method
-   matrix, maps each REQ to AC/test/evidence and adds architecture/catalog/status
-   navigation. Static governance, changed-link review and Mermaid render prove
-   this documentation stage only; AC-ORL-001 has an explicit review exception.
-   TASK-ORL-CAPABILITY-REVIEW joins disjoint read-only state/time, messaging and
-   runtime/lifecycle reviews against the complete official documentation families.
-   Root owns the integrated inventory and REQ/AC-ORL-007..010; research alone
-   neither registers a provider nor grants a new database consistency guarantee.
-3. TASK-ORL-WORKERS, CONTROL and HINTS start only when the owning feature's
-   concrete operation, quotas, exact methods and immutable/lifetime/trust
-   contracts are resolved. Writes are disjoint feature-local role folders in
-   `src/KeyLoad.Clustering/ClusterRouting/` and the actual affected slice;
-   tests mirror those slices. Root alone joins generated contracts and call graph.
-4. TASK-ORL-JOBS resolves the native API and persistent provider/reconciliation
-   gate first. Messaging owns `Features/Messaging/Grains/`, `Contracts/` and
-   `Execution/`, matching Core canonical due owners and real process/RF3 tests.
-   Server/AppHost composition and central package pins have one root owner.
-   No added provider or experimental opt-in bypasses required architecture review.
-5. TASK-ORL-VERIFY runs the candidate's meaningful operation tests, final canonical
-   Release build/format/analyzers, Aspire unit/scalar/recovery/RF3 suites and
-   required coverage/fault gates. Actual SDK/MCP caller evidence and comparable
-   Linux GitHub measurements precede capability or acceleration claims.
+## Verification
 
-The feature specification is the canonical task graph, dependency/start/join,
-flow/test/bound and rollout source. No candidate task is complete merely because
-an attribute compiles. Failed or incomplete proof does not unblock its dependants.
-New public control APIs, provider formats or dependency defects need the owning
-contract and, for ManagedCode defects, its mandatory published repair/release.
-
-Rollout/rollback retain original request aliases, persisted authorization,
-ZoneTree state, ordered apply and recovery journals. Stop admission and join
-live work before disabling a candidate. Reconcile persistent job delivery against
-canonical generations before provider removal; this documentation stage changes
-no persisted format or data.
-
-## Native sources checked against Orleans 10.4.0
-
-- [Stateless worker grains](https://learn.microsoft.com/en-us/dotnet/orleans/grains/stateless-worker-grains): interchangeable activations and per-identity/per-silo limits.
-- [Request scheduling](https://learn.microsoft.com/en-us/dotnet/orleans/grains/request-scheduling): non-reentrancy, selective interleaving and turns across awaits.
-- [Concurrency attributes v10.4.0](https://github.com/dotnet/orleans/blob/v10.4.0/src/Orleans.Core.Abstractions/Concurrency/GrainAttributeConcurrency.cs): interface/class attribute placement and the native IInvokable MayInterleave predicate.
-- [One-way requests](https://learn.microsoft.com/en-us/dotnet/orleans/grains/oneway): absence of callee completion/error acknowledgement.
-- [Durable Jobs v10.4.0 README](https://github.com/dotnet/orleans/blob/v10.4.0/src/Orleans.DurableJobs/README.md): native one-time at-least-once manager/handler and provider requirements.
-- [Durable Jobs v10.4.0 public API](https://github.com/dotnet/orleans/blob/v10.4.0/src/api/Orleans.DurableJobs/Orleans.DurableJobs.cs): native manager, handler, run context, registration and bounds.
-- [Orleans v10.4.0 release](https://github.com/dotnet/orleans/releases/tag/v10.4.0): matching prerelease Durable Jobs status.
-
-Native journal implementation stage, 2026-10-06: REQ/AC-ORL-013 in
-[RuntimeJournal](../Features/ClusterRouting/RuntimeJournal.md) owns the exact Core,
-Orleans and Server joins, ordered worker tasks, rollout/rollback, private identity
-and real recovery/RF3 acceptance. Scoped ORLEANSEXP005 is owner authorized. 
-The REQ/AC-ORL-013 call graph copies every existing default-deny edge and admits
-the native RuntimeJournalClient's exact ReadCoreAsync and SendCommandAsync calls
-to IRequestGrain.ExecuteStreamAsync. Native JournaledStateManager suppresses
-ExecutionContext for its background work loop, so provider callbacks establish
-their immediate caller identity with the supported RunWithCurrentCallerAsync
-API around the complete native CQRS stream drain and restore it on every exit.
-The coordinator's concrete ExecuteJobAsync edge remains scoped to its actual
-saga effect; remove the unused manager wildcard and speculative concrete
-ProcessDueAsync provider allowance. TASK-ORL-JOURNAL-GRAPH-014 freezes exact
-Orleans client/Server registration ownership, ordered guarded private preparation,
-root join and verification in the RuntimeJournal contract. Preserve signed
-protected identity, fresh separately authorized request grains, backpressure and
-RF3 authority. Actual native scheduling/journal callbacks, duplicate dispatch,
-single saga/message effect, caller restoration, denied method/target and healthy
-follow-up controls run through Aspire after build/format. No coordinator wildcard
-or alternate database path is admitted; complete process, RF3 and Linux
-qualification remains required.
-
-Native streamed-request telemetry join, 2026-10-06: TASK-ORL-TELEMETRY-STREAM-002
-in [RuntimeAdoption](../Features/ClusterRouting/RuntimeAdoption.md) freezes the
-REQ/AC-ORL-012 client propagation and exact native stream-start classification
-contract before code. Stage1 is a private Luna patch for ServiceDefaults
-ClusterRouting Contracts/OrleansTelemetryPolicy.cs,
-Diagnostics/OrleansTelemetryTagSanitizer.cs and the actual RequestCqrsFixture
-client registration. Stage2 is root guard/source review and native format/build;
-stage3 runs the unchanged real signed-operation, parentage, metrics and privacy
-workflow through Aspire normal/scalar before Linux/RF3 qualification. No pins,
-provider replacement, synthetic telemetry, raw metadata or bound changes apply.
-Rollback and source-inventory constraints are in the owning feature contract.
-The original228/230 local result leaves the label and later assertions open;
-source reasoning is not runtime proof and this ADR is not fully implemented.
-
-## ANN projection maintenance
-
-REQ/AC-ORL-013 and REQ/AC-ANN native maintenance follow the background-worker
-pattern above: StatelessWorker grains accept projection events, buffer them and, on
-an Orleans timer, write the batch through the ordinary path; they do not check
-leadership or use a singleton coordinator. They retain the existing validated
-`IOptions<RuntimeJournalOptions>` and `IOptions<DatabaseLimits>` instead of
-reconstructing options inside execution. The original limits, cancellation and
-journal-before-effects contracts remain unchanged; the private ANN binding keeps
-generated Orleans binary serialization with its original alias and Id0..2. The
-ORLEANSEXP005 opt-in stays scoped to the native journal declarations only; every
-other diagnostic and analyzer severity stays required. Source repair alone closes
-none of the runtime gates, which require fresh compiled source and Linux
-qualification.
+TUnit tests against the Aspire-owned cluster through the real .NET SDK and official MCP client: restart of a silo with the same files, a Grain Service call to a chosen silo, replication to `ReplicaCount` silos found through membership, worker buffering and timer flush with a crash in between (no acknowledged data lost, buffered work rebuilt), and case-variant keys rejected by the helper. Process-kill tests do not prove power-loss durability.

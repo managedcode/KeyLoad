@@ -15,11 +15,11 @@ internal static class BlobSupersessionPublicTrial
 
     internal static async Task RunAsync(ClusterFixture fixture, CancellationToken token)
     {
-        var versions = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
+        var versions = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
             fixture.AdminKey, async callers =>
             {
-                var scenario = await RelationalSqlRf3Scenario.CreateAsync(callers.Sdk, token);
-                var blob = new BlobRef(scenario.Partition, RelationalSqlRf3Tokens.Blobs, "supersession-public");
+                var scenario = await RelationalSqlClusterScenario.CreateAsync(callers.Sdk, token);
+                var blob = new BlobRef(scenario.Partition, RelationalSqlClusterTokens.Blobs, "supersession-public");
                 var first = await PublishAsync(callers, blob, 0, new byte[] { 1, 3, 5, 7 }, token);
                 var second = await PublishAsync(callers, blob, 1, new byte[] { 2, 4, 6, 8, 10, 12, 14, 16 }, token);
                 await RequireAsync(callers, first, second, token);
@@ -28,7 +28,7 @@ internal static class BlobSupersessionPublicTrial
         for (var cycle = 0; cycle < 2; cycle++)
         {
             await ColdAsync(fixture, token);
-            _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2,
+            _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2,
                 fixture.AdminKey, async callers =>
                 {
                     await RequireAsync(callers, versions.First, versions.Second, token);
@@ -37,7 +37,7 @@ internal static class BlobSupersessionPublicTrial
         }
     }
 
-    private static async Task<Version> PublishAsync(RequestCqrsRf3Callers callers, BlobRef blob,
+    private static async Task<Version> PublishAsync(RequestCqrsClusterCallers callers, BlobRef blob,
         long expectedRevision, byte[] bytes, CancellationToken token)
     {
         var upload = Guid.NewGuid();
@@ -59,7 +59,7 @@ internal static class BlobSupersessionPublicTrial
         return new(begin, begun, part, written, complete, completed);
     }
 
-    private static async Task RequireAsync(RequestCqrsRf3Callers callers, Version first,
+    private static async Task RequireAsync(RequestCqrsClusterCallers callers, Version first,
         Version second, CancellationToken token)
     {
         await BlobSupersessionPublicAssertions.ReplayAsync(callers, first, token);

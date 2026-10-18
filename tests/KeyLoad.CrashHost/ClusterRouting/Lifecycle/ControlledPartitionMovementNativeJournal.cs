@@ -33,7 +33,7 @@ internal sealed class ControlledPartitionMovementNativeJournal : IDisposable
 
     /// <summary>Opens the original configured native replica journal and materializer.</summary>
     /// <param name="database">The actual borrowed canonical database owner.</param>
-    /// <param name="physical">Its immutable actual physical RF3 logical scope.</param>
+    /// <param name="physical">Its immutable actual physical CLUSTER logical scope.</param>
     /// <param name="directory">The independently owned replica-store directory.</param>
     /// <param name="maximumFixtureEntries">The exact selected closed fixture history profile.</param>
     /// <param name="replicaObserver">Existing native durable replica boundary observer; null preserves original behavior.</param>

@@ -13,11 +13,11 @@ internal static class CredentialSubjectReplacementFlow
         var before = await CredentialSubjectReplacementAssertions.ImageAsync(root, state, token);
         state.RebindResult = await McpCallerAssertions.SdkStatusAsync(await root.ConfigureApiKeyAsync(
             state.RebindCommandId, state.Rebound, token));
-        await SqlRf3Protocol.EqualAsync(before, await CredentialSubjectReplacementAssertions.ImageAsync(root, state, token));
+        await SqlClusterProtocol.EqualAsync(before, await CredentialSubjectReplacementAssertions.ImageAsync(root, state, token));
         await CredentialSubjectReplacementAssertions.StageAsync(root, reader, session, state, second: true, token);
         state.RepairResult = await McpCallerAssertions.SdkStatusAsync(await root.ConfigureApiKeyAsync(
             state.RepairCommandId, state.First.Identity.Credential, token));
-        await SqlRf3Protocol.EqualAsync(before, await CredentialSubjectReplacementAssertions.ImageAsync(root, state, token));
+        await SqlClusterProtocol.EqualAsync(before, await CredentialSubjectReplacementAssertions.ImageAsync(root, state, token));
         await ReplayedAsync(root, reader, session, state, token);
     }
 
@@ -27,10 +27,10 @@ internal static class CredentialSubjectReplacementFlow
         await CredentialSubjectReplacementAssertions.StageAsync(root, reader, session, state, second: false, token);
         var before = await CredentialSubjectReplacementAssertions.ImageAsync(root, state, token);
         await ReplayAsync(root, state.RebindCommandId, state.Rebound, state.RebindResult, token);
-        await SqlRf3Protocol.EqualAsync(before, await CredentialSubjectReplacementAssertions.ImageAsync(root, state, token));
+        await SqlClusterProtocol.EqualAsync(before, await CredentialSubjectReplacementAssertions.ImageAsync(root, state, token));
         await CredentialSubjectReplacementAssertions.StageAsync(root, reader, session, state, second: false, token);
         await ReplayAsync(root, state.RepairCommandId, state.First.Identity.Credential, state.RepairResult, token);
-        await SqlRf3Protocol.EqualAsync(before, await CredentialSubjectReplacementAssertions.ImageAsync(root, state, token));
+        await SqlClusterProtocol.EqualAsync(before, await CredentialSubjectReplacementAssertions.ImageAsync(root, state, token));
         await CredentialSubjectReplacementAssertions.SeedsAsync(root, state, token);
     }
 
@@ -42,6 +42,6 @@ internal static class CredentialSubjectReplacementFlow
             throw new InvalidOperationException("The original credential configuration outcome is absent.");
         }
         var actual = await McpCallerAssertions.SdkStatusAsync(await root.ConfigureApiKeyAsync(command, credential, token));
-        await SqlRf3Protocol.EqualAsync(original, actual);
+        await SqlClusterProtocol.EqualAsync(original, actual);
     }
 }

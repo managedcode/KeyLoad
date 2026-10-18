@@ -98,13 +98,13 @@ internal static class FunctionalGateAnalyticsCold
     }, token);
 
     private static Task<T> WithAdministratorAsync<T>(FunctionalGateFixture fixture,
-        Func<RequestCqrsRf3Callers, Task<T>> action, CancellationToken token)
-        => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, fixture.NodeNames[0], fixture.AdminKey, action, token);
+        Func<RequestCqrsClusterCallers, Task<T>> action, CancellationToken token)
+        => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, fixture.NodeNames[0], fixture.AdminKey, action, token);
 
-    private static Task<T> WithUserAsync<T>(FunctionalGateFixture fixture, RequestCqrsRf3Callers administrator,
+    private static Task<T> WithUserAsync<T>(FunctionalGateFixture fixture, RequestCqrsClusterCallers administrator,
         FunctionalGateColdState state, FunctionalGateAnalyticsColdUser user, string node,
         Func<FunctionalGateContext, Task<T>> action, CancellationToken token)
-        => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, node, user.Identity.Secret,
+        => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, node, user.Identity.Secret,
             caller => action(new(administrator, caller, caller, state.Partition, state.Anchor, FunctionalGateColdProtocol.Resources)
             {
                 WriterPrincipalId = user.Identity.Principal.Id,

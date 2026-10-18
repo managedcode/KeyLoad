@@ -8,7 +8,7 @@ namespace KeyLoad.IntegrationTests.Features.BlobStorage;
 internal sealed class BlobMaximumRangePublicTests(ClusterFixture fixture)
 {
     [Test]
-    public async Task InclusiveMaximumUnalignedRangesRefuseOneOverPreserveEveryOriginalReceiptAndTwoRf3ColdCycles()
+    public async Task InclusiveMaximumUnalignedRangesRefuseOneOverPreserveEveryOriginalReceiptAndTwoClusterColdCycles()
     {
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>

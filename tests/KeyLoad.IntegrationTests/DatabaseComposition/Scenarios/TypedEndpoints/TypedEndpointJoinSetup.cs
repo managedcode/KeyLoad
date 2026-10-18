@@ -18,7 +18,7 @@ internal static class TypedEndpointJoinSetup
     private const long EpochStep = 1;
 
     internal static async Task<TypedEndpointJoinSeed> RunAsync(ClusterFixture fixture,
-        RequestCqrsRf3Callers admin, CancellationToken token)
+        RequestCqrsClusterCallers admin, CancellationToken token)
     {
         var partition = new PartitionRef(TenantPrefix + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat),
             Database, Domain, Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat));
@@ -76,14 +76,14 @@ internal static class TypedEndpointJoinSetup
         return new(partition, to, identity, principal, models);
     }
 
-    internal static Task<ResourceDefinition> ConfigureAsync(RequestCqrsRf3Callers admin,
+    internal static Task<ResourceDefinition> ConfigureAsync(RequestCqrsClusterCallers admin,
         PartitionRef partition, ResourceDefinition definition, CancellationToken token, long? expectedVersion = null)
         => ConfigureCoreAsync(admin, new(partition.TenantId, partition.DatabaseId, definition)
         {
             ExpectedSchemaVersion = expectedVersion
         }, token);
 
-    private static async Task<ResourceDefinition> ConfigureCoreAsync(RequestCqrsRf3Callers admin,
+    private static async Task<ResourceDefinition> ConfigureCoreAsync(RequestCqrsClusterCallers admin,
         ConfigureResourceRequest request, CancellationToken token)
         => await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.ConfigureResourceAsync(Guid.NewGuid(), request, token));
 

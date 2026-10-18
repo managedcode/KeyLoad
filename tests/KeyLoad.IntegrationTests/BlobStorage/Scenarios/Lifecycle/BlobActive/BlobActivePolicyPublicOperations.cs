@@ -8,13 +8,13 @@ namespace KeyLoad.IntegrationTests.Features.BlobStorage;
 internal static class BlobActivePolicyPublicOperations
 {
     private const string PartHash = "98f608e5aa56c97d8cf793e433cb3e2afd1bc5e6fa051e968a851c352b4406a0";
-    internal static async Task BeginAsync(RequestCqrsRf3Callers creator, BlobActivePolicyPublicState state, CancellationToken token)
+    internal static async Task BeginAsync(RequestCqrsClusterCallers creator, BlobActivePolicyPublicState state, CancellationToken token)
     {
         state.Begun = await McpCallerAssertions.SdkSuccessAsync(await creator.Sdk.BeginBlobUploadAsync(state.Begin, token));
         var actual = state.Begun.Value;
         state.Current = new(state.Blob, state.Begin.UploadId, 4L, 0L, 0, 0L,
             actual.ExpiresAt, BlobUploadStatus.Active, actual.IntegrityHash);
-        await SqlRf3Protocol.EqualAsync(state.Current, actual);
+        await SqlClusterProtocol.EqualAsync(state.Current, actual);
         await BlobActivePolicyPublicAssertions.ReceiptAsync(state, state.Begin.CommandId, state.Begun.Receipt);
         var hash = Chain(actual.IntegrityHash);
         state.DeniedPart = new(Guid.NewGuid(), state.Blob, state.Begin.UploadId, 0, state.Bytes, PartHash);
@@ -32,8 +32,8 @@ internal static class BlobActivePolicyPublicOperations
         return Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(frame));
     }
 
-    internal static async Task PublishAsync(RequestCqrsRf3Callers administrator,
-        RequestCqrsRf3Callers creator, BlobActivePolicyPublicState state, CancellationToken token)
+    internal static async Task PublishAsync(RequestCqrsClusterCallers administrator,
+        RequestCqrsClusterCallers creator, BlobActivePolicyPublicState state, CancellationToken token)
     {
         state.Part = state.DeniedPart with
         {
@@ -47,7 +47,7 @@ internal static class BlobActivePolicyPublicOperations
             StoredBytes = 4L,
             IntegrityHash = state.DeniedComplete.ExpectedIntegrityHash
         };
-        await SqlRf3Protocol.EqualAsync(state.Current, state.Written.Value);
+        await SqlClusterProtocol.EqualAsync(state.Current, state.Written.Value);
         await BlobActivePolicyPublicAssertions.ReceiptAsync(state, state.Part.CommandId, state.Written.Receipt);
         await BlobActivePolicyPublicAssertions.CurrentAsync(administrator, creator, state, token);
         state.Complete = state.DeniedComplete with
@@ -57,7 +57,7 @@ internal static class BlobActivePolicyPublicOperations
         state.Completed = await McpCallerAssertions.SdkSuccessAsync(await creator.Sdk.CompleteBlobUploadAsync(state.Complete, token));
         var expected = new BlobMetadata(state.Blob, 1L, state.Begin.UploadId, 4L, 1,
             state.DeniedComplete.ExpectedIntegrityHash, new RowAccess(), state.Completed.Value.UpdatedAt);
-        await SqlRf3Protocol.EqualAsync(expected, state.Completed.Value);
+        await SqlClusterProtocol.EqualAsync(expected, state.Completed.Value);
         state.Current = state.Current with
         {
             Status = BlobUploadStatus.Complete
@@ -66,8 +66,8 @@ internal static class BlobActivePolicyPublicOperations
         await BlobActivePolicyPublicAssertions.CurrentAsync(administrator, creator, state, token);
     }
 
-    internal static async Task ReplayAsync(RequestCqrsRf3Callers administrator,
-        RequestCqrsRf3Callers creator, BlobActivePolicyPublicState state, CancellationToken token)
+    internal static async Task ReplayAsync(RequestCqrsClusterCallers administrator,
+        RequestCqrsClusterCallers creator, BlobActivePolicyPublicState state, CancellationToken token)
     {
         Task Observe() => BlobActivePolicyPublicAssertions.CurrentAsync(administrator, creator, state, token);
         await BlobBoundedRetirementPublicReplay.MatchingAsync(creator, "keyload_blobs_write_part", state.Part,

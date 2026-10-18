@@ -2,7 +2,7 @@ using KeyLoad.CrashHost.Features.ResourceExecution;
 
 namespace KeyLoad.RecoveryTests.Features.ResourceExecution;
 
-/// <summary>Genuine process-kill recovery of conservative inventory; not RF3 or power-loss qualification.</summary>
+/// <summary>Genuine process-kill recovery of conservative inventory; not CLUSTER or power-loss qualification.</summary>
 [NotInParallel]
 internal sealed class D2InventoryProcessRecoveryTests
 {

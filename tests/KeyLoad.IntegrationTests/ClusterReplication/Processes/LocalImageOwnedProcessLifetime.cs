@@ -25,7 +25,7 @@ internal static partial class LocalImageOwnedProcessLifetime
 
             count += read;
         }
-        throw new InvalidOperationException("Local RF3 image verifier output exceeded its bound.");
+        throw new InvalidOperationException("Local CLUSTER image verifier output exceeded its bound.");
     }
 
     internal static async Task ObserveAsync(Task exit, Task output, Task error, CancellationToken cancellationToken)
@@ -87,7 +87,7 @@ internal static partial class LocalImageOwnedProcessLifetime
         var joined = Task.WhenAll(originalTasks);
         if (await Task.WhenAny(joined, Task.Delay(SettlementLimit, TimeProvider.System)).ConfigureAwait(false) != joined)
         {
-            failures.Add(new TimeoutException("Local RF3 image process and original stream readers did not settle within the cleanup threshold."));
+            failures.Add(new TimeoutException("Local CLUSTER image process and original stream readers did not settle within the cleanup threshold."));
             if (!HasExited(process, failures))
             {
                 TryKill(process, failures);

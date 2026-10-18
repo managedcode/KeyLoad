@@ -11,10 +11,10 @@ internal static class QueueViewLeaseIsolationRows
         await Assert.That(page.Cursor).IsNull();
         var expected = new List<QueryRow>
         {
-            Row(SqlModelViewRf3Scenario.FirstMessageId, state.Acked ? MessageState.Acked : MessageState.Leased,
+            Row(SqlModelViewClusterScenario.FirstMessageId, state.Acked ? MessageState.Acked : MessageState.Leased,
                 QueueViewLeaseIsolationProtocol.One, state.Version, QueueViewLeaseIsolationProtocol.Created,
                 QueueViewLeaseIsolationProtocol.Orders, state.Acked, hidden),
-            Row(SqlModelViewRf3Scenario.SecondMessageId, MessageState.Ready, QueueViewLeaseIsolationProtocol.Empty,
+            Row(SqlModelViewClusterScenario.SecondMessageId, MessageState.Ready, QueueViewLeaseIsolationProtocol.Empty,
                 QueueViewLeaseIsolationProtocol.InitialVersion, QueueViewLeaseIsolationProtocol.Paid,
                 QueueViewLeaseIsolationProtocol.Billing, false, hidden)
         };
@@ -35,8 +35,8 @@ internal static class QueueViewLeaseIsolationRows
             await Assert.That(JsonElement.DeepEquals(observed.RootElement, value.RootElement)).IsTrue();
             await Assert.That(actual.Json.Contains(state.Reader.Secret, StringComparison.Ordinal)
                 || actual.Json.Contains(state.Delivery.Token, StringComparison.Ordinal)
-                || actual.Json.Contains(SqlModelViewRf3Scenario.QueueCanary, StringComparison.Ordinal)
-                || actual.Json.Contains(SqlModelViewRf3Scenario.QueueHeaderCanary, StringComparison.Ordinal)).IsFalse();
+                || actual.Json.Contains(SqlModelViewClusterScenario.QueueCanary, StringComparison.Ordinal)
+                || actual.Json.Contains(SqlModelViewClusterScenario.QueueHeaderCanary, StringComparison.Ordinal)).IsFalse();
         }
     }
 

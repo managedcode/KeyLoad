@@ -30,14 +30,7 @@ internal sealed class ControlledPartitionMovementNativeNode : IDisposable
         Action<CommitStage, long, int>? observer = null,
         long maximumFixtureEntries = ControlledPartitionMovementNativeJournal.SupportingHistoryEntries, IOptions<DatabaseLimits>? limits = null,
         Action<ReplicaCrashBoundary>? replicaObserver = null)
-        : this(root, owner, UnavailablePartitionMovementCheckpointVerifier.Instance, observer, maximumFixtureEntries, limits, replicaObserver) { }
-
-    internal ControlledPartitionMovementNativeNode(string root, PhysicalShardRecord owner,
-        IPartitionMovementCheckpointVerifier checkpointVerifier, Action<CommitStage, long, int>? observer = null,
-        long maximumFixtureEntries = ControlledPartitionMovementNativeJournal.SupportingHistoryEntries, IOptions<DatabaseLimits>? limits = null,
-        Action<ReplicaCrashBoundary>? replicaObserver = null)
     {
-        ArgumentNullException.ThrowIfNull(checkpointVerifier);
         ArgumentNullException.ThrowIfNull(owner);
         if (maximumFixtureEntries != ControlledPartitionMovementNativeJournal.SupportingHistoryEntries
             && maximumFixtureEntries != ControlledPartitionMovementNativeJournal.TerminalHistoryEntries
@@ -59,7 +52,7 @@ internal sealed class ControlledPartitionMovementNativeNode : IDisposable
                 CrashExecutionOptions.DueWork(), CrashExecutionOptions.EventSource(), CrashExecutionOptions.Messaging(),
                 CrashExecutionOptions.GraphExecution(), CrashExecutionOptions.ChangeFeedExecution(),
                 CrashExecutionOptions.BlobExecution(), CrashExecutionOptions.NativeClaimsExecution(),
-                CrashExecutionOptions.TimeSeriesExecution(), CrashExecutionOptions.MovementCheckpoints(), checkpointVerifier, physicalOwner: owner);
+                CrashExecutionOptions.TimeSeriesExecution(), physicalOwner: owner);
             Database.Bootstrap(new(InfrastructurePrincipal, SystemTenant,
                 [new(Wildcard, Wildcard, Capability.All)], [Wildcard])
             {

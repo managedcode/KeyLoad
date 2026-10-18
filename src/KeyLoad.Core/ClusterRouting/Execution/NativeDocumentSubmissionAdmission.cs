@@ -1,6 +1,5 @@
 using KeyLoad.Core.Features.ClusterRouting.Execution;
 using KeyLoad.Core.Features.ClusterRouting.Identity;
-using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -34,25 +33,26 @@ public sealed partial class DatabaseEngine
             normalized = NormalizeOperation(operation);
         }
         catch (KeyLoadException) { return; }
-        if (TryReadOrdinaryDocumentSubmission(normalized) is { } command)
+        if (TryReadOrdinaryDocumentSubmission(normalized) is not null)
         {
-            ValidateSubmissionAdmission(normalized, command);
+            ValidateSubmissionAdmissionCore(normalized, null);
         }
     }
 
-    /// <summary>Checks authorized changed identity using the original verified operation and candidate.</summary>
-    internal void ValidateSubmissionAdmission(ReplicatedOperation operation, CommandRequest command)
-        => ValidateSubmissionAdmissionCore(operation, command, null);
+    /// <summary>Checks authorized changed identity using the original verified operation.</summary>
+    internal void ValidateVerifiedSubmissionAdmission(ReplicatedOperation operation)
+        => ValidateSubmissionAdmissionCore(operation, null);
 
-    internal void ValidateSubmissionAdmission(ReplicatedOperation operation, CommandRequest command, ReadExecutionBudget work)
+    /// <summary>Checks authorized changed identity using the original verified operation and bounded work.</summary>
+    internal void ValidateSubmissionAdmission(ReplicatedOperation operation, ReadExecutionBudget work)
     {
         ArgumentNullException.ThrowIfNull(work);
         work.Check();
-        ValidateSubmissionAdmissionCore(operation, command, work);
+        ValidateSubmissionAdmissionCore(operation, work);
         work.Check();
     }
 
-    private void ValidateSubmissionAdmissionCore(ReplicatedOperation operation, CommandRequest command, ReadExecutionBudget? work)
+    private void ValidateSubmissionAdmissionCore(ReplicatedOperation operation, ReadExecutionBudget? work)
     {
         _ = Store.Read(raw =>
         {
@@ -65,10 +65,6 @@ public sealed partial class DatabaseEngine
                 {
                     System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(denial).Throw();
                 }
-                return false;
-            }
-            if (PartitionMoveSourceFenceStorage.Read(view, command.Partition, Limits.MaxBatchBytes) is not null)
-            {
                 return false;
             }
             var scope = CommandOutcomePartitionIdentity.Resolve(operation);
@@ -115,7 +111,7 @@ public sealed partial class DatabaseEngine
     {
         try
         {
-            if (!IsOrdinaryDocumentSubmission(view, operation))
+            if (ReadOrdinaryDocumentSubmission(operation) is null)
             {
                 return false;
             }
@@ -152,12 +148,5 @@ public sealed partial class DatabaseEngine
         return !command.Mutations.IsDefaultOrEmpty
             && command.Mutations.All(static mutation => mutation is InsertTypedRow or PutDocument or PatchDocument or DeleteDocument)
                 ? command : null;
-    }
-
-    private bool IsOrdinaryDocumentSubmission(IKeyValueView view, ReplicatedOperation operation)
-    {
-        var command = ReadOrdinaryDocumentSubmission(operation);
-        return command is not null
-            && PartitionMoveSourceFenceStorage.Read(view, command.Partition, Limits.MaxBatchBytes) is null;
     }
 }

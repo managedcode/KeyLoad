@@ -9,7 +9,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
 internal static class CatalogBootstrapAuthorityDenied
 {
-    internal static async Task RootAsync(RequestCqrsRf3Callers original, CatalogBootstrapAuthorityState state,
+    internal static async Task RootAsync(RequestCqrsClusterCallers original, CatalogBootstrapAuthorityState state,
         string variant, CancellationToken token)
     {
         var reference = new EntityRef(state.Partition, P.Collection, P.Document);
@@ -17,12 +17,12 @@ internal static class CatalogBootstrapAuthorityDenied
         var code = variant == P.PrincipalDemoted ? ErrorCode.PermissionDenied : ErrorCode.Unauthenticated;
         await Assert.That(result.IsFailed).IsTrue();
         await Assert.That(result.Value).IsNull();
-        await SqlRf3Protocol.EqualAsync(Errors.Problem(code, variant == P.PrincipalDemoted ? P.ScopeDenied : P.Unavailable), result.Problem);
+        await SqlClusterProtocol.EqualAsync(Errors.Problem(code, variant == P.PrincipalDemoted ? P.ScopeDenied : P.Unavailable), result.Problem);
         if (variant == P.PrincipalDemoted)
         {
             var reply = await original.Mcp.CallAsync(McpCallerTools.DocumentsGet, new GetDocumentRequest(reference), token);
             await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true);
-            await SqlRf3Protocol.EqualAsync(JsonSerializer.SerializeToElement(Errors.Problem(code, P.ScopeDenied), JsonDefaults.Options), reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error));
+            await SqlClusterProtocol.EqualAsync(JsonSerializer.SerializeToElement(Errors.Problem(code, P.ScopeDenied), JsonDefaults.Options), reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error));
         }
         else
         {
@@ -37,7 +37,7 @@ internal static class CatalogBootstrapAuthorityDenied
     {
         if (variant == P.PrincipalDemoted)
         {
-            await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, P.Nodes[P.FirstIndex], fixture.AdminKey, async root =>
+            await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, P.Nodes[P.FirstIndex], fixture.AdminKey, async root =>
             {
                 await RootAsync(root, state, variant, token);
                 return true;
@@ -54,7 +54,7 @@ internal static class CatalogBootstrapAuthorityDenied
                 var result = await sdk.GetAsync(new(state.Partition, P.Collection, P.Document), token);
                 await Assert.That(result.IsFailed).IsTrue();
                 await Assert.That(result.Value).IsNull();
-                await SqlRf3Protocol.EqualAsync(Errors.Problem(ErrorCode.Unauthenticated, P.Unavailable), result.Problem);
+                await SqlClusterProtocol.EqualAsync(Errors.Problem(ErrorCode.Unauthenticated, P.Unavailable), result.Problem);
             }, failures);
         }, failures);
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -68,7 +68,7 @@ internal static class CatalogBootstrapAuthorityDenied
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    internal static async Task ReaderAdministrationAsync(RequestCqrsRf3Callers reader,
+    internal static async Task ReaderAdministrationAsync(RequestCqrsClusterCallers reader,
         CatalogBootstrapAuthorityState state, CancellationToken token)
     {
         var target = state.Administrator with
@@ -78,11 +78,11 @@ internal static class CatalogBootstrapAuthorityDenied
         var result = await reader.Sdk.ConfigurePrincipalAsync(state.ReaderDeniedCommandId, target, token);
         await Assert.That(result.IsFailed).IsTrue();
         await Assert.That(result.Value).IsNull();
-        await SqlRf3Protocol.EqualAsync(Errors.Problem(ErrorCode.PermissionDenied, P.AdministrationDenied), result.Problem);
+        await SqlClusterProtocol.EqualAsync(Errors.Problem(ErrorCode.PermissionDenied, P.AdministrationDenied), result.Problem);
         var args = McpOfficialClient.Arguments(new ConfigurePrincipalRequest(target));
         args.Add(McpCallerProtocol.CommandId, state.ReaderDeniedCommandId);
         var reply = await reader.Mcp.Client.InvokeKeyLoadToolAsync(McpCallerTools.PrincipalsConfigure, args, token);
         await McpCallerAssertions.ErrorAsync(reply, ErrorCode.PermissionDenied, dispatched: true);
-        await SqlRf3Protocol.EqualAsync(JsonSerializer.SerializeToElement(Errors.Problem(ErrorCode.PermissionDenied, P.McpDenied), JsonDefaults.Options), reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error));
+        await SqlClusterProtocol.EqualAsync(JsonSerializer.SerializeToElement(Errors.Problem(ErrorCode.PermissionDenied, P.McpDenied), JsonDefaults.Options), reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error));
     }
 }

@@ -6,8 +6,8 @@ namespace KeyLoad.IntegrationTests.Features.TimeSeries;
 
 internal static class SeriesFiniteOverflowPublicWindowChecks
 {
-    internal static async Task HealthyAsync(RequestCqrsRf3Callers administrator,
-        RequestCqrsRf3Callers reader, SeriesFiniteOverflowPublicState state, CancellationToken token)
+    internal static async Task HealthyAsync(RequestCqrsClusterCallers administrator,
+        RequestCqrsClusterCallers reader, SeriesFiniteOverflowPublicState state, CancellationToken token)
     {
         var dense = SeriesFiniteOverflowPublicExpected.Windows(state, wide: false);
         await SeriesFiniteOverflowPublicObservation.ReadAsync(administrator, reader, state,
@@ -22,8 +22,8 @@ internal static class SeriesFiniteOverflowPublicWindowChecks
         }
     }
 
-    internal static async Task OverflowAsync(RequestCqrsRf3Callers administrator,
-        RequestCqrsRf3Callers reader, SeriesFiniteOverflowPublicState state, CancellationToken token)
+    internal static async Task OverflowAsync(RequestCqrsClusterCallers administrator,
+        RequestCqrsClusterCallers reader, SeriesFiniteOverflowPublicState state, CancellationToken token)
     {
         await Assert.That(state.Purged).IsFalse();
         var request = SeriesFiniteOverflowPublicExpected.Windows(state, wide: true);
@@ -31,7 +31,7 @@ internal static class SeriesFiniteOverflowPublicWindowChecks
         await Assert.That(result.IsFailed).IsTrue();
         await Assert.That(result.Value).IsNull();
         await Assert.That(result.Problem).IsNotNull();
-        await SqlRf3Protocol.EqualAsync(Errors.Problem(ErrorCode.Validation,
+        await SqlClusterProtocol.EqualAsync(Errors.Problem(ErrorCode.Validation,
             SeriesFiniteOverflowPublicExpected.OverflowDetail), result.Problem!);
         await SeriesFiniteOverflowPublicChecks.CurrentAsync(administrator, state, token);
         await HealthyAsync(administrator, reader, state, token);

@@ -80,7 +80,7 @@ internal sealed class SafeProjectorOperationDatabase
     internal CommitToken NextToken()
     {
         var placement = Database.ReadAtomicPartitionPlacement(SafeProjectorOperationProtocol.Root,
-            new(SafeProjectorOperationProtocol.PlacementVersion, Source.Partition));
+            Source.Partition);
         return new(placement.Incarnation, Source.Partition.AtomicPartitionId,
             checked(JournalCut().LastIndex + SafeProjectorOperationProtocol.NextJournalIndex), placement.PlacementEpoch);
     }

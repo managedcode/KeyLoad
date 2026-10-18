@@ -76,9 +76,9 @@ internal static class FunctionalGateSearch
     {
         var commandId = Guid.NewGuid();
         var request = new ConfigureResourceRequest(ctx.Partition.TenantId, ctx.Partition.DatabaseId, definition);
-        await SqlRf3Protocol.EqualAsync(definition, await ctx.SdkAsync(
+        await SqlClusterProtocol.EqualAsync(definition, await ctx.SdkAsync(
             ctx.Administrator.Sdk.ConfigureResourceAsync(commandId, request, token)));
-        await SqlRf3Protocol.EqualAsync(definition, await ctx.McpHeaderAsync<ResourceDefinition>(
+        await SqlClusterProtocol.EqualAsync(definition, await ctx.McpHeaderAsync<ResourceDefinition>(
             ctx.Administrator, McpCallerTools.ResourcesConfigure, request, commandId, token));
         FunctionalGateCreationLifetime.Expect(ctx, commandId, definition, table: false);
     }
@@ -99,8 +99,8 @@ internal static class FunctionalGateSearch
         await Assert.That(receipt.Token.Position).IsGreaterThan(Initial);
         await Assert.That(receipt.Token.OwnershipEpoch).IsGreaterThan(Initial);
         await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
-        await SqlRf3Protocol.EqualAsync(expected, receipt.Mutations.ToArray());
-        await SqlRf3Protocol.EqualAsync(receipt, replay);
+        await SqlClusterProtocol.EqualAsync(expected, receipt.Mutations.ToArray());
+        await SqlClusterProtocol.EqualAsync(receipt, replay);
         return receipt;
     }
 
@@ -110,8 +110,8 @@ internal static class FunctionalGateSearch
     internal static async Task SearchAsync(FunctionalGateContext ctx, SearchRequest request,
         RankedDocument[] expected, CancellationToken token)
     {
-        await SqlRf3Protocol.EqualAsync(expected, await ctx.SdkAsync(ctx.Reader.Sdk.SearchAsync(request, token)));
-        await SqlRf3Protocol.EqualAsync(expected, await ctx.McpAsync<RankedDocument[]>(
+        await SqlClusterProtocol.EqualAsync(expected, await ctx.SdkAsync(ctx.Reader.Sdk.SearchAsync(request, token)));
+        await SqlClusterProtocol.EqualAsync(expected, await ctx.McpAsync<RankedDocument[]>(
             ctx.Reader, McpCallerTools.SearchExecute, request, token));
     }
 
@@ -134,8 +134,8 @@ internal static class FunctionalGateSearch
         var expected = edge is null ? new global::KeyLoad.GraphTraversal([vertex], [])
             : new global::KeyLoad.GraphTraversal([.. new[] { vertex, ctx.Bind(ctx.Anchor) }
                 .OrderBy(item => item.Collection, StringComparer.Ordinal).ThenBy(item => item.Id, StringComparer.Ordinal)], [edge]);
-        await SqlRf3Protocol.EqualAsync(expected, await ctx.SdkAsync(ctx.Reader.Sdk.TraverseAsync(request, token)));
-        await SqlRf3Protocol.EqualAsync(expected, await ctx.McpAsync<global::KeyLoad.GraphTraversal>(
+        await SqlClusterProtocol.EqualAsync(expected, await ctx.SdkAsync(ctx.Reader.Sdk.TraverseAsync(request, token)));
+        await SqlClusterProtocol.EqualAsync(expected, await ctx.McpAsync<global::KeyLoad.GraphTraversal>(
             ctx.Reader, McpCallerTools.GraphTraverse, request, token));
     }
 }

@@ -1,0 +1,96 @@
+using KeyLoad.Client;
+using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.Features.DocumentStorage;
+using KeyLoad.Server;
+
+namespace KeyLoad.IntegrationTests.Features.Authorization;
+
+internal static class CrossTenantClusterWholeFlow
+{
+    internal const string Index = "secret";
+    internal const string HealthyJson = "{\"public\":\"healthy\",\"secret\":\"healthy-canary\"}";
+    internal const string HealthyCanary = "healthy-canary";
+    internal static async Task RunAsync(ClusterFixture fixture)
+    {
+        using var deadline = McpCallerDeadline.Create();
+        using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
+        var admin = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
+        var owned = await SeedAsync(fixture, admin, deadline.Token);
+        var foreign = await SeedAsync(fixture, admin, deadline.Token);
+        var identity = await McpPersistedIdentity.CreateAsync(fixture, owned.Partition,
+            Capability.DocumentsRead | Capability.DocumentsWrite | Capability.Query, deadline.Token);
+        var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
+        McpOfficialClient? session = null;
+        var failures = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            session = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2, identity.Secret, deadline.Token);
+            await RejectReadsAsync(admin, sdk, session, owned, foreign, identity.Secret, deadline.Token);
+            await CrossTenantClusterStateAssertions.StateAsync(admin, owned, McpDocumentProtocol.InitialJson, 1, deadline.Token);
+            await CrossTenantClusterStateAssertions.StateAsync(admin, foreign, McpDocumentProtocol.InitialJson, 1, deadline.Token);
+            var denied = foreign.Command(Guid.NewGuid(), HealthyJson);
+            await RejectWritesAsync(admin, sdk, session, owned, foreign, denied, identity.Secret, deadline.Token);
+            await CrossTenantClusterStateAssertions.StateAsync(admin, foreign, McpDocumentProtocol.InitialJson, 1, deadline.Token);
+            await CrossTenantClusterStateAssertions.StateAsync(admin, owned, McpDocumentProtocol.InitialJson, 1, deadline.Token);
+            await CrossTenantClusterHealthyFlow.VerifyAsync(sdk, session, owned, identity.Secret, deadline.Token);
+            await CrossTenantClusterStateAssertions.StateAsync(admin, foreign, McpDocumentProtocol.InitialJson, 1, deadline.Token);
+        }, failures);
+        if (session is not null)
+        {
+            await ServerFailureObserver.ObserveAsync(() => session.DisposeAsync().AsTask(), failures);
+        }
+        ServerFailureObserver.ThrowIfAny(failures);
+    }
+    private static async Task<McpDocumentScenario> SeedAsync(ClusterFixture fixture, KeyLoadClient admin, CancellationToken token)
+    {
+        var partition = new PartitionRef(McpDocumentProtocol.TenantPrefix + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat),
+            McpDocumentProtocol.Database, McpDocumentProtocol.Domain, Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat));
+        var scenario = new McpDocumentScenario(partition);
+        var resource = new ResourceDefinition(McpDocumentProtocol.Collection, ResourceKind.Collection, scenario.Partition.TransactionDomainId)
+        {
+            Indexes = [new(Index, ["/secret"])]
+        };
+        await McpCallerAssertions.SdkSuccessAsync(await admin.ConfigureResourceAsync(Guid.NewGuid(),
+            new(scenario.Partition.TenantId, scenario.Partition.DatabaseId, resource), token));
+        await scenario.SeedAsync(fixture, token);
+        return scenario;
+    }
+    private static async Task RejectReadsAsync(KeyLoadClient admin, KeyLoadClient sdk, McpOfficialClient mcp,
+        McpDocumentScenario owned, McpDocumentScenario foreign, string secret, CancellationToken token)
+    {
+        var before = await CrossTenantClusterStateAssertions.ImageAsync(admin, owned, foreign, token);
+        await CrossTenantClusterErrorAssertions.SdkAsync(await sdk.GetAsync(foreign.Reference, token), secret);
+        await CrossTenantClusterStateAssertions.UnchangedAsync(admin, owned, foreign, before, token);
+        await CrossTenantClusterErrorAssertions.McpAsync(await mcp.CallAsync(McpCallerTools.DocumentsGet,
+            new GetDocumentRequest(foreign.Reference), token), secret);
+        await CrossTenantClusterStateAssertions.UnchangedAsync(admin, owned, foreign, before, token);
+        foreach (var indexed in new[] { false, true })
+        {
+            var request = CrossTenantClusterStateAssertions.Query(foreign.Partition, indexed);
+            await CrossTenantClusterErrorAssertions.SdkAsync(await sdk.QueryAsync(request, token), secret);
+            await CrossTenantClusterStateAssertions.UnchangedAsync(admin, owned, foreign, before, token);
+            await CrossTenantClusterErrorAssertions.McpAsync(await mcp.CallAsync(McpCallerTools.QueryExecute, request, token), secret);
+            await CrossTenantClusterStateAssertions.UnchangedAsync(admin, owned, foreign, before, token);
+        }
+    }
+    private static async Task RejectWritesAsync(KeyLoadClient admin, KeyLoadClient sdk, McpOfficialClient mcp,
+        McpDocumentScenario owned, McpDocumentScenario foreign, CommandRequest request, string secret, CancellationToken token)
+    {
+        var before = await CrossTenantClusterStateAssertions.ImageAsync(admin, owned, foreign, token);
+        await CrossTenantClusterErrorAssertions.SdkAsync(await sdk.CommitAsync(request, token), secret);
+        await CrossTenantClusterStateAssertions.UnchangedAsync(admin, owned, foreign, before, token);
+        await CrossTenantClusterErrorAssertions.McpAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, request, token), secret);
+        await CrossTenantClusterStateAssertions.UnchangedAsync(admin, owned, foreign, before, token);
+        await CrossTenantClusterErrorAssertions.SdkAsync(await sdk.CommitAsync(request, token), secret);
+        await CrossTenantClusterStateAssertions.UnchangedAsync(admin, owned, foreign, before, token);
+        var changed = request with
+        {
+            Mutations = [new PutDocument(McpDocumentProtocol.Collection,
+            McpDocumentProtocol.Entity, McpDocumentProtocol.ConflictingJson)]
+        };
+        await CrossTenantClusterErrorAssertions.SdkAsync(await sdk.CommitAsync(changed, token), secret);
+        await CrossTenantClusterStateAssertions.UnchangedAsync(admin, owned, foreign, before, token);
+        await CrossTenantClusterErrorAssertions.McpAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, changed, token), secret);
+        await CrossTenantClusterStateAssertions.UnchangedAsync(admin, owned, foreign, before, token);
+    }
+}

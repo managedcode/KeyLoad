@@ -19,7 +19,7 @@ internal static class SensitiveAuthorityAssertions
 
     private static async Task DocumentAsync(DocumentResult expected, DocumentResult actual)
     {
-        await SqlRf3Protocol.EqualAsync(expected with
+        await SqlClusterProtocol.EqualAsync(expected with
         {
             Json = string.Empty
         }, actual with
@@ -28,7 +28,7 @@ internal static class SensitiveAuthorityAssertions
         });
         using var expectedBody = JsonDocument.Parse(expected.Json);
         using var actualBody = JsonDocument.Parse(actual.Json);
-        await SqlRf3Protocol.EqualAsync(expectedBody.RootElement, actualBody.RootElement);
+        await SqlClusterProtocol.EqualAsync(expectedBody.RootElement, actualBody.RootElement);
     }
 
     internal static async Task<SensitiveAuthorityImage> ImageAsync(KeyLoadClient root,

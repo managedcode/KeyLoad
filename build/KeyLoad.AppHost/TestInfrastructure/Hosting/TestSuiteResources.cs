@@ -36,11 +36,11 @@ internal static class TestSuiteResources
         var resultsDirectory = ResolvePath(root, settings.ResultsDirectory ?? Path.Combine(DefaultResultsDirectoryName, settings.Suite));
         var arguments = BuildArguments(root, settings, resultsDirectory);
         var runner = CreateRunner(builder, settings.ResourceName, root, arguments);
-        if (settings.NativeCoverageRf3 is not null)
+        if (settings.NativeCoverageCluster is not null)
         {
             ConfigureNativeCoverage(builder, runner, settings, root, resultsDirectory);
         }
-        if (settings.LocalRf3ImageEnabled)
+        if (settings.LocalClusterImageEnabled)
         {
             ConfigureLocalImage(builder, runner, root);
         }
@@ -57,17 +57,17 @@ internal static class TestSuiteResources
     private static void ConfigureLocalImage(IDistributedApplicationBuilder builder,
         IResourceBuilder<ExecutableResource> runner, string root)
     {
-        const string LocalImageChildEnvironment = "KEYLOAD_LOCAL_RF3_IMAGE_CHILD";
+        const string LocalImageChildEnvironment = "KEYLOAD_LOCAL_CLUSTER_IMAGE_CHILD";
         const string EnabledValue = "true";
         const string ImageReceiptEnvironment = "KEYLOAD_IMAGE_RECEIPT";
-        var execution = LocalRf3ImageExecution.Create(root);
-        var preparation = LocalRf3ImagePrerequisite.Add(builder, root, execution);
+        var execution = LocalClusterImageExecution.Create(root);
+        var preparation = LocalClusterImagePrerequisite.Add(builder, root, execution);
         runner.WaitForCompletion(preparation);
-        runner.WithEnvironment(LocalRf3ImageExecution.ProvenanceEnvironment, LocalRf3ImageExecution.Provenance)
-            .WithEnvironment(LocalRf3ImageExecution.ImageReferenceEnvironment, execution.ImageReference)
-            .WithEnvironment(LocalRf3ImageExecution.ReceiptEnvironment, execution.ReceiptPath)
+        runner.WithEnvironment(LocalClusterImageExecution.ProvenanceEnvironment, LocalClusterImageExecution.Provenance)
+            .WithEnvironment(LocalClusterImageExecution.ImageReferenceEnvironment, execution.ImageReference)
+            .WithEnvironment(LocalClusterImageExecution.ReceiptEnvironment, execution.ReceiptPath)
             .WithEnvironment(LocalImageChildEnvironment, EnabledValue)
-            .WithEnvironment(LocalRf3ImageRequest.EnabledEnvironment, string.Empty)
+            .WithEnvironment(LocalClusterImageRequest.EnabledEnvironment, string.Empty)
             .WithEnvironment(ImageReceiptEnvironment, string.Empty)
             .WithEnvironment(GithubRevisionEnvironment, string.Empty)
             .WithEnvironment(GithubActionsEnvironment, string.Empty);
@@ -79,8 +79,8 @@ internal static class TestSuiteResources
     {
         const long TicksPerMillisecond = TimeSpan.TicksPerMillisecond;
         const long NoElapsedTicks = 0;
-        var selected = settings.NativeCoverageRf3
-            ?? throw new InvalidOperationException(NativeCoverageRf3Protocol.InvalidSelection);
+        var selected = settings.NativeCoverageCluster
+            ?? throw new InvalidOperationException(NativeCoverageClusterProtocol.InvalidSelection);
         var runtime = AppHostOptionsRegistration.Get(builder);
         var coverage = runtime.NativeCoverage.Value;
         var execution = runtime.TestExecution.Value;
@@ -88,20 +88,20 @@ internal static class TestSuiteResources
         if (pollTicks <= NoElapsedTicks || pollTicks % TicksPerMillisecond != NoElapsedTicks
             || execution.ProcessExitPollInterval > coverage.ShutdownTimeout)
         {
-            throw new InvalidOperationException(NativeCoverageRf3Protocol.InvalidSelection);
+            throw new InvalidOperationException(NativeCoverageClusterProtocol.InvalidSelection);
         }
-        var preparation = NativeCoverageRf3Prerequisite.Add(builder, settings, root, resultsDirectory,
+        var preparation = NativeCoverageClusterPrerequisite.Add(builder, settings, root, resultsDirectory,
             out var run);
         runner.WaitForCompletion(preparation);
-        NativeCoverageRf3ExecutionEnvironment.Apply(runner, runtime.NativeCoverage,
+        NativeCoverageClusterExecutionEnvironment.Apply(runner, runtime.NativeCoverage,
             selected.Admission.SourceManifestPath);
-        runner.WithEnvironment(NativeCoverageRf3Protocol.ServerModeEnvironment, NativeCoverageRf3Protocol.Mode)
-            .WithEnvironment(NativeCoverageRf3Protocol.SourceManifestEnvironment,
+        runner.WithEnvironment(NativeCoverageClusterProtocol.ServerModeEnvironment, NativeCoverageClusterProtocol.Mode)
+            .WithEnvironment(NativeCoverageClusterProtocol.SourceManifestEnvironment,
                 selected.Admission.SourceManifestPath)
-            .WithEnvironment(NativeCoverageRf3Protocol.RunIdEnvironment, run.RunId)
-            .WithEnvironment(NativeCoverageRf3Protocol.RunManifestEnvironment, run.ManifestPath)
-            .WithEnvironment(NativeCoverageRf3Protocol.ImageReferenceEnvironment, run.ImageReference)
-            .WithEnvironment(NativeCoverageRf3Protocol.StartupPollEnvironment,
+            .WithEnvironment(NativeCoverageClusterProtocol.RunIdEnvironment, run.RunId)
+            .WithEnvironment(NativeCoverageClusterProtocol.RunManifestEnvironment, run.ManifestPath)
+            .WithEnvironment(NativeCoverageClusterProtocol.ImageReferenceEnvironment, run.ImageReference)
+            .WithEnvironment(NativeCoverageClusterProtocol.StartupPollEnvironment,
                 (pollTicks / TicksPerMillisecond).ToString(CultureInfo.InvariantCulture));
     }
 

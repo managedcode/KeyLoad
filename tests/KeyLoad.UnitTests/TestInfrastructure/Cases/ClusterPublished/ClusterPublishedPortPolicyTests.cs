@@ -19,7 +19,7 @@ internal sealed class ClusterPublishedPortPolicyTests
     [Arguments(65533, false)]
     [Arguments(1, false)]
     [Arguments(5301, true)]
-    public async Task CentralSnapshotControlsEveryActualRf3Endpoint(int firstPort, bool ephemeral)
+    public async Task CentralSnapshotControlsEveryActualClusterEndpoint(int firstPort, bool ephemeral)
     {
         var builder = CreateBuilder();
         builder.Configuration[ClusterDeploymentOptions.FirstPublicPortKey] = firstPort.ToString(CultureInfo.InvariantCulture);
@@ -58,7 +58,7 @@ internal sealed class ClusterPublishedPortPolicyTests
     [Arguments(65534)]
     [Arguments(65535)]
     [Arguments(int.MaxValue)]
-    public async Task InvalidFullRf3RangeRejectsBeforeFilesOrResources(int firstPort)
+    public async Task InvalidFullClusterRangeRejectsBeforeFilesOrResources(int firstPort)
     {
         var builder = CreateBuilder();
         builder.Configuration[ClusterDeploymentOptions.FirstPublicPortKey] = firstPort.ToString(CultureInfo.InvariantCulture);

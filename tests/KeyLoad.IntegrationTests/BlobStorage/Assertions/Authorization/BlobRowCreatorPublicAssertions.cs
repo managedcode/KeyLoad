@@ -23,39 +23,39 @@ internal static class BlobRowCreatorPublicAssertions
         await healthy();
     }
 
-    internal static async Task ActiveAsync(RequestCqrsRf3Callers creator, BeginBlobUploadRequest begin,
+    internal static async Task ActiveAsync(RequestCqrsClusterCallers creator, BeginBlobUploadRequest begin,
         BlobUploadInfo expected, CancellationToken token)
     {
         var request = new BlobUploadInfoRequest(begin.Blob, begin.UploadId);
-        await SqlRf3Protocol.EqualAsync(expected, await PublicReadAssertions.UploadAsync(
+        await SqlClusterProtocol.EqualAsync(expected, await PublicReadAssertions.UploadAsync(
             await creator.Sdk.GetBlobUploadInfoAsync(request, token)));
-        await SqlRf3Protocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<BlobUploadInfoReadResult>(
+        await SqlClusterProtocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<BlobUploadInfoReadResult>(
             await creator.Mcp.CallAsync("keyload_blobs_upload_info", request, token))).Value.Upload);
         await Assert.That(await PublicReadAssertions.MetadataAsync(await creator.Sdk.GetBlobMetadataAsync(new(begin.Blob), token))).IsNull();
         await Assert.That((await McpCallerAssertions.SuccessAsync<BlobMetadataReadResult>(
             await creator.Mcp.CallAsync("keyload_blobs_metadata", new BlobMetadataRequest(begin.Blob), token))).Value.Metadata).IsNull();
     }
 
-    internal static async Task CurrentAsync(RequestCqrsRf3Callers caller,
+    internal static async Task CurrentAsync(RequestCqrsClusterCallers caller,
         BlobSupersessionPublicTrial.Version publication, CancellationToken token)
     {
         var metadata = publication.Completed.Value;
-        await SqlRf3Protocol.EqualAsync(metadata, await PublicReadAssertions.MetadataAsync(
+        await SqlClusterProtocol.EqualAsync(metadata, await PublicReadAssertions.MetadataAsync(
             await caller.Sdk.GetBlobMetadataAsync(new(metadata.Blob), token)));
-        await SqlRf3Protocol.EqualAsync(metadata, (await PublicReadAssertions.RequiredMetadataAsync(
+        await SqlClusterProtocol.EqualAsync(metadata, (await PublicReadAssertions.RequiredMetadataAsync(
             await caller.Mcp.CallAsync("keyload_blobs_metadata", new BlobMetadataRequest(metadata.Blob), token))).Value);
         foreach (var (offset, bytes) in new[] { (0L, BlobRowCreatorPublicPublication.Bytes), (metadata.Length, Array.Empty<byte>()) })
         {
             var request = new BlobReadRequest(metadata.Blob, metadata.Revision, offset, bytes.Length);
             var expected = new BlobReadResult(metadata, offset, bytes);
-            await SqlRf3Protocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(
+            await SqlClusterProtocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(
                 await caller.Sdk.ReadBlobRangeAsync(request, token)));
-            await SqlRf3Protocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<BlobReadResult>(
+            await SqlClusterProtocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<BlobReadResult>(
                 await caller.Mcp.CallAsync("keyload_blobs_read_range", request, token))).Value);
         }
     }
 
-    internal static async Task ReadDeniedAsync(RequestCqrsRf3Callers administrator, RequestCqrsRf3Callers other, RequestCqrsRf3Callers creator,
+    internal static async Task ReadDeniedAsync(RequestCqrsClusterCallers administrator, RequestCqrsClusterCallers other, RequestCqrsClusterCallers creator,
         string credential, string privateValue, BlobSupersessionPublicTrial.Version publication, CancellationToken token)
     {
         var metadata = publication.Completed.Value;
@@ -73,7 +73,7 @@ internal static class BlobRowCreatorPublicAssertions
         await BlobPublishedRowReadFenceAssertions.RunAsync(administrator, other, creator, credential, privateValue, publication, outbox, token);
     }
 
-    internal static async Task CreatorDeniedAsync(RequestCqrsRf3Callers other, RequestCqrsRf3Callers creator,
+    internal static async Task CreatorDeniedAsync(RequestCqrsClusterCallers other, RequestCqrsClusterCallers creator,
         string credential, string privateValue, BlobSupersessionPublicTrial.Version publication, CancellationToken token)
     {
         Func<Task> healthy = () => CurrentAsync(creator, publication, token);

@@ -3,7 +3,7 @@ using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.GraphTraversal;
 
-/// <summary>KL-023 / AC-GRAPH-003/004: elapsed time stops an admitted real traversal without partial success or writes.</summary>
+/// <summary>/ AC-GRAPH-003/004: elapsed time stops an admitted real traversal without partial success or writes.</summary>
 internal sealed class GraphTraversalDeadlineTests
 {
     private const string Orders = "deadline-orders";

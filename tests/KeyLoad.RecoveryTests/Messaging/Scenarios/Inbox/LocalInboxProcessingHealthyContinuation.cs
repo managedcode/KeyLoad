@@ -11,7 +11,6 @@ internal static class LocalInboxProcessingHealthyContinuation
     private const long OriginalLeaseVersion = 1L;
     private const long HealthyDocumentRevision = 1L;
     private const int InitialAttempt = 1;
-    private const int PlacementContractVersion = 1;
     private const int NextCommitPosition = 1;
     private const string DocumentKind = "putDocument";
     private const string AckKind = "Ack";
@@ -67,7 +66,7 @@ internal static class LocalInboxProcessingHealthyContinuation
     private static CommitToken NextToken(DatabaseEngine database, ZoneTreeStore store)
     {
         var placement = database.ReadAtomicPartitionPlacement(CrashFixtureValues.Principal,
-            new(PlacementContractVersion, LocalInboxProcessingCrashContract.Partition));
+            LocalInboxProcessingCrashContract.Partition);
         return new(placement.Incarnation, LocalInboxProcessingCrashContract.Partition.AtomicPartitionId,
             checked(store.Position + NextCommitPosition), placement.PlacementEpoch);
     }

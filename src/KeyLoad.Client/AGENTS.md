@@ -1,29 +1,28 @@
 # KeyLoad.Client
 
-## Purpose and entry points
+## Purpose, entry points and ownership
+
 - Owns the .NET SDK client surface used by applications connecting to KeyLoad.
 - Main entry points: `KeyLoadClient.cs` and `QueryExecution/Queries/KeyLoadQuery.cs`.
-
-## Ownership and boundaries
 - Client capabilities belong under `<SliceName>/` and the same-name `docs/Features/<SliceName>.md`; keep shared client composition separate from feature behavior.
-- The SDK owns request construction and response mapping, not trusted authorization, database persistence, replication, partition placement, or server-side validation. Credentials and authorization policy are database-owned; callers cannot assert roles.
-- Current flat client files are migration debt. Public API changes require contract review and caller-visible tests; do not hide dependency defects with SDK workarounds.
-
-## Commands and evidence
-- GitHub Actions solution build: `dotnet build KeyLoad.slnx --no-restore --configuration Release`.
-- Real client flow is invoked by `dotnet test --project tests/KeyLoad.IntegrationTests --no-build --no-restore --configuration Release` in `.github/workflows/ci.yml`; execute tests only in GitHub Actions.
-
-## Skills and protected risks
+- The SDK owns request construction and response mapping, not trusted authorization, database persistence, replication, or server-side validation. Credentials and authorization policy are database-owned; callers cannot assert roles.
 - Applicable skills: none installed; skill installation is prohibited by owner direction.
 - Preserve cancellation, disposal, transport errors and typed contracts. Keep secrets out of source and diagnostics; maintain central package pins and the no-lock-file policy.
 
-## Read-first and canonical slice ownership
-- Owns `QueryExecution/Transport/SqlClient.cs` unified SELECT/CALL transport under ADR-054 and `BlobStorage/` typed canonical lifecycle/range adapters under ADR-038. Preserve stable command IDs and classify interrupted CALL as potentially unknown writes.
-- Feature-owned `BlobClientExtensions` use the single assembly-internal Send transport and validate public client/request arguments before HTTP work; do not duplicate transport or evade aggregate type-size limits through partial declarations.
-- Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
-- `ClientApi` owns shared SDK transport and request/response infrastructure under `ClientApi/`, matching `docs/Features/ClientApi.md`.
-- Business SDK operations MUST mirror their owning business slice, including `DocumentStorage`, `EventStreams`, `Messaging`, `GraphTraversal`, `TimeSeries`, `Search`, `QueryExecution`, `Authorization` and `ChangeFeeds`, under `<same-business-SliceName>/` and its matching feature doc.
-- `KeyLoadClient.cs` and `QueryExecution/Queries/KeyLoadQuery.cs` are current entry points; shared transport belongs to `ClientApi`, while business behavior keeps the same canonical name as core, contracts, API and tests.
+## Boundaries and protected risks
 
-## Vertical-slice responsibility folders
-- Keep feature-owned implementation inside its canonical `<SliceName>/` and organize it in populated, feature-local responsibility folders (such as `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Transport/`, `Hosting/`, `Serialization/`, or `Validation/`). Do not leave a flat dump of unrelated responsibilities at the slice root; keep only genuinely shared building blocks and executable/composition entry points outside feature slices. Preserve namespaces and runtime contracts during physical moves.
+Follow the [root policy](../../AGENTS.md) and the owning feature specification. Keep changes in their actual owner, preserve unrelated work, and remove replaced code together with exclusive callers and fixtures. Use native Orleans calls for distributed execution and silo-local ZoneTree owners for files. Preserve persisted authorization, operation correctness, resource bounds, cancellation and joined shutdown. Never turn a static check or focused test into a claim of complete runtime qualification.
+
+## Commands and verification
+
+From the repository root:
+
+```sh
+dotnet build KeyLoad.slnx --no-restore --configuration Release -warnaserror
+```
+
+Use the root's complete solution, native TUnit, real process recovery and Aspire SDK/MCP gates as applicable. Local checks are development evidence; delivered-source qualification and public measurements require exact-source Linux GitHub artifacts. Do not weaken compiler, analyzer, source-identity, coverage or runtime assertions.
+
+## Skills
+
+Use the installed Orleans skill for Orleans design and the relevant installed formatting, Aspire or diagnostics skill when the task needs it. Follow explicit owner scope and dependency-adoption rules.

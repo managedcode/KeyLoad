@@ -6,7 +6,7 @@ namespace KeyLoad.IntegrationTests.Features.ResourceExecution;
 
 internal static class SlowBodyAdmissionReturnCounters
 {
-    internal static async Task<HttpAdmissionStatus> BaselineAsync(RequestCqrsRf3Callers root, CancellationToken token)
+    internal static async Task<HttpAdmissionStatus> BaselineAsync(RequestCqrsClusterCallers root, CancellationToken token)
     {
         while (true)
         {
@@ -19,7 +19,7 @@ internal static class SlowBodyAdmissionReturnCounters
             await Task.Delay(Poll, token);
         }
     }
-    internal static Task HeldAsync(RequestCqrsRf3Callers root, HttpAdmissionStatus baseline, int length, CancellationToken token)
+    internal static Task HeldAsync(RequestCqrsClusterCallers root, HttpAdmissionStatus baseline, int length, CancellationToken token)
         => ExactAsync(root, baseline with
         {
             Node = baseline.Node with
@@ -33,7 +33,7 @@ internal static class SlowBodyAdmissionReturnCounters
                 RetainedBytes = baseline.VerifiedScopes.RetainedBytes + EnvelopeBytes
             }
         }, token);
-    internal static async Task ExactAsync(RequestCqrsRf3Callers root, HttpAdmissionStatus expected, CancellationToken token)
+    internal static async Task ExactAsync(RequestCqrsClusterCallers root, HttpAdmissionStatus expected, CancellationToken token)
     {
         while (true)
         {
@@ -44,6 +44,6 @@ internal static class SlowBodyAdmissionReturnCounters
             await Task.Delay(Poll, token);
         }
     }
-    private static async Task<HttpAdmissionStatus> ReadAsync(RequestCqrsRf3Callers root, CancellationToken token)
+    private static async Task<HttpAdmissionStatus> ReadAsync(RequestCqrsClusterCallers root, CancellationToken token)
         => (await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.AdmissionStatusAsync(token))).Http!;
 }

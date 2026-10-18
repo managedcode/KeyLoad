@@ -5,11 +5,10 @@ internal static class NativeCommandObservationScope
 {
     internal static bool IsEligible(DecodedGrainRequest request)
         => request.Envelope.Purpose == GrainNativeContracts.RequestPurpose
-            && request.Envelope.CommandKind is OperationKind.ConfigurePlacementPolicy
-                or OperationKind.Batch or OperationKind.Receive or OperationKind.Delivery
+            && request.Envelope.CommandKind is OperationKind.Batch or OperationKind.Receive or OperationKind.Delivery
                 or OperationKind.Processing or OperationKind.CommitInbox or OperationKind.ConfigureResource
                 or OperationKind.CreateTable or OperationKind.SetQueueDispatch
-                or OperationKind.BootstrapPhysicalShardCatalog or OperationKind.BindAtomicPartitionPlacement
+                or OperationKind.BootstrapPhysicalShardCatalog
                 or OperationKind.RegisterPhysicalOwner or OperationKind.ConfigurePrincipal
                 or OperationKind.ConfigureApiKey or OperationKind.SetDispatch or OperationKind.RuntimeJournal
                 or OperationKind.ConfigureSubscription or OperationKind.SeekSubscription

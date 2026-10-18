@@ -12,7 +12,7 @@ public partial class DatabaseEngine
     private const string TypedJoinRecordMismatch = "The typed endpoint record has a different canonical identity.";
 
     private (string FromPrimaryKey, string ToPrimaryKey)? AuthorizeTypedEndpointJoin(IKeyValueView view, PrincipalRecord principal,
-        PartitionRef partition, QueueToGraph command, BatchResourceAdmission admission)
+        PartitionRef partition, QueueToGraph command)
     {
         if (command.FromCollection is null && command.ToCollection is null)
         {
@@ -23,17 +23,17 @@ public partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.Validation, TypedJoinRequiresRelationalCollections);
         }
-        var fromPrimaryKey = AuthorizeTypedEndpointResource(view, principal, partition, command.FromCollection, admission);
-        var toPrimaryKey = AuthorizeTypedEndpointResource(view, principal, partition, command.ToCollection, admission);
+        var fromPrimaryKey = AuthorizeTypedEndpointResource(view, principal, partition, command.FromCollection);
+        var toPrimaryKey = AuthorizeTypedEndpointResource(view, principal, partition, command.ToCollection);
         return (fromPrimaryKey, toPrimaryKey);
     }
 
     private string AuthorizeTypedEndpointResource(IKeyValueView view, PrincipalRecord principal,
-        PartitionRef partition, string collection, BatchResourceAdmission admission)
+        PartitionRef partition, string collection)
     {
         JsonData.Identifier(collection);
         Authorization.Require(principal, partition, collection, Capability.DocumentsRead);
-        var resource = BatchResource(view, partition, collection, admission, ResourceKind.Collection);
+        var resource = BatchResource(view, partition, collection, ResourceKind.Collection);
         if (resource.RelationalSchema is not { } schema)
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, TypedJoinRequiresRelationalCollections);

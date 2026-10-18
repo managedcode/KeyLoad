@@ -3,8 +3,8 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
 
-/// <summary>AC-MCP-005/007 and AC-DSTORE-001: real RF3 MCP and HTTP clients share canonical document outcomes.</summary>
-/// <param name="fixture">The initialized actual Docker/Aspire RF3 application.</param>
+/// <summary>AC-MCP-005/007 and AC-DSTORE-001: real CLUSTER MCP and HTTP clients share canonical document outcomes.</summary>
+/// <param name="fixture">The initialized actual Docker/Aspire CLUSTER application.</param>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class McpDocumentParityTests(ClusterFixture fixture)

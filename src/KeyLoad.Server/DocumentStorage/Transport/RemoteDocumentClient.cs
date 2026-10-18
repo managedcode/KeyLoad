@@ -1,5 +1,4 @@
 using KeyLoad.Clustering;
-using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
@@ -50,10 +49,6 @@ internal sealed class RemoteDocumentClient : IAsyncDisposable
 
     internal Task<ReadOnlyMemory<byte>> ReadLifetimeAsync(RemoteResourceLifetimeReadCallV2 call, CancellationToken token)
         => RemoteResourceLifetimeReadExchange.ReadAsync(this, options, membership, clock, call, token);
-
-    internal Task<ControlledBlobReadResult> ReadControlledBlobOutcomeV2Async(RemoteControlledBlobOutcomeCallV2 call,
-        CancellationToken token)
-        => RemoteControlledBlobOutcomeExchangeV2.ReadAsync(this, options, membership, clock, call, token);
 
     internal Task<KeyLoad.Server.Features.EventStreams.EventVectorAuthenticatedExchange> SendEventVectorAsync(
         RegisteredPhysicalOwnerV1 destination, KeyLoad.Server.Features.EventStreams.EventVectorRemoteCall originalCall,

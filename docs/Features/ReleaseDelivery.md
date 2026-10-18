@@ -2,22 +2,22 @@
 
 ## License distribution
 
-The owner's final decision on 2026-10-05 selects Elastic License 2.0 to permit
-application use while reserving third-party hosted/managed database services
-for separate authorization from ManagedCode, without automatic expiry.
+KeyLoad is licensed under Elastic License 2.0, which permits application use while
+reserving third-party hosted/managed database services for separate authorization
+from ManagedCode, without automatic expiry.
 [ADR-107](../ADR/ADR-107-elastic-license.md) owns the license and
 implementation contract; the complete root [LICENSE](../../LICENSE) is authoritative.
 
 | Requirement | Acceptance and pass/fail evidence |
 | --- | --- |
-| REQ-LIC-001 standard license | AC-LIC-001: the complete ELv2 body matches the authoritative published source byte-for-byte, with a separate KeyLoad/ManagedCode copyright and licensor header. The hosted/managed-service, license-key and notice-preservation limitations remain unchanged; no BSL Change Date, Apache conversion or GPL covenant remains. Exact standard-text comparison is the manual legal-text exception; absent or altered standard terms fail. |
-| REQ-LIC-002 accurate distribution metadata | AC-LIC-002: NuGet packs the actual root LICENSE as a file and dotnet publish copies it into server/CLI distribution roots; README identifies ELv2/source availability and site JSON-LD links to that license. Inspect an actual local package/publish output and built/source metadata; existing SiteMetadataTests retain the full actual-builder flow. An obsolete MIT/BSL declaration or missing license file fails. |
+| REQ-LIC-001 standard license | AC-LIC-001: the complete ELv2 body matches the authoritative published source byte-for-byte, with a separate KeyLoad/ManagedCode copyright and licensor header. The hosted/managed-service, license-key and notice-preservation limitations remain unchanged; the published terms are unchanged. Exact standard-text comparison is the manual legal-text exception; absent or altered standard terms fail. |
+| REQ-LIC-002 accurate distribution metadata | AC-LIC-002: NuGet packs the actual root LICENSE as a file and dotnet publish copies it into server/CLI distribution roots; README identifies ELv2/source availability and site JSON-LD links to that license. Inspect an actual local package/publish output and built/source metadata; existing SiteMetadataTests retain the full actual-builder flow. A conflicting license declaration or missing license file fails. |
 | REQ-LIC-003 preserve independent licenses | AC-LIC-003: third-party license notices and vendored Three.js bytes remain unchanged. Review the scoped diff and original vendor manifest hashes; no dependency relicensing or runtime/storage changes are permitted. |
 
-TASK-LIC-001 freezes the contract, TASK-LIC-002 updates the license/metadata and
-existing site assertions, and TASK-LIC-003 checks exact text, package output,
-governance and the final canonical solution build. Runtime replicated-cluster, coverage and
-performance gates remain unchanged; license metadata does not qualify the database.
+The license, metadata and site assertions are updated together; exact text, package
+output, governance and the final canonical solution build are checked. Runtime
+replicated-cluster, coverage and performance gates remain unchanged; license metadata
+does not qualify the database.
 
 ```mermaid
 flowchart LR
@@ -27,7 +27,7 @@ flowchart LR
     License --> Commercial[Separate authorization for hosted database services]
 ```
 
-The owner requires four workflows (Build and Tests, Benchmarks, Website and Release)
+Delivery uses four workflows (Build and Tests, Benchmarks, Website and Release)
 and a real dated database release. ADR-112 owns the separate Website boundary. The immutable
 version/tag is `v<major>.<minor>.<yyMMdd>.<daily-build>`; major/minor come from central
 source configuration, UTC defines the date, and the positive daily sequence is
@@ -95,5 +95,4 @@ missing credentials or incomplete artifacts fail without force or overwrite.
 
 No NuGet feed publication or version-bump commit is included. The requested NuGet
 files are real GitHub Release assets. Site publication authenticates the current
-benchmark run/attempt/SHA, independently preserves the required genuine historical
-archive, and retains every existing test/browser/coverage/freshness gate.
+benchmark run/attempt/SHA, independently preserves the required genuine archive, and retains every existing test/browser/coverage/freshness gate.

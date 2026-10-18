@@ -5,7 +5,7 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 internal sealed class SqlJoinAliasCollisionTests
 {
     [Test]
-    public async Task AcKl095RightAliasCollisionRefusesWithoutEffectsThenLeftPredicateReplaysAcrossTwoColdCuts()
+    public async Task RightAliasCollisionRefusesWithoutEffectsThenLeftPredicateReplaysAcrossTwoColdCuts()
     {
         var failures = new List<Exception>();
         try

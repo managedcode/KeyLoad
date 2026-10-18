@@ -1,218 +1,69 @@
 # RelationalStorage
 
 Status: Typed-row and first Q2 join source present; local operation evidence
-recorded below, complete original Linux/RF3 qualification pending.
-Owner direction2026-10-02 requires relational data within one linked AI database.
+recorded below, complete original Linux/cluster qualification pending.
+Relational data lives within one linked AI database.
 [ADR-055](../ADR/ADR-055-typed-relational-rows.md) owns the typed-row stage;
 [ADR-054](../ADR/ADR-054-central-sql.md) owns central SQL.
 
 | Requirement | Acceptance | Test/task/evidence |
 |---|---|---|
-| REQ-REL-001: bounded persisted column schema and primary entity identity | AC-AISQL-002/003 | TASK-AISQL-005/008, real ZoneTree schema/row tests + RF3 |
-| REQ-REL-002: native unique/revision/security checks and mixed-model atomicity | AC-AISQL-004 | TASK-AISQL-005/008 transactional negative/rollback/reopen tests |
-| REQ-REL-003: typed rows share canonical query/graph/vector/workflow identity | AC-AISQL-004/006 | SDK/MCP/SQL RF3 linked rows and real-store linkage tests |
+| REQ-REL-001: bounded persisted column schema and primary entity identity | AC-AISQL-002/003 | Real ZoneTree schema/row tests + replicated-cluster tests |
+| REQ-REL-002: native unique/revision/security checks and mixed-model atomicity | AC-AISQL-004 | Transactional negative/rollback/reopen tests |
+| REQ-REL-003: typed rows share canonical query/graph/vector/workflow identity | AC-AISQL-004/006 | SDK/MCP/SQL cluster linked rows and real-store linkage tests |
 | REQ-REL-004: bounded joins and relational FK/check/default/cascade semantics | AC-REL-004: explicit future contract + real atomicity/authorization/budget/fault tests before capability advertisement | PLANNED subsequent ADR/stage; not satisfied by typed rows |
-| REQ-REL-005: native indexed correctness and comparable RF3 performance | AC-AISQL-008/009/010 | Exact-SHA GitHub qualification and future dedicated table/CALL measurements; no inferred speed result |
-
-Canonical map: Abstractions/Features/RelationalStorage/ schema contracts;
-Core/Features/RelationalStorage/ validation; UnitTests/Features/RelationalStorage/;
-IntegrationTests/Features/RelationalStorage/. Existing document mutation/query
-transport owns row CRUD/read; SQL and protocol adapters stay QueryExecution.
-UI: N/A in this stage, existing generic resource console remains read-only.
-Storage: N/A new engine; reuse canonical document/index/journal/replica storage.
-Per-project policy is read before implementation; root owns shared joins.
+| REQ-REL-005: native indexed correctness and comparable cluster performance | AC-AISQL-008/009/010 | Exact-SHA GitHub qualification and future dedicated table/CALL measurements; no inferred speed result |
 
 ```mermaid
 sequenceDiagram
-    participant Caller as SQL SDK MCP caller
-    participant Gate as Atomic command gate
-    participant Table as Typed row validator
-    participant Store as Canonical entity and native indexes
-    Caller->>Gate: Existing mutation with stable CommandId
-    Gate->>Table: Validate final PUT or PATCH row
-    Table-->>Gate: Valid typed row or constraint error
-    Gate->>Store: Atomic row indexes events queue effects
-    Store-->>Caller: Same commit receipt or whole batch rollback
+ participant Caller as SQL SDK MCP caller
+ participant Gate as Atomic command gate
+ participant Table as Typed row validator
+ participant Store as Canonical entity and native indexes
+ Caller->>Gate: Existing mutation with stable CommandId
+ Gate->>Table: Validate final PUT or PATCH row
+ Table-->>Gate: Valid typed row or constraint error
+ Gate->>Store: Atomic row indexes events queue effects
+ Store-->>Caller: Same commit receipt or whole batch rollback
 ```
 
 Exact pass/fail, positive/negative/edge/error/type/null/current-format rejection/rollback and
 test methodology are canonical in [SQL acceptance](QueryExecution.md)
 and [execution contract](QueryExecution.md). Rows require current persisted authority;
 schema constraints are not row-level grants. Local compile/runtime checks are
-development evidence under the owner's latest root policy; original Linux
+development evidence under the root policy; original Linux
 qualification, coverage/endurance/power-loss and remaining JOIN/FK gates stay explicit.
 
-
-TASK-REL-004-INNER-JOIN-001..006 is accepted for the first bounded same-partition
-Text primary-key INNER equijoin under REQ-REL-004. [ADR-118](../ADR/ADR-118-bounded-relational-inner-join.md)
-freezes Q2/AST2 grammar, exact source identity/projection, authorization, single
-read-cut, cumulative scan/probe/byte/result/cancellation limits, exact paths and
-whole-operation native/RF3 tests before implementation. AC-REL-004-JOIN-001..006
-map there to parser/version execution, native ZoneTree results/reopen, persisted
-resource/row/field authority, boundary/error/healthy-follow-up flows and real
-SDK/official-MCP RF3. Existing typed-row and mixed-model requirements remain
-mandatory; arbitrary joins, FK/check/default/cascade, full SQL and client protocol
-remain open. Source for this operator is joined; public RF3/Linux qualification
-is pending. UI N/A:
-existing SQL/SDK/MCP callers expose the operation; storage engine/format N/A:
-reuse canonical ZoneTree rows under the existing node-local RF3 owner.
-
-TASK-REL-004-INNER-JOIN-007 maps AC-REL-004-JOIN-004/006 to three real RF3
-SDK/official-MCP budget-error, unchanged-source-state and healthy-follow-up
-flows. The additive test-only typed fixture configuration and exact ownership
-are frozen in ADR-118 before implementation. Exact arithmetic stays in the real
-native unit flows; no test hook or production limit is added. Source for these
-cases is joined; actual SDK/official-MCP RF3 and original Linux evidence remain
-pending.
-
-Stage VII R290 full Release and R294 native formatter pass. The R291/R292
-owning normal/scalar cohorts each pass 606/606, including actual typed rows,
-bounded joins, persisted authority/redaction, work/byte/cancellation/reopen and
-the admitted primary-key/source_revision literal SQL/AST regression. R293 real
-indexed/idempotency process recovery passes 2/2. Every cohort retains original
-source/DLL/PDB and report hashes with zero drift/skips in the
-[status tracker](../implementation/status.json). These local subsets do not
-close REQ-REL-004: complete negative-form execution, admitted RF3 cancellation,
-fresh public RF3/Linux, arbitrary joins, FK/check/default/cascade and full SQL
-remain required.
-
-
-TASK-REL-004-INNER-JOIN-011 corrects actual RF3 setup under existing AC-REL-004-JOIN-001..006 and AC-QUERY-007-JOIN-001. Authentic Linux run37612238705 attempt1 / SHA24c0ac47 retains seven Q2 failed operations: six report Validation at the added typed-resource Configure CALL, while JoinedPageByteBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp separately fails node2 startup. Do not relabel the startup failure as a schema failure or claim this source change fixes it.
-
-Freeze before implementation: every ResourcesConfigure SQL CALL is a canonical header command whose parameter envelope must contain exactly request and a nonempty caller-owned commandId. The five new configure helper/case call sites omitted commandId, unlike the existing RelationalSqlRf3Scenario configuration. SqlOperationCompiler forwards that envelope to McpArgumentDecoder.HeaderCommand; ValidateKeys rejects its one-field shape with Validation and “The tool arguments do not match the canonical operation contract.” before request/schema decoding or any dispatch. The original reports expose Validation only; this precise detail/path is a source finding, not invented runtime observation. Current RelationalSchemaRules explicitly permits id when it is the primary key, so no schema admission rule changes.
-
-Each affected configure CALL must supply one fresh Guid.NewGuid() as its original stable outer commandId argument, using the existing SqlRf3Protocol.Call composition. Preserve all typed columns, schemas, seed/source/literal pages, cumulative budget numbers, read-cut writers and every original awaited SDK/official MCP authorization/cancellation/no-effect/healthy-followup oracle. No production fallback/generated server identity, retry, tolerance or topology change is allowed. Integration RelationalStorage owns the five exact files RelationalSqlRf3JoinBudgetData.cs, RelationalSqlRf3JoinTests.cs, RelationalSqlRf3JoinAuthorizationTests.cs, RelationalSqlRf3JoinCancellationTests.cs and RelationalSqlRf3JoinReadCutTests.cs. Root joins guarded source, compiles and executes the seven owning native cases plus unchanged qualification gates; source correction alone is unexecuted and cannot close public RF3 or Linux acceptance. Rollback restores only these caller arguments; no wire/storage migration or new dependency.
-
-## Explicit public Q2 rejection RF3 selection
-
-TASK-REL-004-INNER-JOIN-PUBLIC-012-SELECTOR maps AC-REL-004-JOIN-001/003/005
-and AC-QUERY-007-JOIN-001 to REQ/AC-TEST-015 and REQ/AC-TUNIT-ENTRY-006 under
-ADR-118/119. Native local-image selection additionally admits exactly:
-
-    /*/*/RelationalSqlRf3JoinRejectionTests/*
-
-This selects the existing12 Arguments of
-RejectedJoinOnFourPublicPathsPreservesRowsAndCompleteHealthyPage. Preserve the
-byte-exact standard8 and six-silo1 selectors. Wildcard class names, method-only
-subsets, combined classes, unsupported/mixed/inherited image configuration and
-GitHub provenance reject; no default selector or tool catalog expands. Both the
-native selector and fixture's closed argument reader must admit this exact
-additional selector before preparation. The existing actual Node selection
-workflow tests positive original TUnit/filter/environment propagation and every
-existing rejection for all three selectors, plus four public12 near-miss filters
-with the exact safe local-selection error. This is infrastructure evidence only.
-
-Sol owns selector/argument admission and native selection regressions; SolNative
-owns the independent public12 helper commandId correction. Every SQL CALL
-configuration command carries its required outer canonical commandId for
-that operation under the existing stable command identity contract.
-Root joins the canonical independent R3 public12 packet and this selector and
-runs all12 complete rejection operations through real SDK query/SQL and official
-MCP query/SQL on the same existing owned RF3 fixture, preserving literal full
-row identity/JSON/revision, no disclosure and complete healthy follow-up. Keep
-original image/source verification, readiness, cancellation, process/reader
-joining, locks and exact-tag cleanup. No provider, public API, storage format,
-SQL language claim, default policy or qualification gate changes. Native
-normal/scalar selection proof, actual12 RF3 reports and original Linux delivery
-remain pending until executed; neither this selector nor source review closes
-full SQL or SQL-client protocol conformance. Rollback removes this additional
-selector and its assertions as one unit.
-
-
-## RF3 join authorization fixture policy update
-
-TASK-REL-004-INNER-JOIN-AUTH-POLICY-EPOCH-001 refines existing AC-REL-004-JOIN-003/005 and AC-QUERY-007-JOIN-001 under ADR-118 and Authorization REQ-AUTH-001/006/007. Original local R333 executed8 cases with7Passed/1Failed,381seconds and zero4217-source/896-image drift. The failed RightResourceAndJoinFieldUseDenialsHaveNoEffectsAndHealthyCallersStillRead stops at CreateIdentityAsync's ConfigurePrincipalAsync with RevisionConflict; its later denial/state/healthy oracles are not runtime-qualified. Keep its original receipt/log/TRX unchanged.
-
-Freeze before implementation: McpPersistedIdentity.CreateAsync already persists the fresh principal at canonical PolicyEpoch1 and its credential. Adding the right-side scope grant is a real update to that same persisted principal, so ExecuteConfigurePrincipal requires its new epoch to be strictly greater. Configuring changed grants at epoch1 correctly fails RevisionConflict. The owning fixture must assert actual initial epoch1, submit the existing one original configure command with exact epoch2 and unchanged identity/credential, then assert the complete returned principal matches the requested record and its exact epoch2. Do not alter epoch admission, generate a replacement principal/credential, retry, or treat RevisionConflict as success.
-
-Integration RelationalStorage owns only RelationalSqlRf3JoinAuthorizationTests.CreateIdentityAsync and its epoch constants. Keep both independent limited/missing-use identities, all four real SDK/officialMCP query paths, exact PermissionDenied/no-disclosure, literal healthy joined page/source/revisions, unchanged left/right document bytes and before/after pages. Existing RightResourceAndJoinFieldUseDenialsHaveNoEffectsAndHealthyCallersStillRead is the whole-operation regression. Root owns guarded join, formatting/build and fresh actual RF3 execution; no source review closes RF3/Linux acceptance. Existing ADR-118 is sufficient because this corrects caller setup under the unchanged persisted policy contract, with no public/storage/topology/dependency change. Rollback removes only the fixture correction and this task note; original failures remain retained.
-
-
-## TASK-REL-UNIQUE-ROLLBACK-REPLAY-COLD-001
+## Rel unique rollback replay cold
 
 REQ-REL-002 / AC-AISQL-004 under ADR055 extend SAME AcAisql004PatchConflictAndDeleteRetainNativeUniqueAndRevisionContract after all original conflict, stale revision, delete and unique-name reuse assertions. This typed-row stage does not claim foreign keys/defaults/cascades/arbitrary joins/full SQL.
 
-Original canonical state is first deleted, second revision2/namealpha/count1. A genuine Batch first stages second's count1→2 PATCH at expectedrevision2, then tries absent third row with occupied unique alpha. Exact Conflict has no successful receipt/private row; full indexed literal second row, missing third, deleted first and complete OutboxStatus remain unchanged. A definitive first rejection may persist its original failed outcome/clock; do not assert nonexistent global pre-failure byte equality. Capture complete bounded native key/value image and physical position AFTER that original failure. Retry same exact command/time returns complete original OperationResult and changes no native byte/position.
+## Rel join admitted cancel full state
 
-Corrected fresh command retains original PATCH and inserts third/namegamma under the SAME real unique index. Require independent complete mutation receipts patchDocument/second/revision3 + putDocument/third/revision1, native ProcessDurable, exact original commandId and real original receipt token. Full indexed alpha page is second/revision3 with independently literal canonical PATCH JSON including all typed values; gamma page is third/revision1 with exact original literal PUT JSON. Full authorized query returns those two literal rows, null cursor and actual current local cut. Same-ID full receipt replay retains all native bytes/position; original failed command still returns its original Conflict after healthy state changed, with no effects.
+REQ-REL-004 / AC-REL-004-JOIN-004/006 admitted native cancellation: preserve the original SqlInnerJoinCancellationTests.AcJoinCancellationAfterNativeRangeProgressSettlesTheOriginalReadAndKeepsTheStoreHealthy declaration and its genuine ZoneTree RangeExaminedBytes seam. Capture the complete bounded native key/value image, physical position and serialized store identity BEFORE taking the native-progress baseline. Cancellation occurs only after the actual original query has admitted and increased native range work. Await the same original operation task and require OperationCanceledException carrying its original token; before any healthy continuation, independently require unchanged full image, position and identity. The same QueryEngine then executes both SQL and independently constructed AST against the original cut, with literal full ordered page JSON, IDs/revisions, source aliases/IDs/revisions, empty redaction metadata, null cursor and native join access path. Repeat full no-effect checks after both operations. Existing pre-cancelled SDK/MCP cluster case is retained as a separate control and does not qualify admitted Docker cluster cancellation. No product observer, protocol, provider, timeout, default, quota or storage change. Native preview is not compilation/runtime/Linux acceptance.
 
-Join original store, same-directory native reopen with original validated options and configured factory, exact NodeId/incarnation/nondecreasing ReadGeneration/full native bytes/physical cut. Reuse both exact original commands/time: old failed result and healthy full receipt remain byte-equal without new domain effects/outcome writes. Full typed SQL indexed rows remain independently literal. Then genuine revision3→4 PATCH of second count2→3 proves cold write health and produces new independent patchDocument receipt, original new-ID replay and complete final SQL rows/outbox horizon; cold store joins before original fixture cleanup. Retain initiating and cleanup failures with original observer/lexical store ownership.
+## Rel join cluster admitted cancellation
 
-No product/API/serializer/format/limits/deadline/trust/provider change; no migration/fallback/source-oracle expectation. Core atomic gate remains authoritative. Native checkOnly + pernewpath NS/reconstruction are source only. Exact original Unit method/UID/deadline unchanged; required normal SIMD native50 compilation/formatter/analyzers/fresh discovery/runtime and Linux/process/RF3/coverage gates remain OPEN.
+AC-REL-004-JOIN-004/006 and AC-QUERY-007-JOIN-002 retain the original pre-cancelled RelationalSqlClusterJoinCancellationTests member as a separate control. A distinct four-case whole operation with two Boolean arguments uses the existing Aspire-owned RequestCqrsClusterWave.StartProbedAsync current-image cluster lane and genuine SDK/official MCP SQL and independently constructed AST callers. The private bounded AuthorizationReload hold follows the actual ReadCapability admission and cluster read barrier, before the fresh persisted principal reload. It proves genuine admitted-operation cancellation only; it does not prove Q2 native row progress. The independent original SqlInnerJoinCancellationTests native RangeExaminedBytes scenario owns row-progress cancellation evidence.
 
+## Rel join retained identity
 
-## TASK-REL-JOIN-ADMITTED-CANCEL-FULL-STATE-001
-
-REQ-REL-004 / AC-REL-004-JOIN-004/006 admitted native cancellation: preserve the original SqlInnerJoinCancellationTests.AcJoinCancellationAfterNativeRangeProgressSettlesTheOriginalReadAndKeepsTheStoreHealthy declaration and its genuine ZoneTree RangeExaminedBytes seam. Capture the complete bounded native key/value image, physical position and serialized store identity BEFORE taking the native-progress baseline. Cancellation occurs only after the actual original query has admitted and increased native range work. Await the same original operation task and require OperationCanceledException carrying its original token; before any healthy continuation, independently require unchanged full image, position and identity. The same QueryEngine then executes both SQL and independently constructed AST against the original cut, with literal full ordered page JSON, IDs/revisions, source aliases/IDs/revisions, empty redaction metadata, null cursor and native join access path. Repeat full no-effect checks after both operations. Existing pre-cancelled SDK/MCP RF3 case is retained as a separate control and does not qualify admitted Docker RF3 cancellation. No product observer, protocol, provider, timeout, default, quota or storage change. Native preview is not compilation/runtime/Linux acceptance.
-
-## TASK-REL-JOIN-RF3-ADMITTED-CANCELLATION-001
-
-AC-REL-004-JOIN-004/006 and AC-QUERY-007-JOIN-002 retain the original pre-cancelled RelationalSqlRf3JoinCancellationTests member as a separate control. A distinct four-case whole operation with two Boolean arguments uses the existing Aspire-owned RequestCqrsRf3Wave.StartProbedAsync current-image RF3 lane and genuine SDK/official MCP SQL and independently constructed AST callers. The private bounded AuthorizationReload hold follows the actual ReadCapability admission and RF3 read barrier, before the fresh persisted principal reload. It proves genuine admitted-operation cancellation only; it does not prove Q2 native row progress. The independent original SqlInnerJoinCancellationTests native RangeExaminedBytes scenario owns row-progress cancellation evidence.
-
-After persisted scoped identity, both declared Text-primary-key schemas and genuine seeded rows, retain the original public task and initially live caller token. Require a validated AuthorizationReload/Observed marker from current signed discovery before cancelling that original token. Require AuthorizationReload/Cancelled and ProducerDisposed/Observed for the same session, arm, original signed request ID, empty read command ID, voter, silo and retained native identity; await the original public task, then retire its arm. SDK must return its existing safe Cancelled failure without a page; official MCP must interrupt with OperationCanceledException without a result. The original 20-second McpCallerDeadline and existing startup, hold and cleanup ceilings remain unchanged. No artificial pause, retry, fake producer, public endpoint/counter, Q2 instrumentation, local-image admission change or protocol change is introduced.
-
-Before and after each original cancellation, compare complete caller-visible source document records and outbox state, original complete joined page and cut. Fresh independently constructed SQL and AST operations through both SDK and official MCP must return the complete independent literal page: ordered output JSON, row IDs/revisions, both source aliases/IDs/revisions, redaction metadata, null cursor, unchanged original cut and native join access path. Preserve fresh persisted authentication/permissions. Always join cancelled tasks, held callbacks and original producers; cancel/release only still-open arms, dispose original clients, join all Aspire resources and observers, then dispose controls and delete the owned root only after successful joins. Preserve primary and cleanup failures and original evidence. Native source preview and local development proof do not qualify Linux RF3 acceptance or full SQL/KL075.
-
-## TASK-REL-JOIN-RETAINED-IDENTITY-001
-
-REQ-REL-001/003, AC-REL-004-JOIN-002/003/006 and AC-QUERY-007-JOIN-002 use the [canonical Q2 observed-identity acceptance contract](QueryExecution.md#task-rel-join-retained-identity-001). Its complete real-store SQL/AST regression covers six native faults, full no-effect images, exact repair and two dirty plus two healthy cold continuations, preserving the original read cut, authorization, budgets and receipt. Source is implemented; required compiler, runtime, Linux and RF3 gates remain open.
+REQ-REL-001/003, AC-REL-004-JOIN-002/003/006 and AC-QUERY-007-JOIN-002 use the [canonical Q2 observed-identity acceptance contract](QueryExecution.md). Its complete real-store SQL/AST regression covers six native faults, full no-effect images, exact repair and two dirty plus two healthy cold continuations, preserving the original read cut, authorization, budgets and receipt. Source is implemented; required compiler, runtime, Linux and cluster gates remain open.
 
 REQ-REL-001/003 and ADR055 require existing typed primary JSON values to equal canonical entity identity. The next finite Q2 source packet is owned by SqlInnerJoinPrimaryIdentityTests, with ten real native retained-row faults including malformed/non-object JSON, full read refusal/no-effects/repair/receipt/two-dirty and two-healthy cold operations under the canonical QueryExecution contract. Schema evolution remains unsupported; ACL, deleted rows, unread right probes, write constraints and shared budgets retain their existing contracts. Source implementation joined; execution pending.
 
-## TASK-REL-RETAINED-PRIMARY-UNIQUENESS-001
+## Rel retained primary uniqueness
 
-REQ-REL-001/003 and ADR-055 require one declared Text primary property, not a last-wins duplicate, in retained typed identities. Canonical row write validation already requires unique property names; Q2 retained reads and authorized typed composition endpoint reads now enforce primary uniqueness with the existing Corruption category. Full remaining schema validation/evolution is unchanged. SqlInnerJoinPrimaryIdentityTests and TypedQueueGraphPrimaryIdentityTests retain genuine raw fault/repair, original operation/receipt identity, literal healthy operations, no-effects and dirty/healthy cold ownership. Their canonical criteria are [QueryExecution](QueryExecution.md#task-rel-join-retained-primary-uniqueness-001) and [DatabaseComposition](DatabaseComposition.md#task-kl095-retained-primary-uniqueness-001). Source implementation requires fresh native and delivered Linux qualification.
+REQ-REL-001/003 and ADR-055 require one declared Text primary property, not a last-wins duplicate, in retained typed identities. Canonical row write validation already requires unique property names; Q2 retained reads and authorized typed composition endpoint reads now enforce primary uniqueness with the existing Corruption category. Full remaining schema validation/evolution is unchanged. SqlInnerJoinPrimaryIdentityTests and TypedQueueGraphPrimaryIdentityTests retain genuine raw fault/repair, original operation/receipt identity, literal healthy operations, no-effects and dirty/healthy cold ownership. Their canonical criteria are [QueryExecution](QueryExecution.md) and [DatabaseComposition](DatabaseComposition.md). Source implementation requires fresh native and delivered Linux qualification.
 
-## TASK-KL046-CREATE-ONLY-IDENTITY-001
+## Create only identity
 
-REQ-SQLC-006 / AC-SQLC-006, REQ-REL-001/003 and AC-TSQL-003/006 use the [canonical bounded CREATE TABLE contract](RelationalStorage/CreateTable.md) and [ADR-132](../ADR/ADR-132-native-create-table-command-identity.md). They define supported schemas, caller-stable command identity, atomic create-only outcomes, the bounded one-shot native session bridge and complete real-store/public RF3 test flows. Full DDL, ordinary SQL row INSERT and complete SQL/client qualification remain open; native source admission does not satisfy those gates.
+REQ-SQLC-006 / AC-SQLC-006, REQ-REL-001/003 and AC-TSQL-003/006 use the [canonical bounded CREATE TABLE contract](RelationalStorage/CreateTable.md) and [ADR-132](../ADR/ADR-132-native-create-table-command-identity.md). They define supported schemas, caller-stable command identity, atomic create-only outcomes, the bounded one-shot native session bridge and complete real-store/public cluster test flows. Full DDL, ordinary SQL row INSERT and complete SQL/client qualification remain open; native source admission does not satisfy those gates.
 
-## TASK-KL046-ORDINARY-TYPED-INSERT-001
+## Ordinary typed insert
 
 REQ-SQLC-006 / AC-SQLC-006, REQ-REL-001/003 and AC-TSQL-003/006 use the [canonical ordinary typed INSERT contract](RelationalStorage/OrdinarySqlInsert.md). It defines bounded VALUES/parameter lowering, original command identity, current atomic create-only authority and complete native/public cold operation gates. General DML/full SQL and Linux/client qualification remain open.
 
 ## Original public Q2 admission cancellation on selected T-SQL
 
-AC-REL-004-JOIN-005/006 and AC-QUERY-007-JOIN-001 retain all four original SDK/official MCP and SQL/AST variants of `RelationalSqlRf3JoinAdmittedCancellationTests.SdkAndOfficialMcpQ2CancellationAfterActualAdmissionSettlesAndContinuesAtTheOriginalCut`. The shared admission seed still used retired `LIMIT 10`. Translate only its complete Q2 join SQL to native `TOP(10)` and quote the same `key` identifier; preserve all projected aliases, join keys, ordering, the independently constructed AST, data, current permissions, original GUID/receipt and literal pages.
-
-The public SQL route uses `SqlOperationCompiler.Compile` with null positional parameter count. Its accepted SELECT is decoded through QueryExecute, whose canonical descriptor retains GrainReadKind.Query; both HTTP SDK and MCP forward that kind through the canonical signed request construction. Explicit public AST still uses AstQuery. The original conditional hold arm therefore remains `ast ? AstQuery : Query`. Native-session SELECT has its separately frozen AstQuery lowering and must not be substituted for this public route.
-
-Original actual AuthorizationReload observation, uncompleted original caller, full no-effects source/outbox checks, original-token cancellation, Cancelled marker, ProducerDisposed marker, original task join, arm retirement and healthy continuation at the original cut are unchanged. Preserve all existing primary/cleanup failures, fixed deadlines and fixture ownership. This caller correction does not prove a current runtime initiating cause or qualification. Actual source adoption, compiler, all four original RF3 variants and exact-source Linux evidence remain required. No cold or physical-memory acceptance is newly claimed by this literal change.
-
-
-## Original JOIN authorization control uses current bounded T-SQL
-
-TASK-REL-JOIN-AUTH-CURRENT-TSQL-001 under REQ-REL-004,
-AC-REL-004-JOIN-002/003/006 and REQ/AC-AUTH-005/006 preserves the original
-RightResourceAndJoinFieldUseDenialsHaveNoEffectsAndHealthyCallersStillRead Case.
-Its single administrator/limited-reader shared QueryText must use
-SELECT TOP (10) instead of retired LIMIT10 before it can qualify authorization.
-The same complete projection (order_key/customer_name/customer_id), source
-collections/aliases, INNER JOIN l.title = r.id, ascending l.key ordering,
-QueryDialectVersion2, AllowFullScan and ten-row bound remain unchanged.
-
-The direct SDK query, unified SDK SQL and both official MCP paths retain their
-complete source/reference/revision/JSON checks; both separately persisted
-limited-right-resource and missing-field-use identities still require exact
-PermissionDenied. Complete left/right document equality, before/after joined
-pages, private-customer exclusion, native request IDs, caller ownership and
-original deadline remain unchanged. This changes only one fixture query,
-not product authorization, epoch/cursor handling, parser, typed INSERT or grants.
-
-Original source319c/run38578269537 attempt1 KL065 fails administrator SDK
-QueryAsync at ReadAdministratorPagesAsync144 before the denied requests.
-The actual current QueryText contains retired LIMIT10. The source correction
-retains the same original Case/arguments and is not a passing RF3/runtime claim.
-Fresh native admission, compiler and exact-source Linux original whole-flow
-qualification remain pending authentic results. No new Case or cold cycle
-is added; all original lifecycle and complete public observation checks remain.
-
-```mermaid
-flowchart LR
-    A[Valid bounded joined query] --> B[Complete administrator page on four routes]
-    B --> C[Exact right-resource and field-use denials]
-    C --> D[Unchanged left/right state and complete healthy pages]
-```
-
-Canonical slice RelationalStorage; ADR118 bounded relational join applies.
-Frontend, package and storage-format changes: N/A.
+AC-REL-004-JOIN-005/006 and AC-QUERY-007-JOIN-001 retain all four original SDK/official MCP and SQL/AST variants of `RelationalSqlClusterJoinAdmittedCancellationTests.SdkAndOfficialMcpQ2CancellationAfterActualAdmissionSettlesAndContinuesAtTheOriginalCut`. The shared admission seed still used retired `LIMIT 10`.

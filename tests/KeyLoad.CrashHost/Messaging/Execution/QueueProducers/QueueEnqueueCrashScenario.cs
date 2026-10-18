@@ -24,7 +24,7 @@ internal static class QueueEnqueueCrashScenario
                     QueueEnqueueCrashProtocol.Headers, NotBefore: due)]);
         var operation = database.NormalizeOperation(CrashDatabase.Operation(OperationKind.Batch, command, command.CommandId));
         var placement = database.ReadAtomicPartitionPlacement(CrashFixtureValues.Principal,
-            new(QueueEnqueueCrashProtocol.PlacementVersion, QueueEnqueueCrashProtocol.Partition));
+            QueueEnqueueCrashProtocol.Partition);
         var target = new CommitToken(placement.Incarnation, QueueEnqueueCrashProtocol.Partition.AtomicPartitionId,
             checked(store.Position + QueueEnqueueCrashProtocol.AdjacentPosition), placement.PlacementEpoch);
         await File.WriteAllBytesAsync(Path.Combine(directory, QueueEnqueueCrashProtocol.OperationFile), NativeSerialization.Serialize(operation));

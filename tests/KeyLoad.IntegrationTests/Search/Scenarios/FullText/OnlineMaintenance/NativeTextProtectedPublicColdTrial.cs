@@ -32,36 +32,36 @@ internal static class NativeTextProtectedPublicColdTrial
         }, token);
     }
 
-    private static Task<T> AdminAsync<T>(ClusterFixture fixture, Func<RequestCqrsRf3Callers, Task<T>> operation,
-        CancellationToken token) => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
+    private static Task<T> AdminAsync<T>(ClusterFixture fixture, Func<RequestCqrsClusterCallers, Task<T>> operation,
+        CancellationToken token) => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
             fixture.AdminKey, operation, token);
 
-    private static async Task PolicyAsync(RequestCqrsRf3Callers administrator,
+    private static async Task PolicyAsync(RequestCqrsClusterCallers administrator,
         NativeTextProtectedPublicColdState state, bool allowed, long epoch, CancellationToken token)
     {
         var expected = state.Identity.Principal with
         {
             PolicyEpoch = epoch,
             FieldGrants = allowed ? state.Identity.Principal.FieldGrants
-                : state.Identity.Principal.FieldGrants.Remove(NativeTextRf3Scenario.TextUseGrant)
+                : state.Identity.Principal.FieldGrants.Remove(NativeTextClusterScenario.TextUseGrant)
         };
         var actual = await McpCallerAssertions.SdkSuccessAsync(
             await administrator.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), expected, token));
-        await SqlRf3Protocol.EqualAsync(expected, actual);
+        await SqlClusterProtocol.EqualAsync(expected, actual);
     }
 
-    private static Task<bool> DeniedAsync(ClusterFixture fixture, RequestCqrsRf3Callers administrator,
+    private static Task<bool> DeniedAsync(ClusterFixture fixture, RequestCqrsClusterCallers administrator,
         NativeTextProtectedPublicColdState state, CancellationToken token)
-        => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, state.Identity.Secret,
+        => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, state.Identity.Secret,
             async reader =>
             {
                 await NativeTextProtectedPublicColdAssertions.DeniedAsync(reader, administrator, state, token);
                 return true;
             }, token);
 
-    private static Task<bool> HealthyAsync(ClusterFixture fixture, RequestCqrsRf3Callers administrator,
+    private static Task<bool> HealthyAsync(ClusterFixture fixture, RequestCqrsClusterCallers administrator,
         NativeTextProtectedPublicColdState state, long epoch, CancellationToken token)
-        => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, state.Identity.Secret,
+        => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, state.Identity.Secret,
             async reader =>
             {
                 await NativeTextProtectedPublicColdAssertions.HealthyAsync(reader, state, epoch, token);

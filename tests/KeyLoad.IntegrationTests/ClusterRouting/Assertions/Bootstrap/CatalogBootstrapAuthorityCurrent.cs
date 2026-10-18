@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using System.Reflection;
-using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
@@ -18,18 +17,11 @@ internal static class CatalogBootstrapAuthorityCurrent
     internal static async Task RunAsync(ClusterFixture fixture, CatalogBootstrapAuthorityState state, CancellationToken token)
     {
         var profile = ClusterFixturePhysicalShardIdentity.ReadProfile(fixture.Root);
-        AtomicPartitionPlacementResolution expected = new(P.Version, state.Partition, fixture.PhysicalShardId,
-            profile.Incarnation, [.. P.Voters], P.OriginalRevision, P.EmptyRevision, P.EmptyRevision, true);
-        await SqlRf3Protocol.EqualAsync(expected, state.Placement);
         foreach (var node in P.Nodes)
         {
-            await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, node, state.AdministratorKey, async administrator =>
+            await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, node, state.AdministratorKey, async administrator =>
             {
                 await administrator.AssertFreshRoutingReadyAsync(token);
-                await SqlRf3Protocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(
-                    await administrator.Sdk.ReadAtomicPartitionPlacementAsync(new(P.Version, state.Partition), token)));
-                await SqlRf3Protocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<AtomicPartitionPlacementResolution>(
-                    await administrator.Mcp.CallAsync(McpCallerTools.AdminPartitionPlacementRead, new AtomicPartitionPlacementReadRequest(P.Version, state.Partition), token))).Value);
                 await ReplayAsync(administrator, state.Original, state.Receipt, token);
                 if (state.HealthyCommand is not null && state.HealthyReceipt is not null)
                 {
@@ -38,15 +30,15 @@ internal static class CatalogBootstrapAuthorityCurrent
                 await StatusAsync(administrator, state, node, token);
                 return true;
             }, token);
-            await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, node, state.ReaderKey, async reader =>
+            await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, node, state.ReaderKey, async reader =>
             {
                 var reference = new EntityRef(state.Partition, P.Collection, P.Document);
                 DocumentReadResult expectedDocument = new(new(reference,
                     state.HealthyReceipt is null ? P.OriginalRevision : P.HealthyRevision,
                     state.HealthyReceipt is null ? P.OriginalJson : P.HealthyJson, false, []));
-                await SqlRf3Protocol.EqualAsync(expectedDocument, await McpCallerAssertions.SdkSuccessAsync(
+                await SqlClusterProtocol.EqualAsync(expectedDocument, await McpCallerAssertions.SdkSuccessAsync(
                     await reader.Sdk.GetAsync(reference, state.Receipt.Token, token)));
-                await SqlRf3Protocol.EqualAsync(expectedDocument, (await McpCallerAssertions.SuccessAsync<DocumentReadResult>(
+                await SqlClusterProtocol.EqualAsync(expectedDocument, (await McpCallerAssertions.SuccessAsync<DocumentReadResult>(
                     await reader.Mcp.CallAsync(McpCallerTools.DocumentsGet, new GetDocumentRequest(reference, state.Receipt.Token), token))).Value);
                 await CatalogBootstrapAuthorityDenied.ReaderAdministrationAsync(reader, state, token);
                 return true;
@@ -55,25 +47,24 @@ internal static class CatalogBootstrapAuthorityCurrent
     }
 
     internal static async Task ReceiptAsync(CommandRequest command, CommitReceipt receipt,
-        AtomicPartitionPlacementResolution placement, long revision)
+        long revision)
     {
-        await SdkProblemBudgetPublicAssertions.ReceiptAsync(receipt, command, placement,
-            [new(P.Put, P.Collection, P.Document, revision)]);
+        await SdkProblemBudgetPublicAssertions.ReceiptAsync(receipt, command, [new(P.Put, P.Collection, P.Document, revision)]);
         await Assert.That(receipt.Mutations.All(mutation => PrivateReferences.GetValue(mutation) is ImmutableArray<EntityRef> { IsEmpty: true })).IsTrue();
     }
 
-    private static async Task ReplayAsync(RequestCqrsRf3Callers caller, CommandRequest command,
+    private static async Task ReplayAsync(RequestCqrsClusterCallers caller, CommandRequest command,
         CommitReceipt receipt, CancellationToken token)
     {
         var sdk = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.CommitAsync(command, token));
         var mcp = (await McpCallerAssertions.SuccessAsync<CommitReceipt>(await caller.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token))).Value;
-        await SqlRf3Protocol.EqualAsync(receipt, sdk);
-        await SqlRf3Protocol.EqualAsync(receipt, mcp);
+        await SqlClusterProtocol.EqualAsync(receipt, sdk);
+        await SqlClusterProtocol.EqualAsync(receipt, mcp);
         await Assert.That(sdk.Mutations.All(mutation => PrivateReferences.GetValue(mutation) is ImmutableArray<EntityRef> { IsEmpty: true })).IsTrue();
         await Assert.That(mcp.Mutations.All(mutation => PrivateReferences.GetValue(mutation) is ImmutableArray<EntityRef> { IsEmpty: true })).IsTrue();
     }
 
-    private static async Task StatusAsync(RequestCqrsRf3Callers caller, CatalogBootstrapAuthorityState state,
+    private static async Task StatusAsync(RequestCqrsClusterCallers caller, CatalogBootstrapAuthorityState state,
         string node, CancellationToken token)
     {
         var status = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.StatusAsync(token));
@@ -86,7 +77,6 @@ internal static class CatalogBootstrapAuthorityCurrent
         {
             state.PhysicalOwners.Add(node, status.NodeId);
         }
-        await Assert.That(status.Incarnation).IsEqualTo(state.Placement.Incarnation);
         await Assert.That(status.Applied).IsGreaterThanOrEqualTo((state.HealthyReceipt ?? state.Receipt).Token.Position);
         await Assert.That(status.Voters).IsEqualTo(P.Nodes.Length);
         await Assert.That(status.RoutingReady).IsTrue();

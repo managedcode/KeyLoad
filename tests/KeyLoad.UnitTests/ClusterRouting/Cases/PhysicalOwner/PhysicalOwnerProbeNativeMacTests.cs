@@ -48,7 +48,6 @@ internal sealed class PhysicalOwnerProbeNativeMacTests
         };
         var changed = new[]
         {
-            request with { Channel = PartitionMovementGrainServiceChannel.Outcome },
             request with { Query = false },
             request with { CallerVoter = ReplicaSecurityFixture.UnknownVoter },
             request with { CallerSiloAddress = fixture.OtherGeneration },

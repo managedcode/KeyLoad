@@ -15,7 +15,7 @@ internal static class NativeConfiguredTimeSeriesReadRegression
     private const string RunIdFormat = "N";
     private const string FullRangeName = "inclusive-full-range";
 
-    // AC-CQ-034: reuse the selected genuine RF3 resources and real SDK request path.
+    // AC-CQ-034: reuse the selected genuine CLUSTER resources and real SDK request path.
     internal static async Task VerifyAsync(DistributedApplication app, string adminKey, CancellationToken cancellationToken)
     {
         var execution = NativeExecutionPolicyFixture.Read();

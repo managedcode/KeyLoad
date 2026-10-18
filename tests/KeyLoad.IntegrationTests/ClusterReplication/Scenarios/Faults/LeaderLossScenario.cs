@@ -118,7 +118,7 @@ internal static class LeaderLossScenario
         }
         catch (Exception diagnosticsFailure) when (IsNonFatalCleanupFailure(diagnosticsFailure))
         {
-            failure.Data[Rf3DiagnosticsFailureKey] = diagnosticsFailure;
+            failure.Data[ClusterDiagnosticsFailureKey] = diagnosticsFailure;
         }
     }
 
@@ -134,7 +134,7 @@ internal static class LeaderLossScenario
             }
             catch (Exception restartFailure) when (IsNonFatalCleanupFailure(restartFailure))
             {
-                failure.Data[Rf3RestartFailureKeyPrefix + node] = restartFailure;
+                failure.Data[ClusterRestartFailureKeyPrefix + node] = restartFailure;
             }
         }
 
@@ -154,7 +154,7 @@ internal static class LeaderLossScenario
             }
             catch (Exception readinessFailure) when (IsNonFatalCleanupFailure(readinessFailure))
             {
-                failure.Data[Rf3ReadinessFailureKey] = readinessFailure;
+                failure.Data[ClusterReadinessFailureKey] = readinessFailure;
             }
         }
     }

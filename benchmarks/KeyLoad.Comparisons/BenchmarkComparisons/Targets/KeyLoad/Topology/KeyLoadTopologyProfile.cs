@@ -10,13 +10,13 @@ internal static class KeyLoadTopologyProfile
     private const string Transport = "HTTP JSON";
     private const string Authorization = "authenticated root, all grants";
     private const string Rf1Topology = "1 voter, RF1; quorum 1 of 1; no replica fault tolerance; one physical shard on one host";
-    private const string Rf3Topology = "3 voters, RF3, one physical shard; all processes on one host";
+    private const string ClusterTopology = "3 voters, CLUSTER, one physical shard; all processes on one host";
     private const string Rf1Acknowledgement = "QuorumProcessDurable; benchmark RF1, one local process acknowledgement; topology recovery and power-loss unqualified";
-    private const string Rf3Acknowledgement = "QuorumProcessDurable; process-kill qualified, power-loss unqualified";
+    private const string ClusterAcknowledgement = "QuorumProcessDurable; process-kill qualified, power-loss unqualified";
     private const string Rf1ReadContract = "strong quorum barrier; requires the only voter; graph returns vertices and edges, projected to IDs";
-    private const string Rf3ReadContract = "strong quorum barrier; graph returns vertices and edges, projected to IDs";
+    private const string ClusterReadContract = "strong quorum barrier; graph returns vertices and edges, projected to IDs";
     private const string Rf1ClusterState = "One ready benchmark RF1 voter; quorum 1 of 1; no replica fault tolerance; one node-local store on one Docker host";
-    private const string Rf3ClusterState = "Three ready RF3 voters; one physical shard; independent node-local stores on one Docker host";
+    private const string ClusterClusterState = "Three ready CLUSTER voters; one physical shard; independent node-local stores on one Docker host";
 
     internal static int ValidateExpectedNodes(int expectedNodes)
     {
@@ -32,7 +32,7 @@ internal static class KeyLoadTopologyProfile
         var (topology, acknowledgement, readContract) = ValidateExpectedNodes(expectedNodes) switch
         {
             SingleItemCount => (Rf1Topology, Rf1Acknowledgement, Rf1ReadContract),
-            _ => (Rf3Topology, Rf3Acknowledgement, Rf3ReadContract)
+            _ => (ClusterTopology, ClusterAcknowledgement, ClusterReadContract)
         };
         return new(TargetName, TargetVersion, topology, acknowledgement, readContract, Transport, Authorization, image);
     }
@@ -40,7 +40,7 @@ internal static class KeyLoadTopologyProfile
     internal static string ClusterState(int expectedNodeCount) => ValidateExpectedNodes(expectedNodeCount) switch
     {
         SingleItemCount => Rf1ClusterState,
-        _ => Rf3ClusterState
+        _ => ClusterClusterState
     };
 
 }

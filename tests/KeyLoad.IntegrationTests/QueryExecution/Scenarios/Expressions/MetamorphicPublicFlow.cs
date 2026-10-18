@@ -18,7 +18,7 @@ internal static class MetamorphicPublicFlow
                 MetamorphicPublicState state;
                 using (var deadline = McpCallerDeadline.Create())
                 {
-                    state = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
+                    state = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
                         root => MetamorphicPublicSetup.RunAsync(fixture, root, seed, deadline.Token), deadline.Token);
                 }
                 var plans = Enumerable.Range(0, 4).Select(shape => MetamorphicPublicPlan.Create(
@@ -30,7 +30,7 @@ internal static class MetamorphicPublicFlow
                     await ServerFailureObserver.ObserveAsync(async () =>
                     {
                         using var deadline = McpCallerDeadline.Create();
-                        await ModelSqlRf3Cold.RunAsync(fixture, deadline.Token);
+                        await ModelSqlClusterCold.RunAsync(fixture, deadline.Token);
                         await WaveAsync(fixture, state, plans, descending, offset, false, deadline.Token);
                     }, coldFailures);
                 }
@@ -43,8 +43,8 @@ internal static class MetamorphicPublicFlow
         MetamorphicPublicPlan[] plans, bool descending, int offset)
     {
         using var deadline = McpCallerDeadline.Create();
-        await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, root =>
-            RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, state.Identity.Secret, async reader =>
+        await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, root =>
+            RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, state.Identity.Secret, async reader =>
             {
                 await MetamorphicPublicOperations.RunAsync(root, reader, state, plans, descending, offset, true, deadline.Token);
                 await MetamorphicPublicSetup.PolicyAsync(root, state, true, 3L, deadline.Token);
@@ -59,8 +59,8 @@ internal static class MetamorphicPublicFlow
     }
     private static Task<bool> WaveAsync(ClusterFixture fixture, MetamorphicPublicState state, MetamorphicPublicPlan[] plans,
         bool descending, int offset, bool denied, CancellationToken token)
-        => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, root =>
-            RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, state.Identity.Secret, async reader =>
+        => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, root =>
+            RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, state.Identity.Secret, async reader =>
             {
                 await MetamorphicPublicOperations.RunAsync(root, reader, state, plans, descending, offset, denied, token);
                 await MetamorphicPublicCurrent.ReplayAsync(root, state, token);

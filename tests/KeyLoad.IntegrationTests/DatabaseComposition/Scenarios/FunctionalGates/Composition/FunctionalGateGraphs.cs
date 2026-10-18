@@ -35,9 +35,9 @@ internal static class FunctionalGateGraphs
                 ResourceKind.Graph, ctx.Partition.TransactionDomainId);
             var request = new ConfigureResourceRequest(ctx.Partition.TenantId, ctx.Partition.DatabaseId, definition);
             var commandId = Guid.NewGuid();
-            await SqlRf3Protocol.EqualAsync(definition, await ctx.SdkAsync(
+            await SqlClusterProtocol.EqualAsync(definition, await ctx.SdkAsync(
                 ctx.Administrator.Sdk.ConfigureResourceAsync(commandId, request, token)));
-            await SqlRf3Protocol.EqualAsync(definition, await ctx.McpHeaderAsync<ResourceDefinition>(
+            await SqlClusterProtocol.EqualAsync(definition, await ctx.McpHeaderAsync<ResourceDefinition>(
                 ctx.Administrator, McpCallerTools.ResourcesConfigure, request, commandId, token));
         }
     }
@@ -102,8 +102,8 @@ internal static class FunctionalGateGraphs
         await Assert.That(receipt.Token.Position).IsGreaterThan(Initial);
         await Assert.That(receipt.Token.OwnershipEpoch).IsGreaterThan(Initial);
         await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
-        await SqlRf3Protocol.EqualAsync(expected, receipt.Mutations.ToArray());
-        await SqlRf3Protocol.EqualAsync(receipt, replay);
+        await SqlClusterProtocol.EqualAsync(expected, receipt.Mutations.ToArray());
+        await SqlClusterProtocol.EqualAsync(receipt, replay);
     }
 
     private static async Task DocumentAsync(FunctionalGateContext ctx, EntityRef vertex,
@@ -112,8 +112,8 @@ internal static class FunctionalGateGraphs
         var sdk = await ctx.SdkAsync(ctx.Reader.Sdk.GetAsync(vertex, token));
         var mcp = await ctx.McpAsync<DocumentReadResult>(ctx.Reader, McpCallerTools.DocumentsGet,
             new GetDocumentRequest(vertex), token);
-        await SqlRf3Protocol.EqualAsync(new DocumentReadResult(expected), sdk);
-        await SqlRf3Protocol.EqualAsync(new DocumentReadResult(expected), mcp);
+        await SqlClusterProtocol.EqualAsync(new DocumentReadResult(expected), sdk);
+        await SqlClusterProtocol.EqualAsync(new DocumentReadResult(expected), mcp);
     }
 
     private static async Task TraverseAsync(FunctionalGateContext ctx, string graph,
@@ -123,8 +123,8 @@ internal static class FunctionalGateGraphs
         var expected = edge is null ? new global::KeyLoad.GraphTraversal([vertex], [])
             : new global::KeyLoad.GraphTraversal([.. new[] { vertex, ctx.Bind(ctx.Anchor) }
                 .OrderBy(item => item.Collection, StringComparer.Ordinal).ThenBy(item => item.Id, StringComparer.Ordinal)], [edge]);
-        await SqlRf3Protocol.EqualAsync(expected, await ctx.SdkAsync(ctx.Reader.Sdk.TraverseAsync(request, token)));
-        await SqlRf3Protocol.EqualAsync(expected, await ctx.McpAsync<global::KeyLoad.GraphTraversal>(
+        await SqlClusterProtocol.EqualAsync(expected, await ctx.SdkAsync(ctx.Reader.Sdk.TraverseAsync(request, token)));
+        await SqlClusterProtocol.EqualAsync(expected, await ctx.McpAsync<global::KeyLoad.GraphTraversal>(
             ctx.Reader, McpCallerTools.GraphTraverse, request, token));
     }
 }

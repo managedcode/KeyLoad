@@ -16,12 +16,12 @@ internal static class FunctionalGateRelationalAssertions
         await Assert.That(actual.Token.Position).IsGreaterThan(P.Absent);
         await Assert.That(actual.Token.OwnershipEpoch).IsGreaterThan(P.Absent);
         await Assert.That(actual.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
-        await SqlRf3Protocol.EqualAsync(expected, actual.Mutations);
+        await SqlClusterProtocol.EqualAsync(expected, actual.Mutations);
     }
 
     internal static async Task PageAsync(QueryPage actual, ImmutableArray<QueryRow> rows)
     {
-        await SqlRf3Protocol.EqualAsync(rows, actual.Rows);
+        await SqlClusterProtocol.EqualAsync(rows, actual.Rows);
         await Assert.That(actual.Cursor).IsNull();
         await Assert.That(actual.CutPosition).IsGreaterThan(P.Absent);
     }

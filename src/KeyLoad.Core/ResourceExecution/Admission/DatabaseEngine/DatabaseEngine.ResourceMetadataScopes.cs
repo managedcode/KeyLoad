@@ -8,9 +8,7 @@ public sealed partial class DatabaseEngine
     private static bool IsResourceFreeNativeOperation(OperationKind kind)
         => kind is OperationKind.ConfigurePrincipal or OperationKind.ConfigureApiKey or OperationKind.SetDispatch
             or OperationKind.RuntimeJournal or OperationKind.BootstrapPhysicalShardCatalog
-            or OperationKind.BindAtomicPartitionPlacement or OperationKind.RegisterPhysicalOwner
-            or OperationKind.ConfigurePlacementPolicy or OperationKind.PersistPlacementIntent
-            or OperationKind.PlacementIntentPhase or OperationKind.ResourceRetirementPhase;
+            or OperationKind.RegisterPhysicalOwner or OperationKind.ResourceRetirementPhase;
 
     private static bool ObserveCatalogResourceEffect(IKeyValueView view, ReplicatedOperation operation)
     {

@@ -5,6 +5,6 @@ namespace KeyLoad.IntegrationTests.Features.BlobStorage;
 internal sealed class BlobActivePolicyPublicTests(ClusterFixture fixture)
 {
     [Test]
-    public Task ActiveUploadWriteRevocationHigherEpochRepairFencesOriginalIdsAndPreservesFreshPublicationAcrossTwoRf3ColdCycles()
+    public Task ActiveUploadWriteRevocationHigherEpochRepairFencesOriginalIdsAndPreservesFreshPublicationAcrossTwoClusterColdCycles()
         => BlobActivePolicyPublicTrial.RunAsync(fixture, TestContext.Current!.Execution.CancellationToken);
 }

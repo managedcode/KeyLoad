@@ -9,14 +9,14 @@ REQ-RESOURCE-005 private honest node capture → AC-DBPROF-005/007.
 REQ-RESOURCE-006 correctness/measured overhead → AC-DBPROF-006/008.
 Existing REQ-RESOURCE-002 and REQ-MP-005 require actual native evidence.
 
-Owner correction2026-10-06 also maps REQ-CQ-013 / AC-CQ-034/035/038 to this
+REQ-CQ-013 / AC-CQ-034/035/038 map to this
 primitive's operational reservation and retry policy. ADR-113 freezes native
 DatabasePhaseExecutionOptions registration, pre-ownership validation and explicit
 BCL scalar projection: disabled mode by default, stripes1/2/4 (default4), attempts
 1..4 (default4), no primitive fallback. DatabasePhase* TUnit cases cover nondefault
 native binding, invalid admission, actual bounded allocation, concurrency and
-unchanged snapshots. Fixed32/6/16 metadata and128KiB remain upper guarantees;
-enabled-startup/overhead/export/RF3 qualification remains separately pending.
+unchanged snapshots. Fixed bank dimensions, metadata and128KiB remain upper guarantees;
+enabled-startup/overhead/export/cluster qualification remains separately pending.
 
 ```mermaid
 sequenceDiagram
@@ -39,36 +39,17 @@ Server owns private exporter/startup composition in the same slice. Existing
 feature owners retain their actual source boundaries; no business behavior moves
 into Diagnostics. Unit/Integration tests use ResourceExecution; frontend N/A
 because this stage has no public UI or endpoint. SDK/MCP contracts are unchanged,
-tested through actual RF3. Root alone owns shared project/config/docs/Git/gates.
-Another app root owns benchmark/AppHost/site/CI/aggregate schemas; no write there.
+tested through the actual replicated cluster.
 
 ## Closed phase inventory
+
+A replicated write is ordinary Orleans calls to the ZoneTree owners on ReplicaCount silos with majority acknowledgement after durable local apply; its profiling boundaries are not part of this inventory yet.
 
 |ID/name|Actual timing boundary; preservation|
 |---|---|
 |00 PublicAuthenticationDispatch|CredentialResolver actual node ExecuteRead await; exclude next middleware.|
 |01 PublicOperationDispatch|CanonicalOperationGateway actual node Execute await.|
-|02 AuthorizedAuthenticationBarrier|Verified Authenticate grain branch actual Coordinator barrier await.|
-|03 AuthorizedOperationBarrier|Verified other read branch actual barrier await; do not merge cuts.|
 |04 AuthorizedReadCapability|Verified grain capability call/result; excludes encoding.|
-|05 ReadTransportReady|Read executor actual transport-ready await.|
-|06 LeaderBarrierTotal|Actual leader method through apply and final leadership check.|
-|07 ReadRoundsWait|Actual rounds wait to acquire/failure.|
-|08 ReadRoundsHold|Successful acquire through existing release before apply.|
-|09 SubmitRoundsWait|Actual submit rounds wait to acquire/failure.|
-|10 SubmitRoundsHold|Acquire through existing release after apply/outcome.|
-|11 HeartbeatRoundsHold|Only actual zero-wait acquire to release; rejection is Busy attempt.|
-|12 QuorumFollowerAwait|Start original follower tasks through majority-loop terminal, not tail join.|
-|13 RoundCommitFinalize|Actual final protocol-locked call; not always durable commit.|
-|14 FollowerSynchronization|Each original sender's own completion/release, including independent tails.|
-|15 ReplicaProtocolGateWait|Actual protocol wait to acquire/failure.|
-|16 ReplicaProtocolGateHold|Acquire through actual release, including nested store work.|
-|17 ReplicaRequestEncode|Original typed serialization and payload-cap check, before the original RPC deadline is armed.|
-|18 ReplicaTransportAwait|Original invocation expression, including its UTF8 string-argument conversion under the already armed deadline, then actual active.InvokeAsync await; not isolated network time.|
-|19 ReplicaReplyDecode|Existing strict UTF8 bytes and typed decode.|
-|20 ReplicaDiscoveryResolve|Actual resolve including cached/gate/HTTP/verification work.|
-|21 OrleansReplicaExchangeAwait|Existing Exchange plus WaitAsync WRAPPER terminal; not original-tail completion.|
-|22 ReplicaReceiverTotal|Actual receiver reply/error; typed non-ack is Rejected except original token-proven OCE/fault precedence in ADR-063.|
 |23 CanonicalApplyWait|Original materializer watermark wait; not CPU or gate wait.|
 |24 CanonicalApplyGateWait|Existing actual worker/checkpoint/snapshot/install gate wait.|
 |25 CanonicalApplyGateHold|Successful corresponding acquire through actual release; maintenance included.|
@@ -94,28 +75,19 @@ The production-owned pure AddSaturating helper covers exact/overflow snapshot
 math; source review verifies every real Capture merge applies its overflow
 marker as sticky quality. Tests do not mutate live counters to force overflow.
 Production joins receive independent exact-source review plus genuine SDK/MCP
-RF3 authorization/minority/cancellation, original-task and process-recovery gates.
+replicated-cluster authorization/minority/cancellation, original-task and process-recovery gates.
 Private capture tests reject missing/partial/wrong-node/source/image/window,
 oversize/default schema and degraded profiles instead of fabricating numbers.
 
-The primitive bank, arithmetic and immutable process-mode facade are now
-implemented in source with19 acceptance-derived TUnit cases. The reviewed
-Replication-A/provider joins add12 actual boundaries:05,15..19 and26..31.
-Their full development build and formatter pass with all analyzers enabled;
-the source receipt (report removed from repository)
-binds the exact inputs and preservation review. This does not
-establish actual phase counts, allocations or performance. Default mode remains
-off. The newly independently reviewed public/request joins add00..04, bringing
-the source total to17/32; these new boundaries still require direct enabled
-counter/RF3/on-off overhead proof. The remaining15 producers, private capture, trusted process-mode startup
-and actual RF3 profile qualification remain open.
+The primitive bank, arithmetic and immutable process-mode facade are
+implemented in source with acceptance-derived TUnit cases. Default mode remains
+off. Direct enabled counter, private capture, trusted process-mode startup and
+actual replicated-cluster profile qualification remain open; source and build
+checks establish no actual phase counts, allocations or performance.
 
-Runtime/allocations/performance qualification is GitHub TUnit/MTP only. Current
-owner workflow policy uses CI/ci.yml for build and every project test, Benchmarks
-for load/comparison plus downstream website qualification/publication, and Release.
-Historical actual Tests-run evidence retains its original workflow identity. Full
-new-source build/formatter/analyzers/governance, normal/scalar/recovery/RF3 must
-pass without skips. Development checks, authored fixtures and fixed budgets are
+Runtime/allocations/performance qualification is GitHub TUnit/MTP only. Full
+build/formatter/analyzers/governance, normal/scalar/recovery/cluster must pass
+without skips. Development checks, authored fixtures and fixed budgets are
 source evidence only. Numeric coverage collection remains unconfigured.
 Periodic node snapshots and resources bracket client windows; phases overlap
 and can end after the initiating quorum. No summing/subtracting phases into

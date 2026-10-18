@@ -7,7 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
 internal static class SqlPendingQueuePublicFlow
 {
-    internal static async Task RunAsync(ClusterFixture fixture, RequestCqrsRf3Callers administrator,
+    internal static async Task RunAsync(ClusterFixture fixture, RequestCqrsClusterCallers administrator,
         QueueLifecyclePublicState state, CancellationToken token)
     {
         var identity = await McpPersistedIdentity.CreateAsync(fixture, state.Partition, state.Lane.Queue,
@@ -18,7 +18,7 @@ internal static class SqlPendingQueuePublicFlow
             PolicyEpoch = identity.Principal.PolicyEpoch + QueueLifecyclePublicProtocol.One
         };
         principal = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), principal, token));
-        await using var reader = await RequestCqrsRf3Callers.ConnectAsync(fixture.App, McpCallerProtocol.Node2, identity.Secret, token);
+        await using var reader = await RequestCqrsClusterCallers.ConnectAsync(fixture.App, McpCallerProtocol.Node2, identity.Secret, token);
         var request = new QueryRequest(state.Partition,
             $"SELECT * FROM QUEUE_MESSAGES('{state.Lane.Queue}') ORDER BY id LIMIT {QueueLifecyclePublicProtocol.Two}", AllowFullScan: true);
         await DeniedAsync(reader, state, request, token);
@@ -51,7 +51,7 @@ internal static class SqlPendingQueuePublicFlow
         await SqlPendingQueuePublicAssertions.UnchangedAsync(administrator, state, token);
     }
 
-    private static async Task DeniedAsync(RequestCqrsRf3Callers reader, QueueLifecyclePublicState state,
+    private static async Task DeniedAsync(RequestCqrsClusterCallers reader, QueueLifecyclePublicState state,
         QueryRequest request, CancellationToken token)
     {
         await DeniedRequestAsync(reader, state, McpCallerTools.QueryExecute, request,
@@ -66,16 +66,16 @@ internal static class SqlPendingQueuePublicFlow
             [new("/@id", false)], QueueLifecyclePublicProtocol.Two, false,
             new(ModelQuerySourceKind.QueueMessages, state.Lane.Queue)), AllowFullScan: true);
 
-    private static async Task DeniedRequestAsync(RequestCqrsRf3Callers reader, QueueLifecyclePublicState state,
+    private static async Task DeniedRequestAsync(RequestCqrsClusterCallers reader, QueueLifecyclePublicState state,
         string tool, object request, Func<Task<ManagedCode.Communication.Result<QueryPage>>> execute, CancellationToken token)
     {
         var sdk = await execute();
-        await SagaTimeoutRf3Assertions.AssertSdkErrorAsync(sdk, ErrorCode.PermissionDenied);
+        await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(sdk, ErrorCode.PermissionDenied);
         await Assert.That(sdk.Value).IsNull();
         await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(tool, request, token), ErrorCode.PermissionDenied, dispatched: true);
-        var sql = SqlRf3Protocol.Call(state.Partition, tool, request);
+        var sql = SqlClusterProtocol.Call(state.Partition, tool, request);
         var q1 = await reader.Sdk.ExecuteSqlAsync(sql, token);
-        await SagaTimeoutRf3Assertions.AssertSdkErrorAsync(q1, ErrorCode.PermissionDenied);
+        await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(q1, ErrorCode.PermissionDenied);
         await Assert.That(q1.Value).IsNull();
         await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token), ErrorCode.PermissionDenied, dispatched: true);
     }

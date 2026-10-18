@@ -15,7 +15,7 @@ internal sealed partial class FunctionalGateFixture : IAsyncDisposable
     private readonly Lock disposalGate = new();
     private readonly bool coldReopen;
     private IDistributedApplicationTestingBuilder? builder;
-    private LocalRf3ImageTestSession? imageSession;
+    private LocalClusterImageTestSession? imageSession;
     private Task? disposal;
     private ClusterFixtureDiagnostics? diagnostics;
     private string[] diagnosticSecrets = [];
@@ -66,9 +66,9 @@ internal sealed partial class FunctionalGateFixture : IAsyncDisposable
     {
         using var preparationBound = new CancellationTokenSource(TimeSpan.FromMinutes(15), TimeProvider.System);
         using var preparation = CancellationTokenSource.CreateLinkedTokenSource(token, preparationBound.Token);
-        imageSession = await LocalRf3ImageTestSession.StartIfSelectedAsync(preparation.Token).ConfigureAwait(false);
+        imageSession = await LocalClusterImageTestSession.StartIfSelectedAsync(preparation.Token).ConfigureAwait(false);
         var selection = imageSession?.Selection;
-        if (selection is null && LocalRf3ImageSelection.Read() is not null)
+        if (selection is null && LocalClusterImageSelection.Read() is not null)
         {
             throw new InvalidOperationException("The functional fixture requires its own selected local image preparation session.");
         }
@@ -90,7 +90,7 @@ internal sealed partial class FunctionalGateFixture : IAsyncDisposable
         var repository = ClusterFixtureDiagnostics.FindRepositoryRoot().FullName;
         ColdRuntime = new(App, containers, repository, selection);
         var identity = selection is null ? null
-            : await LocalRf3ImageIdentity.VerifyBeforeStartAsync(App, repository, selection, NodeNames, startup.Token)
+            : await LocalClusterImageIdentity.VerifyBeforeStartAsync(App, repository, selection, NodeNames, startup.Token)
                 .ConfigureAwait(false);
         if (identity is null)
         {
@@ -100,7 +100,7 @@ internal sealed partial class FunctionalGateFixture : IAsyncDisposable
         await AspireStartupReadiness.WaitForHealthyAsync(App, NodeNames, startup.Token).ConfigureAwait(false);
         if (identity is not null)
         {
-            await LocalRf3ImageIdentity.VerifyStartedContainersAsync(identity, containers, NodeNames, startup.Token)
+            await LocalClusterImageIdentity.VerifyStartedContainersAsync(identity, containers, NodeNames, startup.Token)
                 .ConfigureAwait(false);
         }
         started = true;

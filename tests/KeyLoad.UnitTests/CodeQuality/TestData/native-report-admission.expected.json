@@ -1,5 +1,5 @@
 {
-  "originalRepository": "/private/tmp/keyload-kl065-cache-cuts-r26-20261011/lane/source",
+  "originalRepository": "/private/tmp/keyload-native-report-fixture/lane/source",
   "cases": [
     {
       "className": "KeyLoad.UnitTests.Features.Authorization.GenerationVisibilityTests",

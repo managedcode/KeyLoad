@@ -7,7 +7,7 @@ internal static class ProductionSourceManifestContributorAssertions
     private const int RegistrySchemaVersion = 1;
     private const int ExpectedUnitRows = 50;
     private const int ExpectedRecoveryRows = 1;
-    private const int ExpectedRf3Rows = 11;
+    private const int ExpectedClusterRows = 11;
     private const int MaximumIdentityFieldCharacters = 512;
     private const int MaximumOperationCharacters = 4096;
     private const int MinimumFieldCount = 1;
@@ -18,7 +18,7 @@ internal static class ProductionSourceManifestContributorAssertions
     private const string ExactCasesProperty = "exactCases";
     private const string UnitSuite = "unit";
     private const string RecoverySuite = "recovery";
-    private const string Rf3Suite = "rf3";
+    private const string ClusterSuite = "cluster";
     private const string MismatchedLeafMethod = "MismatchedLeafRequestPartitionFailsBeforeAnyStorageRead";
     private const string PartitionSetMethod = "EmptyOversizedAndNullPartitionSetsFailAsValidation";
     private const string OwnershipMethod = "ExpectedOwnerMismatchFailsClosedAndProtectedFieldUseStillApplies";
@@ -37,7 +37,7 @@ internal static class ProductionSourceManifestContributorAssertions
         AcceptanceProperty, ClassNameProperty, ExecutedModulesProperty, InstanceNameProperty, MethodNameProperty,
         OperationProperty, RequirementsProperty, SuiteProperty
     ];
-    private static readonly string[] Suites = [UnitSuite, RecoverySuite, Rf3Suite];
+    private static readonly string[] Suites = [UnitSuite, RecoverySuite, ClusterSuite];
     private static readonly string[] ProductionModules =
     [
         "KeyLoad.Abstractions", "KeyLoad.Cli", "KeyLoad.Client", "KeyLoad.Core",
@@ -53,10 +53,10 @@ internal static class ProductionSourceManifestContributorAssertions
     };
     private static readonly string[] CandidateIdentities =
     [
-        "rf3|KeyLoad.IntegrationTests.Features.QueryExecution.PartitionQueryPublicRf3Tests|AcPquery006SdkAndOfficialMcpReturnIndependentFullReferenceOrder|AcPquery006SdkAndOfficialMcpReturnIndependentFullReferenceOrder",
-        "rf3|KeyLoad.IntegrationTests.Features.DocumentStorage.McpDocumentCrudParityTests|AcDstore001SdkPatchAndMcpDeleteMatchTheMirroredCrudLifecycle|AcDstore001SdkPatchAndMcpDeleteMatchTheMirroredCrudLifecycle",
-        "rf3|KeyLoad.IntegrationTests.Features.DocumentStorage.McpDocumentCrudParityTests|AcDstore001McpPatchAndSdkDeleteMatchTheMirroredCrudLifecycle|AcDstore001McpPatchAndSdkDeleteMatchTheMirroredCrudLifecycle",
-        "rf3|KeyLoad.IntegrationTests.Features.DocumentStorage.McpDocumentCrudParityTests|AcDstore001StaleExplicitReplacementIsRejectedWithoutChangingRevisionTwo|AcDstore001StaleExplicitReplacementIsRejectedWithoutChangingRevisionTwo",
+        "cluster|KeyLoad.IntegrationTests.Features.QueryExecution.PartitionQueryPublicClusterTests|AcPquery006SdkAndOfficialMcpReturnIndependentFullReferenceOrder|AcPquery006SdkAndOfficialMcpReturnIndependentFullReferenceOrder",
+        "cluster|KeyLoad.IntegrationTests.Features.DocumentStorage.McpDocumentCrudParityTests|AcDstore001SdkPatchAndMcpDeleteMatchTheMirroredCrudLifecycle|AcDstore001SdkPatchAndMcpDeleteMatchTheMirroredCrudLifecycle",
+        "cluster|KeyLoad.IntegrationTests.Features.DocumentStorage.McpDocumentCrudParityTests|AcDstore001McpPatchAndSdkDeleteMatchTheMirroredCrudLifecycle|AcDstore001McpPatchAndSdkDeleteMatchTheMirroredCrudLifecycle",
+        "cluster|KeyLoad.IntegrationTests.Features.DocumentStorage.McpDocumentCrudParityTests|AcDstore001StaleExplicitReplacementIsRejectedWithoutChangingRevisionTwo|AcDstore001StaleExplicitReplacementIsRejectedWithoutChangingRevisionTwo",
         "recovery|KeyLoad.RecoveryTests.Features.DocumentStorage.CommandIdempotencyProcessRecoveryTests|AcDocument006OneHundredCommandRetriesSurviveRealProcessRestart|AcDocument006OneHundredCommandRetriesSurviveRealProcessRestart"
     ];
 
@@ -126,7 +126,7 @@ internal static class ProductionSourceManifestContributorAssertions
             Suites.Order(StringComparer.Ordinal), TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(suiteCounts[UnitSuite]).IsEqualTo(ExpectedUnitRows);
         await Assert.That(suiteCounts[RecoverySuite]).IsEqualTo(ExpectedRecoveryRows);
-        await Assert.That(suiteCounts[Rf3Suite]).IsEqualTo(ExpectedRf3Rows);
+        await Assert.That(suiteCounts[ClusterSuite]).IsEqualTo(ExpectedClusterRows);
     }
 
     private static async Task AssertQueryExpansionAsync(JsonElement contributors, JsonElement queryContract)

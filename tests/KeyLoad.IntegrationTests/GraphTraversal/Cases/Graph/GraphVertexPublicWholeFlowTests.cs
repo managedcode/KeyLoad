@@ -7,7 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.GraphTraversal;
 internal sealed class GraphVertexPublicWholeFlowTests(ClusterFixture fixture)
 {
     [Test]
-    public async Task CanonicalVerticesKeepAtomicRebindDeleteReplayAndBothAdjacencyDirectionsAcrossTwoRf3ColdCuts()
+    public async Task CanonicalVerticesKeepAtomicRebindDeleteReplayAndBothAdjacencyDirectionsAcrossTwoClusterColdCuts()
     {
         using var deadline = McpCallerDeadline.Create();
         await GraphVertexPublicFlow.Run(fixture, deadline.Token);

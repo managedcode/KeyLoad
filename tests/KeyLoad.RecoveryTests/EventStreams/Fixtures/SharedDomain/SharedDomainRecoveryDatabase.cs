@@ -10,6 +10,5 @@ internal static class SharedDomainRecoveryDatabase
         => new(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(),
             RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(),
             RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.BlobExecution(), RecoveryExecutionOptions.NativeClaimsExecution(),
-            RecoveryExecutionOptions.TimeSeriesExecution(), RecoveryExecutionOptions.MovementCheckpoints(),
-            KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
+            RecoveryExecutionOptions.TimeSeriesExecution());
 }

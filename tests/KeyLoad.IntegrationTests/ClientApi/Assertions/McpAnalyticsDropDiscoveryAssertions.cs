@@ -7,21 +7,21 @@ namespace KeyLoad.IntegrationTests.Features.ClientApi;
 
 internal static class McpAnalyticsDropDiscoveryAssertions
 {
-    internal static async Task ReadsAsync(RequestCqrsRf3Callers caller,
+    internal static async Task ReadsAsync(RequestCqrsClusterCallers caller,
         McpAnalyticsDropDiscoveryState state, CancellationToken token)
     {
-        await SqlRf3Protocol.EqualAsync(P.Expected(state.Anchor), await McpCallerAssertions.SdkSuccessAsync(
+        await SqlClusterProtocol.EqualAsync(P.Expected(state.Anchor), await McpCallerAssertions.SdkSuccessAsync(
             await caller.Sdk.ReadAnalyticsEventsAsync(P.Read(state.Partition), token)));
-        await SqlRf3Protocol.EqualAsync(P.Expected(state.Anchor), (await McpCallerAssertions.SuccessAsync<AnalyticsEventsPage>(
+        await SqlClusterProtocol.EqualAsync(P.Expected(state.Anchor), (await McpCallerAssertions.SuccessAsync<AnalyticsEventsPage>(
             await caller.Mcp.CallAsync(AnalyticsStoreProtocol.ReadTool, P.Read(state.Partition), token))).Value);
-        await SqlRf3Protocol.EqualAsync(P.Aggregate, await McpCallerAssertions.SdkSuccessAsync(
+        await SqlClusterProtocol.EqualAsync(P.Aggregate, await McpCallerAssertions.SdkSuccessAsync(
             await caller.Sdk.AggregateAnalyticsAsync(P.Query(state.Partition), token)));
-        await SqlRf3Protocol.EqualAsync(P.Aggregate, (await McpCallerAssertions.SuccessAsync<AnalyticsAggregateResult>(
+        await SqlClusterProtocol.EqualAsync(P.Aggregate, (await McpCallerAssertions.SuccessAsync<AnalyticsAggregateResult>(
             await caller.Mcp.CallAsync(AnalyticsStoreProtocol.AggregateTool, P.Query(state.Partition), token))).Value);
         await RowAsync(caller, state.Anchor, P.AnchorJson, token);
     }
 
-    internal static async Task<EntityRef> CaptureAsync(RequestCqrsRf3Callers caller, EntityRef name,
+    internal static async Task<EntityRef> CaptureAsync(RequestCqrsClusterCallers caller, EntityRef name,
         string expectedJson, CancellationToken token)
     {
         var actual = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.GetAsync(name, token));
@@ -36,20 +36,20 @@ internal static class McpAnalyticsDropDiscoveryAssertions
         return reference;
     }
 
-    internal static async Task RowAsync(RequestCqrsRf3Callers caller, EntityRef reference,
+    internal static async Task RowAsync(RequestCqrsClusterCallers caller, EntityRef reference,
         string json, CancellationToken token)
     {
         var expected = new DocumentReadResult(new(reference, 1, json, false, []));
-        await SqlRf3Protocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(
+        await SqlClusterProtocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(
             await caller.Sdk.GetAsync(reference, token)));
-        await SqlRf3Protocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<DocumentReadResult>(
+        await SqlClusterProtocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<DocumentReadResult>(
             await caller.Mcp.CallAsync(McpCallerTools.DocumentsGet, new GetDocumentRequest(reference), token))).Value);
     }
 
-    internal static async Task ReceiptAsync(RequestCqrsRf3Callers caller, CommandRequest command,
-        CommitReceipt actual, MutationReceipt[] effects, CancellationToken token)
+    internal static async Task ReceiptAsync(CommandRequest command,
+        CommitReceipt actual, MutationReceipt[] effects)
     {
-        await NativeSubmissionColdAssertions.PlacementAsync(caller, command, actual, token);
+        await NativeSubmissionColdAssertions.AtomicPartitionAsync(command, actual);
         await Assert.That(actual.Token.Position).IsGreaterThan(0);
         await NativeSubmissionColdAssertions.ReceiptAsync(actual,
             new(command.CommandId, actual.Token, [.. effects], DurabilityProfile.QuorumProcessDurable));

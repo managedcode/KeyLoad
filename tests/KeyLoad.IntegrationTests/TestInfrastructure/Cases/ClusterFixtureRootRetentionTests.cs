@@ -4,7 +4,7 @@ using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.IntegrationTests.Features.TestInfrastructure;
 
-/// <summary>Actual local root-release policy and native store ownership; no injected Aspire stop or RF3 proof.</summary>
+/// <summary>Actual local root-release policy and native store ownership; no injected Aspire stop or CLUSTER proof.</summary>
 internal sealed class ClusterFixtureRootRetentionTests
 {
     private const string RootPrefix = "keyload-fixture-root-retention-";
@@ -27,9 +27,7 @@ internal sealed class ClusterFixtureRootRetentionTests
     private static readonly byte[] Value = [StoredValue];
 
     [Test]
-    [Arguments(false)]
-    [Arguments(true)]
-    public async Task FailedCleanupRetainsNativeOwnerThenExactReopenAndHealthyRelease(bool appStopped)
+    public async Task FailedCleanupRetainsNativeOwnerThenExactReopenAndHealthyRelease()
     {
         var root = Path.Combine(Path.GetTempPath(), RootPrefix + Guid.NewGuid().ToString(GuidFormat));
         var directory = Path.Combine(root, StoreDirectory);
@@ -37,7 +35,6 @@ internal sealed class ClusterFixtureRootRetentionTests
         var released = false;
         ZoneTreeStore? active = null;
         Snapshot expected = null!;
-        var owner = new PostgresRf3FixtureOwnership();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             Directory.CreateDirectory(root);
@@ -50,7 +47,7 @@ internal sealed class ClusterFixtureRootRetentionTests
                 {
                     store.Commit((transaction, _) => { transaction.Put(Key, Value); return true; });
                     expected = Capture(store);
-                    await RetainAsync(owner, root, store, expected, appStopped, () => active is not null);
+                    await RetainAsync(root, store, expected, () => active is not null);
                 }, failures);
             }
             active = null;
@@ -70,7 +67,7 @@ internal sealed class ClusterFixtureRootRetentionTests
             released = true;
             if (failures.Count == NoFailures)
             {
-                await ReleaseAsync(owner, root, appStopped: true);
+                await ReleaseAsync(root);
             }
         }, failures);
         if (failures.Count == NoFailures && released && Directory.Exists(root))
@@ -89,7 +86,7 @@ internal sealed class ClusterFixtureRootRetentionTests
         {
             Directory.CreateDirectory(root);
             await File.WriteAllTextAsync(Path.Combine(root, SentinelFile), SentinelValue);
-            await ReleaseAsync(new PostgresRf3FixtureOwnership(), root, appStopped: false);
+            await ReleaseAsync(root);
         }, failures);
         if (failures.Count == NoFailures && Directory.Exists(root))
         {
@@ -98,8 +95,8 @@ internal sealed class ClusterFixtureRootRetentionTests
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task RetainAsync(PostgresRf3FixtureOwnership owner, string root, ZoneTreeStore store,
-        Snapshot expected, bool appStopped, Func<bool> hasLiveOwner)
+    private static async Task RetainAsync(string root, ZoneTreeStore store,
+        Snapshot expected, Func<bool> hasLiveOwner)
     {
         var original = new IOException(FailureMarker);
         var originals = new List<Exception> { original };
@@ -114,7 +111,7 @@ internal sealed class ClusterFixtureRootRetentionTests
             Directory.Delete(root, recursive: true);
             return Task.CompletedTask;
         }
-        var incomplete = await owner.JoinAndReleaseRootAsync(null, appStopped, false, false, originals, DeleteAsync);
+        var incomplete = await PostgresClusterFixtureOwnership.ReleaseRootAsync(false, originals, DeleteAsync);
         await Assert.That(incomplete).IsFalse();
         await Assert.That(deletes).IsEqualTo(NoDeletes);
         await Assert.That(originals.Count).IsEqualTo(OneFailure);
@@ -122,7 +119,7 @@ internal sealed class ClusterFixtureRootRetentionTests
         await VerifyAsync(root, store, expected);
     }
 
-    private static async Task ReleaseAsync(PostgresRf3FixtureOwnership owner, string root, bool appStopped)
+    private static async Task ReleaseAsync(string root)
     {
         var failures = new List<Exception>();
         var deletes = NoDeletes;
@@ -132,7 +129,7 @@ internal sealed class ClusterFixtureRootRetentionTests
             Directory.Delete(root, recursive: true);
             return Task.CompletedTask;
         }
-        var incomplete = await owner.JoinAndReleaseRootAsync(null, appStopped, false, false, failures, DeleteAsync);
+        var incomplete = await PostgresClusterFixtureOwnership.ReleaseRootAsync(false, failures, DeleteAsync);
         await Assert.That(incomplete).IsFalse();
         await Assert.That(failures).IsEmpty();
         await Assert.That(deletes).IsEqualTo(OneDelete);

@@ -1,32 +1,25 @@
 # Representative scaled workloads
 
-## Current execution contract
+## Execution contract
 
 [ADR-142](../../ADR/ADR-142-shared-live-benchmark-sessions.md) and
-[SessionExecution](SessionExecution.md) supersede the per-cell runner, warmup,
-repetition, planner and report-production instructions in the retained source
-stages below. Current measurement jobs share one live native database/topology
-across separate TUnit cases, measure the initial load, and perform no per-case
-reset or reseeding. Historical implementation snapshots and immutable originals
-retain their original identities; retired runners and fixtures are not current
-qualification evidence.
+[SessionExecution](SessionExecution.md) define the measurement shape: current
+measurement jobs share one live native database/topology across separate TUnit cases,
+measure the initial load, and perform no per-case reset or reseeding. The dataset,
+operation-count, native capability, correctness, privacy, cancellation, resource,
+topology and provenance requirements below are mandatory. The seven document cases do
+not complete the required vector, graph, queue, event, time-series or physical
+100k-corpus coverage; family integration and exact-source native Linux qualification
+are separate gates.
 
-The original dataset, operation-count, native capability, correctness, privacy,
-cancellation, resource, topology and provenance requirements remain mandatory.
-The current seven document cases do not complete the required vector, graph,
-queue, event, time-series or physical100k-corpus coverage. Family integration and
-exact-source native Linux qualification remain open.
-
-Owner correction 2026-10-05 limits active benchmark datasets to exactly100k and1m
-for every database. The active native fixture bound is1m, and each checked raw
-read invocation consumes1m operations. Older retained-source observations and
-immutable results below remain historical; they are not active scale requirements.
-Canonical slice: BenchmarkComparisons. ADR: [ADR-069](../../ADR/ADR-069-representative-scaled-workloads.md).
-Owner correction2026-10-03 requires actual100K/1M records and at least100K
-measured operations per applicable workload cell, sequential/random/ordered/range,
-indexing and complex queries. All stages remain unqualified until native originals.
-The old4096-record raw control and270-cell database control stay separate.
-Actual first-run failures and preserving native/minimum/peak repairs are tracked in
+Active benchmark datasets are exactly 100k and 1m records for every database. The
+active native fixture bound is 1m, and each checked raw read invocation consumes 1m
+operations. Canonical slice: BenchmarkComparisons. ADR:
+[ADR-069](../../ADR/ADR-069-representative-scaled-workloads.md). The workloads use
+actual 100K/1M records and at least 100K measured operations per applicable workload
+cell, covering sequential/random/ordered/range reads, indexing and complex queries. All
+stages remain unqualified until native originals exist. The 4096-record raw control and
+the database control stay separate. Runtime repairs are specified in
 [ScaledRuntimeRepairs](ScaledRuntimeRepairs.md), REQ/AC-SCALE-RT-001..003.
 
 |Requirement|Acceptance|Caller-visible behavior and proof|
@@ -37,7 +30,7 @@ Actual first-run failures and preserving native/minimum/peak repairs are tracked
 |REQ-SCALE-004|AC-SCALE-004|Every read invocation really performs1M operations over allN keys and consumes exact record identities/checksum; real BDNmetadata and nativeprocess|
 |REQ-SCALE-005|AC-SCALE-005|Separate records/calls/iterations, load/oracle/resources/digest, complete8cell/profile/duration gates and original failures|
 |REQ-SCALE-006|AC-SCALE-006|Local internal scale originals bound to source/machine; full-database GitHub comparisons use isolated runners and authenticated comparable originals; local evidence never publishes|
-|REQ-SCALE-007|AC-SCALE-007|Mandatory subsequent genuine SDK/officialMCP/RF3 ordered/index/complex-query supported-peer cohort, exact results/ACK/resources; currently OPEN|
+|REQ-SCALE-007|AC-SCALE-007|Mandatory subsequent genuine SDK/officialMCP/cluster ordered/index/complex-query supported-peer cohort, exact results/ACK/resources; currently OPEN|
 |REQ-SCALE-008|AC-SCALE-008|All current source preserved/periodic main delivery, full real quality/fault/coverage/endurance gates, no fake/skipped/invented success|
 
 ```mermaid
@@ -55,40 +48,33 @@ flowchart LR
 ```
 
 The exact binary, permutation, immutable arena, tier settings, deadlines, native
-observations,12GiB ceiling/headroom, body/close preservation and BDNjob contract
-are frozen in ADR069 and root ScaledWorkloads.md before
-coding. Data/code/testing workers have disjoint new prefixes; root alone owns
-shared workflow/executor/strict parser/docs/Git integration. Tests precede their
-reviewed implementation, followed by independent fullsource review and actual
-normal/scalar+native gates. No new dependency or product API is introduced.
-PhaseA internal raw measurements run locally for optimization. Ordinary genuine
-correctness checks belong in CI; internal benchmark jobs, modes and dependencies
-are prohibited in benchmarks.yml. Only full-database comparisons and their
-preparation/aggregation/website stages use that pipeline. No additional workflow
-or internal GitHub performance context is authorized here.
+observations, 12GiB ceiling/headroom, body/close preservation and BDN job contract are
+frozen in ADR-069 and this document. Tests are real and are followed by independent
+full-source review and actual normal/scalar+native gates. No new dependency or product
+API is introduced. Phase A internal raw measurements run locally for optimization.
+Ordinary genuine correctness checks belong in CI; internal benchmark jobs, modes and
+dependencies are prohibited in benchmarks.yml. Only full-database comparisons and their
+preparation/aggregation/website stages use that pipeline.
 
-Backend/public contracts N/A for PhaseA because production APIs/storage remain.
-Frontend N/A until complete genuine scale metrics have an accepted separate
-projection; current270/site schema cannot accept these diagnostics. Library and
-tests use Features/BenchmarkComparisons; workflow/helper tooling use the same
-slice. PhaseB covers actual backend/public-client/query/storage/index behavior
-and requires its exact contract before implementation. No surface is silently omitted.
+Backend/public contracts are N/A for Phase A because production APIs/storage remain.
+Frontend is N/A until complete genuine scale metrics have an accepted separate
+projection; the site schema cannot accept these diagnostics. Library and tests use the
+BenchmarkComparisons slice; workflow/helper tooling use the same slice. Phase B covers
+actual backend/public-client/query/storage/index behavior and requires its exact
+contract before implementation. No surface is silently omitted.
 
 Q1 supports bounded
 read-only predicates/equality-prefix indexes, not unrestricted SQL or joins.
 Explain must prove real index use; actual results must be independently verified.
-Keep authorization, public bounds, RF3 ACK, cancellation and original fault rules.
+Keep authorization, public bounds, cluster ACK, cancellation and original fault rules.
 
 Native all-record validation and actual residency/peak-memory decide each size's
-eligibility. Source capacities are planning arithmetic, not measured fit/RSS.
-Historical estimate for the rejected 5M/1KiB full-materialized design exceeded
-10.32GB retained; this is not an active dataset scale. The current profile
-eliminates duplicate value-corpus retention. Process-kill/cache/
-localBDN evidence never proves powerloss durability, full database leadership or
-production readiness. Numeric coverage collection is still unavailable and open.
+eligibility. Source capacities are planning arithmetic, not measured fit/RSS. The
+profile eliminates duplicate value-corpus retention. Process-kill/cache/local BDN
+evidence never proves power-loss durability, full database leadership or production
+readiness. Numeric coverage collection is still unavailable and open.
 
 ## Native profile contracts
-
 
 - Reuse internal RawStorageEngineKind only. ScaledRawStorageCorpus(count,payload)
   accepts1..1,000,000 and32/1024B; qualification datasets are EXACT100K/1M.
@@ -118,8 +104,8 @@ production readiness. Numeric coverage collection is still unavailable and open.
   and NextRandom() int, RetainedOrderBytes long and PermutationDigest string;
   ScaledRawStorageValueArena(corpus).Value(index) Memory<byte> for seeded0..N-1
   and RetainedValueBytes long. Arena constructor fills each immutable chunk once;
-  all bytes remain unchanged through owner close. New headers/order are separate
-  from old control types and never expand their bounds.
+  all bytes remain unchanged through owner close. Headers/order are separate
+  from the control types and never expand their bounds.
 - ScaledRawStorageFixture(engine,count,payload,cancellationToken=default) owns
   descriptor/order/native engine, one pinned seed/output scratch and one separate
   expected-value scratch. ExactlyN charged terminal successful seed writes;
@@ -143,7 +129,7 @@ production readiness. Numeric coverage collection is still unavailable and open.
   SuccessfulSeedWrites, VerifiedRecords, VerificationPasses, NativeReadCalls,
   RetainedKeyBytes, RetainedValueBytes, RetainedOrderBytes, FullValueDigest,
   PermutationDigest, ProcessPeakBytes and nullable genuine NativeResidentRecords,
-  Actual native resident counts are observed values; no removed candidate log
+  Actual native resident counts are observed values; no log
   counters or invented unavailable measurements remain. Write/load and full validation duration are
   actual untimed stopwatch observations. ScaledRawStorageSettings validates
   the actual ZoneTree input and process-memory capacity. Root authorizes no public product API. Additional immutable cold
@@ -189,7 +175,7 @@ production readiness. Numeric coverage collection is still unavailable and open.
   counter/pre-cancel/disposed tests plus manual vendor close limitation; native
  100K/1M generated runners prove actual fit. Authored source is not proof.
 - AC-SCALE-004 / REQ-SCALE-004: public unsealed ScaledStorageReadBenchmarks,
-  separate class name from old RawStorageBenchmarks wildcard, one selected engine/
+  separate class name from the RawStorageBenchmarks wildcard, one selected engine/
   count per process. Each SequentialRead/RandomRead invocation executes EXACT1M
   actual reads; every call checks returned full record ID and consumed sum equals
   (1M/N)*N*(N-1)/2. OperationsPerInvoke1M, invocation1/unroll1, .NET10,
@@ -228,13 +214,13 @@ production readiness. Numeric coverage collection is still unavailable and open.
 - AC-SCALE-007 / REQ-SCALE-007: actual product/full-service ordered/range, index
   preparation/index lookup verified by Explain and bounded complex Q1 queries
   through authorized SDK/officialMCP; exact ordered result/count/digest;100K+
-  measured calls per supported cell at both required record scales (100K and1M). Real RF3 process/container and
+  measured calls per supported cell at both required record scales (100K and1M). Real cluster process/container and
   native peer tests, authorization/negative/cancel/error/recovery cases, equivalent
   index/schema/ACK/topology/resource settings. Unsupported APIs are explicit,
   source limitations are never relabelled successes. This PhaseB criterion is OPEN.
 - AC-SCALE-008 / REQ-SCALE-008: entire current eligible source preserved and
   periodically main-committed/pushed; full relevant build/unit/scalar/format/
-  governance, actual recovery/RF3 and required numeric coverage qualified without
+  governance, actual recovery/cluster and required numeric coverage qualified without
   skip/fake/invented evidence. Baseline actual failures tracked one-by-one. Raw
   cache success does not close full database endurance/powerloss/performance goal.
 
@@ -242,24 +228,22 @@ production readiness. Numeric coverage collection is still unavailable and open.
 
 |AC|Automated evidence and verification|Explicit exception/remaining gate|
 |---|---|---|
-|001|NEW ScaledRawStorageCorpusTests/ReadOrderTests literal vectors, full uniqueness and actual buffer/span errors, normal/scalar TUnit|Managed/native/RSS model is only planning arithmetic|
-|002/003|NEW ScaledRawStorageFixtureTests/SettingsTests real mini+100K ZoneTree fixtures/copy/pins/resources/owner/cancel; generated mini,100K and1M fixtures; mini remains a control and only100K/1M qualify|Unobserved vendor constructor/pending/finite close faults remain manual limitation, not invented injected failures|
-|004|NEW ScaledRawStorageBenchmarkTests real metadata and1M checksum methods plus genuine BDN subprocess originals|Per-operation bounds/oracle overhead remains included and labelled|
-|005|NEW ScaledRawStorageReportTests real bounded Node pure parser success/error vectors; genuine generated reports|Parser fixture values never publish or authenticate a provider|
+|001|ScaledRawStorageCorpusTests/ReadOrderTests literal vectors, full uniqueness and actual buffer/span errors, normal/scalar TUnit|Managed/native/RSS model is only planning arithmetic|
+|002/003|ScaledRawStorageFixtureTests/SettingsTests real mini+100K ZoneTree fixtures/copy/pins/resources/owner/cancel; generated mini,100K and1M fixtures; mini remains a control and only100K/1M qualify|Unobserved vendor constructor/pending/finite close faults remain manual limitation, not invented injected failures|
+|004|ScaledRawStorageBenchmarkTests real metadata and1M checksum methods plus genuine BDN subprocess originals|Per-operation bounds/oracle overhead remains included and labelled|
+|005|ScaledRawStorageReportTests real bounded Node pure parser success/error vectors; genuine generated reports|Parser fixture values never publish or authenticate a provider|
 |006|Root local original8cell scale receipt; PhaseB authenticated full-database provider originals in Benchmarks|Manual source/machine/config/statistical and hardware reconciliation; no local website substitution or internal Benchmarks jobs|
 |007|Future frozen PhaseB real SDK/MCP/public query/container tests and supported native-peer cohorts|Not yet implemented/qualified; no raw point scan surrogate|
-|008|Full solution Release; real TUnit normal/scalar/recovery/RF3; dotnet format verify; node governance; exact-source Actions originals|Coverage collector/baseline still unavailable, no numeric pass claim|
+|008|Full solution Release; real TUnit normal/scalar/recovery/cluster; dotnet format verify; node governance; exact-source Actions originals|Coverage collector/baseline still unavailable, no numeric pass claim|
 
-Rollback removes only new scale fixtures/profile/helpers/tests/docs coherently;
-no persisted data/public API migration. Original4096/270/provider receipts remain
-immutable. Every delegated writer stops at an unavailable pinned API, lifetime/
-ownership ambiguity, same-file conflict or contract drift and returns complete
-private files/diffs/hashes. Root alone integrates, reviews, delivers and owns gates.
+Rollback removes only the scale fixtures/profile/helpers/tests/docs coherently; no
+persisted data/public API migration is involved. Original 4096/provider receipts remain
+immutable.
 
-## AC-SCALE-003 construction and close ownership correction
+## Construction and close ownership (AC-SCALE-003)
 
-The stopped native candidate loses retryable owned resources if a constructor
-throws and native close also fails. Missing vendor-fault evidence is not an
+A constructor that throws while native close also fails must not lose retryable
+owned resources. Missing vendor-fault evidence is not an
 exception to keeping our successfully acquired handles, pins and arenas alive.
 Before joining, construct managed owners without acquiring native resources;
 assign the core to the fixture and each engine to the core before invoking its
@@ -299,14 +283,12 @@ postoracle. Release the linked lifetime and ownership slot only after core close
 All actual timed methods verify their returned checksum after the complete1M
 calls. Native read counts increase only for a valid admitted point call.
 
-Root owns this lifecycle contract and integration. The bounded test writer adds
-ScaledRawStorageOwnerTests before the native worker's preserving revision:
-genuine live owner remains readable after rejected second acquisition, original
-seed/read counts remain truthful, actual close admits one new native owner, and
-repeat close remains safe for the ZoneTree fixture. Existing invalid/pre-cancel/metadata/
-full-value tests remain. Real vendor close-failure proof is still unavailable;
-no injected failure or fabricated native fault closes that exception. Strong
-independent source review checks every new ownership path before integration.
+ScaledRawStorageOwnerTests prove: the genuine live owner remains readable after a
+rejected second acquisition, original seed/read counts remain truthful, actual close
+admits one new native owner, and repeat close remains safe for the ZoneTree fixture.
+The invalid/pre-cancel/metadata/full-value tests remain. Real vendor close-failure
+proof is unavailable; no injected failure or fabricated native fault closes that
+exception. Independent source review checks every ownership path.
 
 Complete initial, explicit and final full-value verification also captures the
 actual engine's residence/address/page/index bounds before successful oracle
@@ -322,64 +304,11 @@ map the strict four-cell report and two-report cohort to the intended bounded No
 tests. Parser vectors are controlled data. This stage does not authenticate cold
 native manifests, process ownership, machine identity or measured observations.
 
-## Execution ownership and join conditions
+## Final gates
 
-Root owns shared contracts, final integration, local report parsing and Git.
-Workers cannot change existing controls, product APIs, packages, production quotas,
-workflows or website contracts. Stop on pinned API, ownership/lifetime/same-file
-ambiguity. A private candidate requires complete bytes, hashes, acceptance mapping
-and source-only limitations. Review and integrate only completed worker results.
-
-|Stage|Acceptance|Owner/tier and disjoint scope|Start, verification and completion|
-|---|---|---|---|
-|SCALE-P|001..008|Root high-capability; canonical feature/ADR/contracts|Freeze native API/workload contracts and observe full relevant baseline|
-|SCALE-T|001..004|Luna test writer; only new ScaledRawStorage*Tests|Root and independent strongest source review before implementation|
-|SCALE-D|001|Luna data writer; only new corpus/read-order/value-arena|ReviewedT; full private exact data sources/hashes; independent ofE|
-|SCALE-E|002..004|Luna native writer; only new settings/engine/fixture/snapshot/BDN|ReviewedT and frozenDAPI; genuine calls/owners/bounds; complete private packet|
-|SCALE-T2|003|Luna test writer; NEW ScaledRawStorageOwnerTests only|Frozen construction/close correction; genuine live-owner/rejection/close/replacement cases; root review before E2|
-|SCALE-E2|002..004|Luna native writer; preserving stopped E revision in private v2 mirror|Approved T2; staged acquisition, charged owner and safe repeat-close; complete revised source/hash packet|
-|SCALE-T3|003|Luna test writer; NEW ScaledRawStorageBoundsTests only|Genuine mini/100K bounds, reserved miss and counters; strongest source review before native join|
-|SCALE-E3|002..004|Luna native writer; five preserving private native revisions|Actual final residence capture, token ordering, digest and XML corrections; root and completed strongest R3 review|
-|SCALE-R|001..004|Strongest read-only reviewer|StoppedD/E; full exact source/test/lifetime/resource review before integration|
-|SCALE-I|001..008|Root sole repository join/Git owner|Complete reviewedD/E/R; fresh Release/focused normal+scalar/full/format/governance; preserve eligible current main scope|
-|SCALE-N|003..006|Root actual local runtime owner|Genuine100K then1M on the ZoneTree provider after the previous value/resource gate; full8cell machine/source-bound originals, never site figures|
-|SCALE-H|002..004/006|Luna read-only native hot-path research; private source report only|Independent of runningN; rank source-backed profile targets without executing load or changing contracts; root joins with actual original measurements before any optimization contract|
-|SCALE-PV|002..004/006|Luna read-only pinned upstream native source research; private report only|StoppedH package pins; verify native defaults/read internals through primary source without code/runtime mutation; root joins with originalN before changing any setting|
-|SCALE-B|007/008|Root contracts/integration then disjoint workers|Freeze real public SDK/MCP/index/range/complex-query and native-peer contracts; exact-source GitHub hardware/cohort/fault gates|
-
-Full relevant pre-source baseline: actual full26-project Release0warnings/errors;
-TUnit2641/2641passed/0failed/0skipped. Original local TRX
-artifacts/local/full-unit-scale-baseline/KeyLoad.UnitTests_net10.0_arm64.trx
-SHA2567dda1e7702acc17182f92e454d576feb1beb2e8c0d2dc9cc83ae6b12d035a6ea.
-Later shared-source changes require fresh integrated checks. The prior native
-unknown-header null guard, pending-status oracle, stored corruption-error oracle
-and pre-cancelled membership cases all passed this baseline. Real intensive update
-ResourceExhausted after approximately40K successes remains unattributed; retain
-actual counters and never raise quotas without diagnosis. Short raw control rows
-remain unqualified speed evidence.
-
-Ordered final gates: independent source review; Release solution build with real
-analyzers and numeric limits; focused normal/scalar then full relevant regressions;
-formatter; original governance validator; reviewed eligible-current main commit,
-fetch/ordinary merge/push and remote confirmation. Actual process recovery and
-Docker/Aspire RF3 via .NET/officialMCP, genuine database comparison, numeric coverage,
-endurance/fault qualification remain required. No skill/tool installation. The
-installed Orleans skill applies if PhaseB changes routing/authority and produces
-a concrete boundary/failure-contract review.
-
-Historical local verification snapshot (2026-10-03): the source then under review was joined. The recorded full Release r7 passed with
-zero warnings/errors; genuine local normal54/54 and scalar54/54 passed without
-skips, source drift or unsettled owned process groups. historical report (removed from repository)
-records the exact source/assembly hashes and original TRX. At that snapshot, the
-100K BDN run was still in progress; it did not establish completion of the current
-8-cell profile. Current qualification status is tracked separately. The strict
-scaled-report parser and genuine cold manifest producer remain OPEN in source.
-PhaseB, numeric coverage, powerloss and whole-product comparative qualification
-remain OPEN.
-
-Historical r2 failed8 analyzer checks: IDE0031, CA2213 tree/session/store/settings,
-CA1816, IDE0059 and IDE0005. Preserving direct close/clear-after-success, public
-SuppressFinalize, definite assignment and import repairs now compile in r7.
-The first focused run failed16/51 (seven invalid ZoneTree mini limits, nine
-macOS zero peaks); [runtime repairs](ScaledRuntimeRepairs.md) subsequently pass
-54/54 in both modes. Original failed outcomes remain retained as failed snapshots.
+Release solution build with real analyzers and numeric limits; focused normal/scalar
+then full relevant regressions; formatter; governance validator. Actual process
+recovery and Docker/Aspire replicated-cluster tests via .NET/official MCP, genuine
+database comparison, numeric coverage and endurance/fault qualification remain
+required. Short raw control rows are unqualified speed evidence, and quotas are never
+raised without diagnosis.

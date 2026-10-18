@@ -30,7 +30,7 @@ internal static class EventMessageSensitivePublicAssertions
         await Assert.That(headers).IsEqualTo(EventMessageSensitivePublicProtocol.Headers);
     }
 
-    internal static async Task ReplayAsync(RequestCqrsRf3Callers root, RequestCqrsRf3Callers caller,
+    internal static async Task ReplayAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers caller,
         EventMessageSensitivePublicState state, CancellationToken token)
     {
         foreach (var route in QueueLifecyclePublicProtocol.Routes)
@@ -42,7 +42,7 @@ internal static class EventMessageSensitivePublicAssertions
         await ReceiptReplayAsync(root, caller, state, token);
     }
 
-    internal static async Task ReceiptReplayAsync(RequestCqrsRf3Callers root, RequestCqrsRf3Callers caller,
+    internal static async Task ReceiptReplayAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers caller,
         EventMessageSensitivePublicState state, CancellationToken token)
     {
         foreach (var route in QueueLifecyclePublicProtocol.Routes)

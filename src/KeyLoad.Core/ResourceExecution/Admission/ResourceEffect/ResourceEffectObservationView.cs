@@ -1,36 +1,11 @@
 using System.Collections.Immutable;
-using KeyLoad.Core.Features.ClusterRouting.Authorization;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.ResourceExecution;
 
 internal class ResourceEffectObservationView(IKeyValueView inner, ResourceEffectBindingScope scope)
-    : IKeyValueView, IResourceEffectObservation, IPartitionMovementReadScope
+    : IKeyValueView, IResourceEffectObservation
 {
-    private bool movementAuthorityAbsent;
-    bool IPartitionMovementReadScope.MovementAuthorityAbsent
-    {
-        get => inner is IPartitionMovementReadScope movement ? movement.MovementAuthorityAbsent
-            : inner is not IAtomicTransaction && movementAuthorityAbsent;
-        set
-        {
-            if (inner is IPartitionMovementReadScope movement)
-            {
-                movement.MovementAuthorityAbsent = value;
-            }
-            else if (inner is not IAtomicTransaction)
-            {
-                movementAuthorityAbsent = value;
-            }
-        }
-    }
-    bool IPartitionMovementReadScope.CanReuseCommittedMovementAbsence
-        => inner is IPartitionMovementReadScope movement ? movement.CanReuseCommittedMovementAbsence
-            : inner is not IAtomicTransaction;
-    bool IPartitionMovementReadScope.CanPublishCommittedMovementAbsence
-        => inner is IPartitionMovementReadScope movement ? movement.CanPublishCommittedMovementAbsence
-            : inner is not IAtomicTransaction;
-
     public void ObserveLifetime(ResourceLifetimeV1 lifetime) => scope.ObserveLifetime(lifetime);
     public void ObserveResource(PartitionRef partition, ResourceLifetimeV1 lifetime) => scope.Observe(partition, lifetime);
     public int MaximumRangeRecords => inner.MaximumRangeRecords;

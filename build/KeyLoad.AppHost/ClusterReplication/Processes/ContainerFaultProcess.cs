@@ -49,7 +49,7 @@ internal static class ContainerFaultProcess
             if (primary is not null)
             {
                 failures.Add(primary);
-                var cleanup = LocalRf3OwnedProcessLifetime.TerminateAndJoinAsync(process,
+                var cleanup = LocalClusterOwnedProcessLifetime.TerminateAndJoinAsync(process,
                     exit ?? Task.CompletedTask, output ?? Task.CompletedTask, error ?? Task.CompletedTask,
                     failures, options, TimeProvider.System);
                 var cleanupFailure = await OwnedProcessFailureObserver.CaptureAsync(cleanup).ConfigureAwait(false);
@@ -71,9 +71,9 @@ internal static class ContainerFaultProcess
             using var deadline = new CancellationTokenSource(options.Value.ApplicationCleanupTimeout, TimeProvider.System);
             using var lifetime = CancellationTokenSource.CreateLinkedTokenSource(token, deadline.Token);
             exit = process.WaitForExitAsync(CancellationToken.None);
-            output = LocalRf3OwnedProcessLifetime.ReadBoundedAsync(process.StandardOutput, MaximumOutputCharacters);
-            error = LocalRf3OwnedProcessLifetime.ReadBoundedAsync(process.StandardError, MaximumOutputCharacters);
-            await LocalRf3OwnedProcessLifetime.ObserveAsync(exit, output, error, TimeProvider.System, lifetime.Token).ConfigureAwait(false);
+            output = LocalClusterOwnedProcessLifetime.ReadBoundedAsync(process.StandardOutput, MaximumOutputCharacters);
+            error = LocalClusterOwnedProcessLifetime.ReadBoundedAsync(process.StandardError, MaximumOutputCharacters);
+            await LocalClusterOwnedProcessLifetime.ObserveAsync(exit, output, error, TimeProvider.System, lifetime.Token).ConfigureAwait(false);
             return (process.ExitCode, await output.ConfigureAwait(false), await error.ConfigureAwait(false));
         }
     }

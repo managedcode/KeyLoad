@@ -23,7 +23,7 @@ internal static class ClusterFixturePhysicalShardIdentity
         }
         if (!ClusterFixtureProtocol.IsNodeName(nodeName) || identity == Guid.Empty)
         {
-            throw new ArgumentException("The physical-shard override must identify one RF3 voter and a nonempty identity.");
+            throw new ArgumentException("The physical-shard override must identify one CLUSTER voter and a nonempty identity.");
         }
         var node = builder.CreateResourceBuilder(builder.Resources.OfType<ContainerResource>()
             .Single(resource => resource.Name == nodeName));

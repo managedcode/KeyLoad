@@ -13,8 +13,8 @@ internal sealed class OrleansNodeClosure
     internal bool IsJoined => Volatile.Read(ref completed);
 
     internal static bool KnownOwnersJoined(NativeRequestWorkOwner work, RemoteDocumentRuntime? documents,
-        PartitionMovementRuntime? movement, RemoteGraphNodeResources graphs)
-        => work.IsJoined && (documents?.IsJoined ?? true) && (movement?.IsJoined ?? true) && graphs.IsJoined;
+        RemoteGraphNodeResources graphs)
+        => work.IsJoined && (documents?.IsJoined ?? true) && graphs.IsJoined;
 
     internal void Complete(IReadOnlyCollection<Exception> cleanupFailures)
     {

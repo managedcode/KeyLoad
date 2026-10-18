@@ -3,7 +3,7 @@ using KeyLoad.Comparisons.Targets;
 
 namespace KeyLoad.UnitTests.Features.BenchmarkComparisons;
 
-/// <summary>AC-METH-004: final native RF3 copy proof rejects stale membership and incomplete final durability/readback.</summary>
+/// <summary>AC-METH-004: final native CLUSTER copy proof rejects stale membership and incomplete final durability/readback.</summary>
 internal sealed class DocumentFinalCopyProofTests
 {
     [Test]

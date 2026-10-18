@@ -7,7 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.GraphTraversal;
 
 internal static class GraphPathRawReadR43Reads
 {
-    internal static async Task StageAsync(RequestCqrsRf3Callers admin, RequestCqrsRf3Callers reader,
+    internal static async Task StageAsync(RequestCqrsClusterCallers admin, RequestCqrsClusterCallers reader,
         GraphPathRawReadR43State state, CancellationToken token)
     {
         foreach (var sql in new[] { false, true })
@@ -17,8 +17,8 @@ internal static class GraphPathRawReadR43Reads
                 : await reader.Sdk.ShortestPathAsync(state.Request(), token));
             await ResultAsync(sdk, state);
             await GraphPathRawReadR43Current.ObserveAsync(admin, state, token);
-            var reply = sql ? await reader.Mcp.CallAsync(GraphPathRf3Scenario.SqlTool, state.Sql(), token)
-                : await reader.Mcp.CallAsync(GraphPathRf3Scenario.DirectTool, state.Request(), token);
+            var reply = sql ? await reader.Mcp.CallAsync(GraphPathClusterScenario.SqlTool, state.Sql(), token)
+                : await reader.Mcp.CallAsync(GraphPathClusterScenario.DirectTool, state.Request(), token);
             await ResultAsync((await McpCallerAssertions.SuccessAsync<GraphShortestPathResult>(reply)).Value, state);
             if (state.Allowed)
             {
@@ -28,7 +28,7 @@ internal static class GraphPathRawReadR43Reads
             else
             {
                 await McpCallerAssertions.DoesNotDiscloseAsync(reply, state.Identity.Secret,
-                    GraphPathRf3Scenario.SecretMarker);
+                    GraphPathClusterScenario.SecretMarker);
             }
             await GraphPathRawReadR43Current.ObserveAsync(admin, state, token);
         }
@@ -39,8 +39,8 @@ internal static class GraphPathRawReadR43Reads
         await Assert.That(result.Version).IsEqualTo(1);
         await Assert.That(result.Found).IsTrue();
         await Assert.That(result.Hops).IsEqualTo(2);
-        await SqlRf3Protocol.EqualAsync(state.Vertices, result.Vertices.ToArray());
-        await SqlRf3Protocol.EqualAsync(state.ProjectedEdges, result.Edges.ToArray());
+        await SqlClusterProtocol.EqualAsync(state.Vertices, result.Vertices.ToArray());
+        await SqlClusterProtocol.EqualAsync(state.ProjectedEdges, result.Edges.ToArray());
         await Assert.That(result.CutPosition).IsGreaterThan(0L);
     }
 }

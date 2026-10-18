@@ -9,8 +9,8 @@ internal static class BlobRowCreatorPublicPublication
 {
     internal static readonly byte[] Bytes = [17, 29, 43, 61];
 
-    internal static async Task<BlobSupersessionPublicTrial.Version> RunAsync(RequestCqrsRf3Callers creator,
-        RequestCqrsRf3Callers other, McpPersistedIdentity creatorIdentity, McpPersistedIdentity otherIdentity,
+    internal static async Task<BlobSupersessionPublicTrial.Version> RunAsync(RequestCqrsClusterCallers creator,
+        RequestCqrsClusterCallers other, McpPersistedIdentity creatorIdentity, McpPersistedIdentity otherIdentity,
         BlobRef blob, CancellationToken token)
     {
         var begin = new BeginBlobUploadRequest(Guid.NewGuid(), blob, Guid.NewGuid(), Bytes.LongLength, 0,
@@ -42,7 +42,7 @@ internal static class BlobRowCreatorPublicPublication
         await Assert.That(completed.Value.VersionId).IsEqualTo(begin.UploadId);
         await Assert.That(completed.Value.PartCount).IsEqualTo(1);
         await Assert.That(completed.Value.IntegrityHash).IsEqualTo(hash);
-        await SqlRf3Protocol.EqualAsync(begin.Access, completed.Value.Access);
+        await SqlClusterProtocol.EqualAsync(begin.Access, completed.Value.Access);
         var published = new BlobSupersessionPublicTrial.Version(begin, begun, part, written, complete, completed);
         await BlobRowCreatorPublicAssertions.CurrentAsync(creator, published, token);
         await BlobRowCreatorPublicReplay.RunAsync(creator, published, token);

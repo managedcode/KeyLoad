@@ -1,7 +1,7 @@
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
-using static KeyLoad.IntegrationTests.Features.ClusterReplication.DocumentSessionReadRf3Protocol;
+using static KeyLoad.IntegrationTests.Features.ClusterReplication.DocumentSessionReadClusterProtocol;
 using static KeyLoad.IntegrationTests.Features.ClusterReplication.ReplicaIsolationFlowProtocol;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
@@ -45,7 +45,7 @@ internal static class ReplicaIsolationFlowAssertions
         CommitToken?[] minima = [null, original, minimum];
         foreach (var token in minima)
         {
-            await DocumentSessionReadRf3NoQuorum.VerifyAsync(sdk, mcp, reference, token, secret, cancellationToken);
+            await DocumentSessionReadClusterNoQuorum.VerifyAsync(sdk, mcp, reference, token, secret, cancellationToken);
         }
     }
 
@@ -58,10 +58,10 @@ internal static class ReplicaIsolationFlowAssertions
             await McpCallerAssertions.SdkSuccessAsync(await client.CommitAsync(command, cancellationToken)));
         await EqualReceiptAsync(receipt, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
             await official.CallAsync(McpCallerTools.DocumentsCommit, command, cancellationToken))).Value);
-        var call = SqlRf3Protocol.Call(command.Partition, McpCallerTools.DocumentsCommit, command);
-        await EqualReceiptAsync(receipt, await SqlRf3Protocol.SdkAsync<CommitReceipt>(client, call, cancellationToken));
-        await EqualReceiptAsync(receipt, await SqlRf3Protocol.McpAsync<CommitReceipt>(official, call, cancellationToken));
-        await SqlRf3Protocol.EqualAsync(before, await McpCallerAssertions.SdkSuccessAsync(
+        var call = SqlClusterProtocol.Call(command.Partition, McpCallerTools.DocumentsCommit, command);
+        await EqualReceiptAsync(receipt, await SqlClusterProtocol.SdkAsync<CommitReceipt>(client, call, cancellationToken));
+        await EqualReceiptAsync(receipt, await SqlClusterProtocol.McpAsync<CommitReceipt>(official, call, cancellationToken));
+        await SqlClusterProtocol.EqualAsync(before, await McpCallerAssertions.SdkSuccessAsync(
             await client.OutboxStatusAsync(command.Partition, cancellationToken)));
     }
 

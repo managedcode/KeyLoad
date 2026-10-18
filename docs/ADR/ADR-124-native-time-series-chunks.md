@@ -2,9 +2,9 @@
 
 Status: Proposed; implementation and qualification pending.
 
-# KL078 whole native chunk implementation contract — source freeze R1
+## Native chunk implementation contract
 
-Original task: architecture §27.6 and KL078; existing REQ-SERIES-017..020 / AC-CHUNK-001..006 remain unchanged transient codec controls. This stage adds REQ/AC-SERIES-CHUNK-007..012. No benchmark, power-loss, acceleration or whole-task PASS is implied by source.
+Scope: architecture §27.6; existing REQ-SERIES-017..020 / AC-CHUNK-001..006 remain unchanged transient codec controls. This stage adds REQ/AC-SERIES-CHUNK-007..012. No benchmark, power-loss, acceleration or whole-task PASS is implied by source.
 
 007: A persisted, same-atomic-partition open window receives every new acknowledged sample in its exact half-open UTC range. Equal UTC timestamp uses actual original sample Sequence, original offset and IEEE bits; duplicate EventId retains original existing fingerprint semantics. Enrollment starts only at an admitted canonical source cut; no backfill or migration. Explicit Open rejects any preexisting raw sample in the window (no synthesized old enrollment), overlap and retained identity reuse. Fresh current persisted SeriesManage/SeriesRead and ordinary SeriesAppend remain required.
 
@@ -45,11 +45,11 @@ Native ApplyCommittedCommand uses the original admitted operation business time 
 
 ## Ownership/order/qualification
 
-1. This contract plus TimeSeries/ADR124 appendices before implementation; ADR124 is reserved only if the live number/path is absent.
-2. Abstractions TimeSeries typed roles; Core TimeSeries contracts/storage/commands/queries/serialization/config; additive shared Mutation discriminators/authorizer/dispatcher; Orleans TimeSeries StatelessWorker maintenance grains and native read branch; Server/Client existing typed transport; independent literal catalog tuple addition coordinated with root.
+1. This contract plus TimeSeries/ADR124 appendices precede implementation.
+2. Abstractions TimeSeries typed roles; Core TimeSeries contracts/storage/commands/queries/serialization/config; additive shared Mutation discriminators/authorizer/dispatcher; Orleans TimeSeries StatelessWorker maintenance grains and native read branch; Server/Client existing typed transport; independent literal catalog tuple addition.
 3. Unit full native lifecycle/mixed rollback/privacy/corruption/cancel controls; Recovery real CrashHost cuts; Integration genuine Aspire SDK/official MCP/Q1/cold/worker revoke→healthy, all original readers/processes/resources joined.
-4. Root sole guarded live join/compiler/census/Linux evidence owner. New source methods/arguments are not native UID/count/PASS. Normal/scalar and every mandatory global suite/performance/fault gate remain open until authenticated exact-source originals.
+4. Join, compiler, census and Linux evidence are produced once for the integrated source. New source methods/arguments are not native UID/count/PASS. Normal/scalar and every mandatory global suite/performance/fault gate remain open until authenticated exact-source originals.
 5. Rollback unpublished source as a coherent stage only; after publishing records no format downgrade, metadata deletion, automatic raw fallback or fabricated current authority.
 
 
-R2 clarification: MaximumChunkWindows=32, MaximumChunkWindowRecords=4096, MaximumChunkCorrections=256 and MaximumPendingChunkWindows=32 are centrally validated purpose-owned properties on the existing TimeSeriesExecutionOptions. Existing registration/OptionsFactory remains. The same original IOptions owner is retained for codec calls; no Options.Create/default wrapper. Merge hints confer no rights; creator/current state is reread at the native current barrier before connection-grain dispatch. Worker pool size, buffer size and timer interval are centrally validated typed options. A merge CAS failure is genuine persisted outcome; a revised authoritative window intent has a distinct stable command identity and cannot silently change the body under the failed ID.
+Chunk window bounds: MaximumChunkWindows=32, MaximumChunkWindowRecords=4096, MaximumChunkCorrections=256 and MaximumPendingChunkWindows=32 are centrally validated purpose-owned properties on the existing TimeSeriesExecutionOptions. Existing registration/OptionsFactory remains. The same original IOptions owner is retained for codec calls; no Options.Create/default wrapper. Merge hints confer no rights; creator/current state is reread at the native current barrier before connection-grain dispatch. Worker pool size, buffer size and timer interval are centrally validated typed options. A merge CAS failure is genuine persisted outcome; a revised authoritative window intent has a distinct stable command identity and cannot silently change the body under the failed ID.

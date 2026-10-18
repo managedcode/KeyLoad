@@ -6,29 +6,29 @@ namespace KeyLoad.IntegrationTests.Features.GraphTraversal;
 
 internal static class GraphPathRebindR44Current
 {
-    internal static async Task ObserveAsync(RequestCqrsRf3Callers admin, GraphPathRebindR44State state,
+    internal static async Task ObserveAsync(RequestCqrsClusterCallers admin, GraphPathRebindR44State state,
         CancellationToken token)
     {
         foreach (var vertex in state.Vertices)
         {
             var document = new DocumentResult(vertex, 1L, "{}", false, []);
-            await SqlRf3Protocol.EqualAsync(document, await PublicReadAssertions.DocumentAsync(await admin.Sdk.GetAsync(vertex, token)));
-            await SqlRf3Protocol.EqualAsync(document, (await PublicReadAssertions.DocumentAsync(
+            await SqlClusterProtocol.EqualAsync(document, await PublicReadAssertions.DocumentAsync(await admin.Sdk.GetAsync(vertex, token)));
+            await SqlClusterProtocol.EqualAsync(document, (await PublicReadAssertions.DocumentAsync(
                 await admin.Mcp.CallAsync(McpCallerTools.DocumentsGet, new GetDocumentRequest(vertex), token))).Value);
-            var request = new TraverseRequest(state.Seed.Partition, GraphPathRf3Scenario.Graph, vertex, 1, 4, 4);
-            await SqlRf3Protocol.EqualAsync(state.Outgoing(vertex), await McpCallerAssertions.SdkSuccessAsync(
+            var request = new TraverseRequest(state.Seed.Partition, GraphPathClusterScenario.Graph, vertex, 1, 4, 4);
+            await SqlClusterProtocol.EqualAsync(state.Outgoing(vertex), await McpCallerAssertions.SdkSuccessAsync(
                 await admin.Sdk.TraverseAsync(request, token)));
-            await SqlRf3Protocol.EqualAsync(state.Outgoing(vertex), (await McpCallerAssertions.SuccessAsync<global::KeyLoad.GraphTraversal>(
+            await SqlClusterProtocol.EqualAsync(state.Outgoing(vertex), (await McpCallerAssertions.SuccessAsync<global::KeyLoad.GraphTraversal>(
                 await admin.Mcp.CallAsync(McpCallerTools.GraphTraverse, request, token))).Value);
             await IncomingAsync(admin, state, vertex, token);
         }
-        await SqlRf3Protocol.EqualAsync(state.Outbox, await OutboxAsync(admin, state, token));
+        await SqlClusterProtocol.EqualAsync(state.Outbox, await OutboxAsync(admin, state, token));
     }
 
-    private static async Task IncomingAsync(RequestCqrsRf3Callers admin, GraphPathRebindR44State state,
+    private static async Task IncomingAsync(RequestCqrsClusterCallers admin, GraphPathRebindR44State state,
         EntityRef vertex, CancellationToken token)
     {
-        var request = new ReadIncomingGraphEdgesRequestV1(1, vertex, GraphPathRf3Scenario.Graph, 4);
+        var request = new ReadIncomingGraphEdgesRequestV1(1, vertex, GraphPathClusterScenario.Graph, 4);
         var rows = state.Edges.Where(edge => edge.To == vertex).OrderBy(edge => edge.From.Collection, StringComparer.Ordinal)
             .ThenBy(edge => edge.From.Id, StringComparer.Ordinal).ThenBy(edge => edge.Id, StringComparer.Ordinal)
             .Select(edge => new GraphIncomingEdgeRowV1(edge, 0L)).ToArray();
@@ -40,17 +40,17 @@ internal static class GraphPathRebindR44Current
 
     private static async Task PageAsync(GraphIncomingEdgesPageV1 page, GraphIncomingEdgeRowV1[] rows)
     {
-        await SqlRf3Protocol.EqualAsync(rows, page.Rows.ToArray());
+        await SqlClusterProtocol.EqualAsync(rows, page.Rows.ToArray());
         await Assert.That(page.Version).IsEqualTo(1);
         await Assert.That(page.CutPosition).IsGreaterThan(0L);
-        await Assert.That(page.Projection).IsEqualTo(GraphIncomingRf3Scenario.Projection);
+        await Assert.That(page.Projection).IsEqualTo(GraphIncomingClusterScenario.Projection);
     }
 
-    internal static async Task<OutboxStatus> OutboxAsync(RequestCqrsRf3Callers admin,
+    internal static async Task<OutboxStatus> OutboxAsync(RequestCqrsClusterCallers admin,
         GraphPathRebindR44State state, CancellationToken token)
     {
         var current = await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.OutboxStatusAsync(state.Seed.Partition, token));
-        await SqlRf3Protocol.EqualAsync(current, (await McpCallerAssertions.SuccessAsync<OutboxStatus>(
+        await SqlClusterProtocol.EqualAsync(current, (await McpCallerAssertions.SuccessAsync<OutboxStatus>(
             await admin.Mcp.CallAsync(McpCallerTools.OutboxStatus, new GetOutboxStatusRequest(state.Seed.Partition), token))).Value);
         return current;
     }

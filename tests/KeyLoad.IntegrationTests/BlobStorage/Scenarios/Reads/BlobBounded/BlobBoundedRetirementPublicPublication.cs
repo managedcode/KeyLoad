@@ -10,7 +10,7 @@ internal static class BlobBoundedRetirementPublicPublication
         WriteBlobPartRequest[] Parts, BlobCommitResult<BlobUploadInfo>[] Written,
         CompleteBlobUploadRequest Complete, BlobCommitResult<BlobMetadata> Completed, byte[] Bytes);
 
-    internal static async Task<Published> CreateAsync(RequestCqrsRf3Callers callers, BlobRef blob,
+    internal static async Task<Published> CreateAsync(RequestCqrsClusterCallers callers, BlobRef blob,
         long expectedRevision, byte[] bytes, CancellationToken token)
     {
         var begin = new BeginBlobUploadRequest(Guid.NewGuid(), blob, Guid.NewGuid(), bytes.LongLength, expectedRevision);

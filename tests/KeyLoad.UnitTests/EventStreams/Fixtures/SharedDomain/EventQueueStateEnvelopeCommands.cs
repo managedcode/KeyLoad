@@ -11,7 +11,7 @@ internal static class EventQueueStateEnvelopeCommands
 {
     internal static CommitToken NextToken(EventQueueStateEnvelopeFixture fixture)
     {
-        var placement = fixture.Database.ReadAtomicPartitionPlacement(Root, new(PlacementRequestVersion, fixture.Partition));
+        var placement = fixture.Database.ReadAtomicPartitionPlacement(Root, fixture.Partition);
         return new(placement.Incarnation, fixture.Partition.AtomicPartitionId,
             checked(fixture.Store.Position + CommitPositionStep), placement.PlacementEpoch);
     }

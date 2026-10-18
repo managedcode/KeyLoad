@@ -11,7 +11,7 @@ internal static class SlowBodyAdmissionReturnAttempt
 {
     private const string UnexpectedResponse = "The incomplete original request unexpectedly returned an HTTP response: ";
 
-    internal static async Task RunAsync(ClusterFixture fixture, RequestCqrsRf3Callers root,
+    internal static async Task RunAsync(ClusterFixture fixture, RequestCqrsClusterCallers root,
         EarlyAdmissionQualificationState state, SlowBodyAdmissionReturnMode mode, CancellationToken token)
     {
         var failures = new List<Exception>();
@@ -55,13 +55,13 @@ internal static class SlowBodyAdmissionReturnAttempt
     }
     private static async Task SettleAsync(SlowBodyAdmissionReturnTransport transport,
         SlowBodyAdmissionReturnBody body, CancellationTokenSource canceled, Task<HttpResponseMessage>? pending,
-        HttpAdmissionStatus? baseline, RequestCqrsRf3Callers root, SlowBodyAdmissionReturnMode mode,
+        HttpAdmissionStatus? baseline, RequestCqrsClusterCallers root, SlowBodyAdmissionReturnMode mode,
         List<Exception> failures)
     {
         // Abort independently even when the hold or counter oracle failed; preserve every original failure.
         ServerFailureObserver.Observe(() => transport.Disconnect(requireConnected: false), failures);
         body.Release();
-        using var cleanup = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline, TimeProvider.System);
+        using var cleanup = new CancellationTokenSource(RequestCqrsClusterProtocol.CleanupDeadline, TimeProvider.System);
         if (pending is not null)
         {
             await ServerFailureObserver.ObserveAsync(() => TerminalAsync(pending, mode, canceled.Token, cleanup.Token), failures);
@@ -69,7 +69,7 @@ internal static class SlowBodyAdmissionReturnAttempt
             await ServerFailureObserver.ObserveAsync(canceled.CancelAsync, failures);
             if (!pending.IsCompleted)
             {
-                using var finalJoin = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline, TimeProvider.System);
+                using var finalJoin = new CancellationTokenSource(RequestCqrsClusterProtocol.CleanupDeadline, TimeProvider.System);
                 await ServerFailureObserver.ObserveAsync(() => TerminalAsync(pending, mode, canceled.Token, finalJoin.Token), failures);
                 if (body.Entered.IsCompleted)
                 {

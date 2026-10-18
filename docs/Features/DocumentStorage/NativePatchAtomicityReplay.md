@@ -1,7 +1,7 @@
 # Native late-patch atomicity and retained replay
 
 Canonical slice: DocumentStorage. This extends REQ-DSTORE-001/002/007 and ADR-002,
-ADR-017, ADR-060 and ADR-117 without changing product formats or admission.
+ADR-060 and ADR-117 without changing product formats or admission.
 
 ## Requirements and acceptance
 
@@ -16,7 +16,7 @@ ADR-017, ADR-060 and ADR-117 without changing product formats or admission.
 Tests: `tests/KeyLoad.UnitTests/DocumentStorage/` owns Cases,
 Fixtures, Helpers, Assertions and Contracts roles for this scenario.
 Backend and shared contracts: existing native document batch implementation and
-current generated serializers; no product change. Frontend, SDK/MCP and RF3:
+current generated serializers; no product change. Frontend, SDK/MCP and cluster:
 N/A for this isolated native functional regression; their original qualification
 gates remain separate and mandatory.
 
@@ -43,5 +43,5 @@ fixture; they are not a concurrent cross-store snapshot or full raw journal dump
 
 Requirements authored before code. This scenario adds native source coverage.
 Compiler, native TUnit execution, delivered-source Linux, process recovery and
-Docker/Aspire RF3 qualification are OPEN. Two same-process cold owner reopens
+Docker/Aspire cluster qualification are OPEN. Two same-process cold owner reopens
 do not prove process-kill or power-loss durability.

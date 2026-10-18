@@ -52,7 +52,7 @@ internal static class AnnProviderQualificationProducer
     {
         token.ThrowIfCancellationRequested();
         var id = Guid.NewGuid();
-        var placement = owner.Database.ReadAtomicPartitionPlacement(Root, new(PlacementVersion, owner.Source.Partition));
+        var placement = owner.Database.ReadAtomicPartitionPlacement(Root, owner.Source.Partition);
         var next = checked(owner.Native.ReadJournalCut().LastIndex + NextJournalEntry);
         var expected = new CommitReceipt(id, new(placement.Incarnation, owner.Source.Partition.AtomicPartitionId,
             next, placement.PlacementEpoch), receipts, DurabilityProfile.ProcessDurable);

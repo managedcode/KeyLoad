@@ -3,7 +3,7 @@ using KeyLoad.Client;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
-[ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = "rf3")]
+[ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = "cluster")]
 [NotInParallel]
 internal sealed class RequestIdReceiptTests(ClusterFixture fixture)
 {

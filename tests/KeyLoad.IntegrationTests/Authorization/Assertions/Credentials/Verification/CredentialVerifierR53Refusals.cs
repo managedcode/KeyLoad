@@ -17,7 +17,7 @@ internal static class CredentialVerifierR53Refusals
         await PrivateAsync(JsonSerializer.Serialize(refused, JsonDefaults.Options), state, verifier);
         await Assert.That(refused.IsSuccess).IsFalse();
         await Assert.That(refused.Value).IsNull();
-        await SqlRf3Protocol.EqualAsync(Errors.Problem(ErrorCode.Unauthenticated,
+        await SqlClusterProtocol.EqualAsync(Errors.Problem(ErrorCode.Unauthenticated,
             CredentialVerifierR53Protocol.UnavailableDetail), refused.Problem);
     }
 

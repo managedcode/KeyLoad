@@ -10,13 +10,9 @@ internal static class GrainPartitionResolver
         OperationKind.RemoteGraphSource or OperationKind.RemoteGraphReceive or OperationKind.RemoteGraphComplete
             => GrainRemoteGraphCommand.Resolve(request),
         OperationKind.EventFeedControl or OperationKind.EventFeedSourcePhase => GrainEventVectorSourceCommand.Resolve(request),
-        OperationKind.PartitionMovementPhase => GrainPartitionMovementCommand.Resolve(request),
         OperationKind.ResourceRetirementPhase => GrainResourceRetirementCommand.Resolve(request),
         OperationKind.OnlineTextPublicationPhase => GrainOnlineTextPublicationCommand.Resolve(request),
         OperationKind.Bm25CorpusPublicationPhase => GrainBm25CorpusPublicationCommand.Resolve(request),
-        OperationKind.PlacementIntentPhase => GrainPlacementIntentCommand.Resolve(request),
-        OperationKind.ConfigurePlacementPolicy => PlacementHeaderRoute<ConfigurePlacementPolicyRequest>(request, static value => value.ControlPartition),
-        OperationKind.PersistPlacementIntent => PlacementHeaderRoute<PersistPlacementIntentRequest>(request, static value => value.ControlPartition),
         OperationKind.Batch when request.Envelope.Purpose == RemoteTransferPeerProtocol.GrainPurpose
             => GrainRemoteTransferCommand.Resolve(request),
         OperationKind.Batch => Route<CommandRequest>(request, value => (value.CommandId, value.Partition)),
@@ -41,22 +37,11 @@ internal static class GrainPartitionResolver
         OperationKind.DeleteBlob => Route<DeleteBlobRequest>(request, value => (value.CommandId, value.Blob.Partition)),
         OperationKind.ReclaimBlob => Route<ReclaimBlobRequest>(request, value => (value.CommandId, value.Blob.Partition)),
         OperationKind.ConfigureResource or OperationKind.CreateTable or OperationKind.DropTable or OperationKind.SetDispatch or OperationKind.BootstrapPhysicalShardCatalog
-            or OperationKind.RegisterPhysicalOwner or OperationKind.BindAtomicPartitionPlacement or OperationKind.RuntimeJournal
+            or OperationKind.RegisterPhysicalOwner or OperationKind.RuntimeJournal
             => GrainRoutingProtocol.CatalogPartition,
         OperationKind.ConfigurePrincipal or OperationKind.ConfigureApiKey => GrainRoutingProtocol.AuthorizationPartition,
         _ => throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest)
     };
-
-    private static string PlacementHeaderRoute<T>(DecodedGrainRequest request, Func<T, PartitionRef> select)
-    {
-        if (request.Envelope.CommandId == Guid.Empty)
-        {
-            throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
-        }
-        var partition = select(GrainNativePayload.ReadCommand<T>(request.Payload));
-        DatabaseEngine.ValidatePartition(partition);
-        return partition.AtomicPartitionId;
-    }
 
     private static string Route<T>(DecodedGrainRequest request, Func<T, (Guid CommandId, PartitionRef Partition)> identity)
     {

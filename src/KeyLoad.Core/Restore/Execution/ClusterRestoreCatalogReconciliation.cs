@@ -73,7 +73,6 @@ public static class ClusterRestoreCatalogReconciliation
                 }, sourceOrigin, limits.Value);
         }
         StageCatalog(transaction, original, mappings, selected.Target);
-        StagePlacements(transaction, original, mappings, work);
         transaction.Put(KeyCodec.Encode(MarkerSpace, MarkerVersion), marker);
         work.Check();
         transaction.ValidateCommit();
@@ -140,25 +139,6 @@ public static class ClusterRestoreCatalogReconciliation
             var revision = original.RegisteredOwners?.Revision ?? PhysicalOwnerDirectoryProtocol.RevisionStep;
             var directory = new PhysicalOwnerDirectoryV1(PhysicalOwnerDirectoryProtocol.Version, revision, target, owners);
             transaction.Put(PhysicalOwnerDirectorySerialization.Key(), PhysicalOwnerDirectorySerialization.Encode(directory));
-        }
-    }
-
-    private static void StagePlacements(IAtomicTransaction transaction, ClusterBackupOwnerCut original,
-        ImmutableArray<ClusterRestoreOwnerMapping> mappings, ReadExecutionBudget work)
-    {
-        foreach (var partition in original.Partitions)
-        {
-            work.Check();
-            if (partition.Placement.IsFallback)
-            {
-                continue;
-            }
-            var target = mappings.Single(mapping => mapping.Source.PhysicalShardId == partition.Placement.PhysicalShardId).Target;
-            var row = new AtomicPartitionPlacementV1(AtomicPartitionPlacementProtocol.CurrentVersion,
-                partition.Roster.Partition, target.PhysicalShardId, partition.Placement.Revision,
-                target.Incarnation, target.VoterIds, target.PlacementEpoch);
-            transaction.Put(AtomicPartitionPlacementSerialization.RowKey(row.Partition),
-                AtomicPartitionPlacementSerialization.SerializeBounded(row));
         }
     }
 }

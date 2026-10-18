@@ -1,15 +1,5 @@
 # ADR-047: public embedded benchmark scenarios and typed executable
 
-The 2026-10-05 native placement prerequisite preserves REQ-BC-022 / AC-EM-002/003's
-real embedded microbenchmark contract: its setup must bootstrap a native physical
-catalog using that actual local store's NodeId/Incarnation and one explicit local
-voter before the existing ConfigureResource/Batch seed. Use the existing Core
-native operation factory and persisted bootstrap command, outside measured
-methods, with the same TimeProvider.System clock and owned cleanup. Root owns
-the BenchmarkScenarios setup join and real fixture/generated-consumer regressions
-through Aspire. This is the existing embedded control, not RF3 or comparison
-topology qualification; its three measured methods and inputs remain unchanged.
-
 Status: Accepted; implementation and qualification pending.
 Related: REQ-BC-022, AC-EM-001..004, AC-CQ-007/008, ADR032/033/035.
 
@@ -26,7 +16,7 @@ BenchmarkComparisons ownership. Existing KeyLoad.Benchmarks remains the sole
 microbenchmark executable, with only a typed application runner selecting the
 fixture assembly. The public fixture CLR identity belongs to the library namespace; preserve the
 three method names/filter fragments and operation behavior. This is a benchmark tooling boundary, not a database product,
-RF3 topology, managed dependency replacement or comparative-report change.
+cluster topology, managed dependency replacement or comparative-report change.
 
 ```mermaid
 flowchart LR
@@ -41,18 +31,18 @@ flowchart LR
 
 Implementation contract, accepted before writes:
 
-1. Lead owns new policy, this ADR, feature/architecture and central project/solution
-   references/inventory/CI/status. W owns only new library source/csproj, existing
-   microbenchmark Program/csproj/new typed runner and NEW EmbeddedBenchmark* TUnit
-   sources. Exact permissions/task graph are in ADR-047-embedded-benchmark-host.md.
-2. W authors metadata/lifetime/actual-process assertions first, archives source
-   and tests-first hashes, then coherent fixture move and ownership/clock/keys/XML
+1. The new library source/csproj, the existing microbenchmark Program/csproj with a new typed
+   runner and new EmbeddedBenchmark* TUnit sources are one coherent unit; policy, this ADR,
+   feature/architecture and central project/solution references/inventory/CI are
+   updated with it.
+2. Author metadata/lifetime/actual-process assertions first and archive source
+   and tests-first hashes, then the coherent fixture move and ownership/clock/keys/XML
    repairs. Preserve seeding and every timed input/call/MemoryDiagnoser. Dispose
-   acquired resources on setup error and repeated/uninitialized cleanup. Lead
-   reviews complete failure/acquisition paths; environmental fault-path review is
+   acquired resources on setup error and repeated/uninitialized cleanup. Review
+   complete failure/acquisition paths; environmental fault-path review is
    explicit supplemental evidence, not a fake deterministic runtime test.
-3. Lead joins every diff, adds real references/inventory only after files exist,
-   verifies25-project strict policy and23 custom consumers, normal Release builds,
+3. Add real references/inventory only after files exist and
+   verify25-project strict policy and23 custom consumers, normal Release builds,
    generated registration,400/200/64/3, formatter/governance/import/diff and source
    provenance. Coverage and other source prerequisites stay explicitly pending.
 4. Exact-SHA GitHub TUnit invokes actual executable with Dry/full JSON. The pinned
@@ -60,7 +50,7 @@ Implementation contract, accepted before writes:
    supplies Method/Statistics/Measurements; all three need positive actual
    Workload/Result measurements and complete output/report retention. Exit0 alone
    is insufficient. No local runs, fake child or synthetic measurement evidence.
-5. Full required unit/recovery/Docker Aspire RF3 SDK/MCP and existing gates must
+5. Full required unit/recovery/Docker Aspire replicated-cluster SDK/MCP and existing gates must
    pass on the same delivered source. Dry results qualify runner execution only;
    comparative profiles/site/power-loss/endurance/production claims remain governed
    by their own gates. Update honest evidence before changing this ADR's status.
@@ -71,8 +61,7 @@ BenchmarkDotNet's CSharp4.14.0 requires exact Common4.14.0 while the real Orlean
 test graph already owns Common5.0.0. Before changing central dependencies, accept
 only the CSharp5.0.0 peer pin, whose actual nuspec requires exact Common5.0.0 and
 satisfies BenchmarkDotNet's minimum. Keep the existing Common/SDK/Orleans and
-ManagedCode pins, analyzer SDK assets and all diagnostics unchanged. Lead alone
-owns that shared configuration; actual paired restore, enabled builds and stage4's
+ManagedCode pins, analyzer SDK assets and all diagnostics unchanged. This shared configuration has a single owner; actual paired restore, enabled builds and stage4's
 real Dry generated consumer are required compatibility evidence. Rollback of the
 complete benchmark join also removes the new peer pin; removing it alone leaves
 the invalid graph and is not an accepted rollback. No ManagedCode release or
@@ -80,5 +69,5 @@ persisted-data change follows from this compiler-package alignment.
 Deliver the source/library/host/test/reference changes coherently; persisted data is
 unchanged. Rollback removes that complete source unit while preserving strict policy,
 without a duplicate fixture API or diagnostic bypass. Shared
-contracts/configuration/docs have one lead owner; independent query/storage/native
+contracts/configuration/docs have a single owner; independent query/storage/native
 work cannot be overwritten. Accepted remains until every mapped gate succeeds.

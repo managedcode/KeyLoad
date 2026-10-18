@@ -1,13 +1,12 @@
-import { createHash } from 'node:crypto';
 import { lstat, readFile, readdir } from 'node:fs/promises';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const SCRIPT_DIRECTORY = dirname(fileURLToPath(import.meta.url));
 const DEFAULT_ROOT = resolve(SCRIPT_DIRECTORY, '../../..');
-const RECORD_PATH = 'docs/implementation/mcaf-installation.json';
+const SOLUTION_PATH = 'KeyLoad.slnx';
+const MODULE_PATHS = ['docs', 'site', 'scripts', '.github/workflows', 'analyzers', 'build'];
 const ROOT_POLICY_PATH = 'AGENTS.md';
-const RECORD_ARRAY_FIELDS = Object.freeze({ projects: 'projects', modules: 'modules', skills: 'skillFiles' });
 const PATH_SEPARATOR = '/';
 const REQUIRED_FILES = [
   'docs/Features/RepositoryGovernance.md',
@@ -36,6 +35,10 @@ const SKIPPED_DIRECTORY_NAMES = new Set([
   'output',
   'node_modules',
   '.data',
+  'data',
+  'backups',
+  '.agents',
+  '.codex',
 ]);
 const LOCAL_POLICY_MARKERS = [
   /purpose/i,
@@ -58,13 +61,6 @@ const namedMessages = {
   repositoryPath: value => `Repository path must be a safe relative path: ${value}`,
   symbolicLinkPrefix: 'Refusing to follow symbolic link: ',
   symbolicLink: value => `Refusing to follow symbolic link: ${value}`,
-  invalidRecord: 'Installation record must be a JSON object.',
-  invalidRootRecord: 'preservedRoot must declare AGENTS.md, a positive prefixBytes value and a SHA256 digest.',
-  shortRoot: value => `AGENTS.md is shorter than preserved prefix length ${value}.`,
-  prefixMismatch: (expected, actual) => `AGENTS.md preserved prefix SHA256 mismatch: expected ${expected}, found ${actual}.`,
-  invalidArray: field => `Installation record ${field} must be an array of unique, nonempty, safe relative paths.`,
-  invalidArrayItem: (field, value) => `Installation record ${field} contains an invalid path: ${String(value)}`,
-  duplicateArrayItem: (field, value) => `Installation record ${field} contains a duplicate path: ${value}`,
   missingItem: (label, value) => `${label} is missing: ${value}`,
   unexpectedItem: (label, value) => `${label} is unexpected: ${value}`,
   missingPolicy: value => `Required local policy is missing: ${value}`,
@@ -77,11 +73,9 @@ const namedMessages = {
   missingRootPolicy: value => `Root AGENTS.md is missing required policy ${value}.`,
   missingCommand: value => `Root AGENTS.md is missing the required command: ${value}.`,
   rootPlaceholder: 'Root AGENTS.md contains an unresolved template placeholder.',
-  skillsMustBeDisabled: 'Installation record must state skillsInstalled: false.',
-  skillDirectories: values => `Repository skill directories are present: ${values.join(', ')}.`,
   failurePrefix: 'FAIL: ',
   failureSummary: count => `Governance validation failed with ${count} issue(s).\n`,
-  success: (projects, modules) => `PASS: preserved root prefix, ${projects} projects, ${modules} modules, required governance, local policies and unchanged empty skill inventory.\n`,
+  success: (projects, modules) => `PASS: current solution inventory, ${projects} projects, ${modules} modules, required governance and local policies.\n`,
 };
 
 function parseRoot(argumentsList) {
@@ -134,7 +128,6 @@ async function walkRepository(root, currentDirectory, inventory) {
       if (/^(?:src|tests|benchmarks|analyzers|build)\/[^/]+\/Features$/.test(toRepositoryPath(root, absolutePath))) {
         inventory.flatFeatureSources.push(toRepositoryPath(root, absolutePath));
       }
-      if (entry.name.toLowerCase() === 'skills') inventory.skillDirectories.push(toRepositoryPath(root, absolutePath));
       await walkRepository(root, absolutePath, inventory);
       continue;
     }
@@ -145,7 +138,6 @@ async function walkRepository(root, currentDirectory, inventory) {
     const specificationSlice = projectSlice?.[1] === 'Restore' ? 'BackupRestore' : projectSlice?.[1];
     if (projectSlice && await exists(root, `docs/Features/${specificationSlice}.md`)) inventory.flatFeatureSources.push(repositoryPath);
     if (entry.name.endsWith('.csproj')) inventory.projects.push(repositoryPath);
-    if (entry.name === 'SKILL.md') inventory.skillFiles.push(repositoryPath);
   }
 }
 
@@ -160,46 +152,11 @@ function addMissingItems(diagnostics, label, expected, actual) {
   }
 }
 
-function isSafeRelativePath(value) {
-  if (typeof value !== 'string' || value.trim().length === 0 || value.includes('\\') || value.startsWith(PATH_SEPARATOR)) return false;
-  return value.split(PATH_SEPARATOR).every(part => part.length > 0 && part !== '.' && part !== '..');
-}
-
-function validateRecordPathArray(record, field, diagnostics) {
-  const values = record[field];
-  if (!Array.isArray(values)) {
-    diagnostics.push(namedMessages.invalidArray(field));
-    return [];
-  }
-  const uniqueValues = [];
-  const seenValues = new Set();
-  for (const value of values) {
-    if (!isSafeRelativePath(value)) {
-      diagnostics.push(namedMessages.invalidArrayItem(field, value));
-    } else if (seenValues.has(value)) {
-      diagnostics.push(namedMessages.duplicateArrayItem(field, value));
-    } else {
-      seenValues.add(value);
-      uniqueValues.push(value);
-    }
-  }
-  return uniqueValues;
-}
-
-function validateRecordCollections(record, diagnostics) {
-  return {
-    projects: validateRecordPathArray(record, RECORD_ARRAY_FIELDS.projects, diagnostics),
-    modules: validateRecordPathArray(record, RECORD_ARRAY_FIELDS.modules, diagnostics),
-    skillFiles: validateRecordPathArray(record, RECORD_ARRAY_FIELDS.skills, diagnostics),
-  };
-}
-
-async function validateRecordAndInventory(root, record, inventory, diagnostics) {
-  const collections = validateRecordCollections(record, diagnostics);
-  await validatePreservedPrefix(root, record, diagnostics);
-  addMissingItems(diagnostics, 'Project inventory', [...collections.projects].sort(), inventory.projects);
-  addMissingItems(diagnostics, 'Recorded skill file inventory', collections.skillFiles, inventory.skillFiles);
-  return collections;
+async function validateSolutionInventory(root, inventory, diagnostics) {
+  const solution = await readUtf8(root, SOLUTION_PATH);
+  const declaredProjects = [...solution.matchAll(/<Project\s+Path="([^"]+)"\s*\/>/g)]
+    .map(match => match[1]).sort();
+  addMissingItems(diagnostics, 'Project inventory', declaredProjects, inventory.projects);
 }
 
 async function validateRootPolicy(root, diagnostics) {
@@ -211,31 +168,6 @@ async function validateRootPolicy(root, diagnostics) {
     if (!rootPolicy.includes(commandMarker)) diagnostics.push(namedMessages.missingCommand(commandMarker));
   }
   if (PLACEHOLDER_PATTERNS.some(pattern => pattern.test(rootPolicy))) diagnostics.push(namedMessages.rootPlaceholder);
-}
-
-function validateSkills(record, inventory, diagnostics) {
-  if (record.skillsInstalled !== false) diagnostics.push(namedMessages.skillsMustBeDisabled);
-  if (inventory.skillDirectories.length > 0) diagnostics.push(namedMessages.skillDirectories(inventory.skillDirectories));
-}
-
-async function validatePreservedPrefix(root, record, diagnostics) {
-  const preservation = record.preservedRoot;
-  if (!preservation || preservation.path !== ROOT_POLICY_PATH || !Number.isInteger(preservation.prefixBytes) || preservation.prefixBytes <= 0 || !/^[a-f0-9]{64}$/i.test(preservation.sha256 ?? '')) {
-    diagnostics.push(namedMessages.invalidRootRecord);
-    return false;
-  }
-  const rootBytes = await readFile(await resolveRegularFile(root, ROOT_POLICY_PATH));
-  if (rootBytes.length < preservation.prefixBytes) {
-    diagnostics.push(namedMessages.shortRoot(preservation.prefixBytes));
-    return false;
-  }
-  const prefix = rootBytes.subarray(0, preservation.prefixBytes);
-  const actualHash = createHash('sha256').update(prefix).digest('hex');
-  if (actualHash !== preservation.sha256) {
-    diagnostics.push(namedMessages.prefixMismatch(preservation.sha256, actualHash));
-    return false;
-  }
-  return true;
 }
 
 function validateLocalPolicyText(repositoryPath, content, diagnostics) {
@@ -277,28 +209,21 @@ async function validateRequiredFiles(root, diagnostics) {
 
 async function validate(root) {
   const diagnostics = [];
-  const loadedRecord = JSON.parse(await readUtf8(root, RECORD_PATH));
-  const record = loadedRecord && typeof loadedRecord === 'object' && !Array.isArray(loadedRecord) ? loadedRecord : {};
-  if (record !== loadedRecord) diagnostics.push(namedMessages.invalidRecord);
-  const inventory = { projects: [], skillFiles: [], skillDirectories: [], workingFiles: [], flatFeatureSources: [] };
+  const inventory = { projects: [], workingFiles: [], flatFeatureSources: [] };
   await walkRepository(root, root, inventory);
   inventory.projects.sort();
-  inventory.skillFiles.sort();
-  inventory.skillDirectories.sort();
   inventory.workingFiles.sort();
   for (const repositoryPath of inventory.workingFiles) diagnostics.push(namedMessages.workingFile(repositoryPath));
   for (const repositoryPath of inventory.flatFeatureSources) diagnostics.push(repositoryPath.endsWith('/Features')
     ? namedMessages.obsoleteProjectFeatures(repositoryPath) : namedMessages.flatFeatureSource(repositoryPath));
-  const collections = await validateRecordAndInventory(root, record, inventory, diagnostics);
+  await validateSolutionInventory(root, inventory, diagnostics);
   await validateRootPolicy(root, diagnostics);
   await validateRequiredFiles(root, diagnostics);
-  await validateLocalPolicies(root, collections.projects, collections.modules, diagnostics);
-  validateSkills(record, inventory, diagnostics);
+  await validateLocalPolicies(root, inventory.projects, MODULE_PATHS, diagnostics);
   return {
     diagnostics,
     projectCount: inventory.projects.length,
-    moduleCount: collections.modules.length,
-    skillFileCount: inventory.skillFiles.length,
+    moduleCount: MODULE_PATHS.length,
   };
 }
 

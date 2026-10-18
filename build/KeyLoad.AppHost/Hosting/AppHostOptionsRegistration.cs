@@ -1,7 +1,6 @@
 using System.Runtime.CompilerServices;
 using KeyLoad.AppHost.Features.BenchmarkComparisons;
 using KeyLoad.AppHost.Features.ClusterReplication;
-using KeyLoad.AppHost.Features.ClusterRouting;
 using KeyLoad.AppHost.Features.CodeQuality;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.AppHost.Features.TestInfrastructure.Validation;
@@ -35,11 +34,10 @@ internal static class AppHostOptionsRegistration
         var deployment = Bind<BenchmarkDeploymentOptions>(builder.Configuration.GetSection(BenchmarkDeploymentOptions.SectionName), value => value.IsValid(), BenchmarkDeploymentOptions.ValidationMessage);
         var relay = Bind<BenchmarkRelayOptions>(builder.Configuration, _ => true, BenchmarkDeploymentOptions.ValidationMessage);
         var coverage = BindNativeCoverage(builder.Configuration);
-        var coverageImage = Bind<NativeCoverageRf3ImageOptions>(
+        var coverageImage = Bind<NativeCoverageClusterImageOptions>(
             builder.Configuration.GetSection(NativeCoverageExecutionOptions.SectionName),
-            options => options.IsValid(), NativeCoverageRf3ImageOptions.ValidationMessage);
+            options => options.IsValid(), NativeCoverageClusterImageOptions.ValidationMessage);
         var control = AppHostControlOptionsRegistration.Bind(builder.Configuration, execution, coverage);
-        var probeFiles = Bind<RequestProbeFileOptions>(builder.Configuration.GetSection(RequestProbeFileOptions.SectionName), value => value.IsValid(), RequestProbeFileOptions.ValidationMessage);
         var localImage = Bind<LocalImageOptions>(builder.Configuration, _ => true, ContainerImageExecutionOptions.ValidationMessage);
         var images = Bind<ContainerImageOptions>(builder.Configuration, _ => true, ContainerImageExecutionOptions.ValidationMessage);
         var imageExecution = Bind<ContainerImageExecutionOptions>(builder.Configuration.GetSection(ContainerImageExecutionOptions.SectionName),
@@ -50,7 +48,7 @@ internal static class AppHostOptionsRegistration
             builder.Configuration.GetSection(KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions.SectionName),
             value => value.IsValid(), KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions.ValidationMessage);
         var runtime = new AppHostRuntimeOptions(execution, startup, resources, provenance, control, images, imageExecution, localImage,
-            cluster, command, http, replay, profile, deployment, relay, probeFiles, isolatedReplay,
+            cluster, command, http, replay, profile, deployment, relay, isolatedReplay,
             isolatedAdmission, coverage, coverageImage);
         Register(builder.Services, runtime);
         return runtime;
@@ -65,7 +63,6 @@ internal static class AppHostOptionsRegistration
         services.AddSingleton(runtime.Profile);
         services.AddSingleton(runtime.Deployment);
         services.AddSingleton(runtime.BenchmarkRelay);
-        services.AddSingleton(runtime.RequestProbeFiles);
         services.AddSingleton(runtime.LocalImage);
         services.AddSingleton(runtime.Images);
         services.AddSingleton(runtime.ImageExecution);
@@ -76,7 +73,7 @@ internal static class AppHostOptionsRegistration
         services.AddSingleton(runtime.Startup);
         services.AddSingleton(runtime.IsolatedAdmission);
         services.AddSingleton(runtime.NativeCoverage);
-        services.AddSingleton(runtime.NativeCoverageRf3Image);
+        services.AddSingleton(runtime.NativeCoverageClusterImage);
     }
 
     internal static IOptions<ClusterProfileExecutionOptions> BindProfileExecution(IConfiguration configuration) =>

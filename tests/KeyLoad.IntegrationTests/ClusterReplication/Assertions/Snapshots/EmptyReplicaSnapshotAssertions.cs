@@ -78,14 +78,14 @@ internal static class EmptyReplicaSnapshotAssertions
             McpCallerTools.ProjectionsCommit, state.ProjectionRequest, token))).Value, state.OutboxEffect);
         if (allRoutes)
         {
-            var processing = KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.Call(state.Partition,
+            var processing = KeyLoad.IntegrationTests.Features.QueryExecution.SqlClusterProtocol.Call(state.Partition,
                 McpCallerTools.SubscriptionsProcess, state.Processing);
-            await ExactAsync(await KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.SdkAsync<SubscriptionProcessingResult>(sdk, processing, token), state.ProcessingEffect);
-            await ExactAsync(await KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.McpAsync<SubscriptionProcessingResult>(mcp, processing, token), state.ProcessingEffect);
-            var projection = KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.Call(state.Partition,
+            await ExactAsync(await KeyLoad.IntegrationTests.Features.QueryExecution.SqlClusterProtocol.SdkAsync<SubscriptionProcessingResult>(sdk, processing, token), state.ProcessingEffect);
+            await ExactAsync(await KeyLoad.IntegrationTests.Features.QueryExecution.SqlClusterProtocol.McpAsync<SubscriptionProcessingResult>(mcp, processing, token), state.ProcessingEffect);
+            var projection = KeyLoad.IntegrationTests.Features.QueryExecution.SqlClusterProtocol.Call(state.Partition,
                 McpCallerTools.ProjectionsCommit, state.ProjectionRequest);
-            await ExactAsync(await KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.SdkAsync<ProjectionBatchResult>(sdk, projection, token), state.OutboxEffect);
-            await ExactAsync(await KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.McpAsync<ProjectionBatchResult>(mcp, projection, token), state.OutboxEffect);
+            await ExactAsync(await KeyLoad.IntegrationTests.Features.QueryExecution.SqlClusterProtocol.SdkAsync<ProjectionBatchResult>(sdk, projection, token), state.OutboxEffect);
+            await ExactAsync(await KeyLoad.IntegrationTests.Features.QueryExecution.SqlClusterProtocol.McpAsync<ProjectionBatchResult>(mcp, projection, token), state.OutboxEffect);
         }
     }
 
@@ -125,10 +125,10 @@ internal static class EmptyReplicaSnapshotAssertions
             McpCallerTools.DocumentsCommit, command, token))).Value, expected);
         if (allRoutes)
         {
-            var call = KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.Call(command.Partition,
+            var call = KeyLoad.IntegrationTests.Features.QueryExecution.SqlClusterProtocol.Call(command.Partition,
                 McpCallerTools.DocumentsCommit, command);
-            await ExactAsync(await KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.SdkAsync<CommitReceipt>(sdk, call, token), expected);
-            await ExactAsync(await KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.McpAsync<CommitReceipt>(mcp, call, token), expected);
+            await ExactAsync(await KeyLoad.IntegrationTests.Features.QueryExecution.SqlClusterProtocol.SdkAsync<CommitReceipt>(sdk, call, token), expected);
+            await ExactAsync(await KeyLoad.IntegrationTests.Features.QueryExecution.SqlClusterProtocol.McpAsync<CommitReceipt>(mcp, call, token), expected);
         }
         await Assert.That(expected.CommandId).IsEqualTo(command.CommandId);
         await Assert.That(expected.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
@@ -141,10 +141,10 @@ internal static class EmptyReplicaSnapshotAssertions
         await ExactAsync(Success(await sdk.GetAsync(reference, minimum, token)).Document, expected);
         await ExactAsync((await PublicReadAssertions.DocumentAsync(await mcp.CallAsync(
             McpCallerTools.DocumentsGet, new GetDocumentRequest(reference, minimum), token))).Value, expected);
-        var call = KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.Call(reference.Partition,
+        var call = KeyLoad.IntegrationTests.Features.QueryExecution.SqlClusterProtocol.Call(reference.Partition,
             McpCallerTools.DocumentsGet, new GetDocumentRequest(reference, minimum));
-        await ExactAsync((await KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.SdkAsync<DocumentReadResult>(sdk, call, token)).Document, expected);
-        await ExactAsync((await KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.McpAsync<DocumentReadResult>(mcp, call, token)).Document, expected);
+        await ExactAsync((await KeyLoad.IntegrationTests.Features.QueryExecution.SqlClusterProtocol.SdkAsync<DocumentReadResult>(sdk, call, token)).Document, expected);
+        await ExactAsync((await KeyLoad.IntegrationTests.Features.QueryExecution.SqlClusterProtocol.McpAsync<DocumentReadResult>(mcp, call, token)).Document, expected);
     }
 
     internal static async Task ExactAsync<T>(T actual, T expected)

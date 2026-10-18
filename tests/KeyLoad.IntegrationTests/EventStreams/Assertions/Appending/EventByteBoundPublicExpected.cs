@@ -16,9 +16,9 @@ internal static class EventByteBoundPublicExpected
     internal static async Task PageAsync(EventByteBoundPublicState state, StreamPage page,
         int[] indices, bool more, long? snapshot = null)
     {
-        await SqlRf3Protocol.EqualAsync(state.Scenario.Stream, page.Stream);
-        await SqlRf3Protocol.EqualAsync(new StreamHead(3L, 1L, 1L), page.Head);
-        await SqlRf3Protocol.EqualAsync(indices.Select(index => state.Original.Events[index]).ToArray(), page.Events.ToArray());
+        await SqlClusterProtocol.EqualAsync(state.Scenario.Stream, page.Stream);
+        await SqlClusterProtocol.EqualAsync(new StreamHead(3L, 1L, 1L), page.Head);
+        await SqlClusterProtocol.EqualAsync(indices.Select(index => state.Original.Events[index]).ToArray(), page.Events.ToArray());
         await Assert.That(page.HasMore).IsEqualTo(more);
         if (more)
         {
@@ -34,15 +34,15 @@ internal static class EventByteBoundPublicExpected
 
     internal static async Task OriginalAsync(McpEventStreamScenario scenario, StreamPage page)
     {
-        await SqlRf3Protocol.EqualAsync(scenario.Stream, page.Stream);
-        await SqlRf3Protocol.EqualAsync(new StreamHead(3L, 1L, 1L), page.Head);
+        await SqlClusterProtocol.EqualAsync(scenario.Stream, page.Stream);
+        await SqlClusterProtocol.EqualAsync(new StreamHead(3L, 1L, 1L), page.Head);
         await Assert.That(page.Events.Length).IsEqualTo(3);
         for (var index = 0; index < 3; index++)
         {
-            await SqlRf3Protocol.EqualAsync(scenario.Stream, page.Events[index].Stream);
+            await SqlClusterProtocol.EqualAsync(scenario.Stream, page.Events[index].Stream);
             await Assert.That(page.Events[index].Revision).IsEqualTo(index + 1L);
             await Assert.That(page.Events[index].EventSequence).IsEqualTo(index + 1L);
-            await SqlRf3Protocol.EqualAsync(McpEventStreamScenario.ExpectedEvents[index], page.Events[index].Data);
+            await SqlClusterProtocol.EqualAsync(McpEventStreamScenario.ExpectedEvents[index], page.Events[index].Data);
         }
         await Assert.That(page.HasMore).IsFalse();
         await Assert.That(page.Cursor).IsNull();

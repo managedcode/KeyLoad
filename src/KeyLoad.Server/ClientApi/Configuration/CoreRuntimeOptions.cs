@@ -16,7 +16,6 @@ internal sealed record CoreRuntimeOptions(
     IOptions<BlobExecutionOptions> BlobExecution,
     IOptions<NativeClaimsExecutionOptions> NativeClaimsExecution,
     IOptions<TimeSeriesExecutionOptions> TimeSeriesExecution,
-    IOptions<PartitionMovementCheckpointOptions> MovementCheckpoints,
     IOptions<KeyLoad.Query.Features.Search.PackedAnnOptions> PackedAnn,
     IOptions<KeyLoad.Core.Features.Search.AnnSeedOptions> AnnSeed,
     IOptions<KeyLoad.Query.Features.Search.PackedAnnStorageOptions> PackedAnnStorage,
@@ -40,7 +39,6 @@ internal sealed record CoreRuntimeOptions(
         _ = BlobExecution.Value;
         _ = NativeClaimsExecution.Value;
         _ = TimeSeriesExecution.Value;
-        _ = MovementCheckpoints.Value;
         _ = PackedAnn.Value;
         _ = AnnSeed.Value;
         _ = PackedAnnStorage.Value;

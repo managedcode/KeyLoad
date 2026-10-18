@@ -1,10 +1,9 @@
 namespace KeyLoad.IntegrationTests.Features.BlobStorage;
 
 internal sealed class BlobPartIdentityR40State(BeginBlobUploadRequest begin,
-    AtomicPartitionPlacementResolution placement, OutboxStatus outbox)
+    OutboxStatus outbox)
 {
     internal BeginBlobUploadRequest Begin { get; } = begin;
-    internal AtomicPartitionPlacementResolution Placement { get; } = placement;
     internal OutboxStatus Outbox { get; } = outbox;
     internal BlobCommitResult<BlobUploadInfo> Begun { get; set; } = null!;
     internal WriteBlobPartRequest First { get; set; } = null!;

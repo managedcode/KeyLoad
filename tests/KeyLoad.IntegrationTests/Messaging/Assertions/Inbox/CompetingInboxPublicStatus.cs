@@ -15,14 +15,13 @@ internal static class CompetingInboxPublicStatus
         {
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                _ = await RequestCqrsRf3Callers.RunOwnedAsync(state.Fixture.App, node, state.Fixture.AdminKey, async caller =>
+                _ = await RequestCqrsClusterCallers.RunOwnedAsync(state.Fixture.App, node, state.Fixture.AdminKey, async caller =>
                 {
                     var status = await ReadConvergedAsync(state, caller, node, token);
                     await Assert.That(Guid.TryParse(status.NodeId, out var id)).IsTrue();
                     await Assert.That(id).IsNotEqualTo(Guid.Empty);
                     await Assert.That(nodes.Add(status.NodeId)).IsTrue();
                     await Assert.That(status.ProcessId).IsGreaterThan(0);
-                    await Assert.That(status.Incarnation).IsEqualTo(state.Placement.Incarnation);
                     await Assert.That(status.Voters).IsEqualTo(CompetingInboxPublicProtocol.Nodes.Length);
                     await Assert.That(status.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
                     await Assert.That(status.RoutingReady).IsTrue();
@@ -48,7 +47,7 @@ internal static class CompetingInboxPublicStatus
         ServerFailureObserver.ThrowIfAny(failures);
     }
     private static async Task<NodeStatus> ReadConvergedAsync(CompetingInboxPublicState state,
-        RequestCqrsRf3Callers caller, string node, CancellationToken token)
+        RequestCqrsClusterCallers caller, string node, CancellationToken token)
     {
         var minimum = state.Producers.Select(value => value.Receipt.Token.Position)
             .Concat(state.Current.Select(value => value.Receipt.Token.Position)).Append(state.Winner.Token.Position).Max();

@@ -30,7 +30,7 @@ internal static class NativeArchiveEntryFlow
         var command = new CommandRequest(Guid.NewGuid(), fixture.Source.Partition, [new PutDocument(P.Collection, P.Document, P.Before)]);
         var operation = Operation(fixture.Source.Database, command);
         var before = fixture.Source.Store.Position;
-        var placement = fixture.Source.Database.ReadAtomicPartitionPlacement(P.Root, new(P.Version, fixture.Source.Partition));
+        var placement = fixture.Source.Database.ReadAtomicPartitionPlacement(P.Root, fixture.Source.Partition);
         var receipt = fixture.Source.Database.Apply(operation).Get<CommitReceipt>();
         await NativeArchiveEntryAssertions.ReceiptAsync(receipt, command, placement,
             before + P.PositionStep, P.InitialRevision, fixture.Source.Store.Identity.Durability);

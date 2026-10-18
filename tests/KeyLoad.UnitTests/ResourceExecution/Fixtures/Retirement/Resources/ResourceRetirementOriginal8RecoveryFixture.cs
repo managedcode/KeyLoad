@@ -4,7 +4,7 @@ using static KeyLoad.UnitTests.Features.ResourceExecution.ResourceRetirementPrep
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
-/// <summary>Owns six actual independent local native stores, without claiming replica consensus or RF3 transport.</summary>
+/// <summary>Owns six actual independent local native stores, without claiming replica consensus or CLUSTER transport.</summary>
 internal static class ResourceRetirementOriginal8RecoveryFixture
 {
     internal static async Task RunAsync(Func<IReadOnlyList<ControlledPartitionMovementNode>, CancellationToken, Task> exercise)

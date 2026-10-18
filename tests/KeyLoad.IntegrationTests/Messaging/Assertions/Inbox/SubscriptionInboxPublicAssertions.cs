@@ -11,21 +11,21 @@ internal static class SubscriptionInboxPublicAssertions
     {
         get;
     } =
-        [new PutDocument(SubscriptionFilterRf3Protocol.Collection, First, "{\"n\":1}", 0),
-         new PutDocument(SubscriptionFilterRf3Protocol.Collection, Second, "{\"n\":2}", 0)];
+        [new PutDocument(SubscriptionFilterClusterProtocol.Collection, First, "{\"n\":1}", 0),
+         new PutDocument(SubscriptionFilterClusterProtocol.Collection, Second, "{\"n\":2}", 0)];
     internal static global::System.Collections.Immutable.ImmutableArray<Mutation> ChangedEffects
     {
         get;
     } =
-        [new PutDocument(SubscriptionFilterRf3Protocol.Collection, First, "{\"n\":99}", 1),
-         new PutDocument(SubscriptionFilterRf3Protocol.Collection, Second, "{\"n\":2}", 0)];
+        [new PutDocument(SubscriptionFilterClusterProtocol.Collection, First, "{\"n\":99}", 1),
+         new PutDocument(SubscriptionFilterClusterProtocol.Collection, Second, "{\"n\":2}", 0)];
 
     internal static async Task DocumentsAsync(KeyLoadClient sdk, SubscriptionRef group, CancellationToken token)
     {
         foreach (var expected in new[] { (First, "{\"n\":1}"), (Second, "{\"n\":2}") })
         {
             var actual = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(
-                new(group.Source.Partition, SubscriptionFilterRf3Protocol.Collection, expected.Item1), token));
+                new(group.Source.Partition, SubscriptionFilterClusterProtocol.Collection, expected.Item1), token));
             await Assert.That(actual!.Json).IsEqualTo(expected.Item2);
             await Assert.That(actual.Revision).IsEqualTo(1L);
         }
@@ -48,7 +48,7 @@ internal static class SubscriptionInboxPublicAssertions
         await Assert.That(problem.GetProperty(McpCallerProtocol.ProblemStatus).GetInt32()).IsEqualTo(409);
         await Assert.That(problem.GetProperty(McpCallerProtocol.ProblemDetail).GetString())
             .IsEqualTo("The database operation could not be completed.");
-        await SubscriptionFilterRf3Assertions.EqualAsync(
+        await SubscriptionFilterClusterAssertions.EqualAsync(
             await McpCallerAssertions.SdkSuccessAsync(await sdk.SubscriptionStatusAsync(request.Subscription, token)), before);
         await DocumentsAsync(sdk, request.Subscription, token);
         return global::System.Text.Json.JsonSerializer.Serialize(failure.Problem, JsonDefaults.Options);

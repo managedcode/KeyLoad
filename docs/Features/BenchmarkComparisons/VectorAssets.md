@@ -1,11 +1,10 @@
 # BenchmarkComparisons vector assets
 
-Continuation of [BenchmarkComparisons](../BenchmarkComparisons.md), existing
-REQ-BC-012/013/016/017/025/029. The acceptance matrix below is the durable contract;
-the ignored root vector-assets acceptance/plan files retain local task planning.
-Decision: [ADR-053](../../ADR/ADR-053-unified-visual-identity.md) vector repair
-continuation and [ADR-040](../../ADR/ADR-040-static-site-threejs-evidence.md) manual
-visual review; no database/public API/persistence boundary changes.
+Part of [BenchmarkComparisons](../BenchmarkComparisons.md), existing
+REQ-BC-012/013/016/017/025/029. The acceptance matrix below is the durable contract.
+Decisions: [ADR-053](../../ADR/ADR-053-unified-visual-identity.md) (vector logo and
+posters) and [ADR-040](../../ADR/ADR-040-static-site-threejs-evidence.md) (manual
+visual review); no database/public API/persistence boundary changes.
 
 - REQ-VEC-001 → AC-VEC-001: replace the raster-in-SVG poster with real geometry.
 - REQ-VEC-002 → AC-VEC-002/003: project the canonical vector logo outside the
@@ -49,5 +48,4 @@ presentation source, never archived reports or database formats.
 | AC-VEC-005 | The real builder emits both posters and canonical assets with unchanged brand parity and benchmark provenance. | Complete SiteTests, source/output byte parity, native coverage and Pages gates in GitHub at the exact source revision. |
 
 GitHub-only TUnit/MTP qualification remains required for every automated criterion.
-The implementation evidence (report removed from repository) records
-development checks and manual preview separately from the blocked publication.
+Development checks and the manual preview are recorded separately from publication.

@@ -637,7 +637,7 @@
     "branchMerge": "unmeasured; retain each native report branch pair separately"
   },
   "thresholds": null,
-  "qualification": "private exact Query functional profile only; does not close AC-CQ-009 or product/RF3 coverage",
+  "qualification": "private exact Query functional profile only; does not close AC-CQ-009 or product/CLUSTER coverage",
   "bounds": {
     "originalXmlBytes": 33554432,
     "sources": 5000,

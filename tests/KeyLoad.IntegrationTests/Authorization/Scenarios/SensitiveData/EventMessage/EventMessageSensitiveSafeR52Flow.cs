@@ -6,7 +6,7 @@ namespace KeyLoad.IntegrationTests.Features.Authorization;
 
 internal static class EventMessageSensitiveSafeR52Flow
 {
-    internal static async Task WarmAsync(ClusterFixture fixture, RequestCqrsRf3Callers root,
+    internal static async Task WarmAsync(ClusterFixture fixture, RequestCqrsClusterCallers root,
         EventMessageSensitiveSafeR52State state, CancellationToken token)
         => await ReadersAsync(fixture, state, async worker =>
         {
@@ -38,7 +38,7 @@ internal static class EventMessageSensitiveSafeR52Flow
             await EventMessageSensitiveSafeR52Replay.ReceiptsAsync(root, caller, state, token);
         }, token);
 
-    internal static async Task AfterFirstColdAsync(ClusterFixture fixture, RequestCqrsRf3Callers root,
+    internal static async Task AfterFirstColdAsync(ClusterFixture fixture, RequestCqrsClusterCallers root,
         EventMessageSensitiveSafeR52State state, CancellationToken token)
         => await ReadersAsync(fixture, state, async worker =>
         {
@@ -76,7 +76,7 @@ internal static class EventMessageSensitiveSafeR52Flow
             await EventMessageSensitiveSafeR52Replay.ReceiptsAsync(root, caller, state, token);
         }, token);
 
-    internal static async Task AfterSecondColdAsync(ClusterFixture fixture, RequestCqrsRf3Callers root,
+    internal static async Task AfterSecondColdAsync(ClusterFixture fixture, RequestCqrsClusterCallers root,
         EventMessageSensitiveSafeR52State state, CancellationToken token)
         => await ReadersAsync(fixture, state, async worker =>
         {
@@ -121,7 +121,7 @@ internal static class EventMessageSensitiveSafeR52Flow
             }
         }, token);
 
-    private static async Task AckAsync(RequestCqrsRf3Callers worker, EventMessageSensitiveSafeR52State state,
+    private static async Task AckAsync(RequestCqrsClusterCallers worker, EventMessageSensitiveSafeR52State state,
         object received, string id, CancellationToken token)
     {
         object request;
@@ -142,9 +142,7 @@ internal static class EventMessageSensitiveSafeR52Flow
         var commandId = request is SubscriptionDeliveryCommand subscriptionCommand ? subscriptionCommand.CommandId
             : ((DeliveryCommand)request).CommandId;
         await Assert.That(receipt.CommandId).IsEqualTo(commandId);
-        await Assert.That(receipt.Token.Incarnation).IsEqualTo(state.Placement.Incarnation);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(state.Model.Partition.AtomicPartitionId);
-        await Assert.That(receipt.Token.OwnershipEpoch).IsEqualTo(state.Placement.PlacementEpoch);
         await Assert.That(receipt.Token.Position).IsGreaterThan((long)EventMessageSensitiveSafeR52Protocol.EmptyCount);
         await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
         var key = state.Model.Subscription
@@ -152,13 +150,13 @@ internal static class EventMessageSensitiveSafeR52Flow
                 : EventMessageSensitiveSafeR52Protocol.SecondPosition).ToString(System.Globalization.CultureInfo.InvariantCulture) : id;
         var version = state.Model.Subscription ? EventMessageSensitiveSafeR52Protocol.FirstLeaseVersion
             : EventMessageSensitiveSafeR52Protocol.AckedVersion;
-        await SqlRf3Protocol.EqualAsync<MutationReceipt[]>([new(EventMessageSensitiveSafeR52Protocol.AckKind,
+        await SqlClusterProtocol.EqualAsync<MutationReceipt[]>([new(EventMessageSensitiveSafeR52Protocol.AckKind,
             state.Model.Resource.Name, key, version)], receipt.Mutations.ToArray());
         state.Completions.Add((request, receipt));
     }
 
     private static async Task ReadersAsync(ClusterFixture fixture,
-        EventMessageSensitiveSafeR52State state, Func<RequestCqrsRf3Callers, Task> action, CancellationToken token)
-        => await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, state.Model.Key,
+        EventMessageSensitiveSafeR52State state, Func<RequestCqrsClusterCallers, Task> action, CancellationToken token)
+        => await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, state.Model.Key,
             async worker => { await action(worker); return true; }, token);
 }

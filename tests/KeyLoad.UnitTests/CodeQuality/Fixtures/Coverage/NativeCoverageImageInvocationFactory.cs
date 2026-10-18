@@ -133,7 +133,7 @@ internal static partial class NativeCoverageImageInvocationFactory
         {
             throw new InvalidDataException("The test image invocation exceeds its admitted descriptor bound.");
         }
-        await NativeCoverageRf3InvocationWriter.WriteCreateOnlyAsync(path, bytes, options.ReadBufferBytes,
+        await NativeCoverageClusterInvocationWriter.WriteCreateOnlyAsync(path, bytes, options.ReadBufferBytes,
             TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
     }
 

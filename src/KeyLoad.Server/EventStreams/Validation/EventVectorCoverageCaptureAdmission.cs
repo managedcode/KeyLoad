@@ -31,7 +31,7 @@ internal static class EventVectorCoverageCaptureAdmission
                 || capture.NodeId == Guid.Empty || capture.ReadGeneration < InitialCut
                 || capture.StoreCutPosition < InitialCut || capture.AppliedCutPosition < InitialCut
                 || capture.HasMore || capture.PhysicalCatalog is null
-                || capture.RegisteredOwnerRows is null || capture.PlacementRows is null
+                || capture.RegisteredOwnerRows is null
                 || capture.AtomicPartitionRosterRows is null || capture.SourceHeadRows is null
                 || capture.RosterOriginRows is null)
             {

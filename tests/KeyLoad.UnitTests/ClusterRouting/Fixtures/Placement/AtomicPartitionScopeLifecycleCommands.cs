@@ -5,10 +5,10 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 internal static class AtomicPartitionScopeLifecycleCommands
 {
-    internal const string Documents = "kl069-documents";
-    internal const string Events = "kl069-events";
-    internal const string Queue = "kl069-queue";
-    internal const string ForeignQueue = "kl069-foreign";
+    internal const string Documents = "documents";
+    internal const string Events = "events";
+    internal const string Queue = "queue";
+    internal const string ForeignQueue = "foreign";
     internal const string FirstJson = "{\"number\":1}";
     internal const string HealthyJson = "{\"number\":2}";
     internal const string DomainDetail = "The resource belongs to a different transaction domain.";

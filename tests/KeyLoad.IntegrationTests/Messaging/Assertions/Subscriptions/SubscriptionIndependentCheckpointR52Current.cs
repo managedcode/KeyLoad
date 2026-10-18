@@ -9,22 +9,13 @@ internal static class SubscriptionIndependentCheckpointR52Current
         KeyLoadClient admin, McpOfficialClient official, CancellationToken token)
     {
         var partition = state.Seed.Group.Source.Partition;
-        var placement = new AtomicPartitionPlacementReadRequest(1, partition);
-        var current = await McpCallerAssertions.SdkSuccessAsync(await admin.ReadAtomicPartitionPlacementAsync(placement, token));
-        if (state.Placement is not null)
-        {
-            await SubscriptionFilterRf3Assertions.EqualAsync(current, state.Placement);
-        }
-        state.Placement = current;
-        await SubscriptionFilterRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<AtomicPartitionPlacementResolution>(
-            await official.CallAsync(McpCallerTools.AdminPartitionPlacementRead, placement, token))).Value, current);
         state.Outbox = await McpCallerAssertions.SdkSuccessAsync(await admin.OutboxStatusAsync(partition, token));
-        await SubscriptionFilterRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<OutboxStatus>(
+        await SubscriptionFilterClusterAssertions.EqualAsync((await McpCallerAssertions.SuccessAsync<OutboxStatus>(
             await official.CallAsync(McpCallerTools.OutboxStatus, new GetOutboxStatusRequest(partition), token))).Value, state.Outbox);
         var source = await McpCallerAssertions.SdkSuccessAsync(await admin.ReadEventSourceAsync(new(state.Seed.Group.Source), token));
         if (state.Source is not null)
         {
-            await SubscriptionFilterRf3Assertions.EqualAsync(source.Events.Take(state.Source.Events.Length).ToArray(), state.Source.Events.ToArray());
+            await SubscriptionFilterClusterAssertions.EqualAsync(source.Events.Take(state.Source.Events.Length).ToArray(), state.Source.Events.ToArray());
         }
         state.Source = source;
         await SourceAsync(source, state);
@@ -37,7 +28,7 @@ internal static class SubscriptionIndependentCheckpointR52Current
     {
         var plain = new SubscriptionDefinition(state.Seed.Manager.Principal.Id)
         {
-            Policy = new() { MaxWindow = SubscriptionFilterRf3Protocol.Window }
+            Policy = new() { MaxWindow = SubscriptionFilterClusterProtocol.Window }
         };
         var primaryDefinition = state.PrimaryGeneration == 1 ? plain : state.Seed.Replacement.Definition;
         var primary = new SubscriptionInfo(state.Seed.Group, primaryDefinition, state.PrimaryGeneration,
@@ -49,14 +40,9 @@ internal static class SubscriptionIndependentCheckpointR52Current
         await SourceAsync((await McpCallerAssertions.SuccessAsync<EventSourcePage>(
             await mcp.CallAsync(McpCallerTools.EventsRead, new ReadEventSourceRequest(state.Seed.Group.Source), token))).Value, state);
         var partition = state.Seed.Group.Source.Partition;
-        var placement = new AtomicPartitionPlacementReadRequest(1, partition);
-        await SubscriptionFilterRf3Assertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
-            await admin.ReadAtomicPartitionPlacementAsync(placement, token)), state.Placement);
-        await SubscriptionFilterRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<AtomicPartitionPlacementResolution>(
-            await official.CallAsync(McpCallerTools.AdminPartitionPlacementRead, placement, token))).Value, state.Placement);
-        await SubscriptionFilterRf3Assertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
+        await SubscriptionFilterClusterAssertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
             await admin.OutboxStatusAsync(partition, token)), state.Outbox);
-        await SubscriptionFilterRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<OutboxStatus>(
+        await SubscriptionFilterClusterAssertions.EqualAsync((await McpCallerAssertions.SuccessAsync<OutboxStatus>(
             await official.CallAsync(McpCallerTools.OutboxStatus, new GetOutboxStatusRequest(partition), token))).Value, state.Outbox);
     }
 
@@ -64,7 +50,7 @@ internal static class SubscriptionIndependentCheckpointR52Current
     {
         var plain = new SubscriptionDefinition(state.Seed.Manager.Principal.Id)
         {
-            Policy = new() { MaxWindow = SubscriptionFilterRf3Protocol.Window }
+            Policy = new() { MaxWindow = SubscriptionFilterClusterProtocol.Window }
         };
         return group == state.Seed.Independent
             ? new(group, state.IndependentDefinition, state.Generation, state.Generation,
@@ -77,9 +63,9 @@ internal static class SubscriptionIndependentCheckpointR52Current
     private static async Task StatusAsync(KeyLoadClient sdk, McpOfficialClient mcp,
         SubscriptionInfo expected, CancellationToken token)
     {
-        await SubscriptionFilterRf3Assertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
+        await SubscriptionFilterClusterAssertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
             await sdk.SubscriptionStatusAsync(expected.Subscription, token)), expected);
-        await SubscriptionFilterRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<SubscriptionInfo>(
+        await SubscriptionFilterClusterAssertions.EqualAsync((await McpCallerAssertions.SuccessAsync<SubscriptionInfo>(
             await mcp.CallAsync(McpCallerTools.SubscriptionsStatus, new GetSubscriptionRequest(expected.Subscription), token))).Value, expected);
     }
 
@@ -92,13 +78,13 @@ internal static class SubscriptionIndependentCheckpointR52Current
         for (var index = 0; index < corpus.Length; index++)
         {
             await Assert.That(page.Events[index].Position).IsEqualTo(index + 1L);
-            await SubscriptionFilterRf3Assertions.EqualAsync(page.Events[index].Source, state.Seed.Group.Source);
-            await SubscriptionFilterRf3Assertions.EqualAsync(page.Events[index].Data, corpus[index]);
+            await SubscriptionFilterClusterAssertions.EqualAsync(page.Events[index].Source, state.Seed.Group.Source);
+            await SubscriptionFilterClusterAssertions.EqualAsync(page.Events[index].Data, corpus[index]);
         }
         if (state.Source is not null)
         {
-            await SubscriptionFilterRf3Assertions.EqualAsync(page.Events, state.Source.Events);
-            await SubscriptionFilterRf3Assertions.EqualAsync(page.Head, state.Source.Head);
+            await SubscriptionFilterClusterAssertions.EqualAsync(page.Events, state.Source.Events);
+            await SubscriptionFilterClusterAssertions.EqualAsync(page.Head, state.Source.Head);
         }
     }
 }

@@ -52,14 +52,14 @@ internal static class ColdBootstrapCliStatus
         IOptions<TestExecutionOptions> policy, CancellationToken token)
     {
         var exit = process.WaitForExitAsync(CancellationToken.None);
-        var output = LocalRf3OwnedProcessLifetime.ReadBoundedAsync(process.StandardOutput, policy.Value.CleanupOutputCharacters);
-        var error = LocalRf3OwnedProcessLifetime.ReadBoundedAsync(process.StandardError, policy.Value.CleanupOutputCharacters);
+        var output = LocalClusterOwnedProcessLifetime.ReadBoundedAsync(process.StandardOutput, policy.Value.CleanupOutputCharacters);
+        var error = LocalClusterOwnedProcessLifetime.ReadBoundedAsync(process.StandardError, policy.Value.CleanupOutputCharacters);
         var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(() => LocalRf3OwnedProcessLifetime.ObserveAsync(exit, output, error,
+        await ServerFailureObserver.ObserveAsync(() => LocalClusterOwnedProcessLifetime.ObserveAsync(exit, output, error,
             TimeProvider.System, token), failures).ConfigureAwait(false);
         if (failures.Count != Success || !exit.IsCompleted || !output.IsCompleted || !error.IsCompleted)
         {
-            await LocalRf3OwnedProcessLifetime.TerminateAndJoinAsync(process, exit, output, error, failures, policy, TimeProvider.System).ConfigureAwait(false);
+            await LocalClusterOwnedProcessLifetime.TerminateAndJoinAsync(process, exit, output, error, failures, policy, TimeProvider.System).ConfigureAwait(false);
         }
         ServerFailureObserver.ThrowIfAny(failures);
         await Assert.That(process.ExitCode).IsEqualTo(Success);

@@ -1,6 +1,6 @@
 # Original journal publication failure
 
-Canonical [StorageRecovery](../StorageRecovery.md), applies [ADR-003](../../ADR/ADR-003-durability-ack-barrier.md), [ADR-046](../../ADR/ADR-046-storage-private-owners.md), and [ADR-116](../../ADR/ADR-116-first-release-current-format.md). Implements the prior Root-frozen journal original-cause requirements.
+Canonical [StorageRecovery](../StorageRecovery.md), applies [ADR-003](../../ADR/ADR-003-durability-ack-barrier.md), [ADR-046](../../ADR/ADR-046-storage-private-owners.md), and [ADR-116](../../ADR/ADR-116-first-release-current-format.md).
 
 REQ-JOURNAL-CAUSE-001: Keep the existing UnknownWriteOutcome code/detail, poison transition, header/payload synchronous writes and Flush(true), ordered apply/position and gate/error telemetry. Retain the actual exception caught by Publish beneath the existing typed failure using the existing Errors.Fail(code, detail, cause); never manufacture a provider or outcome.
 
@@ -19,4 +19,4 @@ flowchart LR
  G --> H[Two native cold full-cut checks]
 ```
 
-This is a real owned native handle failure, not a power-loss/IO hardware/RF3/SDK/MCP claim. The test neither installs a fake provider nor replaces the journal field or adds a hook/timer. Existing Runtime constructor and FailedOpen cleanup findings remain separate; no synthetic dual failure is introduced. Root alone integrates tracked source and qualifies compiler/style/Linux full original storage/recovery/RF3. All execution/whole-task gates remain OPEN.
+This is a real owned native handle failure, not a power-loss/IO hardware/cluster/SDK/MCP claim. The test neither installs a fake provider nor replaces the journal field or adds a hook/timer. Existing Runtime constructor and FailedOpen cleanup findings remain separate; no synthetic dual failure is introduced. Linux full storage/recovery/replicated-cluster qualification is a separate gate.

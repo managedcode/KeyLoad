@@ -12,8 +12,8 @@ internal static class EarlyAdmissionQualificationHeld
     private const string ContentType = "application/json";
     private const string Bearer = "Bearer";
     private const string ControlRoute = "/v1/admin/dispatch?paused=false";
-    internal static async Task RunAsync(ClusterFixture fixture, RequestCqrsRf3Callers root,
-        RequestCqrsRf3Callers reader, EarlyAdmissionQualificationState state, CancellationToken token)
+    internal static async Task RunAsync(ClusterFixture fixture, RequestCqrsClusterCallers root,
+        RequestCqrsClusterCallers reader, EarlyAdmissionQualificationState state, CancellationToken token)
     {
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -54,13 +54,13 @@ internal static class EarlyAdmissionQualificationHeld
                         }, failures);
                     }, failures);
                 }
-                using var cleanup = new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline, TimeProvider.System);
+                using var cleanup = new CancellationTokenSource(RequestCqrsClusterProtocol.CleanupDeadline, TimeProvider.System);
                 await ServerFailureObserver.ObserveAsync(async () => _ = await QuietAsync(root, cleanup.Token), failures);
             }, failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
-    private static async Task<long> QuietAsync(RequestCqrsRf3Callers root, CancellationToken token)
+    private static async Task<long> QuietAsync(RequestCqrsClusterCallers root, CancellationToken token)
     {
         while (true)
         {
@@ -73,7 +73,7 @@ internal static class EarlyAdmissionQualificationHeld
             await Task.Delay(Poll, token);
         }
     }
-    private static async Task HeldAsync(RequestCqrsRf3Callers root, long baseline, int bodyBytes, CancellationToken token)
+    private static async Task HeldAsync(RequestCqrsClusterCallers root, long baseline, int bodyBytes, CancellationToken token)
     {
         while (true)
         {

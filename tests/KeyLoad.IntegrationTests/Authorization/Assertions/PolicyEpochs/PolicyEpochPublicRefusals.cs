@@ -9,7 +9,7 @@ namespace KeyLoad.IntegrationTests.Features.Authorization;
 
 internal static class PolicyEpochPublicRefusals
 {
-    internal static async Task AllAsync(ClusterFixture fixture, RequestCqrsRf3Callers reader, KeyLoadClient root,
+    internal static async Task AllAsync(ClusterFixture fixture, RequestCqrsClusterCallers reader, KeyLoadClient root,
         PolicyEpochPublicState state, ErrorCode code, CancellationToken token)
     {
         await PolicyEpochPublicAssertions.ImageAsync(root, state.Scenario, token);
@@ -23,10 +23,10 @@ internal static class PolicyEpochPublicRefusals
         await PolicyEpochPublicPolicy.ReplayAsync(root, state, token);
     }
 
-    private static async Task RouteAsync(ClusterFixture fixture, RequestCqrsRf3Callers reader, QueryRequest request, int route,
+    private static async Task RouteAsync(ClusterFixture fixture, RequestCqrsClusterCallers reader, QueryRequest request, int route,
         ErrorCode code, string credential, CancellationToken token)
     {
-        var sql = SqlRf3Protocol.Call(request.Partition, McpCallerTools.QueryExecute, request);
+        var sql = SqlClusterProtocol.Call(request.Partition, McpCallerTools.QueryExecute, request);
         if (route == PolicyEpochPublicProtocol.Sdk)
         {
             await SdkAsync(await reader.Sdk.QueryAsync(request, token), code, credential);
@@ -55,10 +55,10 @@ internal static class PolicyEpochPublicRefusals
                 ? await reader.Mcp.CallAsync(McpCallerTools.QueryExecute, request, token)
                 : await reader.Mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token);
         await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true);
-        await McpCallerAssertions.DoesNotDiscloseAsync(reply, credential, ResourcePolicyUpdateRf3Protocol.SecretValue);
+        await McpCallerAssertions.DoesNotDiscloseAsync(reply, credential, ResourcePolicyUpdateClusterProtocol.SecretValue);
     }
 
-    private static async Task RefuseMcpAsync(ClusterFixture fixture, RequestCqrsRf3Callers reader,
+    private static async Task RefuseMcpAsync(ClusterFixture fixture, RequestCqrsClusterCallers reader,
         QueryRequest request, SqlOperationRequest sql, int route, string credential, CancellationToken token)
     {
         var error = await Assert.ThrowsAsync<global::System.Net.Http.HttpRequestException>(
@@ -71,7 +71,7 @@ internal static class PolicyEpochPublicRefusals
         await Assert.That(error).IsNotNull();
         await Assert.That(error!.StatusCode).IsEqualTo(global::System.Net.HttpStatusCode.Unauthorized);
         await Assert.That(error.Message.Contains(credential, StringComparison.Ordinal)).IsFalse();
-        await Assert.That(error.Message.Contains(ResourcePolicyUpdateRf3Protocol.SecretValue, StringComparison.Ordinal)).IsFalse();
+        await Assert.That(error.Message.Contains(ResourcePolicyUpdateClusterProtocol.SecretValue, StringComparison.Ordinal)).IsFalse();
         await KeyLoad.IntegrationTests.Features.ClientApi.McpUnauthorizedProbe.VerifyAsync(
             fixture, McpCallerProtocol.Node2, credential, token);
     }
@@ -90,6 +90,6 @@ internal static class PolicyEpochPublicRefusals
         }
         var text = Encoding.UTF8.GetString(JsonDefaults.Serialize(result.Problem));
         await Assert.That(text.Contains(credential, StringComparison.Ordinal)).IsFalse();
-        await Assert.That(text.Contains(ResourcePolicyUpdateRf3Protocol.SecretValue, StringComparison.Ordinal)).IsFalse();
+        await Assert.That(text.Contains(ResourcePolicyUpdateClusterProtocol.SecretValue, StringComparison.Ordinal)).IsFalse();
     }
 }

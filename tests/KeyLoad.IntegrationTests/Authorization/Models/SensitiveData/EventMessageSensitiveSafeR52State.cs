@@ -1,10 +1,8 @@
 namespace KeyLoad.IntegrationTests.Features.Authorization;
 
-internal sealed class EventMessageSensitiveSafeR52State(EventMessageSensitivePublicState model,
-    AtomicPartitionPlacementResolution placement)
+internal sealed class EventMessageSensitiveSafeR52State(EventMessageSensitivePublicState model)
 {
     internal EventMessageSensitivePublicState Model { get; } = model;
-    internal AtomicPartitionPlacementResolution Placement { get; } = placement;
     internal OutboxStatus Outbox { get; set; } = null!;
     internal EventSourcePage? Page
     {

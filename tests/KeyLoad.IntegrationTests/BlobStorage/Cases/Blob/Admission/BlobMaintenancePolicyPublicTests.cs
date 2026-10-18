@@ -5,6 +5,6 @@ namespace KeyLoad.IntegrationTests.Features.BlobStorage;
 internal sealed class BlobMaintenancePolicyPublicTests(ClusterFixture fixture)
 {
     [Test]
-    public Task PersistedDeleteAndManageRevocationRepairPreservesRetiredBytesOriginalFailuresAndHealthyReceiptsAcrossTwoRf3ColdCycles()
+    public Task PersistedDeleteAndManageRevocationRepairPreservesRetiredBytesOriginalFailuresAndHealthyReceiptsAcrossTwoClusterColdCycles()
         => BlobMaintenancePolicyPublicTrial.RunAsync(fixture, TestContext.Current!.Execution.CancellationToken);
 }

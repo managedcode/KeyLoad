@@ -7,7 +7,7 @@ internal static class NativeResourcePolicySelectionAssertions
     private const string SelectedProperty = "resourcePolicy";
     private const string RejectedProperty = "resourcePolicyUnsupportedCount";
     private const int ExpectedRefusals = 4;
-    private const string Filter = "/*/*/ResourcePolicyUpdateRf3Tests/AcRpol004PolicyAckFencesReadersCursorsAndStaleRetriedUpdatesAcrossRf3";
+    private const string Filter = "/*/*/ResourcePolicyUpdateClusterTests/AcRpol004PolicyAckFencesReadersCursorsAndStaleRetriedUpdatesAcrossCluster";
 
     internal static async Task AssertAsync(JsonElement root)
     {

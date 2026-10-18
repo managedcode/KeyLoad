@@ -6,7 +6,7 @@ using P = KeyLoad.UnitTests.Features.BackupRestore.InitialConservationLineagePro
 
 namespace KeyLoad.UnitTests.Features.BackupRestore;
 
-/// <summary>Test-owned explicit offline mapping, not a hosted RF3 topology or a terminal retirement issuer.</summary>
+/// <summary>Test-owned explicit offline mapping, not a hosted CLUSTER topology or a terminal retirement issuer.</summary>
 internal sealed class InitialConservationSlot : IDisposable
 {
     private readonly byte[] signer = RandomNumberGenerator.GetBytes(P.SigningBytes);

@@ -29,22 +29,22 @@ internal static class StandardAspNetAuthorityTrial
         await Assert.That(absentIdentity.IsSuccess).IsFalse();
         await Assert.That(absentIdentity.Value).IsNull();
         await Assert.That(absentIdentity.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.Unauthenticated));
-        await SqlRf3Protocol.EqualAsync(before, await DiscoveryAuthorityValues.ImageAsync(root, state, token));
+        await SqlClusterProtocol.EqualAsync(before, await DiscoveryAuthorityValues.ImageAsync(root, state, token));
         var command = state.Scenario.Command(Guid.NewGuid());
         var deniedWrite = await reader.CommitAsync(command, token);
         await Assert.That(deniedWrite.IsSuccess).IsFalse();
         await Assert.That(deniedWrite.Value).IsNull();
         await Assert.That(deniedWrite.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
-        await SqlRf3Protocol.EqualAsync(before, await DiscoveryAuthorityValues.ImageAsync(root, state, token));
+        await SqlClusterProtocol.EqualAsync(before, await DiscoveryAuthorityValues.ImageAsync(root, state, token));
         var officialDenied = await session.CallAsync(McpCallerTools.DocumentsCommit, command, token);
         await McpCallerAssertions.ErrorAsync(officialDenied, ErrorCode.PermissionDenied, dispatched: true);
         await McpCallerAssertions.DoesNotDiscloseAsync(officialDenied, state.Identity.Secret, McpDocumentProtocol.PrivateValue);
-        await SqlRf3Protocol.EqualAsync(before, await DiscoveryAuthorityValues.ImageAsync(root, state, token));
+        await SqlClusterProtocol.EqualAsync(before, await DiscoveryAuthorityValues.ImageAsync(root, state, token));
         var changed = state.Scenario.Command(command.CommandId, McpDocumentProtocol.ConflictingJson);
         var changedDenied = await session.CallAsync(McpCallerTools.DocumentsCommit, changed, token);
         await McpCallerAssertions.ErrorAsync(changedDenied, ErrorCode.PermissionDenied, dispatched: true);
         await McpCallerAssertions.DoesNotDiscloseAsync(changedDenied, state.Identity.Secret, McpDocumentProtocol.ConflictValue);
-        await SqlRf3Protocol.EqualAsync(before, await DiscoveryAuthorityValues.ImageAsync(root, state, token));
+        await SqlClusterProtocol.EqualAsync(before, await DiscoveryAuthorityValues.ImageAsync(root, state, token));
         await DiscoveryAuthorityValues.HealthyAsync(root, reader, session, state, token);
     }
 }

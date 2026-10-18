@@ -1,6 +1,6 @@
 # Native CQRS HTTP transport bounds
 
-Status: owning repair10.2.7 delivered at source6dae0a68960055f01216c186448787000fd0b6e6; canonical Linux release passes1345/1345 and all four published packages are verified from NuGet. KeyLoad's three central pins are updated; Aspire consumer qualification remains pending. Canonical slice: ClientApi. Parent: [ClientApi](../ClientApi.md). Decision: [ADR-083](../../ADR/ADR-083-cqrs-http-transport-bounds.md). Product stream integration remains subject to [NativeCqrs](../ClusterRouting/NativeCqrs.md) C1–C3.
+KeyLoad's three central pins are updated; Aspire consumer qualification remains pending. Canonical slice: ClientApi. Parent: [ClientApi](../ClientApi.md). Decision: [ADR-083](../../ADR/ADR-083-cqrs-http-transport-bounds.md). Product stream integration remains subject to [NativeCqrs](../ClusterRouting/NativeCqrs.md) C1–C3.
 
 The selected Communication10.2.6 native HTTP reader passes an unbounded body into the BCL SSE parser and reads a non-success body using ReadAsStringAsync. A non-Problem response can become its public Problem.Detail verbatim. Repair these paths in the owning Communication repository; KeyLoad must not introduce another parser or consume an unpublished package.
 
@@ -39,15 +39,7 @@ Frozen well-known Problem titles are cqrs_stream_frame_limit_exceeded, cqrs_stre
 
 The native async enumerator permits one operation at a time. A pending MoveNext must receive cancellation and finish before DisposeAsync; invoking both concurrently is not a valid lifecycle oracle. Timeout cleanup must request actual cancellation and join the owned reader rather than treating Task.WaitAsync as reader completion. Keep the native request, response, parser and stream disposal chain; no alternate HTTP client, server writer, CQRS dispatcher, Result envelope compatibility or KeyLoad workaround. Changes to generic producer normalization, command execution reliability or Graph are outside this repair unless an actual test demonstrates a separately specified defect.
 
-## Ordered ownership and verification
-
-1. Root freezes this REQ/AC/API contract, ADR and scoped task before write release.
-2. Luna owns a reviewable patch staged under /private/tmp for only owning Communication/Cqrs client admission/helpers/constants, CQRS tests and concrete README examples. Reuse CqrsTestHost.StartMinimalApiAsync/GetTestClient for real HTTP. Existing stub-based tests may have an unsafe oracle corrected; they cannot prove physical resource/lifecycle boundaries. No builds, releases, version changes or Git actions by the worker.
-3. Root reviews and applies the scoped patch to the owning repository under existing dependency-repair authorization. Recheck its working tree, preserve unrelated changes, run its canonical restore/full build/TUnit coverage and required bounded performance check for the added hot path. Root owns diagnostic repairs and evidence.
-4. Root increments both canonical Version/PackageVersion from10.2.6 to10.2.7 only after relevant checks, commits the complete scoped repair, pushes main without force and follows its release workflow. Independently verify ManagedCode.Communication, ManagedCode.Communication.AspNetCore and ManagedCode.Communication.Orleans10.2.7 from NuGet; partial publication is insufficient.
-5. Root updates KeyLoad's three central pins only after feed proof, restores/builds and exercises actual native CQRS consumers through Aspire. Product C2 remains blocked on its own signed request, persisted authorization, RF3, terminal authority, aggregate/count/rate/time and official MCP contracts.
-
-Migration: additive options and intentional removal of raw-body failure exposure. README gives explicit bounded-client usage and the new status-only plain-text behavior. Rollback: redeploy a homogeneous prior KeyLoad binary before product C2 adoption; never reintroduce the unsafe raw-body path or replace the repaired library with a consumer parser. No storage format or RF3 topology changes.
+Migration: additive options and intentional removal of raw-body failure exposure. README gives explicit bounded-client usage and the new status-only plain-text behavior. Rollback: redeploy a homogeneous prior KeyLoad binary before product C2 adoption; never reintroduce the unsafe raw-body path or replace the repaired library with a consumer parser. No storage format or cluster topology changes.
 
 ## Native parser EOF and cancellation qualification correction, 2026-10-04
 

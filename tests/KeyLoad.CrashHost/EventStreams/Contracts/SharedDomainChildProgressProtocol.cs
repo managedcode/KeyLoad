@@ -2,7 +2,7 @@ namespace KeyLoad.CrashHost.Features.EventStreams;
 
 internal static class SharedDomainChildProgressProtocol
 {
-    internal const string FileName = "kl081-child-progress.bin";
+    internal const string FileName = "child-progress.bin";
     internal const string Alias = "keyload.test.shared-domain-child-progress.v1";
     internal const string PhaseAlias = "keyload.test.shared-domain-child-progress-phase.v1";
     internal const string Invalid = "The original shared-domain child progress witness is invalid.";

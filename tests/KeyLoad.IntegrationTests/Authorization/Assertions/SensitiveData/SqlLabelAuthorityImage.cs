@@ -22,7 +22,7 @@ internal static class SqlLabelAuthorityImage
             var reference = new EntityRef(partition, row.Collection, row.Id);
             var actual = await PublicReadAssertions.DocumentAsync(await root.GetAsync(reference, token));
             await Assert.That(actual).IsNotNull();
-            await SqlRf3Protocol.EqualAsync(new DocumentResult(reference, McpCallerProtocol.FirstRevision,
+            await SqlClusterProtocol.EqualAsync(new DocumentResult(reference, McpCallerProtocol.FirstRevision,
                 row.Json, false, []), actual);
             if (actual is not null)
             {

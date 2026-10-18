@@ -296,7 +296,7 @@ function New-FcReport([object[]] $Runs, [string] $Filter, [object[]] $Sources, [
         sourceFilesWithoutLineRecords = @($unreportedSources | Sort-Object)
         runs = $runReports
         thresholds = $null
-        qualification = 'private exact Query case profile only; every admitted class, method, and instance appears once per TRX with a passing result; no threshold pass; does not close AC-CQ-009 or product/RF3 coverage'
+        qualification = 'private exact Query case profile only; every admitted class, method, and instance appears once per TRX with a passing result; no threshold pass; does not close AC-CQ-009 or product/CLUSTER coverage'
     }
 }
 
@@ -304,7 +304,7 @@ function Convert-FcReportToMarkdown([object] $Report) {
     $builder = [Text.StringBuilder]::new()
     [void] $builder.AppendLine('# KeyLoad.Query functional coverage')
     [void] $builder.AppendLine('')
-    [void] $builder.AppendLine('Private exact `PartitionQuery` case profile through native `unit` normal with hardware intrinsics enabled. This report records raw counts and uncovered locations; it applies no threshold and does not qualify complete product or RF3 coverage.')
+    [void] $builder.AppendLine('Private exact `PartitionQuery` case profile through native `unit` normal with hardware intrinsics enabled. This report records raw counts and uncovered locations; it applies no threshold and does not qualify complete product or CLUSTER coverage.')
     [void] $builder.AppendLine('')
     [void] $builder.AppendLine('| Run | TRX cases | Native lines covered | Native lines valid | Native line percent | Native branch pairs |')
     [void] $builder.AppendLine('|---|---:|---:|---:|---:|---:|')

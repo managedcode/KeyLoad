@@ -5,7 +5,7 @@ namespace KeyLoad.IntegrationTests.Features.Authorization;
 
 internal static class EventMessageSensitivePublicSeed
 {
-    internal static async Task<EventMessageSensitivePublicState> RunAsync(RequestCqrsRf3Callers root,
+    internal static async Task<EventMessageSensitivePublicState> RunAsync(RequestCqrsClusterCallers root,
         bool subscription, bool dataAuthority, bool header, CancellationToken token)
     {
         var suffix = Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat);

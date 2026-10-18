@@ -84,7 +84,7 @@ internal static class SubscriptionGroupProgressAuthorityAssertions
 
     internal static CommitToken NextToken(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group)
     {
-        var placement = db.ReadAtomicPartitionPlacement("root", new(1, group.Source.Partition));
+        var placement = db.ReadAtomicPartitionPlacement("root", group.Source.Partition);
         return new(placement.Incarnation, group.Source.Partition.AtomicPartitionId,
             checked(store.Position + 1), placement.PlacementEpoch);
     }

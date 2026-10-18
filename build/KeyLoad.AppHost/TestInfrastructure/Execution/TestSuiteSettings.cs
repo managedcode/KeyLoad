@@ -17,11 +17,11 @@ internal sealed record TestSuiteSettings(
     bool ReportTrx,
     string? CoverageSettings,
     string? CoverageOutput,
-    bool LocalRf3ImageEnabled)
+    bool LocalClusterImageEnabled)
 {
     private const string GetResourceNameComparisonText = "tests-";
 
-    internal NativeCoverageRf3Selection? NativeCoverageRf3
+    internal NativeCoverageClusterSelection? NativeCoverageCluster
     {
         get; init;
     }

@@ -74,18 +74,18 @@ internal static class FunctionalGateColdWorkloads
     internal static async Task ReplayAsync(FunctionalGateContext context, FunctionalGateColdWorkload proof,
         CancellationToken token)
     {
-        await SqlRf3Protocol.EqualAsync(proof.Receipt, await context.SdkAsync(context.Writer.Sdk.CommitAsync(proof.Command, token)));
-        await SqlRf3Protocol.EqualAsync(proof.Receipt, await context.McpAsync<CommitReceipt>(context.Writer,
+        await SqlClusterProtocol.EqualAsync(proof.Receipt, await context.SdkAsync(context.Writer.Sdk.CommitAsync(proof.Command, token)));
+        await SqlClusterProtocol.EqualAsync(proof.Receipt, await context.McpAsync<CommitReceipt>(context.Writer,
             McpCallerTools.DocumentsCommit, proof.Command, token));
         var reference = proof.Expected.Document!.Reference;
-        await SqlRf3Protocol.EqualAsync(proof.Expected, await context.SdkAsync(context.Reader.Sdk.GetAsync(reference, token)));
-        await SqlRf3Protocol.EqualAsync(proof.Expected, await context.McpAsync<DocumentReadResult>(context.Reader,
+        await SqlClusterProtocol.EqualAsync(proof.Expected, await context.SdkAsync(context.Reader.Sdk.GetAsync(reference, token)));
+        await SqlClusterProtocol.EqualAsync(proof.Expected, await context.McpAsync<DocumentReadResult>(context.Reader,
             McpCallerTools.DocumentsGet, new GetDocumentRequest(reference), token));
     }
 
     private static Task<T> RunAsync<T>(FunctionalGateFixture fixture, FunctionalGateContext original,
         McpPersistedIdentity identity, Func<FunctionalGateContext, Task<T>> action, CancellationToken token)
-        => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, fixture.NodeNames[^1], identity.Secret,
+        => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, fixture.NodeNames[^1], identity.Secret,
             caller => action(original with
             {
                 Writer = caller,

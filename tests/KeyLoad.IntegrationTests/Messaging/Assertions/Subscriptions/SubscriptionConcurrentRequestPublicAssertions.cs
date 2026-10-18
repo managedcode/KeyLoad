@@ -25,7 +25,7 @@ internal static class SubscriptionConcurrentRequestPublicAssertions
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny([.. sdkFailures, .. mcpFailures]);
         var original = first ?? throw new InvalidOperationException("The original concurrent SDK result is absent.");
         var replay = second ?? throw new InvalidOperationException("The original concurrent MCP result is absent.");
-        await SubscriptionFilterRf3Assertions.EqualAsync(original, replay);
+        await SubscriptionFilterClusterAssertions.EqualAsync(original, replay);
         return original;
     }
 
@@ -34,16 +34,16 @@ internal static class SubscriptionConcurrentRequestPublicAssertions
     {
         foreach (var saved in state.History)
         {
-            await SubscriptionFilterRf3Assertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
+            await SubscriptionFilterClusterAssertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
                 await sdk.CompleteSubscriptionAsync(saved.Request, token)), saved.Receipt);
-            await SubscriptionFilterRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(
+            await SubscriptionFilterClusterAssertions.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(
                 await mcp.CallAsync(McpCallerTools.SubscriptionsComplete, saved.Request, token))).Value, saved.Receipt);
         }
         if (firstCurrent)
         {
-            await SubscriptionFilterRf3Assertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
+            await SubscriptionFilterClusterAssertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
                 await sdk.ReceiveSubscriptionAsync(state.First, token)), state.FirstResult);
-            await SubscriptionFilterRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<ReceiveSubscriptionResult>(
+            await SubscriptionFilterClusterAssertions.EqualAsync((await McpCallerAssertions.SuccessAsync<ReceiveSubscriptionResult>(
                 await mcp.CallAsync(McpCallerTools.SubscriptionsReceive, state.First, token))).Value, state.FirstResult);
         }
         else
@@ -51,11 +51,11 @@ internal static class SubscriptionConcurrentRequestPublicAssertions
             await SubscriptionPhasePublicAssertions.ReceiveFailureAsync(sdk, mcp, state.First, ErrorCode.StaleLease, token);
         }
         await SubscriptionPhasePublicAssertions.ReceiveFailureAsync(sdk, mcp, state.Remaining, ErrorCode.StaleLease, token);
-        await SubscriptionFilterRf3Assertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
+        await SubscriptionFilterClusterAssertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
             await sdk.ReceiveSubscriptionAsync(state.Empty, token)), state.EmptyResult);
-        await SubscriptionFilterRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<ReceiveSubscriptionResult>(
+        await SubscriptionFilterClusterAssertions.EqualAsync((await McpCallerAssertions.SuccessAsync<ReceiveSubscriptionResult>(
             await mcp.CallAsync(McpCallerTools.SubscriptionsReceive, state.Empty, token))).Value, state.EmptyResult);
-        await SubscriptionFilterRf3Assertions.HistoryAsync(sdk, mcp, state.First.Subscription.Source, source, token);
+        await SubscriptionFilterClusterAssertions.HistoryAsync(sdk, mcp, state.First.Subscription.Source, source, token);
     }
 
     internal static async Task LiteralSourceAsync(EventSourcePage source)
@@ -63,13 +63,13 @@ internal static class SubscriptionConcurrentRequestPublicAssertions
         await Assert.That(source.Events.Length).IsEqualTo(4);
         await Assert.That(source.Head.TailPosition).IsEqualTo(4L);
         var expected = new EventData[] {
-            new(SubscriptionFilterRf3Protocol.FirstEvent, SubscriptionFilterRf3Protocol.Created, SubscriptionFilterRf3Protocol.Payload),
-            new(SubscriptionFilterRf3Protocol.SecondEvent, SubscriptionFilterRf3Protocol.Changed, SubscriptionFilterRf3Protocol.Payload),
-            new(SubscriptionFilterRf3Protocol.ThirdEvent, SubscriptionFilterRf3Protocol.Created, SubscriptionFilterRf3Protocol.Payload),
-            new(SubscriptionFilterRf3Protocol.FourthEvent, SubscriptionFilterRf3Protocol.Changed, SubscriptionFilterRf3Protocol.Payload) };
+            new(SubscriptionFilterClusterProtocol.FirstEvent, SubscriptionFilterClusterProtocol.Created, SubscriptionFilterClusterProtocol.Payload),
+            new(SubscriptionFilterClusterProtocol.SecondEvent, SubscriptionFilterClusterProtocol.Changed, SubscriptionFilterClusterProtocol.Payload),
+            new(SubscriptionFilterClusterProtocol.ThirdEvent, SubscriptionFilterClusterProtocol.Created, SubscriptionFilterClusterProtocol.Payload),
+            new(SubscriptionFilterClusterProtocol.FourthEvent, SubscriptionFilterClusterProtocol.Changed, SubscriptionFilterClusterProtocol.Payload) };
         for (var index = 0; index < expected.Length; index++)
         {
-            await SubscriptionFilterRf3Assertions.EqualAsync(source.Events[index].Data, expected[index]);
+            await SubscriptionFilterClusterAssertions.EqualAsync(source.Events[index].Data, expected[index]);
             await Assert.That(source.Events[index].Position).IsEqualTo(index + 1L);
         }
     }

@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using System.Text.Json;
-using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
@@ -27,21 +26,16 @@ internal static class FunctionalGateCompositionCalls
 
     internal static Task<CommitReceipt> CommandAsync(FunctionalGateContext context, CommandRequest command,
         bool official, CancellationToken token)
-        => SqlAsync<CommitReceipt>(context, SqlRf3Protocol.Call(context.Partition,
+        => SqlAsync<CommitReceipt>(context, SqlClusterProtocol.Call(context.Partition,
             McpCallerTools.DocumentsCommit, command) with
         {
             CommandId = command.CommandId
         }, official, true, token);
 
     internal static async Task ReceiptAsync(FunctionalGateContext context, CommitReceipt actual,
-        Guid commandId, ImmutableArray<MutationReceipt> effects, CancellationToken token)
+        Guid commandId, ImmutableArray<MutationReceipt> effects)
     {
-        var placement = await context.SdkAsync(context.Administrator.Sdk.ReadAtomicPartitionPlacementAsync(
-            new(P.PlacementVersion, context.Partition), token));
-        await Assert.That(placement.Partition).IsEqualTo(context.Partition);
-        await Assert.That(actual.Token.Incarnation).IsEqualTo(placement.Incarnation);
         await Assert.That(actual.Token.AtomicPartitionId).IsEqualTo(context.Partition.AtomicPartitionId);
-        await Assert.That(actual.Token.OwnershipEpoch).IsEqualTo(placement.PlacementEpoch);
         await Assert.That(actual.Token.Position).IsGreaterThan(P.Absent);
         await NativeSubmissionColdAssertions.ReceiptAsync(actual,
             new(commandId, actual.Token, effects, DurabilityProfile.QuorumProcessDurable));

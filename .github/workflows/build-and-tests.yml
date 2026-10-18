@@ -5,11 +5,11 @@ on:
   pull_request:
   workflow_dispatch:
     inputs:
-      task:
-        description: 'Select full qualification, an acceptance task, or sequential functional database gates'
+      mode:
+        description: 'Select full qualification or sequential functional database gates'
         type: choice
         default: all
-        options: [all, functional-gates, KL-008, KL-011, KL-014, KL-015, KL-021, KL-027, KL-036, KL-033, KL-035, KL-029, KL-034, KL-042, KL-079, KL-065, KL-078, KL-087]
+        options: [all, functional-gates]
 permissions:
   contents: read
 concurrency:
@@ -27,7 +27,7 @@ jobs:
         run: node scripts/Features/RepositoryGovernance/verify.mjs
   analyzer-rules:
     name: Test code analyzers
-    if: ${{ github.event_name != 'workflow_dispatch' || inputs.task == 'all' }}
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.mode == 'all' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -102,7 +102,7 @@ jobs:
           if-no-files-found: error
   verify:
     name: Build and test KeyLoad
-    if: ${{ github.event_name != 'workflow_dispatch' || inputs.task == 'all' }}
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.mode == 'all' }}
     needs: repository-checks
     strategy:
       fail-fast: false
@@ -213,89 +213,9 @@ jobs:
           name: code-quality-${{ matrix.os }}
           path: artifacts/code-quality/**
           if-no-files-found: error
-  task-acceptance:
-    if: ${{ github.event_name != 'workflow_dispatch' || inputs.task != 'functional-gates' }}
-    name: Qualify ${{ matrix.task }} (${{ matrix.profile }} caller)
-    runs-on: ubuntu-24.04
-    timeout-minutes: 180
-    strategy:
-      fail-fast: false
-      matrix:
-        task: ${{ fromJSON(inputs.task == 'KL-008' && '["KL-008"]' || inputs.task == 'KL-011' && '["KL-011"]' || inputs.task == 'KL-014' && '["KL-014"]' || inputs.task == 'KL-015' && '["KL-015"]' || inputs.task == 'KL-021' && '["KL-021"]' || inputs.task == 'KL-027' && '["KL-027"]' || inputs.task == 'KL-036' && '["KL-036"]' || inputs.task == 'KL-033' && '["KL-033"]' || inputs.task == 'KL-035' && '["KL-035"]' || inputs.task == 'KL-029' && '["KL-029"]' || inputs.task == 'KL-034' && '["KL-034"]' || inputs.task == 'KL-042' && '["KL-042"]' || inputs.task == 'KL-079' && '["KL-079"]' || inputs.task == 'KL-065' && '["KL-065"]' || inputs.task == 'KL-078' && '["KL-078"]' || inputs.task == 'KL-087' && '["KL-087"]' || '["KL-008","KL-011","KL-014","KL-015","KL-021","KL-027","KL-036","KL-033","KL-035","KL-029","KL-034","KL-042","KL-079","KL-065","KL-078","KL-087"]') }}
-        profile: [normal]
-    steps:
-      - name: Download source code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Set up .NET
-        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
-        with:
-          global-json-file: global.json
-      - name: Check Docker
-        if: ${{ matrix.task != 'KL-008' }}
-        run: docker version
-      - name: Build this task's KeyLoad server image
-        if: ${{ matrix.task != 'KL-008' }}
-        id: images
-        run: node scripts/Features/BenchmarkComparisons/prepare-images.mjs --server-only
-      - name: Configure this task's Docker image
-        if: ${{ matrix.task != 'KL-008' }}
-        shell: bash
-        env:
-          KEYLOAD_SERVER_IMAGE: ${{ steps.images.outputs.server-image }}
-        run: |
-          test -n "$KEYLOAD_SERVER_IMAGE"
-          printf 'KeyLoad__ContainerImages__Server=%s\nKEYLOAD_IMAGE_RECEIPT=%s\n' "$KEYLOAD_SERVER_IMAGE" "$RUNNER_TEMP/keyload-images/image-receipt.json" >> "$GITHUB_ENV"
-      - name: Restore .NET packages
-        run: dotnet restore KeyLoad.slnx
-      - name: Build the complete current solution
-        id: build
-        run: dotnet build KeyLoad.slnx --no-restore --configuration Release -warnaserror
-      - name: Prepare original task source and test-image receipts
-        id: source-identity
-        shell: pwsh
-        run: |
-          & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.production-source-manifest.ps1 `
-            -Mode prepare -Root $env:GITHUB_WORKSPACE `
-            -EvidenceRoot (Join-Path $env:GITHUB_WORKSPACE 'TestResults/task-acceptance')
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Discover and execute this task's complete acceptance flows
-        id: acceptance
-        if: ${{ !cancelled() && steps.build.outcome == 'success' && steps.source-identity.outcome == 'success' }}
-        shell: pwsh
-        env:
-          KEYLOAD_ACCEPTANCE_TASK: ${{ matrix.task }}
-          KEYLOAD_ACCEPTANCE_PROFILE: ${{ matrix.profile }}
-        run: |
-          & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/task-acceptance.ps1 `
-            -Repository $env:GITHUB_WORKSPACE `
-            -EvidenceRoot (Join-Path $env:GITHUB_WORKSPACE 'TestResults/task-acceptance') `
-            -Task $env:KEYLOAD_ACCEPTANCE_TASK -Profile $env:KEYLOAD_ACCEPTANCE_PROFILE
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Verify unchanged task source and test images
-        if: ${{ !cancelled() && steps.source-identity.outcome == 'success' }}
-        shell: pwsh
-        run: |
-          & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.production-source-manifest.ps1 `
-            -Mode verify -Root $env:GITHUB_WORKSPACE `
-            -EvidenceRoot (Join-Path $env:GITHUB_WORKSPACE 'TestResults/task-acceptance')
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Clean up this task's Docker registry
-        if: ${{ always() && (steps.images.outcome == 'success' || steps.images.outcome == 'failure') }}
-        run: node scripts/Features/BenchmarkComparisons/cleanup-images.mjs
-      - name: Save this task's original acceptance results
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: task-acceptance-${{ matrix.task }}-${{ matrix.profile }}
-          path: |
-            TestResults/task-acceptance/**
-            artifacts/qualification/**
-            artifacts/code-quality/**
-            ${{ runner.temp }}/keyload-images/**
-          if-no-files-found: error
-  docker-rf3:
-    name: ${{ inputs.task == 'functional-gates' && 'Test functional database gates (one then three nodes)' || 'Test three-node database' }}
-    if: ${{ github.event_name != 'workflow_dispatch' || inputs.task == 'all' || inputs.task == 'functional-gates' }}
+  docker-cluster:
+    name: ${{ inputs.mode == 'functional-gates' && 'Test functional database gates (one then three nodes)' || 'Test three-node database' }}
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.mode == 'all' || inputs.mode == 'functional-gates' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 180
     steps:
@@ -333,21 +253,21 @@ jobs:
         shell: pwsh
         run: |
           $root = $env:GITHUB_WORKSPACE
-          $evidence = Join-Path $root 'TestResults/functional-coverage/rf3'
+          $evidence = Join-Path $root 'TestResults/functional-coverage/cluster'
           & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.production-source-manifest.ps1 `
             -Mode prepare -Root $root -EvidenceRoot $evidence
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           "KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST=$evidence/functional-coverage.production-source-manifest.json" | Add-Content $env:GITHUB_ENV
       - name: Test functional database gate with 1 node(s)
         id: functional-single
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.task == 'functional-gates' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'functional-gates' }}
         shell: bash
         env:
           TMPDIR: ${{ runner.temp }}/functional-gates
         run: |
           evidence="TestResults/functional-gates/single"
           mkdir -p "$TMPDIR" "$evidence"
-          if node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=rf3 '--KeyLoadTests:Filter=/*/*/FunctionalDatabaseGateTests/SingleInstanceRunsEveryModelThroughSdkMcpAndSqlWithPersistedUsers' --KeyLoadTests:Execution:MaximumParallelTests=50 --KeyLoadTests:ResultsDirectory=TestResults/functional-gates/single --KeyLoadTests:ReportTrx=true > "$evidence/native.stdout.original.txt" 2> "$evidence/native.stderr.original.txt"; then
+          if node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=cluster '--KeyLoadTests:Filter=/*/*/FunctionalDatabaseGateTests/SingleInstanceRunsEveryModelThroughSdkMcpAndSqlWithPersistedUsers' --KeyLoadTests:Execution:MaximumParallelTests=50 --KeyLoadTests:ResultsDirectory=TestResults/functional-gates/single --KeyLoadTests:ReportTrx=true > "$evidence/native.stdout.original.txt" 2> "$evidence/native.stderr.original.txt"; then
             native_exit=0
           else
             native_exit=$?
@@ -358,7 +278,7 @@ jobs:
           exit "$native_exit"
       - name: Verify original single functional gate receipt
         id: functional-single-receipt
-        if: ${{ !cancelled() && inputs.task == 'functional-gates' && (steps.functional-single.outcome == 'success' || steps.functional-single.outcome == 'failure') }}
+        if: ${{ !cancelled() && inputs.mode == 'functional-gates' && (steps.functional-single.outcome == 'success' || steps.functional-single.outcome == 'failure') }}
         shell: pwsh
         env:
           NATIVE_OUTCOME: ${{ steps.functional-single.outcome }}
@@ -399,14 +319,14 @@ jobs:
           if (-not $valid) { throw 'The exact original functional case must execute once and pass without skips.' }
       - name: Test functional database gate with 3 node(s)
         id: functional-three
-        if: ${{ success() && github.event_name == 'workflow_dispatch' && inputs.task == 'functional-gates' && steps.functional-single-receipt.outcome == 'success' }}
+        if: ${{ success() && github.event_name == 'workflow_dispatch' && inputs.mode == 'functional-gates' && steps.functional-single-receipt.outcome == 'success' }}
         shell: bash
         env:
           TMPDIR: ${{ runner.temp }}/functional-gates
         run: |
           evidence="TestResults/functional-gates/three"
           mkdir -p "$TMPDIR" "$evidence"
-          if node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=rf3 '--KeyLoadTests:Filter=/*/*/FunctionalDatabaseGateTests/ThreeNodeClusterRunsSameEveryModelScenarioThroughSdkMcpAndSql' --KeyLoadTests:Execution:MaximumParallelTests=50 --KeyLoadTests:ResultsDirectory=TestResults/functional-gates/three --KeyLoadTests:ReportTrx=true > "$evidence/native.stdout.original.txt" 2> "$evidence/native.stderr.original.txt"; then
+          if node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=cluster '--KeyLoadTests:Filter=/*/*/FunctionalDatabaseGateTests/ThreeNodeClusterRunsSameEveryModelScenarioThroughSdkMcpAndSql' --KeyLoadTests:Execution:MaximumParallelTests=50 --KeyLoadTests:ResultsDirectory=TestResults/functional-gates/three --KeyLoadTests:ReportTrx=true > "$evidence/native.stdout.original.txt" 2> "$evidence/native.stderr.original.txt"; then
             native_exit=0
           else
             native_exit=$?
@@ -417,7 +337,7 @@ jobs:
           exit "$native_exit"
       - name: Verify original three functional gate receipt
         id: functional-three-receipt
-        if: ${{ !cancelled() && inputs.task == 'functional-gates' && (steps.functional-three.outcome == 'success' || steps.functional-three.outcome == 'failure') }}
+        if: ${{ !cancelled() && inputs.mode == 'functional-gates' && (steps.functional-three.outcome == 'success' || steps.functional-three.outcome == 'failure') }}
         shell: pwsh
         env:
           NATIVE_OUTCOME: ${{ steps.functional-three.outcome }}
@@ -458,7 +378,7 @@ jobs:
           if (-not $valid) { throw 'The exact original functional case must execute once and pass without skips.' }
       - name: Test native cold profile and selector preconditions
         id: functional-cold-preconditions
-        if: ${{ success() && github.event_name == 'workflow_dispatch' && inputs.task == 'functional-gates' && steps.functional-three-receipt.outcome == 'success' }}
+        if: ${{ success() && github.event_name == 'workflow_dispatch' && inputs.mode == 'functional-gates' && steps.functional-three-receipt.outcome == 'success' }}
         shell: bash
         run: |
           evidence="TestResults/functional-gates/cold-preconditions"
@@ -474,7 +394,7 @@ jobs:
           exit "$native_exit"
       - name: Verify original native cold precondition receipt
         id: functional-cold-preconditions-receipt
-        if: ${{ !cancelled() && inputs.task == 'functional-gates' && (steps.functional-cold-preconditions.outcome == 'success' || steps.functional-cold-preconditions.outcome == 'failure') }}
+        if: ${{ !cancelled() && inputs.mode == 'functional-gates' && (steps.functional-cold-preconditions.outcome == 'success' || steps.functional-cold-preconditions.outcome == 'failure') }}
         shell: pwsh
         env:
           NATIVE_OUTCOME: ${{ steps.functional-cold-preconditions.outcome }}
@@ -539,14 +459,14 @@ jobs:
           if (-not $valid) { throw 'Every original cold profile and selector precondition must execute exactly once and pass without skips.' }
       - name: Test cold functional database gate with 1 node(s)
         id: functional-cold-single
-        if: ${{ success() && github.event_name == 'workflow_dispatch' && inputs.task == 'functional-gates' && steps.functional-cold-preconditions-receipt.outcome == 'success' }}
+        if: ${{ success() && github.event_name == 'workflow_dispatch' && inputs.mode == 'functional-gates' && steps.functional-cold-preconditions-receipt.outcome == 'success' }}
         shell: bash
         env:
           TMPDIR: ${{ runner.temp }}/functional-gates
         run: |
           evidence="TestResults/functional-gates/cold-single"
           mkdir -p "$TMPDIR" "$evidence"
-          if node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=rf3 '--KeyLoadTests:Filter=/*/*/FunctionalDatabaseColdReopenTests/SingleInstanceColdReopensAllModelsAndReplaysOriginalPublicCommands' --KeyLoadTests:Execution:MaximumParallelTests=50 --KeyLoadTests:ResultsDirectory=TestResults/functional-gates/cold-single --KeyLoadTests:ReportTrx=true > "$evidence/native.stdout.original.txt" 2> "$evidence/native.stderr.original.txt"; then
+          if node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=cluster '--KeyLoadTests:Filter=/*/*/FunctionalDatabaseColdReopenTests/SingleInstanceColdReopensAllModelsAndReplaysOriginalPublicCommands' --KeyLoadTests:Execution:MaximumParallelTests=50 --KeyLoadTests:ResultsDirectory=TestResults/functional-gates/cold-single --KeyLoadTests:ReportTrx=true > "$evidence/native.stdout.original.txt" 2> "$evidence/native.stderr.original.txt"; then
             native_exit=0
           else
             native_exit=$?
@@ -557,7 +477,7 @@ jobs:
           exit "$native_exit"
       - name: Verify original single cold functional gate receipt
         id: functional-cold-single-receipt
-        if: ${{ !cancelled() && inputs.task == 'functional-gates' && (steps.functional-cold-single.outcome == 'success' || steps.functional-cold-single.outcome == 'failure') }}
+        if: ${{ !cancelled() && inputs.mode == 'functional-gates' && (steps.functional-cold-single.outcome == 'success' || steps.functional-cold-single.outcome == 'failure') }}
         shell: pwsh
         env:
           NATIVE_OUTCOME: ${{ steps.functional-cold-single.outcome }}
@@ -598,14 +518,14 @@ jobs:
           if (-not $valid) { throw 'The exact original functional case must execute once and pass without skips.' }
       - name: Test cold functional database gate with 3 node(s)
         id: functional-cold-three
-        if: ${{ success() && github.event_name == 'workflow_dispatch' && inputs.task == 'functional-gates' && steps.functional-cold-single-receipt.outcome == 'success' }}
+        if: ${{ success() && github.event_name == 'workflow_dispatch' && inputs.mode == 'functional-gates' && steps.functional-cold-single-receipt.outcome == 'success' }}
         shell: bash
         env:
           TMPDIR: ${{ runner.temp }}/functional-gates
         run: |
           evidence="TestResults/functional-gates/cold-three"
           mkdir -p "$TMPDIR" "$evidence"
-          if node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=rf3 '--KeyLoadTests:Filter=/*/*/FunctionalDatabaseColdReopenTests/ThreeNodeColdReopensAllModelsAndReplaysOriginalPublicCommands' --KeyLoadTests:Execution:MaximumParallelTests=50 --KeyLoadTests:ResultsDirectory=TestResults/functional-gates/cold-three --KeyLoadTests:ReportTrx=true > "$evidence/native.stdout.original.txt" 2> "$evidence/native.stderr.original.txt"; then
+          if node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=cluster '--KeyLoadTests:Filter=/*/*/FunctionalDatabaseColdReopenTests/ThreeNodeColdReopensAllModelsAndReplaysOriginalPublicCommands' --KeyLoadTests:Execution:MaximumParallelTests=50 --KeyLoadTests:ResultsDirectory=TestResults/functional-gates/cold-three --KeyLoadTests:ReportTrx=true > "$evidence/native.stdout.original.txt" 2> "$evidence/native.stderr.original.txt"; then
             native_exit=0
           else
             native_exit=$?
@@ -616,7 +536,7 @@ jobs:
           exit "$native_exit"
       - name: Verify original three cold functional gate receipt
         id: functional-cold-three-receipt
-        if: ${{ !cancelled() && inputs.task == 'functional-gates' && (steps.functional-cold-three.outcome == 'success' || steps.functional-cold-three.outcome == 'failure') }}
+        if: ${{ !cancelled() && inputs.mode == 'functional-gates' && (steps.functional-cold-three.outcome == 'success' || steps.functional-cold-three.outcome == 'failure') }}
         shell: pwsh
         env:
           NATIVE_OUTCOME: ${{ steps.functional-cold-three.outcome }}
@@ -657,14 +577,14 @@ jobs:
           if (-not $valid) { throw 'The exact original functional case must execute once and pass without skips.' }
       - name: Test distinct native files and exclusive-owner refusal with 3 nodes
         id: functional-file-ownership-three
-        if: ${{ success() && github.event_name == 'workflow_dispatch' && inputs.task == 'functional-gates' && steps.functional-cold-three-receipt.outcome == 'success' }}
+        if: ${{ success() && github.event_name == 'workflow_dispatch' && inputs.mode == 'functional-gates' && steps.functional-cold-three-receipt.outcome == 'success' }}
         shell: bash
         env:
           TMPDIR: ${{ runner.temp }}/functional-gates
         run: |
           evidence="TestResults/functional-gates/file-ownership-three"
           mkdir -p "$TMPDIR" "$evidence"
-          if node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=rf3 '--KeyLoadTests:Filter=/*/*/FunctionalFileOwnershipRf3Tests/DistinctNativeFilesRetainAllModelsAcrossCompetingOwnersAndTwoColdReopens' --KeyLoadTests:Execution:MaximumParallelTests=50 --KeyLoadTests:ResultsDirectory=TestResults/functional-gates/file-ownership-three --KeyLoadTests:ReportTrx=true > "$evidence/native.stdout.original.txt" 2> "$evidence/native.stderr.original.txt"; then
+          if node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=cluster '--KeyLoadTests:Filter=/*/*/FunctionalFileOwnershipClusterTests/DistinctNativeFilesRetainAllModelsAcrossCompetingOwnersAndTwoColdReopens' --KeyLoadTests:Execution:MaximumParallelTests=50 --KeyLoadTests:ResultsDirectory=TestResults/functional-gates/file-ownership-three --KeyLoadTests:ReportTrx=true > "$evidence/native.stdout.original.txt" 2> "$evidence/native.stderr.original.txt"; then
             native_exit=0
           else
             native_exit=$?
@@ -675,7 +595,7 @@ jobs:
           exit "$native_exit"
       - name: Verify original distinct-files and exclusive-owner refusal receipt
         id: functional-file-ownership-three-receipt
-        if: ${{ !cancelled() && github.event_name == 'workflow_dispatch' && inputs.task == 'functional-gates' && steps.functional-cold-three-receipt.outcome == 'success' && (steps.functional-file-ownership-three.outcome == 'success' || steps.functional-file-ownership-three.outcome == 'failure') }}
+        if: ${{ !cancelled() && github.event_name == 'workflow_dispatch' && inputs.mode == 'functional-gates' && steps.functional-cold-three-receipt.outcome == 'success' && (steps.functional-file-ownership-three.outcome == 'success' || steps.functional-file-ownership-three.outcome == 'failure') }}
         shell: pwsh
         env:
           NATIVE_OUTCOME: ${{ steps.functional-file-ownership-three.outcome }}
@@ -703,7 +623,7 @@ jobs:
           $method = 'DistinctNativeFilesRetainAllModelsAcrossCompetingOwnersAndTwoColdReopens'
           $valid = $valid -and $results[0].outcome -ceq 'Passed' -and $results[0].testName -ceq $method -and
             $results[0].testId -ceq $definitions[0].id -and $definitions[0].TestMethod.name -ceq $method -and
-            $definitions[0].TestMethod.className -ceq 'KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalFileOwnershipRf3Tests'
+            $definitions[0].TestMethod.className -ceq 'KeyLoad.IntegrationTests.Features.DatabaseComposition.FunctionalFileOwnershipClusterTests'
           [ordered]@{
             sourceRevision = $env:GITHUB_SHA; runId = $env:GITHUB_RUN_ID; runAttempt = $env:GITHUB_RUN_ATTEMPT
             method = $method; nodes = 3; maximumParallelTests = 50; nativeOutcome = $env:NATIVE_OUTCOME; nativeExitCode = $nativeExit; accepted = $valid
@@ -715,44 +635,44 @@ jobs:
           } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $directory 'functional-gate-receipt.json') -Encoding utf8NoBOM
           if (-not $valid) { throw 'The exact original functional case must execute once and pass without skips.' }
       - name: Test three-node database with .NET and MCP clients
-        id: rf3-required
-        if: ${{ inputs.task != 'functional-gates' }}
-        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=rf3 --KeyLoadTests:ResultsDirectory=TestResults/rf3-required --KeyLoadTests:ReportTrx=true
+        id: cluster-required
+        if: ${{ inputs.mode != 'functional-gates' }}
+        run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=cluster --KeyLoadTests:ResultsDirectory=TestResults/cluster-required --KeyLoadTests:ReportTrx=true
       - name: Check original three-node reports for diagnostic upload
-        id: rf3-original-reports
-        if: ${{ inputs.task != 'functional-gates' && !cancelled() && (steps.rf3-required.outcome == 'success' || steps.rf3-required.outcome == 'failure') }}
+        id: cluster-original-reports
+        if: ${{ inputs.mode != 'functional-gates' && !cancelled() && (steps.cluster-required.outcome == 'success' || steps.cluster-required.outcome == 'failure') }}
         shell: bash
         run: |
-          test -d TestResults/rf3-required
-          original_trx=$(find TestResults/rf3-required -type f -name '*.trx' -size +0c -print -quit)
+          test -d TestResults/cluster-required
+          original_trx=$(find TestResults/cluster-required -type f -name '*.trx' -size +0c -print -quit)
           test -n "$original_trx"
           printf '%s\n' "$original_trx"
       - name: Save original three-node diagnostics before covered suites
-        if: ${{ inputs.task != 'functional-gates' && !cancelled() && steps.rf3-original-reports.outcome == 'success' }}
+        if: ${{ inputs.mode != 'functional-gates' && !cancelled() && steps.cluster-original-reports.outcome == 'success' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: docker-rf3-original-diagnostics
+          name: docker-cluster-original-diagnostics
           path: |
-            TestResults/rf3-required/**
-            TestResults/functional-coverage/rf3/**
+            TestResults/cluster-required/**
+            TestResults/functional-coverage/cluster/**
           if-no-files-found: error
       - name: Reconcile original native full and five-group discovery in both modes
         id: native-census
-        if: ${{ inputs.task != 'functional-gates' && !cancelled() && steps.coverage-source.outcome == 'success' }}
+        if: ${{ inputs.mode != 'functional-gates' && !cancelled() && steps.coverage-source.outcome == 'success' }}
         shell: pwsh
         run: |
           & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.workflow-discovery.ps1 `
             -Repository $env:GITHUB_WORKSPACE `
-            -EvidenceRoot (Join-Path $env:GITHUB_WORKSPACE 'TestResults/functional-coverage/rf3')
+            -EvidenceRoot (Join-Path $env:GITHUB_WORKSPACE 'TestResults/functional-coverage/cluster')
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Execute full censuses and twelve original covered suite inputs
         id: functional-coverage
-        if: ${{ inputs.task != 'functional-gates' && !cancelled() && steps.native-census.outcome == 'success' }}
+        if: ${{ inputs.mode != 'functional-gates' && !cancelled() && steps.native-census.outcome == 'success' }}
         shell: pwsh
         run: |
           & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.workflow-collect.ps1 `
             -Repository $env:GITHUB_WORKSPACE `
-            -EvidenceRoot (Join-Path $env:GITHUB_WORKSPACE 'TestResults/functional-coverage/rf3') `
+            -EvidenceRoot (Join-Path $env:GITHUB_WORKSPACE 'TestResults/functional-coverage/cluster') `
             -SourceManifestPath $env:KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Verify original coverage source and test-image receipts after all children settle
@@ -762,32 +682,32 @@ jobs:
         run: |
           & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.production-source-manifest.ps1 `
             -Mode verify -Root $env:GITHUB_WORKSPACE `
-            -EvidenceRoot (Join-Path $env:GITHUB_WORKSPACE 'TestResults/functional-coverage/rf3')
+            -EvidenceRoot (Join-Path $env:GITHUB_WORKSPACE 'TestResults/functional-coverage/cluster')
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Assemble product descriptor from original reports
         id: product-descriptor
-        if: ${{ inputs.task != 'functional-gates' && success() }}
+        if: ${{ inputs.mode != 'functional-gates' && success() }}
         shell: pwsh
         env:
           RECOVERY_EXIT_CODE: ${{ steps.functional-coverage.outputs.recovery_exit_code }}
-          RF3_EXIT_CODE: ${{ steps.functional-coverage.outputs.rf3_exit_code }}
+          CLUSTER_EXIT_CODE: ${{ steps.functional-coverage.outputs.cluster_exit_code }}
         run: |
           & pwsh -NoLogo -NoProfile -File scripts/Features/CodeQuality/functional-coverage.native-product-descriptor.ps1 `
             -Repository $env:GITHUB_WORKSPACE `
             -SourceManifestPath $env:KEYLOAD_PRODUCT_COVERAGE_SOURCE_MANIFEST `
-            -ResultsRoot (Join-Path $env:GITHUB_WORKSPACE 'TestResults/functional-coverage/rf3') `
-            -UnitRunStatusPath (Join-Path $env:GITHUB_WORKSPACE 'TestResults/functional-coverage/rf3/functional-coverage.unit-run-status.v1.json') `
-            -RecoveryExitCode ([int]$env:RECOVERY_EXIT_CODE) -Rf3ExitCode ([int]$env:RF3_EXIT_CODE)
+            -ResultsRoot (Join-Path $env:GITHUB_WORKSPACE 'TestResults/functional-coverage/cluster') `
+            -UnitRunStatusPath (Join-Path $env:GITHUB_WORKSPACE 'TestResults/functional-coverage/cluster/functional-coverage.unit-run-status.v1.json') `
+            -RecoveryExitCode ([int]$env:RECOVERY_EXIT_CODE) -ClusterExitCode ([int]$env:CLUSTER_EXIT_CODE)
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Exercise original product admission and copied TRX denial with healthy re-admission
         id: product-admission
-        if: ${{ inputs.task != 'functional-gates' && success() }}
+        if: ${{ inputs.mode != 'functional-gates' && success() }}
         env:
           KEYLOAD_NATIVE_PRODUCT_ADMISSION_REQUIRED: 'true'
-          KEYLOAD_NATIVE_PRODUCT_DESCRIPTOR_PATH: ${{ github.workspace }}/TestResults/functional-coverage/rf3/functional-coverage.native-product-descriptor.v1.json
+          KEYLOAD_NATIVE_PRODUCT_DESCRIPTOR_PATH: ${{ github.workspace }}/TestResults/functional-coverage/cluster/functional-coverage.native-product-descriptor.v1.json
         run: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=unit '--KeyLoadTests:Filter=/*/*/NativeCoverageMergeTests/*' --KeyLoadTests:ResultsDirectory=TestResults/native-product-admission --KeyLoadTests:ReportTrx=true
       - name: Verify original product-admission test and closed phase receipt
-        if: ${{ inputs.task != 'functional-gates' && !cancelled() && steps.product-admission.outcome != 'skipped' }}
+        if: ${{ inputs.mode != 'functional-gates' && !cancelled() && steps.product-admission.outcome != 'skipped' }}
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -810,7 +730,7 @@ jobs:
           finally { $document.Dispose() }
           $phase = ConvertFrom-Json ([Text.Encoding]::UTF8.GetString($bytes)) -AsHashtable
           Assert-FcNativeExactKeys $phase @('schemaVersion','phase','descriptorSha256','healthyAdmissions','rejectedAdmissions','rejectedOutcome')
-          $descriptor = Join-Path $env:GITHUB_WORKSPACE 'TestResults/functional-coverage/rf3/functional-coverage.native-product-descriptor.v1.json'
+          $descriptor = Join-Path $env:GITHUB_WORKSPACE 'TestResults/functional-coverage/cluster/functional-coverage.native-product-descriptor.v1.json'
           foreach ($name in @('schemaVersion','healthyAdmissions','rejectedAdmissions')) {
             if ($phase[$name] -isnot [int] -and $phase[$name] -isnot [long]) { throw 'Invalid product phase integer.' }
           }
@@ -821,11 +741,11 @@ jobs:
             throw 'The product-admission phase does not bind the original descriptor and complete flow.'
           }
       - name: Validate and merge native product coverage
-        if: ${{ inputs.task != 'functional-gates' && success() }}
+        if: ${{ inputs.mode != 'functional-gates' && success() }}
         shell: pwsh
         run: |
           $root = $env:GITHUB_WORKSPACE
-          $evidence = Join-Path $root 'TestResults/functional-coverage/rf3'
+          $evidence = Join-Path $root 'TestResults/functional-coverage/cluster'
           $descriptorPath = Join-Path $evidence 'functional-coverage.native-product-descriptor.v1.json'
           $boundsPath = Join-Path $evidence 'functional-coverage.native-options.v1.json'
           $descriptor = Get-Content -LiteralPath $descriptorPath -Raw | ConvertFrom-Json
@@ -843,11 +763,11 @@ jobs:
         if: ${{ always() && (steps.images.outcome == 'success' || steps.images.outcome == 'failure') }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: docker-rf3-image-evidence
+          name: docker-cluster-image-evidence
           path: ${{ runner.temp }}/keyload-images/**
           if-no-files-found: error
       - name: Retain focused functional gate outcomes after cleanup
-        if: ${{ always() && inputs.task == 'functional-gates' }}
+        if: ${{ always() && inputs.mode == 'functional-gates' }}
         shell: pwsh
         env:
           SINGLE_OUTCOME: ${{ steps.functional-single.outcome }}
@@ -885,7 +805,7 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
-          name: ${{ inputs.task == 'functional-gates' && 'functional-gates-qualification' || 'docker-rf3-qualification' }}
+          name: ${{ inputs.mode == 'functional-gates' && 'functional-gates-qualification' || 'docker-cluster-qualification' }}
           path: |
             TestResults/**
             ${{ runner.temp }}/functional-gates/**/native-resource-logs/**
@@ -896,6 +816,6 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
-          name: code-quality-docker-rf3
+          name: code-quality-docker-cluster
           path: artifacts/code-quality/**
           if-no-files-found: error

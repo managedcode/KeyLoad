@@ -8,21 +8,21 @@ internal static class NativeTextRawReadPolicyPublicTrial
 {
     internal static async Task RunAsync(ClusterFixture fixture, CancellationToken token)
     {
-        _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
+        _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
             fixture.AdminKey, async administrator =>
             {
-                var scenario = await NativeTextRf3Scenario.CreateAsync(fixture, token);
+                var scenario = await NativeTextClusterScenario.CreateAsync(fixture, token);
                 var identity = await scenario.CreateReaderAsync(fixture, true, true, false, true, token);
                 await Assert.That(identity.Principal.PolicyEpoch).IsEqualTo(1L);
                 await Assert.That(identity.Principal.RestrictRows).IsTrue();
-                await Assert.That(identity.Principal.OwnerId).IsEqualTo(NativeTextRf3Scenario.OwnerA);
-                return await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2,
+                await Assert.That(identity.Principal.OwnerId).IsEqualTo(NativeTextClusterScenario.OwnerA);
+                return await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2,
                     identity.Secret, async reader =>
                     {
                         await NativeTextRawReadPolicyPublicAssertions.PhaseAsync(reader, administrator, scenario, false, token);
                         await PersistAsync(administrator, identity.Principal with
                         {
-                            FieldGrants = identity.Principal.FieldGrants.Add(NativeTextRf3Scenario.SecretReadGrant),
+                            FieldGrants = identity.Principal.FieldGrants.Add(NativeTextClusterScenario.SecretReadGrant),
                             PolicyEpoch = 2L
                         }, token);
                         await NativeTextRawReadPolicyPublicAssertions.PhaseAsync(reader, administrator, scenario, true, token);
@@ -36,11 +36,11 @@ internal static class NativeTextRawReadPolicyPublicTrial
             }, token);
     }
 
-    private static async Task PersistAsync(RequestCqrsRf3Callers administrator,
+    private static async Task PersistAsync(RequestCqrsClusterCallers administrator,
         PrincipalRecord expected, CancellationToken token)
     {
         var actual = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.ConfigurePrincipalAsync(
             Guid.NewGuid(), expected, token));
-        await SqlRf3Protocol.EqualAsync(expected, actual);
+        await SqlClusterProtocol.EqualAsync(expected, actual);
     }
 }

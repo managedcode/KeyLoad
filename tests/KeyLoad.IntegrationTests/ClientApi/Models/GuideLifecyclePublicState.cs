@@ -4,7 +4,7 @@ using ManagedCode.Communication;
 namespace KeyLoad.IntegrationTests.Features.ClientApi;
 
 internal sealed record GuideLifecyclePublicState(McpDocumentScenario Scenario, McpPersistedIdentity Identity,
-    AtomicPartitionPlacementResolution Placement, CommandRequest Seed, CommitReceipt SeedReceipt,
+    CommandRequest Seed, CommitReceipt SeedReceipt,
     CommandRequest Healthy, OutboxStatus Outbox)
 {
     internal Guid RepairCommandId { get; } = Guid.NewGuid();

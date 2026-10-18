@@ -9,18 +9,18 @@ namespace KeyLoad.IntegrationTests.Features.Authorization;
 internal static class SqlLabelAuthorityRefusals
 {
     internal static async Task DeniedAsync(KeyLoadClient sdk, McpOfficialClient session,
-        GraphSearchRf3Scenario scenario, string key, CancellationToken token)
+        GraphSearchClusterScenario scenario, string key, CancellationToken token)
     {
-        var request = SqlGraphSearchRf3Scenario.Request(scenario.Partition, SqlGraphSearchRf3Scenario.LabeledStatement);
+        var request = SqlGraphSearchClusterScenario.Request(scenario.Partition, SqlGraphSearchClusterScenario.LabeledStatement);
         var denied = await sdk.SearchSqlAsync(request, token);
         await Assert.That(denied.IsSuccess).IsFalse();
         await Assert.That(denied.Value).IsNull();
         await Assert.That(denied.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
         await SafeAsync(JsonSerializer.Serialize(denied, JsonDefaults.Options), key);
-        var direct = await session.CallAsync(SqlGraphSearchRf3Scenario.QuerySearchTool, request, token);
+        var direct = await session.CallAsync(SqlGraphSearchClusterScenario.QuerySearchTool, request, token);
         await McpCallerAssertions.ErrorAsync(direct, ErrorCode.PermissionDenied, dispatched: true);
         await SafeAsync(JsonSerializer.Serialize(direct), key);
-        var call = SqlRf3Protocol.Call(scenario.Partition, SqlGraphSearchRf3Scenario.QuerySearchTool, request);
+        var call = SqlClusterProtocol.Call(scenario.Partition, SqlGraphSearchClusterScenario.QuerySearchTool, request);
         var q1 = await sdk.ExecuteSqlAsync(call, token);
         await Assert.That(q1.IsSuccess).IsFalse();
         await Assert.That(q1.Value.ValueKind).IsEqualTo(JsonValueKind.Undefined);
@@ -34,9 +34,9 @@ internal static class SqlLabelAuthorityRefusals
     internal static async Task RevokedAsync(ClusterFixture fixture, KeyLoadClient sdk, McpOfficialClient session,
         SqlLabelAuthorityState state, CancellationToken token)
     {
-        foreach (var statement in new[] { SqlGraphSearchRf3Scenario.LabeledStatement, SqlGraphSearchRf3Scenario.EmptyStatement })
+        foreach (var statement in new[] { SqlGraphSearchClusterScenario.LabeledStatement, SqlGraphSearchClusterScenario.EmptyStatement })
         {
-            var request = SqlGraphSearchRf3Scenario.Request(state.Scenario.Partition, statement);
+            var request = SqlGraphSearchClusterScenario.Request(state.Scenario.Partition, statement);
             var denied = await sdk.SearchSqlAsync(request, token);
             await Assert.That(denied.IsSuccess).IsFalse();
             await Assert.That(denied.Value).IsNull();
@@ -45,9 +45,9 @@ internal static class SqlLabelAuthorityRefusals
             await UnauthorizedAsync(async () =>
             {
                 await session.CallAsync(
-                SqlGraphSearchRf3Scenario.QuerySearchTool, request, token);
+                SqlGraphSearchClusterScenario.QuerySearchTool, request, token);
             }, state.Identity.Secret);
-            var call = SqlRf3Protocol.Call(state.Scenario.Partition, SqlGraphSearchRf3Scenario.QuerySearchTool, request);
+            var call = SqlClusterProtocol.Call(state.Scenario.Partition, SqlGraphSearchClusterScenario.QuerySearchTool, request);
             var q1 = await sdk.ExecuteSqlAsync(call, token);
             await Assert.That(q1.IsSuccess).IsFalse();
             await Assert.That(q1.Value.ValueKind).IsEqualTo(JsonValueKind.Undefined);
@@ -79,8 +79,8 @@ internal static class SqlLabelAuthorityRefusals
 
     private static async Task SafeAsync(string actual, string key)
     {
-        foreach (var canary in new[] { key, GraphSearchRf3Scenario.Label, GraphSearchRf3Scenario.Alpha,
-            GraphSearchRf3Scenario.Beta, GraphSearchRf3Scenario.Gamma, SqlGraphSearchRf3Scenario.LabeledStatement })
+        foreach (var canary in new[] { key, GraphSearchClusterScenario.Label, GraphSearchClusterScenario.Alpha,
+            GraphSearchClusterScenario.Beta, GraphSearchClusterScenario.Gamma, SqlGraphSearchClusterScenario.LabeledStatement })
         {
             await Assert.That(actual.Contains(canary, StringComparison.Ordinal)).IsFalse();
         }

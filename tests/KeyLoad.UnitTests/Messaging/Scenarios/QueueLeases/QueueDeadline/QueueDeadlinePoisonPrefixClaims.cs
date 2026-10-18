@@ -9,7 +9,7 @@ internal static class QueueDeadlinePoisonPrefixClaims
 {
     internal static CommitToken NextToken(DatabaseEngine database, ZoneTreeStore store, QueueLaneRef lane)
     {
-        var placement = database.ReadAtomicPartitionPlacement(QueueDeadlinePoisonPrefixProtocol.Root, new(QueueDeadlinePoisonPrefixProtocol.First, lane.Partition));
+        var placement = database.ReadAtomicPartitionPlacement(QueueDeadlinePoisonPrefixProtocol.Root, lane.Partition);
         return new(placement.Incarnation, lane.Partition.AtomicPartitionId, checked(store.Position + QueueDeadlinePoisonPrefixProtocol.First), placement.PlacementEpoch);
     }
 

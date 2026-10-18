@@ -18,7 +18,7 @@ public sealed partial class DatabaseEngine
     private const string InvalidCommandBudgetMessage = "The operation ID or byte budget is invalid.";
     private const string PreviousCommandIncarnationMessage = "This command belongs to a previous database incarnation.";
     private const string CommandContentConflictMessage = "The command ID was already used with different content.";
-    private const string CommittedClockAheadMessage = "The leader clock is behind the committed clock.";
+    private const string CommittedClockAheadMessage = "The operation time is behind the committed storage time.";
     private const string InvalidCommandJsonMessage = "The operation contains invalid protocol JSON.";
     private const string MissingOutcomePartitionMessage = "A partition-scoped command outcome has no partition identity.";
 
@@ -28,6 +28,29 @@ public sealed partial class DatabaseEngine
     /// <returns>The durable logical result, including a stored domain failure.</returns>
     public OperationResult Apply(ReplicatedOperation operation, long replicationIndex = AtomicCommandCommitFirstElementIndex)
         => ApplyCore(operation, replicationIndex, selectEmbeddedClock: false, cancellationToken: default);
+
+    /// <summary>Prepares one authorized operation once before sending identical bytes to storage copies.</summary>
+    public ReplicatedOperation PrepareStorageOperation(ReplicatedOperation operation, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var verified = VerifyOperationAuthority(operation);
+        var prepared = Store.Read(view =>
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var now = EvaluationClock.GetUtcNow();
+            if (view.ReadOwnedValue(KeySpace.ClockBytes) is { } encoded)
+            {
+                var committed = NativeSerialization.Deserialize<DateTimeOffset>(encoded);
+                now = now < committed ? committed : now;
+            }
+            return PrepareQueueRetryInView(view, verified with { EvaluatedAt = now });
+        });
+        return prepared;
+    }
+
+    /// <summary>Applies a verified operation under the native atomic store gate with caller cancellation.</summary>
+    public OperationResult ApplyStorageOperation(ReplicatedOperation operation, CancellationToken cancellationToken)
+        => ApplyCore(VerifyOperationAuthority(operation), AtomicCommandCommitInitialSequence, selectEmbeddedClock: false, cancellationToken);
 
     internal OperationResult ApplyEmbedded(ReplicatedOperation operation, CancellationToken cancellationToken)
         => ApplyCore(operation, AtomicCommandCommitFirstElementIndex, selectEmbeddedClock: true, cancellationToken);
@@ -39,10 +62,6 @@ public sealed partial class DatabaseEngine
         if (operation.Id == Guid.Empty || Encoding.UTF8.GetByteCount(operation.PayloadJson) > Limits.MaxBatchBytes)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, InvalidCommandBudgetMessage);
-        }
-        if (operation.Kind == OperationKind.PartitionMovementPhase)
-        {
-            RequireConfiguredMovementOwner();
         }
         operation = NormalizeOperation(operation);
         var committed = Store.Commit((transaction, position) =>
@@ -127,7 +146,7 @@ public sealed partial class DatabaseEngine
                 replayed = true;
                 return previous;
             }
-            RequireOriginalEffectAdmission(transaction, principal, operation, partitionScope);
+            RequireOriginalEffectAdmission(transaction, principal, operation);
             if (!RequirePreparedResourceRetirementClock(transaction, operation))
             {
                 ValidateCommandClock(transaction, operation.EvaluatedAt);

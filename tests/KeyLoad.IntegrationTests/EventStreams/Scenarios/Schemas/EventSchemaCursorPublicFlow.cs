@@ -8,7 +8,7 @@ internal static class EventSchemaCursorPublicFlow
 {
     internal static async Task RunAsync(ClusterFixture fixture, CancellationToken token)
     {
-        var state = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
+        var state = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
             async admin =>
             {
                 var seeded = await EventSchemaCursorPublicSeed.CreateAsync(fixture, admin, token);
@@ -17,15 +17,15 @@ internal static class EventSchemaCursorPublicFlow
             }, token);
         for (var cold = 1; cold <= 2; cold++)
         {
-            await FeedLiveRf3Cold.RestartAsync(fixture, token);
-            _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
+            await FeedLiveClusterCold.RestartAsync(fixture, token);
+            _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
                 async admin => { await WithReaderAsync(fixture, admin, state, cold, token); return true; }, token);
         }
     }
 
-    private static Task<bool> WithReaderAsync(ClusterFixture fixture, RequestCqrsRf3Callers admin,
+    private static Task<bool> WithReaderAsync(ClusterFixture fixture, RequestCqrsClusterCallers admin,
         EventSchemaCursorPublicState state, int stage, CancellationToken token)
-        => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, state.Reader.Secret,
+        => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, state.Reader.Secret,
             async reader =>
             {
                 await EventSchemaCursorPublicCalls.HealthyAsync(admin, reader, state, token);

@@ -11,7 +11,7 @@ internal static class BlobUnderfilledR47Trial
 
     internal static async Task RunAsync(ClusterFixture fixture, CancellationToken token)
     {
-        var state = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
+        var state = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
             async callers =>
             {
                 var original = await BlobPartIdentityR40Operations.StartAsync(callers, token);
@@ -22,7 +22,7 @@ internal static class BlobUnderfilledR47Trial
                 return owned;
             }, token);
         await ColdAsync(fixture, token);
-        _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, fixture.AdminKey,
+        _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, fixture.AdminKey,
             async callers =>
             {
                 await BlobPartIdentityR40Assertions.CurrentAsync(callers, state.Original, token);
@@ -36,7 +36,7 @@ internal static class BlobUnderfilledR47Trial
                 return true;
             }, token);
         await ColdAsync(fixture, token);
-        _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node3, fixture.AdminKey,
+        _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node3, fixture.AdminKey,
             async callers =>
             {
                 await BlobPartIdentityR40Assertions.CurrentAsync(callers, state.Original, token);

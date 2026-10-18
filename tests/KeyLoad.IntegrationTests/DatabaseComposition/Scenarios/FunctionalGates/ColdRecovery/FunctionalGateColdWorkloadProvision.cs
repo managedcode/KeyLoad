@@ -9,7 +9,7 @@ internal static class FunctionalGateColdWorkloadProvision
     internal const int AdditionalIdentities = 5;
     internal const int TotalWorkloadIdentities = 8;
 
-    internal static async Task<McpPersistedIdentity[]> CreateAsync(RequestCqrsRf3Callers administrator,
+    internal static async Task<McpPersistedIdentity[]> CreateAsync(RequestCqrsClusterCallers administrator,
         PartitionRef partition, Capability read, CancellationToken token)
     {
         var identities = new List<McpPersistedIdentity>();
@@ -17,7 +17,7 @@ internal static class FunctionalGateColdWorkloadProvision
         {
             var resource = Resource(index);
             var definition = new ResourceDefinition(resource, ResourceKind.Collection, partition.TransactionDomainId);
-            await SqlRf3Protocol.EqualAsync(definition, await McpCallerAssertions.SdkSuccessAsync(
+            await SqlClusterProtocol.EqualAsync(definition, await McpCallerAssertions.SdkSuccessAsync(
                 await administrator.Sdk.ConfigureResourceAsync(Guid.NewGuid(),
                     new(partition.TenantId, partition.DatabaseId, definition), token)));
             var identity = await FunctionalGateColdProvision.IdentityAsync(administrator, partition, read, false, token);
@@ -29,7 +29,7 @@ internal static class FunctionalGateColdWorkloadProvision
             };
             var observed = await McpCallerAssertions.SdkSuccessAsync(
                 await administrator.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), expected, token));
-            await SqlRf3Protocol.EqualAsync(expected, observed);
+            await SqlClusterProtocol.EqualAsync(expected, observed);
             identities.Add(identity with
             {
                 Principal = observed

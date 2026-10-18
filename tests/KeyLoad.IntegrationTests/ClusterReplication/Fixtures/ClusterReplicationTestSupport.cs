@@ -6,9 +6,9 @@ namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 
 internal static class ClusterReplicationTestSupport
 {
-    internal const string Rf3DiagnosticsFailureKey = "KeyLoad.Rf3DiagnosticsFailure";
-    internal const string Rf3ReadinessFailureKey = "KeyLoad.Rf3ReadinessFailure";
-    internal const string Rf3RestartFailureKeyPrefix = "KeyLoad.Rf3RestartFailure.";
+    internal const string ClusterDiagnosticsFailureKey = "KeyLoad.ClusterDiagnosticsFailure";
+    internal const string ClusterReadinessFailureKey = "KeyLoad.ClusterReadinessFailure";
+    internal const string ClusterRestartFailureKeyPrefix = "KeyLoad.ClusterRestartFailure.";
     private static readonly CompositeFormat NodeNameFormat = CompositeFormat.Parse("node{0}");
 
     internal static bool IsNonFatalCleanupFailure(Exception error) =>

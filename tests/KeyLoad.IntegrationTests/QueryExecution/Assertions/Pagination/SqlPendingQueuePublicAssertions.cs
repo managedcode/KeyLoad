@@ -7,7 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
 internal static class SqlPendingQueuePublicAssertions
 {
-    internal static async Task UnchangedAsync(RequestCqrsRf3Callers callers, QueueLifecyclePublicState state, CancellationToken token)
+    internal static async Task UnchangedAsync(RequestCqrsClusterCallers callers, QueueLifecyclePublicState state, CancellationToken token)
     {
         await QueueLifecyclePublicAssertions.LiteralAsync(callers, state, QueueLifecyclePublicProtocol.Parked,
             new(QueueLifecyclePublicProtocol.Parked, MessageState.Cancelled, QueueLifecyclePublicProtocol.One,
@@ -19,7 +19,7 @@ internal static class SqlPendingQueuePublicAssertions
                 SafeFailureCode: "AttemptsExhausted"), true, token);
     }
 
-    internal static async Task RowsAsync(RequestCqrsRf3Callers callers, QueueLifecyclePublicState state, QueryPage page, CancellationToken token)
+    internal static async Task RowsAsync(RequestCqrsClusterCallers callers, QueueLifecyclePublicState state, QueryPage page, CancellationToken token)
     {
         await Assert.That(page.Rows.Length).IsEqualTo(QueueLifecyclePublicProtocol.Two);
         await Assert.That(page.Rows.Select(row => row.EntityId).SequenceEqual(

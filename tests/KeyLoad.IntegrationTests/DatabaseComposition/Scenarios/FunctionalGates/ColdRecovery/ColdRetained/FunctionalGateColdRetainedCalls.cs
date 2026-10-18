@@ -9,7 +9,7 @@ internal static class FunctionalGateColdRetainedCalls
     internal static async Task RunAsync(FunctionalGateFixture fixture, FunctionalGateContext original,
         McpPersistedIdentity identity, Func<FunctionalGateContext, Task> action, CancellationToken token)
     {
-        await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, fixture.NodeNames[^1], identity.Secret, async caller =>
+        await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, fixture.NodeNames[^1], identity.Secret, async caller =>
         {
             await action(original with
             {
@@ -23,15 +23,15 @@ internal static class FunctionalGateColdRetainedCalls
     }
 
     internal static Task<CommitReceipt> CommitAsync(FunctionalGateContext context, CommandRequest command,
-        DropLifecycleRf3Route route, CancellationToken token)
+        DropLifecycleClusterRoute route, CancellationToken token)
         => route switch
         {
-            DropLifecycleRf3Route.Sdk => context.SdkAsync(context.Writer.Sdk.CommitAsync(command, token)),
-            DropLifecycleRf3Route.Mcp => context.McpAsync<CommitReceipt>(context.Writer,
+            DropLifecycleClusterRoute.Sdk => context.SdkAsync(context.Writer.Sdk.CommitAsync(command, token)),
+            DropLifecycleClusterRoute.Mcp => context.McpAsync<CommitReceipt>(context.Writer,
                 McpCallerTools.DocumentsCommit, command, token),
-            DropLifecycleRf3Route.SqlSdk => FunctionalGateRelationalCalls.SqlSdkAsync<CommitReceipt>(context,
+            DropLifecycleClusterRoute.SqlSdk => FunctionalGateRelationalCalls.SqlSdkAsync<CommitReceipt>(context,
                 context.Writer, FunctionalGateRelationalCalls.Commit(command), token),
-            DropLifecycleRf3Route.SqlMcp => FunctionalGateRelationalCalls.SqlMcpAsync<CommitReceipt>(context,
+            DropLifecycleClusterRoute.SqlMcp => FunctionalGateRelationalCalls.SqlMcpAsync<CommitReceipt>(context,
                 context.Writer, FunctionalGateRelationalCalls.Commit(command), token),
             _ => throw new ArgumentOutOfRangeException(nameof(route))
         };

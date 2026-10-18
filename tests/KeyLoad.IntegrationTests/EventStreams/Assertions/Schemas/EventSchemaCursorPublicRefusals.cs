@@ -7,7 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.EventStreams;
 internal static class EventSchemaCursorPublicRefusals
 {
     private const string DetailKey = "detail";
-    internal static async Task OldAsync(RequestCqrsRf3Callers admin, RequestCqrsRf3Callers reader,
+    internal static async Task OldAsync(RequestCqrsClusterCallers admin, RequestCqrsClusterCallers reader,
         EventSchemaCursorPublicState state, CancellationToken token)
     {
         foreach (var captured in state.Captures.Where(item => item.Schema != state.Definition.SchemaVersion))
@@ -16,7 +16,7 @@ internal static class EventSchemaCursorPublicRefusals
             var result = await reader.Sdk.ReadStreamAsync(request, token);
             await Assert.That(result.IsFailed).IsTrue();
             await Assert.That(result.Value).IsNull();
-            await SqlRf3Protocol.EqualAsync(Errors.Problem(ErrorCode.CursorExpired,
+            await SqlClusterProtocol.EqualAsync(Errors.Problem(ErrorCode.CursorExpired,
                 EventSchemaCursorPublicExpected.ExpiredDetail), result.Problem);
             await EventSchemaCursorPublicCalls.HealthyAsync(admin, reader, state, token);
             var reply = await reader.Mcp.CallAsync(McpCallerTools.StreamsRead, request, token);

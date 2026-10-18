@@ -12,7 +12,7 @@ internal sealed class RequestCqrsOfflineProcessOwnedChild : IAsyncDisposable
     private readonly System.Threading.Lock disposalGate = new();
     private readonly ProcessStartInfo start;
     private readonly CancellationTokenSource cancellation;
-    private readonly Task<NodeEpochRf3OfflineResult> operation;
+    private readonly Task<NodeEpochClusterOfflineResult> operation;
     private Process? process;
     private Task? disposalTask;
     private bool observed;
@@ -21,12 +21,12 @@ internal sealed class RequestCqrsOfflineProcessOwnedChild : IAsyncDisposable
     {
         this.start = start;
         cancellation = CancellationTokenSource.CreateLinkedTokenSource(parentToken);
-        operation = NodeEpochRf3OfflineProcess.RunAsync(start, cancellation.Token);
+        operation = NodeEpochClusterOfflineProcess.RunAsync(start, cancellation.Token);
     }
 
     internal bool IsSettled => operation.IsCompleted;
 
-    internal async Task<NodeEpochRf3OfflineResult> ObserveResultAsync()
+    internal async Task<NodeEpochClusterOfflineResult> ObserveResultAsync()
     {
         try
         {
@@ -181,7 +181,7 @@ internal sealed class RequestCqrsOfflineProcessOwnedChild : IAsyncDisposable
 
     private static async Task<string> ReadMarkerAsync(string path, CancellationToken cancellationToken)
     {
-        await using var input = NodeEpochRf3OfflineFiles.OpenRead(path);
+        await using var input = NodeEpochClusterOfflineFiles.OpenRead(path);
         if (input.Length is < 1 or > RequestCqrsOfflineProcessProtocol.MarkerBytes)
         {
             throw new InvalidDataException(RequestCqrsOfflineProcessProtocol.InvalidMarker);

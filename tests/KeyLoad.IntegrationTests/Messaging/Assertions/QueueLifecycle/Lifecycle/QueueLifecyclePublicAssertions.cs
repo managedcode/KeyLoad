@@ -5,7 +5,7 @@ namespace KeyLoad.IntegrationTests.Features.Messaging;
 
 internal static class QueueLifecyclePublicAssertions
 {
-    internal static async Task LiteralAsync(RequestCqrsRf3Callers callers, QueueLifecyclePublicState state, string id,
+    internal static async Task LiteralAsync(RequestCqrsClusterCallers callers, QueueLifecyclePublicState state, string id,
         MessageMetadata metadata, bool retained, CancellationToken token)
     {
         var expected = new MessageInspection(metadata, retained ? QueueLifecyclePublicProtocol.CanonicalPayload : null,
@@ -19,7 +19,7 @@ internal static class QueueLifecyclePublicAssertions
         }
     }
 
-    internal static async Task InitialAsync(RequestCqrsRf3Callers callers, QueueLifecyclePublicState state, CancellationToken token)
+    internal static async Task InitialAsync(RequestCqrsClusterCallers callers, QueueLifecyclePublicState state, CancellationToken token)
     {
         await LiteralAsync(callers, state, QueueLifecyclePublicProtocol.Parked,
             new(QueueLifecyclePublicProtocol.Parked, MessageState.DeadLettered, QueueLifecyclePublicProtocol.One,
@@ -31,7 +31,7 @@ internal static class QueueLifecyclePublicAssertions
                 LeaseVersion: QueueLifecyclePublicProtocol.One, SafeFailureCode: "AttemptsExhausted"), true, token);
     }
 
-    internal static async Task TerminalAsync(RequestCqrsRf3Callers callers, QueueLifecyclePublicState state, CancellationToken token)
+    internal static async Task TerminalAsync(RequestCqrsClusterCallers callers, QueueLifecyclePublicState state, CancellationToken token)
     {
         await LiteralAsync(callers, state, QueueLifecyclePublicProtocol.Parked,
             new(QueueLifecyclePublicProtocol.Parked, MessageState.Cancelled, QueueLifecyclePublicProtocol.One,

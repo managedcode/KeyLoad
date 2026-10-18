@@ -1,4 +1,3 @@
-using KeyLoad.Client;
 using KeyLoad.CrashHost.Features.EventStreams;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.Messaging;
@@ -22,42 +21,11 @@ internal static class SharedDomainPublicSeed
                     Guid.NewGuid(), new(tenant, Database, resource), token));
             }
         }, token);
-        var identity = await MessagingRf3Identity.CreateAsync(fixture, tenant,
+        var identity = await MessagingClusterIdentity.CreateAsync(fixture, tenant,
             resources.Select(resource => new ScopeGrant(Database, resource.Name, Capability.All)).ToArray(), [], false, token);
         var state = new SharedDomainPublicState(scopes, identity);
-        await PlacementAsync(fixture, state, token);
-        return state;
-    }
-
-    internal static async Task PlacementAsync(ClusterFixture fixture, SharedDomainPublicState state, CancellationToken token)
-    {
-        await SharedDomainPublicSession.RunAsync(fixture, fixture.AdminKey, async (sdk, _) =>
-        {
-            foreach (var scope in state.Scopes)
-            {
-                var actual = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReadAtomicPartitionPlacementAsync(
-                    new(PlacementVersion, scope.Partition), token));
-                await Assert.That(actual.Partition).IsEqualTo(scope.Partition);
-                await Assert.That(actual.VoterIds.Distinct(StringComparer.Ordinal).Count()).IsEqualTo(Rf3Voters);
-                await Assert.That(actual.Incarnation).IsNotEqualTo(Guid.Empty);
-                if (state.Placements.TryGetValue(scope.Partition.AtomicPartitionId, out var original))
-                {
-                    await SharedDomainPublicValues.EqualAsync(actual, original);
-                }
-                else
-                {
-                    state.Placements.Add(scope.Partition.AtomicPartitionId, actual);
-                }
-            }
-        }, token);
-        var first = state.Placements.Values.First();
-        foreach (var placement in state.Placements.Values)
-        {
-            await Assert.That(placement.PhysicalShardId).IsEqualTo(first.PhysicalShardId);
-            await Assert.That(placement.Incarnation).IsEqualTo(first.Incarnation);
-            await SharedDomainPublicValues.EqualAsync(placement.VoterIds.ToArray(), first.VoterIds.ToArray());
-        }
         await Assert.That(state.Scopes.Select(scope => scope.Partition.AtomicPartitionId).Distinct(StringComparer.Ordinal).Count())
             .IsEqualTo(state.Scopes.Length);
+        return state;
     }
 }

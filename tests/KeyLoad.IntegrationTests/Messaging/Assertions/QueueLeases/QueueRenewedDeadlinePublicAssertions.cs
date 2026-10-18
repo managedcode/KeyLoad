@@ -14,19 +14,19 @@ internal static class QueueRenewedDeadlinePublicAssertions
         => code == ErrorCode.RevisionConflict ? Stale : code == ErrorCode.Conflict
             ? NotDue : throw new InvalidOperationException("The deadline refusal is not a selected case.");
 
-    internal static async Task ImagesAsync(RequestCqrsRf3Callers callers, QueueLeaseRf3Seed seed,
+    internal static async Task ImagesAsync(RequestCqrsClusterCallers callers, QueueLeaseClusterSeed seed,
         MessageInspection expected, CancellationToken token)
     {
-        await QueueLeaseRf3Assertions.EqualAsync(
-            await QueueLeaseRf3Assertions.InspectAsync(callers.Sdk, seed.Lane, token), expected);
+        await QueueLeaseClusterAssertions.EqualAsync(
+            await QueueLeaseClusterAssertions.InspectAsync(callers.Sdk, seed.Lane, token), expected);
         var reply = await McpCallerAssertions.SuccessAsync<MessageInspectionResult>(
             await callers.Mcp.CallAsync(McpCallerTools.MessagesInspect,
-                new InspectMessageRequest(seed.Lane, QueueLeaseRf3Protocol.Message), token));
-        await QueueLeaseRf3Assertions.EqualAsync(reply.Value, new MessageInspectionResult(expected));
-        await QueueLeaseRf3Future.RequireAsync(callers.Sdk, callers.Mcp, seed, token);
+                new InspectMessageRequest(seed.Lane, QueueLeaseClusterProtocol.Message), token));
+        await QueueLeaseClusterAssertions.EqualAsync(reply.Value, new MessageInspectionResult(expected));
+        await QueueLeaseClusterFuture.RequireAsync(callers.Sdk, callers.Mcp, seed, token);
     }
 
-    internal static async Task<string> RefusalAsync(RequestCqrsRf3Callers callers,
+    internal static async Task<string> RefusalAsync(RequestCqrsClusterCallers callers,
         CommandRequest request, ErrorCode code, string detail, CancellationToken token)
     {
         var failure = await callers.Sdk.CommitAsync(request, token);
@@ -46,7 +46,7 @@ internal static class QueueRenewedDeadlinePublicAssertions
         return JsonSerializer.Serialize(failure.Problem, JsonDefaults.Options);
     }
 
-    internal static async Task RefusalsAsync(RequestCqrsRf3Callers callers,
+    internal static async Task RefusalsAsync(RequestCqrsClusterCallers callers,
         QueueRenewedDeadlinePublicState state, MessageInspection expected, CancellationToken token)
     {
         foreach (var original in state.Refusals)
@@ -57,30 +57,30 @@ internal static class QueueRenewedDeadlinePublicAssertions
         }
     }
 
-    internal static async Task LiveOriginalAsync(RequestCqrsRf3Callers callers,
+    internal static async Task LiveOriginalAsync(RequestCqrsClusterCallers callers,
         QueueRenewedDeadlinePublicState state, CancellationToken token)
     {
         await Assert.That(TimeProvider.System.GetUtcNow()).IsLessThan(state.Renewed.Metadata.LeaseUntil!.Value);
-        await QueueLeaseRf3Assertions.EqualAsync(
+        await QueueLeaseClusterAssertions.EqualAsync(
             await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ReceiveAsync(state.Request, token)), state.Claim);
         var original = await McpCallerAssertions.SuccessAsync<ReceiveResult>(
             await callers.Mcp.CallAsync(McpCallerTools.MessagesReceive, state.Request, token));
-        await QueueLeaseRf3Assertions.EqualAsync(original.Value, state.Claim);
-        await QueueLeaseRf3Assertions.ReplayedAsync(callers.Sdk, callers.Mcp, state.Renew, state.RenewReceipt, token);
+        await QueueLeaseClusterAssertions.EqualAsync(original.Value, state.Claim);
+        await QueueLeaseClusterAssertions.ReplayedAsync(callers.Sdk, callers.Mcp, state.Renew, state.RenewReceipt, token);
         await ImagesAsync(callers, state.Seed, state.Renewed, token);
     }
 
-    internal static async Task SettledOriginalAsync(RequestCqrsRf3Callers callers,
+    internal static async Task SettledOriginalAsync(RequestCqrsClusterCallers callers,
         QueueRenewedDeadlineSettled state, CancellationToken token)
     {
         var original = state.Original;
-        await QueueLeaseRf3Assertions.DeniedAsync(
+        await QueueLeaseClusterAssertions.DeniedAsync(
             await callers.Sdk.ReceiveAsync(original.Request, token), ErrorCode.StaleLease);
         await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(
             McpCallerTools.MessagesReceive, original.Request, token), ErrorCode.StaleLease, true);
-        await QueueLeaseRf3Assertions.ReplayedAsync(callers.Sdk, callers.Mcp,
+        await QueueLeaseClusterAssertions.ReplayedAsync(callers.Sdk, callers.Mcp,
             original.Renew, original.RenewReceipt, token);
-        await QueueLeaseRf3Assertions.ReplayedAsync(callers.Sdk, callers.Mcp, state.Ack, state.AckReceipt, token);
+        await QueueLeaseClusterAssertions.ReplayedAsync(callers.Sdk, callers.Mcp, state.Ack, state.AckReceipt, token);
         await RefusalsAsync(callers, original, state.Acked, token);
         await ImagesAsync(callers, original.Seed, state.Acked, token);
     }
@@ -90,6 +90,6 @@ internal static class QueueRenewedDeadlinePublicAssertions
     {
         await Assert.That(actual.CommandId).IsEqualTo(id);
         var mutation = await Assert.That(actual.Mutations).HasSingleItem();
-        await QueueLeaseRf3Assertions.EqualAsync(mutation, new MutationReceipt(action, lane.Queue, message, version));
+        await QueueLeaseClusterAssertions.EqualAsync(mutation, new MutationReceipt(action, lane.Queue, message, version));
     }
 }

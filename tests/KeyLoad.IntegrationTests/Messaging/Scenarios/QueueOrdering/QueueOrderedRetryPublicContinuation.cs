@@ -5,7 +5,7 @@ namespace KeyLoad.IntegrationTests.Features.Messaging;
 
 internal static class QueueOrderedRetryPublicContinuation
 {
-    internal static async Task RunAsync(RequestCqrsRf3Callers callers, QueueOrderedRetryPublicState state, CancellationToken token)
+    internal static async Task RunAsync(RequestCqrsClusterCallers callers, QueueOrderedRetryPublicState state, CancellationToken token)
     {
         await QueueLifecyclePublicRoutes.CommitAsync(callers, state.Caller, new(Guid.NewGuid(), state.Caller.Partition,
             [new RedriveQueueMessage(state.Caller.Lane.Queue, QueueOrderedRetryPublicProtocol.First,
@@ -31,13 +31,13 @@ internal static class QueueOrderedRetryPublicContinuation
         await QueueOrderedRetryPublicTerminal.RunAsync(callers, state, healthy: false, token);
         await QueueLifecyclePublicRoutes.ReplayAsync(callers, state.Caller, token);
     }
-    private static async Task StaleAsync(RequestCqrsRf3Callers callers, QueueOrderedRetryPublicState state, CancellationToken token)
+    private static async Task StaleAsync(RequestCqrsClusterCallers callers, QueueOrderedRetryPublicState state, CancellationToken token)
     {
         var old = new DeliveryCommand(Guid.NewGuid(), state.Caller.Lane, state.Original!.Token, DeliveryAction.Ack);
-        await SagaTimeoutRf3Assertions.AssertSdkErrorAsync(await callers.Sdk.CompleteAsync(old, token), ErrorCode.StaleLease);
+        await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(await callers.Sdk.CompleteAsync(old, token), ErrorCode.StaleLease);
         await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.MessagesComplete, old, token), ErrorCode.StaleLease, dispatched: true);
-        var sql = SqlRf3Protocol.Call(state.Caller.Partition, McpCallerTools.MessagesComplete, old);
-        await SagaTimeoutRf3Assertions.AssertSdkErrorAsync(await callers.Sdk.ExecuteSqlAsync(sql, token), ErrorCode.StaleLease);
+        var sql = SqlClusterProtocol.Call(state.Caller.Partition, McpCallerTools.MessagesComplete, old);
+        await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(await callers.Sdk.ExecuteSqlAsync(sql, token), ErrorCode.StaleLease);
         await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token), ErrorCode.StaleLease, dispatched: true);
         await QueueLifecyclePublicAssertions.LiteralAsync(callers, state.Caller, QueueOrderedRetryPublicProtocol.First,
             new(QueueOrderedRetryPublicProtocol.First, MessageState.Ready, QueueOrderedRetryPublicProtocol.Initial,

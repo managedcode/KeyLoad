@@ -1,7 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core.Features.ClusterRouting.Validation;
 using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Server.Features.Messaging;
 using Microsoft.Extensions.Options;
@@ -14,7 +13,6 @@ internal sealed class RemoteDocumentEndpoint : IAsyncDisposable
     private const int PresentEnvelopeCount = 1;
     private const int RequiredEnvelopeCount = 1;
     private readonly NodeOptions options;
-    private readonly RemoteControlledBlobReceiver controlledBlob;
     private readonly RemoteTransferPeerReceiver? queueTransfer;
     private readonly RemoteDocumentWorkOwner owner;
     private readonly PartitionMovementReplayCache replay;
@@ -23,13 +21,12 @@ internal sealed class RemoteDocumentEndpoint : IAsyncDisposable
     private readonly RemoteResourceLifetimeReadEndpoint? lifetime;
 
     internal RemoteDocumentEndpoint(IOptions<NodeOptions> nodeOptions, RemoteDocumentWorkOwner owner,
-        RemoteControlledBlobReceiver controlledBlob, IOptions<OrleansMembershipOptions> membership,
+        IOptions<OrleansMembershipOptions> membership,
         IOptions<GrainRoutingOptions> routing, TimeProvider clock, RemoteTransferPeerReceiver? queueTransfer = null,
         RemoteResourceLifetimeReadEndpoint? lifetime = null)
     {
         options = nodeOptions.Value;
         this.owner = owner;
-        this.controlledBlob = controlledBlob;
         this.queueTransfer = queueTransfer;
         this.lifetime = lifetime;
         this.routing = routing.Value;
@@ -90,13 +87,6 @@ internal sealed class RemoteDocumentEndpoint : IAsyncDisposable
             return await (lifetime ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteResourceLifetimeReadProtocol.Unavailable))
                 .ExecuteAsync(request, replay, RemoteModelNativeDispatch.RequireBinding(binding), token).ConfigureAwait(false);
         }
-        if (request.Channel == RemoteModelNativeChannel.ResourceLifetimeBlobOutcome)
-        {
-            var outcome = NativeSerialization.Deserialize<RemoteControlledBlobOutcomeCallV2>(request.Payload.Span);
-            RemoteControlledBlobOutcomeEndpointV2.RequireEnvelope(request, outcome);
-            return await RemoteControlledBlobOutcomeEndpointV2.ExecuteAsync(outcome, controlledBlob,
-                options, replay, clock, effectBoundary, RemoteModelNativeDispatch.RequireBinding(binding), token).ConfigureAwait(false);
-        }
         var transport = RemoteDocumentWire.DecodeCall(request.Payload.Span);
         RequireEnvelope(request, transport);
         if (transport.QueueTransfer is { } transfer)
@@ -111,18 +101,15 @@ internal sealed class RemoteDocumentEndpoint : IAsyncDisposable
 
     private static void RequireEnvelope(RemoteModelNativeRequest request, RemoteDocumentTransportEnvelope transport)
     {
-        var count = (transport.Document is null ? AbsentEnvelopeCount : PresentEnvelopeCount) + (transport.Controlled is null ? AbsentEnvelopeCount : PresentEnvelopeCount)
-            + (transport.ControlledBlob is null ? AbsentEnvelopeCount : PresentEnvelopeCount) + (transport.QueueTransfer is null ? AbsentEnvelopeCount : PresentEnvelopeCount);
+        var count = (transport.Document is null ? AbsentEnvelopeCount : PresentEnvelopeCount)
+            + (transport.QueueTransfer is null ? AbsentEnvelopeCount : PresentEnvelopeCount);
         if (count != RequiredEnvelopeCount)
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, RemoteDocumentProtocol.InvalidProof);
         }
-        var source = transport.Document?.Source ?? transport.Controlled?.Source ?? transport.ControlledBlob?.Source
-            ?? transport.QueueTransfer!.SourceOwner.Owner;
-        var destination = transport.Document?.Fence.Destination.Owner ?? transport.Controlled?.Destination.Owner
-            ?? transport.ControlledBlob?.Destination.Owner ?? transport.QueueTransfer!.DestinationOwner.Owner;
-        var expiry = transport.Document?.ExpiresAt ?? transport.Controlled?.Request.Frame.ExpiresAt
-            ?? transport.ControlledBlob?.Request.Frame.ExpiresAt ?? transport.QueueTransfer!.ExpiresAt;
+        var source = transport.Document?.Source ?? transport.QueueTransfer!.SourceOwner.Owner;
+        var destination = transport.Document?.Fence.Destination.Owner ?? transport.QueueTransfer!.DestinationOwner.Owner;
+        var expiry = transport.Document?.ExpiresAt ?? transport.QueueTransfer!.ExpiresAt;
         if (!PhysicalOwnerEntryValidation.SameOwner(source, request.SourceOwner)
             || !PhysicalOwnerEntryValidation.SameOwner(destination, request.DestinationOwner) || expiry != request.ExpiresAt)
         {

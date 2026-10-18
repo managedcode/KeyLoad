@@ -15,18 +15,18 @@ internal static class EventReferenceSelectAssertions
     internal static async Task SamePageAsync(QueryPage expected, QueryPage actual)
     {
         await Assert.That(actual.CutPosition).IsGreaterThanOrEqualTo(expected.CutPosition);
-        await SqlRf3Protocol.EqualAsync(expected with
+        await SqlClusterProtocol.EqualAsync(expected with
         {
             CutPosition = actual.CutPosition
         }, actual);
     }
 
-    internal static async Task PageAsync(RequestCqrsRf3Callers callers, EventReferenceSelectState state,
+    internal static async Task PageAsync(RequestCqrsClusterCallers callers, EventReferenceSelectState state,
         bool masked, CancellationToken token)
     {
         var direct = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.QueryAsync(EventReferenceSelectProtocol.Request(state.Partition), token));
-        var sql = await SqlRf3Protocol.SdkAsync<QueryPage>(callers.Sdk, EventReferenceSelectProtocol.Operation(state.Partition), token);
-        var official = await SqlRf3Protocol.McpAsync<QueryPage>(callers.Mcp, EventReferenceSelectProtocol.Operation(state.Partition), token);
+        var sql = await SqlClusterProtocol.SdkAsync<QueryPage>(callers.Sdk, EventReferenceSelectProtocol.Operation(state.Partition), token);
+        var official = await SqlClusterProtocol.McpAsync<QueryPage>(callers.Mcp, EventReferenceSelectProtocol.Operation(state.Partition), token);
         var query = (await McpCallerAssertions.SuccessAsync<QueryPage>(await callers.Mcp.CallAsync(
             McpCallerTools.QueryExecute, EventReferenceSelectProtocol.Request(state.Partition), token))).Value;
         await Assert.That(direct.Cursor).IsNull();

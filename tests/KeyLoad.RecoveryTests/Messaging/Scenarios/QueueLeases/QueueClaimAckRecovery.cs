@@ -112,7 +112,7 @@ internal static class QueueClaimAckRecovery
     internal static CommitToken NextToken(DatabaseEngine database, ZoneTreeStore store)
     {
         var placement = database.ReadAtomicPartitionPlacement(CrashFixtureValues.Principal,
-            new(QueueClaimAckCrashProtocol.PlacementVersion, QueueClaimAckCrashProtocol.Partition));
+            QueueClaimAckCrashProtocol.Partition);
         return new(placement.Incarnation, QueueClaimAckCrashProtocol.Partition.AtomicPartitionId,
             checked(store.Position + QueueClaimAckCrashProtocol.AdjacentPosition), placement.PlacementEpoch);
     }
@@ -125,7 +125,7 @@ internal static class QueueClaimAckRecovery
         await Assert.That(operation.Kind).IsEqualTo(ack ? OperationKind.Delivery : OperationKind.Receive);
         await QueueClaimAckRecoveryAssertions.EqualAsync(database.NormalizeOperation(operation), operation);
         var placement = database.ReadAtomicPartitionPlacement(CrashFixtureValues.Principal,
-            new(QueueClaimAckCrashProtocol.PlacementVersion, QueueClaimAckCrashProtocol.Partition));
+            QueueClaimAckCrashProtocol.Partition);
         await Assert.That(target.Incarnation).IsEqualTo(placement.Incarnation);
         await Assert.That(target.OwnershipEpoch).IsEqualTo(placement.PlacementEpoch);
         await Assert.That(target.AtomicPartitionId).IsEqualTo(QueueClaimAckCrashProtocol.Partition.AtomicPartitionId);

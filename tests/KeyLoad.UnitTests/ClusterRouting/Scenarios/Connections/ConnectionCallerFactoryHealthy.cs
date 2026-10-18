@@ -12,7 +12,7 @@ internal static class ConnectionCallerFactoryHealthy
         var freshRequest = Guid.NewGuid();
         await Assert.That(freshRequest).IsNotEqualTo(state.OriginalRequest);
         var placement = scenario.Fixture.Database.Database.ReadAtomicPartitionPlacement(D.Root,
-            new(D.PlacementVersion, state.Following.Partition));
+            state.Following.Partition);
         var actual = calls.Start(state.Second, freshRequest, state.Following, token);
         var reply = await state.Tasks.CompleteAsync(actual);
         await scenario.Observation.Read(freshRequest).Disposed.Task.WaitAsync(token);

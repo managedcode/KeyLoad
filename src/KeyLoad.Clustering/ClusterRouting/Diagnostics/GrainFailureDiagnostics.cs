@@ -13,12 +13,11 @@ internal static partial class GrainFailureDiagnostics
     private const int InitialAggregateDepth = 0;
     private const int NoInnerExceptions = 0;
     private const int PrimaryExceptionIndex = 0;
-    private const string FailureMessage = "Orleans request rejected: {RequestId} at {Stage} ({Category}) with {ErrorCode}; movement guard {MovementOwnerGuard}; parent operands {ParentReadOperands}. Closed cause {CauseKind}.";
+    private const string FailureMessage = "Orleans request rejected: {RequestId} at {Stage} ({Category}) with {ErrorCode}. Closed cause {CauseKind}.";
     private const string StageMetadataKeyValue = "KeyLoad.Orleans.ClusterRouting.GrainFailureStage";
     [LoggerMessage(EventId = FailureEventId, Message = FailureMessage)]
     private static partial void LogFailure(ILogger logger, LogLevel level, Guid requestId,
         GrainFailureStage stage, GrainFailureCategory category, ErrorCode errorCode,
-        global::KeyLoad.Core.PartitionMoveOwnerGuard movementOwnerGuard, string parentReadOperands,
         GrainFailureCauseKind causeKind, Exception? exception);
 
     /// <summary>Names the private exception data entry used for an optional closed stage marker.</summary>
@@ -67,12 +66,9 @@ internal static partial class GrainFailureDiagnostics
         var stage = error.Data[StageMetadataKey] is GrainFailureStage marked && Enum.IsDefined(marked) ? marked : ValidStage(fallback);
         var category = Category(error, stage);
         var safeCode = Enum.IsDefined(code) ? code : ErrorCode.OwnershipLost;
-        var movementOwnerGuard = global::KeyLoad.Core.PartitionMoveOwnerDiagnostic.Read(error);
-        var parentReadOperands = global::KeyLoad.Core.PartitionMoveParentReadDiagnostic.ReadText(error);
         var causeKind = CauseKind(error, category);
         var level = category == GrainFailureCategory.Unexpected ? LogLevel.Error : LogLevel.Warning;
-        LogFailure(logger, level, requestId, stage, category, safeCode, movementOwnerGuard,
-            parentReadOperands, causeKind, null);
+        LogFailure(logger, level, requestId, stage, category, safeCode, causeKind, null);
         ReplicaReadFailureLog.Observe(logger, error, requestId);
     }
 

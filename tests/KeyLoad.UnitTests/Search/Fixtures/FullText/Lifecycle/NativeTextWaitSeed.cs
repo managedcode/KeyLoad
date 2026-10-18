@@ -5,7 +5,7 @@ using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
-/// <summary>Seeds a real persisted log/materializer prefix for unit component checks; does not claim RF3 authority.</summary>
+/// <summary>Seeds a real persisted log/materializer prefix for unit component checks; does not claim CLUSTER authority.</summary>
 internal static class NativeTextWaitSeed
 {
     private const string Root = "root";

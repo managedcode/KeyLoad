@@ -30,18 +30,7 @@ public sealed partial class DatabaseEngine
         return selected?.Owner ?? throw Errors.Fail(missingOwnerCode, UnregisteredPlacementOwner);
     }
 
-    private static AtomicPartitionPlacementResolution ResolveRegisteredPlacement(IKeyValueView view,
-        PartitionRef partition, PhysicalShardRecord control)
-    {
-        var row = AtomicPartitionPlacementSerialization.ReadRow(view, partition);
-        if (row is not null)
-        {
-            AtomicPartitionPlacementValidation.ValidateRowShape(row, partition);
-        }
-        var owner = row is null ? control
-            : ResolveRegisteredPlacementOwner(view, control, row.PhysicalShardId, ErrorCode.Corruption);
-        var directory = AtomicPartitionPlacementSerialization.ReadDirectory(view);
-        owner = ResolveMovementPlacementOwner(view, partition, owner, row);
-        return ResolvePlacement(partition, owner, directory, row);
-    }
+    private static AtomicPartitionPlacementResolution ResolveRegisteredPlacement(PartitionRef partition,
+        PhysicalShardRecord control)
+        => ResolvePlacement(partition, control);
 }

@@ -1,4 +1,3 @@
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Features.InternalSerialization;
 
@@ -26,14 +25,11 @@ public sealed partial class DatabaseEngine
 
     internal static Type? NativeOperationPayloadType(OperationKind kind) => kind switch
     {
-        OperationKind.ConfigurePlacementPolicy => typeof(ConfigurePlacementPolicyRequest),
-        OperationKind.PlacementIntentPhase => typeof(global::KeyLoad.Core.Features.ClusterRouting.Contracts.PlacementIntentPhaseRequestV1),
         OperationKind.RemoteGraphSource => typeof(global::KeyLoad.Core.Features.GraphTraversal.RemoteGraphSourceMutationV1),
         OperationKind.RemoteGraphReceive => typeof(global::KeyLoad.Core.Features.GraphTraversal.RemoteGraphReceiverMutationV1),
         OperationKind.RemoteGraphComplete => typeof(global::KeyLoad.Core.Features.GraphTraversal.RemoteGraphCompletionMutationV1),
         OperationKind.Bm25CorpusPublicationPhase => typeof(global::KeyLoad.Core.Features.Search.Bm25CorpusPublicationPhaseCommand),
         OperationKind.OnlineTextPublicationPhase => typeof(global::KeyLoad.Core.Features.Search.OnlineTextPublicationPhaseCommand),
-        OperationKind.PartitionMovementPhase => typeof(PartitionMovementAuthenticatedCommandV1),
         OperationKind.Batch => typeof(CommandRequest),
         OperationKind.Receive => typeof(ReceiveRequest),
         OperationKind.Delivery => typeof(DeliveryCommand),
@@ -44,7 +40,6 @@ public sealed partial class DatabaseEngine
         OperationKind.CreateTable => typeof(CreateTableRequest),
         OperationKind.SetQueueDispatch => typeof(QueueDispatchControlRequest),
         OperationKind.BootstrapPhysicalShardCatalog => typeof(BootstrapPhysicalShardCatalogRequest),
-        OperationKind.BindAtomicPartitionPlacement => typeof(BindAtomicPartitionPlacementRequest),
         OperationKind.RegisterPhysicalOwner => typeof(RegisterPhysicalOwnerV1),
         OperationKind.ConfigurePrincipal => typeof(ConfigurePrincipalRequest),
         OperationKind.ConfigureApiKey => typeof(ConfigureApiKeyRequest),
@@ -82,7 +77,6 @@ public sealed partial class DatabaseEngine
         return kind switch
         {
             OperationKind.OnlineTextPublicationPhase => NativeTypedFingerprint<global::KeyLoad.Core.Features.Search.OnlineTextPublicationPhaseCommand>(payload.Value),
-            OperationKind.PartitionMovementPhase => NativeTypedFingerprint<PartitionMovementAuthenticatedCommandV1>(payload.Value),
             OperationKind.Batch => NativeTypedFingerprint<CommandRequest>(payload.Value),
             OperationKind.Receive => NativeTypedFingerprint<ReceiveRequest>(payload.Value),
             OperationKind.Delivery => NativeTypedFingerprint<DeliveryCommand>(payload.Value),
@@ -93,7 +87,6 @@ public sealed partial class DatabaseEngine
             OperationKind.CreateTable => NativeTypedFingerprint<CreateTableRequest>(payload.Value),
             OperationKind.SetQueueDispatch => NativeTypedFingerprint<QueueDispatchControlRequest>(payload.Value),
             OperationKind.BootstrapPhysicalShardCatalog => NativeTypedFingerprint<BootstrapPhysicalShardCatalogRequest>(payload.Value),
-            OperationKind.BindAtomicPartitionPlacement => NativeTypedFingerprint<BindAtomicPartitionPlacementRequest>(payload.Value),
             OperationKind.RegisterPhysicalOwner => NativeTypedFingerprint<RegisterPhysicalOwnerV1>(payload.Value),
             OperationKind.ConfigurePrincipal => NativeTypedFingerprint<ConfigurePrincipalRequest>(payload.Value),
             OperationKind.ConfigureApiKey => NativeTypedFingerprint<ConfigureApiKeyRequest>(payload.Value),

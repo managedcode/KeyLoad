@@ -7,24 +7,24 @@ namespace KeyLoad.IntegrationTests.Features.Authorization;
 internal static class PolicyEpochPublicContinuation
 {
     internal static async Task<PolicyEpochPublicState> RunAsync(ClusterFixture fixture, KeyLoadClient administrator,
-        ResourcePolicyUpdateRf3Scenario scenario, CancellationToken token)
+        ResourcePolicyUpdateClusterScenario scenario, CancellationToken token)
     {
         var seed = new CommandRequest(Guid.NewGuid(), scenario.Partition,
-            [new PutDocument(ResourcePolicyUpdateRf3Protocol.Collection, PolicyEpochPublicProtocol.SecondId,
+            [new PutDocument(ResourcePolicyUpdateClusterProtocol.Collection, PolicyEpochPublicProtocol.SecondId,
                 PolicyEpochPublicProtocol.SecondJson)]);
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await administrator.CommitAsync(seed, token));
         await Assert.That(receipt.CommandId).IsEqualTo(seed.CommandId);
         MutationReceipt[] expected = [new(PolicyEpochPublicProtocol.PutKind,
-            ResourcePolicyUpdateRf3Protocol.Collection, PolicyEpochPublicProtocol.SecondId,
+            ResourcePolicyUpdateClusterProtocol.Collection, PolicyEpochPublicProtocol.SecondId,
             PolicyEpochPublicProtocol.SeedRevision)];
-        await KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.EqualAsync(expected, receipt.Mutations.ToArray());
-        return await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, fixture.AdminKey,
-            root => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, scenario.Reader.Secret,
+        await KeyLoad.IntegrationTests.Features.QueryExecution.SqlClusterProtocol.EqualAsync(expected, receipt.Mutations.ToArray());
+        return await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, fixture.AdminKey,
+            root => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, scenario.Reader.Secret,
                 reader => ContinueAsync(fixture, root.Sdk, reader, scenario, seed, receipt, token), token), token);
     }
 
-    private static async Task<PolicyEpochPublicState> ContinueAsync(ClusterFixture fixture, KeyLoadClient root, RequestCqrsRf3Callers reader,
-        ResourcePolicyUpdateRf3Scenario scenario, CommandRequest seed, CommitReceipt receipt, CancellationToken token)
+    private static async Task<PolicyEpochPublicState> ContinueAsync(ClusterFixture fixture, KeyLoadClient root, RequestCqrsClusterCallers reader,
+        ResourcePolicyUpdateClusterScenario scenario, CommandRequest seed, CommitReceipt receipt, CancellationToken token)
     {
         var cursors = await PolicyEpochPublicAssertions.PagesAsync(reader, root, scenario, false, token);
         var state = new PolicyEpochPublicState(scenario, seed, receipt, cursors, scenario.Reader);

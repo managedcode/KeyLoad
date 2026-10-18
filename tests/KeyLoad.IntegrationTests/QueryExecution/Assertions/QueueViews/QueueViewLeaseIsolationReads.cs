@@ -7,7 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
 internal static class QueueViewLeaseIsolationReads
 {
-    internal static async Task RunAsync(RequestCqrsRf3Callers root, RequestCqrsRf3Callers reader,
+    internal static async Task RunAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers reader,
         QueueViewLeaseIsolationState state, CancellationToken token)
     {
         foreach (var hidden in new[] { false, true })
@@ -21,7 +21,7 @@ internal static class QueueViewLeaseIsolationReads
         await ExplainAsync(root, reader, state, token);
     }
 
-    private static Task ExplainAsync(RequestCqrsRf3Callers root, RequestCqrsRf3Callers reader,
+    private static Task ExplainAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers reader,
         QueueViewLeaseIsolationState state, CancellationToken token)
         => QueueViewLeaseIsolationImages.ObserveAsync(root, state, async () =>
         {
@@ -49,11 +49,11 @@ internal static class QueueViewLeaseIsolationReads
                 await Assert.That(page.CutPosition).IsGreaterThan((long)Empty);
                 await Assert.That(page.AccessPath).IsEqualTo(QueuePath);
                 await Assert.That(page.Cursor).IsNull();
-                await SqlRf3Protocol.EqualAsync(new[] { expected }, page.Rows.ToArray());
+                await SqlClusterProtocol.EqualAsync(new[] { expected }, page.Rows.ToArray());
             }
         }, token);
 
-    internal static async Task<QueryPage> ReadAsync(RequestCqrsRf3Callers caller, QueueViewLeaseIsolationState state,
+    internal static async Task<QueryPage> ReadAsync(RequestCqrsClusterCallers caller, QueueViewLeaseIsolationState state,
         int route, bool hidden, CancellationToken token)
     {
         var sql = QueueViewLeaseIsolationRequests.Sql(state, hidden);
@@ -64,8 +64,8 @@ internal static class QueueViewLeaseIsolationReads
             SdkAst => await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.QueryAstAsync(ast, token)),
             McpSql => (await McpCallerAssertions.SuccessAsync<QueryPage>(await caller.Mcp.CallAsync(McpCallerTools.QueryExecute, sql, token))).Value,
             McpAst => (await McpCallerAssertions.SuccessAsync<QueryPage>(await caller.Mcp.CallAsync(McpCallerTools.QueryAst, ast, token))).Value,
-            SdkQ1 => await SqlRf3Protocol.SdkAsync<QueryPage>(caller.Sdk, new(state.Scenario.Partition, sql.Sql, AllowFullScan: true), token),
-            McpQ1 => await SqlRf3Protocol.McpAsync<QueryPage>(caller.Mcp, new(state.Scenario.Partition, sql.Sql, AllowFullScan: true), token),
+            SdkQ1 => await SqlClusterProtocol.SdkAsync<QueryPage>(caller.Sdk, new(state.Scenario.Partition, sql.Sql, AllowFullScan: true), token),
+            McpQ1 => await SqlClusterProtocol.McpAsync<QueryPage>(caller.Mcp, new(state.Scenario.Partition, sql.Sql, AllowFullScan: true), token),
             _ => throw new InvalidOperationException(UnknownRoute)
         };
     }

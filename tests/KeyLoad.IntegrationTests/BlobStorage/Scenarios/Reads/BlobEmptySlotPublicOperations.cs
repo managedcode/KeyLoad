@@ -1,5 +1,4 @@
 using KeyLoad.Client;
-using KeyLoad.IntegrationTests.Features.BackupRestore;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
@@ -8,7 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.BlobStorage;
 
 internal static class BlobEmptySlotPublicOperations
 {
-    internal static async Task PublishAsync(RequestCqrsRf3Callers callers, BlobEmptySlotPublicState state, CancellationToken token)
+    internal static async Task PublishAsync(RequestCqrsClusterCallers callers, BlobEmptySlotPublicState state, CancellationToken token)
     {
         state.Healthy = state.RetainedRefused with
         {
@@ -34,37 +33,37 @@ internal static class BlobEmptySlotPublicOperations
         await Assert.That(state.Published.Value.PartCount).IsEqualTo(0);
         await Assert.That(state.Published.Value.Deleted).IsFalse();
         await Assert.That(state.Published.Value.IntegrityHash).IsEqualTo(state.HealthyBegun.Value.IntegrityHash);
-        await BlobEmptySlotPublicAssertions.ReceiptAsync(callers, state.HealthyBegun.Receipt, state.Healthy.CommandId, state.Blob, token);
-        await BlobEmptySlotPublicAssertions.ReceiptAsync(callers, state.Published.Receipt, state.Complete.CommandId, state.Blob, token);
+        await BlobEmptySlotPublicAssertions.ReceiptAsync(state.HealthyBegun.Receipt, state.Healthy.CommandId, state.Blob);
+        await BlobEmptySlotPublicAssertions.ReceiptAsync(state.Published.Receipt, state.Complete.CommandId, state.Blob);
         await BlobEmptySlotPublicAssertions.CurrentAsync(callers, state, token);
     }
 
-    internal static async Task ReclaimReplayAsync(RequestCqrsRf3Callers callers, BlobEmptySlotPublicState state, CancellationToken token)
+    internal static async Task ReclaimReplayAsync(RequestCqrsClusterCallers callers, BlobEmptySlotPublicState state, CancellationToken token)
     {
-        await SqlRf3Protocol.EqualAsync(state.Reclaimed, await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ReclaimBlobAsync(state.Reclaim, token)));
+        await SqlClusterProtocol.EqualAsync(state.Reclaimed, await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ReclaimBlobAsync(state.Reclaim, token)));
         await BlobEmptySlotPublicAssertions.CurrentAsync(callers, state, token);
-        await SqlRf3Protocol.EqualAsync(state.Reclaimed, (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobReclaimResult>>(await callers.Mcp.CallAsync("keyload_blobs_reclaim", state.Reclaim, token))).Value);
+        await SqlClusterProtocol.EqualAsync(state.Reclaimed, (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobReclaimResult>>(await callers.Mcp.CallAsync("keyload_blobs_reclaim", state.Reclaim, token))).Value);
         await BlobEmptySlotPublicAssertions.CurrentAsync(callers, state, token);
     }
 
-    internal static async Task ReplayAsync(RequestCqrsRf3Callers callers, BlobEmptySlotPublicState state, CancellationToken token)
+    internal static async Task ReplayAsync(RequestCqrsClusterCallers callers, BlobEmptySlotPublicState state, CancellationToken token)
     {
-        await SqlRf3Protocol.EqualAsync(state.HealthyBegun, await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.BeginBlobUploadAsync(state.Healthy, token)));
+        await SqlClusterProtocol.EqualAsync(state.HealthyBegun, await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.BeginBlobUploadAsync(state.Healthy, token)));
         await BlobEmptySlotPublicAssertions.CurrentAsync(callers, state, token);
-        await SqlRf3Protocol.EqualAsync(state.HealthyBegun, (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobUploadInfo>>(await callers.Mcp.CallAsync("keyload_blobs_begin_upload", state.Healthy, token))).Value);
+        await SqlClusterProtocol.EqualAsync(state.HealthyBegun, (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobUploadInfo>>(await callers.Mcp.CallAsync("keyload_blobs_begin_upload", state.Healthy, token))).Value);
         await BlobEmptySlotPublicAssertions.CurrentAsync(callers, state, token);
-        await SqlRf3Protocol.EqualAsync(state.Published, await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.CompleteBlobUploadAsync(state.Complete, token)));
+        await SqlClusterProtocol.EqualAsync(state.Published, await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.CompleteBlobUploadAsync(state.Complete, token)));
         await BlobEmptySlotPublicAssertions.CurrentAsync(callers, state, token);
-        await SqlRf3Protocol.EqualAsync(state.Published, (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobMetadata>>(await callers.Mcp.CallAsync("keyload_blobs_complete_upload", state.Complete, token))).Value);
+        await SqlClusterProtocol.EqualAsync(state.Published, (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobMetadata>>(await callers.Mcp.CallAsync("keyload_blobs_complete_upload", state.Complete, token))).Value);
         await BlobEmptySlotPublicAssertions.CurrentAsync(callers, state, token);
         await ReclaimReplayAsync(callers, state, token);
         await BlobEmptySlotPublicAssertions.RefusedAsync(callers, state, state.InitialRefused, token);
         await BlobEmptySlotPublicAssertions.RefusedAsync(callers, state, state.RetainedRefused, token);
-        await ClusterRestoreRf3AuthorityTrial.ErrorAsync(await callers.Sdk.BeginBlobUploadAsync(state.First, token), ErrorCode.TokenInvalidated);
+        await BlobBoundedRetirementPublicAssertions.FailedAsync(await callers.Sdk.BeginBlobUploadAsync(state.First, token), ErrorCode.TokenInvalidated);
         await BlobEmptySlotPublicAssertions.CurrentAsync(callers, state, token);
         await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync("keyload_blobs_begin_upload", state.First, token), ErrorCode.TokenInvalidated, dispatched: true);
         await BlobEmptySlotPublicAssertions.CurrentAsync(callers, state, token);
-        await ClusterRestoreRf3AuthorityTrial.ErrorAsync(await callers.Sdk.AbortBlobUploadAsync(state.Abort, token), ErrorCode.TokenInvalidated);
+        await BlobBoundedRetirementPublicAssertions.FailedAsync(await callers.Sdk.AbortBlobUploadAsync(state.Abort, token), ErrorCode.TokenInvalidated);
         await BlobEmptySlotPublicAssertions.CurrentAsync(callers, state, token);
         await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync("keyload_blobs_abort_upload", state.Abort, token), ErrorCode.TokenInvalidated, dispatched: true);
         await BlobEmptySlotPublicAssertions.CurrentAsync(callers, state, token);

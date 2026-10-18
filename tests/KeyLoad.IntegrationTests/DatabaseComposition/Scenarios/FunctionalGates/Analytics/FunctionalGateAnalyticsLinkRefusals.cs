@@ -17,7 +17,7 @@ internal static class FunctionalGateAnalyticsLinkRefusals
         await McpCallerAssertions.ErrorAsync(await context.Administrator.Mcp.CallAsync(AnalyticsStoreProtocol.ReadTool,
             request, token), ErrorCode.OwnershipLost, dispatched: true);
         await unchanged();
-        await SqlAsync(context, SqlRf3Protocol.Call(context.Partition, AnalyticsStoreProtocol.ReadTool, request), unchanged, token);
+        await SqlAsync(context, SqlClusterProtocol.Call(context.Partition, AnalyticsStoreProtocol.ReadTool, request), unchanged, token);
     }
 
     internal static async Task WriteAsync(FunctionalGateContext context, CommandRequest command,

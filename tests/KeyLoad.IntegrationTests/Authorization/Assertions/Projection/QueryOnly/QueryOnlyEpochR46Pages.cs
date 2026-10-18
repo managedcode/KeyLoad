@@ -6,8 +6,8 @@ namespace KeyLoad.IntegrationTests.Features.Authorization;
 
 internal static class QueryOnlyEpochR46Pages
 {
-    internal static async Task<QueryPage[]> RequireAsync(RequestCqrsRf3Callers root,
-        RequestCqrsRf3Callers reader, QueryOnlyEpochR46State state, CancellationToken token)
+    internal static async Task<QueryPage[]> RequireAsync(RequestCqrsClusterCallers root,
+        RequestCqrsClusterCallers reader, QueryOnlyEpochR46State state, CancellationToken token)
     {
         var firstPages = new QueryPage[2];
         for (var route = 0; route < firstPages.Length; route++)
@@ -15,7 +15,7 @@ internal static class QueryOnlyEpochR46Pages
             var before = await PolicyEpochPublicAssertions.ImageAsync(root.Sdk, state.Original.Scenario, token);
             var request = PolicyEpochPublicProtocol.Request(state.Original.Scenario.Partition);
             var first = await ReadAsync(reader, request, route, token);
-            await RowAsync(first, ResourcePolicyUpdateRf3Protocol.DocumentId, ResourcePolicyUpdateRf3Protocol.SeedJson);
+            await RowAsync(first, ResourcePolicyUpdateClusterProtocol.DocumentId, ResourcePolicyUpdateClusterProtocol.SeedJson);
             await Assert.That(string.IsNullOrEmpty(first.Cursor)).IsFalse();
             firstPages[route] = first;
             await QueryOnlyEpochR46Current.RequireAsync(root, reader, state, token);
@@ -34,7 +34,7 @@ internal static class QueryOnlyEpochR46Pages
         return firstPages;
     }
 
-    private static async Task<QueryPage> ReadAsync(RequestCqrsRf3Callers reader,
+    private static async Task<QueryPage> ReadAsync(RequestCqrsClusterCallers reader,
         QueryRequest request, int route, CancellationToken token)
         => route == 0 ? await McpCallerAssertions.SdkSuccessAsync(await reader.Sdk.QueryAsync(request, token))
             : (await McpCallerAssertions.SuccessAsync<QueryPage>(await reader.Mcp.CallAsync(
@@ -43,7 +43,7 @@ internal static class QueryOnlyEpochR46Pages
     private static async Task RowAsync(QueryPage page, string id, string json)
     {
         QueryRow[] rows = [new(id, 1L, json, false, [])];
-        await SqlRf3Protocol.EqualAsync(rows, page.Rows.ToArray());
+        await SqlClusterProtocol.EqualAsync(rows, page.Rows.ToArray());
         await Assert.That(page.AccessPath).IsEqualTo(PolicyEpochPublicProtocol.Scan);
         await Assert.That(page.CutPosition).IsGreaterThan(0L);
     }

@@ -6,7 +6,7 @@ namespace KeyLoad.IntegrationTests.Features.BlobStorage;
 
 internal static class BlobTombstoneListingPublicReplay
 {
-    internal static async Task FinalAsync(RequestCqrsRf3Callers callers,
+    internal static async Task FinalAsync(RequestCqrsClusterCallers callers,
         BlobTombstoneListingPublicState state, CancellationToken token)
     {
         Task Observe() => BlobTombstoneListingPublicAssertions.CurrentAsync(callers, state, token);
@@ -34,7 +34,7 @@ internal static class BlobTombstoneListingPublicReplay
             ct => callers.Sdk.ReclaimBlobAsync(state.Reclaim, ct), Observe, token);
     }
 
-    private static async Task GoneAsync(RequestCqrsRf3Callers callers,
+    private static async Task GoneAsync(RequestCqrsClusterCallers callers,
         BlobBoundedRetirementPublicPublication.Published old, Func<Task> observe, CancellationToken token)
     {
         await RefusedAsync(callers, "keyload_blobs_begin_upload", old.Begin,
@@ -48,7 +48,7 @@ internal static class BlobTombstoneListingPublicReplay
             ct => callers.Sdk.CompleteBlobUploadAsync(old.Complete, ct), observe, token);
     }
 
-    private static async Task RefusedAsync<T>(RequestCqrsRf3Callers callers, string tool, object request,
+    private static async Task RefusedAsync<T>(RequestCqrsClusterCallers callers, string tool, object request,
         Func<CancellationToken, Task<ManagedCode.Communication.Result<T>>> invoke, Func<Task> observe, CancellationToken token)
     {
         await BlobBoundedRetirementPublicAssertions.FailedAsync(await invoke(token), ErrorCode.TokenInvalidated);

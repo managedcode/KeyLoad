@@ -12,7 +12,7 @@ internal static class NativeCommandObservationPreparation
         ICommitCoordinator coordinator, TimeProvider clock, IOptions<GrainRoutingOptions> options,
         GrainRequestCodec codec, NativeRequestWorkOwner owner, IPhysicalRequestPlacement? physical,
         ReplicaSiloDiscoveryState? runtime, DecodedGrainRequest request, string actorKey,
-        IGrainContext? context, Func<Task> beforeReply, CancellationToken token)
+        IGrainContext? context, CancellationToken token)
     {
         var preparation = default(NativeCommandObservationPreparationWork);
         NativeCommandObservation? observation = null;
@@ -35,7 +35,6 @@ internal static class NativeCommandObservationPreparation
             var reply = await PrepareAsync(database, coordinator, clock, options, codec, physical, request,
                 context, work, observation).ConfigureAwait(true);
             preparation.TransferTo(observation);
-            await beforeReply().ConfigureAwait(true);
             observation.Budget.Check();
             observation.Lease.AdmitPublication();
             observation.FinishPreparation();

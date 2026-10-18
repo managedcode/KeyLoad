@@ -31,7 +31,7 @@ public sealed partial class DatabaseEngine
             {
                 throw Errors.Fail(ErrorCode.Unauthenticated, RemoteGraphProtocol.Invalid);
             }
-            var placement = ResolveRegisteredPlacement(view, target.Partition, catalog.DefaultShard);
+            var placement = ResolveRegisteredPlacement(target.Partition, catalog.DefaultShard);
             var directory = PhysicalOwnerDirectorySerialization.Read(view)
                 ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteGraphProtocol.MissingAuthority);
             var destination = directory.Owners.SingleOrDefault(value => value.Owner.PhysicalShardId == placement.PhysicalShardId)

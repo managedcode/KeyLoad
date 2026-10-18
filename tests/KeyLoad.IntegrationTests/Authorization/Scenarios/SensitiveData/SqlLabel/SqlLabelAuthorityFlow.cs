@@ -9,12 +9,12 @@ internal static class SqlLabelAuthorityFlow
 {
     internal static async Task RunAsync(ClusterFixture fixture, CancellationToken token)
     {
-        var scenario = await GraphSearchRf3Scenario.CreateAsync(fixture, token);
+        var scenario = await GraphSearchClusterScenario.CreateAsync(fixture, token);
         var identity = await scenario.CreateReaderAsync(fixture, token);
         var command = Guid.NewGuid();
         var repaired = identity.Principal with
         {
-            FieldGrants = [GraphSearchRf3Scenario.LabelFieldGrant],
+            FieldGrants = [GraphSearchClusterScenario.LabelFieldGrant],
             PolicyEpoch = SqlLabelAuthorityProtocol.RepairedEpoch
         };
         var state = new SqlLabelAuthorityState(scenario, identity, command, repaired);
@@ -22,11 +22,11 @@ internal static class SqlLabelAuthorityFlow
         {
             var image = await SqlLabelAuthorityImage.CaptureAsync(root, scenario.Partition, token);
             await SqlLabelAuthorityRefusals.DeniedAsync(sdk, session, scenario, identity.Secret, token);
-            await SqlRf3Protocol.EqualAsync(image, await SqlLabelAuthorityImage.CaptureAsync(root, scenario.Partition, token));
-            var granted = await GraphSearchRf3Scenario.GrantLabelUseAsync(fixture, identity, token);
-            await SqlRf3Protocol.EqualAsync(identity.Principal with
+            await SqlClusterProtocol.EqualAsync(image, await SqlLabelAuthorityImage.CaptureAsync(root, scenario.Partition, token));
+            var granted = await GraphSearchClusterScenario.GrantLabelUseAsync(fixture, identity, token);
+            await SqlClusterProtocol.EqualAsync(identity.Principal with
             {
-                FieldGrants = [GraphSearchRf3Scenario.LabelFieldGrant],
+                FieldGrants = [GraphSearchClusterScenario.LabelFieldGrant],
                 PolicyEpoch = identity.Principal.PolicyEpoch + 1
             }, granted.Principal);
             await SqlLabelAuthorityResults.HealthyAsync(sdk, session, scenario.Partition, token);
@@ -35,14 +35,14 @@ internal static class SqlLabelAuthorityFlow
                 Revoked = true,
                 PolicyEpoch = SqlLabelAuthorityProtocol.RevokedEpoch
             };
-            await SqlRf3Protocol.EqualAsync(revoked,
+            await SqlClusterProtocol.EqualAsync(revoked,
                 await McpCallerAssertions.SdkSuccessAsync(await root.ConfigurePrincipalAsync(Guid.NewGuid(), revoked, token)));
             await SqlLabelAuthorityRefusals.RevokedAsync(fixture, sdk, session, state, token);
-            await SqlRf3Protocol.EqualAsync(image, await SqlLabelAuthorityImage.CaptureAsync(root, scenario.Partition, token));
-            await SqlRf3Protocol.EqualAsync(repaired,
+            await SqlClusterProtocol.EqualAsync(image, await SqlLabelAuthorityImage.CaptureAsync(root, scenario.Partition, token));
+            await SqlClusterProtocol.EqualAsync(repaired,
                 await McpCallerAssertions.SdkSuccessAsync(await root.ConfigurePrincipalAsync(command, repaired, token)));
             await HealthyAsync(root, sdk, session, state, token);
-            await SqlRf3Protocol.EqualAsync(image, await SqlLabelAuthorityImage.CaptureAsync(root, scenario.Partition, token));
+            await SqlClusterProtocol.EqualAsync(image, await SqlLabelAuthorityImage.CaptureAsync(root, scenario.Partition, token));
         }, token);
         await SqlLabelAuthorityCold.RunAsync(fixture, state, token);
     }
@@ -52,9 +52,9 @@ internal static class SqlLabelAuthorityFlow
     {
         var before = await SqlLabelAuthorityImage.CaptureAsync(root, state.Scenario.Partition, token);
         await SqlLabelAuthorityResults.HealthyAsync(sdk, session, state.Scenario.Partition, token);
-        await SqlRf3Protocol.EqualAsync(state.RepairResult, await McpCallerAssertions.SdkSuccessAsync(
+        await SqlClusterProtocol.EqualAsync(state.RepairResult, await McpCallerAssertions.SdkSuccessAsync(
             await root.ConfigurePrincipalAsync(state.RepairCommand, state.RepairResult, token)));
-        await SqlRf3Protocol.EqualAsync(before,
+        await SqlClusterProtocol.EqualAsync(before,
             await SqlLabelAuthorityImage.CaptureAsync(root, state.Scenario.Partition, token));
     }
 }

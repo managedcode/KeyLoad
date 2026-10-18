@@ -1,6 +1,6 @@
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
-// Native crypto/codec boundary proof only; these cases do not execute retirement or claim live RF3 membership.
+// Native crypto/codec boundary proof only; these cases do not execute retirement or claim live CLUSTER membership.
 internal sealed class ResourceRetirementNativeEnvelopeTests
 {
     [Test]

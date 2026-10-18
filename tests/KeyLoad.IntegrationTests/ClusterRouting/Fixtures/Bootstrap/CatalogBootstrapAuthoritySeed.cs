@@ -1,4 +1,3 @@
-using KeyLoad.Client;
 using KeyLoad.Core;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.IntegrationTests.Features.QueryExecution;
@@ -9,7 +8,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 internal static class CatalogBootstrapAuthoritySeed
 {
     internal static async Task<CatalogBootstrapAuthorityState> RunAsync(ClusterFixture fixture,
-        RequestCqrsRf3Callers root, CancellationToken token)
+        RequestCqrsClusterCallers root, CancellationToken token)
     {
         var suffix = Guid.NewGuid().ToString(P.GuidFormat);
         PartitionRef partition = new(P.TenantPrefix + suffix, P.Database, P.TenantPrefix + suffix, P.TenantPrefix + suffix);
@@ -24,29 +23,28 @@ internal static class CatalogBootstrapAuthoritySeed
         ResourceDefinition resource = new(P.Collection, ResourceKind.Collection, partition.TransactionDomainId);
         var configured = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.ConfigureResourceAsync(Guid.NewGuid(),
             new(partition.TenantId, partition.DatabaseId, resource), token));
-        await SqlRf3Protocol.EqualAsync(resource, configured);
+        await SqlClusterProtocol.EqualAsync(resource, configured);
         await PrincipalAsync(root, administrator, administratorKey, token);
         await PrincipalAsync(root, reader, readerKey, token);
-        return await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, P.Nodes[P.FirstIndex], administratorKey, async survivor =>
+        return await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, P.Nodes[P.FirstIndex], administratorKey, async survivor =>
         {
-            var placement = await McpCallerAssertions.SdkSuccessAsync(await survivor.Sdk.ReadAtomicPartitionPlacementAsync(new(P.Version, partition), token));
             var command = new CommandRequest(Guid.NewGuid(), partition,
                 [new PutDocument(P.Collection, P.Document, P.OriginalJson, P.EmptyRevision)]);
             var receipt = await McpCallerAssertions.SdkSuccessAsync(await survivor.Sdk.CommitAsync(command, token));
-            await CatalogBootstrapAuthorityCurrent.ReceiptAsync(command, receipt, placement, P.OriginalRevision);
-            return new CatalogBootstrapAuthorityState(partition, administrator, administratorKey, reader, readerKey, command, receipt, placement);
+            await CatalogBootstrapAuthorityCurrent.ReceiptAsync(command, receipt, P.OriginalRevision);
+            return new CatalogBootstrapAuthorityState(partition, administrator, administratorKey, reader, readerKey, command, receipt);
         }, token);
     }
 
-    private static async Task PrincipalAsync(RequestCqrsRf3Callers root, PrincipalRecord principal,
+    private static async Task PrincipalAsync(RequestCqrsClusterCallers root, PrincipalRecord principal,
         string secret, CancellationToken token)
     {
         var command = Guid.NewGuid();
-        await SqlRf3Protocol.EqualAsync(principal, await McpCallerAssertions.SdkSuccessAsync(
+        await SqlClusterProtocol.EqualAsync(principal, await McpCallerAssertions.SdkSuccessAsync(
             await root.Sdk.ConfigurePrincipalAsync(command, principal, token)));
         var args = McpOfficialClient.Arguments(new ConfigurePrincipalRequest(principal));
         args.Add(McpCallerProtocol.CommandId, command);
-        await SqlRf3Protocol.EqualAsync(principal, (await McpCallerAssertions.SuccessAsync<PrincipalRecord>(
+        await SqlClusterProtocol.EqualAsync(principal, (await McpCallerAssertions.SuccessAsync<PrincipalRecord>(
             await root.Mcp.Client.InvokeKeyLoadToolAsync(McpCallerTools.PrincipalsConfigure, args, token))).Value);
         var credential = DatabaseEngine.Credential(principal.Id, principal.Id, secret);
         var credentialCommand = Guid.NewGuid();

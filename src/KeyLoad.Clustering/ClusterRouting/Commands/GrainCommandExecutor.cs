@@ -6,8 +6,7 @@ namespace KeyLoad.Clustering;
 
 internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoordinator coordinator, TimeProvider clock,
     IOptions<GrainRoutingOptions> options, GrainRequestCodec? codec = null, NativeRequestWorkOwner? workOwner = null, IPhysicalRequestPlacement? physical = null,
-    IGrainPartitionMovementSealedOperationObserver? sealedObserver = null, INativeOnlineTextMaintenance? onlineText = null,
-    IPlacementIntentPersistence? placementPersistence = null, Func<INativeDropTableExecution>? borrowDropTable = null)
+    INativeOnlineTextMaintenance? onlineText = null, Func<INativeDropTableExecution>? borrowDropTable = null)
 {
     private readonly GrainRoutingOptions settings = options.Value;
     internal async Task<GrainOperationReply> ExecuteAsync(DecodedGrainRequest request, string actorKey,
@@ -51,9 +50,8 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
             await NativeCommandCapabilityAuthorization.ObserveAndValidateAsync(database, clock, settings,
                 codec, request, GrainRequestPhase.BeforeSubmit, context, operationToken).ConfigureAwait(true);
             NativeCommandWorkAdmission.Bind(database, request, principal, clock, work);
-            var result = await SubmitCommandAsync(kind, request, principal, context, operationToken).ConfigureAwait(true);
+            var result = await SubmitCommandAsync(kind, request, principal, operationToken).ConfigureAwait(true);
             stage = GrainFailureStage.ReplyEncoding;
-            GrainPartitionMovementJournalObservation.CaptureReturned(codec, request, result, context);
             await ObservePhaseAsync(request, GrainRequestPhase.SubmitReturned, context, operationToken).ConfigureAwait(true);
             var reply = GrainReplyFactory.Operation(result: result, cancellationToken: operationToken, options: options);
             return work is null || reply.Error is not null ? reply : reply with
@@ -77,7 +75,7 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
     }
 
     private async Task<OperationResult> SubmitCommandAsync(OperationKind kind, DecodedGrainRequest request,
-        PrincipalRecord principal, IGrainContext? context, CancellationToken operationToken)
+        PrincipalRecord principal, CancellationToken operationToken)
     {
         return kind switch
         {
@@ -85,17 +83,10 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
                 ?? throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest))
                 .ExecuteAsync(request.Envelope.RequestId, request.Envelope.CommandId, principal.Id,
                     GrainNativePayload.Read<DropTableRequest>(request.Payload), request.Envelope.ExpiresAt, operationToken).ConfigureAwait(true),
-            OperationKind.PersistPlacementIntent => await GrainPlacementIntentPersistence.SubmitAsync(
-                placementPersistence ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest),
-                coordinator, request, operationToken).ConfigureAwait(true),
             OperationKind.RemoteGraphSource or OperationKind.RemoteGraphReceive or OperationKind.RemoteGraphComplete
                 => await GrainRemoteGraphCommand.SubmitAsync(database, coordinator, request, principal, operationToken).ConfigureAwait(true),
             OperationKind.EventFeedControl or OperationKind.EventFeedSourcePhase => await GrainEventVectorSourceCommand.SubmitAsync(
                 database, coordinator, request, principal, operationToken).ConfigureAwait(true),
-            OperationKind.PlacementIntentPhase => await GrainPlacementIntentCommand.SubmitAsync(
-                database, coordinator, request, principal, operationToken).ConfigureAwait(true),
-            OperationKind.PartitionMovementPhase => await GrainPartitionMovementCommand.SubmitAsync(
-                database, coordinator, request, principal, codec, context, sealedObserver, operationToken).ConfigureAwait(true),
             OperationKind.Batch => await SubmitBatchAsync(request, principal, operationToken).ConfigureAwait(true),
             OperationKind.CommitProjectionBatch => await SubmitCheckpointAsync(request, principal,
                 operationToken).ConfigureAwait(true),

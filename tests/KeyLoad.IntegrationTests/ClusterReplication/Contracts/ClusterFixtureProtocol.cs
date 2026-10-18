@@ -1,6 +1,6 @@
 namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 
-/// <summary>Stable fixture-only names and profile keys used by the Aspire RF3 test environment.</summary>
+/// <summary>Stable fixture-only names and profile keys used by the Aspire CLUSTER test environment.</summary>
 internal static class ClusterFixtureProtocol
 {
     internal const int FirstNodeNumber = 1;
@@ -43,7 +43,7 @@ internal static class ClusterFixtureProtocol
     internal const string HealthCheckLoggerCategory = "Microsoft.Extensions.Diagnostics.HealthChecks.DefaultHealthCheckService";
     internal const string ArtifactDirectory = "artifacts";
     internal const string QualificationDirectory = "qualification";
-    internal const string DiagnosticsFileName = "rf3-failure.log";
+    internal const string DiagnosticsFileName = "cluster-failure.log";
 
     /// <summary>Returns whether the resource name belongs to the fixed three-node cluster.</summary>
     /// <param name="resourceName">The Aspire resource name to validate.</param>
@@ -51,7 +51,7 @@ internal static class ClusterFixtureProtocol
     internal static bool IsNodeName(string resourceName) => resourceName is Node1Name or Node2Name or Node3Name;
 
     /// <summary>Creates the unchanged Aspire node resource name for an ordinal.</summary>
-    /// <param name="number">A one-based RF3 node number.</param>
+    /// <param name="number">A one-based CLUSTER node number.</param>
     /// <returns>The corresponding node1, node2, or node3 resource name.</returns>
     internal static string NodeName(int number) => number is >= FirstNodeNumber and <= NodeCount
         ? NodePrefix + number.ToString(System.Globalization.CultureInfo.InvariantCulture)

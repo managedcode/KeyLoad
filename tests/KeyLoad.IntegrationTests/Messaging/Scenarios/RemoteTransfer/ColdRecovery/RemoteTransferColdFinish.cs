@@ -18,7 +18,7 @@ internal static class RemoteTransferColdFinish
         var ack = new DeliveryCommand(Guid.NewGuid(), seed.Scenario.DestinationQueue, delivery.Token, DeliveryAction.Ack);
         var acknowledged = (await McpCallerAssertions.SuccessAsync<CommitReceipt>(await mcp.CallAsync(
             McpCallerTools.MessagesComplete, ack, token))).Value;
-        await SqlRf3Protocol.EqualAsync(acknowledged, await McpCallerAssertions.SdkSuccessAsync(await sdk.CompleteAsync(ack, token)));
+        await SqlClusterProtocol.EqualAsync(acknowledged, await McpCallerAssertions.SdkSuccessAsync(await sdk.CompleteAsync(ack, token)));
         var image = await PublicReadAssertions.MessageAsync(await sdk.InspectAsync(
             new(seed.Scenario.DestinationQueue, seed.Message.MessageId), token));
         ArgumentNullException.ThrowIfNull(image);
@@ -27,7 +27,7 @@ internal static class RemoteTransferColdFinish
         await Assert.That(image.HeadersJson).IsNull();
         var duplicate = seed.Accept(intent);
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(duplicate, token));
-        await QueueProducerRf3Assertions.ReplayAsync(sdk, mcp, duplicate, receipt, token);
+        await QueueProducerClusterAssertions.ReplayAsync(sdk, mcp, duplicate, receipt, token);
         await RemoteTransferColdAssertions.ReceiptAsync(sdk, mcp, seed, proof, token);
         await RemoteTransferColdAssertions.MessageAsync(sdk, mcp, seed, image, token);
         var empty = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReceiveAsync(

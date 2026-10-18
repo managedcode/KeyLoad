@@ -27,9 +27,7 @@ internal static class MongoNativeReadinessRegressionProtocol
     internal const string SourceLabel = "keyload.source";
     internal const string RunLabel = "keyload.run";
     internal const string AttemptLabel = "keyload.attempt";
-    internal const string TaskLabel = "keyload.task";
     internal const string FixtureLabel = "keyload.fixture";
-    internal const string Task = "TASK-ISO-031M-N";
     internal const string DomainPassed = "MongoNativeReadinessDomainPassed";
     internal const string AdmissionPassed = "MongoNativeReadinessAdmissionPassed";
     internal const string LowerObserved = "MongoNativeReadinessLowerPrimaryObserved";

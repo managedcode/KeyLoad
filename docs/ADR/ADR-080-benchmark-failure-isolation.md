@@ -7,7 +7,7 @@ Related: REQ/AC-BC-FAIL-001..021, REQ/AC-BC-CURRENT-001..004, REQ/AC-BC-WEB-001.
 ## Decision
 
 Keep exactly four GitHub Actions workflows: Build and Tests, Benchmarks, Website,
-and Release. Build and Tests owns solution/build/analyzer/unit/scalar/recovery/RF3
+and Release. Build and Tests owns solution/build/analyzer/unit/scalar/recovery/cluster
 checks. Benchmarks owns native preparation, independent database workloads and
 source-bound result aggregation. Website owns website source qualification and
 Pages publication. Release remains its separate manually admitted workflow.
@@ -88,8 +88,8 @@ qualification, source/tuple freshness and independent lifecycle.
    content-only/measured qualification and exact freshness. Workflow changes stay
    in the four named workflow files and their existing feature-local composite
    actions; no alternate executor or publisher is introduced.
-3. The integration owner reviews all producer/consumer, permissions, source,
-   archive, TUnit, coverage, browser and provider diffs together. Native tests use
+3. All producer/consumer, permissions, source,
+   archive, TUnit, coverage, browser and provider diffs are reviewed together. Native tests use
    the real existing processes, files and clients; no mock, source-text assertion,
    fake GitHub executor, fabricated artifact or skipped gate substitutes for them.
 4. Verify the complete delivered source with static workflow and inventory checks,

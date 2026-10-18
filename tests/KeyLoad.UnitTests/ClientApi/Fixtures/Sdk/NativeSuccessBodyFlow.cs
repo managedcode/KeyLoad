@@ -94,7 +94,7 @@ internal sealed class NativeSuccessBodyFlow : IAsyncDisposable
             appendNativePrefix, declareLength, options.Value.MaximumResponseBodyBytes);
         await Assert.That(endpoint.Healthy.CommandId).IsNotEqualTo(endpoint.Original.CommandId);
         var placement = scenario.Fixture.Database.Database.ReadAtomicPartitionPlacement(D.Root,
-            new(D.PlacementVersion, endpoint.Original.Partition));
+            endpoint.Original.Partition);
         transportUncertain = true;
         server = await KeyLoadClientKestrelServer.StartAsync(endpoint.HandleAsync);
         transportUncertain = false;

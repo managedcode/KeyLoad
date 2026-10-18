@@ -12,7 +12,7 @@ internal static class RemoteTransferColdStages
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(seed.Create, token));
         await RemoteTransferColdAssertions.ReceiptLiteralAsync(receipt, seed.Create, seed.Scenario.SourceQueue,
             seed.TransferId, RemoteTransferColdProtocol.CreateKind, RemoteTransferColdProtocol.CreateRevision);
-        await QueueProducerRf3Assertions.ReplayAsync(sdk, mcp, seed.Create, receipt, token);
+        await QueueProducerClusterAssertions.ReplayAsync(sdk, mcp, seed.Create, receipt, token);
         var intent = await RemoteTransferColdAssertions.SourceAsync(sdk, mcp, seed, null, token);
         await Assert.That(intent.State).IsEqualTo(QueueTransferState.OutputPending);
         await Assert.That(intent.ReceiptToken).IsNull();
@@ -29,13 +29,13 @@ internal static class RemoteTransferColdStages
             McpCallerTools.DocumentsCommit, command, token))).Value;
         await RemoteTransferColdAssertions.ReceiptLiteralAsync(receipt, command, seed.Scenario.DestinationQueue,
             seed.TransferId, RemoteTransferColdProtocol.AcceptKind, receipt.Token.Position);
-        await QueueProducerRf3Assertions.ReplayAsync(sdk, mcp, command, receipt, token);
+        await QueueProducerClusterAssertions.ReplayAsync(sdk, mcp, command, receipt, token);
         var proof = await PublicReadAssertions.ReceiptAsync(await sdk.InspectQueueTransferReceiptAsync(seed.ReceiptRequest, token))
             ?? throw new InvalidOperationException(RemoteTransferColdProtocol.Missing);
         await Assert.That(proof.SourceQueue).IsEqualTo(seed.Scenario.SourceQueue);
         await Assert.That(proof.DestinationQueue).IsEqualTo(seed.Scenario.DestinationQueue);
         await Assert.That(proof.TransferId).IsEqualTo(seed.TransferId);
-        await SqlRf3Protocol.EqualAsync(receipt.Token, proof.TargetCommit);
+        await SqlClusterProtocol.EqualAsync(receipt.Token, proof.TargetCommit);
         await Assert.That(string.IsNullOrEmpty(proof.ReceiptToken)).IsFalse();
         await RemoteTransferColdAssertions.SourceAsync(sdk, mcp, seed, intent, token);
         await RemoteTransferColdAssertions.ReceiptAsync(sdk, mcp, seed, proof, token);
@@ -51,7 +51,7 @@ internal static class RemoteTransferColdStages
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(command, token));
         await RemoteTransferColdAssertions.ReceiptLiteralAsync(receipt, command, seed.Scenario.SourceQueue,
             seed.TransferId, RemoteTransferColdProtocol.CompleteKind, RemoteTransferColdProtocol.CompleteRevision);
-        await QueueProducerRf3Assertions.ReplayAsync(sdk, mcp, command, receipt, token);
+        await QueueProducerClusterAssertions.ReplayAsync(sdk, mcp, command, receipt, token);
         await RemoteTransferColdAssertions.SourceAsync(sdk, mcp, seed,
             intent with
             {

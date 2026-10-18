@@ -15,7 +15,6 @@ internal static class RemoteTransferPeerReplyValidation
         var owner = call.DestinationOwner.Owner;
         if (call.ExpiresAt <= clock.GetUtcNow() || reply.RequestId != call.RequestId || reply.Nonce != call.Nonce
             || reply.Result is not null || reply.QueryLeaf is not null || reply.SearchLeaf is not null
-            || reply.Controlled is not null || reply.ControlledBlob is not null
             || (reply.Error is null) != (reply.QueueTransfer is not null)
             || reply.Error is null && reply.SafeDetail is not null
             || reply.Error is { } error && (!Enum.IsDefined(error) || string.IsNullOrWhiteSpace(reply.SafeDetail))

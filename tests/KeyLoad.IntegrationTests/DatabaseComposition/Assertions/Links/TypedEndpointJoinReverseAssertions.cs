@@ -21,21 +21,21 @@ internal static class TypedEndpointJoinReverseAssertions
         var expected = new CommitReceipt(command.CommandId, actual.Token,
             [new(EnqueueKind, TypedEndpointJoinProtocol.EmptyQueue, id, InitialVersion)],
             DurabilityProfile.QuorumProcessDurable);
-        await SqlRf3Protocol.EqualAsync(expected, actual);
+        await SqlClusterProtocol.EqualAsync(expected, actual);
         await Assert.That(actual.Token.AtomicPartitionId).IsEqualTo(command.Partition.AtomicPartitionId);
     }
 
-    internal static Task<bool> OriginalAsync(ClusterFixture fixture, RequestCqrsRf3Callers admin,
+    internal static Task<bool> OriginalAsync(ClusterFixture fixture, RequestCqrsClusterCallers admin,
         TypedEndpointJoinState state, CancellationToken token)
-        => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, state.Reverse!.Identity.Secret,
+        => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, state.Reverse!.Identity.Secret,
             async callers =>
     {
         var reverse = state.Reverse!;
-        await SqlRf3Protocol.EqualAsync(reverse.DeniedProblem,
+        await SqlClusterProtocol.EqualAsync(reverse.DeniedProblem,
             await TypedEndpointJoinReverseFlow.FencedAsync(callers, reverse.Denied, token));
         if (reverse.Current is { } current && reverse.CurrentReceipt is { } currentReceipt)
         {
-            await SqlRf3Protocol.EqualAsync(reverse.FencedProblem!.Value,
+            await SqlClusterProtocol.EqualAsync(reverse.FencedProblem!.Value,
                 await TypedEndpointJoinReverseFlow.FencedAsync(callers, reverse.Command, token));
             await ReplayAsync(callers, current, currentReceipt, repaired: true, token);
         }
@@ -48,21 +48,21 @@ internal static class TypedEndpointJoinReverseAssertions
         return true;
     }, token);
 
-    private static async Task ReplayAsync(RequestCqrsRf3Callers callers, CommandRequest command,
+    private static async Task ReplayAsync(RequestCqrsClusterCallers callers, CommandRequest command,
         CommitReceipt receipt, bool repaired, CancellationToken token)
     {
         var sql = DeclarativeCompositionSql.Reverse(command, (GraphToQueueMutation)command.Mutations[0]);
-        await SqlRf3Protocol.EqualAsync(receipt, await SqlRf3Protocol.SdkAsync<CommitReceipt>(callers.Sdk, sql, token));
-        await SqlRf3Protocol.EqualAsync(receipt, await SqlRf3Protocol.McpAsync<CommitReceipt>(callers.Mcp, sql, token));
-        await SqlRf3Protocol.EqualAsync(receipt,
+        await SqlClusterProtocol.EqualAsync(receipt, await SqlClusterProtocol.SdkAsync<CommitReceipt>(callers.Sdk, sql, token));
+        await SqlClusterProtocol.EqualAsync(receipt, await SqlClusterProtocol.McpAsync<CommitReceipt>(callers.Mcp, sql, token));
+        await SqlClusterProtocol.EqualAsync(receipt,
             await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.CommitAsync(command, token)));
         await ReceiptAsync(command, receipt, repaired);
     }
 
-    internal static async Task UnchangedAsync(RequestCqrsRf3Callers admin, TypedEndpointJoinState state,
+    internal static async Task UnchangedAsync(RequestCqrsClusterCallers admin, TypedEndpointJoinState state,
         TypedEndpointJoinReverseState? reverse, CancellationToken token)
     {
-        await SqlRf3Protocol.EqualAsync(state.Models,
+        await SqlClusterProtocol.EqualAsync(state.Models,
             await TypedEndpointJoinAssertions.CaptureAsync(admin, state.Seed.Partition, token));
         var suffix = TypedEndpointJoinProtocol.Prefix + TypedEndpointJoinProtocol.MatchedMessage;
         var changed = new InspectMessageRequest(new(state.Seed.Partition, TypedEndpointJoinProtocol.EmptyQueue),
@@ -74,7 +74,7 @@ internal static class TypedEndpointJoinReverseAssertions
         await MessageAsync(admin, state, RepairedPrefix + suffix, RepairedReadySequence, reverse?.Current is not null, token);
     }
 
-    private static async Task MessageAsync(RequestCqrsRf3Callers admin, TypedEndpointJoinState state,
+    private static async Task MessageAsync(RequestCqrsClusterCallers admin, TypedEndpointJoinState state,
         string id, long sequence, bool exists, CancellationToken token)
     {
         var request = new InspectMessageRequest(new(state.Seed.Partition, TypedEndpointJoinProtocol.EmptyQueue), id);
@@ -91,8 +91,8 @@ internal static class TypedEndpointJoinReverseAssertions
             TypedEndpointJoinProtocol.To(state.Seed.Partition), TypedEndpointJoinProtocol.Label, TypedEndpointJoinProtocol.Attributes);
         var expected = new MessageInspection(new MessageMetadata(id, MessageState.Ready, NoAttempts,
             InitialVersion, sequence, null, null),
-            DatabaseCompositionRf3Payload.OrdinalGolden(link), TypedEndpointJoinProtocol.Attributes);
-        await SqlRf3Protocol.EqualAsync(expected, actual);
-        await SqlRf3Protocol.EqualAsync(expected, official);
+            DatabaseCompositionClusterPayload.OrdinalGolden(link), TypedEndpointJoinProtocol.Attributes);
+        await SqlClusterProtocol.EqualAsync(expected, actual);
+        await SqlClusterProtocol.EqualAsync(expected, official);
     }
 }

@@ -16,7 +16,7 @@ internal static class McpCatalogHintExpectations
         {
             idempotent = false;
         }
-        if (command is OperationKind.ConfigureResource or OperationKind.BindAtomicPartitionPlacement
+        if (command is OperationKind.ConfigureResource
             or OperationKind.BeginBlobUpload or OperationKind.WriteBlobPart or OperationKind.AbortBlobUpload)
         {
             destructive = false;

@@ -8,7 +8,7 @@ namespace KeyLoad.IntegrationTests.Features.Authorization;
 
 internal static class CredentialAuthorityCold
 {
-    private const string ColdScenario = "kl068-credential-current-policy-cold";
+    private const string ColdScenario = "credential-current-policy-cold";
     private static readonly string[] Nodes = [McpCallerProtocol.Node1, McpCallerProtocol.Node2, McpCallerProtocol.Node3];
 
     internal static async Task RunAsync(ClusterFixture fixture, CredentialAuthorityState state, bool expire, CancellationToken token)
@@ -16,7 +16,7 @@ internal static class CredentialAuthorityCold
         var image = await AdversarialAuthorityTrial.WithRootAsync(fixture, McpCallerProtocol.Node1,
             root => DiscoveryAuthorityValues.ImageAsync(root, state.Document, token));
         await RestartAsync(fixture, token);
-        await SqlRf3Protocol.EqualAsync(image, await AdversarialAuthorityTrial.WithRootAsync(fixture, McpCallerProtocol.Node1,
+        await SqlClusterProtocol.EqualAsync(image, await AdversarialAuthorityTrial.WithRootAsync(fixture, McpCallerProtocol.Node1,
             root => DiscoveryAuthorityValues.ImageAsync(root, state.Document, token)));
         await CredentialAuthorityClients.RunAsync(fixture, state, expire, changeCredential: false, token);
     }

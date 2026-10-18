@@ -6,7 +6,7 @@ namespace KeyLoad.IntegrationTests.Features.BlobStorage;
 
 internal static class BlobScopedBytesR42Cleanup
 {
-    internal static async Task RunAsync(RequestCqrsRf3Callers callers, BlobScopedBytesR42State[] states, CancellationToken token)
+    internal static async Task RunAsync(RequestCqrsClusterCallers callers, BlobScopedBytesR42State[] states, CancellationToken token)
     {
         var state = states[0];
         state.Abort = new(Guid.NewGuid(), state.Blob, state.Begin.UploadId);
@@ -15,7 +15,7 @@ internal static class BlobScopedBytesR42Cleanup
         {
             Status = BlobUploadStatus.Aborted
         };
-        await SqlRf3Protocol.EqualAsync(state.Current, state.Aborted.Value);
+        await SqlClusterProtocol.EqualAsync(state.Current, state.Aborted.Value);
         await BlobScopedBytesR42Assertions.ReceiptAsync(state.Aborted.Receipt, state.Abort.CommandId, state);
         await BlobScopedBytesR42Assertions.CurrentAsync(callers, states, token);
         Task Observe() => BlobScopedBytesR42Assertions.CurrentAsync(callers, states, token);
@@ -24,7 +24,7 @@ internal static class BlobScopedBytesR42Cleanup
         {
             state.Reclaims[index] = new(Guid.NewGuid(), state.Blob, state.Begin.UploadId, 1);
             state.Reclaimed[index] = (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobReclaimResult>>(await callers.Mcp.CallAsync("keyload_blobs_reclaim", state.Reclaims[index], token))).Value;
-            await SqlRf3Protocol.EqualAsync(new BlobReclaimResult(state.Begin.UploadId, 1, index == 0 ? 1 : 0, index == 0 ? 65536L : 17L, index == 1), state.Reclaimed[index].Value);
+            await SqlClusterProtocol.EqualAsync(new BlobReclaimResult(state.Begin.UploadId, 1, index == 0 ? 1 : 0, index == 0 ? 65536L : 17L, index == 1), state.Reclaimed[index].Value);
             await BlobScopedBytesR42Assertions.ReceiptAsync(state.Reclaimed[index].Receipt, state.Reclaims[index].CommandId, state);
             state.Current = index == 0 ? state.Current! with
             {

@@ -34,7 +34,7 @@ internal static class FunctionalGateQueueGraphQueue
         var ack = new DeliveryCommand(Guid.NewGuid(), lane, delivery.Token, DeliveryAction.Ack);
         var receipt = await ctx.McpAsync<CommitReceipt>(ctx.Writer, McpCallerTools.MessagesComplete, ack, token);
         await FunctionalGateCompositionCalls.ReceiptAsync(ctx, receipt, ack.CommandId,
-            [new(P.AckKind, lane.Queue, delivery.Id, P.Acknowledged)], token);
+            [new(P.AckKind, lane.Queue, delivery.Id, P.Acknowledged)]);
         await FunctionalGateQueues.EqualAsync(receipt, await ctx.SdkAsync(ctx.Writer.Sdk.CompleteAsync(ack, token)));
         await FunctionalGateQueues.EqualAsync(new MessageInspection(new(delivery.Id, MessageState.Acked, 1,
             P.Acknowledged, original.Metadata.ReadySequence, null, null, LeaseVersion: P.Created), null, null),

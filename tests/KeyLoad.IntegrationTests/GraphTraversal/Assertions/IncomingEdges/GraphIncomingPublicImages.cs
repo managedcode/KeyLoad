@@ -7,7 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.GraphTraversal;
 internal static class GraphIncomingPublicImages
 {
     internal static async Task<(DocumentResult[] Documents, OutboxStatus[] Outbox, GraphIncomingEdgesPageV1 Incoming)>
-        CaptureAsync(KeyLoadClient administrator, GraphIncomingRf3Seed seed, CancellationToken token)
+        CaptureAsync(KeyLoadClient administrator, GraphIncomingClusterSeed seed, CancellationToken token)
     {
         var documents = new List<DocumentResult>();
         foreach (var reference in new[] { seed.Target, seed.LocalSource, seed.FirstSource, seed.SecondSource })
@@ -20,7 +20,7 @@ internal static class GraphIncomingPublicImages
             outbox.Add(await McpCallerAssertions.SdkSuccessAsync(await administrator.OutboxStatusAsync(partition, token)));
         }
         var incoming = await McpCallerAssertions.SdkSuccessAsync(await administrator.IncomingEdgesAsync(
-            GraphIncomingRf3Scenario.Request(seed), token));
+            GraphIncomingClusterScenario.Request(seed), token));
         return ([.. documents], [.. outbox], incoming);
     }
 
@@ -28,22 +28,22 @@ internal static class GraphIncomingPublicImages
         (DocumentResult[] Documents, OutboxStatus[] Outbox, GraphIncomingEdgesPageV1 Incoming) before,
         (DocumentResult[] Documents, OutboxStatus[] Outbox, GraphIncomingEdgesPageV1 Incoming) after)
     {
-        await SqlRf3Protocol.EqualAsync(before.Documents, after.Documents);
-        await SqlRf3Protocol.EqualAsync(before.Outbox, after.Outbox);
-        await SqlRf3Protocol.EqualAsync(before.Incoming.Version, after.Incoming.Version);
-        await SqlRf3Protocol.EqualAsync(before.Incoming.Projection, after.Incoming.Projection);
-        await SqlRf3Protocol.EqualAsync(before.Incoming.Rows, after.Incoming.Rows);
+        await SqlClusterProtocol.EqualAsync(before.Documents, after.Documents);
+        await SqlClusterProtocol.EqualAsync(before.Outbox, after.Outbox);
+        await SqlClusterProtocol.EqualAsync(before.Incoming.Version, after.Incoming.Version);
+        await SqlClusterProtocol.EqualAsync(before.Incoming.Projection, after.Incoming.Projection);
+        await SqlClusterProtocol.EqualAsync(before.Incoming.Rows, after.Incoming.Rows);
         await Assert.That(after.Incoming.CutPosition).IsGreaterThanOrEqualTo(before.Incoming.CutPosition);
     }
 
-    internal static async Task LiteralDocumentsAsync(KeyLoadClient administrator, GraphIncomingRf3Seed seed,
+    internal static async Task LiteralDocumentsAsync(KeyLoadClient administrator, GraphIncomingClusterSeed seed,
         long localRevision, CancellationToken token)
     {
         foreach (var reference in new[] { seed.Target, seed.LocalSource, seed.FirstSource, seed.SecondSource })
         {
             var expected = new DocumentResult(reference, reference == seed.LocalSource ? localRevision
-                : GraphIncomingPublicPolicy.InitialRevision, GraphIncomingRf3Scenario.EmptyJson, false, []);
-            await SqlRf3Protocol.EqualAsync(expected,
+                : GraphIncomingPublicPolicy.InitialRevision, GraphIncomingClusterScenario.EmptyJson, false, []);
+            await SqlClusterProtocol.EqualAsync(expected,
                 await PublicReadAssertions.DocumentAsync(await administrator.GetAsync(reference, token)));
         }
     }

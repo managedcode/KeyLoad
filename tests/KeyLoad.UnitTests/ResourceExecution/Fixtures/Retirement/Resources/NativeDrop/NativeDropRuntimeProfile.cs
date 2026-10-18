@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
-/// <summary>Drop-only profile over the existing real two-RF3-group application owners.</summary>
+/// <summary>Drop-only profile over the existing real two-CLUSTER-group application owners.</summary>
 internal sealed class NativeDropRuntimeProfile : IAsyncDisposable
 {
     private readonly List<Task> originals = [];

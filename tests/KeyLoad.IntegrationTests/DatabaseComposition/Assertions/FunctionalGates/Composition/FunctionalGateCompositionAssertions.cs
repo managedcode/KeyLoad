@@ -8,7 +8,7 @@ internal static class FunctionalGateCompositionAssertions
     internal static async Task AnchorAsync(FunctionalGateContext context, CancellationToken token)
     {
         var actual = await context.SdkAsync(context.Reader.Sdk.GetAsync(context.Bind(context.Anchor), token));
-        await SqlRf3Protocol.EqualAsync(new DocumentReadResult(new(context.Bind(context.Anchor), P.Initial,
+        await SqlClusterProtocol.EqualAsync(new DocumentReadResult(new(context.Bind(context.Anchor), P.Initial,
             P.AnchorJson, false, [])), actual);
     }
 
@@ -29,7 +29,7 @@ internal static class FunctionalGateCompositionAssertions
     {
         var page = await FunctionalGateCompositionCalls.SqlAsync<QueryPage>(context,
             FunctionalGateCompositionCalls.Read(context, collection, id), official, false, token);
-        await SqlRf3Protocol.EqualAsync(new QueryRow[] { new(id, revision, json, false, []) }, page.Rows.ToArray());
+        await SqlClusterProtocol.EqualAsync(new QueryRow[] { new(id, revision, json, false, []) }, page.Rows.ToArray());
         await Assert.That(page.Cursor).IsNull();
         await Assert.That(page.AccessPath).IsEqualTo(P.Point);
         await Assert.That(page.CutPosition).IsGreaterThanOrEqualTo(minimum.Token.Position);

@@ -7,11 +7,11 @@ namespace KeyLoad.IntegrationTests.Features.Search;
 
 internal static class NativeTextProtectedPublicColdAssertions
 {
-    internal static async Task HealthyAsync(RequestCqrsRf3Callers reader,
+    internal static async Task HealthyAsync(RequestCqrsClusterCallers reader,
         NativeTextProtectedPublicColdState state, long epoch, CancellationToken token)
     {
-        var wait = new WaitForIndexRequest(state.Scenario.Partition, NativeTextRf3Scenario.Collection,
-            NativeTextRf3Scenario.TextField, state.Deleted.Token);
+        var wait = new WaitForIndexRequest(state.Scenario.Partition, NativeTextClusterScenario.Collection,
+            NativeTextClusterScenario.TextField, state.Deleted.Token);
         foreach (var result in new[]
         {
             await McpCallerAssertions.SdkSuccessAsync(await reader.Sdk.WaitForIndexAsync(wait, token)),
@@ -26,26 +26,26 @@ internal static class NativeTextProtectedPublicColdAssertions
             await Assert.That(result.AppliedToken.OwnershipEpoch).IsEqualTo(state.Deleted.Token.OwnershipEpoch);
             await Assert.That(result.AppliedToken.Position).IsGreaterThanOrEqualTo(state.Deleted.Token.Position);
         }
-        var reference = new EntityRef(state.Scenario.Partition, NativeTextRf3Scenario.Collection,
-            NativeTextRf3Scenario.FirstId);
+        var reference = new EntityRef(state.Scenario.Partition, NativeTextClusterScenario.Collection,
+            NativeTextClusterScenario.FirstId);
         RankedDocument[] expected = [new(new(reference, 2, "{\"owner\":\"owner-a\"}", true,
-            [NativeTextRf3Scenario.TextField, NativeTextRf3Scenario.VectorField, NativeTextRf3Scenario.SecretField]), 1d / 61d)];
+            [NativeTextClusterScenario.TextField, NativeTextClusterScenario.VectorField, NativeTextClusterScenario.SecretField]), 1d / 61d)];
         await PageAsync(reader, state.Scenario.Text("fresh"), expected, token);
         await PageAsync(reader, state.Scenario.Text("Львів"), expected, token);
         await PageAsync(reader, state.Scenario.Text("needle"), [], token);
         await PageAsync(reader, state.Scenario.Text("Київ"), [], token);
     }
 
-    private static async Task PageAsync(RequestCqrsRf3Callers reader, SearchRequest request,
+    private static async Task PageAsync(RequestCqrsClusterCallers reader, SearchRequest request,
         RankedDocument[] expected, CancellationToken token)
     {
-        await SqlRf3Protocol.EqualAsync(expected,
+        await SqlClusterProtocol.EqualAsync(expected,
             await McpCallerAssertions.SdkSuccessAsync(await reader.Sdk.SearchAsync(request, token)));
-        await SqlRf3Protocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<RankedDocument[]>(
+        await SqlClusterProtocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<RankedDocument[]>(
             await reader.Mcp.CallAsync(McpCallerTools.SearchExecute, request, token))).Value);
     }
 
-    internal static async Task DeniedAsync(RequestCqrsRf3Callers reader, RequestCqrsRf3Callers administrator,
+    internal static async Task DeniedAsync(RequestCqrsClusterCallers reader, RequestCqrsClusterCallers administrator,
         NativeTextProtectedPublicColdState state, CancellationToken token)
     {
         var before = await McpCallerAssertions.SdkSuccessAsync(
@@ -57,9 +57,9 @@ internal static class NativeTextProtectedPublicColdAssertions
         await Assert.That(denied.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
         await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(McpCallerTools.SearchExecute, request, token),
             ErrorCode.PermissionDenied, dispatched: true);
-        await SqlRf3Protocol.EqualAsync(before, await McpCallerAssertions.SdkSuccessAsync(
+        await SqlClusterProtocol.EqualAsync(before, await McpCallerAssertions.SdkSuccessAsync(
             await administrator.Sdk.OutboxStatusAsync(state.Scenario.Partition, token)));
-        await SqlRf3Protocol.EqualAsync(before, (await McpCallerAssertions.SuccessAsync<OutboxStatus>(
+        await SqlClusterProtocol.EqualAsync(before, (await McpCallerAssertions.SuccessAsync<OutboxStatus>(
             await administrator.Mcp.CallAsync(McpCallerTools.OutboxStatus,
                 new GetOutboxStatusRequest(state.Scenario.Partition), token))).Value);
     }

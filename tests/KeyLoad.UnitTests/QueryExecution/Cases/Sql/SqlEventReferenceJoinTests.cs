@@ -6,7 +6,7 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 internal sealed class SqlEventReferenceJoinTests
 {
     [Test]
-    public async Task AcKl095EventEntityReferenceJoinRefusesThenRepairsPersistedPolicyAndReplaysLiteralRowsAcrossTwoColdCuts()
+    public async Task EventEntityReferenceJoinRefusesThenRepairsPersistedPolicyAndReplaysLiteralRowsAcrossTwoColdCuts()
     {
         var failures = new List<Exception>();
         try

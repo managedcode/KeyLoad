@@ -1,351 +1,113 @@
-## Current exact public-cohort local image selection
-
-### Final exact Smallint successor cohort
-REQ-TUNIT-ENTRY-006 / AC-TUNIT-ENTRY-006 and REQ-TEST-015 / AC-TEST-015 additionally admit only the exact sorted union of the retained 50-class cohort and the actually authored PostgresInt16Rf3WholeFlowTests. The final literal contains 51 classes; original 38 and 50 literals and their refusal controls remain intact. Actual compiled instances and UIDs come only from the next genuine native census. Both canonical JavaScript and Integration native readers share the same exact literal, while the existing original Node wholeflow adds the third positive/control set with native50/TRX/deadline/options, six malformed-filter refusals, all original ambient-context refusals and input/environment/output conservation. Strict verified local image, source/container ownership and inherited GitHub rejection remain unchanged. Local-development selection is not Linux qualification or a pass claim.
-
-### Additive exact successor public cohort
-REQ-TUNIT-ENTRY-006 / AC-TUNIT-ENTRY-006 and REQ-TEST-015 / AC-TEST-015: preserve the current exact sorted 38-class local-development selector and add only its exact sorted union with the nine authored whole classes from next-companion52-source-N.integration-plan.prepared.json. The exact union also includes the actually integrated SQL whole classes PostgresErrorReplyReceiverRf3Tests, SqlNullDistinctRf3WholeFlowTests and PostgresDecimalRf3WholeFlowTests. The successor contains 50 classes; its actual native instances, UIDs and parameterized bindings require the next genuine compiled census. Class count is not execution count or acceptance.
-
-Both canonical nativeSelection and the actual Integration LocalRf3ImageSelection reader recognize the same literal union. Existing native image/source/config/receipt verification, inherited GitHub/coverage/comparison rejection, real six-owner Aspire/Docker ownership and joined disposal remain unchanged. No wildcard, arbitrary subset, guessed UID or alternative runner is admitted.
-
-The original NativeTUnitSelectionTests declaration and four Arguments retain their UIDs. Its actual owned Node subprocess verifies both literal cohorts, exact native50/TRX/timeout/preparation arguments, all original 16 ambient-context refusals for both, six strict malformed-filter refusals for each, immutable input/environment and absence of created output resources. The original 38-class controls remain intact. This is local-development selection, not Linux RF3/fault/endurance/performance qualification.
-
-
-REQ-TEST-015 / AC-TEST-015 and REQ-TUNIT-ENTRY-006 / AC-TUNIT-ENTRY-006 admit this additional literal sorted whole-class union:
-
-```text
-/*/*/(BlobArchiveActivePublicTests|BlobBoundedRetirementPublicTests|BlobListRowPolicyPublicTests|BlobPartialReadBoundaryPublicTests|BlobPublicCancellationTests|BlobReadPolicyPublicTests|BlobRejectedContentPublicTests|BlobReservationQuotaPublicTests|BlobRestoredReclaimPublicTests|BlobRowCreatorPublicTests|BlobSupersessionPublicTests|CurrentOwnershipTokenAfterMovementRf3Tests|DeclarativeCompositionReverseQuotaRf3Tests|GraphVertexPublicWholeFlowTests|NativeTextDistinctTermsPublicTests|NativeTextNestedWildcardPublicTests|NativeTextNormalizationPublicTests|NativeTextProtectedPublicColdTests|NativeTextRawReadPolicyPublicTests|NativeTextRequestRefusalPublicTests|NativeTextRowOwnershipPublicTests|NativeTextSelectedSchemaPublicTests|PartitionMovementFencedAbortRf3Tests|PhysicalShardPartitionMovementRf3Tests|PostgresNativeSessionRf3Tests|PostgresPortalOwnershipRf3Tests|PostgresPositiveExecuteRf3Tests|ProjectionPublicColdTests|QueueLeaseFencingRf3Tests|QueueLifecyclePublicRf3Tests|SqlFetchCountRf3WholeFlowTests|SqlNullOrderingRf3WholeFlowTests|SqlOffsetRf3WholeFlowTests|SubscriptionPhasePublicColdTests|TenantCapacityPlacementRf3Tests|TenantDedicatedOwnerRf3Tests|TenantPackingActivationRf3Tests|TypedEndpointJoinRf3Tests)/*
-```
-
-The canonical Node adapter and the native Integration test-session argument reader must accept exactly the same union. It selects every original native method and Arguments in these 38 authored classes; the sole fresh compiled census and strict binder supply actual UIDs/counts, never source inference. Subsets, reordered unions, class-name wildcards, added classes and whitespace variants remain refused. Existing admitted controls remain unchanged.
-
-NativeTUnitSelectionTests.NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections retains its original four suite Arguments and joined actual Node subprocess. The complete operation flow verifies exact filter/native50/TRX/60-minute argv and the three preparation arguments, rejects six near-miss unions plus the original mixed/inherited/GitHub/coverage/benchmark/wrong-suite conditions, preserves frozen input/environment and leaves its unique results-path probe absent. Selection only returns arguments/environment; it creates no image, AppHost or Docker resource.
-
-The AppHost request boundary intentionally accepts an explicit nonempty filter after exclusive suite/image/protocol checks; it has no separate exact-filter registry. Its image prerequisite/session still verifies original source/receipt/reference/config-ID/label identity, prepares one image, owns output and application cleanup, and rejects mixed GitHub/local identity. This change is development admission only: it creates no GitHub identity, broad fallback, qualification whitelist, new runner or database operation. Required Linux/fault/endurance/coverage/performance gates remain open.
-
-
-## Public model operation selection
-
-REQ/AC-TEST-015 and REQ/AC-TUNIT-ENTRY-006 admit this exact additional local development selector under ADR-117/118/119:
-
-    /*/*/(TypedEndpointJoinRf3Tests|DeclarativeCompositionReverseQuotaRf3Tests|SubscriptionPhasePublicColdTests|BlobSupersessionPublicTests|BlobPartialReadBoundaryPublicTests|NativeTextProtectedPublicColdTests|CurrentOwnershipTokenAfterMovementRf3Tests)/*
-
-The native selector and fixture argument reader must agree on this literal seven-class union. It selects every actual native method and Arguments in those classes: typed SQL composition and queue quota refusal/repair, subscription phases, blob supersession and partial reads, protected text search, and partition movement. Fresh discovery determines actual identities and counts; this contract does not invent UIDs or execution results.
-
-Preserve the original native50 default, all existing selector controls, bounded image/source verification, Aspire-owned genuine RF3 membership, discovered SDK and official MCP endpoints, current persisted authorization, original deadlines, cancellation and joined cleanup. The existing native entry operation flow verifies exact argv/environment propagation and refuses near-miss selectors plus inherited, mixed and GitHub identities. Default and Linux image admission remain unchanged. Local evidence cannot close Linux, full-suite, fault, endurance, coverage or benchmark qualification.
-
 # TestInfrastructure
 
-## Native Aspire startup stage evidence, 2026-10-12
+TestInfrastructure owns how KeyLoad is verified. Tests are native TUnit on Microsoft.Testing.Platform. The Aspire AppHost owns the Docker cluster resources, their readiness, test-runner dependencies, execution, scoped fault injection through Aspire-owned resource commands and joined shutdown. The cluster is configured by `KeyLoad:SiloCount` (Orleans silos) and `KeyLoad:ReplicaCount` (copies of each partition; 3 is only the default and it never exceeds the silo count). A write is sent through ordinary Orleans calls to the ZoneTree owners of those copies and is acknowledged after a majority confirms durable local apply; membership, discovery, placement and activation movement belong to Orleans ([ADR-036](../ADR/ADR-036-orleans-foundation.md), [ADR-136](../ADR/ADR-136-native-orleans-partition-ownership.md), [ADR-143](../ADR/ADR-143-independent-silo-replica-topology.md)). Tests drive the database only through the real .NET SDK and the official MCP C# SDK client, and every owned resource is cleaned up.
 
-REQ-TEST-ASPIRE-STARTUP-001: the actual RF3 fixture enables the pinned Aspire native profiling source for its own private random session. Before genuine AppHost Start, resolve one AppHost-DI-owned synchronous ActivityListener for only native DcpEnsureKubernetesClient and DcpKubernetesApi operations. Admit activities only when their native session tag equals that actual configuration. Preserve every original timeout, parallelism, image, public SDK/MCP, readiness, fault and stop/disposal contract.
+## Test framework and real-cluster tests
 
-REQ-TEST-ASPIRE-STARTUP-002: keep fixed-size counters, closed phase flags and only native nonnegative long timings/retry counts, plus known/exists booleans. Ignore every other tag, event payload, exception message, stack, path, URL, credential, caller payload, inventory and profiling identity. Retain the first observed native error/timeout projection and the latest projection, with no activity objects or per-event backlog. Save exactly two bounded lines (each less than 1,024 UTF-8 bytes) to one closed-name file in the existing original fixture results directory. Existing 32 original receipts, node fairness and 80-line/8-KiB files stay unchanged. Missing observations are explicitly unavailable and do not establish a cause.
+| Requirement | Acceptance and observable evidence |
+|---|---|
+| REQ-TEST-001: TUnit and Microsoft.Testing.Platform are the sole .NET test framework/runner. | AC-TEST-001: all test projects compile and run with TUnit; no xUnit/VSTest package or attribute remains; migrated assertions preserve every original scenario. |
+| REQ-TEST-002: real replicated-cluster tests launch Docker containers under Aspire and invoke the real .NET SDK and official MCP SDK clients. | AC-TEST-002: CI captures the configured number of independent silo containers (3 by default), stable persisted directories, SDK/MCP success/denial flows and node kill/restart with rejoin. |
+| REQ-TEST-003: generated lock files, local data, secrets, logs and test artifacts do not enter Git or the Docker context. | AC-TEST-003: tracked-file inventory and ignore checks reject these outputs; central NuGet versions remain pinned. |
 
-AC-TEST-ASPIRE-STARTUP-001 maps both requirements to the unchanged genuine ClusterFixture startup, public client operations and disposal flow, including failure cleanup. The original source-bound native report must retain the same first-failure projection and original startup outcome; another fixture session cannot populate it. Native source/lifetime/privacy review is the explicit manual verification for this environmental diagnostic boundary; actual current-image RF3 artifacts and exact-source Linux execution remain OPEN. No synthetic ActivitySource, provider, Docker failure, successful lifecycle or root-cause inference qualifies it.
+```mermaid
+flowchart LR
+    CI[GitHub Actions] --> TUnit[TUnit and MTP]
+    TUnit --> Aspire[Aspire lifecycle]
+    Aspire --> Docker[Orleans silo containers]
+    SDK[Real .NET and MCP clients] --> Docker
+    TUnit --> Evidence[Run and artifact evidence]
+```
 
-Slice map: Integration ClusterReplication Contracts/ClusterFixtureStartupProfile owns exact pinned first-party keys; Helpers/ClusterFixtureStartupEvidence owns only bounded passive projection; existing ClusterFixtureComposition.ConfigureLogging configures this native profile without enabling raw Debug logs; ClusterFixtureDiagnostics.Start resolves the observer before actual start and SaveCoreAsync writes its separate projection after the original receipt. AppHost DI disposes the listener after the unchanged genuine application shutdown. Its synchronous callback checks the same lock/disposed boundary; no background task or alternative network/lifecycle owner exists. Public API, persistence, backend, SDK/MCP and frontend changes are N/A.
+Slice map: tests mirror their product slice; shared fixture/lifecycle infrastructure remains at test project roots. Shared CI/.gitignore/.dockerignore are integration-owned infrastructure. Production data/API/GUI: N/A, this framework migration adds no domain behavior. Blobs and MCP coverage must not be reported complete from framework migration alone.
 
-Authenticated original run38223377791/job114724825828/source bab8d9b07c5574f9552273ccaefc3d80929c8f34 retained the native initialization timeout and 19 failed tests. The underlying Dcp controller/kubeconfig/runner cause was not retained and remains unproven; the new projection supplies stage evidence only. The original archive/digest and failures remain immutable.
+Traceability: AC-TEST-001 maps to all invoking test projects, AC-TEST-002 to IntegrationTests and ComparisonTests, AC-TEST-003 to source/ignore checks. Delivered-source qualification comes from Linux GitHub runs; local runs and development builds are development evidence. Coverage and complexity policy cannot be claimed satisfied without measured configured gates.
 
-### Native process settlement and complete CI suite budget
+Test report retention (REQ/AC-TEST-001/002/005, AC-MP-012): CI retains the actual root TestResults reports from native TUnit alongside each existing scoped report glob. Comparison test reports use a separate comparison-test-results artifact so the measured comparison-suite archive keeps its existing contract; no test, timeout, gate, permission, measured-report schema or ignore rule changes. Retention cannot convert failing or unexecuted tests to success.
 
-REQ/AC-TEST-015 requires the local-image lifetime helpers to await already
-completed original exit/stdout/stderr tasks on every observation-loop entry.
-A completed reader fault immediately starts owned failure cleanup. Cleanup sends
-SIGTERM, allows the existing one-second grace and kills only the original owned
-tree if actual exit remains pending. Five seconds is a failed-cleanup escalation
-threshold, never successful settlement: record the timeout, retry the owned kill
-when necessary, await actual exit, then close only still-pending owned pipe
-handles and await both original readers. Preserve the primary failure before
-cleanup failures. Never release process/context/application owners while original
-tasks are unsettled or use a detached continuation as settlement. Native tests
-cover an already faulted reader while the child remains alive and cancellation
-after actual readiness; explicit temporary-directory helpers delete only after
-process settlement and preserve deletion failures.
+## Test entry and suite selection
 
-Root joins local image cleanup in TestSuiteApplication only after actual AppHost
-stop and producer/runner settlement, under a separate45-second cleanup token,
-before output settlement and application disposal. Preparation output is included
-only for explicit local mode. Default GitHub image selection and full RF3 gates
-remain mandatory.
-
-REQ/AC-TEST-010 also requires enough bounded GitHub job time for all three
-sequential unit, scalar and recovery suites plus build/format/preflight. Exact
-run37349838022 exhausted the previous30-minute job limit after both unit suites
-failed and cancelled recovery. The Linux verify job receives120 minutes; no
-individual native suite deadline, required check, artifact or failure predicate
-is removed. A failed, timed out or cancelled suite remains failed/unqualified.
-
-TASK-TEST-RF3-AGGREGATE-BUDGET refines REQ/AC-TEST-010 for the separate RF3
-job. Run37560457057 at6816ae91 passed full native normal/scalar2767 each and
-recovery235 in its verify job. Its RF3 job started02:07:28Z, the native RF3 step
-started02:15:19Z and was canceled03:07:42Z near the configured60-minute job
-ceiling; no original RF3 TRX was produced. The same job must also execute the
-required instrumented unit/scalar/recovery/RF3 cohort and source/artifact checks.
-Allow180 minutes for that aggregate job, preserving every individual deadline,
-failure/cancellation predicate, required suite and artifact. This budget change
-does not make an unfinished or failed run qualified or alter workload bounds.
-
-TASK-TEST-LOCAL-CURRENT-WAVE extends REQ/AC-TEST-015 to current-image fault
-waves. R183 rejected the owned local receipt before creating an AppHost because
-RequestCqrsRf3ImageProof admitted only GitHub receipts. Reuse the existing
-local-development selector, canonical receipt/reference checks, exclusive
-GitHub/local environments and native bounded image verifier. One common local
-identity read validates actual immutable COPY inputs and daemon identity before
-wave composition; the existing pre-start local verifier checks all three model
-annotations. Every expected node reference must equal that exact owned image.
-ReadAsync selects only the validated reference; VerifyModelAsync returns the
-identity from its actual pre-start verifier to a local variable in WaveStartup.
-That exact returned identity supplies the post-readiness container checks. Each
-pre-start read revalidates the canonical receipt/reference against the expected
-map; no ambient cache, changed caller map or synthetic identity carrier applies.
-After native start/readiness establishes resource creation, verify each actual
-container config ID/reference under the unchanged wave deadline. Keep partial
-start, stopped-voter fault, original failure and joined cleanup semantics.
-The default GitHub manifest/digest path remains fail closed. Missing, mixed,
-stale or forged local inputs reject; local evidence is development-only.
-Root owns contract/integration/gates; Luna privately owns LocalRf3ImageIdentity,
-RequestCqrsRf3ImageProof and RequestCqrsRf3WaveStartup, with a feature-local
-local-image validation helper only if mandatory type limits require it.
-That helper is ClusterReplication/Scenarios/Resources/LocalRf3ImageSelection.cs: it owns
-the existing closed selector/environment/reference/receipt validation only.
-LocalRf3ImageIdentity retains native verification and model/container proof.
-The existing due leader/rejoin/cold-restart and catalog mismatch whole flows
-provide real Aspire SDK/MCP regressions; no fixture/model assertion qualifies
-their database effects or substitutes for delivered-source Linux execution.
-
-AC-TEST-010 requires original per-suite MTP/TRX evidence from every required
-CI suite. Its Aspire caller explicitly enables `KeyLoadTests:ReportTrx=true`;
-an omitted report setting, absent report, cancelled suite or failed native
-runner cannot establish qualification. Run37303831451's missing full-suite
-TRX receipts are retained as an evidence gap, alongside its original artifacts.
-
-## Unified Aspire test entry
-
-TASK-C1-LOGGER-PROVENANCE-NEGATIVE refines the existing DIAG-003/005/006
-model-selection regression after the original Stage IV Linux normal/scalar
-reports each passed2770/2771 and failed the same exact negative case. The local
-RF3 image reader rejects GitHub provenance before C1 logger selection. Freeze
-the negative matrix's exact expected rejection per row before changing source:
-the deliberately enabled local-image row explicitly supplies GitHub provenance
-to its unstarted builder configuration and expects the existing local-image
-configuration error on every host; other incompatible rows retain the exact C1
-selection error. Keep resource counts unchanged and the owned root absent,
-with original failure/cleanup joins. Never clear inherited runner provenance,
-mutate process environment, change a production validator, produce an image,
-start Docker or broaden the expected-error set. The independent real positive
-builder/build/disposal flow remains mandatory.
-
-Existing ADR-082/117 own this options/model-control boundary; product/data/API
-changes and new frontend are N/A. A Luna worker owns only the existing
-UnitTests TestInfrastructure selection case and rejection helper in a private
-guarded packet; root reviews, joins, runs native normal/scalar, commits/pushes
-and retains fresh exact-source Linux evidence. This is model-admission evidence,
-not database RF3 or a functional coverage contribution. Qualification pending.
-
-TASK-C1-LOGGER-MODEL-CONTROL maps the native logger-control fixture to the
-DIAG-003/005/006 contract in
-[NativeCqrsRequestV2](ClusterRouting/NativeCqrsRequestV2.md) and ADR-082. Only its
-explicit true-only selector composes the authoritative RF3 resource model and
-returns after Build before RunAsync. Native logger operations and original task
-joins remain real; startup/readiness/Docker/database RF3 are N/A for this control.
-The ordinary ClusterFixture and Wave paths remain mandatory RF3 evidence. The
-native testing wrapper owns final application disposal after reader settlement;
-inherited image/provenance settings are permitted, selected workload modes reject.
-
-`NativeLoggerModelControlSelectionTests` is a UnitTests model-isolation regression for this exact selector. It
-exercises the real distributed-application builder, options admission,
-`AddKeyLoad` composition, built RF3 model, owned directories, resource
-annotations and joined application disposal. Incompatible selections must reject
-before resources or the owned DataRoot exist. This case maps to
-DIAG-003/005/006 composition isolation only; it does not start resources, observe
-logger streams, execute database operations, contribute product functional
-coverage, or qualify Docker/RF3. The unchanged native logger whole flows and
-separate RF3 gates remain mandatory.
-
-The rejection matrix also covers `Ephemeral=false` and a blank DataRoot. For
-all rejected selections, observe the unchanged resource count and absent root
-before cleanup. Preserve the primary admission/assertion failure, delete only the
-unique root in `finally` if an unexpected failure created it, retain deletion
-failures after the primary, then verify the root is absent. This test-only
-refinement changes neither selector behavior nor product cleanup.
-
-[ADR-074](../ADR/ADR-074-aspire-owned-test-entry.md) specifies the owner-required
-single test entry and partial-start cleanup. Source and qualification are pending.
+[ADR-117](../ADR/ADR-117-native-tunit-ci-entry.md) defines the test entry: CI invokes native TUnit/Microsoft.Testing.Platform directly after build through `scripts/Features/TestInfrastructure/run-tests.mjs`, and the TUnit fixtures own the Aspire testing builder, resource startup, readiness, discovered endpoints, real clients and joined shutdown. Unit and recovery suites use the same entry without acquiring a cluster topology. The closed suites are `analyzers`, `unit`, `recovery`, `cluster`, `comparison` and `site`.
 
 | Requirement | Acceptance | Tests / evidence |
 |---|---|---|
-| REQ-TEST-009: Aspire owns suite execution | AC-TEST-009: each closed suite creates one native executable with correct TUnit project/arguments/results and optional original TRX/Cobertura settings; scalar disablement applies to its runner; unknown/explicit-empty suites, invalid bounded paths, incomplete coverage settings and mixed benchmark modes reject before resources; only comparison may pass its existing native target to the child without composing outer database resources | AspireTestEntryModelTests using the actual Aspire builder; original entry-run reports |
-| REQ-TEST-010: test entry preserves outcomes and bounded lifetime | AC-TEST-010: native nonzero/failed-start/missing-exit/cancel/timeout cannot count as success; stop/disposal always run; every existing CI suite and artifact remains | root source lifetime review and actual Linux CI native runner exit/status evidence |
-| REQ-TEST-011: RF3 is owned once and startup failure releases resources | AC-TEST-011: outer test model contains no idle duplicate nodes; tested child AppHost owns three Docker nodes and discovered SDK/MCP endpoints; every partial start is disposed before deleting only its owned directory | real Aspire model tests, ClusterFixture source lifetime review, actual Docker RF3/recovery artifacts |
+| REQ-TEST-009: closed suite selection maps to native TUnit execution | AC-TEST-009: each closed suite selects the correct TUnit project, arguments, results directory and optional original TRX/Cobertura settings; unknown or explicit-empty suites, invalid bounded paths, incomplete coverage settings and mixed benchmark modes reject before resources; only comparison may pass its existing native benchmark target | AspireTestEntryModelTests using the actual Aspire builder; original native run reports |
+| REQ-TEST-010: test entry preserves outcomes and bounded lifetime | AC-TEST-010: native nonzero/failed-start/missing-exit/cancel/timeout cannot count as success; stop/disposal always run; every existing CI suite and artifact remains | source lifetime review and actual Linux CI native runner exit/status evidence |
+| REQ-TEST-011: the replicated cluster is owned once and startup failure releases resources | AC-TEST-011: the test fixture's Aspire application owns the configured Docker silo nodes (`KeyLoad:SiloCount`, with `KeyLoad:ReplicaCount` copies; 3 is only the default) and discovered SDK/MCP endpoints, with no idle duplicate nodes; every partial start is disposed before deleting only its owned directory | real Aspire model tests, ClusterFixture source lifetime review, actual Docker cluster/recovery artifacts |
 
-Canonical source: AppHost Features/TestInfrastructure; actual model regressions:
-ComparisonTests Features/BenchmarkComparisons/UnitContracts; functional infrastructure tests remain in UnitTests Features/TestInfrastructure. Shared IntegrationTests fixture and
-CI composition are root-owned joins. No public database or persisted format change.
-Local entry runs are development evidence; delivered-source Linux gates remain.
+Partial-start cleanup: every Build, image check, Start, profile or readiness failure disposes everything the fixture acquired, preserving the original failure alongside cleanup failures, and deletes only the fixture's owned data directory. Arguments are individual native process arguments, never shell text; paths and filters are bounded to 4096 characters without NUL characters, and optional filters are development selection, never a complete qualification claim. Required CI suites set `KeyLoadTests:ReportTrx=true`; an omitted report setting cannot qualify original TRX retention.
 
-## Explicit local RF3 image preparation
+Canonical source: AppHost TestInfrastructure; actual model regressions: ComparisonTests BenchmarkComparisons/UnitContracts; functional infrastructure tests remain in UnitTests TestInfrastructure. Shared IntegrationTests fixture and CI composition are integration-owned. No public database or persisted format change. Local runs are development evidence; delivered-source Linux gates remain.
 
-REQ-TEST-015 / AC-TEST-015 extends [ADR-074](../ADR/ADR-074-aspire-owned-test-entry.md)
-with an explicit `KeyLoadTests:LocalRf3Image:Enabled=true` development mode,
-accepted only with `Suite=rf3` and an explicit nonblank bounded development filter.
-Following the owner's native-entry correction in ADR-117, image preparation is
-bounded prerequisite work for the native TUnit fixtures; it cannot launch an
-outer AppHost test runner or execute database workloads.
-The tested child AppHost owns exactly three Docker nodes, readiness, discovered
-SDK/MCP endpoints, scoped faults and complete shutdown; no idle outer cluster is
-created. Unknown, non-RF3, protocol-cohort or mixed GitHub/local modes reject before
-resources. Missing image configuration continues to fail closed in the default mode.
+### Logger model-control selection
 
-The producer builds the repository server Dockerfile using its actual effective
-COPY inputs, names, modes and bytes, `.dockerignore` and pinned base digests. It
-first creates an invocation-owned immutable build-context snapshot of exactly
-those inputs and builds Docker from that snapshot. It validates the two context
-COPY declarations separately from the exact internal `COPY --from=build` stage
-copy; an unsupported Dockerfile or ignore declaration rejects before building.
-Admission charges at most 20,000 input files and 512 MiB of aggregate bytes before
-reading or retaining their contents; hashing and copying stream one admitted file
-at a time. The captured snapshot digest binds the actual Docker build input,
-including modes; before/after hashes of a mutable checkout alone are insufficient.
-The producer records a bounded canonical input fingerprint, unique invocation tag, actual local
-Docker image config ID and a custom input label in a separate `local-development`
-receipt. A dirty working tree is identified by these inputs, never a fabricated
-GitHub revision. The config ID is not a registry manifest digest. Before startup,
-the child verifies receipt schema/bounds, current input fingerprint, actual image
-ID/label and all three modeled tags. After startup it verifies each owned container's
-actual image config ID. StartAsync schedules resources asynchronously; await the
-existing native three-resource healthy readiness within the unchanged two-minute
-fixture startup token before inspecting their actual config IDs. Both local-image
-and native coverage started-image verification follow that readiness, and all
-public SDK/MCP operations remain after verification. Do not treat host StartAsync
-return as proof that Docker has created containers or add a separate retry/deadline.
-Missing, oversized or malformed receipts, changed inputs,
-wrong tags/labels/IDs and conflicting proof selectors fail before database effects.
+The existing DIAG-003/005/006 model-selection regression keeps an exact expected rejection per row of its negative matrix. The local image reader rejects GitHub provenance before C1 logger selection: the deliberately enabled local-image row explicitly supplies GitHub provenance to its unstarted builder configuration and expects the existing local-image configuration error on every host; other incompatible rows retain the exact C1 selection error. Resource counts stay unchanged and the owned root absent, with original failure/cleanup joins. Inherited runner provenance is never cleared, process environment never mutated, a production validator never changed, no image produced, no Docker started and the expected-error set never broadened. The independent real positive builder/build/disposal flow remains mandatory.
 
-Build failure prevents runner execution. Every failure/cancellation joins the
-owned producer, runner and child resources. Image cleanup occurs only after owned
-nodes stop, targets only this invocation's unique tag and rechecks image ID/label
-before removal; no force deletion, pruning or unrelated-resource cleanup.
-Cleanup validates the immutable owned receipt, tag, label, image ID and absence
-of every running or stopped container using that image; a subsequent checkout
-edit does not prevent cleanup of its proven owned tag. Current checkout input
-validation remains mandatory before database startup. Cancellation, output-limit
-failure and timeout signal only the owned native process, escalate within a
-bounded grace period and join its actual exit and both original stream readers.
-The context snapshot is removed after producer settlement; receipts and a bounded
-original Docker build-output tail remain available for diagnosing failure.
-Retain the original development receipt and native test reports. Local results cannot
-qualify delivered-source Linux CI, registry image provenance or website metrics;
-the existing GitHub image producer and verifiers remain mandatory and unchanged.
+The native logger-control fixture maps to the DIAG-003/005/006 contract in [NativeCqrsRequestV2](ClusterRouting/NativeCqrsRequestV2.md) and ADR-082. Only its explicit true-only selector composes the authoritative cluster resource model and returns after Build before RunAsync. Native logger operations and original task joins remain real; startup/readiness/Docker/database cluster are N/A for this control. The ordinary ClusterFixture and Wave paths remain mandatory cluster evidence. The native testing wrapper owns final application disposal after reader settlement; inherited image/provenance settings are permitted, selected workload modes reject.
 
-TASK-TEST-LOCAL-CLEANUP-COMMAND refines the same REQ/AC-TEST-015 owner contract.
-`local-image-process.mjs` already selects the Docker executable; the owned-image
-container query in `local-server-image.mjs` must pass only `ps` and its bounded
-arguments, never a second executable token. Root repairs that command after the
-actual R149 image's canonical cleanup failed. Verify the full native owned-image
-prepare, identity verification, cleanup and repeated-absence cleanup operation.
-Keep receipt/label/config-ID checks, zero running or stopped referencing
-containers, non-force removal and all original process/reader joins. This local
-tooling operation does not qualify database RF3, Linux delivery or coverage.
+`NativeLoggerModelControlSelectionTests` is a UnitTests model-isolation regression for this exact selector. It exercises the real distributed-application builder, options admission, `AddKeyLoad` composition, built cluster model, owned directories, resource annotations and joined application disposal. Incompatible selections must reject before resources or the owned DataRoot exist. This case maps to DIAG-003/005/006 composition isolation only; it does not start resources, observe logger streams, execute database operations, contribute product functional coverage, or qualify Docker/cluster. The unchanged native logger whole flows and separate cluster gates remain mandatory.
 
-TASK-TEST-LOCAL-CONTEXT-REALIZATION implements this existing REQ/AC-TEST-015
-snapshot and cleanup contract. Root freezes and owns the joins; unpack_atomicity
-Luna owns only `scripts/Features/TestInfrastructure/local-image-context.mjs`,
-the new cohesive `local-image-snapshot.mjs`, `local-server-image.mjs` and
-`tests/KeyLoad.UnitTests/TestInfrastructure/Cases/LocalRf3/LocalRf3ImageContextSnapshotTests.cs`.
-The reviewed R2 correction is assigned to ci_failure_evidence Luna and adds only
-`scripts/Features/TestInfrastructure/local-image-process.mjs` and the cohesive
-`UnitTests/Features/TestInfrastructure/Processes/LocalImageSnapshotProcess.cs`.
-Admit each metadata entry and its bytes before retaining it; use bounded directory
-enumeration rather than an unbounded readdir array. Track exclusive staging
-ancestors for standalone COPY files separately from the unchanged canonical
-digest entries. The Node regression includes that real COPY path and an actual
-over-limit rejection followed by unchanged input and healthy capture.
-Build-output retention uses the existing65,536-byte per-stream cap and a separate
-invocation-owned `<receiptPath>.build-output.json` file with only original stdout
-and stderr tail bytes encoded as base64. Write it exclusively after the original
-producer and both readers settle, on success or failure, before snapshot cleanup;
-retain its write failure alongside the original failure. No receipt field changes.
-Only Docker build uses tail retention; introspection keeps its strict output-limit
-rejection. A reader fault or signal immediately terminates only the owned child,
-arms the existing kill grace and joins all original work while preserving failures.
-The C# Node fixture has a60-second operation deadline,8-KiB drained output bounds,
-owned-child termination and original reader/exit joining. Preserve the operation
-failure with every cleanup failure; attempt both snapshots and parent cleanup.
-The C# caller creates the private unique filesystem root, supplies it to Node,
-and removes only that owned root after original process/readers join, including
-timeout and reader-failure paths where Node cannot reach its own finally.
-First admit the exact existing input metadata and limits, then stream admitted
-regular files into an exclusive invocation context with no-follow/stat checks,
-preserving paths and file/directory modes. Hash the bytes actually copied; retain
-no unbounded array of input buffers. Build Docker only from this context, join
-the original producer and readers, and remove only the owned snapshot after
-settlement. Image cleanup uses original receipt/daemon identity rather than
-mutable checkout bytes; startup verification still rejects changed current inputs.
-The real TUnit/Node filesystem flow rejects a symlink without publishing a partial
-snapshot, creates the bounded context, changes the original input, verifies the
-frozen copy/digest/modes, cleans it and successfully repeats the operation. No
-fake Docker, source-text tests or bound change. Root then prepares an actual
-image and verifies real Aspire RF3 clients/cleanup; filesystem proof alone cannot
-qualify Docker or Linux delivery. Dependencies, receipt schema, default GitHub
-path and database contracts remain unchanged. Rollback removes this helper/join
-as one unit and cannot admit a mutable-context build as compliant.
+The rejection matrix also covers `Ephemeral=false` and a blank DataRoot. For all rejected selections, observe the unchanged resource count and absent root before cleanup. Preserve the primary admission/assertion failure, delete only the unique root in `finally` if an unexpected failure created it, retain deletion failures after the primary, then verify the root is absent. This test-only refinement changes neither selector behavior nor product cleanup.
 
-TASK-TEST-LOCAL-RF3-CONTRACT (root) precedes TASK-TEST-LOCAL-RF3-IMAGE
-(dependency_closeout). The worker owns AppHost Features/TestInfrastructure local
-settings, prerequisite and cleanup; ClusterReplication/Resources local image
-selection; scripts/Features/TestInfrastructure bounded producer; separate
-IntegrationTests ClusterReplication local verification and native AppHost model
-regressions. Request admission belongs to Validation and invocation construction
-to Execution; obsolete executable copies under Models are removed. Native
-SIGTERM/kill helpers use generated LibraryImport with AllowUnsafeBlocks enabled
-only in KeyLoad.AppHost.csproj and KeyLoad.IntegrationTests.csproj. This does not
-enable unsafe code solution-wide or suppress analyzer diagnostics. Root owns
-shared ClusterFixture/TestSuiteResources/TestSuiteApplication composition joins,
-review, build, Aspire runtime evidence and delivery. Tests use the actual Aspire
-builder to prove dependency ordering and absence of outer nodes; parser/input
-tests cover negative cells without pretending to prove Docker creation. Real
-Docker/Aspire RF3 SDK and official MCP evidence must prove image identity, three
-nodes and cleanup. Frontend, production data/API changes and local comparison
-mode are N/A for this infrastructure stage. Current-image proof remains
-mandatory; local image preparation never skips or substitutes current-format
-recovery, SDK/MCP or RF3 cases. Original acceptance remains open until its
-complete required qualification exists.
+## Scoped fault injection and container lifecycle ownership
 
-### TASK-TI-RF3-IMAGE-MODE-011: preserve the default CI image path
+All test container lifecycle and fault orchestration runs through the AppHost-owned resources and native Aspire resource commands ([ADR-117](../ADR/ADR-117-native-tunit-ci-entry.md)). Test callers do not invoke engine CLI commands to run, start, restart, stop, kill or remove containers and create no independent cleanup containers. A genuine SIGKILL fault is a bounded command registered on the exact owned ephemeral test resource and invoked through `ResourceCommandService`; a graceful Stop is never substituted for it. Fault commands stay absent from ordinary product and comparison resources unless a separately authorized test-only composition selects them. The AppHost owns the selected resource identity, process and output-reader settlement, readiness, restart and shutdown; read-only container inspection may remain bounded identity evidence but is not lifecycle ownership.
 
-REQ/AC-TEST-011/015 retains the two existing image-proof modes. Exact Linux
-CI37462761672 on e6295 recorded121 pre-start failures because the local-only
-IntegrationTests helper treated the shared server image reference as an explicit
-local selector. A server reference also belongs to the default authenticated
-GitHub mode and cannot select local provenance by itself.
+## Explicit local image preparation for the replicated cluster
 
-LocalRf3ImageIdentity enters its local verification only when a local provenance
-or local receipt selector is present. With both absent it leaves the default
-path to the existing strict RuntimeContainerImage parsing, exact-source GitHub
-receipt and modeled image checks. Preserve every local provenance/receipt/tag/
-input/config-ID/membership check and reject incomplete or conflicting local
-selectors. Do not add fallback proof, synthesize a receipt, accept mutable images
-or change the actual Docker/Aspire RF3 topology.
+REQ-TEST-015 / AC-TEST-015 extends the [ADR-117](../ADR/ADR-117-native-tunit-ci-entry.md) test entry with an explicit `KeyLoadTests:LocalClusterImage:Enabled=true` development mode, accepted only with `Suite=cluster` and an explicit nonblank bounded development filter. Following ADR-117, image preparation is bounded prerequisite work for the native TUnit fixtures; it cannot launch an outer AppHost test runner or execute database workloads. The tested child AppHost owns the configured Docker silo nodes (`KeyLoad:SiloCount`; 3 is only the default), readiness, discovered SDK/MCP endpoints, scoped faults and complete shutdown; no idle outer cluster is created. Unknown, non-cluster, protocol-cohort or mixed GitHub/local modes reject before resources. Missing image configuration continues to fail closed in the default mode.
 
-Root owns this single helper predicate and its integration with the existing
-ClusterFixture. Existing genuine default-CI and explicit-local RF3 operation
-flows provide the positive/negative evidence; source review alone does not qualify
-either mode. Renew canonical build/format and exact-source Linux SDK/official MCP
-RF3 with original reports. ADR-074's existing ownership and proof contracts remain
-unchanged; rollback restores only this test-harness predicate, retaining failures.
+The producer builds the repository server Dockerfile using its actual effective COPY inputs, names, modes and bytes, `.dockerignore` and pinned base digests. It first creates an invocation-owned immutable build-context snapshot of exactly those inputs and builds Docker from that snapshot. It validates the two context COPY declarations separately from the exact internal `COPY --from=build` stage copy; an unsupported Dockerfile or ignore declaration rejects before building. Admission charges at most 20,000 input files and 512 MiB of aggregate bytes before reading or retaining their contents; hashing and copying stream one admitted file at a time. The captured snapshot digest binds the actual Docker build input, including modes; before/after hashes of a mutable checkout alone are insufficient. The producer records a bounded canonical input fingerprint, unique invocation tag, actual local Docker image config ID and a custom input label in a separate `local-development` receipt. A dirty working tree is identified by these inputs, never a fabricated GitHub revision. The config ID is not a registry manifest digest. Before startup, the child verifies receipt schema/bounds, current input fingerprint, actual image ID/label and every modeled node tag. After startup it verifies each owned container's actual image config ID. StartAsync schedules resources asynchronously; await the existing native healthy readiness of every node resource within the unchanged two-minute fixture startup token before inspecting their actual config IDs. Both local-image and native coverage started-image verification follow that readiness, and all public SDK/MCP operations remain after verification. Do not treat host StartAsync return as proof that Docker has created containers or add a separate retry/deadline. Missing, oversized or malformed receipts, changed inputs, wrong tags/labels/IDs and conflicting proof selectors fail before database effects.
+
+Build failure prevents runner execution. Every failure/cancellation joins the owned producer, runner and child resources. Image cleanup occurs only after owned nodes stop, targets only this invocation's unique tag and rechecks image ID/label before removal; no force deletion, pruning or unrelated-resource cleanup. Cleanup validates the immutable owned receipt, tag, label, image ID and absence of every running or stopped container using that image; a subsequent checkout edit does not prevent cleanup of its proven owned tag. Current checkout input validation remains mandatory before database startup. Cancellation, output-limit failure and timeout signal only the owned native process, escalate within a bounded grace period and join its actual exit and both original stream readers. The context snapshot is removed after producer settlement; receipts and a bounded original Docker build-output tail remain available for diagnosing failure. Retain the original development receipt and native test reports. Local results cannot qualify delivered-source Linux CI, registry image provenance or website metrics; the existing GitHub image producer and verifiers remain mandatory and unchanged.
+
+Under the same REQ/AC-TEST-015 contract, `local-image-process.mjs` already selects the Docker executable; the owned-image container query in `local-server-image.mjs` must pass only `ps` and its bounded arguments, never a second executable token. Verify the full native owned-image prepare, identity verification, cleanup and repeated-absence cleanup operation. Keep receipt/label/config-ID checks, zero running or stopped referencing containers, non-force removal and all original process/reader joins. This local tooling operation does not qualify database cluster, Linux delivery or coverage.
+
+The REQ/AC-TEST-015 snapshot and cleanup contract is realized in `scripts/Features/TestInfrastructure/local-image-context.mjs`, `local-image-snapshot.mjs`, `local-image-process.mjs` and `local-server-image.mjs`, with the filesystem regression in `tests/KeyLoad.UnitTests/TestInfrastructure/Cases/LocalCluster/LocalClusterImageContextSnapshotTests.cs`. Admit each metadata entry and its bytes before retaining it; use bounded directory enumeration rather than an unbounded readdir array. Track exclusive staging ancestors for standalone COPY files separately from the unchanged canonical digest entries. The Node regression includes that real COPY path and an actual over-limit rejection followed by unchanged input and healthy capture. Build-output retention uses the existing65,536-byte per-stream cap and a separate invocation-owned `<receiptPath>.build-output.json` file with only original stdout and stderr tail bytes encoded as base64. Write it exclusively after the original producer and both readers settle, on success or failure, before snapshot cleanup; retain its write failure alongside the original failure. No receipt field changes. Only Docker build uses tail retention; introspection keeps its strict output-limit rejection. A reader fault or signal immediately terminates only the owned child, arms the existing kill grace and joins all original work while preserving failures. The C# Node fixture has a60-second operation deadline,8-KiB drained output bounds, owned-child termination and original reader/exit joining. Preserve the operation failure with every cleanup failure; attempt both snapshots and parent cleanup. The C# caller creates the private unique filesystem root, supplies it to Node, and removes only that owned root after original process/readers join, including timeout and reader-failure paths where Node cannot reach its own finally. First admit the exact existing input metadata and limits, then stream admitted regular files into an exclusive invocation context with no-follow/stat checks, preserving paths and file/directory modes. Hash the bytes actually copied; retain no unbounded array of input buffers. Build Docker only from this context, join the original producer and readers, and remove only the owned snapshot after settlement. Image cleanup uses original receipt/daemon identity rather than mutable checkout bytes; startup verification still rejects changed current inputs. The real TUnit/Node filesystem flow rejects a symlink without publishing a partial snapshot, creates the bounded context, changes the original input, verifies the frozen copy/digest/modes, cleans it and successfully repeats the operation. No fake Docker, source-text tests or bound change. An actual prepared image then verifies real Aspire cluster clients/cleanup; filesystem proof alone cannot qualify Docker or Linux delivery. Dependencies, receipt schema, default GitHub path and database contracts remain unchanged.
+
+The slice spans AppHost Features/TestInfrastructure local settings, prerequisite and cleanup; ClusterReplication/Resources local image selection; the scripts/Features/TestInfrastructure bounded producer; and separate IntegrationTests ClusterReplication local verification and native AppHost model regressions. Request admission belongs to Validation and invocation construction to Execution; obsolete executable copies under Models are removed. Native SIGTERM/kill helpers use generated LibraryImport with AllowUnsafeBlocks enabled only in KeyLoad.AppHost.csproj and KeyLoad.IntegrationTests.csproj. This does not enable unsafe code solution-wide or suppress analyzer diagnostics. Tests use the actual Aspire builder to prove dependency ordering and absence of outer nodes; parser/input tests cover negative cells without pretending to prove Docker creation. Real Docker/Aspire SDK and official MCP evidence must prove image identity, every configured node and cleanup. Frontend, production data/API changes and local comparison mode are N/A for this infrastructure stage. Current-image proof remains mandatory; local image preparation never skips or substitutes current-format recovery, SDK/MCP or replicated-cluster cases.
+
+### Default CI image path
+
+REQ/AC-TEST-011/015 retains the two existing image-proof modes. An earlier Linux CI run failed before startup because the local-only IntegrationTests helper treated the shared server image reference as an explicit local selector. A server reference also belongs to the default authenticated GitHub mode and cannot select local provenance by itself.
+
+LocalClusterImageIdentity enters its local verification only when a local provenance or local receipt selector is present. With both absent it leaves the default path to the existing strict RuntimeContainerImage parsing, exact-source GitHub receipt and modeled image checks. Preserve every local provenance/receipt/tag/input/config-ID check and reject incomplete or conflicting local selectors. Do not add fallback proof, synthesize a receipt, accept mutable images or change the actual Docker/Aspire cluster topology.
+
+Existing genuine default-CI and explicit-local cluster operation flows provide the positive/negative evidence; source review alone does not qualify either mode. The ADR-117 ownership and proof contracts remain unchanged.
+
+### Exact local selection and local-image provenance
+
+REQ/AC-TEST-015 and REQ/AC-TUNIT-ENTRY-006: the local-development image mode admits only closed exact filter literals, each a whole test class, a whole-class union or one exact method. The Node selector and the fixture's argument reader accept the same literals; wildcard, prefix, partial, reordered, appended, whitespace and method-only near misses, and inherited GitHub, coverage, benchmark or wrong-suite identity, are refused before any resource is created. Admission only selects existing native TUnit cases; it creates no UID, no GitHub identity and no qualification, and a selected case still runs through the real Aspire topology, SDK and official MCP clients with joined cleanup.
+
+When a verified local image is selected, restart and failure receipts record `SourceSha=null` and the separately named `LocalBuildInputDigest`, `LocalImageInvocationId` and `LocalImageConfigId`; a build-input digest is never a Git SHA. A missing, corrupt or substituted receipt or image is refused, with no ambient reread and no fallback. The ordinary non-local path keeps its Git SHA acquisition and GitHub source/run/attempt/PDB/DLL/image gates.
+
+On cancellation the local image verifier emits exactly one allowlisted phase marker (DockerContext, DockerEndpoint, DockerOs, Receipt, BuildInputs, ImageInspect, Identity or Complete) after joining its original process and readers, so the failure receipt names the interrupted step without raw Docker output, identities, paths or environment.
+
+Run-owned failure receipts live under the actual TUnit ResultsDirectory of their own run; a foreign root on the same owner is refused, and the existing 32-receipt ceiling, 80-line/8192-byte bound and privacy clipping are unchanged.
+
+### Serial bounded current-input reading
+
+REQ-TEST-015 / AC-TEST-015 retain the existing immutable local-image build-context and current-input verification operation.
+
+The owning local-image-snapshot.mjs reader may replace each per-file ReadStream with serial FileHandle.read using one reused 65,536-byte buffer, matching the observed existing ReadStream chunk size. Preserve exact sorted header/digest bytes, complete file contents including empty and multi-chunk files, O_NOFOLLOW, original pre/post handle and path identity/stat/size checks, all existing file/entry/byte admission, directory/scaffold closure, initiating and close failures, and the original 30-second verifier. No parallelism, timeout, input selection, receipt/schema/identity or Docker admission change. Snapshot creation and its original copied-stream ownership remain unchanged.
+
+The original AcTest015LocalImageBuildUsesImmutableAdmittedFilesystemSnapshotAndCleansItBeforeReuse adds actual multi-chunk and empty filesystem inputs, independent full-byte snapshot oracles before and after checkout mutation, and joined cleanup, preserving all original symlink/overflow/no-effect/mode/refusal checks and its case identity. Retain old/new exact current-source digest observations and execute the real native operation through canonical native50/SIMD-enabled entry. A healthy prerequisite is not authorization or replicated-cluster acceptance by itself; delivered Linux/source-image/coverage gates remain distinct.
+
+## Native process settlement and CI suite budget
+
+REQ/AC-TEST-015 requires the local-image lifetime helpers to await already completed original exit/stdout/stderr tasks on every observation-loop entry. A completed reader fault immediately starts owned failure cleanup. Cleanup sends SIGTERM, allows the existing one-second grace and kills only the original owned tree if actual exit remains pending. Five seconds is a failed-cleanup escalation threshold, never successful settlement: record the timeout, retry the owned kill when necessary, await actual exit, then close only still-pending owned pipe handles and await both original readers. Preserve the primary failure before cleanup failures. Never release process/context/application owners while original tasks are unsettled or use a detached continuation as settlement. Native tests cover an already faulted reader while the child remains alive and cancellation after actual readiness; explicit temporary-directory helpers delete only after process settlement and preserve deletion failures.
+
+Local image cleanup joins in TestSuiteApplication only after actual AppHost stop and producer/runner settlement, under a separate45-second cleanup token, before output settlement and application disposal. Preparation output is included only for explicit local mode. Default GitHub image selection and the full replicated-cluster gates remain mandatory.
+
+REQ/AC-TEST-010 also requires enough bounded GitHub job time for the sequential unit and recovery suites plus build/format/preflight. A previous30-minute job limit was exhausted after both unit suites failed and recovery was cancelled. The Linux verify job receives120 minutes; no individual native suite deadline, required check, artifact or failure predicate is removed. A failed, timed out or cancelled suite remains failed/unqualified.
+
+REQ/AC-TEST-010 also bounds the separate replicated-cluster job. A previous run of that job was canceled near its configured60-minute ceiling and produced no original TRX. The same job must also execute the required instrumented unit/recovery/cluster cohort and source/artifact checks. Allow180 minutes for that aggregate job, preserving every individual deadline, failure/cancellation predicate, required suite and artifact. This budget change does not make an unfinished or failed run qualified or alter workload bounds.
+
+AC-TEST-010 requires original per-suite MTP/TRX evidence from every required CI suite. Its Aspire caller explicitly enables `KeyLoadTests:ReportTrx=true`; an omitted report setting, absent report, cancelled suite or failed native runner cannot establish qualification. A missing full-suite TRX receipt is an evidence gap, never a pass.
 
 ## Prompt termination on owned Aspire failure
 
-[ADR-086](../ADR/ADR-086-aspire-terminal-failure.md) defines the private lifecycle
-repair prompted by CI [37202347856](https://github.com/managedcode/KeyLoad/actions/runs/37202347856).
-Its original reports show RF3 87/88 passed (one authorization assertion)
-and unit 2947/2953 passed (six native CQRS cases); they do not establish an AppHost
-crash. Website tests were 201/202 passed, with a real Chrome node-selection
-assertion failure. Dashboard-disabled CLI warnings appeared before successful
-suites too. These facts come from the original RF3, unit and site TUnit artifacts
-at source `15ea5030c6fc010b29127b4b8de07bd255afc7ff`, not inferred CLI text.
+[ADR-086](../ADR/ADR-086-aspire-terminal-failure.md) defines the private lifecycle repair for owned terminal Aspire failures. Dashboard-disabled CLI warnings alone are not topology failures and are not inferred from CLI text; outcomes come from the original TUnit reports.
 
 | Requirement | Acceptance and evidence |
 |---|---|
@@ -353,232 +115,84 @@ at source `15ea5030c6fc010b29127b4b8de07bd255afc7ff`, not inferred CLI text.
 | REQ-TEST-013: completion and planned fault contracts remain intact | AC-TEST-013: expected WaitForCompletion exit is allowed; nonzero/missing completion exit fails; healthy/running and transient health snapshots continue waiting; no dependencies remains valid; guards are canceled and joined before intentional comparison node kill/restart assertions |
 | REQ-TEST-014: original outcome, ownership and cleanup remain intact | AC-TEST-014: native runner exit codes, startup exceptions and cancellation remain failures where applicable; AppHost stopping cancels waits; every notification task is canceled/joined, existing diagnostics and stop/disposal remain; unrelated database cells are unaffected |
 
-TASK-TEST-FAILFAST-CONTRACT (root, complete): requirements/ADR and owning source
-review. TASK-TEST-FAILFAST-NATIVE (progress_runner, locally verified): only new
-AppHost Features/TestInfrastructure lifecycle helpers and ComparisonTests
-Features/TestInfrastructure native notification regressions. TASK-TEST-FAILFAST-JOIN
-(root, after helper): TestSuiteApplication and IsolatedNativeCase integration,
-CI focused selection, docs, review and exact-source validation. vector_runtime
-owns read-only lifecycle review. These tasks preserve concurrent engine changes;
-RF3 CQRS/authorization failures belong to their existing owner. Public database,
-stored data, dependencies and topology are N/A: this is private test orchestration.
-Native service tests establish notification handling, not real Docker failure
-qualification; delivered Linux tests and failure artifact review remain required.
+The lifecycle helpers live in AppHost Features/TestInfrastructure with native notification regressions in ComparisonTests Features/TestInfrastructure; TestSuiteApplication and IsolatedNativeCase integrate them. Public database, stored data, dependencies and topology are N/A: this is private test orchestration. Native service tests establish notification handling, not real Docker failure qualification; delivered Linux tests and failure artifact review remain required.
 
-Local development evidence, 2026-10-04: the complete Release solution build has
-zero warnings/errors; the full required formatter and repository governance pass.
-The canonical Aspire comparison entry with `/*/*/AspireFailure*/*` reports
-36/36 TUnit cases passed in 3.017 seconds, with no skipped, cancelled, timed-out
-or flaky cases. The retained report is
-`TestResults/aspire-failure-local3/KeyLoad.ComparisonTests-macos-net10.0.tunit-report.json`.
-The existing `AspireTestEntry*` model/artifact regressions also pass 5/5 through
-the same entry; their original report remains in `TestResults/aspire-failure-entry/`.
-This includes genuine DCP missing-executable startup failure and native
-BeforeStart failure/cancellation, preserving the original outcome and joining
-tasks before cleanup. The no-lifetime case uses Aspire's real custom-resource
-extension seam, `Resource, IResourceWithoutLifetime`, and native notifications;
-neither native parameters nor certificate collections implement that marker in
-the pinned 13.6 runtime. No database/service substitute is used. These checks
-ran on macOS against the current working tree, which also contains concurrent
-engine changes; they do not qualify an exact delivered Linux SHA or its complete
-unit, recovery, RF3 and benchmark suites.
+## Central native TUnit admission
 
-Status: implementation in progress. Owner: KeyLoad lead. Decision: [ADR-036](../ADR/ADR-036-orleans-foundation.md).
+REQ-TEST-016 / AC-TEST-016 requires every Aspire-owned TUnit runner to receive its native `--maximum-parallel-tests` argument from centrally bound and validated `IOptions<TestExecutionOptions>`. `KeyLoadTests:Execution:MaximumParallelTests` defaults to50 for ordinary functional tests and accepts only1–50. Comparison selections require1 and reject a larger explicit value before startup per [NativeTUnitEntry](TestInfrastructure/NativeTUnitEntry.md#requirements-and-acceptance). zero/unlimited, negative and above-ceiling values fail before resources are added. Preserve each test's own worker count, workload, deadline and assertions, all required suites and original exit reports. The setting must flow to the actual runner command, including configured non-default values; inherited TUnit environment variables cannot override that validated command argument. This does not cap GitHub benchmark matrices or change measurement workloads. Heavy functional load/mixed-ingestion cases require a separate exclusive selection and stay outside coverage; their real complete-flow qualification remains open under REQ/AC-TUNIT-ENTRY-014.
 
-REQ-TEST-008 / AC-TEST-008 (TASK-RUNTIME-EVENTSOURCE-W3) coordinates the actual
-global Microsoft logging EventSource across the two diagnostic suites. Listener
-disposal issues a Disable command; LoggingEventSource disables its global filter
-state even when another capture remains active. Exact fa80c701 Windows CI misses
-ToolsCall midway through KnownMethodCategoryIsClosed. Use a single named native
-TUnit NotInParallel key on McpTransportDiagnosticsTests and
-GrainFailureDiagnosticsTests, declared once in a TestInfrastructure constant.
-Preserve all native provider/capture/filter and privacy/error/category assertions;
-no fake logging, sleeps, retries or production diagnostic change. Existing failing
-category/privacy cases and all grain diagnostics are the regression matrix, with
-full multi-OS GitHub execution required. Root owns this small cross-slice test
-scheduling join because the shared global resource has one integration owner.
-ADR039/036 existing contracts suffice; no product/API/data migration applies.
+Native Aspire model tests map default/configured forwarding, boundary and malformed configuration rejection to AC-TEST-016. Full native unit/recovery/cluster and exact-source Linux reports remain required. [ADR-113](../ADR/ADR-113-centralized-runtime-options.md) owns the central options standard; the AppHost owns Configuration/Execution/Validation/Hosting propagation and its focused model regressions.
 
-| Requirement | Acceptance and observable evidence |
-|---|---|
-| REQ-TEST-001: TUnit and Microsoft.Testing.Platform are the sole .NET test framework/runner. | AC-TEST-001: all test projects compile and run with TUnit; no xUnit/VSTest package or attribute remains; migrated assertions preserve every original scenario. |
-| REQ-TEST-002: real RF3 tests launch Docker containers under Aspire and invoke the real .NET SDK and official MCP SDK clients. | AC-TEST-002: CI captures three independent containers, stable persisted directories, SDK/MCP success/denial flows and replica failover/rejoin. |
-| REQ-TEST-003: generated lock files, local data, secrets, logs and test artifacts do not enter Git or the Docker context. | AC-TEST-003: tracked-file inventory and ignore checks reject these outputs; central NuGet versions remain pinned. |
+### Current normal-only suite composition
 
-```mermaid
-flowchart LR
-    CI[GitHub Actions] --> TUnit[TUnit and MTP]
-    TUnit --> Aspire[Aspire lifecycle]
-    Aspire --> Docker[Three Orleans containers]
-    SDK[Real .NET and MCP clients] --> Docker
-    TUnit --> Evidence[Run and artifact evidence]
-```
+Native SIMD is mandatory in every product and test run. TestSuiteProtocol and ProjectForSuite admit only analyzers/unit/recovery/cluster/comparison/site; any other suite name is unknown and refuses before resource creation. TestSuiteResources has no runner-disabled-intrinsics branch: 50 native slots for ordinary tests and exclusive scheduling for heavy tests, explicit supported parallelism, comparison isolation of one test at a time, all project/argument/TRX/coverage/path selection and genuine Aspire preparation, readiness, clients and shutdown are retained. There is no ignored alias, scalar alternate or limits/configuration fallback.
 
-Slice map: tests mirror their product slice; shared fixture/lifecycle infrastructure remains at test project roots. Shared CI/.gitignore/.dockerignore are integration-owned infrastructure. Production data/API/GUI: N/A, this framework migration adds no domain behavior. The Orleans/Docker boundary changes are ClusterReplication and ClusterRouting. Blobs and MCP coverage must not be reported complete from framework migration alone.
+Native audit proves TestSuiteApplication, TestSuiteSettingsReader and typed execution policy have no scalar-specific behavior, so their cancellation, output/process joins and failure ledgers remain byte-exact. Existing AspireTestEntryModelTests same declarations verify the complete six-suite model, exact native argument/project/results shape and absent injected disable environment. FilterIsOneNativeArgumentAndIsBoundedBeforeResourcesAreAdded now refuses old unit-scalar before its original genuine healthy model; full negative and healthy controls/disposal remain. Its independent default ordinary literal is50, while the explicit rejected comparison20 configuration remains independently20. This source-owned model remains in ComparisonTests and executes only through authorized GitHub Benchmarks under its local policy; no local benchmark workload is started. Existing FunctionalTestParallelismTests/NativeTUnitSelectionTests normal controls and final all-source compiler/format/native census remain mandatory.
 
-Traceability: AC-TEST-001 maps to all invoking test projects, AC-TEST-002 to IntegrationTests and ComparisonTests, AC-TEST-003 to source/ignore checks. TASK-TEST-MIGRATE and TASK-REP-VERIFY are in the execution plan. Tests run only in GitHub Actions; development builds are compilation evidence. Coverage and complexity policy cannot be claimed satisfied without measured configured gates.
+### Single normal (native SIMD) profile for functional coverage
 
-TASK-RUNTIME-ARTIFACTS-W retains actual root TestResults reports from native TUnit
-alongside each existing scoped report glob under REQ/AC-TEST-001/002/005 and
-AC-MP-012. Run37005805424 proves the missing RF3/analyzer report retention path.
-Comparison test reports use a separate comparison-test-results artifact so the
-measured comparison-suite archive keeps its existing contract. The lead owns
-ci.yml; no test, timeout, gate, permission, measured-report schema or ignore rule
-changes. Source review and downloaded complete reports at the new exact run/job
-SHA are required evidence. The artifact-path repair itself has a manual exact-CI
-verification exception; it cannot convert failing or unexecuted tests to success.
+REQ-CQ-SIMD-PROFILE-001 requires a single current normal profile with native SIMD enabled, exact normal/full-group/recovery/cluster source-bound inventories, and closed refusal of scalar inputs without evidence replacement. AC-CQ-SIMD-PROFILE-001 maps to the existing complete ProductionSourceManifestOperationTests native operation, current CLI profile refusal controls, full native report/descriptor merge and delivered normal functional collection; all must preserve thresholds and genuine shutdown. ADR-117 owns this profile schema and admission rule; no compatibility reader accepts older receipts.
 
-TASK-RUNTIME-COMPARISON-DIAGNOSTICS-W is a failure-only refinement of
-REQ/AC-TEST-002/005 and AC-MP-012 after run37005805424. Before StartAsync,
-passively retain at most 128 lifecycle records for the comparison runner and its
-eight direct wait resources. Only fixed resource names, native timestamps,
-local observation sequence, closed state/health categories and exit code are
-retained. Snapshot version/readiness are internal in the pinned native package
-and remain unavailable; do not infer or reflect them. No properties,
-environments, endpoints, connection strings, health
-descriptions, exception text or payloads. On the existing cancellation/timeout
-path, emit at most 80 lines/8KiB to test-runner stderr, preserving the original
-failure even if observation or output fails. Keep this diagnostic out of measured
-comparison archives and retain the eight-minute timeout and existing terminal
-predicate. The worker owns only a new ComparisonResourceDiagnostics helper;
-the lead owns the RealComparisonSuite join and shared documentation. The closed
-receipt formatter may be a second helper to preserve type limits; lead extracts
-existing evidence-directory/report-copy logic to ComparisonTestEvidenceFiles.cs
-without changing path resolution or report bytes. Source privacy,
-memory/task-lifetime review plus actual exact-SHA GitHub resource events are the
-verification exception for an environmental failure path; no synthetic provider,
-local AppHost execution or successful-workload claim is allowed.
+Current profile inventory becomes unit normal full census plus exactly five disjoint normal functional groups, recovery, all 11 cluster contributors and unchanged required ordinary controls. Contributor registry is independently frozen 49 Unit +1 recovery +11 cluster =61; remove only 49 scalar duplicates. Exact remaining operation identities/requirements/modules/state descriptions stay unchanged. The three real test images Unit/Recovery/Integration remain independently source/PDB/compile-receipt bound; redundant scalar Unit reference disappears.
 
-REQ-TEST-006 / AC-TEST-006: real shared fixture ownership transfers only after
-successful setup. Failure after opening a store releases it before deleting its
-owned fresh directory; the same path can reopen without a leaked lock.
-Existing supplied directories are rejected before acquisition or mutation, with
-their files and real active owner preserved; finally cleanup follows an attempted
-store disposal even when an environmental disposal failure throws. Admitted
-background work is released/cancelled/observed before database disposal on every
-path. CQ016's accepted contract/task graph and ADR033/032 govern source-only
-changes: lead owns TestDatabase and new TestInfrastructure/FixtureLifetimeTests;
-workers own real EventStreams/Messaging setup regressions and analytical task
-cleanup. The lead also owns RealZoneTreeReadGateHold and the new canonical
-ResourceExecution/ReadGateLifetimeTests. Original ten-second admitted-search
-timeouts begin after cancellation/release attempts; final observation always
-awaits actual workers and the actual gate holder before store disposal. Real
-immediate/entered and repeated gate disposal cases assert subsequent real-store
-usability; environmental timeout/fault branches require the supplemental source
-audit rather than a synthetic injector. Actual invalid limits/event counts/batch configuration and same-path
-ZoneTree reopen are independent GitHub TUnit assertions. Environmental cleanup/
-coordination failures additionally require full source lifetime review; no fake
-or local qualification. All existing132 methods/19 migrated roots stay preserved.
+Current descriptor unitCensus has exactly normal, run-status exactly one full normal +five groups, suiteRuns exactly five groups +recovery +cluster; unknown scalar keys, suites, status and profiles reject before file acquisition under exact-key guards. Task Profile ValidateSet accepts normal only. Reject an inherited disabled-intrinsics environment before launching normal work and restore the original environment in finally; scalar receipts are never accepted through a compatibility reader.
 
-REQ-TEST-007 / AC-TEST-007 (TASK-RUNTIME-RECEIPTS-W) preserves failure evidence
-from run37015193756 without making failed gates pass. Save the existing bounded
-RF3 diagnostic text both as the last-failure file and as a sequential fixture-owned
-receipt; cap retained individual files at32, keeping the earliest failures and
-unchanged per-file privacy/line/byte caps. Bounded filenames contain only the
-sequence. Actual GitHub artifacts must retain the first replica failure before
-later MCP failures overwrite the last-failure view.
+All remaining report/TRX UID, source/PDB/image equality, maximumParallelTests50, create-only, file/byte/path/reparse/inventory/refusal/disposal/charged reads and 80/70/90/noDecrease/repeated-input gates remain unchanged. No successful coverage or task acceptance from source/discovery or partial SELECT.
 
-On comparison cleanup, stop the actual application, copy any existing complete
-report files using the existing helper, then delete owned temporary data. Native
-terminal state, zero exit, deadlines and all existing assertions remain required;
-retained report bytes are partial evidence when the test fails. Recovery runs on
-each matrix OS after successful build even if a preceding unit/style/analyzer
-step fails, with normal job failure preserved and no continue-on-error. A failed
-build or cancellation prevents recovery. The lead owns ci.yml, RF3 receipt helper
-and RealComparisonSuite cleanup join. ADR036/035 govern the ordered source-only
-rollback. Actual temporary-file IntegrationTests verify first/last receipt
-preservation, the32-file ceiling and concurrent whole-file writes; source privacy
-and exact-SHA GitHub first-failure/report/recovery artifacts supplement those
-assertions. Environmental watch/runner failures
-must not be replaced by mocks or counted as green qualification.
+Whole regression: existing NativeImagesProduceClosedManifestAndRejectTamperingWithoutReplacingEvidence performs native prepare/full literal inventory and compile identity checks, failed edited input unchanged, exact repair/healthy verify and create-only refusal. Deepen same operation with actual unsupported scalar contributor/image manifest refusal and unchanged exact repair; no property-only tests. Existing native report merge/repeated input/read confinement/process settlement/cluster contributor controls remain in complete selected normal operation set. One complete owning batch compile/normal execution after all edits; root integrates then delivered Linux required. No new scalar runs.
 
-TASK-RUNTIME-RESTART-RECEIPT-W4 refines REQ/AC-TEST-007 after exact main
-b533c80 / CI37032546228. The failed native restart attempt is currently missing
-its container generation: the first receipt shows the killed old node and later
-receipts show a successful restoration. Capture the public Aspire current
-ResourceId, closed state/health, exit code and creation/start/stop timestamps
-before Start, after its successful command and immediately after an existing
-restart failure. These are sampled snapshots, not a native snapshot version or
-proof of the transition which caused the failure. Native Version and readiness
-internals are unavailable and must not be reflected or inferred.
+## Build and Tests boundary
 
-The failure receipt includes the existing verified pre-kill Docker ID/start time,
-closed failure stage/type, Start success and one immediate read-only Docker
-inspection of ID/status/exit/OOM/start/finish/error-present. No Docker error text,
-environment, properties, endpoints, credentials, arbitrary method/type text or
-payload is included. Only validated native identifiers and timestamps are
-retained; unknown states/types become a fixed unavailable/other marker. At most
-32 earliest restart receipts plus one latest view are retained, with80-line/8KiB
-UTF-8 bounds and filenames containing only the local sequence. The diagnostic
-has its own three-second native-inspection deadline after the original failure.
-Every path after process creation owns termination, reaping and observation of
-both redirected readers, including setup, wait and reader faults. Mandatory
-cleanup can extend wall time if operating-system termination is delayed; no
-hard end-to-end three-second return or detached process/reader claim is allowed.
-Termination checks an exit race and retries a failed live-child tree kill once;
-a final live-child kill error is retained through mandatory task joining. If
-the operating system permanently refuses termination, finite cleanup cannot be
-guaranteed. This environmental branch needs native CI evidence or source review,
-never a synthetic process failure or a passing lifecycle claim.
-It releases/awaits its actual CLI process and redirected readers on cancellation,
-then rethrows the original restart exception even if diagnostic inspection or
-file writing fails. Existing synchronous whole-file persistence keeps its
-80-line/8KiB limit; no hard three-second filesystem-latency claim or detached
-writer task is allowed.
-No Start, health, runtime identity, zero-exit, cancellation, timeout, retry count,
-quorum, atomicity, data or cleanup assertion changes.
+REQ-TEST-PIPELINE-001: Build and Tests runs solution builds, repository checks and KeyLoad functional analyzer/unit/scalar/recovery/cluster tests only. Benchmark tests are compiled in the separate KeyLoad.ComparisonTests project and executed only by Benchmarks, including progress, entry and counter regressions.
 
-Root owns ContainerRuntimeControl and the closed receipt-kind join in
-ClusterFailureReceipts; one disjoint worker owns only new ClusterReplication
-failure-capture/projection/CLI-lifetime helpers and real temporary-file tests.
-Tests first prove only selected native public snapshot fields survive with
-canary properties/env/URL/state/identifier/type rejected, whole valid bounded
-files preserve the first failed generation across later receipts, and32-file
-retention remains exact. Native-shaped Docker records cover valid identities,
-safe error-presence projection and malformed ID/state/exit/OOM/timestamp fields;
-actual stream readers prove output is drained after its retained prefix is full.
-Do not fake native services, Docker or process failures.
-The original RF3 leader-loss/minority scenario remains the real lifecycle test;
-an environmental failure branch additionally requires exact-SHA GitHub artifact
-review and source lifetime/predicate comparison. If the next run succeeds, do
-not claim its unexecuted failure path qualified. ADR-035/036/039 existing
-privacy/lifetime contracts suffice; no product/public/dependency boundary changes.
-Rollback reverts only this additive diagnostic join and its helpers/tests.
+AC-TEST-PIPELINE-001: the unit assembly discovers no BenchmarkComparisons cases; the comparison assembly retains their test inventory and assertions; Build and Tests invokes no comparison suite or benchmark load-generator preparation. Benchmarks executes the transferred contracts in normal and scalar modes and retains original TRX reports. Static workflow/project inventory review is the explicit infrastructure-placement evidence exception; actual Aspire/TUnit discovery and original reports verify the runtime boundary.
 
-## Accepted comparison-host startup diagnostics
+## Platform, dependency and release qualification
 
-AC-REC-FUP-004 records the preserving W6 fixture follow-up: the exact delivered
-SHA, complete GitHub job/report artifacts, native failure identities and report
-hashes remain in the runtime ledger. Unit/Recovery/RF3/Comparison must all execute;
-failed or unexecuted cases cannot count as green. Local development build,
-formatter and governance are source validation only. Full native artifact review
-and source lifetime/predicate audit cover environmental branches which cannot be
-injected without prohibited service doubles. StorageRecovery owns AC-REC-FUP-003;
-ClusterReplication owns AC-REC-FUP-001/002. Existing ADR035/036/033 apply.
+Actors: the contributor, the CI runner, the release owner and the evidence consumer. Source/config entry points: [canonical CI](../../.github/workflows/build-and-tests.yml), [global.json](../../global.json), [central packages](../../Directory.Packages.props), dependency survey (report removed from repository), [qualification status](../implementation/status.json). Product runtime is N/A: the infrastructure starts and verifies the real product and never substitutes a demo engine.
 
-REQ-TEST-009 / AC-TEST-009 (TASK-RUNTIME-HOST-DIAGNOSTICS-W5) refines the
-private real-process AC-HOST-003/007 fixture after exact8b475d4 /
-CI37042082081 repeats four Windows20-second failures. One existing deadline
-covers both native exit and redirected-output drain; current failure evidence
-does not distinguish them. Source configuration order is not a diagnosis.
+| Requirement | Acceptance / flows | Test / evidence mapping |
+|---|---|---|
+| REQ-TEST-004: versions, licenses, native dependencies and platforms are fixed for the delivered source | AC-TEST-004: the centrally pinned package/image inventory and source provenance match the actual restore/container; required platform jobs pass, and an incompatible, missing, native or license requirement fails explicitly; free comparison engines need no Enterprise edition | Linux-only GitHub qualification; macOS local runs are development evidence only. Restore and inventory alone do not qualify the native build or runtime. Original Linux receipts match central inputs but do not retain complete package-graph/archive identity. Clean delivered-source restore/native/platform qualification remains pending. |
+| REQ-TEST-005: the release manifest advertises only verified capability/guarantee gates | AC-TEST-005: all required build/analyze/format/TUnit/recovery/replicated-cluster SDK/MCP gates and the configured coverage/complexity gates pass on the exact delivered SHA; failures, unsupported and unconfigured gates remain explicitly unavailable; power-loss, endurance and fault gates are separate, and a stable release is withheld until the required evidence exists | Consolidated exact SHA/run/job/artifact release evidence; [CodeQuality](CodeQuality.md), [BenchmarkComparisons](BenchmarkComparisons.md), [ResourceExecution](ResourceExecution.md) owning checks |
 
-Before the existing timeout cleanup, retain only a closed ProcessExit/OutputDrain
-stage, actual available exit state/code, closed capture-task states, capped
-capture lengths and boolean matches for existing static validation markers.
-The receipt is at most8KiB and keeps the original TimeoutException message
-prefix. No raw child output, exception text, arguments, environment, paths,
-endpoints, credentials or unknown values are logged. Diagnostic observation
-failure becomes a fixed unavailable marker and cannot replace the original
-startup timeout or caller cancellation.
+Negative/edge/error flows: a skipped suite is not passing; a flaky case is a failure; a malformed or missing artifact, a mismatched SHA/profile, an unavailable engine/license/platform or a test resource startup failure never replaces the previous qualified history. An old CI run does not qualify uncommitted code, and a test method name is not a result. [ADR-031](../ADR/ADR-031-modular-all-in-one-resource-isolation.md) and [ADR-036 foundation](../ADR/ADR-036-orleans-foundation.md) fix the topology and capability scope.
 
-Each actual StreamReader still uses4096-character reads, retains32768 characters
-maximum and drains the remainder. Synchronize partial-buffer observation; retain
-the same20-second shared startup deadline and five-second cleanup behavior.
-Do not add retries, serialization, sleeps, client/config reorder, product changes
-or new detached work. Preserve all four configuration/ordering assertions and
-the real cleanup test. Environmental failure/cancellation additionally needs
-source lifetime review and the actual GitHub failure receipt; a successful run
-does not qualify its unexecuted failure branch.
+Canonical restore uses the unchanged repository NuGet.Config and central pins with a private package directory, preserving the shared global cache. AC-TEST-PACKAGE-001 requires the actual restored VFS10.0.11 archive to match the authoritative exact-version NuGet catalog SHA512 and repository commit, with refreshed asset content hashes and no local feed/project reference. Rebuild and rerun affected native whole-operation regressions from those published inputs. A mismatch or missing package fails; earlier local receipts remain explicitly unqualified for published dependency identity. This changes development build inputs only; runtime contracts, licensing decisions and dependencies remain unchanged under ADR-107/117.
+
+Target maps: the shared AppHost, CrashHost, fixtures and workflows are composition/infrastructure; business cases mirror the owning canonical `<SliceName>/` slice; TUnit/MTP is the single .NET framework and runner. Frontend is N/A; real first-render website evidence belongs to BenchmarkComparisons. One integration owner owns the central project, CI and resource graph; bounded test workers keep every assertion and join with real GitHub evidence. Documentation files do not start the local product and do not weaken any gate.
+
+### Source identity and platform gate
+
+[PlatformIdentity](TestInfrastructure/PlatformIdentity.md) is the canonical whole-task supplement to REQ/AC-TEST-004. It maps original clean restore/build, actual archive/source/license closure, managed/native ownership and explicit platform dispositions. Clean delivered-source Linux evidence is a separate gate.
+
+## Fixture lifetime and failure evidence
+
+REQ-TEST-006 / AC-TEST-006: real shared fixture ownership transfers only after successful setup. Failure after opening a store releases it before deleting its owned fresh directory; the same path can reopen without a leaked lock. Existing supplied directories are rejected before acquisition or mutation, with their files and real active owner preserved; finally cleanup follows an attempted store disposal even when an environmental disposal failure throws. Admitted background work is released/cancelled/observed before database disposal on every path. Original ten-second admitted-search timeouts begin after cancellation/release attempts; final observation always awaits actual workers and the actual gate holder before store disposal. Real immediate/entered and repeated gate disposal cases assert subsequent real-store usability; environmental timeout/fault branches require the supplemental source audit rather than a synthetic injector. Actual invalid limits/event counts/batch configuration and same-path ZoneTree reopen are independent GitHub TUnit assertions. Environmental cleanup/ coordination failures additionally require full source lifetime review; no fake or local qualification. All existing132 methods/19 migrated roots stay preserved.
+
+REQ-TEST-007 / AC-TEST-007 preserves failure evidence without making failed gates pass. Save the existing bounded cluster diagnostic text both as the last-failure file and as a sequential fixture-owned receipt; cap retained individual files at32, keeping the earliest failures and unchanged per-file privacy/line/byte caps. Bounded filenames contain only the sequence. Actual GitHub artifacts must retain the first replica failure before later MCP failures overwrite the last-failure view.
+
+On comparison cleanup, stop the actual application, copy any existing complete report files using the existing helper, then delete owned temporary data. Native terminal state, zero exit, deadlines and all existing assertions remain required; retained report bytes are partial evidence when the test fails. Recovery runs on the Linux runner after successful build even if a preceding unit/style/analyzer step fails, with normal job failure preserved and no continue-on-error. A failed build or cancellation prevents recovery. Actual temporary-file IntegrationTests verify first/last receipt preservation, the32-file ceiling and concurrent whole-file writes; source privacy and exact-SHA GitHub first-failure/report/recovery artifacts supplement those assertions. Environmental watch/runner failures must not be replaced by mocks or counted as green qualification.
+
+### Restart receipts
+
+REQ/AC-TEST-007: a failed native restart attempt must retain its container generation; otherwise the first receipt shows only the killed old node and later receipts a successful restoration. Capture the public Aspire current ResourceId, closed state/health, exit code and creation/start/stop timestamps before Start, after its successful command and immediately after an existing restart failure. These are sampled snapshots, not a native snapshot version or proof of the transition which caused the failure. Native Version and readiness internals are unavailable and must not be reflected or inferred.
+
+The failure receipt includes the existing verified pre-kill Docker ID/start time, closed failure stage/type, Start success and one immediate read-only Docker inspection of ID/status/exit/OOM/start/finish/error-present. No Docker error text, environment, properties, endpoints, credentials, arbitrary method/type text or payload is included. Only validated native identifiers and timestamps are retained; unknown states/types become a fixed unavailable/other marker. At most 32 earliest restart receipts plus one latest view are retained, with80-line/8KiB UTF-8 bounds and filenames containing only the local sequence. The diagnostic has its own three-second native-inspection deadline after the original failure. Every path after process creation owns termination, reaping and observation of both redirected readers, including setup, wait and reader faults. Mandatory cleanup can extend wall time if operating-system termination is delayed; no hard end-to-end three-second return or detached process/reader claim is allowed. Termination checks an exit race and retries a failed live-child tree kill once; a final live-child kill error is retained through mandatory task joining. If the operating system permanently refuses termination, finite cleanup cannot be guaranteed. This environmental branch needs native CI evidence or source review, never a synthetic process failure or a passing lifecycle claim. It releases/awaits its actual CLI process and redirected readers on cancellation, then rethrows the original restart exception even if diagnostic inspection or file writing fails. Existing synchronous whole-file persistence keeps its 80-line/8KiB limit; no hard three-second filesystem-latency claim or detached writer task is allowed. No Start, health, runtime identity, zero-exit, cancellation, timeout, retry count, quorum, atomicity, data or cleanup assertion changes.
+
+ContainerRuntimeControl and the closed receipt-kind join in ClusterFailureReceipts use new ClusterReplication failure-capture/projection/CLI-lifetime helpers with real temporary-file tests. Tests first prove only selected native public snapshot fields survive with canary properties/env/URL/state/identifier/type rejected, whole valid bounded files preserve the first failed generation across later receipts, and32-file retention remains exact. Native-shaped Docker records cover valid identities, safe error-presence projection and malformed ID/state/exit/OOM/timestamp fields; actual stream readers prove output is drained after its retained prefix is full. Do not fake native services, Docker or process failures. The real node kill/restart scenario remains the lifecycle test; an environmental failure branch additionally requires exact-SHA GitHub artifact review and source lifetime/predicate comparison. If the next run succeeds, do not claim its unexecuted failure path qualified. ADR-035/036/039 existing privacy/lifetime contracts suffice; no product/public/dependency boundary changes.
+
+### Comparison runner diagnostics
+
+This is a failure-only diagnostic under REQ/AC-TEST-002/005 and AC-MP-012. Before StartAsync, passively retain at most 128 lifecycle records for the comparison runner and its eight direct wait resources. Only fixed resource names, native timestamps, local observation sequence, closed state/health categories and exit code are retained. Snapshot version/readiness are internal in the pinned native package and remain unavailable; do not infer or reflect them. No properties, environments, endpoints, connection strings, health descriptions, exception text or payloads. On the existing cancellation/timeout path, emit at most 80 lines/8KiB to test-runner stderr, preserving the original failure even if observation or output fails. Keep this diagnostic out of measured comparison archives and retain the eight-minute timeout and existing terminal predicate. Source privacy, memory/task-lifetime review plus actual exact-SHA GitHub resource events are the verification exception for an environmental failure path; no synthetic provider, local AppHost execution or successful-workload claim is allowed.
+
+### Host startup diagnostics
+
+These diagnostics refine the private real-process AC-HOST-003/007 fixture. One existing deadline covers both native exit and redirected-output drain; current failure evidence does not distinguish them. Source configuration order is not a diagnosis.
+
+Before the existing timeout cleanup, retain only a closed ProcessExit/OutputDrain stage, actual available exit state/code, closed capture-task states, capped capture lengths and boolean matches for existing static validation markers. The receipt is at most8KiB and keeps the original TimeoutException message prefix. No raw child output, exception text, arguments, environment, paths, endpoints, credentials or unknown values are logged. Diagnostic observation failure becomes a fixed unavailable marker and cannot replace the original startup timeout or caller cancellation.
+
+Each actual StreamReader still uses4096-character reads, retains32768 characters maximum and drains the remainder. Synchronize partial-buffer observation; retain the same20-second shared startup deadline and five-second cleanup behavior. Do not add retries, serialization, sleeps, client/config reorder, product changes or new detached work. Preserve all four configuration/ordering assertions and the real cleanup test. Environmental failure/cancellation additionally needs source lifetime review and the actual GitHub failure receipt; a successful run does not qualify its unexecuted failure branch.
 
 ```mermaid
 flowchart LR
@@ -591,295 +205,57 @@ flowchart LR
     Receipt --> Cleanup[Existing owned cleanup]
 ```
 
-Slice ownership: one worker owns only ComparisonTests/Features/BenchmarkComparisons/
-UnitContracts/Processes/ComparisonHostProcess.cs and new cohesive capture/diagnostic/test helpers;
-root owns shared documentation and integration. New genuine native-shaped
-projection/privacy and real-stream prefix/EOF cases map AC-TEST-009.1–003;
-the existing real host cases map009.4. Exact delivered-SHA full GitHub
-unit/recovery/RF3/comparison plus native receipt review map009.5. All tests
-remain TUnit/MTP and CI-only. Existing ADR035/043 private fixture ownership,
-privacy and lifetime contracts suffice; no public/data/dependency/deployment
-migration is authorized. Rollback reverts only this additive private diagnostic
-packet and its source docs; coverage and full goal remain unqualified.
+### Global logging EventSource scheduling
 
-## Platform, dependency та release qualification
+REQ-TEST-008 / AC-TEST-008 coordinates the actual global Microsoft logging EventSource across the two diagnostic suites. Listener disposal issues a Disable command; LoggingEventSource disables its global filter state even when another capture remains active. Use a single named native TUnit NotInParallel key on McpTransportDiagnosticsTests and GrainFailureDiagnosticsTests, declared once in a TestInfrastructure constant. Preserve all native provider/capture/filter and privacy/error/category assertions; no fake logging, sleeps, retries or production diagnostic change. Existing failing category/privacy cases and all grain diagnostics are the regression matrix. ADR039/036 existing contracts suffice; no product/API/data migration applies.
 
-### Central native TUnit admission
+### Native Aspire startup stage evidence
 
-REQ-TEST-016 / AC-TEST-016 (TASK-GENERAL-OPTIONS-TEST-ADMISSION-001) requires
-every Aspire-owned TUnit runner to receive its native `--maximum-parallel-tests`
-argument from centrally bound and validated `IOptions<TestExecutionOptions>`.
-`KeyLoadTests:Execution:MaximumParallelTests` defaults to20 for ordinary functional
-tests and accepts only1–50. Comparison selections require1 and reject a larger
-explicit value before startup under the owner clarification2026-10-09 in
-[NativeTUnitEntry](TestInfrastructure/NativeTUnitEntry.md#functional-concurrency-and-exclusive-measurements-2026-10-09).
-zero/unlimited, negative and above-ceiling values fail before resources are added.
-The admission history includes the original
-full unit v34 run, which completed4061/4133 passing, with four readiness deadline failures
-and native cluster startup cancellation while other compiled workloads were
-active. Those observations do not establish a defect in production locks or prove
-that this admission policy resolves every failure. Preserve each test's own worker
-count, workload, deadline and assertions, all required suites and original exit
-reports. The setting must flow to the actual runner command, including configured
-non-default values; inherited TUnit environment variables cannot override that
-validated command argument. This does not cap GitHub benchmark matrices or change
-measurement workloads. Heavy functional load/mixed-ingestion cases require a
-separate exclusive selection and stay outside coverage; their real complete-flow
-qualification remains open under REQ/AC-TUNIT-ENTRY-014.
+REQ-TEST-ASPIRE-STARTUP-001: the actual replicated-cluster fixture enables the pinned Aspire native profiling source for its own private random session. Before genuine AppHost Start, resolve one AppHost-DI-owned synchronous ActivityListener for only native DcpEnsureKubernetesClient and DcpKubernetesApi operations. Admit activities only when their native session tag equals that actual configuration. Preserve every original timeout, parallelism, image, public SDK/MCP, readiness, fault and stop/disposal contract.
 
-Native Aspire model tests map default/configured forwarding, boundary and malformed
-configuration rejection to AC-TEST-016. Full native unit/scalar/recovery/RF3 and
-exact-source Linux reports remain required. [ADR-113](../ADR/ADR-113-centralized-runtime-options.md)
-owns the central options standard; root owns this contract, the AppHost contributor
-owns Configuration/Execution/Validation/Hosting propagation and its focused model
-regressions. Rollback reverts only that setting, propagation and test addition,
-without changing existing runner lifetime, cleanup, suite or outcome contracts.
+REQ-TEST-ASPIRE-STARTUP-002: keep fixed-size counters, closed phase flags and only native nonnegative long timings/retry counts, plus known/exists booleans. Ignore every other tag, event payload, exception message, stack, path, URL, credential, caller payload, inventory and profiling identity. Retain the first observed native error/timeout projection and the latest projection, with no activity objects or per-event backlog. Save exactly two bounded lines (each less than 1,024 UTF-8 bytes) to one closed-name file in the existing original fixture results directory. Existing 32 original receipts, node fairness and 80-line/8-KiB files stay unchanged. Missing observations are explicitly unavailable and do not establish a cause.
 
-B3 keeps the exact task lifetime above while satisfying enabled CA1031: a private
-throwing AggregateException wrapper preserves each original exception object;
-the collector handles only that wrapper and adds direct inner errors. It never
-flattens or drops an original empty aggregate. Raw-worker awaits retain only the
-exact expected cancellation exception. CQ016's accepted B3 contract and graph
-govern source review and genuine GitHub admission/cancellation regressions;
-environmental error branches retain the explicit full-source audit supplement.
+AC-TEST-ASPIRE-STARTUP-001 maps both requirements to the unchanged genuine ClusterFixture startup, public client operations and disposal flow, including failure cleanup. The original source-bound native report must retain the same first-failure projection and original startup outcome; another fixture session cannot populate it. Native source/lifetime/privacy review is the explicit manual verification for this environmental diagnostic boundary; actual current-image cluster artifacts and exact-source Linux execution remain OPEN. No synthetic ActivitySource, provider, Docker failure, successful lifecycle or root-cause inference qualifies it.
 
-Актори: contributor, CI runner, release owner і evidence consumer. Source/config entry points: [canonical CI](../../.github/workflows/build-and-tests.yml), [global.json](../../global.json), [central packages](../../Directory.Packages.props), dependency survey (report removed from repository), [qualification status](../implementation/status.json). Product runtime N/A: infrastructure запускає та перевіряє справжній продукт, не підміняє його demo engine.
+Slice map: Integration ClusterReplication Contracts/ClusterFixtureStartupProfile owns exact pinned first-party keys; Helpers/ClusterFixtureStartupEvidence owns only bounded passive projection; existing ClusterFixtureComposition.ConfigureLogging configures this native profile without enabling raw Debug logs; ClusterFixtureDiagnostics.Start resolves the observer before actual start and SaveCoreAsync writes its separate projection after the original receipt. AppHost DI disposes the listener after the unchanged genuine application shutdown. Its synchronous callback checks the same lock/disposed boundary; no background task or alternative network/lifecycle owner exists. Public API, persistence, backend, SDK/MCP and frontend changes are N/A.
 
-| Вимога | Acceptance / flows | Test / evidence mapping |
-|---|---|---|
-| REQ-TEST-004: versions/licenses/native dependencies та platforms зафіксовані для delivered source | AC-TEST-004: centrally pinned package/image inventory і source provenance відповідають actual restore/container; required platform jobs pass, incompatible/missing/native/license requirement explicit fail; free comparison engines не потребують Enterprise | Owner-selected Linux-only GitHub qualification; macOS local runs remain development evidence. The 2026-10-07 local inventory has50 central pins,27 project asset files and264 package/version pairs. The fresh R239 isolated restore selects all264 archives from NuGet.org; the VFS10.0.11 archive matches the exact official catalog SHA512/repository commit and the K4os1.3.8 source license is bound to its immutable release commit. There are0 unresolved package/license inventory rows. Restore and inventory alone do not qualify the native build or runtime. Original Linux receipts match central inputs but do not retain complete package-graph/archive identity. Clean delivered-source restore/native/platform qualification remains pending. |
-| REQ-TEST-005: release manifest рекламує тільки перевірені capability/guarantee gates | AC-TEST-005: all required build/analyze/format/TUnit/recovery/RF3 SDK/MCP та configured coverage/complexity pass на exact delivered SHA; failures/unsupported/unconfigured remain explicit unavailable; power-loss/endurance/fault gates окремі, stable release withheld до потрібних доказів | PLANNED consolidated exact SHA/run/job/artifact release evidence для KL-041/044/080/104; [CodeQuality](CodeQuality.md), [BenchmarkComparisons](BenchmarkComparisons.md), [ResourceExecution](ResourceExecution.md) owning checks |
+### Owned preparation failure diagnostics
 
-Negative/edge/error flows: skipped suite не passing; flaky case — failure; malformed/missing artifact, mismatched SHA/profile, unavailable engine/license/platform або test resource startup failure не замінює previous qualified history. Old CI не кваліфікує uncommitted code; test method name не є result. [ADR-031](../ADR/ADR-031-modular-all-in-one-resource-isolation.md) і [ADR-036 foundation](../ADR/ADR-036-orleans-foundation.md) фіксують topology/capability scope.
+REQ/AC-TEST-007/010/014/015 and REQ/AC-TUNIT-ENTRY-006 cover preparation-startup failures of selected cases. Before Build, the session registers a passive native host logger retaining only closed category/severity/event ID/exception kind; it never formats messages, exception text, properties, environments or endpoints. Observe actual prerequisite notifications before Start, retain at most128 records, and emit an80-line/8192-byte failure receipt before teardown. Include caller-token and ApplicationStopping states and actual prerequisite state/exit. These identify cancellation provenance; an absent original cause remains unobserved. Prime the original TestSuiteOutput subscription from actual current resource state, then keep its existing native stream and joined cleanup. The producer retains its original bounded build-output sidecar under its existing contract; neither an absent stream nor a host-stop flag proves a Docker cause. Preserve primary, diagnostic and cleanup failures together. No deadline, selector, topology, native provider, success predicate or qualification gate changes. The diagnostics live in the ClusterReplication session and AppHost TestInfrastructure output priming.
 
-TASK-TEST-PUBLISHED-PACKAGE-IDENTITY repairs the local qualification inputs before
-further native verification. Preserve the shared global cache and its original
-receipts; use a task-private package directory and the unchanged repository
-NuGet.Config/central pins for canonical restore. AC-TEST-PACKAGE-001 requires the
-actual restored VFS10.0.11 archive to match the authoritative exact-version NuGet
-catalog SHA512 and repository commit, with refreshed asset content hashes and no
-local feed/project reference. Rebuild and rerun affected native whole-operation
-regressions from those published inputs. A mismatch or missing package fails;
-earlier local receipts remain explicitly unqualified for published dependency
-identity. This changes development build inputs only; runtime contracts,
-licensing decisions and dependencies remain unchanged under ADR-107/117.
+Verification requires the original failed preparation receipt and resource logs, unchanged failure/cleanup settlement, followed by the same actual SDK/MCP workflows on the current owned image with complete cleanup. Source lifetime/privacy review supplements environmental failure evidence; no fake provider or synthetic hook qualifies startup. A successful rerun cannot erase the original failure or establish why it stopped.
 
-Target maps: shared AppHost/CrashHost/fixtures/workflows — composition/infrastructure; business cases mirror owning canonical `Features/<SliceName>/`, TUnit/MTP — єдиний .NET framework/runner. Frontend N/A; real first-render website evidence належить BenchmarkComparisons. One integration owner owns central project/CI/resource graph; bounded test workers зберігають every assertion та join з real GitHub evidence. Нові doc files не запускають локальний продукт і не послаблюють жоден gate.
-# Build and Tests boundary, owner correction 2026-10-06
+### Fixture-owned preparation composition owner
 
-REQ-TEST-PIPELINE-001: Build and Tests runs solution builds, repository checks and
-KeyLoad functional analyzer/unit/scalar/recovery/RF3 tests only. Benchmark tests
-are compiled in the separate KeyLoad.ComparisonTests project and executed only
-by Benchmarks, including progress, entry and counter regressions.
+REQ/AC-TEST-010/014/015 and REQ/AC-TUNIT-ENTRY-006: The fixture uses pinned Aspire13.6's existing public direct testing builder Create rather than the entrypoint-suspending CreateAsync. An AppHost-owned non-inlined composition bridge ensures native stack-based DCP metadata discovery selects KeyLoad.AppHost, then invokes unchanged AddKeyLoad. The session records the actual native builder immediately, extracts the original validated runner configuration, removes the recursive runner and verifies its one-prerequisite/no-container model before Build/start. No original standalone Program/TestSuiteApplication is resumed to wait on the removed tests-cluster resource. The session is the sole prerequisite execution owner. Native direct builder disposal owns the built application after Stop and original output joining; do not separately dispose that same application first. Keep every original primary/cleanup failure, selector, policy, producer, receipt and tag gate. Standalone suite behavior and the authenticated default image path are unchanged.
 
-AC-TEST-PIPELINE-001: the unit assembly discovers no BenchmarkComparisons cases;
-the comparison assembly retains their test inventory and assertions; Build and
-Tests invokes no comparison suite or benchmark load-generator preparation.
-Benchmarks executes the transferred contracts in normal and scalar modes and
-retains original TRX reports. Static workflow/project inventory review is the
-explicit infrastructure-placement evidence exception; actual Aspire/TUnit
-discovery and original reports verify the runtime boundary.
+The pinned [native implementation](https://github.com/dotnet/aspire/blob/v13.6.0/src/Aspire.Hosting.Testing/DistributedApplicationTestingBuilder.cs) defines direct creation, stack DCP discovery, Build and builder disposal; the suspended factory instead resumes the original entrypoint. Verification must retain the unchanged original failure and run the same actual SDK/MCP operations on its freshly owned image, proving original producer exit, exact model/container identity, readiness of every configured node and complete stop/reader/lock/tag cleanup. Linux gates remain separate. This repairs a concrete competing source owner; it does not assert the original stopping cause or claim an unexecuted green result.
 
-TASK-TEST-PIPELINE-001 moves benchmark cases and exclusive helpers;
-TASK-TEST-PIPELINE-002 updates workflow callers and server-only RF3 image
-preparation; TASK-TEST-PIPELINE-003 verifies compilation, discovery, unchanged
-assertions, formatting and governance. The implementation contract is
-[ADR-074](../ADR/ADR-074-aspire-owned-test-entry.md). No database API, persisted
-format, replication or authorization contract changes.
+### Native TestCluster startup first-cause evidence
 
-TASK-TEST-PIPELINE-EXCLUSIVE-HELPERS completes REQ/AC-TEST-PIPELINE-001 by moving
-the exclusively benchmark-consumed `TestOrchestrationConfigurationKeys.cs` and
-`WorkflowDatabaseGroups.cs` into ComparisonTests
-`Features/BenchmarkComparisons/UnitContracts/Contracts/` and `UnitContracts/Models/`.
-Preserve their complete bytes/namespaces; remove only their two comparison-project
-Compile links. `TestElapsedClock` keeps its one shared source because functional
-unit cases use it. ADR-074 fixes source ownership and root/Luna join roles; source
-byte/hash/reference review plus the existing canonical build/discovery gates
-verify this structural continuation without artificial structure-only tests.
+REQ/AC-TEST-010 and REQ/AC-TUNIT-ENTRY-010 cover the full Unit startup/client-gateway and joined cleanup boundary. Pinned Orleans10.4 already owns file logging, and a failed full Unit run omitted those native files. Failure-only bounded safe projection of the SAME cluster-ID-owned files is saved under actual TUnit ResultsDirectory after genuine joined disposal; uncertain cleanup reads no open logs. Preserve initiating plus every cleanup/capture failure, original native50/SIMD/startup and operation deadlines, all actual clients and operations. No new logger/provider, endpoint, retry, serial execution or success inference. Limits: actual initial silo count plus client files,1MiB inspected/file,64safe header/exception events,65536UTF8output; saturation/missing/unknown are explicit. No raw messages/config/endpoints/identity/credentials/user body. New original cancelled-startup→joined evidence→fresh signed write/replay/close whole regression and all existing ConnectionNative/RequestCqrs/NativeCqrs operations remain required.
 
-TASK-TEST-TUNIT-LOCAL-MEMBERSHIP implements the REQ/AC-TEST-015 prerequisite
-ownership gap under ADR-117. [ADR-119](../ADR/ADR-119-tunit-owned-local-membership-image.md)
-freezes the explicit native selector, per-case TUnit-owned preparation, typed
-selection without global environment mutation, six-name model/runtime proof and
-joined exact-tag cleanup after all database resources/locks settle. Traceability
-is REQ/AC-TUNIT-ENTRY-005 to the actual six-silo membership case and native
-selection/model rejection whole flows. Implementation/runtime qualification is
-pending; a pre-existing external receipt is not end-to-end ownership evidence.
+Parser attachments remain bound to the same accepted native header; rejected/saturated headers reset continuation identity. Under the unchanged64-event ceiling, actual failure headers may displace the last informational header, retaining exact role/offset ordering and explicit saturation. Unknown/missing evidence never establishes a startup cause.
 
-## Owned preparation failure diagnostics
+### Owned fixture failure settlement
 
-TASK-TUNIT-LOCAL-PREPARATION-DIAGNOSTICS-008 refines REQ/AC-TEST-007/010/014/015
-and REQ/AC-TUNIT-ENTRY-006 after R312 failed eight selected cases during
-preparation startup. Before Build, the session registers a passive native host
-logger retaining only closed category/severity/event ID/exception kind; it
-never formats messages, exception text, properties, environments or endpoints.
-Observe actual prerequisite notifications before Start, retain at most128
-records, and emit an80-line/8192-byte failure receipt before teardown. Include
-caller-token and ApplicationStopping states and actual prerequisite state/exit.
-These identify cancellation provenance; an absent original cause remains
-unobserved. Prime the original TestSuiteOutput subscription from actual current
-resource state, then keep its existing native stream and joined cleanup. The
-producer retains its original bounded build-output sidecar under its existing
-contract; neither an absent stream nor a host-stop flag proves a Docker cause.
-Preserve primary, diagnostic and cleanup failures together. No deadline,
-selector, topology, native provider, success predicate or qualification gate
-changes. Sol owns private cohesive ClusterReplication diagnostics/session and
-AppHost TestInfrastructure output priming; root owns joins and native validation.
+REQ-UNIT-OWNED-FAILURE-SETTLEMENT-001: Genuine SampleChunkPartialRetention, RemoteModelNativeMac and ReadGrantFailureSettlement whole operations lexically own their fixture acquisition. Preserve operation exceptions before implicit disposal and all acquisition/disposal exceptions afterward, including fatal errors. Original reverse cold-store disposal and conditional original-store release remain unchanged. Owned MAC credential bytes are cleared on construction/disposal failures without touching borrowed caller bytes. ReadGrant inherits only the independently sealed CancellationToken-last constructor/caller contract; capacity, cancellation, settled grant accounting and complete native images stay unchanged.
 
-Verification requires the original failed preparation receipt and resource logs,
-unchanged failure/cleanup settlement, followed by the same eight actual RF3
-SDK/MCP workflows on the current owned image with complete cleanup. Source
-lifetime/privacy review supplements environmental failure evidence; no fake
-provider or synthetic hook qualifies startup. A successful rerun cannot erase
-R312 or establish why it stopped. Runtime qualification remains pending.
+AC-UNIT-OWNED-FAILURE-SETTLEMENT-001: All original retention/merge/refusal/replay/two-cold, native MAC sign/verify/privacy and read-consumer failure→retained charge→settlement→healthy→cold assertions and declarations remain unchanged. No invented failure/provider, no cap/deadline/default/protocol changes. Canonical Unit50 SIMD and exact source/image/current UID discovery remain mandatory OPEN gates.
 
-## Fixture-owned preparation composition owner
+Source map: TimeSeries/Fixtures/SampleChunks/SampleChunkPartialRetentionFixture.cs and Helpers/SampleChunkPartialRetentionFlow.cs; DocumentStorage/Fixtures/RemoteModelNativeMacFixture.cs; ResourceExecution/Scenarios/ReadBudgets/ReadGrantFailureSettlementFlow.cs.
 
-TASK-TUNIT-LOCAL-PREPARATION-OWNER-009 implements REQ/AC-TEST-010/014/015 and
-REQ/AC-TUNIT-ENTRY-006. The fixture uses pinned Aspire13.6's existing public
-direct testing builder Create rather than the entrypoint-suspending CreateAsync.
-An AppHost-owned non-inlined composition bridge ensures native stack-based DCP
-metadata discovery selects KeyLoad.AppHost, then invokes unchanged AddKeyLoad.
-The session records the actual native builder immediately, extracts the original
-validated runner configuration, removes the recursive runner and verifies its
-one-prerequisite/no-container model before Build/start. No original standalone
-Program/TestSuiteApplication is resumed to wait on the removed tests-rf3 resource.
-The session is the sole prerequisite execution owner. Native direct builder
-disposal owns the built application after Stop and original output joining;
-do not separately dispose that same application first. Keep every original
-primary/cleanup failure, selector, policy, producer, receipt and tag gate.
-Standalone suite behavior and the authenticated default image path are unchanged.
+### Scoped task artifact retention
 
-The pinned [native implementation](https://github.com/dotnet/aspire/blob/v13.6.0/src/Aspire.Hosting.Testing/DistributedApplicationTestingBuilder.cs)
-defines direct creation, stack DCP discovery, Build and builder disposal; the
-suspended factory instead resumes the original entrypoint. Root integrates and
-qualifies this private AppHost Hosting bridge/session join; rollback restores
-only this composition path, with no data/dependency/public API migration.
-Verification must retain the unchanged R312 failure and run the same eight
-actual standard RF3 SDK/MCP operations on its freshly owned image, proving
-original producer exit, exact model/container identity, three-node readiness and
-complete stop/reader/lock/tag cleanup. Six-silo membership and Linux gates remain
-separate. This repairs a concrete competing source owner; it does not assert
-R312's original stopping cause or claim an unexecuted green result.
+REQ/AC-TUNIT-ENTRY-010 and existing REQ/AC-TEST-004 require scoped task jobs to retain their original `artifacts/qualification/**` alongside native discovery/execution reports, source/DLL/PDB bindings, code-quality and image receipts. A task-job upload which omits this fixture-owned directory is an artifact retention gap and cannot establish an absent observation or a failure cause; the immutable original reports and failed outcomes are preserved.
 
-## Explicit public Q2 rejection RF3 selection
+The existing bounded native evidence writers retain closed status/error/numeric metadata without credentials or caller payloads; no new observation, report fabrication, parser, runtime behavior, retry, suite selection or permission is introduced. The functional workflow artifact upload adds exactly that directory, as the full replicated-cluster upload already does. Existing complete mapped operations, no-skip, source/image and joined cleanup gates remain mandatory. CI upload success does not close an operation acceptance gate.
 
-TASK-REL-004-INNER-JOIN-PUBLIC-012-SELECTOR maps AC-REL-004-JOIN-001/003/005
-and AC-QUERY-007-JOIN-001 to REQ/AC-TEST-015 and REQ/AC-TUNIT-ENTRY-006 under
-ADR-118/119. Native local-image selection additionally admits exactly:
+## Native restart ownership and readiness evidence
 
-    /*/*/RelationalSqlRf3JoinRejectionTests/*
+REQ-REP-004 / AC-REP-004 and REQ-TEST-007 / AC-TEST-007: an actual successful Aspire Start is retained independently from its health/readiness completion. Once attempted, an unobserved Start outcome cannot be repeated; it remains owned until actual application/resource shutdown retires it. Once accepted, subsequent recovery resumes only native inspection, health wait and receipt settlement under the caller's existing token/deadline. It never reissues Start because health wait was canceled. The first observed replacement ID/configured image/image ID/start timestamp is retained and exact unchanged identity is required after health, before the original receipt is published. Native runtime identity changing during settlement fails; no readiness success is inferred from running state. Kill cannot replace an unsettled prior restart owner. The original initiating error and all cleanup errors remain separate.
 
-This selects the existing12 Arguments of
-RejectedJoinOnFourPublicPathsPreservesRowsAndCompleteHealthyPage. Preserve the
-byte-exact standard8 and six-silo1 selectors. Wildcard class names, method-only
-subsets, combined classes, unsupported/mixed/inherited image configuration and
-GitHub provenance reject; no default selector or tool catalog expands. Both the
-native selector and fixture's closed argument reader must admit this exact
-additional selector before preparation. The existing actual Node selection
-workflow tests positive original TUnit/filter/environment propagation and every
-existing rejection for all three selectors, plus four public12 near-miss filters
-with the exact safe local-selection error. This is infrastructure evidence only.
-
-Sol owns selector/argument admission and native selection regressions; SolNative
-owns the independent public12 helper commandId correction. Every SQL CALL
-configuration command carries its required outer canonical commandId for
-that operation under the existing stable command identity contract.
-Root joins the canonical independent R3 public12 packet and this selector and
-runs all12 complete rejection operations through real SDK query/SQL and official
-MCP query/SQL on the same existing owned RF3 fixture, preserving literal full
-row identity/JSON/revision, no disclosure and complete healthy follow-up. Keep
-original image/source verification, readiness, cancellation, process/reader
-joining, locks and exact-tag cleanup. No provider, public API, storage format,
-SQL language claim, default policy or qualification gate changes. Native
-normal/scalar selection proof, actual12 RF3 reports and original Linux delivery
-remain pending until executed; neither this selector nor source review closes
-full SQL or SQL-client protocol conformance. Rollback removes this additional
-selector and its assertions as one unit.
-
-
-## Native fixture default-time admission, TASK-TEST-EMBEDDED-CLOCK-ORDER-001
-
-TASK-TEST-EMBEDDED-CLOCK-ORDER-001: TestDatabase is the shared test owner of a genuine native ZoneTree DatabaseEngine. Submit without explicit time must use existing DatabaseEngine.ApplyEmbedded, which selects final business time inside the original ordered Store.Commit callback. Submission with explicit DateTimeOffset retains public Apply and its strict supplied-clock/replay/outcome semantics. Preserve the same stable operation ID, serialization, principal, errors and one real commit; no clamp, retry, mock coordinator, new gate or fenced-manager reset. This fixture composition refines TestInfrastructure actual-operation evidence (REQ/AC-TEST-010) and ADR-028 embedded clock ordering, not RF3 topology or clock qualification. NativeSagaTimeout shared PerTestSession fixture concurrently admits default CompleteSaga/CancelSaga/ConfigurePrincipal/revocation operations while native durable-job journal removal commits; pre-gate default clock sampling can therefore race the later committed instant. Existing five actual NativeSagaTimeoutFunctionalTests plus explicit stale-clock/ClockUncertain/replay tests, full normal/scalar and Linux gates remain required. Original R308 journal fences remain immutable evidence; no runtime success is claimed.
-
-
-## Saga deadline construction and admission
-
-TASK-TEST-SAGA-DEADLINE-ORDER-002 freezes CreateWaitingSaga intent: sampled now constructs dueAt, persisted CompareExchangeSaga.Deadline and identical DueWorkHint.DueAt. It is not an externally authoritative command evaluation instant. Sample deadline construction from the owning Database.EvaluationClock, preserve unchanged DueOffset/CompletionTimeout arithmetic and the exact canonical deadline/hint. Submit without explicit time selects final operation evaluation inside existing ApplyEmbedded commit admission. Never widen deadline, clamp time, retry or reset the native journal fence. Explicit-time canonical clock/replay regressions elsewhere remain unchanged. Existing five genuine NativeSagaTimeoutFunctionalTests deadline/effect/stale/revoked/completed/canceled and healthy control-job oracles remain required, along with original R317 outcomes before join.
-
-### TASK-TEST-R382-NATIVE-OWNER-EXPIRY-001
-
-REQ-TEST-010 / AC-TEST-010 and REQ-MSG-007 / AC-MSG-007: original R382 native failure evidence is retained. Each actual native TestCluster builder carries one private fixture-owner token in its Properties; actual ISiloBuilder.Configuration resolves only that owning fixture. A separately owned fixture cannot replace or clear another builder's owner. Register before native build/start, unregister only the same owner during its original joined cleanup; startup failures retain original failure and database cleanup failures. No new product hook, alternate coordinator, timeout or provider. Existing shared PerTestSession and owned boundary fixtures keep their actual native Orleans/ZoneTree lifetimes.
-
-The parent expiry whole-flow advances the actual owning clock two minutes after the first committed claim. Its unchanged default30second lease has then expired. Canonical receive replay reauthorizes that lease (CommandOutcomes.ValidateCachedQueueReceive -> Messaging.Lease) and must return exact Rejected/LeaseExpired with null result; serializing that null as a recovered receipt was the test error. Assert complete outer/lane identity, typed failure, no stop error, unchanged original persisted ReceiveResult bytes, every native store byte and position, followed by fresh healthy receive. Never extend lease or parent deadline, reset clock, disable strict native validation or invent a result. Existing valid receipt replay cases remain intact. Fresh original focused normal/scalar, full native and Linux gates are required; no source-only PASS or closure.
-
-
-### TASK-KL014-COLD-BOOTSTRAP-SDK-001
-
-REQ/AC-TEST-010, original architecture KL014 and ADR039/117: one fresh owning ClusterFixture captures actual selected storage root and native path existence immediately before creating the AppHost builder, then starts actual Aspire-owned RF3 current image resources, waits existing readiness, uses its discovered endpoint and private local profile in the actual built CLI status child. Reuse original process reader/exit settlement policy from AppHost; no CLI build/restore, secret argument, manual Docker or deadline expansion. Persist non-admin scoped credentials through actual SDK admin calls, configure collection, create/read full literal document, compare complete native receipt bytes for same command replay, require changed-content Conflict and unchanged full document plus original replay bytes, then healthy new-ID revision2. Await original fixture shutdown and assert only its owned root removed; primary and cleanup failures remain aggregated.
-
-This is cold data/bootstrap proof on native RF3, not proof of an unprovisioned clean operating-system machine or a single server without external services. The original clean-machine criterion additionally requires authenticated Linux runner tool/image prerequisites and actual execution evidence; topology remains mandated RF3. Existing SdkSubmitReturnedCancellationReusesCommittedReceipt remains separate mandatory UnknownWriteOutcome recovery proof, including its retained original failure. No task closure or PASS is claimed from authored source.
-
-The fixed internal ClusterFixtureColdStartObservation records only selected Root plus actual directory/file existence after coverage root selection and argument construction, before native builder/startup. No callback, fault control or caller-selected root. The whole operation requires that observation absent and exact same actual root after startup. Existing covered RF3 profile remains exactly eleven selected cases; this new bootstrap case is normal RF3 qualification, not currently eligible for covered selection. Register its actual case through the existing ledger: normal mode is no-op; unexpected covered selection remains rejected, with no whitelist change or coverage suppression. Constructor random root does not establish selected-root identity.
-
-## TASK-CQ-RF3-PREPARATION-OWNERSHIP-002
-
-REQ-CQ-039/040 and AC-CQ-039/040 retain the closed original eleven contributor,
-source/DLL/PDB/image/context and collector admission. Original4e18 BeforeSession
-selection failure used obsolete two-class runtime filter while producer selected
-seven classes/eleven cases; current shared catalogue already repairs that mismatch.
-No nested empty-string normalization is authorized: nested fixture mode/source are
-explicitly cleared, suite is absent, and current typed image context remains strict.
-
-The native TUnit coverage preparation owner must compose the AppHost directly through
-the existing Aspire testing builder API, validating outer original-node selection and
-exact closed catalogue first, then adding the unchanged real prerequisite resources.
-It must never resume a standalone TestSuiteApplication after removing its runner.
-The fixture owns preparation start/readiness/output/stop/dispose/collector cleanup;
-original primary plus joined cleanup failures remain retained. No deadline, image,
-source manifest, public RF3 topology, whitelist or thresholds change. Extend existing
-genuine source-preparation operation with exact old-selector rejection followed by
-healthy canonical-selector source admission and unchanged original manifest bytes.
-This admission control is supporting infrastructure evidence, not product coverage;
-actual covered RF3 eleven original collector flows and Linux gates remain mandatory.
-
-Supporting control owns GITHUB_SHA briefly under the existing globally nonparallel test, using only the genuine prepared native source manifest revision, restores the exact prior environment in finally and propagates primary/restore failures. Production selection still checks its original environment source SHA; no bypass parameter or fabricated manifest.
-
-R3 joined restoration: observe each original environment-key restore individually through existing ServerFailureObserver, continue every remaining key, retain all earlier stop/output/builder/image failures and throw only after restoration settles. Output lifetime disposal and cleanup service lookup similarly retain original failure identities. Prepare primary/cleanup aggregation remains unchanged. Correct actual AppHostRuntimeOptions.NativeCoverageRf3Image property verified in owning source.
-
-## TASK-KL021-OWNED-SILO-ISOLATION-002 — accepted namespace control implementation contract
-
-REQ-MTOKEN-ISOLATION-003: native fault image derives from the exact existing Dockerfile pinned aspnet/runtime and server build. A dedicated feature-owned fault Dockerfile derives from the authenticated exact server @sha256 image receipt; fault-runtime installs native iptables and a bounded coreutils timeout wrapper as container UID0 at image build, then restores APP_UID. Normal root Dockerfile and its runtime final/default target remain byte-for-byte unchanged and receives no fault tools or capability changes. Aspire13.6 public WithDockerfile(context,Dockerfile,stage:fault-runtime) owns the selected three-node image build/start; WithContainerRuntimeArgs adds only NET_ADMIN to these exact owned resources. No privileged, host network/PID namespace, production default changes, manual topology, image digest fiction or whitelist expansion. Tool version/package/license and base/build/image/config identities are actual build/start receipts, not inferred from a web page.
-
-AC-MTOKEN-ISOLATION-003: fixture opts into a separate owned native fault wave and requires Linux/running container Config.User APP_UID, only admitted additional capability NET_ADMIN, no Host/PID/shared namespace, exactly three model names and matching incarnation/config image/build source. Before every firewall mutation re-inspect owned ID/name/image/config/incarnation and verified unique IPv4 endpoints; reject malformed/ambiguous/IPv6/foreign source rather than accepting alias fallback. Native discovery SiloAddress IP/port must match inspected network address TCP11111; HTTP8080 endpoint remains discovered from Aspire. Unconfigured standard/default/covered fixtures cannot acquire this fault capability.
-
-REQ-MTOKEN-ISOLATION-004: create unique per-run bounded-length chains inside only the old leader's network namespace. For each of exactly two owned peer IPv4s, INPUT source and OUTPUT destination rules block both sport11111 and dport11111; attach those exact chains first in the corresponding chain so existing connections and both directions are isolated. HTTP8080 remains outside all rules. Record chain/rule mutation intent BEFORE execution and actual exit/output/check receipt before next mutation, including partial chain creation/jump install. Never flush shared INPUT/OUTPUT rules or unrelated chains. Restore only own exact jump/rules/chains and verify absence.
-
-AC-MTOKEN-ISOLATION-004: native docker exec --user0 uses inspected full owned container ID, executable argument list, no shell interpolation, no detach/privileged. Image timeout wrapper bounds remote iptables work; xtables lock wait fits within it. Host original exec task and bounded stdout/stderr readers remain owned and are actually joined even after initiating cancellation, then partial intents reconcile against native exact chain/rule state before restore. Docker CLI cancellation alone is not evidence of remote exec completion. Unsettled original remote/host work retains primary/cleanup/resource/image ownership and fails; never restores over an in-flight mutation or deletes retained receipts. Actual counter/rule checks and genuine surviving-majority new-term ACK provide fault proof, not HTTP reachability alone.
-
-AC-MTOKEN-ISOLATION-005: real SDK/officialMCP whole-flow uses current optional MinimumToken public contract: original canonical command ACK/token; exact old leader/container/native term; namespace isolation; actual different surviving leader/newer term and majority ACK of one immutable next command; reachable running old leader rejects token-bearing strong read with exact native no-authority error, no stale/partial body; same exact nodes/rules restored and joined; literal current document/revision/token/receipt and healthy reads across restored replicas. Existing parent/start/cleanup deadlines unchanged, no timer sleeps or generic retry-to-green. Any canonical UnknownWriteOutcome is preserved and reconciled only under existing original-ID/receipt contract, never replaced by fresh IDs or fabricated ACK.
-
-Public API evidence: Docker documents container exec UID selection and non-detached process lifetime at https://docs.docker.com/reference/cli/docker/container/exec/ ; namespace isolation and NET_ADMIN (rather than privileged) at https://docs.docker.com/engine/containers/run/ . Pinned Aspire13.6 local XML advertises WithDockerfile stage/build-before-start and WithContainerRuntimeArgs; these are source/API evidence, not native execution. Netfilter upstream https://www.netfilter.org/projects/iptables/index.html owns rule manipulation semantics. Current tool package version/image ID/namespace behavior will be measured in root's genuine native build/start gates; no runtime availability claim before execution.
-
-Ordered ownership: docs/ADR017 contract precedes Dockerfile fault-only stage and AppHost ClusterReplication resource composition helper. Integration ClusterReplication models/lifecycle/processes own exact node/image/IP/chain/rule receipts, original process/readers and restoration; owning case/flow consumes disjoint KL021 MinimumToken API packet. Root joins source/serialization/API paths coherently, builds and runs actual native Linux RF3. Source/API readiness, functional proof and all broader endurance/performance gates remain distinct; no KL021 task closure from authored code.
-
-REQ/AC-MTOKEN-ISOLATION-006: NodeStatus gains additive native Id9 ConsensusTerm, verified free after existing IDs0..8. NodeAdministration.StatusAsync copies Term from the same existing locked partition.Consensus.StateAsync snapshot used for Leader/Applied. Current persisted authorization, separate request grain, readonly status semantics and native/public serializers remain unchanged. Purpose is authenticated operational authority diagnostics, not a test hook. Original ACK and actual new-majority ACK whole-flow requires positive original term and strictly larger surviving term; changed leader alone does not prove it. No on-disk live inspection or invented term. Public SDK/official MCP status full outcomes bind actual native term; defaults of construction do not qualify it.
-
-
-Frozen bounded native authority observation (owner approved2026-10-08): under the SAME original McpCallerDeadline token, sequential authenticated SDK Status operations, exactly one awaited original request in flight, on the two inspected surviving voters may observe readiness. No Task.Delay, sleep, polling worker, reset deadline, mutation retry or health-only inference. The latest32 actual status/error observations form a fixed-size closed diagnostic summary; replies do not accumulate. Readiness is bounded by the original deadline, never by an arbitrary attempt count. Only exact OwnershipLost/503/"The cluster has no current leader with a reachable majority." is a pending authority observation; any other failure remains fatal to the flow. Readiness requires an explicit positive ConsensusTerm strictly newer than the original ACK's status and Leader equal to one of those exact two surviving voters, different from the isolated voter. Then submit exactly one immutable next command; require its actual quorum ACK and fresh status/official MCP status native term. Original cancellation fails honestly after joining its actual observation. Default production status semantics remain diagnostics, not a new strong-read promise; the subsequent actual ACK is the authority proof.
-
-Service-user invariant clarification: the fault Dockerfile inherits and restores the base APP_UID USER. The selected resources preserve the already existing ClusterResourceSettings --user uid:gid override exactly, captured through pinned public ContainerRuntimeArgsCallbackAnnotation before adding NET_ADMIN. They do not change default host/container identity or start service as root. Native tool/read commands alone use --user0 inside each verified owned namespace.
-
-Persisted NodeStatus.NodeId is a physical GUID independent of Aspire node1/node2/node3 resource names. The real flow captures each original authenticated endpoint identity and requires it unchanged after restoration; public SDK/official MCP status comparisons bind that actual GUID rather than an invented resource-name identity.
-
-
-## Accepted partial native restart ownership (2026-10-08)
-
-TASK-REP-PARTIAL-RESTART-001 refines REQ-REP-004 / AC-REP-004 and REQ-TEST-007 / AC-TEST-007. Before implementation: an actual successful Aspire Start is retained independently from its health/readiness completion. Once attempted, an unobserved Start outcome cannot be repeated; it remains owned until actual application/resource shutdown retires it. Once accepted, subsequent recovery resumes only native inspection, health wait and receipt settlement under the caller's existing token/deadline. It never reissues Start because health wait was canceled. The first observed replacement ID/configured image/image ID/start timestamp is retained and exact unchanged identity is required after health, before the original receipt is published. Native runtime identity changing during settlement fails; no readiness success is inferred from running state. Kill cannot replace an unsettled prior restart owner. The original initiating error and all cleanup errors remain separate.
-
-The fixture exposes a useful two-phase native ownership boundary: BeginContainerRestartAsync accepts the actual Start and observes its running replacement; RestartContainerAsync settles native health and receipts for the same owner. This is fixture lifecycle composition, not a product test hook. AC-REP-PARTIAL-RESTART-001: AcEvent008AcceptedRestartCancellationResumesSameReplacementAndPreservesReplay uses actual killed leader/accepted replacement, cancels at the exact-token original health-settlement admission gate, then resumes under the original operation deadline and proves the same running replacement identity, canonical SDK receipt replay, full literal SDK/official MCP aggregate state on all three replicas. No timer, sleep, fake resource, deadline increase or mutation retry is added. During-health scheduler timing is not claimed: the deterministic cancellation is at the explicit accepted-Start-to-native-health boundary. Existing original leader-loss case remains intact.
-
-Original aa103 run37686560768/job113015778654 failure remains immutable. Its initiating Starting/unknown-health cause is unresolved; this repair addresses only the proven secondary repeated Start. Exact-source Linux native RF3 qualification remains open. Root owns join/build/native execution.
+The fixture exposes a useful two-phase native ownership boundary: BeginContainerRestartAsync accepts the actual Start and observes its running replacement; RestartContainerAsync settles native health and receipts for the same owner. This is fixture lifecycle composition, not a product test hook. AC-REP-PARTIAL-RESTART-001: AcEvent008AcceptedRestartCancellationResumesSameReplacementAndPreservesReplay uses an actual killed node/accepted replacement, cancels at the exact-token original health-settlement admission gate, then resumes under the original operation deadline and proves the same running replacement identity, canonical SDK receipt replay, full literal SDK/official MCP aggregate state on every replica. No timer, sleep, fake resource, deadline increase or mutation retry is added. During-health scheduler timing is not claimed: the deterministic cancellation is at the explicit accepted-Start-to-native-health boundary.
 
 ```mermaid
 flowchart LR
@@ -894,624 +270,51 @@ flowchart LR
 
 Restart diagnostic refinement: resumed attempts explicitly record AcceptedStartRetained, never a fabricated new Start success. Begin phase failures save the original exception/category at actual StartCommand or RuntimeInspection stage; diagnostic cleanup failure is attached through the unchanged failure-retention path.
 
-
-## First-incarnation readiness evidence (2026-10-08)
-
-TASK-REP-READINESS-EVIDENCE-001 refines REQ-REP-004 / AC-REP-004 and REQ/AC-TEST-007. This stage follows TASK-REP-PARTIAL-RESTART-001 without changing admission. For each exact Aspire discovered owned node endpoint, one native GET /health/ready is awaited and its bounded response reader settled/disposed. It shares the existing three-second per-node diagnostic deadline with signed discovery, rather than granting either a second budget. Only status200,503,other HTTP status or fixed unavailable is retained; response bodies are drained within the existing8192-byte cap and never retained as readiness explanations. Server's503 body does not identify DatabaseReady/compatible-cohort/catalog branch, so branch remains explicitly Unobserved. No server response/auth semantics change or inferred reason is introduced.
+First-incarnation readiness evidence under REQ-REP-004 / AC-REP-004 and REQ/AC-TEST-007 does not change admission. For each exact Aspire discovered owned node endpoint, one native GET /health/ready is awaited and its bounded response reader settled/disposed. It shares the existing three-second per-node diagnostic deadline with signed discovery, rather than granting either a second budget. Only status200,503,other HTTP status or fixed unavailable is retained; response bodies are drained within the existing8192-byte cap and never retained as readiness explanations. Server's503 body does not identify the DatabaseReady branch, so the branch remains explicitly Unobserved. No server response/auth semantics change or inferred reason is introduced.
 
 Each existing actual native ResourceId log subscription records its closed started/running/completed/canceled/faulted state plus observation timestamps of first/last received log lines. These are observer times, not invented native event timestamps; observed faults are rethrown for existing joined disposal. Save snapshots this evidence without replacing its original failure. ResourceId-keyed task lifecycle is retained; no unproved reattachment is introduced. Current24-line buffers and80-line/8192-byte total artifact limits remain unchanged. Evidence groups put resource/readiness/discovery/subscription state first, followed by newest retained logs so prefix clipping cannot omit the latest signal. Existing failure markers remain.
 
-AC-REP-READINESS-EVIDENCE-001 maps to the actual AcEvent008AcceptedRestartCancellationResumesSameReplacementAndPreservesReplay flow: canceled accepted restart saves real diagnostic evidence before recovery; after real all-three SDK/MCP healthy replay, another one-shot observation must contain HTTP200 for all three owned discovered endpoints and actual log observation state. No fake response/source assertion/timer/retry/increased budget. Native execution and exact Linux original evidence remain root-owned and pending.
-
-The owned namespace-isolation whole flow uses `ReplicaIsolationFixtureLifecycle` to retain the actual fixture until successful startup, then join exactly one final disposal. Failed `ClusterFixture.InitializeAsync` continues to join its original startup cleanup before returning the failure; the outer scope must not issue a second cleanup. Each restored voter has its own native HTTP/official MCP scope, joined before advancing to the next voter, preserving all primary and cleanup failures.
-
-TASK-KL021-NATIVE-NETWORK-IDENTITY-003 refines REQ-MTOKEN-ISOLATION-003 and AC-MTOKEN-ISOLATION-005 within the existing owned-namespace contract. Authenticated original Linux run37821315110/attempt1/source3458 retains schema2 admission facts: one attached network has a present name and ID; native NetworkMode exactly equals that same attached ID and does not equal its name. Admission requires a nonempty mode/name/ID and accepts exact ordinal equality with either identity of that one actual attached network. Missing/malformed identity, multiple networks or an unrelated mode still fails; no prefix, alias, caller value or raw identity is published. Every original running/nonprivileged/non-root/PID/capability/configured-image/source/incarnation check, genuine majority ACK fault proof and joined rule/container cleanup remains mandatory. Root owns ReplicaIsolationContainerAdmission; the existing full former-leader SDK/official-MCP minimum-token failure/restoration flow remains the actual Linux regression. Source review cannot qualify the namespace or close KL-021.
-
-TASK-TUNIT-COVERED-SHUTDOWN-IDENTITY-009 retains the original verified coverage container names on the same startup/stop identity owner, as frozen in [NativeTUnitEntry](TestInfrastructure/NativeTUnitEntry.md) and [ADR-117](../ADR/ADR-117-native-tunit-ci-entry.md). This removes the post-Stop service lookup which failed four original covered relational flows; every native stopped-container and collector/cleanup/coverage gate remains unchanged and pending current-source execution.
-
-The four `NativeTextWait*` unit flows must seed the actual canonical prefix through the native `DurableReplicaLog` and `ReplicaMaterializer`, wait for completed apply and resolve the original persisted complete receipt. `ReplicaAppliedPositionWaitFixture` accepts optional database limits and evaluation clock for this actual ordered-apply component flow. Direct embedded commits cannot substitute for the persisted replication-applied cut; tests must not write `AppliedBytes` manually or weaken production cut validation. This component fixture remains an explicit single-voter unit control; genuine RF3 authority is verified only by the independently owned Aspire/Docker integration flow.
-
-## Native fixed-name restart recreation observation (c028 failure repair)
+AC-REP-READINESS-EVIDENCE-001 maps to the actual AcEvent008AcceptedRestartCancellationResumesSameReplacementAndPreservesReplay flow: canceled accepted restart saves real diagnostic evidence before recovery; after real SDK/MCP healthy replay on every node, another one-shot observation must contain HTTP200 for every owned discovered endpoint and actual log observation state. No fake response/source assertion/timer/retry/increased budget. Native execution and exact Linux original evidence remain pending.
 
 REQ-REP-PARTIAL-RESTART-001 / AC-REP-PARTIAL-RESTART-001: after the one accepted native Aspire Start, fixed-name container removal/recreation is an observable lifecycle transition. Successful native `docker container ls --all --no-trunc` scoped to the exact anchored owned name may report no container until creation. The original bounded runtime observation continues under its original token, timeout and polling interval; this is not another Start or a database retry. A present observation must contain exactly one full ID and the exact name, followed by native inspection of that ID; existing image/start identity and health settlement fences remain mandatory. Docker command failure, malformed or foreign identity, cancellation and cleanup failures remain failures, never absence.
 
-TASK-C028-RESTART-OBSERVATION-001 retains the actual `AcEvent008AcceptedRestartCancellationResumesSameReplacementAndPreservesReplay` SDK/official MCP complete receipt/state flow and original retained-replica/leader-loss scenarios as native qualification. Source review does not qualify these cases. Original c028 required TRX failures and all later cascades remain retained; this correction does not establish a cause for unrelated failures.
+## Cluster operation flows owned by the test infrastructure
 
-## Signed public read admission cancellation (AC-ANN-008)
+### Connection execution cluster tests
 
-The actual current-image Aspire RF3 wave may accept the same centrally validated
-QueryExecutionOptions already owned by ClusterFixture. A typed optional profile
-is applied before BuildAsync; null preserves every existing caller. It changes
-no image whitelist, authority, deadline, signed control format or covered-eleven
-inventory. The explicit ANN profile is disabled outside its owned scenario.
+ADR-125's REQ/AC-CLIENT-CONNECTION-001/002 and REQ/AC-ORL-013 reuse the existing ADR-117 TUnit-owned actual-image preparation and explicit child identity. The additional exact selector is:
 
-AnnPublicCancellationScenario arms the existing signed v2 AuthorizationReload
-read phase for one newly persisted c1-probe identity, empty command identifier,
-ApproximateSearch read kind and actual discovered voter. It cancels the original
-SDK/official MCP token only after that exact signed observation; cancellation and
-ProducerDisposed settle before retiring the arm, rereading the full canonical
-literal corpus and performing healthy SDK/MCP/Q1 ANN reads. SDK read cancellation
-is Cancelled with no page, never UnknownWriteOutcome. Official cancellation is
-its actual interruption. This proves public admission cancellation only; native
-observed-work and partial-file-write cases separately prove execution cancellation.
-Existing parent/wave/cleanup deadlines, original task joins, locks and primary
-plus cleanup retention remain unchanged. No runtime success is claimed.
+    /*/*/(ConnectionClusterSequentialTests|ConnectionClusterOverlapTests|ConnectionClusterAuthorizationTests)/*
 
-Source-bound phase precision: the existing signed AuthorizationReload observation
-is immediately BEFORE GrainRequestAuthority.ReloadForRequest, followed by the
-original scope recheck and fresh persisted reload. This cancellation case proves
-pre-reload public read admission settlement, not completed authorization or
-during-index work. The ordinary healthy follow-up performs actual current
-persisted authorization and one-cut search; separate native worker cases retain
-the genuine after-work cancellation oracle. No control semantics are renamed.
+It owns all five expanded native SDK/official MCP instances, including actual HTTP/2 same-connection overlap. No wildcard/subset/mixed-image or GitHub identity exception is added. ConnectionClusterScenario starts LocalClusterImageTestSession, passes its explicit Selection through RequestCqrsClusterImageProof and wave startup, verifies every modeled node tag and actual image IDs, and joins the original wave before exact-tag cleanup. Existing caller defaults remain unchanged when this selector is absent. Native arguments propagate explicitly without ambient image mutation. The established closed private CQRS probe profile remains required for bounded actual operation/activation witnesses. Native-image preparation and source receipt verification precede cluster startup; no stale image, manually started nodes or local benchmark execution is admitted. All measured qualification remains original Linux GitHub evidence. Complete existing positive/ negative native selection tests remain mandatory alongside the five actual cluster flows; adding selector code alone does not pass either gate.
 
-## Native ANN fixture applied authority (TASK-ANN-NATIVE-FIXTURE-001)
+### Pinned Aspire endpoint model
 
-REQ-ANN-001/007 and AC-ANN-007 require actual persisted applied authority. ANN
-Unit and CrashHost fixtures must submit original commands through independently
-owned native DurableReplicaLog and ReplicaMaterializer; embedded Apply does not
-establish a replicated cut. Every configure/seed/consumer/checkpoint command
-retains its exact identifier, payload, explicit time and outcome. The native
-materializer writes applied authority through original canonical Apply(index).
-After actual bounded WaitForApplyAsync the original operation is replayed only
-to retrieve its persisted outcome, with exact no-effect assertions unchanged.
-No manual AppliedBytes, no synthetic no-op authority, no collector weakening.
+REQ/AC-TEST-001: the full Unit model/disposal flow asserts every Aspire-owned endpoint, including the HTTP/2 endpoint. Preserve genuine configured-node model construction, pinned image, identity, mount, readiness/dependency model and joined disposal checks; independently assert ordered http/silo/http2 names, original http target8080/silo11111 and actual HTTP/2 target8081, scheme, unproxied and internal visibility. Move only endpoint assertions/constants into a feature-local helper to retain the existing 200-line type bound. ADR-125 and current owned ClientApi endpoint composition define the existing contract; no topology, port, timeout or platform exception is introduced. Linux runtime acceptance remains separate.
 
-The opt-in TestDatabase native admission preserves every default embedded and
-explicit-time caller. It owns its separate replica store/log/snapshots/materializer
-and joins the materializer before disposing log/replica/canonical owners. Local
-fixture commit is not a claim of RF3 quorum; public RF3 gates remain mandatory.
-Original validated ReplicaExecutionOptions.CommandTimeout bounds apply settlement;
-original caller cancellation remains linked. Native worker failure is propagated,
-not retried or hidden. Constructor and terminal cleanup retain primary plus owner
-failures. CrashHost keeps distinct acknowledged and JournalFlushed original cuts
-and reopens the same actual durable replica log before replay. Process-kill is
-not power-loss evidence. Original R4 defect receipt remains immutable history.
+REQ-TEST-001/011/015 and their existing ACs preserve the genuine configured-node model construction, complete endpoint assertions and joined model disposal. In ExactSelectionBuildsTheOwnedClusterModelAndSettlesDisposal the pre-DCP http2.Port is 8081, not null. No deployment port configuration changes are authorized by this test correction.
 
-Known native command IDs bind their ORIGINAL retained ReplicaEntry index. If a
-restart/canceled wait left that entry unsettled, admission publishes only its
-original commit index if not already committed, joins its original apply cut
-under the same existing timeout/caller token and resolves its fresh original
-outcome. RecoveryRequired cannot cause a second append for a retained ID. Native
-entry absence within LastIndex fails closed; no fabricated command authority.
+Pinned Aspire.Hosting 13.6.1's EndpointAnnotation retains an omitted backing port and exposes targetPort as Port for an unproxied endpoint unless the port was explicitly set to null. Existing ClusterConnectionEndpointResources.Apply supplies targetPort8081, name http2, isProxiedfalse and no port argument through native WithHttpEndpoint. Therefore the constructed model's public Port property is8081; this is not proof of an explicitly fixed container host binding.
 
-## Scoped KL-036 native Linux acceptance lane (2026-10-09)
+The pinned DcpExecutor allocation checks container SpecifiedPort for a fixed public port. The omitted backing port requires allocation for a proxyless container; EnsureProxylessEndpointPort assigns the real allocated public port while retaining container target8081. The cluster resources omit this http2 backing port. Model verification thus compares http2.Port to its independent Http2TargetPort constant before DCP, preserving exact names/order/scheme/target/internal/unproxied assertions, all other endpoint values, actual Aspire Build and original application/root cleanup. It does not claim actual distinct allocated endpoints, readiness, successful connection or cluster execution; those remain authentic Aspire runtime gates.
 
-TASK-KL036-EXACT-NATIVE-ACCEPTANCE-001 / REQ-KL036-NATIVE-ACCEPTANCE-001 / AC-KL036-NATIVE-ACCEPTANCE-001 add KL-036 to the same closed native task matrix and manual selector. This is scoped public-parent/supporting acceptance, never whole KL-036/product/fullsuite/coverage qualification. Existing task identities KL008/011/014/015/021/027, default full suites, scalar/recovery/RF3 and all artifact/provenance/image/cleanup gates remain mandatory. Five selections contain29 declared cases per profile:20 existing source-mapped supporting instances,3 complete native encoded type-frame flows, and6 genuine Aspire-owned public-parent RF3 flows across PublicParentFlowTests(1), ExpiredRetireCancellationRf3Tests(4), ParentCapacityRf3Tests(1). The UTF8/UTF16 native fingerprint method retains its three actual Int32 boundary instances0/1/2. Framing is supporting registered generated-command/counter framing, malformed native-version refusal then exact healthy complete-payload continuation and concurrent native sessions/canceled admission; it is not a separate product capability.
+### Cold restart of every stopped node before readiness
 
-Root must supply fresh original native filtered metadata and PE/PDB/source bindings before final contract admission. Class/method/parameter/native display/instance/UID/source identity, exact union/no skip/no duplicate/no extra, unmodified original TRX and counters, original source/image before-after and settled native process/registry/resource cleanup remain unchanged. Source-declared counts are not executed or discovered evidence. Linux normal/scalar cells use separate GitHub runners and the existing server-only image producer, exact source/run/attempt/image receipt, native MaximumParallelTests20 and preserved NotInParallel shared-resource protections. Scalar describes only the caller environment; no scalar server assumption is invented. Existing unit30m/RF3 selection60m and180m job limits are unchanged. Failure retains authentic reports and blocks qualification; no omission, retry, fallback, custom runner or extra workflow is introduced.
+REQ/AC-TEST-004/010/014/015 and REQ/AC-TUNIT-ENTRY-001 preserve the genuine fixture-owned Aspire cluster, same-root volumes, native kill/restart receipts, SDK/official MCP/Q1 operations and joined shutdown. After stopping every node, a cold cut must not await the first RestartContainerAsync, whose actual owner waits for cluster readiness while the other nodes remain stopped (QueueLeaseClusterCold awaited it and failed). This is a test-orchestration defect, not permission to change server quorum, schedule deadlines or authorization.
 
-Supporting cases retain real persisted caller-stamped/wrong-stage denials, cold unknown/prepared-winner cancellation, raw scope/read reservations and release/deadline isolation, authenticated Capture/fullmodel/receipt cold replay, native canonical fingerprint and actual Orleans context restoration/concurrency/disposal. Public RF3 preserves linked models and SDK/official MCP/Q1 receipts across two genuine RF3 owners/cold replay; original cancellation own-outcome/lost-reply/unknown charged refusal/distinct cleanup generation; same-token sealed expiry only Cancelled/no-effect; actual cold-corrupt disposition refusal followed by exact fixture-owned database+replica restoration and healthy continuation; configured capture-shape/grant bound denial and restoration. Independent same-seal MissingAuthority remains OPEN, as do native future embedded SafeDetail upper-bound and exact operational pre-admission+1 criteria. No selected flow can close those unqualified gates or substitute fixture reset for production recovery/power-loss proof.
+The orchestration applies to QueueLeaseClusterCold, InboxProcessingClusterCold, QueueProducerClusterCold, SubscriptionFilterClusterCold, TargetInboxClusterCold, SampleChunkRetentionClusterCold and SampleChunkClusterCold. After the original kill-all phase, invoke the existing BeginContainerRestartAsync for every original node using the SAME caller cancellation token and existing failure ledger where applicable. Only then invoke every unchanged RestartContainerAsync and unchanged healthy-resource wait. The native BeginRestart owner retains the original killed-container receipt and accepted replacement identity; subsequent RestartAsync validates and settles that same owner, readiness, original volume/image and actual restart receipt. Existing GraphIncomingPublicCold and FeedLiveClusterCold already use this ordering. Parallel Task.WhenAll and single-node/rolling helpers are outside this orchestration.
 
-Traceability preserves existing PartitionTransfer/ADR106 public-parent/cancellation/disposition contracts and ResourceExecution scoped-grant requirements; this additive execution orchestration uses ADR117 and REQ/AC-TUNIT-ENTRY-010. Ordered stages: docs-first scope, private exact contract/validator/workflow change, root fresh build/native discovery identity comparison, unchanged source/image/process checks, commit/push and authenticate each task-acceptance-KL-036-normal/scalar original artifact source/run/attempt/API+ZIP digest before any acceptance claim. Root owns live docs/workflow/compiler/Git joins; security owner repairs scoped infrastructure and harvests these dedicated original outcomes, Movement/Session own whole parent implementation. Rollback removes only the additive KL036 dispatch/contract entry while retaining originals and all prior lanes; there is no data/protocol migration.
+Preserve all original cases, native UIDs/Args, deadlines, health predicates, per-runner50 and exclusive heavy1. Existing server lifecycle, public contracts, aliases/field IDs, storage and packages stay exact. Verification is the genuine NullSelectedService continuation through both cold cuts and public SDK/MCP/Q1 replay/claim/ACK/healthy assertions. Run the remaining affected original cold operations in exact-source Linux task/full suites; a build or supporting control cannot establish their cluster acceptance. The original failure/cleanup ledger stays unchanged. ADR-117 records this unchanged-topology orchestration contract.
 
-```mermaid
-flowchart LR
-  A[Exact source and native metadata] --> B[KL036 normal or scalar caller]
-  B --> C[23 native supporting cases]
-  B --> D[6 genuine Aspire RF3 cases]
-  C --> E[Original source image TRX and cleanup verification]
-  D --> E
-  E --> F[Scoped acceptance only]
-```
+### Private cold-wave scheduling
 
+AC-TI-CLUSTER-COLD-OWNERSHIP-001: the six SubscriptionPhasePublicColdTests each own an independent actual Aspire Docker application (cluster) and two same-volume cold restarts. Use the existing native TUnit NotInParallel contract for those complete private cold-wave cases, matching the established blob-cancellation ownership pattern. Preserve all original case identities, operations, readiness requirements, tokens, deadlines, SDK/official MCP assertions and joined shutdown. Other independent test classes and the separate native Unit runner retain maximum50; this is no concurrency or performance qualification claim.
 
-### TASK-SDK-KESTREL-FAILURE-OBSERVATION-001
-REQ-TUNIT-KESTREL-OBSERVATION-001 / AC-TUNIT-KESTREL-OBSERVATION-001 under ADR-117 and existing ClientApi transport requirements freeze test-only bounded observations for the authentic eb0 five failures: KeyLoadClientNullReadTests.AllNativeAbsentReadsRemainSuccessfulBeforeUnavailableStatusAndFullHealthyContinuation (two existing arguments), KeyLoadClientNullWriteTests.UnavailableSuccessfulWriteBodyRetainsUnknownOutcomeStableRetryAndNullableReads (two existing arguments), and KeyLoadClientTransportTests.MidBodyCancellationMapsReadFailureAndClientCanSendNextRequest. Actual Kestrel start/send/handler/response completion/cancellation records carry only closed stages/status/category and actual monotonic elapsed, ThreadPool available worker/IO threads, pending work and native thread count. At most64 records, saturation explicit. No URL/path/header/body/credential/payload/caller value is inspected or emitted.
-The existing ephemeral loopback Kestrel/default native HTTP handler chain, actual client/request tokens, five-second bounds, full original negative-to-healthy assertions and cleanup remain unchanged. The optional observation is passed only by these flows; no extra request, warmup, retry, timer, NotInParallel or product/config change. On actual failure only, emit closed JSON to original native stderr before rethrowing the initiating exception; diagnostic-output failures join that same ordered ledger. Success emits nothing. This reveals observed stages only; it cannot infer thread-pool starvation or socket/JIT causation. Root owns guarded join/build and exact Linux normal/scalar original TRX/output qualification. No helper-only test or synthetic outcome qualifies the contract.
-
-
-## TASK-KL033-NATIVE-TASK-ACCEPTANCE-001
-
-Under REQ/AC-TUNIT-ENTRY-010 and ADR117, the closed native task contract adds KL-033 to the existing independent Linux normal/scalar matrix and manual selection. Exact R863 original native metadata supplies four selections:29 Unit cases,10 derived lexical process-recovery cases and6 genuine Aspire RF3 cases,45 per profile. The complete finite criteria and source map are frozen in [Search](Search.md#task-kl033-native-task-acceptance-001-original-finite-hybrid-rank-and-explain); supporting metric/window controls cannot substitute for the actual database/public flows.
-
-Reuse the same prepared source-bound native server image, PE/PDB before/after, exact typed native discovery and original TRX union, MaximumParallelTests20, bounded1800-second discovery, existing30-minute Unit/Recovery and60-minute RF3 child bounds,180-minute job, native exit/readers/disposal and owned image registry cleanup. Both profiles preserve original artifacts; any failed/partial/missing/extra/duplicate/skipped or mixed-source case refuses acceptance. Scalar RF3 remains caller-only. Existing seven tasks and all mandatory complete jobs remain untouched; no custom runner/workflow, LocalRf3Image or coverage/product promotion.
-
-Ordered stages: docs-first finite scope; guarded canonical contract/closed selectors/workflow join from actual native metadata; root build/format/source guards; commit/push; authenticate exact source/run/attempt/cell/API+archive SHA and all original outcome/source-image/cleanup evidence. Root owns live integration/compiler/Git; security owner prepares guarded tooling and authenticates dedicated KL033 originals. Dependencies/global ANN/ranking/quality/performance/endurance remain separate. Rollback removes only additive KL033 scope and retains immutable originals. This source orchestration is not passing Linux acceptance.
-
-
-## TASK-KL035-NATIVE-TASK-ACCEPTANCE-001
-
-REQ/AC-TUNIT-ENTRY-010 adds the complete original KL035 snapshot/install task to the accepted native independent Linux normal/scalar matrix and manual selector. [ClusterReplication](ClusterReplication.md#task-kl035-native-task-acceptance-001-complete-original-snapshot-installation) freezes empty follower, full installed native cut/public outcomes, checksum/atomic/interrupted/corrupt installation and post-GC snapshot+tail recovery criteria. Actual R863 native metadata supplies1 Unit,32 Recovery and2 genuine Aspire RF3 cases:35 per profile. Retained-follower public operation is separate from actual erased-follower SDK/official MCP operation; neither supporting controls nor forwarded reads replace native installed-cut assertions.
-
-Keep all prior eight task lanes/full mandatory jobs, same source-bound server-only image producer/PE-PDB prepared-before-after, original exact native discovery/TRX union with no extras/missing/duplicates/skips, native20, existing1800-second discovery/30-minute Unit-Recovery/60-minute RF3/180-minute job, actual joined child exit/readers/disposal and owned image cleanup. Scalar RF3 disables caller intrinsics only. No custom workflow/runner/LocalRf3Image/bound increase or coverage/product promotion.
-
-Ordered stages: docs-first complete criteria; actual filtered native binding; root guarded canonical contract/selectors/workflow join and source verification/build/format; commit/push; authenticate each exact source/run/attempt/profile API+ZIP and original outcome/source-image/cleanup before acceptance. Root is sole live integration/compiler/Git owner; security owner privately maps and harvests dedicated originals. All failed/partial/pending/missing or mixed evidence remains unqualified. Rollback only additive KL035 scope, retain immutable originals. Process-kill qualification does not close power-loss/endurance/performance/full-product gates.
-
-### TASK-KL029-NATIVE-TASK-ACCEPTANCE-001
-
-REQ/AC-TUNIT-ENTRY-010 and REQ/AC-FTS-001–007,
-REQ/AC-FTS-INCREMENTAL-001–005/007 and REQ/AC-FTS-INC-009–017
-retain the original KL029 architecture predicates: projection deletion plus
-canonical replay returns literal results, checkpoint crashes cannot conceal
-updates, and stale revisions cannot resurrect. Add only KL-029 normal and
-scalar-caller cells to the closed native task matrix/manual choice. Preserve
-all nine prior tasks, full mandatory build/rules/unit normal/scalar/recovery/RF3
-coverage gates, original source-image identity/admission, native20 slots,
-Detailed live output, strict caller environment, retained failure/no-skip checks
-and genuine joined Aspire cleanup. Scoped task receipts never replace full
-suites or supply coverage/provider/performance/endurance/power-loss evidence.
-
-Three exact closed selectors cover the source-authored58 Unit instances
-(including damaged durable original intent and natural original-token expiry),
-18 genuine process Recovery instances (ten full-generation and eight incremental,
-including all seven required cuts plus retained generic posting control), and
-nine genuine RF3 instances (SDK, official MCP and Q1 maintenance paths, persisted
-row/field/revocation/read-cut, leader loss/restart, cancellation and healthy
-continuation). Source counts/displays/constructor expectations are not native
-discovery proof. Root must freshly bind every exact UID, method, instance, typed
-parameter, primary-constructor reported class, source span/hash and assembly/PDB
-against the final coherent image before the canonical contract is admitted.
-
-The natural expiry flow retains unchanged default five-minute lifetime and
-original cancellation, actual signed ExpiresAt, original durable intent/failed
-ACK and canonical pin/outbox/documents, then genuine Release and distinct fresh
-consumer/native generation Build with full literal bilingual/cold continuation.
-Keep thirty-minute Unit/Recovery and sixty-minute RF3 native deadlines unchanged;
-scalar means actual caller DOTNET_EnableHWIntrinsic=0, never unproved server mode.
-
-Ordered stages: freeze this complete source scope; prepare guarded additive
-contract/closed enums/workflow; root coherent build and actual selected metadata;
-strict bind/reseal, root join/commit/push; authenticate both original Linux task
-artifacts API/ZIP/source/run/attempt/native TRX/images/environment/readers/cleanup
-and every final verifier conclusion. Missing/failed/skipped/changed originals
-retain failure. Root owns live source, discovery/build/workflow/Git; Session owns
-whole KL029 operation review and dedicated original evidence. Rollback removes
-only the additive KL029 lane, preserving every prior task and immutable report.
-No data, serializer, public transport, provider or topology migration occurs.
-
-Actual R875 coherent-image metadata originals now contain exactly 58 Unit,
-18 Recovery and nine RF3 cases for these three closed selectors. The owning
-receipt and eleven-task census plan retain original native process/source/PE/PDB
-before-after evidence. Strict native case admission remains required; metadata
-is not an execution, coverage, Linux RF3 or task-acceptance result.
-
-
-## TASK-KL035-COMPLETE-SNAPSHOT-ADMISSION-002
-
-REQ/AC-REP-004 and REQ/AC-TUNIT-ENTRY-010 preserve every original KL035 criterion and all35 prior native case objects. Actual root R883 metadata (native0,14 cases,5742 source inputs/437 image inputs, zero drift; stdout SHA02891a853fc6bda7bf31d7d500de9b8b38587360689e895268de85d3c9066fd2) identifies two distinct omitted classes: ReplicaSnapshotRecoveryTests in ReplicaPersistenceTests.cs and ReplicaSnapshotProcessRecoveryTests in ReplicaProcessRecoveryTests.cs. Their14 exact typed native identities are added to the existing Recovery selection. The complete lane is49/profile:1 Unit+46 Recovery+2 actual Aspire Docker RF3. This is metadata admission, never an outcome claim. Existing historical35 binding and every other task/full suite remain unchanged. The neighboring class names in the earlier table did not admit these separate classes.
-
-AC-KL035-PUBLISHED-REPAIR-001 strengthens the SAME four PublishedImageDamageFailsClosedAndPreservesNewerCanonicalState native process rows (SnapshotVerified/Installed × missing/corrupt): retain the genuine published immutable image within the stopped trial, preserve exact original missing/corrupt failure and newer native canonical cut/NodeId/read generation/full receipt. After the original node is disposed, restore only that exact image, cold recover original snapshot4+tail5 and stable original receipts, submit an independently literal new revision5/cut6 native command through the real log/materializer, require its full original receipt and exact retry without another store position, then cold reopen and verify healthy result/old outcomes again. No fabricated receipt, replacement snapshot, recovery fallback, token/deadline change or product behavior. The helper owns assertions for this actual case, not a standalone test.
-
-AC-KL035-PUBLISHED-REPAIR-001 maps to those four existing cases and feature-local ReplicaSnapshotDamageRecovery. Existing node/materializer observed-owner helpers join primary and cleanup failures before trial files are removed. Fixture exact-image repair is not production repair from missing/corrupt bytes. Root must compile, refresh changed-source native metadata/PDB binding, execute actual operations and authenticate delivered-source Linux normal/scalar exact49 union/source-image/TRX/cleanup before acceptance. Original full-suite556 rows and R883 metadata are retained independently; no current PASS, power-loss, endurance, coverage or whole-product promotion.
-
-
-## TASK-KL036-COMPLETE-SOURCE-ADMISSION-001 — native Linux expectations
-
-The KL-036 selected scope preserves every original34 case declaration and adds the real operational capacity, retained native-page failure and original Close/SourceBeginAbort whole flows, for37 source-declared cases per profile. ADR-106 owns their REQ/AC and execution contracts; ADR-117 owns native invocation and original-report reconciliation. This is an admission expectation, not discovered UID/count or a passing result. Exact-source Linux native discovery, normal/scalar execution and all mandatory full suites remain open. The other nine task objects and all original selectors/case declarations remain intact.
-
-
-## TASK-KL015-C1-NATIVE-CAUSE-001 — bounded original failure classification
-
-REQ-C1-OUTCOME-NATIVE-CAUSE-001: the original C1 inspector must retain its first OpenStore failure and identify known native database, serializer and runtime causes using only closed enum labels and already allowed numeric codes. AC-C1-OUTCOME-NATIVE-CAUSE-001: unwrap only original AggregateException first members and TypeInitializationException/TargetInvocationException inner causes, within the unchanged16-level ceiling; preserve original phase, primary failure, native exit, all resource joins and the256-byte canonical stderr contract. Emit no exception message, stack, path, class-name string, caller data or credential. Unknown causes remain Other and remain failures.
-
-AC-C1-OUTCOME-NATIVE-CAUSE-002: the existing real child-process wrong-node/wrong-incarnation flow must return OpenStore/KeyLoad/TokenInvalidated, release the original owner and then read the original literal outcome through the healthy child. All existing malformed-input, scoped-outcome, disposal and RF3 persisted-revocation whole flows remain mandatory. New labels are diagnostic evidence only, never proof of an absent outcome or a reason to accept failed inspection. ADR-117 owns native execution/report evidence; AC-CRS-005 retains request isolation and persisted authorization. No public/persisted/storage/package/topology boundary changes; no additional ADR is required. Rollback removes the added classification/assertions only. Fresh current-source Linux build, normal/scalar process and real RF3 results remain OPEN.
-
-## KL-001 whole source identity and platform gate
-
-[PlatformIdentity](TestInfrastructure/PlatformIdentity.md) is the canonical whole-task supplement to REQ/AC-TEST-004. It maps original clean restore/build, actual archive/source/license closure, managed/native ownership and explicit platform dispositions. Historical local inventories above remain historical observations; current clean delivered-source Linux evidence is pending.
-
-
-## TASK-TUNIT-SCOPED-QUALIFICATION-ARTIFACT-011 — retain actual task-owned observations
-
-REQ/AC-TUNIT-ENTRY-010 and existing REQ/AC-TEST-004 require scoped task jobs to retain their original `artifacts/qualification/**` alongside native discovery/execution reports, source/DLL/PDB bindings, code-quality and image receipts. Original745f4e37/run37951115844/attempt1 KL021 normal/scalar ZIPs each contain188 members and no authority observation files because the task-job upload omitted this existing fixture-owned directory; that is an artifact retention gap and cannot establish an absent observation or a failure cause. Preserve the immutable original reports and failed outcomes.
-
-The existing bounded native evidence writers retain closed status/error/numeric metadata without credentials or caller payloads; no new observation, report fabrication, parser, runtime behavior, retry, suite selection or permission is introduced. BuildAndTests task-acceptance's existing always-upload step adds exactly that directory, as the full RF3 upload already does. Root owns this documented YAML join and authenticates the next original source/run/attempt/profile/API/ZIP members and native results. Existing complete mapped operations, no-skip, normal/scalar, source/image and joined cleanup gates remain mandatory. Rollback removes the added upload path only, preserving earlier evidence; CI upload success does not close an operation acceptance gate.
-
-
-TASK-TUNIT-SCOPED-QUALIFICATION-ARTIFACT-011 also preserves the genuine joined B-side frame owner/selection/refusal bytes under the existing fixture-owned artifacts/qualification directory. MovementFrameObservationFixture.PreserveEvidence creates one private session-named proof directory only after the original materializer/AppHost/readers and all18 native locks join; it keeps the exact bounded native bytes through the original owner writer and never changes execution or diagnostic authority. The original temporary controls retain their independent lifecycle. Source/frame/entry/cap equality, whole refusal→same-cohort restore→fresh grant→same-move full SDK/MCP/Q1/cold flows and original Linux evidence remain mandatory.
-
-## TASK-TUNIT-TASK-NATIVE-FIFTY-012 — apply the selected concurrency to task callers
-
-Owner direction2026-10-09 and REQ/AC-TUNIT-ENTRY-010 require the same50 native ordinary functional slots in scoped task execution as in the full caller. The original task contract/producer/verifier still pin20; retain those immutable originals as20-slot evidence. Change the current three owning files coherently to50, including actual run-tests child arguments and strict verifier expectations. Preserve all declared task/case/source identities, discovery-before-execution, native report/image/PDB reconciliation, per-selection deadlines, no retry/skip, actual Aspire ownership and always-upload artifacts. Original selected heavy RF3 fixture scheduling remains exclusive; benchmarks remain separately isolated and serial.
-
-Root owns CodeQuality/task-acceptance.contract.json, task-acceptance.ps1 and task-acceptance.verify.ps1. Existing ADR-117 and the owner's native concurrency selection cover this caller-policy correction; no product API, storage, provider, topology or new ADR is needed. Ordered stages: contract, coherent caller/verifier edit, authentic exact-source Linux task discovery/execution and original argument reports, duration/resource/outcome comparison with earlier20-slot cohorts. Configured50 does not prove50 cases overlapped or establish performance. Rollback removes the three-file stage coherently without relabelling historical originals. Required full solution, normal/scalar, recovery and RF3 qualification remain mandatory.
-
-
-## TASK-TUNIT-WHOLE-034-042-NATIVE-ADMISSION-015 — source candidates precede exact native identities
-
-REQ/AC-TUNIT-ENTRY-010 and Search REQ/AC-SEARCH-WAIT-001–003, REQ/AC-SEARCH-ANN-WAIT-001–003, BackupRestore REQ/AC-BACKUP-CLUSTER-001–006 and original KL034/KL042 predicates require additive independent Linux normal/scalar lanes. Current source candidates are24 Unit plus2 genuine RF3 for KL034, and39 supporting Unit plus11 Integration for KL042 (three whole cluster restore cases, seven actual native CLI interruption stages and the existing administrator backup parity case). These source counts, attributes and type names are not native UID, display, compiled-count or execution proof. The CLI process cuts execute within the original RF3 fixture; they do not invent a standalone Recovery suite or replace mandatory full recovery. Existing KL036 strict37 remains intact; its fourteen additional source candidates await a separate actual native binding (proposed51 source union).
-
-The canonical contract adds only KL034/KL042 source-census selections, with exact source class/method/parameter declarations, source argument cardinality and source path; it contains no inferred native instance display or UID. Until authenticated native binding replaces censusSelections with the existing strict cases/selections schema, these cells perform only original bounded native JSON discovery against the prepared complete Release/PDB/source image. Check exact source method/typed-parameter union, source cardinality, unique real native UID, original assembly/source ranges and unchanged prepared/before/after images. Do not parse argument displays into authority. Actual native displays/UIDs remain original observations. A census-only manifest explicitly blocks execution and acceptance, exits failed after source verification and is retained by the existing always-upload step. No acceptance receipt is published. Missing, unexpected, duplicate or changed census also fails with all originals retained.
-
-After root authenticates the source/run/attempt/profile/API/archive and original census, bind every actual display/UID/parameter/constructor source/span/image against the declared source and replace only those new census task entries with the original strict native cases schema. The unchanged execution/TRX/no-skip/source/process verifier then qualifies actual full flows. No automatic conversion, guessed enum/bool display or census-only PASS is permitted. Configured ordinary50, preserved heavy shared-resource exclusions/exclusive1, native discovery1800 seconds, Unit/Recovery30 minutes, RF3 child60 minutes and job180 minutes remain unchanged. Scalar means caller only; real persisted authentication, SDK/official MCP/Q1, native RF3, complete original deadlines/failures and fixture/image/registry cleanup remain required.
-
-Ordered ownership: this feature and ADR117 precede the two additive task objects, producer fail-closed census branch, closed verifier/manual/workflow selectors. Root alone joins live files, builds/pushes and captures Linux originals. Existing ten task objects, strict37, strict113, all full suites and coverage obligations remain unchanged. Qualification regression is the real native census refusal followed by exact authenticated binding and complete healthy Linux operation execution; no getter/property or synthetic runner proves it. Rollback removes only the two additive lanes and census branch, preserving all originals. No product API/trust/storage/schema/provider/topology/dependency change. Source-only; native outcomes, full product, coverage, endurance and power-loss gates remain OPEN.
-
-
-## TASK-TUNIT-KL036-ADDITIONAL-NATIVE-CENSUS-016 — bind the complete movement additions
-
-REQ/AC-TUNIT-ENTRY-010 and original KL036 ClusterRouting acceptance retain the exact existing strict37 task object. The eight additional native case classes are ReceiverIssueFailover, ActiveAdjunct, FinalInstallFrame, FrameObservationScope, CleanupMatrix, ObservedFailureCold, PolicyBusyCold and PolicyEpochCold. Their current attributes declare fourteen additional source instances; proposed51 is source inventory only, with no inferred compiled count, display, constructor identity or UID.
-
-The additive top-level additionalCensuses contract owns exact class/method/source-path/typed-parameter/source-argument declarations for KL036 only. The producer's explicit AdditionalCensus switch chooses this independent census without modifying any of the twelve original task objects. Its fresh kl-036-{profile}-additional-census evidence root retains the original bounded Integration JSON discovery, process/reader settlement, prepared/before/after source/DLL/PDB identity and final source verification. Native50 and heavy shared-resource exclusive1, discovery1800 seconds, settlement30 seconds and all existing operation/job deadlines remain unchanged. The strict verifier reuses owning exact-key/path validators for the additional group, each selection and each candidate; it requires exactly eight distinct canonical RF3 classes/selections, canonical source paths, typed source-argument shapes and fourteen declared source instances. Original native UID/assembly/source-span/image validation remains solely the existing actual discovery validator. Every original strict task/manifest/outcome predicate is retained. No operation executes in this lane; it always refuses acceptance after retaining its original manifest, even when complete discovery succeeds.
-
-The existing KL036 normal/scalar jobs attempt this independently conditioned census after the original strict37 step. Actual complete build and source-preparation success are required; a failed original strict flow does not suppress the additional discovery. All original strict failures remain failures. The existing always-upload and image/registry cleanup own these originals. Missing, duplicate, unexpected or changed native descriptors/image/source fail closed. Root authenticates exact source/run/attempt/profile/API/archive, then binds the actual14 identities against existing37 before a separate strict51 expansion; source arithmetic or successful discovery cannot authorize that expansion or a PASS.
-
-Ordered implementation and ownership: this feature plus ADR117 first; additive contract, exact verifier root-key/descriptor schema, restricted producer switch and independent existing-job step next; root alone joins/builds/commits/pushes/captures original Linux evidence. Verification is actual census refusal followed by authenticated descriptor/source binding and complete original SDK/official MCP/Q1/RF3 flows. No new public/trust/persistence/provider/topology/package seam, fake operation or synthetic getter case. Rollback removes only additionalCensuses, its exact verifier schema, switch and step coherently; all twelve original task objects, prior evidence and required full suites remain. Qualification remains OPEN.
-
-
-## TASK-TUNIT-WHOLE-034-042-STRICT-NATIVE-BINDING-017 — original Linux census admits execution
-
-REQ/AC-TUNIT-ENTRY-010, Search REQ/AC-SEARCH-WAIT-001–003 and REQ/AC-SEARCH-ANN-WAIT-001–003, BackupRestore REQ/AC-BACKUP-CLUSTER-001–006 and every original KL034/KL042 predicate continue TASK-TUNIT-WHOLE-034-042-NATIVE-ADMISSION-015. Authenticated Linux Build and Tests run37977314792/attempt1 at source d2323ed056153ae8bd2ec833fc316ac5863903a4 supplies both independent normal/scalar original censuses. Each profile actually discovered the same complete26 KL034 identities (24 Unit,2 RF3;11 selectors) and50 KL042 identities (39 Unit,11 RF3;15 selectors), including original parameterized native displays and typed constructor/source identities. These are original native observations, not counts inferred from declarations.
-
-Original job/artifact bindings are KL034 normal113978740486/11639990404, scalar113978740434/11640305082; KL042 normal113978740338/11639129382, scalar113978740660/11640130291. API-authenticated archive digests are respectively bc93a9072e1c876b845c01d7ebde6940070d967aa186aa012bcc20b32ac8bbaa, f4eb890fcccdc26bc4e696f2df2c49141013920803935e427e90714ab9750229, 4f310b085a4efa45cdf48db5e74fad0878000410a803ba89173d54b140d5e2c8 and49507fc48213003256198031b0e2857fbdf9bc6c56f977a108647bf58a0df852. Every original discovery and source-verification process exited0 with joined exit/stdout/stderr/disposal and no retained failure; prepared/before/after images are identical. Native PDB-document hashes match the authenticated source tree. Native DLL/PDB SHA, MVID, CodeView identity and embedded compilation receipts are retained metadata; the archives contain no DLL/PDB bytes for independent binary rehash. No native execution/TRX/outcome or acceptance receipt exists for these census-only cohorts. Their deliberate binding-required failure remains original.
-
-Ordered implementation: freeze this trace in TestInfrastructure and ADR117; replace only KL034/KL042 censusSelections with the existing strict selections/cases schema using those exact original arrays; root guards/joins/builds/commits/pushes; freshly discover and execute both complete Linux normal/scalar scopes through the unchanged canonical Aspire/TUnit entry; authenticate every source/image/UID/TRX/outcome/environment/process/resource-cleanup gate. The strict producer independently rebinds the actual new compiled image before execution. Existing ten task objects and ordinal raw arrays, KL036 strict37 and its separate eight-selection/fourteen-source-instance additional census, all twelve task identities, ordinary50/heavy exclusive1 and every original timeout/auth/RF3/SDK/official MCP/Q1 requirement stay exact. No producer/verifier/workflow bypass, synthesized UID/display, timeout change or classification promotion is introduced.
-
-Root owns live integration and Git/Linux delivery; the qualification owner retains both-profile original API/archive/native-identity ledgers and repairs actual complete-flow failures. Rollback restores only these two original census task objects and this additive trace, retaining immutable originals and every other object. No product/persistence/trust/provider/topology boundary changes. Strict execution admission is prepared; complete current-source operation acceptance, required full suites, coverage, endurance and power-loss gates remain OPEN.
-
-
-### TASK-TUNIT-ENTRY-018: authenticated KL036 native census graduation
-
-REQ/AC-TUNIT-ENTRY-010 and the original KL036 ClusterRouting criteria now admit the complete exact native scope from Build and Tests run37977314792/attempt1/source d2323ed056153ae8bd2ec833fc316ac5863903a4. Both original normal/scalar cohorts actually discovered identical37 original identities (24 Unit/13 RF3) and fourteen disjoint additional RF3 identities, yielding a verified51-identity union across eighteen selectors. Counts derive from retained native metadata, not declarations or arithmetic admission. Literal native displays, constructor/type identities, parameter types, source locations and UIDs are preserved in immutable private ledgers; the contract uses their original strict case arrays, and fresh compiled discovery independently rebinds each new image.
-
-Normal job113978740483/artifact11641550309 has archive SHA57d89c5f0a763463775a0337d7c5b6e1554a250fbd41751192984fa73255e111,8567955 bytes. Scalar job113978740282/artifact11640899867 has SHAeea1cc771f8df9bb0f831531d88c660f8d02144401acc9ff2084b8cf3dfbb8ac,8603148 bytes. Authenticated API source/run/artifact data, unchanged prepared/before/after images, complete native PDB/source binding and joined discovery/source-verification processes are retained. The archives carry authenticated DLL/PDB SHA/MVID/CodeView and compilation metadata, not binary bytes for independent DLL/PDB rehash. The additional census intentionally refused acceptance after discovery. Seven original strict selection flows failed in each profile; successful census cannot relabel them as passing.
-
-Ordered lifecycle: freeze this trace and ADR117 first; append only the fourteen original bound cases/eight selections after all ten original strict selection byte sequences; preserve all eleven other task objects and twelve task identities; retire the now-duplicate additionalCensuses descriptor, AdditionalCensus producer switch, its exclusive descriptor validators and its independent intentionally failing workflow step. Preserve the active strict producer/verifier's source/image/UID/type/location/TRX/outcome/environment/process/resource-cleanup predicates. Original immutable census evidence remains history; there is no old-descriptor reader or fallback. Ordinary50/heavy exclusive1, native fixture-owned Aspire RF3, actual SDK/official MCP/Q1 clients, persisted authorization and every original operation/discovery/settlement/job deadline remain unchanged.
-
-Root owns guarded integration, build/format/commit/push and fresh Linux delivery. The qualification owner retains both-profile API/ZIP/native ledgers and follows the complete newly admitted51-case executions, including genuine failures and healthy/cold continuation. Rollback restores only the original strict37 task/adjoining additional-census plumbing coherently from the guarded predecessor; originals stay immutable. This is compiled discovery admission, not source capability, execution success, complete task acceptance, coverage, endurance or power-loss qualification. All genuine runtime gates remain OPEN.
-
-
-## Connection execution RF3 local-image cohort, 2026-10-09
-
-ADR-125's REQ/AC-CLIENT-CONNECTION-001/002 and REQ/AC-ORL-013 reuse the
-existing ADR-119 TUnit-owned actual-image preparation and explicit child identity.
-The additional exact selector is:
-
-    /*/*/(ConnectionRf3SequentialTests|ConnectionRf3OverlapTests|ConnectionRf3AuthorizationTests)/*
-
-It owns all five expanded native SDK/official MCP instances, including actual
-HTTP/2 same-connection overlap. No wildcard/subset/mixed-image or GitHub identity
-exception is added. ConnectionRf3Scenario starts LocalRf3ImageTestSession,
-passes its explicit Selection through RequestCqrsRf3ImageProof and wave startup,
-verifies the three modeled tags and actual image IDs, and joins the original
-wave before exact-tag cleanup. Existing caller defaults remain unchanged when
-this selector is absent. Native arguments propagate explicitly without ambient
-image mutation. The established closed private CQRS probe profile remains
-required for bounded actual operation/activation witnesses. Native-image
-preparation and source receipt verification precede RF3 startup; no stale image,
-manually started nodes or local benchmark execution is admitted. All measured
-qualification remains original Linux GitHub evidence. Complete existing positive/
-negative native selection tests remain mandatory alongside actual five RF3 flows;
-adding selector code alone does not pass either gate.
-
-TASK-TEST-FULL-UNIT-ENDPOINT-001 (2026-10-10), REQ/AC-TEST-001 and TASK-CLIENT-CONNECTION: original b392e523 full Unit model/disposal flow found the prior two-endpoint oracle omitted the existing Aspire-owned HTTP/2 endpoint. Preserve genuine three-node model construction, pinned image, identity, mount, readiness/dependency model and joined disposal checks; independently assert ordered http/silo/http2 names, original http target8080/silo11111 and actual HTTP/2 target8081, scheme, unproxied and internal visibility. Move only endpoint assertions/constants into a feature-local helper to retain the existing 200-line type bound. Root updates this contract before source, builds and reruns positive and rejection model flows. ADR-125 and current owned ClientApi endpoint composition define the existing contract; no topology, port, timeout or platform exception is introduced. Linux runtime RF3 acceptance remains separate and open.
-
-
-### R32 pinned Aspire endpoint model and allocated container port (2026-10-10)
-
-REQ-TEST-001/011/015 and their existing ACs preserve TASK-TEST-FULL-UNIT-ENDPOINT-001's genuine three-node model construction, complete endpoint assertions and joined model disposal. ExactSelectionBuildsTheOwnedRf3ModelAndSettlesDisposal's original R32 refusal was solely the pre-DCP http2.Port null assertion; actual value was8081. No deployment port configuration changes are authorized by this test correction.
-
-Pinned Aspire.Hosting13.6.1's package repository commit is3751e615ad660621f2a7aa4c390ef48e08a0eed8. Its [EndpointAnnotation constructor and Port getter](https://github.com/microsoft/aspire/blob/3751e615ad660621f2a7aa4c390ef48e08a0eed8/src/Aspire.Hosting/ApplicationModel/EndpointAnnotation.cs) retain an omitted backing port and expose targetPort for an unproxied endpoint unless the port was explicitly set to null. Existing ClusterConnectionEndpointResources.Apply supplies targetPort8081, name http2, isProxiedfalse and no port argument through native WithHttpEndpoint. Therefore the constructed model's public Port property is8081; this is not proof of an explicitly fixed container host binding.
-
-The same pinned [DcpExecutor allocation implementation](https://github.com/microsoft/aspire/blob/3751e615ad660621f2a7aa4c390ef48e08a0eed8/src/Aspire.Hosting/Dcp/DcpExecutor.cs) checks container SpecifiedPort for a fixed public port. The omitted backing port requires allocation for a proxyless container; EnsureProxylessEndpointPort assigns the real allocated public port while retaining container target8081. Both current RF3 and six-node RF3 resources omit this http2 backing port. Model verification thus compares http2.Port to its independent Http2TargetPort constant before DCP, preserving exact names/order/scheme/target/internal/unproxied assertions, all other endpoint values, actual Aspire Build and original application/root cleanup. It does not claim actual distinct allocated endpoints, readiness, successful connection or RF3 execution; those remain authentic Aspire runtime gates.
-
-Ordered correction owns only NativeLoggerModelEndpointAssertions.VerifyAsync after this specification appendix. ADR-125's connection endpoint contract and existing orchestration ADRs remain unchanged; no new endpoint, topology, public contract, deadline or limit. Root joins exact guarded source, runs coherent build and original normal/scalar complete model/disposal cases, then actual RF3 endpoint/client qualification. Original R32 failure remains immutable. Rollback restores only the assertion and this appendix; source presence is not PASS.
-
-
-## TASK-KL079-NATIVE-TASK-QUALIFICATION-006
-
-The complete source candidate/REQ/AC map and ordered qualification contract are canonical in [ChangeFeeds](ChangeFeeds.md#task-kl079-native-task-qualification-006), under [ADR117](../ADR/ADR-117-native-tunit-ci-entry.md). Only KL079 is appended to the existing twelve task objects, which remain byte-exact. The existing census-only owner retains native discovery/source/DLL/PDB/images and settlement; it intentionally refuses execution/acceptance until authentic normal/scalar Linux case binding exists. No guessed UID/display/count, source-scan correctness test or coverage promotion.
-
-After original authenticated run/attempt/source/job/artifact/ZIP intake, a separately reviewed exact KL079 strict case union must execute all mapped Unit, original projection process Args and RF3 public/live/cursor/follower flows through the canonical native runner. Native50 ordinary/existing exclusive-heavy ownership, all deadlines, fixture-owned Aspire topology and cleanup, every full-suite/coverage gate and separate Benchmarks/Website stay unchanged. Task artifact upload retains all originals even on failed census. The scalar caller profile is not a Docker-server intrinsic qualification claim.
-
-Functional coverage requires genuine native inventory/contributor binding, actual covered execution and the unchanged final verifier. The eight currently mapped Unit classes do not establish coverage of ChangeFeedObservedWorkTests or the missing KL079 contributor map. Preserve current strict inventories until fresh native originals support a guarded mapping. Root owns join/compile/tests/Git; KL079 owner follows discovery through exact binding, genuine failures and coverage closure. This packet claims no native PASS or feature completion.
-
-
-## TASK-KL079-AUTHENTIC-NATIVE-BINDING-GRADUATION-007
-
-REQ/AC-FEED-001..006 retain TASK-KL079-NATIVE-TASK-QUALIFICATION-006. Its READY7 source census lane is the explicit predecessor, not execution/acceptance. Only after both genuine original Linux census artifacts are authenticated via GitHub run/attempt/source/job/artifact metadata and original ZIP digests may the feature-local proposal binder consume them. The binder is not an authentication endpoint: supplied files never authenticate GitHub. Root/owner retains API/ZIP provenance and review authority separately.
-
-Ordered stages/owners: this TestInfrastructure/ADR117 appendix before the new scripts/CodeQuality task-acceptance.kl079-binding.ps1; reuse the existing native bounded JSON, unique-property, candidate/source/typed-parameter/image and process-settlement validators; require census-only pending state on every selection, no execution results, exact contract/source revision, successful source verification, prepared/before/after compiled images and complete native source binding. Current case source hashes must match original PDB/source images. Normal/scalar native case unions and DLL/PDB/source/build inputs must agree. Exact native identities are ordinal-sorted; duplicate method/display identities or UIDs fail. No synthetic display, parameter, UID, case total or passing outcome is created.
-
-The create-only private outputs are the exact observed KL079 strict-task object, full native UID/source-span observations, coverage/contributor candidates with the reviewed criterion map and missing observed-work Unit inventory rows. Conservative executable-module mapping records Core and the source-linked live Query owners; actual covered execution must establish final module evidence. They are proposals, not live writes or acceptance/coverage receipts. Preserve every older strict task object, contributor/inventory row, group and threshold. A reviewed successor replaces only the new KL079 census object with strict native cases, appends genuinely missing native-bound functional cases, adds their exact keys/class to the existing unit-functional-02 group, and regenerates its selector using Get-FcNativeExactUnitSelector. No sixth group, dummy case, exclusion or source-count relaxation. Existing functional row range reconciliation remains owned by the canonical native rebind mechanism.
-
-Then root joins/rebuilds/pushes the exact-source proposals and the original normal/scalar task execution runs every declared Unit, process and fixture-owned Aspire RF3 SDK/official MCP/both Q1 operation. Full functional coverage runs with native contributors/collector and unchanged final verifier. Case execution alone cannot promote coverage. Missing native current census, partial scalar results, missing RF3 pages/receipts/cold results or failed/unsettled observations keep closure OPEN. Native50 ordinary/exclusive-heavy ownership and original timeouts/Args/authorization/bounds/cleanup stay exact.
-
-No public/persisted/product protocol or migration change is added. Root alone writes live sources/builds/tests/Git. Rollback removes only this proposal helper and appendices; native original archives/receipts and every existing strict contract remain immutable. This source packet is parser/preview/reconstruction only, with no compiler/runtime/coverage PASS.
-
-
-## TASK-KL029-NATIVE-LOCAL-RF3-ADMISSION-008
-
-REQ/AC-FTS-001..007 and the original KL029 projection/rebuild acceptance retain all mapped Unit/process and nine RF3 operation instances. The isolated native compiled discovery actually observes nine original cases, including four ProtectedNativeTextMaintenanceReplaysBilingualUpdateDeleteAcrossAllPublicPaths arguments (Sdk/Mcp/SdkSql/McpSql); discovery is development evidence and cannot qualify Linux runtime or coverage.
-
-Ordered stages and ownership: this TestInfrastructure/ADR117 contract precedes the exact selected-filter append in scripts/TestInfrastructure/run-tests.mjs and Integration ClusterReplication/LocalRf3ImageSelection. Admit ONLY the existing canonical KL029 complete filter:
-
-`/*/*/(NativeTextAsyncRf3Tests)|(NativeTextMaintenanceRf3Tests)|(NativeTextRf3LeaderLossTests)|(NativeTextRf3Tests)|(NativeTextWaitRf3Tests)/*`
-
-Keep every earlier selector and its rejection flow. The original NativeTUnitSelectionTests RF3 parameter now exercises this exact positive native argument/environment composition and all original ambient GitHub/image/coverage/benchmark/suite/missing/unsupported-filter refusals, plus explicit partial/wildcard/additional-class/trailing-space refusals. Its original native Node process and cleanup remain joined. No synthesized case, changed UID/Args or blanket Search filter.
-
-The original LocalRf3ImageTestSession still owns actual AppHost image preparation, bounded receipt/config/input verification, exact image identity on all three started containers, genuine RF3 startup/readiness, discovered SDK/official MCP/Q1 callers, original cancellation and shutdown, output tasks and exact-tag cleanup only after genuine settlement. AppHost LocalRf3ImageRequest already requires a nonempty explicit filter; no third product/transport policy changes. No ambient fake GitHub identity, unrelated image, provider or topology, increased deadline/budget, registry-receipt fallback or benchmark execution. Native50 ordinary and existing exclusive-heavy ownership stay unchanged.
-
-Root joins guarded source and original mapped positive/rejection tests; the KL029 owner then runs the same nine real operation cases in normal/scalar isolated local images, preserving initiating/cleanup failures and full original results/receipts/cold oracles. Exact-source Linux normal/scalar Unit/recovery/RF3, source/DLL/PDB/image/UID/process/cleanup and coverage remain mandatory and OPEN. Local scalar caller configuration is not proof of scalar Docker-server intrinsics. Rollback removes only this exact filter admission and its test additions/appendices; all prior selectors, original failures and native evidence remain immutable. No public/persisted/product contract changes.
-
-
-## TASK-KL094-NATIVE-LOCAL-DISTINCT-OWNER-ADMISSION-010
-
-REQ/AC-XFER-001..005 retain all original cross-owner, durable receipt, authorization, bounded retry, recovery and public-caller gates. This additive TestInfrastructure/ADR117 contract admits only the complete authored native case filter:
-
-`/*/*/RemoteTransferDistinctOwnerTests/ActualDistinctOwnersRetainAcceptReceiptAcrossTwoColdRestartsAndBDoesNotResurrectAcknowledgedMessage`
-
-Ownership/order: these appendices precede the closed filter addition in scripts/Features/TestInfrastructure/run-tests.mjs and Integration ClusterReplication/Scenarios/Resources/LocalRf3ImageSelection.cs. The existing NativeTUnitSelectionTests native RF3 argument verifies original Node selection, native argument/environment composition, every ambient GitHub/image/coverage/benchmark/suite/missing-filter refusal, and four distinct-owner partial/class-wildcard/additional-class/trailing-space refusals. Preserve all existing cases, Args, filters, counts and native50 ordinary admission. This is exact local development admission, not broad Messaging or wildcard catalog selection.
-
-The existing LocalRf3ImageTestSession owns genuine fixture AppHost image preparation, current immutable LocalRf3ImageIdentity/source digest/config/invocation/receipt validation, original linked cancellation and joined output/shutdown/exact-tag cleanup. The protected two-RF3 fixture borrows its actual prepared Selection for the same original six containers, owner roots/options/ports/current persisted subjects, real SDK/official MCP/Q1 operations and two joined same-volume cold restarts. All six image identities must validate against the same original prepared receipt. No old image, manual Docker, fabricated environment/GitHub identity, retry, clock/deadline/default/capacity change or new dispatcher.
-
-The original GitHub strict image/provenance branch is unchanged. Root integrates guarded source; private source/image builds and focused positive/negative native tests are development evidence only. Original exact-source Linux normal/scalar Unit/process/RF3, native discovery/UID/source/DLL/PDB/image/cleanup and complete qualification remain mandatory and OPEN. This authored filter is not a native UID or passing operation. Rollback removes only this closed admission, additive regression checks and appendices, retaining all earlier selectors/evidence and original failures.
-
-
-## TASK-KL029-EXACT-NATIVE-SDK-INITIATING-SELECTION-011
-
-REQ/AC-FTS-001..007 preserve TASK-KL029-NATIVE-LOCAL-RF3-ADMISSION-008 and its full nine mapped RF3 instances. An authenticated private native discovery observed the original ProtectedNativeTextMaintenanceReplaysBilingualUpdateDeleteAcrossAllPublicPaths(Sdk) instance. Add only FilterUid for that exact observed native UID under the existing complete KL029 local-image filter; missing preparation, another UID, another suite/filter, coverage, benchmark settings and all original ambient identity failures refuse. The canonical run-tests.mjs remains the sole caller; no executable-argument replacement outside it.
-
-Ordered ownership: this appendix and ADR117 precede the scripts/TestInfrastructure selection addition and the existing NativeTestSelectionProcess/NativeTUnitSelectionTests complete real Node composition/refusal regression. All original five parameterized cases and earlier selectors remain. The retained image environment remains the original three canonical full-nine preparation arguments. The execution arguments use native --filter-uid and --minimum-expected-tests 1, omit --treenode-filter and retain native50, original timeout, reporting, cancellation and resource ownership. UID selection does not change prepared image scope, admission or topology.
-
-Before execution the owner must discover the current Integration image and verify this exact native UID/type/method/argument identity against original discovery and current source/DLL/PDB; a missing or changed identity refuses. Record prepared9 and executed1 separately with original source/input/image/receipt/TRX/caller/cleanup provenance. One successful initiating SDK instance is local development proof, never nine-case or Linux acceptance. After its complete original receipt/checkpoint/healthy Release/joined cleanup succeeds, the complete original nine normal/scalar flows and all Unit/process/Linux/coverage gates remain mandatory and OPEN. No product, public transport, persisted ID, default, deadline, quota, protocol fallback or benchmark workload changes.
-
-Rollback removes only this narrow caller option and additive regression/appendices; original admission, failures, discovery and image receipts stay immutable. Source preview and real Node composition are distinct from compiled TUnit and operation qualification.
-
-## TASK-FEED-COLD-VOTER-START-001
-
-REQ/AC-TEST-007 and the original ChangeFeeds REQ/AC-FEED-005 preserve fixture-owned Aspire RF3 and the complete public cursor/live-cold operation gates. [ChangeFeeds](ChangeFeeds.md#task-feed-cold-voter-start-001) and [ADR-117](../ADR/ADR-117-native-tunit-ci-entry.md#task-feed-cold-voter-start-001) freeze the original source1c28e/Linux reconnect failure and the native all-three kill followed by first-voter health-before-peer-start ordering.
-
-Order and ownership: root freezes these appendices before changing only FeedLiveRf3Cold; serial BeginContainerRestartAsync accepts each original voter replacement, then the existing serial RestartContainerAsync/health barriers reuse those same owners and identities. Preserve original cancellation, failure aggregation, images, readiness, membership, receipts, cleanup and two-minute case scope. No manual Docker, parallel dictionary writes, retries, additional provider, fresh fixture or widened deadline. Run the same two complete native FeedLiveRf3Tests identities through the canonical caller and actual owned resources; retain original startup/operation/cleanup failures without promoting a partial flow. Full Linux, source/image/native identity, recovery, SDK/official MCP RF3 and coverage remain required. Rollout is the guarded source checkpoint and fresh Linux execution; reversal removes only this additive undelivered repair and trace while retaining immutable originals.
-
-
-## TASK-KL029-LOCAL-RESTART-IDENTITY-005
-
-The original full-nine RF3 local-image selection retains genuine Aspire kill/restart, full update/delete/projection results and original receipt assertions. At the existing completed SourceReceipt stage, the verified local image invocation binds actual immutable build inputs, image configuration and before/after runtime image identities. `SourceSha` is null for this local development branch; `LocalBuildInputDigest`, `LocalImageInvocationId` and `LocalImageConfigId` identify the separate actual local producer. A build-input digest is never a Git SHA. Current input changes or mismatched image identity refuse; there is no newest-file lookup, git-error fallback or copied Git history. Ordinary nonlocal execution retains original Git SHA acquisition, errors and every GitHub source/run/attempt/PDB/DLL/image/UID/cleanup gate.
-
-Implementation order: LocalRf3ImageIdentity retains the verifier's already-validated input digest; ContainerRuntimeReceiptStore composes typed source identity; ContainerRuntimeControl records it only after original Start/health/runtime inspection; ContainerRuntimeReceipts appends nullable local diagnostic fields. The same original leader-loss whole operation is the regression, under unchanged normal/scalar full-nine filters, budgets and deadlines. Original initiating/save/cleanup failures remain retained. Local evidence is development-only; Linux functional coverage and RF3 qualification remain open. No database/public protocol/serializer IDs or production contract changes; rollback removes only the additive local diagnostic branch and fields.
-
-
-# KL029 fixture-owned local restart provenance correction
-
-Source evidence: actual full9 normal RF3 completed4PASS/5FAIL; leader-loss reached genuine Kill/Restart then ReadSourceShaAsync unconditionally invoked git rev-parse HEAD against the authorized no-.git private source snapshot. Four maintenance UnknownWriteOutcome failures are separate unproven causes. No fallback, Git copying, fake Git SHA or image receipt is permitted.
-
-Ordered stages: retain original Kill/Start/health/actual runtime inspection; at original SourceReceipt stage acquire current verified LocalRf3ImageIdentity using the actual selected local invocation. Verify its current input digest via unchanged native local image verifier and exact before/after image reference/config identity. Local development records SourceSha=null and separately named LocalBuildInputDigest, LocalImageInvocationId and LocalImageConfigId. Ordinary nonlocal path retains original native git rev-parse HEAD behavior, exact source SHA and exceptions, with local identity fields absent/null. No GitHub binder/source/run/attempt contract changes.
-
-Minimal native owners: LocalRf3ImageIdentity.Identity retains actual verifier InputDigest instead of discarding it; ContainerRuntimeReceiptStore composes typed internal SourceIdentity through verified local selection or original Git owner; ContainerRuntimeControl uses that typed identity only at existing completed SourceReceipt stage; ContainerRuntimeRestartReceipt appends nullable local identity fields, preserving every original full runtime/kill/start receipt value. All current signed/public/persisted database IDs unchanged; these are test-only JSON diagnostics, no serializer alias/field IDs or provider API.
-
-Read-only identity acquisition uses same original cancellation and current context; no new timeout/retry/caller role/endpoint. An invalid/changed local image refuses; no directory/newest receipt scan or git-error fallback. Failure diagnostics retain original initiating exception and current original save/cleanup ledger. Existing original leader-loss case is the full regression: actual acknowledged update/delete/native projection, genuine owned kill/restart, current read/full receipt, joined shutdown. The original full9 normal/scalar filters, source/PDB/DLL image receipts and Linux qualification remain mandatory; local successes are development-only.
-
-
-## R2 genuine R4 lifetime correction, frozen before source
-
-Actual R4 normal/scalar full9 both4PASS/5FAIL remain immutable. The existing ClusterFixture owns localImageSession.Selection and explicitly supplies it to original startup verification; ContainerRuntimeControl was constructed without that selection. ReadSourceIdentityAsync reread the restored ambient selection, received null and invoked the unchanged Git branch. This is a source-proven local fixture provenance defect, not a consensus/index/receipt-success claim.
-
-Pass SAME retained session Selection to the existing controller at its original construction. At original SourceReceipt stage, existing ReadVerifiedAsync(root, retainedSelection, token) revalidates exact ready receipt, immutable build-input digest, invocation, root and native image. Both before/after native ConfigImage and ImageId must match. Missing/corrupt/substituted receipt or image refuses; no ambient reread may decide local authority and no fallback for a selected local image. Other controller callers remain unchanged until they explicitly own this same verified lifetime. Default null selection follows original strict Git source branch, retaining exact Git JSON shape (new local fields omitted when null). Local SourceSha remains null; input digest is separately named and never masquerades as Git SHA.
-
-Existing leader-loss case is mandatory genuine proof: acknowledged update/delete, real owned kill/start/current native generation and full independent SDK/MCP results plus complete restart metadata, joined app/image cleanup. No constructor/property test substitutes. The original full9 both profiles, exact source/PDB/DLL and actual owned image/receipt metadata remain required. Root-only live join; private original R1/R4 evidence retained.
-
-
-## TASK-KL029-RUN-OWNED-DIAGNOSTICS-001 — original native runner evidence
-
-REQ/AC-TEST-004, REQ/AC-TUNIT-ENTRY-010 and REQ/AC-FTS-001..007 retain each original native runner/profile failure under its actual TUnit ResultsDirectory. Existing ClusterFailureReceipts lazily freezes that actual root plus a fixture-owned opaque directory under its original short write gate; a foreign root on the same owner refuses. Ordinary ClusterFixtureDiagnostics and ContainerRestartFailureCapture use that original receipt owner. Explicit immutable/owned captures remain unchanged. Separate normal/scalar runs and fixtures cannot replace earlier original readiness/discovery/server/restart files. Existing filenames, latest view,32 receipt ceiling,80 lines/8192 UTF8 bytes, privacy clipping, original tokens and initiating/cleanup failures remain unchanged.
-
-The existing receipt operation regression performs two real report-root captures, preserves complete independent first/latest file bytes, rejects a foreign-root reuse without effects, then captures healthy same-owner output and verifies both runs' originals. File writes/read operations and final scoped test cleanup are joined; this sink test is not Aspire RF3 acceptance. No new public telemetry, logger, environment/configuration authority, protocol/provider, retry, timeout, quota or database behavior. Native runner results live outside the deleted application root and are retained by existing GitHub TestResults uploads.
-
-Original private R12 normal cancellation and scalar pre-body startup evidence stays immutable and distinct; lost normal server files cannot be reconstructed or assigned scalar evidence. Source/build/sink proof does not prove their cause. The canonical narrowed SDK normal reproduction must preserve prepared9/executed1 native UID, actual fixture-owned Aspire/image/startup/readiness/discovered callers/shutdown, original deadlines and source/DLL/PDB/image/result receipts. Full exact-source Linux normal/scalar9 RF3, Unit/process, cleanup and coverage remain OPEN. Ordered stages: native API/callers/privacy proof -> contract -> guarded existing-owner correction -> sink operation -> genuine SDK reproduction. Root owns live joins/Git; rollback removes this output selection and regression only, retaining immutable originals.
-
-
-# KL029 original local verifier cancellation phase
-
-REQ/AC-TUNIT-ENTRY-010 and REQ/AC-FTS-005/006; existing ADR-117 native entry and ADR-078 projection qualification. R13 original SDK UID1 failed before body: prerequisite Finished/exit0; CallerCancelled=False/HostStopping=False; original RunVerifier linked30-second token cancelled. Inner phase remains unknown; this contract establishes observation only.
-
-The original verify action owns one closed enum: Unobserved, DockerContext, DockerEndpoint, DockerOs, Receipt, BuildInputs, ImageInspect, Identity, Complete. Set it immediately before that actual native step. Emit exactly one fixed enum marker only on original SIGTERM; no success phase output, raw Docker output, payload, identities, paths or environment. The original same process signal handling and bounded readers remain authoritative.
-
-After actual TerminateAndJoin, the same RunVerifier catch reads only a successfully joined original stderr task, accepts exactly one allowlisted marker, and appends it to the existing same-owner preparation ledger; absence/invalid/duplicate stays Unobserved. Same initiating OCE is rethrown with original stack. Diagnostic failures join original cleanup ledger. No timeout/deadline, stdout schema, public/persisted/transport/protocol fields, services, policies, quotas, source identity, auth or success checks change. Other verifier callers have no observer by default.
-
-Ordered owner stages: script closed phase → original child cancellation → actual process/readers settlement → same ledger record → same original rethrow → existing preparation SaveFailure → ordinary fixture cleanup. No Store/read gate or public database operation changes. Positive support operation uses real child stream/cancellation/join then fresh successful child verification; it does not qualify maintenance RF3. Original SDK1 must subsequently run only after the observation's measured owner cause is addressed, with source/image/TRX/UID identity and complete receipts/literals/Release; full nine normal/scalar remain mandatory.
-
-Owners: scripts/Features/TestInfrastructure/local-server-image.mjs; Integration ClusterReplication LocalRf3ImageIdentity and LocalRf3ImageTestSession; existing preparation ledger; closed phase model; existing process fixture controls. Docs appended before source. Root joins live; private exact guards/native previews/reconstruction. Rollback removes only observation plumbing; historical R13/R12 and sealed cold6/diagnostics6 remain immutable.
-
-The one closed stage belongs in the existing failure header before bounded queued preparation records, so original 80-line truncation cannot hide it. Store a single enum in the same owner only after original joined verifier completion; all other resource records/128 ceiling/80-line/8192-byte output bounds remain exact.
-
-
-## TASK-KL015-GUARD-CASE-PARITY-001 — retain the complete original guard flow
-
-REQ/AC-TUNIT-ENTRY-010 and existing KL015 authorization/diagnostic criteria require the complete native rf3-authority-core union. Authenticated Build and Tests run38063879768/attempt1/source e92ca583a359e84b4a083912efe89c16eeee49eb discovered nine identical cases in both profiles against an eight-case contract. The additional original RequestCqrsRf3McpGuardEvidenceTests.OriginalGuardFailureSurvivesSuccessfulWaveJoinWithNativeEvidenceBeforeRootDeletion was correctly refused before execution; those original failed artifacts remain failed.
-
-Add only that observed class, method, display, source and empty parameter list to the existing exact case array. Preserve all eight prior rows, the same native selector, all other tasks and strict discovery/execution/TRX/source/image/UID/cleanup checks. The operation starts the real Aspire RF3 wave, seeds the workload, performs healthy calls and the original failing official MCP request, verifies its original exception and warning, joins owners, removes the application root and retains the original evidence. No property-only test or fabricated native identity substitutes.
-
-Ordered stages: retain authenticated original archives/metadata; freeze this contract under ADR117; join only the missing case row; build the coherent current solution; acquire current genuine native discovery and source/PE/PDB binding; exercise unchanged admission against exact originals and altered-copy refusals; commit/push for fresh Linux normal/scalar complete execution. Root owns this contract repair while independent feature owners continue. Existing native50 and all deadlines/resource bounds remain unchanged. Source/census admission is not an operation outcome, product coverage or whole-task qualification. Rollback removes only this added row and appendix; immutable original failures remain.
-
-
-## KL035 exact local native snapshot-install selection (2026-10-10)
-
-REQ/AC-TEST-004 and REQ/AC-TUNIT-ENTRY-010 retain the existing native entry, fifty ordinary test slots, exclusive heavy fixture, image-input/receipt binding and all closed selectors. Add only `/*/*/EmptyReplicaSnapshotRf3Tests/*` to the two existing closed local-image selection owners. This admits the existing genuine erased-follower snapshot/tail/public replay/cold flow for local development; it does not establish Linux qualification or manufacture a discovered UID. No topology, snapshot threshold, deadline, quota or product contract changes.
-
-Ordered ownership: native run-tests selection preserves original TUnit arguments and the exact local argument envelope; LocalRf3ImageSelection validates that same envelope before fixture-owned image preparation. The five existing NativeTUnitSelectionTests parameterized whole Node-process controls additionally prove exact filter/parallelism/envelope propagation and refusal of trailing-space, prefix wildcard, method-only and composed foreign-case selections, while retaining all ambient source/image identity refusals. Existing Aspire startup, discovered endpoints, owned image/runtime/volume and joined cleanup remain authoritative. Integration discovery must independently retain the original compiled case identity; source admission is not execution evidence. Required verification: the existing five native selection controls normal/scalar, original KL035 discovery, then actual one-case RF3 normal/scalar and authenticated Linux image/source/UID/cleanup gates. Rollback removes only this closed selector and its controls after no owned runner remains.
-
-
-### TASK-KL043-CAPABILITY-LOCAL-ADMISSION-009 — exact original public operation selection
-
-REQ-STORAGE-024 / AC-NATIVE-003, AC-NATIVE-006 and ADR-117: allow only the existing native method `NativeCapabilityOmissionRf3Tests.ForegroundSdkOrOfficialMcpOmittedCapabilityRefusesThenSameOwnerRepairAndColdReplay` in the local-development fresh RF3 image selector. Its original false/true caller arguments, source/image/PDB/config identity and private fixture-owned Aspire startup/operations/join are unchanged. Both real SDK and official MCP operations must still prove original signed omitted Id7 refusal, full unchanged native authority/model cut (only independently validated original membership progress permitted), exact owned fault repair after all18 owner locks join, real healthy commit/exact receipt/document on all four routes, same-volume cold replay and full models. No marker or CLI selection alone qualifies it. Signed wrong-purpose RF3 remains a separate OPEN gate; current native purpose controls do not provide this public credit.
-
-Only the exact method filter is added to existing native Node and C# selectors. Keep all GitHub provenance and ambient-image rejection, coverage/profile separation, native50 ordinary admission, heavy1 physical fixture ownership, receipt/digest/copy verification and all prior filters byte semantics. Reject class/method wildcards, prefixes, mixed filters and trailing whitespace. Extend the existing full Node CLI operation regression and preserve every old rejection; no fabricated native UID, catalog/status/count change, new image authority, timeout/health/membership/topology change. A fresh private producer image and actual copied PE/PDB/source hashes are required; same original native discovery must return both actual typed booleans. macOS before-start listener refusal is retained failure, not permission to alter Linux topology or qualification. Native RF3 executes only after heavy owner settlement and actual listener prerequisites.
-
-Ownership: scripts/Features/TestInfrastructure/run-tests.mjs; Integration ClusterReplication/Scenarios/Resources/LocalRf3ImageSelection.cs; Unit TestInfrastructure Cases/NativeTUnitSelectionTests.cs and Processes/NativeTestSelectionProcess.cs; new feature Helpers/NativeCapabilitySelectionProgram.cs factors only the new bounded CLI regression program to retain original process-owner200 limit. Existing actual signer/verification/discovery source remains unchanged. Rollback removes the single admission and supporting program/assertions. Root joins guarded append documentation and source; integrated Linux original discovery/full SDK+MCP RF3 and whole KL043 remain OPEN.
-
-
-## TASK-KL035-RETAINED-FOLLOWER-LOCAL-ADMISSION-003
-
-REQ/AC-TEST-004, REQ/AC-TUNIT-ENTRY-010 and REQ/AC-REP-004 retain the original strict49 scope and all current public operations. Add only `/*/*/ClusterTests/RetainedReplicaCatchesUpThroughNativeSnapshotAndKeepsCommandOutcomes` to both existing closed local-image admission owners. This is local discovery/execution infrastructure, never qualification or a topology/product change.
-
-Ordered stages: freeze this appendix; preserve R39 original source/image/results; compose the exact filter into run-tests and LocalRf3ImageSelection; extend the same five original native Node-process controls with full exact arguments/environment/default50 and all inherited identity/refusal checks; independently reject class-wide, method-prefix, foreign union and trailing-space matches; fresh compile and native discovery; actual original retained-follower normal/scalar with joined fixture shutdown; authenticated pushed Linux strict49 source/DLL/PDB/image/UID/cleanup gates remain mandatory.
-
-The narrow Node program fragment owns only the additional selector and its negative operations, keeping the existing process owner and original15s/3s deadlines. It adds no TUnit case or public/serializer ID. Both original snapshot controls, all old selectors, source/image ambient rejection, heavy1, startup/resource/deadline bounds and strict GitHub receipt branch remain unchanged. No new provider, simulated Git identity, quota or blanket filter. Rollback removes only this exact filter/fragment/assertion extension after all original runners settle.
-
-
-### TASK-KL043-CAPABILITY-LOCAL-IMAGE-OWNER-010 — original public fixture image ownership
-
-REQ-STORAGE-024 / AC-NATIVE-003, AC-NATIVE-006 and ADR-117: the original capability trial must own the existing LocalRf3ImageTestSession selected by the exact admitted method, pass its verified selection into the same original TwoRf3MembershipWave, and dispose/join that session after the original seed and six-owner wave. Without selection the existing wave demands genuine GitHub receipt/source provenance; local CLI admission cannot fabricate it. This finite test-fixture repair borrows the established session API and actual image verification/build/preparation resource owner. Null remains the unchanged genuine GitHub path.
-
-StartIfSelectedAsync uses the original linked caller/deadline token; no new timeout, clock, topology, caller authority or image fallback. The exact same preparation session remains alive through both original SDK/MCP Boolean operations and all owned stops/restarts. Every initiating/seed/wave/image cleanup failure remains in the original ServerFailureObserver ledger. Remove the image only when the actual returned wave cleanup succeeds; otherwise join preparation output/tasks and retain the image. Do not infer successful shutdown from a startup exception or missing wave. All original original-signer Id7 omission, causal marker, full unchanged native authority/model cut, exact fault repair after18 locks, receipt/business/cold assertions and Args remain byte-identical.
-
-Ownership: StorageRecovery/Scenarios/Identity/NativeCapabilityOmissionRf3Trial.cs and the narrow ClusterRouting/Helpers/TwoRf3MembershipWave.StartNativeCapabilityOmissionAsync parameter; no ordinary profile or production source change. Rollback removes only this borrowed local session wiring. Required evidence: exact private producer/source/DLL/PDB/copies, native discovery Boolean False/True, full original SDK/MCP fixture-owned Docker/Aspire execution and joined cleanup; delivered Linux and wrong-purpose RF3 remain OPEN.
-
-# TASK-KL043-CAPABILITY-LOCAL-PROFILE-011
-
-REQ-STORAGE-024 / AC-NATIVE-003,006 and ADR117: R120 preserved two original pre-node profile refusals. This successor admits only the existing protected native capability omission profile through the existing typed development image path. It does not convert a config image digest to RuntimeContainerImage/registry authority or synthesize GitHub identity.
-
-Before source: TwoRf3QueryProbe keeps its original immutable runtime branch exactly; a separate local branch requires NativeDiscoveryOmission settings, no runtime image, the already validated ephemeral TwoRf3/remote-document/remote-query/protected-document/probe configuration, and the genuine LocalDevelopmentContainerImage. It calls existing RequestCqrsProbeProfile.ReadLocal, retaining original roots/session/mode validation. NativeDiscoveryOmissionProfile.Create accepts this exclusive local image shape only for its already closed selected profile; absent/mixed image inputs refuse. Ordinary local protected profiles without capability omission still refuse.
-
-Negative enrollment controls precede code: absent omission selection, absent remote-query permission, absent protected-document selection, incomplete local image envelope, mixed ambient GitHub/local provenance and altered source/image identity must continue to refuse. Existing native selection five controls already cover ambient and selector refusal. A new whole AppHost model operation will prove exact valid protected enrollment, then omitted required configuration refusal, preserving every original file/resource-model byte. Model controls do not claim image existence, signer omission, or database operation qualification.
-
-Actual operation gates: fresh LocalRf3ImageTestSession and original linked cancellation own preparation; existing LocalRf3ImageIdentity verifies original receipt/source/invocation/config image before startup and all six actual started containers after startup. Preserve original bool false/true SDK/MCP cases, full causal foreground witness, original omission MAC, all native no-effect cuts/18 joined locks/exact repair, four-route healthy operation, receipt replay and cold full models. R120 remains 2FAIL; no marker/admission/build discovery alone earns runtime credit. Native runtime/GitHub branch and canonical Linux provenance unchanged.
-
-Ancestry: image-owner5 R1 remains immutable; source successor preserves its Trial/Wave ownership bytes. Main Stage50 already joined selector/WAL appendages; final docs compose against fresh main with R1 ownership append explicitly recorded, never blind refresh. Isolated owning AppHost full production build and Integration discovery must precede seal; root integrated Linux whole operation remains OPEN. Rollback removes only this narrow development enrollment while retaining all original evidence and protected runtime branch.
-
-
-### TASK-KL043-PURPOSE-LOCAL-017
-
-REQ-LOCAL-PURPOSE-017 / AC-LOCAL-PURPOSE-017: native local image admission adds only exact method /*/*/NativeSignedPurposeRf3Tests/ForegroundSdkOrOfficialMcpSignedPurposeRefusesThenExactRepairReplayAndTwoColdCuts. Original native CLI five-suite selection/args/default50, four near-match refusals and full ambient GitHub/receipt/coverage/benchmark/wrong-suite negative matrix stay mandatory. Same typed immutable local image/source/session/invocation/six-started image checks and heavy1 joined cleanup; no wildcard/UID or GitHub authority change. Local supporting/metadata proof does not qualify actual public/Linux RF3. Ordered source prerequisite TASK016 public profile; root main join guarded, rollback removes only new exact selector/control.
-
-
-### TASK-KL065-INCOMING-LOCAL-ADMISSION-001
-
-The exact original /*/*/GraphIncomingRf3Tests/PersistedSourceGrantHidesCrossRowsAndTargetGraphDenialIsExplicit is admitted in both existing closed local-image owners for the shared physical RF3 graph incoming policy/revoke/repair/cold operation (AC-GRAPH-XPART-003/005). This is test-infrastructure selection, not remote graph support or delivered Linux qualification. Native discovery binds the original case; no new case or UID is introduced. The original five `NativeEntryPreservesOriginalTUnitArgumentsAndRejectsInvalidSelections` suite controls retain their argument/environment/privacy gates and add exact-method selection, four broad/partial/union/space refusals, all existing ambient identity/coverage/benchmark/wrong-suite refusals, then healthy selection.
-
-Ordered join: docs/ADR → JS selector → Integration closed selector → feature-owned native-process control → existing Unit assertions. Keep original 50 ordinary parallelism, heavy1 fixture ownership, deadlines, source/DLL/PDB/image receipt boundaries, genuine Aspire startup/client operations and joined shutdown. Local InputDigest cannot become GitHub SourceSha; original strict GitHub path is unchanged. Root alone integrates main. Rollback removes only this exact method enrollment and its supporting controls; original selectors and negative controls remain. Normal/scalar RF3 execution and exact-source Linux evidence remain OPEN.
-
-
-## TASK-KL043-PURPOSE-FIXTURE-019: complete exact method admission
-
-REQ-STORAGE-024 and AC-NATIVE-003/006: canonical CLI method admission is not the fixture image owner admission. Add exactly the public17 signed-purpose whole-method filter to existing LocalRf3ImageSelection.ReadNativeArgumentsIfSelected alongside every unchanged current capability/retained/null-service method. Preserve exact native argument shape/order/enabled value, bounds, ambient coverage/GitHub/local provenance refusals and null ordinary path. Existing public17 SDK/MCP bool whole flows and local7 full CLI positive/negative controls remain the regression; no synthetic identity or getter case, wildcard, image authority conversion, default or clock change. Actual immutable local image/six-owner public body and delivered Linux qualification remain OPEN until original execution.
-
-
-## TASK-KL043-PURPOSE-UNIT-CENSUS-020: original operation contributor admission
-
-REQ-STORAGE-024 and AC-NATIVE-003/006: enroll only the actual native NativeSignedPurposeOperationTests.OriginalSignedPurposeRefusesBeforeRoutingThenSameOwnerRepairReplayAndTwoColdCuts whole operation as a functional contributor after fresh complete normal/scalar discovery and independently source-bound PE/PDB observation. The operation owns genuine original signed-envelope refusal, exact same-cut causal witness, persisted owner/result/receipt repair, healthy continuation and two real same-root cold opens; no property, getter, load or metadata-only case receives contributor credit. Preserve every existing functional and required control instance, its classification and original refusal evidence. Add the single discovered case to exactly one existing functional group, retain the five groups and all exclusion controls, refresh only actual source digests/native ranges, then run the unchanged strict full-census validator. Native UID/display/span/count come from the original current assembly, never source-argument arithmetic or private stale images. Ordinary native parallelism stays50; discovery is not execution, numerical coverage, public/Linux RF3, or whole KL043 acceptance. Root owns the finite JSON enrollment and native reconciliation; rollback removes only this new contributor/group entry, without deleting original observations or relaxing validation.
-
-
-## TASK-KL035-COLD-START-ALL-021: begin every stopped RF3 owner before readiness
-
-REQ/AC-TEST-004/010/014/015 and REQ/AC-TUNIT-ENTRY-001 preserve the original genuine fixture-owned Aspire RF3, same-root volumes, native kill/restart receipts, SDK/official MCP/Q1 operations and joined shutdown. The immutable Stage52 NullSelectedService original failed at its first cold cut: after stopping all three nodes, QueueLeaseRf3Cold awaited the first RestartContainerAsync, whose actual owner waits for cluster readiness while the other two nodes remain stopped. This is a test-orchestration defect, not permission to change server quorum, schedule deadlines or authorization.
-
-Before source edits, freeze one finite repair across QueueLeaseRf3Cold, InboxProcessingRf3Cold, QueueProducerRf3Cold, SubscriptionFilterRf3Cold, TargetInboxRf3Cold, SampleChunkRetentionRf3Cold and SampleChunkRf3Cold. After the original kill-all phase, invoke the existing BeginContainerRestartAsync for every original node using the SAME caller cancellation token and existing failure ledger where applicable. Only then invoke every unchanged RestartContainerAsync and unchanged healthy-resource wait. The native BeginRestart owner retains the original killed-container receipt and accepted replacement identity; subsequent RestartAsync validates and settles that same owner, readiness, original volume/image and actual restart receipt. Existing GraphIncomingPublicCold and FeedLiveRf3Cold already use this ordering. Parallel Task.WhenAll and single-node/rolling helpers are outside this finite repair.
-
-Root owns this contract, guarded native edits and integration; independent agents continue their separate scopes. Preserve all original cases, native UIDs/Args, deadlines, health predicates, explicit membership, per-runner50 and exclusive heavy1. Existing server lifecycle, public contracts, aliases/field IDs, storage and packages stay exact. Verification: coherent Release build/format, affected whole-operation normal/scalar controls, then genuine original NullSelectedService continuation through both cold cuts and public SDK/MCP/Q1 replay/claim/ACK/healthy assertions. Run the remaining affected original cold operations in exact-source Linux task/full suites; a build or supporting control cannot establish their RF3 acceptance. Keep the original failure/cleanup ledger unchanged and keep coverage and whole-task gates open until their actual evidence exists. Rollback removes only these seven start-phase calls; no runtime migration or compatibility path applies. ADR-117 records this unchanged-topology orchestration contract.
-
-
-# TASK-KL065-NATIVE-TASK-QUALIFICATION-001
-
-Related original architecture29.3/KL065, REQ/AC-AUTH005/007, REQ/AC-GRAPH002, ADR014/117. Freeze before source: append ONLY KL065 to actual thirteen current strict task objects. Preserve every existing strict case union, selectors, counts, native image/source/process/TRX/cleanup/coverage predicates and separate Benchmarks/Website. Current root is sole live writer. Project membership READY6 is an explicit operation-source predecessor, not an invented new native case.
-
-Existing-operation source map includes the complete current SecurityAndQuery, document row/tenant mutation, equality access path, SQL join row authorization, bounded partition query/public authorization, incoming/traversal/shortest-path/search authorization, node-local raw point-cache authorization and original replica security classes; the original PeerDiscoverySecurity recovery class; and genuine GraphIncoming, GraphPath authorization, cross-tenant, relational join authorization and partition-query public RF3 classes. All original Test/Arguments declarations remain, each class uses its full exact native filter. Native semantic bodies provide source candidate method/parameter/Arguments cardinality only. Do not invent instance displays, UIDs or compiled counts from these declarations.
-
-Ordered stages: this contract/spec/ADR before candidate descriptors and closed task selectors; complete source-bound Release build and current native prepared DLL/PDB/source/image receipts; normal/scalar native census using existing bounded discovery/process/image/source owners, with unchanged source verification and artifact upload/registry cleanup. The census stage intentionally fails acceptance after retaining originals; it never executes or creates a passing receipt. Authenticate actual GitHub source/run/attempt/job/artifact/ZIP digests separately; then use the feature-local create-only proposal binder with both original profiles, current-source/full-image equality and exact unique native cases to produce only a strict task proposal and observation/review files. Root reviewed guarded graduation replaces ONLY new KL065 census object; actual complete Unit/recovery/RF3 execution and final independent verifier follow. No script authenticates supplied files as GitHub.
-
-Original50 ordinary slots/existing exclusiveheavy1, native discovery1800s, Unit/Recovery1800s, RF3 child3600s, settlement30s and job180min remain exact. Caller scalar is distinct from server intrinsic profile. Fixture-owned Aspire realRF3, SDK/officialMCP/Q1, fresh persisted authority, no partial/noeffects and full receipt/body/cold oracles remain original. Full-suite/functional coverage and inventory/contributors are mandatory independent gates; the binder does not generate covered outcomes or relax them.
-
-Important completeness fence: current RowAccess contains OwnerId0/ProjectId1; PrincipalRecord Projects6 and current epoch10; native CanReadRow uses owner OR ordinal project membership in current persisted principal. There is NO current native team contract, and this lane does not manufacture one. Generation-scoped ID-set design and exact cross-tenant cache-key isolation are not established by these row/query results. PeerDiscovery recovery/support declarations are not relabeled as process-kill row-policy qualification. These original whole-task implementation/qualification gaps remain explicitly OPEN even if every mapped existing operation later passes. No team/cache/fullQL/performance/endurance/power-loss/production claim, no narrowed task acceptance assertion. This is a complete current-existing-operation lane, not proof that missing product criteria exist.
-
-Exact affected owners: docs Features Authorization/TestInfrastructure +ADR117 append; CodeQuality task contract/producer/verifier/feature-local binder; single canonical build-and-tests workflow selection. No product/public/persisted aliases/IDs/options/defaults/topology/provider/dependency changes. Rollback removes only additive KL065 candidate/binder/selector/appends before delivery; preserve thirteen originals and all authentic failure/intake evidence. Existing strict execution implementation and final verifier remain unchanged apart from closed KL065 admission; no migration/legacy fallback. Root must retain authenticated original Linux census before graduation and keep missing/duplicate/extra/changed bindings fail-closed.
-
-### KL065 actual team whole-case census successor, 2026-10-11
-
-Preserve immutable READY8 original18 selections/75 source instances. Add only TeamRowPolicyTests.PersistedTeamMembershipRemovalRevocationRepairReplayAndSameRootColdAreComplete as separate19th source-candidate selection after READY15 product/test join. Its exact isolated native discovery and complete normal1/scalar1 operation proofs are retained development evidence; its discovered local UID is NOT a Linux strict identity. No guessed native total or PASS: source75+new1 remain explicit source declarations only. Fresh authenticated normal/scalar Linux census must bind the whole19 selections before strict execution/coverage graduation. All preexisting strict task objects, suites/deadlines, native50/heavy1, source/DLL/PDB/image/cleanup/discovery/final gates stay exact. No new coverage from local discovery alone.
-
-
-# TASK-CODEQUALITY-SIMD-NORMAL-ONLY-001
-
-Owner 2026-10-11 SIMD-always correction supersedes active forced-no-intrinsics qualification. Related REQ/AC-TUNIT-ENTRY-001, current functional coverage identity/threshold/confinement and original native product acceptance retain all complete operations.
-
-REQ-CQ-SIMD-PROFILE-001 requires a single current normal profile with native SIMD enabled, exact normal/full-group/recovery/RF3 source-bound inventories, and closed refusal of former scalar inputs without evidence replacement. AC-CQ-SIMD-PROFILE-001 maps to the existing complete ProductionSourceManifestOperationTests native operation, current CLI profile refusal controls, full native report/descriptor merge and delivered normal functional collection; all must preserve thresholds and genuine shutdown. ADR-117 owns this current profile schema/admission change; historical receipts are read only as immutable history, never by a current compatibility reader.
-
-Scope: private CodeQuality PS/JSON producers, descriptor/merge/profile/report/contributor/task validators, independent native C# whole-operation assertions. Exclude workflows, run-tests.mjs, runtime/kernel/startup, root-owned ProductionSourceManifestScriptAssertions and NativeTestSelectionProcess/NativeTUnitSelectionTests. Root solely composes shared contract joins.
-
-Current profile inventory becomes unit normal full census plus exactly five disjoint normal functional groups, recovery, all 11 RF3 contributors and unchanged required ordinary controls. Contributor registry is independently frozen 49 Unit +1 recovery +11 RF3 =61; remove only 49 scalar duplicates. Exact remaining operation identities/requirements/modules/state descriptions stay unchanged. The three real test images Unit/Recovery/Integration remain independently source/PDB/compile-receipt bound; redundant scalar Unit reference disappears.
-
-Current descriptor unitCensus has exactly normal, run-status exactly one full normal +five groups, suiteRuns exactly five groups +recovery +RF3; unknown scalar keys/suites/status/profile reject before file acquisition under unchanged exact-key guards. Task Profile ValidateSet accepts normal only. Reject inherited disabled-intrinsics environment before launching current normal work, restore unchanged original environment in finally; do not manufacture historical profiles or accept scalar receipts through compatibility readers. Historical original evidence bytes/hashes remain untouched.
-
-All remaining report/TRX UID, source/PDB/image equality, maximumParallelTests50, create-only, file/byte/path/reparse/inventory/refusal/disposal/charged reads and 80/70/90/noDecrease/repeated-input gates remain unchanged. No successful coverage or task acceptance from source/discovery or partial SELECT.
-
-Whole regression: existing NativeImagesProduceClosedManifestAndRejectTamperingWithoutReplacingEvidence performs native prepare/full literal inventory and compile identity checks, failed edited input unchanged, exact repair/healthy verify and create-only refusal. Deepen same operation with actual unsupported scalar contributor/image manifest refusal and unchanged exact repair; no property-only tests. Existing native report merge/repeated input/read confinement/process settlement/RF3 contributor controls remain in complete selected normal operation set. One complete owning batch compile/normal execution after all edits; root integrates then delivered Linux required. No new scalar runs. Rollback only this current normal-only schema admission change under owner direction; no legacy reader.
-
-## TASK-KL066-PUBLIC-LOCAL-ADMISSION-003
-
-Allow only the existing original `/*/*/ResourcePolicyUpdateRf3Tests/AcRpol004PolicyAckFencesReadersCursorsAndStaleRetriedUpdatesAcrossRf3` native treenode in both current closed local-image selectors. This is test preparation for the same original public cursor/revocation/repair/cold whole operation, not a new TUnit declaration, UID, topology, provider or GitHub identity. Native50 ordinary/exclusive RF3 ownership, bounded fixture-owned image/context/source/receipt/readiness/client/shutdown controls and every previous closed selector/refusal remain unchanged. NativeTestSelectionProcess adds actual Node selection plus all existing ambient/native arguments negative checks and four independent wrong-class/prefix/union/whitespace refusals to its existing current parameterized Unit controls. Existing NativeTUnitSelectionTests delegates those exact output assertions to the owning NativeResourcePolicySelectionAssertions helper; NativeResourcePolicySelectionProgram owns only the additive actual Node program fragment. Current-source normal native-SIMD Unit controls then exact Integration discovery plus same original normal native-SIMD RF3 are mandatory; admission/source alone is not operation qualification. No server image/source proof synthesized or limits changed.
-
-
-## TASK-TEST-APPHOST-NATIVE-SIMD-001 — current normal-only suite composition
-
-Owner2026-10-11 mandatory native SIMD supersedes every earlier active unit-scalar/runner-disabled-intrinsics clause, including REQ/AC-TEST-009 and historical suite examples. Immutable original scalar reports remain history, never current qualification. Current TestSuiteProtocol and ProjectForSuite admit only analyzers/unit/recovery/rf3/comparison/site; former unit-scalar is unknown and refuses before resource creation. TestSuiteResources removes only its explicit DOTNET_EnableHWIntrinsic=0 runner branch; native50 ordinary/exclusiveheavy1, explicit supported parallelism, original comparison isolation1, all project/argument/TRX/coverage/path selection and genuine Aspire preparation/readiness/clients/shutdown remain unchanged. No old ignored alias, scalar alternate or limits/configuration fallback.
-
-Native audit proves TestSuiteApplication, TestSuiteSettingsReader and typed execution policy have no scalar-specific behavior, so their cancellation, output/process joins and failure ledgers remain byte-exact. Existing AspireTestEntryModelTests same declarations verify the complete six-suite model, exact native argument/project/results shape and absent injected disable environment. FilterIsOneNativeArgumentAndIsBoundedBeforeResourcesAreAdded now refuses old unit-scalar before its original genuine healthy model; full negative and healthy controls/disposal remain. Its independent default ordinary literal is50, while the explicit rejected comparison20 configuration remains independently20. This source-owned model remains in ComparisonTests and executes only through authorized GitHub Benchmarks under its local policy; no local benchmark workload is started. Existing FunctionalTestParallelismTests/NativeTUnitSelectionTests normal controls and final all-source compiler/format/native census remain mandatory.
-
-Ordered source owners: this spec/local AppHost policy/ADR first; exact protocol and selection retirement; resource branch retirement; original complete model assertions. Root alone joins/builds/executes live inputs. No product/public/persisted ID or storage-format change, migration, clock/deadline/resource increase. Rollback cannot reinstate the superseded scalar mode; preserve originals and repair the same normal-native contract. Current execution/coverage/Linux qualification is OPEN until actual source/DLL/PDB/discovery/reports/cleanup bind. Native source-path/count arithmetic is not UID or PASS.
-
-# TASK-KL065-STRICT-NATIVE-EXECUTION-002
-
-REQ/AC-TUNIT-ENTRY-010, REQ/AC-AUTH-005/007 and REQ/AC-GRAPH-002 retain the complete original KL065 product scope. This ordered successor is frozen before strict registry integration. Authenticated GitHub Build and Tests run38136695039/attempt1, main push ffab3ee49e65f7baa0e63ef9078910bd35df25da, job114461913576 retained all19 successful native census selections and successful final source verification; its deliberate census-only failure is not an operation result. Artifact11701821343 has original ZIP SHA256 8db35c8e3a19d365b53e3c09426481b6129f1f0cc8953dbd375baac31341c069. GitHub API provenance, original ZIP bytes, confined BCL extraction and original process/image/source files are retained separately; supplied files never authenticate themselves.
-
-The existing normal-only canonical binder passed against those originals and unchanged current case sources. Its strict proposal SHA256 ef2fc5cbc484a83ec825ac9df1a3ea63d4d3746492d1a12b307e8051cd7fafab and native observation SHA256 186ebb0a61d3af044d1797551e656782f4112b66f6e0627275415fa0cff6268c bind exactly76 unique observed native UIDs:43 Unit,25 Recovery,8 RF3, in19 original selections. Native displays, constructor-bearing report types, typed parameters, source locations and ordinal case order come from original discovery; no identity or passing outcome is synthesized.
-
-Root stages: freeze this contract and ADR117; guard and replace ONLY the KL065 census object with that exact strict proposal while preserving the other13 task objects byte-for-byte; run canonical static admission, build and relevant meaningful original controls; commit/push the full checkpoint; execute fresh exact-source Linux strict76 through the unchanged producer and independent final verifier. New execution independently discovers and binds its own compiled source/DLL/PDB image. The current SIMD-always owner correction supersedes active normal/scalar clauses in the earlier census contract; the sole active profile is normal. Original history remains immutable.
-
-Preserve native50, exclusive heavy1, discovery/Unit/Recovery1800s, RF3 child3600s, settlement30s, job180min, fixture-owned genuine Aspire RF3, real SDK/official MCP/Q1, authorization, scoped cuts, cancellation, complete original state/receipt/replay/cold oracles, source verification, process/resource settlement and all coverage/inventory/80/70/90 gates. No producer/verifier bypass or successful receipt is created by graduation. Full KL065 acceptance, generation-specific public qualification and wider product/fault/performance gates remain OPEN. Rollback restores only the undelivered task object and successor records, preserving every original provider archive and failed result. Root owns main integration; other agents continue their disjoint feature work.
-
-
-## TASK-KL068-LOCAL-ADMISSION-010
-
-TASK-KL068-LOCAL-ADMISSION-010: REQ/AC-TEST-004, REQ/AC-TUNIT-ENTRY-010 and ADR117 enroll ONLY the two original exact MCP authority methods required by immutable READY10/READY7 in both existing closed canonical JS/native Integration selection owners. Keep all existing filter and source/image/receipt/child/GitHub/ambient/coverage/benchmark/UID refusals, nativeSIMD50 and fixture-owned genuine Aspire RF3 startup/readiness/client/three-node restart/join unchanged. Existing NativeTUnitSelectionTests whole selector operation checks both accepted full argument/environment shapes and refuses class wildcards, method-prefix patterns, appended other case and trailing space; both selections also traverse every original ambient/extra/wrong-suite rejection. No case/UID/catalog/profile/product schema or GitHub identity is added. Actual local source/image/run is development-only; Linux/full-suite/coverage remain OPEN. Docs before code, same native selector only.
-
-Exact filters: `/*/*/McpPersistedAuthorizationTests/AcMcp002CurrentPersistedPrincipalControlsEachCallAfterDiscovery` and `/*/*/McpCredentialLifecycleTests/AcMcp002PersistedCredentialChangesRejectTheClientAfterDiscovery`.
-
-
-### TASK-KL068-LOCAL-INPUT-READER-001 — serial bounded current-input ownership
-
-REQ-TEST-015 / AC-TEST-015 retain the existing immutable local RF3 build-context and current-input verification operation. An original isolated MCP authority run refused during the original 30-second verifier at BuildInputs before its test body; that cancellation remains authentic failed evidence and is not a proven causal performance diagnosis.
-
-The owning local-image-snapshot.mjs reader may replace each per-file ReadStream with serial FileHandle.read using one reused 65,536-byte buffer, matching the observed existing ReadStream chunk size. Preserve exact sorted header/digest bytes, complete file contents including empty and multi-chunk files, O_NOFOLLOW, original pre/post handle and path identity/stat/size checks, all existing file/entry/byte admission, directory/scaffold closure, initiating and close failures, and the original 30-second verifier. No parallelism, timeout, input selection, receipt/schema/identity or Docker admission change. Snapshot creation and its original copied-stream ownership remain unchanged.
-
-The original AcTest015LocalImageBuildUsesImmutableAdmittedFilesystemSnapshotAndCleansItBeforeReuse adds actual multi-chunk and empty filesystem inputs, independent full-byte snapshot oracles before and after checkout mutation, and joined cleanup, preserving all original symlink/overflow/no-effect/mode/refusal checks and its case identity. Retain old/new exact current-source digest observations and execute the real native operation through canonical native50/SIMD-enabled entry. A healthy prerequisite only permits one subsequent complete original SDK/official-MCP authority/revoke/repair/cold operation; it is not authorization or RF3 acceptance itself. Original failures and delivered Linux/source-image/coverage gates remain distinct and OPEN.
-
-
-## TASK-KL068-INITIAL-CREDENTIAL-LOCAL-IMAGE-011
-
-TASK-KL068-INITIAL-CREDENTIAL-LOCAL-IMAGE-011: finite prerequisite for SAME two original initial-credential instances under TASK010. Append ONLY exact method filter to both existing closed local-image admissions. Preserve every original allowed/rejected filter, exact image/receipt/source/ambient/GitHub/child/bounds/coverage/UID protections and SIMD/native50/heavy1. No caller identity or fabricated GitHub receipt. Existing native selector whole-operation controls must execute positive exact filter, four near-miss rejections and all original ambient/authority negatives. No database operation, topology/default/deadline/format or test declaration changes. ADR117/REQ/AC TestInfrastructure native selection ownership applies. Private predecessor READY8 original auth filters; source-only prerequisite, RF3/Linux/task acceptance OPEN.
-
-## Native TestCluster startup first-cause evidence, owner 2026-10-11
-
-TASK-TEST-NATIVE-STARTUP-FIRST-CAUSE-001 maps REQ/AC-TEST-010 and REQ/AC-TUNIT-ENTRY-010 to the unchanged full Unit startup/client-gateway and joined cleanup boundary. Pinned Orleans10.4 already owns file logging; authentic failed fullUnit artifact11702365365 omitted those native files. Failure-only bounded safe projection of the SAME cluster-ID-owned files is saved under actual TUnit ResultsDirectory after genuine joined disposal; uncertain cleanup reads no open logs. Preserve initiating plus every cleanup/capture failure, original native50/SIMD/startup and operation deadlines, all actual clients and operations. No new logger/provider, endpoint, retry, serial execution or success inference. Limits: actual initial silo count plus client files,1MiB inspected/file,64safe header/exception events,65536UTF8output; saturation/missing/unknown are explicit. No raw messages/config/endpoints/identity/credentials/user body. New original cancelled-startup→joined evidence→fresh signed write/replay/close whole regression and all existing ConnectionNative/RequestCqrs/NativeCqrs operations remain required. Linux full-suite overlap qualification remains OPEN until actual source/image-bound execution.
-
-Parser attachments remain bound to the same accepted native header; rejected/saturated headers reset continuation identity. Under the unchanged64-event ceiling, actual failure headers may displace the last informational header, retaining exact role/offset ordering and explicit saturation. Unknown/missing evidence never establishes a startup cause.
-
-
-## TASK-UNIT-OWNED-FAILURE-SETTLEMENT-001 (2026-10-12)
-
-REQ-UNIT-OWNED-FAILURE-SETTLEMENT-001: Genuine SampleChunkPartialRetention, RemoteModelNativeMac and ReadGrantFailureSettlement whole operations lexically own their fixture acquisition. Preserve operation exceptions before implicit disposal and all acquisition/disposal exceptions afterward, including fatal errors. Original reverse cold-store disposal and conditional original-store release remain unchanged. Owned MAC credential bytes are cleared on construction/disposal failures without touching borrowed caller bytes. ReadGrant inherits only the independently sealed CancellationToken-last constructor/caller contract; capacity, cancellation, settled grant accounting and complete native images stay unchanged.
-
-AC-UNIT-OWNED-FAILURE-SETTLEMENT-001: All original retention/merge/refusal/replay/two-cold, native MAC sign/verify/privacy and read-consumer failure→retained charge→settlement→healthy→cold assertions and declarations remain unchanged. No invented failure/provider, no cap/deadline/default/protocol changes. Native fix-first exact rows returned NotFound; source-only preview/reconstruction does not establish analyzer or runtime PASS. Canonical Unit50 SIMD and exact source/image/current UID discovery remain mandatory OPEN gates.
-
-Source map: TimeSeries/Fixtures/SampleChunks/SampleChunkPartialRetentionFixture.cs and Helpers/SampleChunkPartialRetentionFlow.cs; DocumentStorage/Fixtures/RemoteModelNativeMacFixture.cs; ResourceExecution/Scenarios/ReadBudgets/ReadGrantFailureSettlementFlow.cs.
-
-- **AC-TI-R33-PUBLIC-WHOLECLASS-SELECTION-001:** Admit only the exact literal local RF3 whole-class selector `/*/*/(TypedEndpointJoinRf3Tests|DeclarativeCompositionReverseQuotaRf3Tests|SubscriptionPhasePublicColdTests|BlobSupersessionPublicTests|BlobPartialReadBoundaryPublicTests|NativeTextProtectedPublicColdTests|CurrentOwnershipTokenAfterMovementRf3Tests)/*` through the matching Node and Integration closed admissions. The existing genuine Node selection subprocess and original four-suite TUnit workflow must preserve all previous positive selectors, default native50 and all16 ambient/GitHub/inherited/coverage/mixed-suite refusal controls; the new selector joins that same refusal loop and independently rejects six literal single-class/omitted-class/prefix/reordered/foreign-class/trailing-space near misses. Compare actual native argv, exact three-element preparation environment, absent forged image/child/GitHub identity, complete process/output/error-reader/disposal settlement and unchanged original test identities. This required tooling control prepares genuine scoped SDK/official MCP/Aspire RF3 wholeflows; selection/source acceptance does not qualify the selected database cases, measured coverage, RF3 fault gates or Linux delivery.
-
-- **AC-TI-R34-PUBLIC-WHOLECLASS-SELECTION-001:** The new ready Blob, Search, Messaging and physical-placement whole operations require one exact local RF3 selector `/*/*/(TypedEndpointJoinRf3Tests|DeclarativeCompositionReverseQuotaRf3Tests|SubscriptionPhasePublicColdTests|BlobSupersessionPublicTests|BlobPartialReadBoundaryPublicTests|NativeTextProtectedPublicColdTests|CurrentOwnershipTokenAfterMovementRf3Tests|QueueLifecyclePublicRf3Tests|PhysicalShardPartitionMovementRf3Tests|TenantPackingActivationRf3Tests|BlobBoundedRetirementPublicTests|BlobPublicCancellationTests|BlobReadPolicyPublicTests|BlobReservationQuotaPublicTests|NativeTextNestedWildcardPublicTests|NativeTextRawReadPolicyPublicTests|NativeTextRequestRefusalPublicTests|NativeTextRowOwnershipPublicTests)/*` admitted by the matching existing Node and native Integration readers. Preserve the earlier exact selectors and every original credential/source/image/receipt/child/GitHub/ambient/coverage/benchmark/UID guard. Extend the existing genuine Node child and four-suite TUnit selection operation with exact full native arguments, native50, three-element preparation environment, all original sixteen ambient/extra/mixed-suite refusal controls and six independent literal single-class/omitted-class/prefix/reordered/foreign-class/trailing-space refusals. All original case identities, process/output/error-reader/disposal joins, real Aspire-owned resources and SDK/official MCP callers remain. Source admission prepares local development operations only; no GitHub identity, database PASS, coverage or task acceptance is fabricated. Only the delivered current eighteen-class literal is added; future cases require their own reviewed finite selection.
-
-```mermaid
-flowchart LR
-    ExactSelection --> NativeArguments
-    NativeArguments --> AspireOwnedRF3
-    AspireOwnedRF3 --> WholeOperationReceipts
-```
-
-
-## Private RF3 cold-wave scheduling after original R34 readiness failures
-
-AC-TI-RF3-COLD-OWNERSHIP-001: the six SubscriptionPhasePublicColdTests each own an independent actual three-node Aspire Docker application and two same-volume cold restarts. Use the existing native TUnit NotInParallel contract for those complete private cold-wave cases, matching the established physical-movement and blob-cancellation ownership pattern. Preserve all original case identities, operations, readiness requirements, tokens, deadlines, SDK/official MCP assertions and joined shutdown. Other independent test classes and the separate native Unit runner retain maximum50; this is no concurrency or performance qualification claim.
-
-Original R34 executed all six and failed before their public operation assertions. Retained resource logs show lost reachable majority, native scheduler/membership delays and one observed node exit137. Current readonly Docker inventory reports4 CPUs and8,215,646,208 bytes RAM; exit137 alone does not establish OOM, and pressure is not a measured CPU hotspot. Sequencing the existing private topology owners admits no skipped case, fake image, relaxed health, silent retry or product deadline change. Repeat their unchanged complete operation flows only after the common corrected source/image is built; original failures remain immutable.
-
-AC-TI-R35-PUBLIC-WHOLECLASS-SELECTION-001: admit the preceding exact eighteen-class selector extended, in order, by GraphVertexPublicWholeFlowTests, QueueLeaseFencingRf3Tests, PartitionMovementFencedAbortRf3Tests, TenantDedicatedOwnerRf3Tests, PostgresNativeSessionRf3Tests, BlobRowCreatorPublicTests, BlobRejectedContentPublicTests, BlobListRowPolicyPublicTests, NativeTextNormalizationPublicTests and NativeTextDistinctTermsPublicTests. The matching closed Node and native Integration admissions accept only that complete literal twenty-eight-class union. Preserve all earlier selectors, native50, all sixteen ambient/extra/wrong-suite refusals, real owned-image preparation, image/source receipts, SDK/official MCP operations and joined cleanup. Extend the existing whole native selector operation with the full arguments/environment and six independent single-class/omission/prefix/reordering/foreign/trailing-space refusals. Source selection is development admission, not runtime success, coverage, Linux qualification or task acceptance; the independent next OFFSET/capacity work is outside this frozen cohort.
-
-AC-TI-KL079-ORIGINAL-DECLARED-UNION-001: authenticated Linux Build and Tests run38319527883/attempt1, HEAD528ad9515c0059eaa9da914a29f23646c709dde7, job115044019870 and original artifact11782556552 discovered two complete LiveQueryResultCompositionTests operations. The existing strict unit-live-query-result-composition-tests registry declared only LiveDeltaCumulativeCeilingRejectsBeforeRetentionAndOriginalPageBoundaryStillResumes, so execution refused the additional HiddenOutboxReadWorkRefusesWholePageThenOriginalCursorResumesBoundedLiteralPages. Admit only that already-original, source-bound missing operation, retaining the existing operation and every other task/selection/case unchanged. Preserve strict missing/duplicate/foreign/UID/assembly/source/parameter checks, native50, all fourteen KL079 selections and original refusal evidence. The current selected case source is byte-identical to that authenticated head (SHA25678e9123239845b6bc46320d781029993f86a852d769d4354826e44e6fa1866cf). Repeat both complete native budget-refusal/cursor/independent-literal/no-effects/healthy-replay operations against the fresh R35 image. The thirteen executed original selections remain47 executed/46PASS/1FAIL/0skip; this fourteenth unexecuted selection is neither a pass nor a skip. Original snapshot failure and complete current Linux qualification stay open.
+Sequencing the existing private topology owners admits no skipped case, fake image, relaxed health, silent retry or product deadline change; their unchanged complete operation flows repeat only after the common corrected source/image is built, and original failures remain immutable.
 
 REQ/AC-TEST-004/010/014/015 and ADR-117: standalone SQL cold waves must retain restart evidence under the captured actual fixture profile incarnation plus a positive per-fixture cold ordinal. The stable original topic-sql-original-cold label remains the namespace prefix; exact node1/node2/node3 receipts retain the original complete JSON bodies, inspected container/image/source identities and action/readiness times. The safe canonical namespace rejects malformed or foreign path components. New owned receipts publish only after joined create-only pending-file write, flush and disposal, followed by a non-overwriting rename; collision or failure is terminal and retains original evidence. No persistence, wire, storage or authority format changes, and no compatibility fallback, are introduced.
 
-The existing genuine ModelSqlRf3Cold operation still kills all original owners, invokes every original restart concurrently with the same original token, joins every failure and waits for unchanged readiness. Before and after the next cold wave it validates the prior three complete retained files by length and whole-file hash, and captures the new three files after original restart settlement. Owner metadata is weakly bound to the actual fixture, retains only three prior hashes/lengths, and cannot substitute an unrelated profile incarnation. Existing standalone NULLS/FETCH/portal/positive-Execute whole flows remain the operation regression: original policy/refusal/repair, full literal healthy SDK/MCP/Npgsql results, original receipts and two cold waves remain unchanged.
+The existing genuine ModelSqlClusterCold operation still kills all original owners, invokes every original restart concurrently with the same original token, joins every failure and waits for unchanged readiness. Before and after the next cold wave it validates the prior three complete retained files by length and whole-file hash, and captures the new three files after original restart settlement. Owner metadata is weakly bound to the actual fixture, retains only three prior hashes/lengths, and cannot substitute an unrelated profile incarnation. Existing standalone NULLS/FETCH/portal/positive-Execute whole flows remain the operation regression: original policy/refusal/repair, full literal healthy SDK/MCP/Npgsql results, original receipts and two cold waves remain unchanged.
 
 Global NotInParallel and the shared McpCallerProtocol.FixtureKey barrier remain in place. Filename isolation alone does not prove remaining image, process, CPU, resource or fault-control isolation. Removing or narrowing a barrier requires the remaining resource audit and actual matched runtime/CPU evidence; this N-only namespace repair is neither parallel execution nor Linux qualification.
 
@@ -1523,12 +326,48 @@ flowchart LR
     D --> E[Whole-file conservation across next cold wave]
 ```
 
-### R37 failed startup: authenticated evidence and joined native readiness
+### Cold-start SDK flow
 
-REQ/AC-TEST-004/010/014/015 preserve genuine Aspire ownership and the original startup failure independently from every cleanup failure. The actual six R37 QueueLeaseFencing/tenant packing/capacity/dedicated/fenced-abort cases failed before their scenario operations; their unchanged original TRX and native identities remain failed. Parent-process settlement does not qualify node, application, local-image or storage-lock cleanup. The observed premature HTTP responses and Running/Unhealthy states do not establish a node crash, ownership fault or timeout defect.
+REQ/AC-TEST-010 and ADR039/117: one fresh owning ClusterFixture captures actual selected storage root and native path existence immediately before creating the AppHost builder, then starts actual Aspire-owned current-image cluster resources, waits existing readiness, uses its discovered endpoint and private local profile in the actual built CLI status child. Reuse original process reader/exit settlement policy from AppHost; no CLI build/restore, secret argument, manual Docker or deadline expansion. Persist non-admin scoped credentials through actual SDK admin calls, configure collection, create/read full literal document, compare complete native receipt bytes for same command replay, require changed-content Conflict and unchanged full document plus original replay bytes, then healthy new-ID revision2. Await original fixture shutdown and assert only its owned root removed; primary and cleanup failures remain aggregated.
 
-After the original AppHost builder has materialized the actual private profile, ClusterFixture captures its existing administrator, peer credential, physical shard and incarnation before starting the application. This only supplies the same original signed-discovery diagnostic context on startup failure; it exports no credentials and never replaces fresh persisted authorization. The six-owner wave reuses canonical AspireStartupReadiness: all original resource health waits are owned, linked to application stopping, stop on resource unavailability and are joined with primary cancellation and failure retention. Existing configured startup and cleanup deadlines, Docker topology, admission, membership, locks and all complete operation assertions remain unchanged.
+This is cold data/bootstrap proof on the native replicated cluster, not proof of an unprovisioned clean operating-system machine or a single server without external services. The original clean-machine criterion additionally requires authenticated Linux runner tool/image prerequisites and actual execution evidence; the topology remains the Aspire-owned replicated cluster. Existing SdkSubmitReturnedCancellationReusesCommittedReceipt remains separate mandatory UnknownWriteOutcome recovery proof, including its retained original failure.
 
-The two original QueueLeaseFencing cases and original TenantPackingActivation, TenantCapacityPlacement, TenantDedicatedOwner and PartitionMovementFencedAbort whole flows are the affected required controls. They retain full SDK/official MCP operations, literal receipts, refusal/no-effect checks and cold/healthy continuation. This integrated readiness/evidence correction does not claim to repair the unproved Running/Unhealthy cause or qualify cleanup, RF3, Linux or product acceptance. Required actual source-bound rerun and all resource joins remain OPEN.
+The fixed internal ClusterFixtureColdStartObservation records only selected Root plus actual directory/file existence after coverage root selection and argument construction, before native builder/startup. No callback, fault control or caller-selected root. The whole operation requires that observation absent and exact same actual root after startup. Existing covered cluster profile remains exactly eleven selected cases; this new bootstrap case is normal cluster qualification, not currently eligible for covered selection. Register its actual case through the existing ledger: normal mode is no-op; unexpected covered selection remains rejected, with no whitelist change or coverage suppression. Constructor random root does not establish selected-root identity.
 
-R38 extends the closed local RF3 development selector with nine complete functional classes: three BlobStorage, three Search, two TimeSeries and SdkProblemBudgetPublicTests. Their owning specifications define real SDK/official MCP operation results, original receipt replay and two joined cold cycles. Keep all original admitted classes; the new standalone and combined selectors only select existing native TUnit fixtures. Actual native discovery binds identities after the final build. Selector admission and discovered cases are not executed tests, coverage or Linux qualification.
+### Coverage preparation ownership
+
+REQ-CQ-039/040 and AC-CQ-039/040 retain the closed original eleven contributor, source/DLL/PDB/image/context and collector admission. No nested empty-string normalization is authorized: nested fixture mode/source are explicitly cleared, suite is absent, and current typed image context remains strict.
+
+The native TUnit coverage preparation owner must compose the AppHost directly through the existing Aspire testing builder API, validating outer original-node selection and exact closed catalogue first, then adding the unchanged real prerequisite resources. It must never resume a standalone TestSuiteApplication after removing its runner. The fixture owns preparation start/readiness/output/stop/dispose/collector cleanup; original primary plus joined cleanup failures remain retained. No deadline, image, source manifest, public cluster topology, whitelist or thresholds change. Extend existing genuine source-preparation operation with exact old-selector rejection followed by healthy canonical-selector source admission and unchanged original manifest bytes. This admission control is supporting infrastructure evidence, not product coverage; actual covered cluster eleven original collector flows and Linux gates remain mandatory.
+
+Supporting control owns GITHUB_SHA briefly under the existing globally nonparallel test, using only the genuine prepared native source manifest revision, restores the exact prior environment in finally and propagates primary/restore failures. Production selection still checks its original environment source SHA; no bypass parameter or fabricated manifest.
+
+Joined restoration: observe each original environment-key restore individually through existing ServerFailureObserver, continue every remaining key, retain all earlier stop/output/builder/image failures and throw only after restoration settles. Output lifetime disposal and cleanup service lookup similarly retain original failure identities. Prepare primary/cleanup aggregation remains unchanged.
+
+### Signed public read admission cancellation (AC-ANN-008)
+
+The actual current-image Aspire cluster wave may accept the same centrally validated QueryExecutionOptions already owned by ClusterFixture. A typed optional profile is applied before BuildAsync; null preserves every existing caller. It changes no image whitelist, authority, deadline, signed control format or covered-eleven inventory. The explicit ANN profile is disabled outside its owned scenario.
+
+AnnPublicCancellationScenario arms the existing signed v2 AuthorizationReload read phase for one newly persisted c1-probe identity, empty command identifier, ApproximateSearch read kind and actual discovered node. It cancels the original SDK/official MCP token only after that exact signed observation; cancellation and ProducerDisposed settle before retiring the arm, rereading the full canonical literal corpus and performing healthy SDK/MCP/Q1 ANN reads. SDK read cancellation is Cancelled with no page, never UnknownWriteOutcome. Official cancellation is its actual interruption. This proves public admission cancellation only; native observed-work and partial-file-write cases separately prove execution cancellation. Existing parent/wave/cleanup deadlines, original task joins, locks and primary plus cleanup retention remain unchanged. No runtime success is claimed.
+
+Source-bound phase precision: the existing signed AuthorizationReload observation is immediately BEFORE GrainRequestAuthority.ReloadForRequest, followed by the original scope recheck and fresh persisted reload. This cancellation case proves pre-reload public read admission settlement, not completed authorization or during-index work. The ordinary healthy follow-up performs actual current persisted authorization and one-cut search; separate native worker cases retain the genuine after-work cancellation oracle. No control semantics are renamed.
+
+### Kestrel failure observation
+
+REQ-TUNIT-KESTREL-OBSERVATION-001 / AC-TUNIT-KESTREL-OBSERVATION-001 under ADR-117 and existing ClientApi transport requirements freeze test-only bounded observations for five transport failures: KeyLoadClientNullReadTests.AllNativeAbsentReadsRemainSuccessfulBeforeUnavailableStatusAndFullHealthyContinuation (two existing arguments), KeyLoadClientNullWriteTests.UnavailableSuccessfulWriteBodyRetainsUnknownOutcomeStableRetryAndNullableReads (two existing arguments), and KeyLoadClientTransportTests.MidBodyCancellationMapsReadFailureAndClientCanSendNextRequest. Actual Kestrel start/send/handler/response completion/cancellation records carry only closed stages/status/category and actual monotonic elapsed, ThreadPool available worker/IO threads, pending work and native thread count. At most64 records, saturation explicit. No URL/path/header/body/credential/payload/caller value is inspected or emitted. The existing ephemeral loopback Kestrel/default native HTTP handler chain, actual client/request tokens, five-second bounds, full original negative-to-healthy assertions and cleanup remain unchanged. The optional observation is passed only by these flows; no extra request, warmup, retry, timer, NotInParallel or product/config change. On actual failure only, emit closed JSON to original native stderr before rethrowing the initiating exception; diagnostic-output failures join that same ordered ledger. Success emits nothing. This reveals observed stages only; it cannot infer thread-pool starvation or socket/JIT causation. No helper-only test or synthetic outcome qualifies the contract.
+
+### C1 outcome native cause classification
+
+REQ-C1-OUTCOME-NATIVE-CAUSE-001: the original C1 inspector must retain its first OpenStore failure and identify known native database, serializer and runtime causes using only closed enum labels and already allowed numeric codes. AC-C1-OUTCOME-NATIVE-CAUSE-001: unwrap only original AggregateException first members and TypeInitializationException/TargetInvocationException inner causes, within the unchanged16-level ceiling; preserve original phase, primary failure, native exit, all resource joins and the256-byte canonical stderr contract. Emit no exception message, stack, path, class-name string, caller data or credential. Unknown causes remain Other and remain failures.
+
+AC-C1-OUTCOME-NATIVE-CAUSE-002: the existing real child-process flow must return its original closed OpenStore labels, release the original owner and then read the original literal outcome through the healthy child. All existing malformed-input, scoped-outcome, disposal and cluster persisted-revocation whole flows remain mandatory. New labels are diagnostic evidence only, never proof of an absent outcome or a reason to accept failed inspection. ADR-117 owns native execution/report evidence; AC-CRS-005 retains request isolation and persisted authorization. No public/persisted/storage/package/topology boundary changes; no additional ADR is required. Fresh current-source Linux build, normal/scalar process and real cluster results remain OPEN.
+
+### Fixture time admission
+
+TestDatabase is the shared test owner of a genuine native ZoneTree DatabaseEngine. Submit without explicit time must use existing DatabaseEngine.ApplyEmbedded, which selects final business time inside the original ordered Store.Commit callback. Submission with explicit DateTimeOffset retains public Apply and its strict supplied-clock/replay/outcome semantics. Preserve the same stable operation ID, serialization, principal, errors and one real commit; no clamp, retry, mock coordinator, new gate or fenced-manager reset. This fixture composition refines TestInfrastructure actual-operation evidence (REQ/AC-TEST-010) and ADR-028 embedded clock ordering, not cluster topology or clock qualification. NativeSagaTimeout shared PerTestSession fixture concurrently admits default CompleteSaga/CancelSaga/ConfigurePrincipal/revocation operations while native durable-job journal removal commits; pre-gate default clock sampling can therefore race the later committed instant. Existing five actual NativeSagaTimeoutFunctionalTests plus explicit stale-clock/ClockUncertain/replay tests, full normal/scalar and Linux gates remain required. No runtime success is claimed.
+
+CreateWaitingSaga intent: sampled now constructs dueAt, persisted CompareExchangeSaga.Deadline and identical DueWorkHint.DueAt. It is not an externally authoritative command evaluation instant. Sample deadline construction from the owning Database.EvaluationClock, preserve unchanged DueOffset/CompletionTimeout arithmetic and the exact canonical deadline/hint. Submit without explicit time selects final operation evaluation inside existing ApplyEmbedded commit admission. Never widen deadline, clamp time, retry or reset the native journal fence. Explicit-time canonical clock/replay regressions elsewhere remain unchanged. Existing five genuine NativeSagaTimeoutFunctionalTests deadline/effect/stale/revoked/completed/canceled and healthy control-job oracles remain required.
+
+REQ-TEST-010 / AC-TEST-010 and REQ-MSG-007 / AC-MSG-007: each actual native TestCluster builder carries one private fixture-owner token in its Properties; actual ISiloBuilder.Configuration resolves only that owning fixture. A separately owned fixture cannot replace or clear another builder's owner. Register before native build/start, unregister only the same owner during its original joined cleanup; startup failures retain original failure and database cleanup failures. No new product hook, alternate coordinator, timeout or provider. Existing shared PerTestSession and owned boundary fixtures keep their actual native Orleans/ZoneTree lifetimes.
+
+The parent expiry whole-flow advances the actual owning clock two minutes after the first committed claim. Its unchanged default30second lease has then expired. Canonical receive replay reauthorizes that lease (CommandOutcomes.ValidateCachedQueueReceive -> Messaging.Lease) and must return exact Rejected/LeaseExpired with null result; serializing that null as a recovered receipt was the test error. Assert complete outer/lane identity, typed failure, no stop error, unchanged original persisted ReceiveResult bytes, every native store byte and position, followed by fresh healthy receive. Never extend lease or parent deadline, reset clock, disable strict native validation or invent a result. Existing valid receipt replay cases remain intact.

@@ -60,7 +60,7 @@ internal sealed class AspireContainerFaultCommandTests(ClusterFixture fixture)
             await Assert.That(JsonDefaults.Serialize(publicDocument.Value)
                 .SequenceEqual(JsonDefaults.Serialize(original.Document))).IsTrue();
         }
-        await new AggregateReplayRf3LeaderLossTests(fixture)
+        await new AggregateReplayClusterLeaderLossTests(fixture)
             .AcEvent008AcceptedRestartCancellationResumesSameReplacementAndPreservesReplay();
         await Assert.That(JsonDefaults.Serialize(ClusterReplicationTestSupport.Success(
             await sdk.GetAsync(scenario.Reference, token)).Document)

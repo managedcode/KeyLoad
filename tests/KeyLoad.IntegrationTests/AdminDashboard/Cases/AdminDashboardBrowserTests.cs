@@ -20,7 +20,7 @@ internal sealed class AdminDashboardBrowserTests(ClusterFixture fixture)
     private const string FocusVisible = "(()=>{const refresh=document.getElementById('refresh');refresh.focus();return document.activeElement===refresh;})()";
 
     [Test]
-    public async Task AcAd006RealChromeBrowsesSeededRf3DataAndDisconnectClearsSession()
+    public async Task AcAd006RealChromeBrowsesSeededClusterDataAndDisconnectClearsSession()
     {
         using var deadlineTimeout = new CancellationTokenSource(AdminBrowserProtocol.Deadline, TimeProvider.System);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken, deadlineTimeout.Token);

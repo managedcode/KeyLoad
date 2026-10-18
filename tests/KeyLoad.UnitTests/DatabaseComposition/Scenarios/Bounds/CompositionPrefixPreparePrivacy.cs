@@ -11,7 +11,7 @@ using R = KeyLoad.UnitTests.Features.ResourceExecution.ResourceRetirementPrepara
 
 namespace KeyLoad.UnitTests.Features.DatabaseComposition;
 
-// Genuine six independent LOCAL native stores/phases; no consensus or RF3 qualification is represented.
+// Genuine six independent LOCAL native stores/phases; no consensus or CLUSTER qualification is represented.
 internal static class CompositionPrefixPreparePrivacy
 {
     internal static Task RunAsync() => ResourceRetirementPreparationValidationFixture.RunAsync(async (state, token) =>

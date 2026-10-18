@@ -22,17 +22,13 @@ only authority metadata while preserving content provenance. It does not change
 the persisted format. Dispatch stays paused and incomplete restoration fences
 writable service until every required phase completes.
 
-## Current partition roster
+## Backup scope
 
-TASK-KL042-CATALOG-001A in [BackupRestore](../Features/BackupRestore.md) owns the
-`keyload.backup.atomic-partition-catalog-entry.v1` record: Id0 Version, Id1
-Partition, Id2 FirstSeenStorePosition, Id3 FirstSeenAppliedIndex. Registration and
-its outcome share one native atomic commit. Unsupported, negative, future or
-contradictory coordinates fail closed before effects. A complete current census is
-required before capture; row presence alone is not readiness. Current snapshot
-copies retain exact row bytes. Restore must bind roster authority to its verified
-destination cut before admitting writes. Full cluster capture and restore remain
-separate required acceptance gates.
+Each silo-local ZoneTree owner backs up and restores its own current-format files
+through the local operation in [BackupRestore](../Features/BackupRestore.md)
+(REQ/AC-BACKUP-004). Unsupported, negative, future or contradictory coordinates
+fail closed before effects; current snapshot copies retain exact row bytes. A
+globally consistent cut across silos is not part of the current design.
 
 ## Current scoped command outcomes
 
@@ -83,7 +79,7 @@ Outcomes from another incarnation after restore remain invalid and are not rebou
 
 Native ZoneTree backup Restore copies the journal, changes authority incarnation/
 signing key and clears applied/clock state. It does not rewrite feature
-records; DispatchPaused is delivery-only. The integration lead invokes the
+records; DispatchPaused is delivery-only. The server invokes the
 Core BlobStorage normalizer with borrowed IAtomicStore before the silo-local ZoneTree owner
 starts serving requests or background data work. It also resumes
 an interrupted marker before writable startup. No provider->Core dependency.
@@ -148,8 +144,7 @@ retirement semantics and prove failure, lost-reply, late-retry and recovery flow
 payload quotas alone do not bound outcome metadata. This ADR does not claim those
 gates passed.
 
-Root owns shared format/replay/host joins and qualification. Workers own disjoint
-Core BlobStorage normalization and real unit/process/RF3 tests under the feature
+Core BlobStorage normalization and real unit/process/replicated-cluster tests follow the feature
 contracts. Start the cluster only after validating all stores and
 completing required current-format restoration. Rollback restores a coherent
 source checkpoint and a verified compatible current-format cut; it cannot reset
@@ -158,7 +153,7 @@ quotas or discard acknowledged outcomes.
 Required evidence: enabled Release build/format/governance, current native
 record/enum goldens, exact scope/lifetime/permission/error flows, bounded quota
 and corruption rejection, real reopen/kill restore phases and counters,
-actual Aspire SDK/official MCP RF3, functional
+actual Aspire SDK/official MCP cluster, functional
 coverage and exact-source Linux qualification. Compilation alone closes no gate.
 
 ```mermaid

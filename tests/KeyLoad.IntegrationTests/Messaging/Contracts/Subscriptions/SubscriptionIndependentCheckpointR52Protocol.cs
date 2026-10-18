@@ -15,12 +15,12 @@ internal static class SubscriptionIndependentCheckpointR52Protocol
     internal static EventData[] Corpus(long tail)
     {
         EventData[] all = [
-            new(SubscriptionFilterRf3Protocol.FirstEvent, SubscriptionFilterRf3Protocol.Created, Payload),
-            new(SubscriptionFilterRf3Protocol.SecondEvent, SubscriptionFilterRf3Protocol.Changed, Payload),
-            new(SubscriptionFilterRf3Protocol.ThirdEvent, SubscriptionFilterRf3Protocol.Created, Payload),
-            new(SubscriptionFilterRf3Protocol.FourthEvent, SubscriptionFilterRf3Protocol.Changed, Payload),
-            new(SubscriptionFilterRf3Protocol.Healthy, SubscriptionFilterRf3Protocol.Changed, Payload),
-            new(HealthyEvent, SubscriptionFilterRf3Protocol.Changed, Payload)];
+            new(SubscriptionFilterClusterProtocol.FirstEvent, SubscriptionFilterClusterProtocol.Created, Payload),
+            new(SubscriptionFilterClusterProtocol.SecondEvent, SubscriptionFilterClusterProtocol.Changed, Payload),
+            new(SubscriptionFilterClusterProtocol.ThirdEvent, SubscriptionFilterClusterProtocol.Created, Payload),
+            new(SubscriptionFilterClusterProtocol.FourthEvent, SubscriptionFilterClusterProtocol.Changed, Payload),
+            new(SubscriptionFilterClusterProtocol.Healthy, SubscriptionFilterClusterProtocol.Changed, Payload),
+            new(HealthyEvent, SubscriptionFilterClusterProtocol.Changed, Payload)];
         return all.Take(checked((int)tail)).ToArray();
     }
 }

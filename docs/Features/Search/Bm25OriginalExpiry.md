@@ -1,6 +1,6 @@
 # Search: original BM25 phase inner-expiry native operation
 
-Status: source joined; compiler, current-image native execution and Linux qualification gates remain OPEN. Parent contract Bm25CorpusCurrent.md REQ/AC-BM25-CURRENT-005 and its deterministic first-run expiry paragraph remain authoritative. No product error, expiry, payload, alias, quota or authority change is proposed.
+Parent contract Bm25CorpusCurrent.md REQ/AC-BM25-CURRENT-005 and its deterministic first-run expiry paragraph remain authoritative. No product error, expiry, payload, alias, quota or authority change is proposed.
 
 ## Requirements and acceptance
 
@@ -25,4 +25,4 @@ flowchart TD
   Cold --> Healthy[Exact two retained results then fresh healthy publication]
 ```
 
-Scope limits: full canonical image plus native journal CUT and two selected typed entries, not all raw replica journal rows, elected RF3, process-kill, power-loss, SDK/MCP or performance evidence. Current source freeze prevents integration; fresh new-type NotFound and native creation previews are recorded separately. No reload/status/global scan or SDK run is authorized. Timing is genuine expiry crossing, not a scheduling assumption that ordinary execution must be slow. Caller cancellation aborts the original wait and is joined by the existing owner.
+Scope limits: full canonical image plus native journal CUT and two selected typed entries, not all raw replica journal rows, elected cluster, process-kill, power-loss, SDK/MCP or performance evidence. Current source freeze prevents integration; fresh new-type NotFound and native creation previews are recorded separately. No reload/status/global scan or SDK run is authorized. Timing is genuine expiry crossing, not a scheduling assumption that ordinary execution must be slow. Caller cancellation aborts the original wait and is joined by the existing owner.

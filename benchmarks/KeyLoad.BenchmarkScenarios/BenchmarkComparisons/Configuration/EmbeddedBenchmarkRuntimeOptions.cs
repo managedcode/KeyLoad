@@ -12,6 +12,5 @@ internal sealed record EmbeddedBenchmarkRuntimeOptions(IOptions<DatabaseLimits> 
     IOptions<ChangeFeedExecutionOptions> ChangeFeedExecution, IOptions<BlobExecutionOptions> BlobExecution,
     IOptions<NativeClaimsExecutionOptions> NativeClaimsExecution,
     IOptions<TimeSeriesExecutionOptions> TimeSeriesExecution,
-    IOptions<PartitionMovementCheckpointOptions> MovementCheckpoints,
     IOptions<ZoneTreeStorageExecutionOptions> Storage,
     IOptions<ZoneTreePointCacheExecutionOptions> PointCache);

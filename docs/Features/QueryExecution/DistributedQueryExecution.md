@@ -1,4 +1,4 @@
-# KL-037 prerequisite: bounded local partition-leaf merge
+# Distributed query prerequisite: bounded local partition-leaf merge
 
 Status: Accepted internal prerequisite; implementation and qualification pending.
 
@@ -9,7 +9,7 @@ merges its bounded native leaf outputs. Every leaf remains on the same
 incarnation and read generation. The atomic partition is a logical unit; the
 replica copies that hold it are not separate partitions. This stage adds no
 route, public contract, grain fan-out, cursor, or claim of distributed
-execution. Full KL-037 remains pending the Orleans partition-grain fan-out
+execution. Full distributed query execution remains pending the Orleans partition-grain fan-out
 and the later SDK/official-MCP stages.
 
 ## Requirements and acceptance
@@ -21,28 +21,6 @@ and the later SDK/official-MCP stages.
 | REQ-DQUERY-PREREQ-003: merge exact Q1 order before projection can erase sort data | AC-DQUERY-PREREQ-003: each leaf retains canonical encoded ORDER BY keys before projection. Merge compares each key using Q1 direction semantics, then breaks complete ties by ordinal `EntityRef` components `(TenantId, DatabaseId, TransactionDomainId, PartitionKey, Collection, Id)`. It emits at most `min(request.Limit, MaxResults)` rows; duplicate full references across leaves are `Corruption`. An independent central oracle compares full identity, revision, projected JSON/redaction and exact order, including a sort field omitted from projection. | Real native multi-partition store, shuffled insertion, identical textual IDs across partitions, tie and duplicate-result cases, independent in-memory seeded oracle |
 | REQ-DQUERY-PREREQ-004: debit finite global work and memory grants before leaf execution/retention | AC-DQUERY-PREREQ-004: canonical request parsing/admission occurs once. The operator preallocates deterministic fixed per-leaf grants whose sums do not exceed the remaining existing `MaxScanRecords` (10,000), `MaxQueryReadBytes` (67,108,864) and `MaxBatchBytes` (8,388,608); candidates are charged/reserved before their owned order keys or projected rows are retained. Result count remains within `MaxResults` (1,000). Exact inclusive and one-over aggregate record, byte and retained-memory cases fail with `BudgetExceeded` and return no partial result. There is no work stealing or per-leaf reset of global totals. | Exact/one-over real ZoneTree reads and merge reservations; no partial rows on budget failure; later healthy query |
 | REQ-DQUERY-PREREQ-005: preserve one operation token/deadline and honest leaf completion | AC-DQUERY-PREREQ-005: the existing caller token and one 30-second `QueryDeadlineSeconds` lifetime cover validation, all sequential leaf reads and merge. Caller cancellation remains cancellation; elapsed/work limits use the existing typed budget errors. Each synchronous local leaf has settled before the next starts or the method returns. During-work cancellation is asserted only through an actual native read-progress observation that cancels a real `ReadExecutionBudget`, then proves no result and a healthy follow-up. A persisted authorization/budget failure in a later leaf produces no partial page. | Real progress-observed native cancellation following existing graph/partition cancellation patterns; persisted-failure and healthy-follow-up tests |
-
-The stage86q scalar original report establishes a test race: its async polling
-monitor accepted positive bytes after the synchronous query had already returned.
-TASK-DQUERY-CANCEL-OBSERVATION repairs only that test synchronization under
-AC-DQUERY-PREREQ-005. Keep the same 5,000 native ZoneTree rows, request, original
-CTS, 30-second operation budget and exact-token/no-result/healthy-follow-up
-assertions. A QueryExecution-local native observer thread is started and signals
-that it is armed BEFORE the synchronous query begins on the test thread. It
-observes the actual budget byte counter, retains the observed value and requests
-the same CTS on positive native work; no Task.Run/async-yield monitor races query
-completion. Bound arming, observation and the initial join to 15 seconds, retain
-and ultimately join the original thread before any CTS/event/store disposal,
-and preserve actual primary plus observer/settlement failures with the native
-ManagedCode fatal classification. A returned query, missed native progress or
-failed observer is still a test failure, never a successful cancellation or
-retry-to-green. No larger corpus, changed limit, fake clock/provider, product
-test hook or weaker assertion is permitted. The observed native OCE and exact
-caller token establish the passing flow; an armed thread alone is not that proof.
-Ownership is `tests/KeyLoad.UnitTests/QueryExecution/Cases/Partition/PartitionQueryCancellationTests.cs`
-and populated QueryExecution `Helpers/` for its observer/failure settlement.
-ADR-100 already defines the same native synchronous/cancellation boundary;
-this test-only correction adds no public, persisted or runtime contract.
 
 ### Frozen internal contract
 
@@ -112,7 +90,7 @@ bytes 8,388,608. Every custom lower `DatabaseLimits` setting remains effective.
 Per-leaf grants are deterministic and non-borrowable. They may conservatively
 reject skewed data; no grant can be multiplied by the number of leaves.
 
-### Explicit KL-037 boundaries still open
+### Explicit boundaries still open
 
 This prerequisite cannot prove Orleans fan-out across partition grains, remote
 producer backpressure/settlement, bounded node availability, SDK/official MCP
@@ -125,13 +103,13 @@ The synchronous local leaf still proves persisted later-leaf failure, real
 during-work cancellation, per-leaf budget exhaustion and whole-result failure.
 Slow-node timeout, capacity-one native stream backpressure, original
 remote-task join, and a real multi-node exact-source cluster run remain pending
-and must be added only with their owning KL-037 stage.
+and must be added only with their owning contract.
 
 
 ## Source basis and ownership
 
 The original architecture acceptance is
-[`architecture-v0.3.uk.md:765-770`](../../design/architecture-v0.3.uk.md).
+[`product-specification.md:765-770`](../../design/product-specification.md).
 Current Q1 contracts are `QueryRequest`/`AstQueryRequest`, `QueryPage`, and
 `QueryRow` under `src/KeyLoad.Abstractions/QueryExecution/Contracts/`.
 The local operator is `src/KeyLoad.Query/QueryExecution/Queries/QueryEngine.cs`;
@@ -148,12 +126,11 @@ its actual `DatabaseEngine`; no mock storage seam is needed.
 Source ownership is limited to Query feature-local internal contracts,
 models, validation/admission and executor helpers plus a narrow private
 `QueryEngine` join, with real ZoneTree tests in UnitTests `Features/QueryExecution`
-role folders. Query owns no storage placement or transport. The Core grant seam below enforces native leaf read ceilings; never perform
+role folders. Query owns no storage ownership or transport. The Core grant seam below enforces native leaf read ceilings; never perform
 post-hoc accounting.
 
-The exact broader KL-037 target remains in `docs/design/architecture-v0.3.uk.md`;
-this file is a prerequisite-only stage. The implementation must not mark
-KL-037 complete or change its status evidence. UI, SDK, MCP, SQL grammar, server
+The exact broader target remains in `docs/design/product-specification.md`;
+this file is a prerequisite-only stage. The implementation must not mark distributed query execution complete. UI, SDK, MCP, SQL grammar, server
 and Orleans routing are N/A for this stage.
 
 ## Canonical slice and implementation map
@@ -177,8 +154,7 @@ flowchart LR
 ```
 
 This internal stage does not export a product result stream. Native Orleans
-fan-out and ManagedCode.Communication streaming remain required in the later
-KL-037 distributed stage before any public SDK or MCP route is delivered.
+fan-out and ManagedCode.Communication streaming remain required for distributed execution before any public SDK or MCP route is delivered.
 
 ## Frozen native read-grant dependency
 
@@ -273,9 +249,9 @@ is bounded by admitted raw bytes and document limits; it is not retained output.
 
 
 
-## TASK-PQUERY-PUBLIC: public multi-partition SDK/MCP contract
+## Public multi-partition SDK/MCP contract
 
-Status: contract accepted before implementation; source integration and all runtime qualification remain open. This stage does not complete KL-037 distributed execution.
+Status: contract accepted before implementation; source integration and all runtime qualification remain open. This stage does not complete distributed execution.
 
 This stage publishes a typed multi-partition request over the already implemented bounded partition-leaf merge. The caller's connection grain ([ADR-125](../../ADR/ADR-125-connection-owned-execution.md)) executes the request: it calls the logical partition grains through ordinary Orleans calls, each leaf runs against its ZoneTree owner, and the connection grain merges the leaves into one page. The stage adds no global transaction snapshot, cursors or SQL grammar. The cluster concept is described in [ADR-136](../../ADR/ADR-136-native-orleans-partition-ownership.md).
 
@@ -286,7 +262,7 @@ This stage publishes a typed multi-partition request over the already implemente
 - REQ-PQUERY-003: bind each authorized leaf to its own scoped read cut. AC-PQUERY-003: every leaf executes inside the existing `WithQueryView` callback, after it has loaded the persisted principal and passed `Authorization.Require(Query | DocumentsRead)` for that leaf's partition/collection, and reports its own cut, policy epoch, schema version and access path. Leaves may differ in cut and access path; policy epochs must agree. An unauthorized leaf fails `PermissionDenied`, an inconsistent witness fails `Corruption` or `OwnershipLost`, and no partial page is returned.
 - REQ-PQUERY-004: reuse exact DQUERY r2 semantics and budgets. AC-PQUERY-004: one admission/normalization/compilation and one original `ReadExecutionBudget`/caller token/deadline cover all leaves and merge. Reserve the complete 1-8 leaf grants before any read; each leaf rechecks persisted principal/resource/row/field policy, the local store identity/read-generation and the policy epoch. Any later denial or witness mismatch returns no rows. Preserve separate per-leaf cut positions; never synthesize a scalar global cut. Keep the internal DQUERY exact comparator, full EntityRef tie-break, candidate/work/read/retained bounds and no partial result.
 - REQ-PQUERY-005: expose only complete typed replies through the existing native CQRS stream. AC-PQUERY-005: the connection grain returns one typed `PartitionQueryPageV1` after all leaves and the merge settle; faults/cancellation dispose/join the actual stream under existing native lifecycle rules. SDK and official MCP logical results match; no second dispatcher, unbounded materialization, or partial-page mode.
-- REQ-PQUERY-006: qualify the public capability on the real Aspire-owned replicated cluster. AC-PQUERY-006: direct .NET SDK and official MCP cover independent ordered oracle, same textual IDs in distinct partitions, hidden sort fields, ties, empty/no-hit partitions, persisted denial/revocation on a later leaf, caller cancellation/limits with healthy follow-up, acknowledged write/read through a surviving node, and malformed/version/oversized input. The real official MCP schema oracle checks exact request/result properties and required fields; nested `PartitionRef` includes computed `atomicPartitionId` as an optional schema property in addition to its four required identity strings. For nullable `Parameters: Dictionary<string, JsonElement>?`, the type oracle admits only scalar `object`, singleton type-array `[object]`, or the exact unordered two-member set `{object, null}`; the latter is permitted only at this nullable dictionary site. Non-nullable schema fields accept only their exact scalar or singleton type array. Extra, duplicate, empty, non-string, or contradictory type arrays fail. Local references remain bounded to depth 8. Ordered tie fixtures use the native non-unique rank index without changing duplicate-rank inputs; separate native unique-index rejection cases remain mandatory. Every row with `Redacted == false` has a present, initialized `RedactedFields` collection with zero entries; a null collection is not equivalent. Rows that redact data retain the exact omitted field paths. Evidence does not claim full KL-037 completion.
+- REQ-PQUERY-006: qualify the public capability on the real Aspire-owned replicated cluster. AC-PQUERY-006: direct .NET SDK and official MCP cover independent ordered oracle, same textual IDs in distinct partitions, hidden sort fields, ties, empty/no-hit partitions, persisted denial/revocation on a later leaf, caller cancellation/limits with healthy follow-up, acknowledged write/read through a surviving node, and malformed/version/oversized input. The real official MCP schema oracle checks exact request/result properties and required fields; nested `PartitionRef` includes computed `atomicPartitionId` as an optional schema property in addition to its four required identity strings. For nullable `Parameters: Dictionary<string, JsonElement>?`, the type oracle admits only scalar `object`, singleton type-array `[object]`, or the exact unordered two-member set `{object, null}`; the latter is permitted only at this nullable dictionary site. Non-nullable schema fields accept only their exact scalar or singleton type array. Extra, duplicate, empty, non-string, or contradictory type arrays fail. Local references remain bounded to depth 8. Ordered tie fixtures use the native non-unique rank index without changing duplicate-rank inputs; separate native unique-index rejection cases remain mandatory. Every row with `Redacted == false` has a present, initialized `RedactedFields` collection with zero entries; a null collection is not equivalent. Rows that redact data retain the exact omitted field paths. Evidence does not claim full distributed execution.
 
 ## Public generated contracts
 
@@ -303,8 +279,8 @@ All contracts live in `KeyLoad` alongside current query contracts; aliases are f
 
 1. Contract review freezes aliases/IDs/error map/response witnesses and explicitly says no global cut claim.
 2. Query owns the public generated DTOs/aliases, bounded request validation, mapping to the existing internal `PartitionQueryExecution`, and projection from internal candidates to the complete public page. It retains the existing QueryEngine/one-budget path; no second admission/deadline.
-3. Root owns append-only `GrainReadKind.PartitionQuery` and `GrainQueryReadCapabilities` binding inside `DatabaseReadGrain`, existing request-envelope/payload validation and capability inventory; no second grain/dispatcher.
-4. Root owns HTTP `POST /v1/query/partitions`, SDK `PartitionQueryAsync(PartitionQueryRequestV1, CancellationToken)`, MCP `keyload_query_partitions` at `/v1/query/partitions` with read-only hints/catalog description, and typed response mapping, all through the normal signed read path.
+3. The server owns append-only `GrainReadKind.PartitionQuery` and `GrainQueryReadCapabilities` binding inside `DatabaseReadGrain`, existing request-envelope/payload validation and capability inventory; no second grain/dispatcher.
+4. The server owns HTTP `POST /v1/query/partitions`, SDK `PartitionQueryAsync(PartitionQueryRequestV1, CancellationToken)`, MCP `keyload_query_partitions` at `/v1/query/partitions` with read-only hints/catalog description, and typed response mapping, all through the normal signed read path.
 5. Add generated-native codec/strict public-input cases; real ZoneTree unit tests; then genuine Aspire-owned cluster .NET SDK + official MCP tests. Build/format/analyzers and complete unit/recovery/cluster gates precede any acceptance claim.
 
 ## Source-grounded current joins
@@ -313,7 +289,7 @@ All contracts live in `KeyLoad` alongside current query contracts; aliases are f
 - `PartitionQueryExecution.ExecutePartitionQuery` is internal and already creates one `ReadExecutionBudget`, admits once, normalizes once, reserves all grants, executes sequential real local leaves and merges complete output.
 - `PartitionQueryLeafExecutor.Execute` calls existing `DatabaseEngine.WithQueryView`, whose callback runs only after persisted principal/resource authorization. It captures owner identity and per-leaf cut/policy/schema/access-path witnesses.
 - `DatabaseReadGrain` currently owns signed validation, native read admission, one quorum barrier, freshness and persisted authority reload before `GrainQueryReadCapabilities.ExecuteAsync`; the new kind must be appended without changing existing numeric enum values.
-- Existing transport joins are `QueryApi.Map`, `KeyLoadClient`, `McpReadCatalog`, `McpToolNames`, `McpToolRoutes`, `McpToolHints`, and `ApiGrainDispatch`. Root owns all of them.
+- Existing transport joins are `QueryApi.Map`, `KeyLoadClient`, `McpReadCatalog`, `McpToolNames`, `McpToolRoutes`, `McpToolHints`, and `ApiGrainDispatch`; the server owns all of them.
 
 ## Public mapping
 
@@ -325,13 +301,11 @@ The final public page field order is fixed as accepted: Version `[0]`, Rows `[1]
 
 `PartitionQueryExecution.ExecutePartitionQuery` retains its existing internal calls unchanged. Public normalization validates every requested partition first and uses the first canonical sorted partition as the server-generated `AstQueryRequest.Partition` anchor. All leaves remain in the plan and are authorized separately.
 
-REQ/AC-PQUERY-001/004/005 map to `PartitionQueryPublicContractTests`, `PartitionQueryPublicBudgetTests` and `PartitionQueryPublicMergeTests` under `tests/KeyLoad.UnitTests/QueryExecution/Cases/`; REQ/AC-PQUERY-002/003 map to `PartitionQueryPublicAuthorizationTests`; AC-PQUERY-006 maps to `PartitionQueryPublicRf3Tests` under `tests/KeyLoad.IntegrationTests/QueryExecution/Cases/`. Root joins the append-only native read kind, persisted authority path, signed SDK/HTTP/MCP route and complete independent MCP inventory/schema/native-codec corpus. All of these tests use the Aspire-owned caller. A focused pass is development evidence; original full Linux unit/scalar/recovery/cluster/fault/endurance evidence remains required.
+REQ/AC-PQUERY-001/004/005 map to `PartitionQueryPublicContractTests`, `PartitionQueryPublicBudgetTests` and `PartitionQueryPublicMergeTests` under `tests/KeyLoad.UnitTests/QueryExecution/Cases/`; REQ/AC-PQUERY-002/003 map to `PartitionQueryPublicAuthorizationTests`; AC-PQUERY-006 maps to `PartitionQueryPublicClusterTests` under `tests/KeyLoad.IntegrationTests/QueryExecution/Cases/`. Root joins the append-only native read kind, persisted authority path, signed SDK/HTTP/MCP route and complete independent MCP inventory/schema/native-codec corpus. All of these tests use the Aspire-owned caller. A focused pass is development evidence; original full Linux unit/scalar/recovery/cluster/fault/endurance evidence remains required.
 
-### Complete-flow contract regressions, 2026-10-05
+### Complete-flow contract regressions
 
-TASK-PQUERY-FUNCTIONAL-CONTRACT-001 strengthens the existing seven
-`PartitionQueryMcpContractTests` under REQ/AC-PQUERY-001/005 and
-REQ-CQ-009/AC-CQ-021. Each positive test configures an actual persisted collection,
+The seven `PartitionQueryMcpContractTests` cases under REQ/AC-PQUERY-001/005 and REQ-CQ-009/AC-CQ-021 are complete operations. Each positive test configures an actual persisted collection,
 commits a literal document to genuine ZoneTree, decodes the real native/public
 request, executes `QueryEngine.QueryPartitions`, and checks the full returned
 reference, projected content, persisted revision, leaf witness and unchanged
@@ -371,7 +345,7 @@ A bounded batch admits at most the configured concurrency. Leaf calls start inde
 
 Whole flows: independent ZoneTree stores, concurrent leaf work under the owning injected clock and native observable read phase, original caller cancellation with joined workers and unchanged full bytes/cuts and a null page, then a complete literal healthy merge. The Aspire-owned cluster SDK/official MCP/Q1 flow cancels only after actual leaf observation, joins the producer and original clients, and performs a fresh literal healthy merge. No sleeps/retries/quota increase/fake clients/provider/test hook; performance/resource scalability remains unqualified pending comparable Linux GitHub evidence.
 
-## TASK-KL037-GLOBAL-MODALITY-001 - distributed statistics and modality execution
+## Distributed statistics and modality execution
 
 Pre-implementation owning contract. REQ-DQUERY-GLOBAL-001 / AC-DQUERY-GLOBAL-001 requires exact lexical and vector candidate windows from every queried logical partition before weightedRrfV1 fusion. It reuses native TextRanker BM25 arithmetic, the VectorRanker metric/scalar/SIMD contract, GlobalBranchWindowMerger full-reference order and SearchRankFusion. Local fused top-k cannot substitute per-modality global windows. The exact profile rejects a candidate window that is truncated, incomplete, approximate, incomparable or exceeds its original grant; there is no silent exact claim. Approximate ANN/provider profiles remain explicitly unsupported by this exact route and their separate existing APIs remain unchanged. No distributed graph, aggregate SQL or ANN approximation completion is inferred.
 
@@ -409,7 +383,7 @@ The existing PartitionQueryParallelBatch remains the task owner. Its exact origi
 
 `DistributedSearchPageV1` alias `keyload.distributed-search-page.v1`, IDs0 Version:int,1 Hits:ImmutableArray<RankedDocument>,2 Leaves:ImmutableArray<PartitionQueryLeafWitnessV1>,3 StatisticsEpoch:string,4 Complete:bool. Hits are actual fully projected same-cut documents with independent full references/revisions/redaction and weightedRrfV1 scores/explanation. Leaves reuse the existing public scoped per-partition cut/policy/schema/access-path witness, without exposing private proof or resource-policy bytes. StatisticsEpoch is opaque descriptive evidence only and cannot authorize another read. Complete means exact requested top-k over complete global per-modality windows; no partial/approximate candidate result is admitted by this profile.
 
-New public read name `DistributedSearch` maps the same typed request/result across native SDK, official MCP and Q1 CALL, under current ADR125 bounded connection-owned call-local/ManagedCode.Communication read execution. Shared GrainReadKind append composes AFTER KL039 OnlineTextMaintenance, and current connection-owned capability/codec/catalog additions compose against KL039 exact immutable ancestors. Root owns independent complete literal catalog integration and current native metadata count; no count is guessed here. No partial public ingress is integrated alone.
+New public read name `DistributedSearch` maps the same typed request/result across native SDK, official MCP and Q1 CALL, under current ADR125 bounded connection-owned call-local/ManagedCode.Communication read execution. Shared GrainReadKind append composes AFTER OnlineTextMaintenance, and current connection-owned capability/codec/catalog additions compose against exact immutable ancestors. The complete literal catalog and current native metadata count come from the integrated source; no count is guessed here. No partial public ingress is integrated alone.
 
 ### Receiving phases and final projection
 
@@ -417,15 +391,15 @@ ADR-125 governs execution: ingress and every leaf call retain independent signed
 
 The private leaf phases are Statistics, Candidates, Projection and Revalidate. Original centrally validated bounds and the operation deadline constrain every phase; no lifetime reset or public phase input exists. Before any result the projection leaf freshly requires the same cut/current principal/resource and all original text/vector field capabilities, then checks each selected full reference and actual canonical document revision. No deleted/revised/foreign selected document is projected. Explain is attached from the parent's globally fused rank contributions, not generated by an unrelated local ranking pass. Final revalidation repeats actual current modality capabilities and the original witnesses before the response.
 
-Canonical-only leaves call the original TextRanker scoring kernel directly, so SearchBranchExecution/KL039 selected-reader lifecycle is not replaced. The provisional shared rank overload is excluded. The existing GlobalBranchWindowMerger retains its original MaxResults bound; if a complete globally ranked branch would be truncated there, the exact operation refuses BudgetExceeded before fusion instead of silently using a local/global top-k approximation or adding a larger cap. Existing original Search/ANN profiles and defaults remain unchanged.
+Canonical-only leaves call the original TextRanker scoring kernel directly, so SearchBranchExecution/selected-reader lifecycle is not replaced. The provisional shared rank overload is excluded. The existing GlobalBranchWindowMerger retains its original MaxResults bound; if a complete globally ranked branch would be truncated there, the exact operation refuses BudgetExceeded before fusion instead of silently using a local/global top-k approximation or adding a larger cap. Existing original Search/ANN profiles and defaults remain unchanged.
 
 ### Complete caller schema and canonical SQL delegation
 
 The public current bounded profile adds tool literal keyload_query_distributed_search and POST /v1/query/distributed-search, input exactly DistributedSearchRequestV1 {version,partitions,search}, output exactly DistributedSearchPageV1 {version,hits,leaves,statisticsEpoch,complete}. Nested search retains all existing SearchRequest fields/defaults and explicit selected native generation is UnsupportedCapability for this new canonical corpus profile. SDK DistributedSearchAsync, official MCP descriptor and Q1 CALL keyload_query_distributed_search(@payload) all delegate to this same read kind through the existing canonical gateway and bounded discovery; no new SQL parser/dispatcher, extra public privileged field, cursor or global-cut claim. Hints are ReadOnly=true, Idempotent=true, Destructive=false. Initial gateway discovery remains unchanged. All old catalog entries retain exact schemas/routes/hints; independent Unit+officialSDK schema/literal expectations must add this tuple separately before whole join. Two private appended read kinds follow actual current OnlineTextMaintenance and preserve all previous ordinals.
 
-### TASK-KL037-CATALOG-DECODE-001 - complete native schema/decoder continuation
+### Complete native schema and decoder
 
-REQ-DQUERY-GLOBAL-001/003/005 and AC-DQUERY-GLOBAL-001/003/005 plus AC-MCP001 map to the existing `McpCatalogTests.AcMcp001EveryFrozenOperationHasItsExactRouteAndOneCapability`. Preserve its complete independent inventory; append feature-local distributed-search assertions for the literal tool/route/read capability/hints, strict public version/partitions/search schema (all fourteen existing nested fields and optional Limit), complete five-field result and nested document/explanation/scoped witness schema. Execute actual public JSON to descriptor decode to generated native request and public roundtrip, reject caller-authority/unknown outer and nested fields, and perform healthy decode after each refusal. Complete independent result literals must roundtrip through actual public JSON and generated native serializers. These prove schema/decoder behavior only; the separately mapped true two-owner SDK/official MCP/Q1/cold cases and exact-source Linux native outcomes remain required and unqualified until executed. No catalog count, discovery or PASS is inferred from this source.
+REQ-DQUERY-GLOBAL-001/003/005 and AC-DQUERY-GLOBAL-001/003/005 plus AC-MCP-001 map to the existing `McpCatalogTests.AcMcp001EveryFrozenOperationHasItsExactRouteAndOneCapability`. Preserve its complete independent inventory; append feature-local distributed-search assertions for the literal tool/route/read capability/hints, strict public version/partitions/search schema (all fourteen existing nested fields and optional Limit), complete five-field result and nested document/explanation/scoped witness schema. Execute actual public JSON to descriptor decode to generated native request and public roundtrip, reject caller-authority/unknown outer and nested fields, and perform healthy decode after each refusal. Complete independent result literals must roundtrip through actual public JSON and generated native serializers. These prove schema/decoder behavior only; the separately mapped true two-owner SDK/official MCP/Q1/cold cases and exact-source Linux native outcomes remain required and unqualified until executed. No catalog count, discovery or PASS is inferred from this source.
 
 ### Original-deadline normalization
 
@@ -437,7 +411,7 @@ The existing exact ErrorCode factory lacks a cause-bearing overload. A shared ad
 
 Root-approved shared seam: the existing four-argument KeyLoadException constructor becomes internal; Errors.Fail(ErrorCode code, string detail, Exception cause) checks the cause and calls that same constructor with Errors.Status(code). Every old overload, native alias/Ids, code/status and public safe problem detail remains unchanged. Existing original direct OCE catches are not rewritten. The typed nonempty cancellation tree is mapped only by the owning Coordinator after all tasks have joined.
 
-### TASK-KL037-SHARED-ERROR-OWNER-001 - bounded shared primitive responsibility
+### Shared error primitive responsibility
 
 Root approves exact extraction of entire existing KeyLoadException and Errors types from Abstractions/Contracts.cs into Abstractions/KeyLoadException.cs and Abstractions/Errors.cs respectively. These are solution-wide shared primitive owners under the existing root building-block exception, not feature layers or partial files. Preserve namespace KeyLoad, all original members/bodies, native Alias/field IDs and ABI except the already approved internal four-argument constructor and additive cause factory. Contracts remains below400; each extracted type below200. No friend assembly, rule exemption or binary format/JSON change. Integration is one guarded atomic source cohort; rollback is the exact original source cohort before compilation/publication, not a persisted-state migration. Native checkOnly preview/new-path NotSupported and whole canonical build plus same original deadline/caller/mixed-operation controls are required; source movement is not runtime proof.
 

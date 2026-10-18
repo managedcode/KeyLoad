@@ -10,8 +10,8 @@ internal static class HeavyDocumentLoadReadback
 {
     private const int SentinelOrdinal = 0;
     private const int SentinelPageSize = 1;
-    private const string CursorFailure = "Heavy RF3 cursor failed to advance.";
-    private const string ExtraRecordFailure = "Heavy RF3 readback contains extra records.";
+    private const string CursorFailure = "Heavy CLUSTER cursor failed to advance.";
+    private const string ExtraRecordFailure = "Heavy CLUSTER readback contains extra records.";
     private readonly record struct DocumentMarker;
 
     internal static EntityRef Sentinel(PartitionRef partition)

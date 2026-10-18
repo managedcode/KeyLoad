@@ -1,6 +1,6 @@
-# KL-062: sensitive catalog paths over actual arrays
+# Sensitive catalog paths over actual arrays
 
-Authorization REQ-AUTH-006 / AC-AUTH-006 and KL-062 require a single meaning for escaped, nested and array field paths. [RFC 6901 section 4](https://www.rfc-editor.org/rfc/rfc6901#section-4) distinguishes literal object member names from array indices: an array index is zero or ASCII digits beginning with a nonzero digit.
+Authorization REQ-AUTH-006 / AC-AUTH-006 require a single meaning for escaped, nested and array field paths. [RFC 6901 section 4](https://www.rfc-editor.org/rfc/rfc6901#section-4) distinguishes literal object member names from array indices: an array index is zero or ASCII digits beginning with a nonzero digit.
 
 The source-confirmed scalar reader admitted array token `00` as index zero, while the protected-field overlap check kept `00` distinct from `0`. A predicate could therefore inspect a protected value using an unprotected spelling. Separately the output projector's default integer parser admitted leading zeros, signs and whitespace, removing different fields from those named by the persisted catalog.
 
@@ -8,4 +8,15 @@ Use the same concrete array-index recognizer in scalar reads and output removal,
 
 The whole operation starts with a real committed escaped/nested document and persisted sensitive-field catalog. Canonical protected predicate use refuses PermissionDenied. Every alternative array spelling returns no rows, with full point/query output checked independently against complete literal JSON and redacted-field arrays. The same spellings address actual object properties successfully. A persisted use-only grant repairs canonical predicate admission while retaining redaction; a persisted read grant restores raw output. Each read/refusal/replay independently checks the full native store image and position even if its primary assertions fail. The complete original command receipt and stored outcome replay before and after two joined same-root native reopen cycles, with exact complete serialized StoreIdentity conservation. A public field patch preserves the existing catalog byte-for-byte; its full receipt and healthy revision are checked and replayed.
 
-This packet proves the array-path correction in native operation source, not completion of the whole catalog feature. Existing privileged schema/CAS/version/cursor checks remain required. Full native discovery/counts, compilation, TUnit execution, Linux native-SIMD, process recovery and genuine Aspire-owned RF3 SDK/official MCP classification/use/revocation gates remain OPEN until original artifacts exist. Public UI and transport schema are N/A for this private traversal correction. Zero-segment Encode callers were inspected separately; no root/empty-key encoding change is included without a demonstrated caller violation.
+This packet proves the array-path correction in native operation source, not completion of the whole catalog feature. Existing privileged schema/CAS/version/cursor checks remain required. Public UI and transport schema are N/A for this private traversal correction. Zero-segment Encode callers were inspected separately; no root/empty-key encoding change is included without a demonstrated caller violation.
+
+```mermaid
+flowchart LR
+    Path[Requested field path] --> Kind{Actual array?}
+    Kind -->|array| Index[Canonical RFC 6901 index recognizer]
+    Kind -->|object| Literal[Literal member name]
+    Index --> Policy[Persisted sensitive-field catalog]
+    Literal --> Policy
+    Policy -->|protected and not granted| Deny[PermissionDenied or redacted output]
+    Policy -->|granted| Value[Authorized value]
+```

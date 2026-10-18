@@ -1,32 +1,18 @@
 # Live benchmark progress
 
-## Current execution contract
-
-[ADR-142](../../ADR/ADR-142-shared-live-benchmark-sessions.md) and
-[SessionExecution](SessionExecution.md) supersede the per-cell runner, warmup,
-repetition, planner and report-production instructions in the retained source
-stages below. Current measurement jobs share one live native database/topology
-across separate TUnit cases, measure the initial load, and perform no per-case
-reset or reseeding. Historical implementation snapshots and immutable originals
-retain their original identities; retired runners and fixtures are not current
-qualification evidence.
-
-The original dataset, operation-count, native capability, correctness, privacy,
-cancellation, resource, topology and provenance requirements remain mandatory.
-The current seven document cases do not complete the required vector, graph,
-queue, event, time-series or physical100k-corpus coverage. Family integration and
-exact-source native Linux qualification remain open.
-
-Status: Linux component regressions passed; native workload/cancellation artifact qualification pending.
 Parent: [BenchmarkComparisons](../BenchmarkComparisons.md).
 Decision: [ADR-085](../../ADR/ADR-085-live-benchmark-progress.md).
 
-The original [Benchmarks run 37202347845](https://github.com/managedcode/KeyLoad/actions/runs/37202347845)
-measured source `15ea5030`. Its KeyLoad VectorExact steps ran 39–54 minutes before cancellation without workload progress
-in Actions. ComparisonHost stdout was retained only at TUnit teardown, and the
-Aspire CLI did not relay AppHost stdout into the job. Cancellation artifacts did
-not retain the workload phase. This repair owns benchmark observability, not the
-concurrent database execution implementation.
+Measurement jobs share one live native database/topology across separate TUnit cases
+([ADR-142](../../ADR/ADR-142-shared-live-benchmark-sessions.md),
+[SessionExecution](SessionExecution.md)). A long native workload must not look idle in
+GitHub Actions: workload phase and attempt progress are visible while it runs, and a
+cancelled job retains the latest workload phase. This feature owns benchmark
+observability only, not the database execution implementation. The dataset,
+operation-count, native capability, correctness, privacy, cancellation, resource,
+topology and provenance requirements stay mandatory; the seven document cases do not
+complete the required vector, graph, queue, event, time-series or physical 100k-corpus
+coverage, and exact-source native Linux qualification is a separate gate.
 
 | Requirement | Acceptance | Automated proof |
 |---|---|---|
@@ -45,57 +31,18 @@ flowchart LR
     Native --> Report[Unchanged original measurement JSON]
 ```
 
-Slice map: Comparisons owns the observer/phase accounting; ComparisonTests owns
-native log capture and durable latest snapshot; scripts/BenchmarkComparisons owns
-the real process/output relay; benchmarks.yml is the root-owned workload join,
-and benchmarks.yml runs focused native logger/parser/file regressions. Benchmark
-contract cases live in KeyLoad.ComparisonTests/Features/BenchmarkComparisons/
-UnitContracts; Build and Tests unit/scalar execution never runs them.
-Database API, SDK/MCP, stored state, GUI and website metrics: N/A, unchanged.
+Slice map: Comparisons owns the observer/phase accounting; ComparisonTests owns native
+log capture and the durable latest snapshot; scripts/BenchmarkComparisons owns the real
+process/output relay; benchmarks.yml is the workload join and runs the focused native
+logger/parser/file regressions. Benchmark contract cases live in
+`tests/KeyLoad.ComparisonTests/BenchmarkComparisons/UnitContracts`; Build and Tests
+unit/scalar execution never runs them. Database API, SDK/MCP, stored state, GUI and
+website metrics: N/A.
 
-Task graph: TASK-BC-LIVE-CONTRACT(root) -> TASK-BC-LIVE-RUNNER(workerA) and
-TASK-BC-LIVE-CAPTURE(workerB) -> TASK-BC-LIVE-ENTRY(root) ->
-TASK-BC-LIVE-VERIFY(root). Workers have disjoint source/test ownership. Root alone
-owns shared docs, policy, workflow, build, integration, commit and delivery.
-Baseline failure remains ResourceExhausted at 100000 unconsumed outbox records.
-Engine repair belongs to its existing owning task; progress changes do not make
-this failure pass.
-
-Verification: Release solution build, Aspire-owned focused unit/comparison
-regressions, formatter/governance, then delivered-source CI and native Benchmarks.
-Real Docker/RF3/recovery and mandatory endurance/scale gates stay pending until
-their genuine runs complete. The existing profile of 4096 documents and 50000 attempts is a
-control workload, not 100k/1m/5m dataset qualification. Original-job times are not
-request latency metrics.
-
-Development checkpoint, 2026-10-04: repository governance, Node source parsing,
-scoped formatter and diff whitespace checks pass. Comparisons and ComparisonHost compiled in the
-Release solution build; the complete build and complete formatter are blocked by
-concurrent Orleans/CQRS changes in the shared checkout. Focused Aspire/TUnit
-runtime evidence remains pending. A source checkpoint is not a passing build,
-runtime, RF3 or performance qualification.
-
-Delivered checkpoint: source `31dd7ea` passed Linux build, complete formatter,
-governance and analyzers. Its original unit artifact from [run 37210941065](https://github.com/managedcode/KeyLoad/actions/runs/37210941065)
-has 2992/2999 passed: seven phase/observer regressions passed; five Node entry
-fixtures lacked explicit module mode, the workflow filter inventory missed the
-new capture filter, and an existing cache receipt acceptance regression failed.
-The [run 37212016437](https://github.com/managedcode/KeyLoad/actions/runs/37212016437)
-capture artifact has 28/29 passed: native logger capture rejected Aspire's UTC
-timestamp prefix. These failures are retained as evidence; the timestamp, module
-mode and filter inventory corrections require another genuine Linux run. An
-evaluated Node import must not trigger the script's production entry merely
-because its first argument contains the module path; the real child regressions
-also verify this boundary. Full
-unit/scalar, recovery, RF3 and complete native workload gates are not qualified.
-
-Runtime checkpoint: [Linux job 111470753546](https://github.com/managedcode/KeyLoad/actions/runs/37213603249/job/111470753546)
-at source `3d1b8bc413f3ee28a4d36b3784f1caf40eee2658` passed the four independent
-Aspire-owned gates: native progress capture; real process entry/exit/SIGTERM;
-phase/attempt/heartbeat counters; and workflow Aspire entry contracts. The first
-three cover 30 capture cases, five genuine process cases and seven runner/counter
-cases. Build, formatter, governance and analyzers also passed at that source.
-REQ/AC-BC-LIVE-001..004 and TASK-BC-LIVE-VERIFY now have component runtime proof;
-actual complete native workload and Linux cancellation artifacts remain pending.
-This documentation checkpoint changes no runtime source; it does not qualify
-the concurrent engine or the final CI/full-suite result.
+Verification: Release solution build, Aspire-owned focused unit/comparison regressions,
+formatter/governance, then delivered-source CI and native Benchmarks. Real
+Docker/replicated-cluster/recovery and mandatory endurance/scale gates need their own
+genuine runs. The profile of 4096 documents and 50000 attempts is a control workload,
+not 100k/1m dataset qualification. Original-job times are not request latency
+metrics. A source checkpoint is not a passing build, runtime, replication or
+performance qualification.

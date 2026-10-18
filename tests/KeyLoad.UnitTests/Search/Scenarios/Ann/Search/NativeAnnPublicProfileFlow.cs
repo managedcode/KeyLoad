@@ -67,7 +67,7 @@ internal static class NativeAnnPublicProfileFlow
             new ConfigureProjectionConsumerRequest(id, consumer, definition, StartAfter: Start), id: id)
             .Get<ProjectionConsumerInfo>();
         var actual = database.Database.ReadAtomicPartitionPlacement(NativeAnnWaitWholeFlow.Root,
-            new(NativeAnnMaintenanceTestData.Version, database.Partition));
+            database.Partition);
         var placement = new PhysicalShardRecord(actual.PhysicalShardId, actual.Incarnation, actual.VoterIds, actual.PlacementEpoch);
         var pin = new AnnMaintenanceRequest(Guid.NewGuid(), consumer, AnnSeedTestSupport.Collection,
             AnnSeedTestSupport.Field, AnnSeedTestSupport.Space(), Generation, database.Store.Identity.NodeId,

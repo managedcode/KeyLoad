@@ -63,7 +63,7 @@ internal static class ClusterBackupAdmissionWholeFlow
         await nativeGate;
         foreach (var producer in accepted)
         {
-            // The supporting owner deliberately has no registered RF3 owner; no cut is fabricated.
+            // The supporting owner deliberately has no registered CLUSTER owner; no cut is fabricated.
             var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => producer);
             ArgumentNullException.ThrowIfNull(failure);
             await Assert.That(failure.Code).IsEqualTo(ErrorCode.OwnershipLost);

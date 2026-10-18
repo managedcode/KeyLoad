@@ -1,52 +1,29 @@
 # ADR-112: Independent Website publication with optional benchmarks
 
-Status: Accepted; content-only qualification and Pages passed; complete measured qualification pending.
+Status: Accepted; complete measured qualification pending.
 Feature: BenchmarkComparisons, REQ/AC-BC-WEB-001..007.
-
-## Qualified current content publication (2026-10-06)
-
-Exact source ec2c70f11efb0092b842458240e0f047a3735f77 passed the Linux full
-solution build/format in Benchmarks run37492665238/job112369117434, 0 warnings/errors.
-Its Docker-image gate failed and aggregation skipped; final Trigger Website
-job112374043959 succeeded, creating the separate manual Website run37494106149.
-That consumer's authenticated completion wait passed; remaining qualification
-was still running at recording, so its Pages result is not inferred.
-
-Independent push Website run37492665298 completed Check website job112369118969
-and Publish website job112377731260 successfully. Original Aspire receipts prove
-startup6/6, selection30/30, analyzers388/388 and content Site5/5, zero skipped.
-Native Node/Chrome coverage passed unchanged80/70/90 thresholds: lines93, branches78,
-critical builder96 and bootstrap92. Original qualification artifact11426727717
-SHA2560e1bfc93b669224799803b219b5b7be6f131be3d7cda6fab651918c521220c4e was verified.
-
-Predeploy source/absence freshness passed at2026-10-06T16:30:19Z. Original
-publication artifact11426714932, SHA2560325a5af84eb1f467ecebd8d9b4b58c5315ec950842022bfb796f695b056207a,
-records actual Pages success. Public https://www.keyload.cloud/ HTML matched the
-qualified original byte for byte, SHA2563f1b719e86f1a700b016367881f1cc597af2acb7a07f167d01b24737ea08fff6.
-Its schema3 publication receipt records website/control ec2c70f1, measured:null,
-benchmarks:null and content scope; SHA2567637a00e70384b7cdfba1ad24cae9d98af8537b5c22028bd4111a7129152904a.
-This qualifies current content-only pipeline delivery. Complete current measured
-cohort and global database recovery/RF3/endurance gates retain their actual status.
-Keep Accepted until every required measured gate also passes.
 
 ## Decision and trust boundary
 
 Website/website.yml owns website source qualification and Pages publication.
 Its executor accepts trusted own-main push and workflow_dispatch. Build and Tests
-retains every build/analyzer/unit/scalar/recovery/RF3 gate independently.
+retains every build/analyzer/unit/scalar/recovery/cluster gate independently.
 Benchmarks owns native measurements and the final settled aggregate; its final
-website-trigger job dispatches Website on main after success or failure, using
-always() && !cancelled() and exact trusted repository/event admission. Only that
-job has actions:write; database jobs remain read-only. Trigger failure is visible.
+website-trigger job dispatches Website on main only after every preparation/build
+job, every database matrix and the aggregate succeeded (any failed, skipped or
+cancelled prerequisite prevents dispatch), with exact trusted repository/event
+admission. Only that job has actions:write; database jobs remain read-only.
+Trigger failure is visible. Website's push trigger is filtered to `site/**`, its
+native site tests, site-specific scripts/composites and shared build inputs; there
+is no `workflow_run` subscription, alternate executor or measurement bypass.
 
 Optional benchmark_run_id authenticates the original own-repository main run,
 Benchmarks workflow name/path, event and source, then waits at most five minutes
-for completion. It does not select authoritative metrics or bypass freshness.
+for completion and requires the terminal conclusion `success` before qualification. It does not select authoritative metrics or bypass freshness.
 Empty input skips waiting. Invalid metadata, API failure and timeout fail closed.
 
 Select the newest authenticated completed own-main producer with a successful
-aggregate and the complete current 100K/1M cohort contract. Historical originals
-remain immutable and unavailable as current metrics; unknown malformed evidence
+aggregate and the complete current 100K/1M cohort contract. Unknown malformed evidence
 cannot masquerade as absence. A failed/cancelled/in-progress run supplies no
 measurements. A selected corrupt, expired or missing archive fails without an
 older fallback. If no current producer is ready, emit no metrics and a static
@@ -80,26 +57,11 @@ flowchart TD
 
 ## Ordered implementation and delivery
 
-1. TASK-WEB-SEPARATE-001 / TASK-WEB-TRIGGER-001: lead freezes REQ/AC, policies,
-   exact workflows/events, task graph and private disjoint ownership before code.
-2. Selection contributor owns site-isolated-github capture/runs/contract; builder
-   contributor owns site/Features/BenchmarkComparisons/build-site.mjs. Preserve
-   exact original artifacts, bounded native calls and source closure.
-   TASK-CURRENT-WEBSITE-EVENT-071 limits capture to current executor and REST
-   selection/wait inputs. It removes event-file parsing and its exclusive probe,
-   cap and fixtures, preserving REST workflow_runs and artifact.workflow_run
-   provenance, actual authenticated capture and latest-selection operation flows.
-3. Qualification contributor owns SiteContent cases/helpers/contracts and current
-   coverage/source inventory joins. Native file/Node/Chrome flows prove successful
-   admission, absence, foreign executor, corrupt evidence and healthy follow-up.
-   Workflow-shape review uses actionlint/YAML and is not product runtime proof.
-4. Lead joins workflows/composites, native dispatch/admission/wait, tests, inventories
-   and docs; verifies build/format/governance, Aspire cases and actual exact-source
-   Linux Website/Pages/freshness evidence. Release context consumes Build and Tests
-   with its actual four job labels and all source/attempt/success protections.
-5. All REQ/AC-WEB gates retain original failing and passing results. Commit/push
-   the full owner-requested active-branch checkpoint; a commit or successful
-   trigger alone does not qualify Website publication or the database.
+1. REQ/AC, policies, exact workflows/events and the ownership split are frozen before code.
+2. Selection owns site-isolated-github capture/runs/contract; the builder owns site/Features/BenchmarkComparisons/build-site.mjs. Preserve exact original artifacts, bounded native calls and source closure. Capture is limited to the current executor and REST selection/wait inputs; it has no event-file parsing, preserving REST workflow_runs and artifact.workflow_run provenance, actual authenticated capture and latest-selection operation flows.
+3. Qualification owns SiteContent cases/helpers/contracts and the current coverage/source inventory joins. Native file/Node/Chrome flows prove successful admission, absence, foreign executor, corrupt evidence and healthy follow-up. Workflow-shape review uses actionlint/YAML and is not product runtime proof.
+4. Workflows/composites, native dispatch/admission/wait, tests, inventories and docs join once; verify build/format/governance, Aspire cases and actual exact-source Linux Website/Pages/freshness evidence. Release context consumes Build and Tests with its actual four job labels and all source/attempt/success protections.
+5. All REQ/AC-WEB gates retain original failing and passing results. A commit or successful trigger alone does not qualify Website publication or the database.
 
 Dependencies are official Pages actions, GitHub REST, Node, Chrome, TUnit/MTP and
 Aspire. No database/package/DNS change. Rollout joins producer/consumer/builder/
@@ -107,22 +69,10 @@ tests/docs in one source checkpoint. Rollback preserves the independent Website,
 final dispatch, every required gate and immutable measured originals. Keep Accepted
 until actual measured and content-only qualification, freshness and Pages proof exist.
 
-## Scoped automatic trigger correction, 2026-10-08
+## Trigger scope, navigation and diagnostics requirements
 
-TASK-WEB-TRIGGER-SCOPE-001 implements REQ/AC-BC-WEB-008. The current owner direction supersedes this ADR's unfiltered push and success-or-failure final-dispatch clauses: `website.yml` filters trusted main pushes to `site/**`, its native site tests, site-specific scripts/composites and shared build inputs. `benchmarks.yml` retains the same final bounded dispatch with `actions:write` confined to that job, but joins all preparation/build jobs, every database matrix and aggregate; any failed, skipped or cancelled prerequisite prevents dispatch. Website's existing authenticated optional producer wait also requires the actual terminal conclusion `success` before qualification. No `workflow_run` subscription, alternate executor, measurement bypass or changed publication gate is introduced.
+REQ/AC-BC-WEB-008: Website's push trigger and Benchmarks' final dispatch follow the decision above. Verification: push path matches and dependency outcome rejection are source checks; GitHub scheduling, a successful producer dispatch and rejection of a failed producer in actual Linux execution are required provider evidence, not claims from static inspection. Independent site changes can still publish without benchmark figures when no authenticated producer is ready. Rollback preserves the independent Website executor and all source/metric/coverage/browser/freshness/permission checks.
 
-Ordered root stages are policy/REQ/AC freeze, exact workflow edits, source/self-review and YAML/actionlint validation, then commit/push and inspect genuine trusted-main Website event/qualification/Pages evidence. The original bounded producer wait must admit a successful producer and reject a failed producer in actual Linux execution; this is required provider evidence, not a claim from static inspection. Push path matches and dependency outcome rejection are source checks; GitHub scheduling and successful producer dispatch remain explicit required provider evidence. Independent site changes can still publish without benchmark figures when no authenticated producer is ready. Original dated receipts remain historical. Rollback preserves the independent Website executor and all source/metric/coverage/browser/freshness/permission checks; it does not restore an unfiltered or failed-producer trigger.
+REQ/AC-BC-WEB-003: the native menu action and restored fragment finish their actual CSS-adjusted target scroll, clamped to the document's real scroll range, before subsequent hero navigation. The actual Chrome/CDP caller clicks the observed visible menu toggle and link centers through native mouse press/release rather than DOM `.click()`. Test helpers own bounded observation of location and geometry; they cannot force renderer state or focus, accept paused output, increase timeouts or lower coverage. Popover closure, repeated opening/viewport closure, scene lifecycle and joined child cleanup remain mandatory. `SiteContentBrowserTests` retains the full action chain with genuine pointer inputs; failure diagnostics additionally retain active-element tag/id and real scroll bounds, never credentials or user payload. No new dependency or provider boundary.
 
-TASK-WEB-NAVIGATION-001 retains this architecture and tightens the existing AC-BC-WEB-003 browser operation oracle. The native menu action and restored fragment must finish their actual CSS-adjusted target scroll, clamped to the document's real scroll range, before subsequent hero navigation. The failing baseline is original Linux run37753944709/source284dd842: a real WebGL2 canvas was paused outside the viewport at `#product` after the mobile interaction. Test helpers own bounded observation of location and geometry; they cannot force renderer state, accept paused output, increase timeouts or lower coverage. Root joins the assertions/tokens and feature mapping, runs the canonical local site flow plus full quality checks, and retains the next original Linux qualification/Pages outcome. This changes only test sequencing and observable-result assertions; existing production, protocol, metric and provider boundaries suffice, with no new dependency or ADR decision.
-
-
-### Actual native menu pointer input (2026-10-08)
-
-TASK-WEB-NAVIGATION-002 preserves AC-BC-011 and AC-BC-WEB-003: the actual Chrome/CDP caller clicks the observed visible menu toggle and link centers through native mouse press/release, rather than DOM `.click()` which does not model native pointer focus. No forced focus, scroll, renderer mutation, changed destination oracle, deadline or coverage allowance is permitted. Existing popover closure, exact CSS-adjusted clamped target completion, repeated opening/viewport closure, scene lifecycle and joined child cleanup remain mandatory.
-
-Original Linux run37758156397/source32bbe23 retained hash#product with scrollY11734 and product absolute top70. It proves destination failure but does not retain the initiating focus/scroll event. Production navigation is unchanged. `SiteContentBrowserTests` retains the full existing action chain with genuine pointer inputs; failure diagnostics additionally retain active-element tag/id and real scroll bounds, never credentials or user payload. Root alone owns fresh native Chrome/Aspire and Linux Website qualification. Source repair does not claim the original production cause or runtime success.
-
-
-### Native capture failure evidence
-
-REQ/AC-BC-NATIVE-FAILURE-DIAGNOSTICS-001 retain original bounded native process diagnostics after joined cleanup, with credential exclusion and unchanged safe public envelopes. This is a diagnostics-only refinement of the current capture ownership and fail-closed contract, not a new provider/retry/fallback decision. The feature specification binds the authentic failing source/run/artifact and explicitly leaves its underlying transport cause unproved. Root owns the coherent source, tests and two actual Website input paths; exact-source Linux native contract and Website execution remains required before acceptance.
+REQ/AC-BC-NATIVE-FAILURE-DIAGNOSTICS-001: capture retains bounded native process diagnostics after joined cleanup, with credential exclusion and unchanged safe public envelopes. This refines the current capture ownership and fail-closed contract and adds no provider, retry or fallback decision.

@@ -18,8 +18,8 @@ internal static class TestSuiteApplication
 
         var timeProvider = app.Services.GetRequiredService<TimeProvider>();
         var policy = app.Services.GetRequiredService<IOptions<TestExecutionOptions>>().Value;
-        var nativeCoverageCleanup = settings.NativeCoverageRf3 is null
-            ? null : app.Services.GetRequiredService<NativeCoverageRf3Cleanup>();
+        var nativeCoverageCleanup = settings.NativeCoverageCluster is null
+            ? null : app.Services.GetRequiredService<NativeCoverageClusterCleanup>();
         var failures = new List<Exception>();
         using var deadline = new AppHostDeadline(settings.Timeout, timeProvider,
             app.Services.GetRequiredService<IHostApplicationLifetime>().ApplicationStopping);
@@ -32,7 +32,7 @@ internal static class TestSuiteApplication
         }
         finally
         {
-            if (settings.NativeCoverageRf3 is null)
+            if (settings.NativeCoverageCluster is null)
             {
                 await CleanupOrdinaryAsync(app, settings, policy, nativeCoverageCleanup, outputLifetime,
                     output, failures, timeProvider).ConfigureAwait(false);
@@ -55,15 +55,15 @@ internal static class TestSuiteApplication
     }
 
     private static async Task CleanupOrdinaryAsync(DistributedApplication app, TestSuiteSettings settings,
-        TestExecutionOptions policy, NativeCoverageRf3Cleanup? nativeCoverageCleanup,
+        TestExecutionOptions policy, NativeCoverageClusterCleanup? nativeCoverageCleanup,
         CancellationTokenSource outputLifetime, Task output, List<Exception> failures, TimeProvider timeProvider)
     {
         using var cleanup = new CancellationTokenSource(policy.ApplicationCleanupTimeout, timeProvider);
         await CollectAsync(() => app.StopAsync(cleanup.Token), failures).ConfigureAwait(false);
-        if (settings.LocalRf3ImageEnabled)
+        if (settings.LocalClusterImageEnabled)
         {
             using var imageCleanup = new CancellationTokenSource(policy.ImageCleanupTimeout, timeProvider);
-            await CollectAsync(() => app.Services.GetRequiredService<LocalRf3ImageCleanup>()
+            await CollectAsync(() => app.Services.GetRequiredService<LocalClusterImageCleanup>()
                 .CleanupAsync(imageCleanup.Token), failures).ConfigureAwait(false);
         }
         await CollectAsync(outputLifetime.CancelAsync, failures).ConfigureAwait(false);
@@ -78,7 +78,7 @@ internal static class TestSuiteApplication
     }
 
     private static async Task CleanupNativeCoverageAsync(DistributedApplication app, TestExecutionOptions policy,
-        NativeCoverageRf3Cleanup nativeCoverageCleanup, CancellationTokenSource outputLifetime, Task output,
+        NativeCoverageClusterCleanup nativeCoverageCleanup, CancellationTokenSource outputLifetime, Task output,
         List<Exception> failures, TimeProvider timeProvider)
     {
         using var deadline = new NativeCoverageCleanupDeadline(policy.ApplicationCleanupTimeout, timeProvider);
@@ -97,13 +97,13 @@ internal static class TestSuiteApplication
     private static Task ForwardOutputAsync(DistributedApplication app, TestSuiteSettings settings, CancellationToken token)
     {
         string[] resources = [settings.ResourceName];
-        if (settings.LocalRf3ImageEnabled)
+        if (settings.LocalClusterImageEnabled)
         {
-            resources = [.. resources, LocalRf3ImagePrerequisite.ResourceName];
+            resources = [.. resources, LocalClusterImagePrerequisite.ResourceName];
         }
-        if (settings.NativeCoverageRf3 is not null)
+        if (settings.NativeCoverageCluster is not null)
         {
-            resources = [.. resources, NativeCoverageRf3Prerequisite.ResourceName];
+            resources = [.. resources, NativeCoverageClusterPrerequisite.ResourceName];
         }
         return Task.WhenAll(resources.Select(name => TestSuiteOutput.ForwardAsync(app, name, token)));
     }

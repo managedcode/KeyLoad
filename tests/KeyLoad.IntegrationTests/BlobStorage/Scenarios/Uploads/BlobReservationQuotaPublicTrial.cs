@@ -8,7 +8,7 @@ internal static class BlobReservationQuotaPublicTrial
 {
     internal static async Task RunAsync(ClusterFixture fixture, CancellationToken token)
     {
-        _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
+        _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
             fixture.AdminKey, async callers =>
             {
                 var reserved = await BlobReservationQuotaPublicPublication.ReserveAsync(callers, token);
@@ -25,7 +25,7 @@ internal static class BlobReservationQuotaPublicTrial
                 {
                     Status = BlobUploadStatus.Aborted
                 };
-                await SqlRf3Protocol.EqualAsync(expected, aborted.Value);
+                await SqlClusterProtocol.EqualAsync(expected, aborted.Value);
                 await BlobReservationQuotaPublicAssertions.RefusedAsync(callers, reserved.Refused, token);
                 await BlobReservationQuotaPublicAssertions.ReservedAsync(callers, reserved, expected, token);
                 var healthy = await BlobReservationQuotaPublicPublication.PublishAsync(callers, reserved.Refused, token);

@@ -6,8 +6,8 @@ namespace KeyLoad.IntegrationTests.Features.EventStreams;
 
 internal static class EventSchemaCursorPublicCalls
 {
-    internal static async Task<(StreamPage Sdk, StreamPage Mcp)> ReadAsync(RequestCqrsRf3Callers admin,
-        RequestCqrsRf3Callers reader, EventSchemaCursorPublicState state, ReadStreamRequest request,
+    internal static async Task<(StreamPage Sdk, StreamPage Mcp)> ReadAsync(RequestCqrsClusterCallers admin,
+        RequestCqrsClusterCallers reader, EventSchemaCursorPublicState state, ReadStreamRequest request,
         int[] indices, bool more, long? snapshot, CancellationToken token)
     {
         var sdk = await McpCallerAssertions.SdkSuccessAsync(await reader.Sdk.ReadStreamAsync(request, token));
@@ -21,11 +21,11 @@ internal static class EventSchemaCursorPublicCalls
         return (sdk, mcp);
     }
 
-    internal static async Task HealthyAsync(RequestCqrsRf3Callers admin, RequestCqrsRf3Callers reader,
+    internal static async Task HealthyAsync(RequestCqrsClusterCallers admin, RequestCqrsClusterCallers reader,
         EventSchemaCursorPublicState state, CancellationToken token)
         => await ReadAsync(admin, reader, state, EventSchemaCursorPublicExpected.Whole(state), [0, 1, 2], false, null, token);
 
-    internal static async Task CaptureAsync(RequestCqrsRf3Callers admin, RequestCqrsRf3Callers reader,
+    internal static async Task CaptureAsync(RequestCqrsClusterCallers admin, RequestCqrsClusterCallers reader,
         EventSchemaCursorPublicState state, CancellationToken token)
     {
         foreach (var direction in new[] { StreamReadDirection.Forward, StreamReadDirection.Backward })
@@ -38,7 +38,7 @@ internal static class EventSchemaCursorPublicCalls
         await ContinueAsync(admin, reader, state, token);
     }
 
-    internal static async Task ContinueAsync(RequestCqrsRf3Callers admin, RequestCqrsRf3Callers reader,
+    internal static async Task ContinueAsync(RequestCqrsClusterCallers admin, RequestCqrsClusterCallers reader,
         EventSchemaCursorPublicState state, CancellationToken token)
     {
         foreach (var captured in state.Captures.Where(item => item.Schema == state.Definition.SchemaVersion))
@@ -49,13 +49,13 @@ internal static class EventSchemaCursorPublicCalls
         }
     }
 
-    internal static async Task ReplayAsync(RequestCqrsRf3Callers admin, RequestCqrsRf3Callers reader,
+    internal static async Task ReplayAsync(RequestCqrsClusterCallers admin, RequestCqrsClusterCallers reader,
         EventSchemaCursorPublicState state, CancellationToken token)
     {
-        await SqlRf3Protocol.EqualAsync(state.Receipt,
+        await SqlClusterProtocol.EqualAsync(state.Receipt,
             await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.CommitAsync(state.Command, token)));
         await HealthyAsync(admin, reader, state, token);
-        await SqlRf3Protocol.EqualAsync(state.Receipt, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
+        await SqlClusterProtocol.EqualAsync(state.Receipt, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
             await admin.Mcp.CallAsync(McpCallerTools.DocumentsCommit, state.Command, token))).Value);
         await HealthyAsync(admin, reader, state, token);
     }

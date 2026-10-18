@@ -13,13 +13,13 @@ internal static class BlobActivePolicyPublicTrial
     private const string BlobId = "active-policy-public";
     internal static async Task RunAsync(ClusterFixture fixture, CancellationToken token)
     {
-        var state = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
+        var state = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
             administrator => SetupAsync(fixture, administrator, token), token);
         for (var cycle = 0; cycle < 2; cycle++)
         {
             await ColdAsync(fixture, token);
-            _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
-                administrator => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2,
+            _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
+                administrator => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2,
                     state.Identity.Secret, async creator =>
                     {
                         await BlobActivePolicyPublicAssertions.CurrentAsync(administrator, creator, state, token);
@@ -31,18 +31,14 @@ internal static class BlobActivePolicyPublicTrial
     }
 
     private static async Task<BlobActivePolicyPublicState> SetupAsync(ClusterFixture fixture,
-        RequestCqrsRf3Callers administrator, CancellationToken token)
+        RequestCqrsClusterCallers administrator, CancellationToken token)
     {
-        var scenario = await RelationalSqlRf3Scenario.CreateAsync(administrator.Sdk, token);
-        var blob = new BlobRef(scenario.Partition, RelationalSqlRf3Tokens.Blobs, BlobId);
+        var scenario = await RelationalSqlClusterScenario.CreateAsync(administrator.Sdk, token);
+        var blob = new BlobRef(scenario.Partition, RelationalSqlClusterTokens.Blobs, BlobId);
         var identity = await McpPersistedIdentity.CreateAsync(fixture, blob.Partition, blob.Resource,
             Capability.BlobRead | Capability.BlobWrite, token);
-        var request = new AtomicPartitionPlacementReadRequest(1, blob.Partition);
-        var placement = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.ReadAtomicPartitionPlacementAsync(request, token));
-        await SqlRf3Protocol.EqualAsync(placement, (await McpCallerAssertions.SuccessAsync<AtomicPartitionPlacementResolution>(
-            await administrator.Mcp.CallAsync(McpCallerTools.AdminPartitionPlacementRead, request, token))).Value);
-        var state = new BlobActivePolicyPublicState(blob, identity, placement);
-        return await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, identity.Secret,
+        var state = new BlobActivePolicyPublicState(blob, identity);
+        return await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, identity.Secret,
             async creator =>
             {
                 await BlobActivePolicyPublicOperations.BeginAsync(creator, state, token);
@@ -62,7 +58,7 @@ internal static class BlobActivePolicyPublicTrial
             }, token);
     }
 
-    private static async Task PersistAsync(RequestCqrsRf3Callers administrator, PrincipalRecord original,
+    private static async Task PersistAsync(RequestCqrsClusterCallers administrator, PrincipalRecord original,
         bool revoke, long epoch, CancellationToken token)
     {
         var expected = original with
@@ -71,12 +67,12 @@ internal static class BlobActivePolicyPublicTrial
             Grants = [.. original.Grants.Select(grant => grant with
             { Capabilities = revoke ? grant.Capabilities & ~Capability.BlobWrite : grant.Capabilities })]
         };
-        await SqlRf3Protocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(
+        await SqlClusterProtocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(
             await administrator.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), expected, token)));
     }
 
-    private static async Task UploadDeniedAsync(RequestCqrsRf3Callers administrator,
-        RequestCqrsRf3Callers creator, BlobActivePolicyPublicState state, CancellationToken token)
+    private static async Task UploadDeniedAsync(RequestCqrsClusterCallers administrator,
+        RequestCqrsClusterCallers creator, BlobActivePolicyPublicState state, CancellationToken token)
     {
         var request = new BlobUploadInfoRequest(state.Blob, state.Begin.UploadId);
         Task Observe() => BlobActivePolicyPublicAssertions.CurrentAsync(administrator, creator, state, token);

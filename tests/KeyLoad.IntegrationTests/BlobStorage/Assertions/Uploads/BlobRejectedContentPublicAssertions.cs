@@ -37,7 +37,7 @@ internal static class BlobRejectedContentPublicAssertions
         return Convert.ToHexStringLower(SHA256.HashData(preimage));
     }
 
-    internal static async Task PartRefusedAsync(RequestCqrsRf3Callers callers, WriteBlobPartRequest request,
+    internal static async Task PartRefusedAsync(RequestCqrsClusterCallers callers, WriteBlobPartRequest request,
         ErrorCode code, Func<Task> healthy, CancellationToken token)
     {
         var detail = code == ErrorCode.Validation ? InvalidDetail : ConflictDetail;
@@ -47,7 +47,7 @@ internal static class BlobRejectedContentPublicAssertions
         await healthy();
     }
 
-    internal static async Task CompleteRefusedAsync(RequestCqrsRf3Callers callers,
+    internal static async Task CompleteRefusedAsync(RequestCqrsClusterCallers callers,
         CompleteBlobUploadRequest request, Func<Task> healthy, CancellationToken token)
     {
         await RefusedAsync(await callers.Sdk.CompleteBlobUploadAsync(request, token), ErrorCode.Validation, InvalidDetail);
@@ -72,13 +72,13 @@ internal static class BlobRejectedContentPublicAssertions
             .GetProperty(ErrorDetailProperty).GetString()).IsEqualTo(detail);
     }
 
-    internal static async Task HiddenAsync(RequestCqrsRf3Callers callers, BeginBlobUploadRequest begin,
+    internal static async Task HiddenAsync(RequestCqrsClusterCallers callers, BeginBlobUploadRequest begin,
         BlobUploadInfo expected, CancellationToken token)
     {
         var query = new BlobUploadInfoRequest(begin.Blob, begin.UploadId);
-        await SqlRf3Protocol.EqualAsync(expected,
+        await SqlClusterProtocol.EqualAsync(expected,
             await PublicReadAssertions.UploadAsync(await callers.Sdk.GetBlobUploadInfoAsync(query, token)));
-        await SqlRf3Protocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<BlobUploadInfoReadResult>(
+        await SqlClusterProtocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<BlobUploadInfoReadResult>(
             await callers.Mcp.CallAsync("keyload_blobs_upload_info", query, token))).Value.Upload);
         await Assert.That(await PublicReadAssertions.MetadataAsync(
             await callers.Sdk.GetBlobMetadataAsync(new(begin.Blob), token))).IsNull();
@@ -91,7 +91,7 @@ internal static class BlobRejectedContentPublicAssertions
     {
         await Assert.That(before.StoredBytes).IsEqualTo(0L);
         await Assert.That(before.NextOrdinal).IsEqualTo(0);
-        await SqlRf3Protocol.EqualAsync(before with
+        await SqlClusterProtocol.EqualAsync(before with
         {
             StoredBytes = request.Length,
             NextOrdinal = 1,

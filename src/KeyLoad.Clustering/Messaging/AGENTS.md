@@ -1,24 +1,27 @@
 # Orleans Messaging feature
 
-## Purpose and entry points
-- Owns the Orleans due-work grain service, atomic-partition coordinator grain, and their typed internal contracts.
-- Entry points: `GrainServices/RecurringDueGrainService.cs` and `Grains/RecurringDueCoordinatorGrain.cs`.
+## Purpose, entry points and ownership
 
-## Boundaries
-- The per-silo service only discovers hints after current leadership and a quorum read barrier. The keyed coordinator sends work through a fresh signed `IRequestGrain` request and drains the existing native Communication CQRS stream.
+- Owns the Orleans background workers for due and recurring queue work and remote queue transfers, and their typed internal contracts.
+- Entry points: the `GrainServices/` and `Grains/` folders of this feature (currently `GrainServices/RecurringDueGrainService.cs` and `Grains/RecurringDueCoordinatorGrain.cs`).
+- Background work uses Orleans `[StatelessWorker]` grains: each worker accepts events, buffers them and flushes the batch on a typed-option Orleans timer through the normal grain → ZoneTree owner path as a fresh signed native operation, draining the existing native Communication CQRS stream. No `IsLeaderAsync()` or any other leader/consensus gate.
 - Never call `DatabaseEngine.Apply` or `ICommitCoordinator.SubmitNativeAsync` from this feature. Do not create a scheduler principal, trust roles in hints, or move node-local storage handles with activations.
-- Preserve full partition identity, persisted creator revalidation, one-grain-per-request isolation, one five-second dispatch deadline, and stable command identity across the single uncertainty retry.
+- Preserve full partition identity, persisted creator revalidation, per-operation isolation, one five-second dispatch deadline, and stable command identity across the single uncertainty retry.
 
-## Verification and risks
-- Applicable skill: owner-authorized Orleans skill at `/Users/ksemenenko/.codex/skills/orleans/SKILL.md`.
-- Author focused TUnit tests and let the solution integrator run all build and Aspire gates. Native local unit/runtime checks do not qualify RF3.
-- Grain-service startup, stop and task joining are lifecycle-sensitive. Keep the per-silo loop bounded, sequential and cancellation-linked; never detach active dispatch work.
+## Boundaries and protected risks
 
-## Owner-approved KL092 queue coordination
-- QueueDeadlinePrincipalId selects only an operator-created EXISTING persisted principal. Never create/bootstrap/impersonate a scheduler principal. Revalidate scoped QueueConsume and current worker-input authority for every dispatch/effect/replay. Null is unavailable.
-- ADR-125 connection ownership supersedes the historical IRequestGrain activation wording: call-local operations use the actual existing ConnectionGrain and fresh per-operation context; no extra activation or dispatcher. Preserve the original five-second deadline, one uncertainty retry and joined shutdown.
+Follow the [root policy](../../../AGENTS.md) and the owning feature specification. Keep changes in their actual owner, preserve unrelated work, and remove replaced code together with exclusive callers and fixtures. Use native Orleans calls for distributed execution and silo-local ZoneTree owners for files. Preserve persisted authorization, operation correctness, resource bounds, cancellation and joined shutdown. Never turn a static check or focused test into a claim of complete runtime qualification.
 
+## Commands and verification
 
-## Finite native Accept capacity coordination, TASK-KL094-ACCEPT-CAPACITY-ATTEMPT-002
-- ADR-088/094/125 owns the optional signed failure witness and separately authorized source CAS. Discovery remains read-only; it cannot advance attempts or grant authority. Every effect remains the original native signed Batch on the stable ConnectionGrain call-local owner, with fresh persisted subject permissions, original cancellation/deadline and joined CQRS tasks. No per-operation activation, fallback principal, new dispatcher or DurableJobs retry authority.
-- Nullable source ceiling/history and target original failure stamp are charged under actual native count/byte/serialization limits. Unknown or unrelated dependency changes do not advance; known source failure requires explicit existing operator repair. This finite capacity-only boundary does not close universal AC-XFER-005.
+From the repository root:
+
+```sh
+dotnet build KeyLoad.slnx --no-restore --configuration Release -warnaserror
+```
+
+Use the root's complete solution, native TUnit, real process recovery and Aspire SDK/MCP gates as applicable. Local checks are development evidence; delivered-source qualification and public measurements require exact-source Linux GitHub artifacts. Do not weaken compiler, analyzer, source-identity, coverage or runtime assertions.
+
+## Skills
+
+Use the installed Orleans skill for Orleans design and the relevant installed formatting, Aspire or diagnostics skill when the task needs it. Follow explicit owner scope and dependency-adoption rules.

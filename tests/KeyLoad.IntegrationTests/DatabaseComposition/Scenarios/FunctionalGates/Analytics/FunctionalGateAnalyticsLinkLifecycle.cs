@@ -15,7 +15,7 @@ internal static class FunctionalGateAnalyticsLinkLifecycle
             [new PutDocument(literal.Reference.Collection, literal.Reference.Id, literal.Json, P.Absent)]);
         var receipt = await context.SdkAsync(context.Administrator.Sdk.CommitAsync(command, token));
         await FunctionalGateCompositionCalls.ReceiptAsync(context, receipt, command.CommandId,
-            [new(R.PutKind, literal.Reference.Collection, literal.Reference.Id, P.Initial)], token);
+            [new(R.PutKind, literal.Reference.Collection, literal.Reference.Id, P.Initial)]);
         var reference = await FunctionalGateEntityReferences.CaptureAsync(context, context.Administrator, literal, token);
         var store = FunctionalGateUserAnalyticsState.StoreName(context.WriterPrincipalId, P.StoreIndex);
         var proof = new FunctionalGateAnalyticsLinkProof(store, FunctionalGateAnalyticsLinkRequests.Event(reference),

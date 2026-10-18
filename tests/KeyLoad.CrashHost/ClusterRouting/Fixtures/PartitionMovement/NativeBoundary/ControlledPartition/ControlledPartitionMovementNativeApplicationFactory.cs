@@ -8,21 +8,20 @@ namespace KeyLoad.CrashHost.Features.ClusterRouting;
 internal static class ControlledPartitionMovementNativeApplicationFactory
 {
     internal static async Task<ControlledPartitionMovementNativeHost> CreateAsync(string[] arguments,
-        NativeLocalhostClusteringOptions localhostClustering, IGrainPartitionMovementSealedOperationObserver? sealedObserver,
+        NativeLocalhostClusteringOptions localhostClustering,
         IDatabaseAuthenticationExecutionObserver? authenticationObserver,
         Func<IServiceProvider, ILifecycleParticipant<ISiloLifecycle>>? lifecycleParticipantFactory,
         IGrainRequestPhaseObserver? phaseObserver, IGrainRequestPurposeObserver? purposeObserver,
         Action<IServiceCollection, NodeOptions>? configureServices, CancellationToken startupCancellation)
     {
-        var nativeObservation = new ControlledPartitionMovementNativeObservationWitness();
-        var application = await ServerConfiguration.BuildAsync(arguments, sealedObserver: sealedObserver,
+        var application = await ServerConfiguration.BuildAsync(arguments,
             localhostClustering: localhostClustering, authenticationExecutionObserver: authenticationObserver,
-            partitionMovementNativeObserver: nativeObservation, lifecycleParticipantFactory: lifecycleParticipantFactory,
+            lifecycleParticipantFactory: lifecycleParticipantFactory,
             phaseObserver: phaseObserver, purposeObserver: purposeObserver, configureServices: configureServices,
             startupCancellation: startupCancellation).ConfigureAwait(false);
         try
         {
-            return new(application, nativeObservation);
+            return new(application);
         }
         catch (Exception primary)
         {

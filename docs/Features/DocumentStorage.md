@@ -1,6 +1,6 @@
 # DocumentStorage
 
-### Exact caller-owned document text (REQ/AC-DSTORE-008)
+## Exact caller-owned document text (REQ/AC-DSTORE-008)
 
 REQ-DSTORE-008 retains the exact validated `PutDocument.Json` text in the native
 canonical document record: Unicode, escapes, property order, whitespace and
@@ -12,20 +12,7 @@ fingerprint/golden digest remain unchanged. Patch produces its existing validate
 derived document; redacted reads still use the existing persisted field policy.
 There is no promise of original text for a redacted or patched result.
 
-AC-DSTORE-008 maps to `DocumentExactContentTests`: real TestDatabase/ZoneTree Put,
-authorized raw read, native record roundtrip and exact same-command replay retain
-literal caller text; replacement retains its new literal text; duplicate members
-and out-of-range decimals still fail without effects. Existing CRUD, rollback,
-index, image/outbox and native serialization regressions remain mandatory. The
-real SDK/official MCP `PhysicalShardCatalogRf3Tests` Unicode assertion remains
-exact across every voter and restart. Root owns JsonData's shared validation join
-and the document command/test slice; [ADR-060](../ADR/ADR-060-native-internal-serialization.md)
-already requires exact caller-owned document strings. Stored record aliases/IDs,
-native format, public DTOs and command fingerprints do not change; existing
-historical records are not rewritten. Local proof and exact-source Linux RF3
-qualification are separate required evidence.
-
-Status: source-present baseline documented; complete product and GitHub qualification remain pending. Current behavior is distinguished below from the accepted target architecture in [design sections 7 and 37–41](../design/architecture-v0.3.uk.md).
+AC-DSTORE-008 maps to `DocumentExactContentTests`: real TestDatabase/ZoneTree Put, authorized raw read, native record roundtrip and exact same-command replay retain literal caller text; replacement retains its new literal text; duplicate members and out-of-range decimals still fail without effects. Existing CRUD, rollback, index, image/outbox and native serialization regressions remain mandatory. The real SDK/official MCP replicated-cluster Unicode assertion remains exact across every replica and restart. Stored record aliases/IDs, native format, public DTOs and command fingerprints do not change; existing historical records are not rewritten. Local proof and exact-source Linux cluster qualification are separate required evidence.
 
 ## Purpose and actors
 
@@ -44,11 +31,9 @@ DocumentStorage owns tenant/database/domain-scoped JSON documents, revisions, mu
 | Durable specification | This file | `docs/Features/DocumentStorage.md` |
 | HTTP | `src/KeyLoad.Server/DocumentStorage/Transport/DocumentApi.cs` plus shared `Features/ClientApi/ApiEndpoints.cs`: `POST /v1/documents/get` and mutation command `POST /v1/commands` | Shared HTTP transport belongs to `src/KeyLoad.Server/ClientApi/`; document validation and behavior belong to `src/KeyLoad.Core/DocumentStorage/` |
 | .NET SDK | `src/KeyLoad.Client/KeyLoadClient.cs`: `GetAsync` and `CommitAsync` | Shared client transport belongs to `src/KeyLoad.Client/ClientApi/`; typed document behavior maps to this DocumentStorage slice |
-| Official MCP | Actual `Features/ClientApi/McpCommandCatalog.cs` and `McpReadCatalog.cs`, with `McpDocumentParityTests` exercising `keyload_documents_commit` and `keyload_documents_get` through the official C# SDK | Shared ClientApi owns transport/dispatch; DocumentStorage owns the CRUD contract and matching RF3 parity cases |
+| Official MCP | Actual `Features/ClientApi/McpCommandCatalog.cs` and `McpReadCatalog.cs`, with `McpDocumentParityTests` exercising `keyload_documents_commit` and `keyload_documents_get` through the official C# SDK | Shared ClientApi owns transport/dispatch; DocumentStorage owns the CRUD contract and matching cluster parity cases |
 | UI | No document-specific frontend interaction is specified | N/A: database document CRUD is consumed through API/SDK/MCP, not a separate UI surface |
 | Backup/export | Cross-resource archive behavior is owned by BackupRestore | N/A here: this slice supplies canonical records but does not define an independent backup format |
-
-The current root-level files are documented migration debt under ADR-032, not the target layout. Search/query owns query planning and projections; Authorization owns identity/policy rules; Messaging/EventStreams own their resources. DocumentStorage does not own physical node placement, replica consensus, or public route naming.
 
 ## Current source behavior
 
@@ -56,41 +41,39 @@ The current root-level files are documented migration debt under ADR-032, not th
 - Direct document writes are denied when catalog authority is `EventStream`. Row and field permissions are checked on mutation/read. Reads omit deleted or row-invisible records and use the persisted field projector.
 - Index definitions currently support scalar paths with inclusion rules for null/missing values. Updates remove old keys and write new keys in the same transaction. Unique values are enforced within the partition; a conflicting owner rejects the transaction.
 - `CommandRequest` and mutation records participate in the shared ordered batch path. Existing tests cover document/event/queue batch atomicity and persisted command retry. The literal partition key alone does not merge distinct transaction domains.
-- The observed implementation does not establish multikey, covering, partial, computed, global-unique, online generation rebuild, or cluster-wide split semantics. These remain design/backlog work in section 7 and the indexing/shard workstreams KL-011/039; they are outside the original KL-010 CRUD/CAS and KL-012 batch/outcome task scopes.
+- The observed implementation does not establish multikey, covering, partial, computed, global-unique, online generation rebuild, or or online generation rebuild beyond the declared scalar indexes. These remain design/backlog work in section 7 and the indexing workstream; they are outside the CRUD/CAS and batch/outcome scopes.
 
 ## Requirements and acceptance
 
 | Requirement | Measurable acceptance | Existing TUnit evidence or planned test |
 |---|---|---|
-| REQ-DSTORE-001: validate scoped CRUD, revisions, and document authority | AC-DSTORE-001 passes when create/read/replace/patch/delete produce monotone revisions, exact-CAS concurrency has one winner, and invalid/stale writes or direct mutation of event-authoritative resources are rejected without partial state. | Existing `ConcurrentCompareAndSwapHasOneWinner`; actual `DocumentCrudRevisionTests` and `DocumentPutValidationAtomicityTests` cover create/missing/delete/invalid JSON/authority. Original source/PDB-matched Linux normal/scalar evidence and all four task RF3 cases passed; current native RF3 refresh passed. See TASK-DSTORE-KL010-KL012-CLOSEOUT below. |
+| REQ-DSTORE-001: validate scoped CRUD, revisions, and document authority | AC-DSTORE-001 passes when create/read/replace/patch/delete produce monotone revisions, exact-CAS concurrency has one winner, and invalid/stale writes or direct mutation of event-authoritative resources are rejected without partial state. | Existing `ConcurrentCompareAndSwapHasOneWinner`; actual `DocumentCrudRevisionTests` and `DocumentPutValidationAtomicityTests` cover create/missing/delete/invalid JSON/authority. |
 | REQ-DSTORE-002: maintain declared scalar indexes atomically | AC-DSTORE-002 passes when replacing/deleting a document removes its old keys, writes new keys, and a duplicate partition-unique value rejects the full mutation batch. | Existing `UniqueConflictRollsBackDocumentIndexEventAndEnqueue`, `AcMp003PointAndIndexDereferenceConsumeTheSameRawReadBudget`; actual `DocumentScalarIndexMutationTests` covers persisted old/new index transitions and rollback. Local full-suite evidence below; exact-source CI qualification pending. |
 | REQ-DSTORE-003: enforce row/field policy at every document boundary | AC-DSTORE-003 passes when unauthorized row writes/reads and protected field use fail or project according to policy; tenant or row ownership cannot be supplied to gain access. | Existing `NestedSensitiveFieldsAreOmittedAndAliasedPredicateAndSortAreDenied`, `RowScopeAndTenantCannotBeForged`; actual field/row/tenant matrix plus isolated replacement-write and Delete-index-use controls. Local full-suite evidence below; exact-source CI qualification pending. |
 | REQ-DSTORE-004: share an atomic transaction domain with eligible events and queues | AC-DSTORE-004 passes when document + event + local enqueue commit together or all remain absent, same command retry returns the stored outcome, and identical partition-key text in unrelated domains stays isolated. | Existing `DocumentEventAndQueueCommitTogetherAndCommandRetryDoesNotRepeatEffects`, `UniqueConflictRollsBackDocumentIndexEventAndEnqueue`, `SameLiteralPartitionKeyCannotCrossTransactionDomains`. CI qualification pending. |
-| REQ-DSTORE-005: reuse transaction-scoped document images | AC-DSTORE-005 passes when one before-record lookup supplies CRUD and outbox; no final staged lookup/decode is required; exact bytes, revisions, tombstones, indexes, authorization, quotas and sequential same-ID mutations remain intact. Native placement admission adds exactly three bounded metadata point reads to the six current mutation/outcome reads, reused by the Batch receipt and every outbox effect under REQ/AC-MTOKEN-007. A first document write creates its native atomic-roster row using owned-value reads and therefore performs nine borrowed point reads: six mutation/outcome plus three placement reads. A later mutation of that existing row adds one borrowed restore-origin validation, giving ten. Owned-value reads and borrowed point reads remain distinct counters; paired-size payload work is unchanged. Actual native counters must verify the current per-operation total and paired-size payload work; an obsolete outcome lookup must not be retained to satisfy an old counter. | TASK-MP-007I in ADR-035 and ADR-017; real-store paired-size/counter and before/after/failure cases plus existing transaction/change-feed/recovery/RF3 regressions; GitHub evidence pending. |
-| REQ-DSTORE-006: retain command identity and outcome atomically across real process restart | AC-DSTORE-006 passes when two distinct actual CrashHost processes execute one hundred same-ID/same-content retries each around a real first-process kill; every result matches the original complete receipt, while one document revision, one event, one Ready queue message and the exact batch outbox cut remain. Same-ID/changed-content returns Conflict without changing effects or the original outcome; a fresh authorized command succeeds afterward. | TASK-DSTORE-COMMAND-100-RESTART in ADR-002; new `CommandIdempotencyProcessRecoveryTests` and actual CrashHost scenario under `Features/DocumentStorage/`. The original Linux two-process case passed in run37560457057, with unchanged source bound to its native compiled image; see the scoped closeout below. |
-| REQ-DSTORE-007: prove persisted precondition-failure replay and authenticated-principal isolation | AC-DSTORE-007 passes when a failed expected-revision command replays its exact persisted error after a fresh command makes that precondition satisfiable, without a new document/outbox effect, and a fresh command ID then succeeds. Two distinct persisted authorized principals independently execute the same literal command ID and retain their own exact outcomes and documents; changing either principal's existing command content conflicts without changing either effect. | TASK-DSTORE-OUTCOME-MATRIX under ADR-002; new `DocumentCommandOutcomeReplayTests` and `DocumentCommandPrincipalScopeTests`, with real TestDatabase/ZoneTree helpers under UnitTests/Features/DocumentStorage. Native Aspire normal/scalar and delivered-source Linux proof remain required. |
-| REQ-DSTORE-009: persist command identity in its full resolved scope | AC-DSTORE-009 passes when the current scoped-key, retained-error, corruption, restart and public RF3 flows below all pass without outcome rewrites, guessed partition identity or ambiguous principal/ID lookup. | TASK-DSTORE-SCOPED-OUTCOMES-001..004; ADR-002, ADR-011 and ADR-017; real ZoneTree unit/scalar, existing CrashHost recovery and SDK/official MCP Aspire RF3 cases. Contract accepted before implementation; no complete gate is claimed. |
-
+| REQ-DSTORE-005: reuse transaction-scoped document images | AC-DSTORE-005 passes when one before-record lookup supplies CRUD and outbox; no final staged lookup/decode is required; exact bytes, revisions, tombstones, indexes, authorization, quotas and sequential same-ID mutations remain intact. Actual native counters must verify the current per-operation read total and paired-size payload work; an obsolete outcome lookup must not be retained to satisfy an old counter. | ADR-035; real-store paired-size/counter and before/after/failure cases plus existing transaction/change-feed/recovery/cluster regressions; GitHub evidence pending. |
+| REQ-DSTORE-006: retain command identity and outcome atomically across real process restart | AC-DSTORE-006 passes when two distinct actual CrashHost processes execute one hundred same-ID/same-content retries each around a real first-process kill; every result matches the original complete receipt, while one document revision, one event, one Ready queue message and the exact batch outbox cut remain. Same-ID/changed-content returns Conflict without changing effects or the original outcome; a fresh authorized command succeeds afterward. | ADR-002; new `CommandIdempotencyProcessRecoveryTests` and actual CrashHost scenario under `Features/DocumentStorage/`. |
+| REQ-DSTORE-007: prove persisted precondition-failure replay and authenticated-principal isolation | AC-DSTORE-007 passes when a failed expected-revision command replays its exact persisted error after a fresh command makes that precondition satisfiable, without a new document/outbox effect, and a fresh command ID then succeeds. Two distinct persisted authorized principals independently execute the same literal command ID and retain their own exact outcomes and documents; changing either principal's existing command content conflicts without changing either effect. | ADR-002; new `DocumentCommandOutcomeReplayTests` and `DocumentCommandPrincipalScopeTests`, with real TestDatabase/ZoneTree helpers under UnitTests/Features/DocumentStorage. Native Aspire normal/scalar and delivered-source Linux proof remain required. |
+| REQ-DSTORE-009: persist command identity in its full resolved scope | AC-DSTORE-009 passes when the current scoped-key, retained-error, corruption, restart and public cluster flows below all pass without outcome rewrites, guessed partition identity or ambiguous principal/ID lookup. | ADR-002 and ADR-011; real ZoneTree unit/scalar, existing CrashHost recovery and SDK/official MCP Aspire cluster cases. Contract accepted before implementation; no complete gate is claimed. |
 
 ### Existing unit case-to-acceptance crosswalk
 
 This table binds the current operation cases to their existing criteria; it adds
-no product behavior and does not close any CI, recovery, RF3, performance, or
+no product behavior and does not close any CI, recovery, cluster, performance, or
 exact-source gate. A listed class is evidence for only the stated scope.
 
 | Native case class | Existing requirement / acceptance | Evidence boundary |
 |---|---|---|
 | `DocumentCrudRevisionTests`, `DocumentPutValidationAtomicityTests` | REQ-DSTORE-001 / AC-DSTORE-001 | CRUD/CAS/revision, malformed-input rollback, and healthy follow-up. |
 | `DocumentScalarIndexMutationTests` | REQ-DSTORE-002 / AC-DSTORE-002 | Old/new index transitions and uniqueness rollback. |
-| `ScalarIndexProcessRecoveryTests` and the owning CrashHost DocumentStorage scenario | REQ-DSTORE-002 / AC-DSTORE-INDEX-PROCESS-001 | TASK-DSTORE-INDEX-PROCESS freezes the real process/reference-model flow below; source and qualification pending. |
+| `ScalarIndexProcessRecoveryTests` and the owning CrashHost DocumentStorage scenario | REQ-DSTORE-002 / AC-DSTORE-INDEX-PROCESS-001 | Real process/reference-model flow; qualification pending. |
 | `DocumentRowTenantMutationAuthorizationTests` | REQ-DSTORE-003 / AC-DSTORE-003 and REQ-AUTH-005 / AC-AUTH-005 | Put/Patch/Delete cannot forge row owner or tenant; this does not cover all row-scoped read/query adapters. |
 | `DocumentFieldMutationAuthorizationTests`, `DocumentReplacementFieldAuthorizationTests`, `DocumentDeleteIndexAuthorizationTests` | REQ-DSTORE-003 / AC-DSTORE-003 and REQ-AUTH-006 / AC-AUTH-006 | Persisted field-write/index-use grants are independently enforced on the tested paths, not across the full query-adapter or field-lineage matrix. Whole-row delete requires applicable index-use, not field-write. |
 | `DocumentMutationImageTests`, `DocumentMutationImageFailureTests`, `DocumentMutationImageReadTests` | REQ-DSTORE-005 / AC-DSTORE-005 | Real same-ID image/outbox bytes, before-image read-counts, and failure rollback. These cases do not establish REQ-DSTORE-004 cross-resource event/enqueue atomicity or performance qualification. |
-| `DocumentExactContentTests` | REQ-DSTORE-008 / AC-DSTORE-008 | Exact current caller JSON text, replay and invalid-document no-effect behavior; see TASK-DSTORE-EXACT-TEXT below. |
+| `DocumentExactContentTests` | REQ-DSTORE-008 / AC-DSTORE-008 | Exact current caller JSON text, replay and invalid-document no-effect behavior. |
 | `DocumentCommandOutcomeReplayTests`, `DocumentCommandPrincipalScopeTests` | REQ-DSTORE-007 / AC-DSTORE-007 | Persisted expected-revision failure replay and principal-scoped command identity; these do not close the broader REQ-DSTORE-009 matrix. |
 | `VisibleReadTests` | REQ-MP-002 / its existing grouped AC-MP-002..006 acceptance | Bounded visible-document visitation and persisted visibility/stale-vector exclusion. These shared ResourceExecution criteria are exercised through real document/vector state. The owning spec groups AC-MP-002..006 and does not define per-criterion text, so the mapping does not infer separate AC-003/004 semantics from method names or claim the full group is covered. |
 | `ReadOnlyCoreContractTests` | REQ-ROC-005 / AC-ROC-005 under ADR-041 | Strict current public collection-shape behavior and a healthy store follow-up. This cross-slice contract evidence is not AC-DSTORE-001 CRUD coverage. |
-
 
 The current command-outcome retention contract has no automatic TTL/purge path.
 Retries are supported while the original outcome remains in the canonical store
@@ -98,15 +81,6 @@ with the same incarnation and current persisted authorization. No finite minimum
 time window or retry guarantee after explicit outcome/store removal or changed
 incarnation is advertised. This is documented current behavior, not an implemented
 expiry policy. A new policy needs an accepted ADR and its own qualification.
-
-TASK-DSTORE-OUTCOME-MATRIX is a bounded completion of two existing ADR-002 test
-rows. Root owns the contract and review; query_wave Luna/high owns only the two
-new named cases and cohesive helpers under UnitTests/Features/DocumentStorage.
-Use the real persisted policies and original native outcome bytes, with literal
-document/revision and outbox expectations. Physical apply position may advance
-on error/replay and must not be mistaken for a new domain effect. No production
-key, fingerprint, serializer, public outcome API, expiry or permission changes
-are authorized by this test stage.
 
 ## Current scoped outcome contract
 
@@ -116,26 +90,11 @@ principal, explicit Global/Partition scope, the complete resolved `PartitionRef`
 for Partition, and CommandId. The canonical fingerprint, native StoredOutcome
 alias and IDs 0..7, persisted authorization, incarnation checks and ordered
 atomic apply boundary remain unchanged. A partition digest cannot reconstruct
-its full identity or physical owner.
-
-TASK-DSTORE-FULL-IDENTITY-001 supplements the scoped repair with four complete
-real-ZoneTree cases, one for each individual `PartitionRef` component. Hold the
-other three components, persisted principal and command ID fixed while changing
-only tenant, database, transaction domain or partition key. Configure two real
-collections in their actual scopes so a domain change never overwrites the first
-collection's catalog authority. Commit both commands, compare exact independent
-receipts on replay, reject changed content separately in each scope, verify both
-literal document values and unchanged outbox tails after retries/conflicts, then
-reopen the store and resolve/read both original commands. Expected keys use the
-existing independent test oracle, not the production scope/key resolver. A
-dedicated worker owns only new ClusterRouting test cases/helpers; root owns live
-integration and the ordinary/scalar/recovery/RF3 gates. Acceptance maps to
-AC-DSTORE-009 and ADR-002/011; these authored cases do not replace caller-visible
-RF3 proof.
+its full identity.
 
 Current partition keys are `KeySpace.Partition("outcome-v2", partition, principal, id)`;
 global keys are `KeyCodec.Encode("outcome-v2", "global", principal, id)`.
-Current Unknown-scope persisted errors use the distinct nonmovable key
+Current Unknown-scope persisted errors use the distinct key
 `KeyCodec.Encode("outcome-v2", "unknown", principal, id)`; Unknown is explicit
 missing scope, never an inferred partition or trusted global role.
 `outcome-locator-v2` contains the complete partition/principal/id and the exact
@@ -162,29 +121,9 @@ AC-DSTORE-009 requires complete actual-operation scenarios:
 1. The same principal and literal ID commits independently in two configured full partitions, with exact documents, receipts and outbox effects. Both exact retries retain their own results after fresh engine/store reopen; changed content in either scope conflicts and preserves both scopes. Include tenant/database/domain/key distinctions and explicit Global versus Partition reuse.
 2. A real precondition failure in A remains the same retained error after a fresh command makes that precondition satisfiable; reuse in B remains independent. Retry produces no new effects. Actual authorized resolution and revoked/denied controls preserve reauthorization. A current persisted Unknown failure before and after valid A/B commands with the same ID cannot shadow either scoped result; its exact retry/error and changed-content conflict remain independent.
 3. Real native transactions prove outcome/locator/effects/watermark/clock atomicity. Missing or wrong locators, orphan locators, contradictory metadata and malformed records reject without rewriting or partial domain effects; a healthy unrelated command remains usable where its authority is intact. Current Global operations have no partition locator and cannot substitute for a missing Partition result.
-4. Aspire-owned real process cuts and two-process retry scenarios prove current-key recovery and exact current native state preservation. Aspire RF3 tests use both actual SDK and official MCP clients for same-ID/two-partition commits, opposite-endpoint retries and an owned restart/leader path. Local proof remains distinct from delivered-source Linux qualification.
-
-Ordered ownership: TASK-DSTORE-SCOPED-OUTCOMES-001 freezes this feature and the
-ADR-002/011/017 and TokenOwnershipLineage joins (root); 002 owns scoped keys,
-locator codecs/inventory and existing Core commit/resolution paths (Luna private
-packet); 003 updates all actual accessor callers and adds UnitTests,
-RecoveryTests/CrashHost and IntegrationTests operation flows in their canonical
-slices (same worker); 004 joins/reviews, runs build/format/governance and complete
-Aspire normal/scalar/recovery/RF3 plus exact-SHA Linux gates (root).
-Current deployment uses homogeneous RF3 binaries with the exact current native
-contract before admission. Recovery and restore validate the current format and
-preserve its state. Outcome expiry and cross-group token translation remain
-separate unimplemented contracts.
+4. Aspire-owned real process cuts and two-process retry scenarios prove current-key recovery and exact current native state preservation. Aspire cluster tests use both actual SDK and official MCP clients for same-ID/two-partition commits, opposite-endpoint retries and an owned restart path. Local proof remains distinct from delivered-source Linux qualification.
 
 ### Authorization and retained-error ordering
-
-TASK-DSTORE-SCOPED-OUTCOMES-002 preserves the original command trust boundary.
-Normal execution and operation-aware resolution authenticate the persisted
-principal and authorize the operation before reading or decoding retained outcome
-metadata. A revoked caller receives the original authorization error, including
-when the retained bytes are corrupt; after valid authorization the same corrupt
-row fails Corruption. The already-applied replica path retains its existing
-authority and replay order rather than introducing a new caller authorization step.
 
 If normal admission fails before outcome selection, retain that original error
 and reset staged domain effects. Current bounded presence checks prevent a
@@ -201,31 +140,11 @@ rejected by authorization cannot reveal a prior fingerprint. Exact authorized
 Unknown retries and changed-content conflicts still use their independent v2
 identity; no caller-supplied role or metadata-before-authorization shortcut is
 permitted. These flows extend AC-DSTORE-009 and its existing native unit/scalar,
-recovery and RF3 evidence, without qualifying an unexecuted gate.
+recovery and cluster evidence, without qualifying an unexecuted gate.
 
-The current scoped implementation and callers have original source-matched
-Linux normal/scalar and process-recovery proof. The original KL-012 acceptance
-and named public RF3 partition/restart flow are closed below. Full feature
-qualification, the complete Linux RF3 cohort and functional coverage remain
-separate open gates; a task closeout does not mark every supplemental criterion
-or the full DocumentStorage feature complete.
-
-The accepted [ADR-035 document image contract](../ADR/ADR-035-memory-performance.md)
-assigns CRUD handlers and new matching tests to one worker, and shared
-AtomicMutationApplication caller integration to the lead. Internal context/result
-carriers stay under Features/DocumentStorage and within one atomic transaction.
+Under the [ADR-035 document image contract](../ADR/ADR-035-memory-performance.md),
+internal context/result carriers stay under Features/DocumentStorage and within one atomic transaction.
 UI/SDK/MCP schema changes are N/A: public contracts and current persisted bytes stay exact.
-
-The2026-10-04 regression-completion stage maps AC-DSTORE-001 to
-DocumentCrudRevisionTests and DocumentPutValidationAtomicityTests, AC-DSTORE-002
-to DocumentScalarIndexMutationTests, and AC-DSTORE-003 to
-DocumentFieldMutationAuthorizationTests and DocumentRowTenantMutationAuthorizationTests.
-These use actual TestDatabase/ZoneTree and the existing contracts: no new product
-semantics or mutation DTO. Root owns this mapping and join; cluster_wave Luna/high
-owns only these new UnitTests/Features/DocumentStorage files and their cohesive
-fixture. Include duplicate JSON members, document-byte/depth bounds after an
-earlier staged indexed mutation, exact rollback, tombstone/recreate revisions,
-unique-index isolation, persisted field grants and healthy owner follow-up.
 
 Field-write grants gate create/replacement/patch of protected fields. Whole-row
 Delete follows the existing DocumentsWrite capability and row-write policy,
@@ -234,93 +153,32 @@ introduce a field-write requirement for whole-row deletion. This distinguishes
 the current lifecycle and field-mutation contracts in REQ-AUTH-006; neither
 client-supplied row ownership nor an administrator label establishes authority.
 
-TASK-DSTORE-FIELD-MUTATION-ORACLES closes the remaining AC-DSTORE-003 boundaries
-with separate DocumentReplacementFieldAuthorizationTests and
-DocumentDeleteIndexAuthorizationTests. Replacement denial uses a principal that
-already has DocumentsWrite, field-read and indexed field-use grants, isolating the missing
-field-write grant; exact original revision/JSON/index entries remain unchanged,
-and a principal with both grants replaces successfully. Delete denial isolates
-the missing indexed field-use grant and preserves the live record/index; its
-allowed control has field-use but no field-write grant and produces the exact
-next tombstone revision while removing the index entry. These are existing
-persisted-policy semantics, not a public contract or schema change. cluster_wave
-Luna/high owns only the two new files; root reviews and integrates actual Aspire
-normal/scalar/recovery and exact delivered-source Linux/RF3 qualification.
-
 ## Flows and failure behavior
 
 Positive: authorized valid JSON mutation passes catalog and CAS checks, updates document and affected indexes in one atomic command, and returns its committed revision/receipt. Negative: malformed JSON, stale CAS, denied row/field access, event-authoritative direct write, or unique collision rejects the operation. Edge: replacing indexed values removes old entries; delete creates a tombstone; patch of missing/deleted document fails; duplicate command identity is resolved by persisted outcome. Error responses must not disclose protected payload values. Query pages and index scans remain subject to the shared read budgets.
 
 ## Decisions and verification
 
-Related decisions: [ADR-001](../ADR/ADR-001-partition-identity-affinity.md), [ADR-002](../ADR/ADR-002-command-idempotency.md), [ADR-004](../ADR/ADR-004-committed-read-views.md), [ADR-005](../ADR/ADR-005-canonical-keyspace-codec.md), [ADR-006](../ADR/ADR-006-strict-derived-indexes.md), [ADR-010](../ADR/ADR-010-query-budgets-security.md), [ADR-014](../ADR/ADR-014-principals-rbac-row-policy.md), and [ADR-016](../ADR/ADR-016-atomic-physical-placement.md). Cross-resource batches follow [ADR-024](../ADR/ADR-024-transaction-domain-binding.md).
+Related decisions: [ADR-001](../ADR/ADR-001-partition-identity-affinity.md), [ADR-002](../ADR/ADR-002-command-idempotency.md), [ADR-004](../ADR/ADR-004-committed-read-views.md), [ADR-005](../ADR/ADR-005-canonical-keyspace-codec.md), [ADR-006](../ADR/ADR-006-strict-derived-indexes.md), [ADR-010](../ADR/ADR-010-query-budgets-security.md), [ADR-014](../ADR/ADR-014-principals-rbac-row-policy.md). Cross-resource batches follow [ADR-024](../ADR/ADR-024-transaction-domain-binding.md).
 
 ```mermaid
 flowchart LR
-    Client[Authorized command] --> Bind[Catalog resource and atomic partition]
-    Bind --> Check[Validate JSON authority policy and CAS]
-    Check --> Mutate[Document plus strict scalar index mutations]
-    Mutate --> Commit[Ordered atomic commit and persisted outcome]
-    Commit --> Read[Authorized projected read or bounded query]
+ Client[Authorized command] --> Bind[Catalog resource and atomic partition]
+ Bind --> Check[Validate JSON authority policy and CAS]
+ Check --> Mutate[Document plus strict scalar index mutations]
+ Mutate --> Commit[Ordered atomic commit and persisted outcome]
+ Commit --> Read[Authorized projected read or bounded query]
 ```
 
-The 2026-10-04 development receipt (report removed from repository) records8 new real-ZoneTree CRUD cases in full Aspire normal/scalar suites at2889/2889 each and recovery228/228, with unchanged source/runtime and1000 unique atomic process cuts. The original Linux and actual SDK/official-MCP RF3 task closeout below supersedes that task-local pending qualification. Complete current-source Linux RF3 and broader feature acceptance remain required. Document-specific UI is N/A; cross-partition unique constraints and production readiness remain unqualified.
+Document-specific UI is N/A; cross-partition unique constraints and production readiness remain unqualified.
 
-## RF3 CRUD public-client completion (2026-10-04 accepted test scope)
+## cluster CRUD public-client completion
 
-TASK-DSTORE-RF3-PARITY adds only new `McpDocumentCrudParityTests`, `McpDocumentCrudParityAssertions` and, if needed, `McpDocumentCrudParityScenario` under IntegrationTests/Features/DocumentStorage. REQ-DSTORE-001 / AC-DSTORE-001 and existing ADR-002 define the behavior; an additional ADR is N/A because there is no boundary, format, transport or mutation-contract change. cluster_wave Luna/high owns these disjoint test files; root owns review, feature/task mapping, builds and exact-source Aspire/Docker RF3 qualification.
+Two mirrored success cases use the actual existing keyed Aspire ClusterFixture, separate real scoped persisted principal/API-key grants, the .NET SDK and official MCP C# SDK on different cluster endpoints. One executes SDK create -> MCP explicit replacement -> SDK Patch -> MCP Delete; the other reverses each caller. Both callers therefore successfully execute Patch and Delete, and opposite-client reads assert exact canonical JSON and revisions 1/2/3, revision4 tombstone mutation receipt, and null from both after deletion. Matching accepted command retries through the other client preserve the original command receipt/token. A third case performs an explicit replacement at revision1, then repeats a stale expected revision1 through MCP and the same stable command through SDK: exact RevisionConflict and unchanged revision2/JSON are required. Error assertions do not infer durable storage of a failed outcome merely from repeated identical errors.
 
-Two mirrored success cases use the actual existing keyed Aspire ClusterFixture, separate real scoped persisted principal/API-key grants, the .NET SDK and official MCP C# SDK on different RF3 endpoints. One executes SDK create -> MCP explicit replacement -> SDK Patch -> MCP Delete; the other reverses each caller. Both callers therefore successfully execute Patch and Delete, and opposite-client reads assert exact canonical JSON and revisions 1/2/3, revision4 tombstone mutation receipt, and null from both after deletion. Matching accepted command retries through the other client preserve the original command receipt/token. A third case performs an explicit replacement at revision1, then repeats a stale expected revision1 through MCP and the same stable command through SDK: exact RevisionConflict and unchanged revision2/JSON are required. Error assertions do not infer durable storage of a failed outcome merely from repeated identical errors.
+Use the existing bounded McpCallerDeadline, actual persisted authorization helpers, native official tool serializers and existing fixture cleanup. No mock, hand-written MCP transport, trusted client role, new listener, broadened retries or weakened test is allowed. Existing document and policy tests stay intact.
 
-Use the existing bounded McpCallerDeadline, actual persisted authorization helpers, native official tool serializers and existing fixture cleanup. No mock, hand-written MCP transport, trusted client role, new listener, broadened retries or weakened test is allowed. Existing document and policy tests stay intact. The earlier e97 Linux RF3 report remains 83/84 overall; this test scope counts only after its own complete exact-source Linux Aspire RF3 result.
-
-TASK-DSTORE-EXACT-TEXT also updates the existing native ownership, malformed
-record restore, canonical retry and embedded-fixture oracles to require the
-original submitted literal JSON, rather than `JsonData.Validate` output. Their
-authority/corruption/revision/receipt/no-second-effect assertions stay intact.
-Canonical validation/fingerprint golden bytes remain unchanged; canonical retry
-equivalence must not rewrite the first acknowledged document text. These cases
-map to REQ/AC-DSTORE-008 and ADR-060 with the dedicated exact-content tests.
-
-## TASK-DSTORE-KL010-KL012-CLOSEOUT (2026-10-07)
-
-Root independently validated the original reports, current source hashes and
-native PDB document hashes before closing the original task acceptance.
-[Linux run37560457057](https://github.com/managedcode/KeyLoad/actions/runs/37560457057/job/112596312154)
-at `6816ae919cac67c217c85096d04d474667e80f1f` passed normal/scalar2767 each
-and recovery235, without failures or skips, and passed same-job source/image
-verification. Twenty-two mapped whole-operation unit cases pass in both modes;
-the distinct two-process hundred-retry recovery case passes. The root audit
-binds23 document/outcome unit source files, nine recovery source files and all1142
-unchanged non-AppHost product source files to their original PDB checksums.
-The three changed AppHost model-control files remain separate infrastructure
-work. Native identity manifests are provenance combined with those executed
-reports, never standalone qualification.
-
-| Original task | Requirements, cases and acceptance proof |
-|---|---|
-| KL-010 CRUD/CAS and JSON validation | REQ/AC-DSTORE-001 and exact-text supplement008: `DocumentCrudRevisionTests`, `DocumentPutValidationAtomicityTests`, `DocumentExactContentTests`, plus the32-contender `TransactionTests.ConcurrentCompareAndSwapHasOneWinner`. Get/Put/Patch/Delete/recreate preserve exact monotone revisions/tombstone; stale/authority failures and malformed/duplicate/oversized/deep JSON preserve state. The three `McpDocumentCrudParityTests` and all-voter `PhysicalShardCatalogRf3Tests` preserve receipts and exact unredacted text across SDK/MCP and restart. |
-| KL-012 atomic batch/outcome and persisted replay | REQ/AC-DSTORE-004/006 and principal/full-scope supplements007/009: `TransactionTests.DocumentEventAndQueueCommitTogetherAndCommandRetryDoesNotRepeatEffects`, `CommandIdempotencyProcessRecoveryTests.AcDocument006OneHundredCommandRetriesSurviveRealProcessRestart`, command/principal/scoped-outcome cases and four `FullPartitionOutcomeIdentityTests`. One hundred retries in each distinct real process preserve complete receipt, one document/event/queue effect and original outbox cut; changed content conflicts and a fresh authorized command succeeds. Current retention is the explicit no-auto-expiry canonical-record/same-incarnation/reauthorization contract above. `ScopedCommandIdentityRf3Tests` proves SDK/MCP partition-scoped replay/conflict and owned voter restart. |
-
-All five named RF3 cases passed in both original Linux runs
-[37554329420](https://github.com/managedcode/KeyLoad/actions/runs/37554329420/job/112576928739)
-and [37555827366](https://github.com/managedcode/KeyLoad/actions/runs/37555827366/job/112581704430),
-with their exact current test/workflow/assertion files bound to the original PDBs.
-Their full RF3 suites each had141 passed/14 failed; those unrelated failures
-remain open. On2026-10-07 the same five cases passed again in actual local
-native TUnit, fixture-owned Aspire Docker RF3, with both real clients, zero
-skips and zero source/assembly drift. Original TRX SHA-256 is
-`5248d0f18836513f79e7e1a0759c9f34acfe165ca93a8586fa36b8a135efb0d5`.
-The root independent original-source/report audit SHA-256 is
-`aa296da1479ede198753f72b42d372945b83d46dfecaa78419769c58a239640b`;
-full artifact/report identities are retained in `docs/implementation/status.json`.
-No new feature behavior or duplicate getter/shape tests were added for closeout;
-ADR-002/060 already govern these operations. This closes the original two task
-scopes only. Complete DocumentStorage, full Linux RF3, endurance, power loss and
-full product functional coverage are still open; process kill is not power-loss
-proof. Other feature criteria remain individually tracked.
-
-## TASK-DSTORE-INDEX-PROCESS (2026-10-07)
+## Dstore index process
 
 REQ-DSTORE-002 additionally maps to **AC-DSTORE-INDEX-PROCESS-001**: an independent
 parent reference model must agree with canonical documents and declared scalar
@@ -332,396 +190,17 @@ remain admissible. Verify every expected member and excluded old/deleted value,
 exact document JSON/revision and declared unique ownership; a fresh valid
 mutation and subsequent reopen must prove recovery remains usable.
 
-Reuse the existing CrashHost process protocol, native ZoneTree storage, safe
-readiness/fault markers and ordered kill/exit/stdout/stderr settlement. Cover an
-acknowledged cut and an existing in-flight atomic fault boundary; the allowed
-complete outcomes come from the immutable operation schedule and observed
-receipt/cut, never from treating the query engine as its own reference oracle.
-Retain bounded deadlines, current persisted authorization, no partial transaction
-and primary/cleanup failures. Do not add a second storage implementation or
-consumer workaround. Process kill does not establish power-loss durability.
+### Composite range process
 
-Ownership is RecoveryTests/Features/DocumentStorage/Cases/
-`ScalarIndexProcessRecoveryTests.cs`, its feature-local Helpers/Assertions as
-needed, and CrashHost/Features/DocumentStorage/Scenarios with the existing
-dispatch registration. Frontend/SDK/MCP additions are N/A to this child-process
-recovery gap; actual RF3 index qualification remains a separate required gate.
-ADR-002 and ADR-011 already own atomic scalar indexing and process recovery;
-there is no new format, dependency, trust or topology boundary. Root freezes
-requirements before a Luna worker prepares private guarded source, reviews and
-joins it, builds, executes focused native TUnit/recovery and obtains exact-source
-Linux source/PDB evidence before acceptance. Broader index varieties and full
-DocumentStorage qualification remain open.
+REQ-DSTORE-002 / AC-DSTORE-002 and new AC-DSTORE-COMPOSITE-PROCESS-001: preserve original equality/range/composite/partition-unique scope. A real four-process CrashHost matrix verifies inserted, replaced, patched, deleted and tombstoned documents, complete composite/ordered-score/unique native index images in two atomic partitions, literal membership and native exclusive-after-key ranges. Composite equality must report the genuine declared composite index; native range Scan proof is distinct from query-planner inequality seeks. A mixed document/event/enqueue unique conflict must roll back every effect; its original persisted failure and successful acknowledged receipt replay unchanged after crash with complete store-byte and position invariance. A fresh command follows recovery and a fourth reopen preserves it.
 
-### TASK-KL011-COMPOSITE-RANGE-PROCESS-001
-
-REQ-DSTORE-002 / AC-DSTORE-002 and new AC-DSTORE-COMPOSITE-PROCESS-001: preserve original KL011 equality/range/composite/partition-unique scope. A real four-process CrashHost matrix verifies inserted, replaced, patched, deleted and tombstoned documents, complete composite/ordered-score/unique native index images in two atomic partitions, literal membership and native exclusive-after-key ranges. Composite equality must report the genuine declared composite index; native range Scan proof is distinct from KL013 query-planner inequality seeks. A mixed document/event/enqueue unique conflict must roll back every effect; its original persisted failure and successful acknowledged receipt replay unchanged after crash with complete store-byte and position invariance. A fresh command follows recovery and a fourth reopen preserves it.
-
-Reuse original JournalFlushed cut, acknowledged first kill, original child stdout/stderr and joined cleanup/deadlines. Parent literal tuples are independent of observed index values; native public KeySpace encodes the specified literal keys, never calls the index mutation implementation. No provider doubles, fallback, retry-until-pass, power-loss or closure claim. Existing scalar scenario is untouched. Ownership: CrashHost DocumentStorage Contracts/Scenarios owns new current-format private modes; Recovery DocumentStorage Cases/Helpers/Assertions owns actual process orchestration and independent oracle; only existing CrashHost application adds closed dispatch. Source-only packet requires full strict build, native discovery, focused process matrix and original full Linux recovery plus unchanged normal/scalar/RF3 gates. ADR002 owns command replay; ADR011 owns atomic journal/recovery.
-
-## TASK-KL021-DOCUMENT-SESSION-READ-001
-
-Accepted homogeneous first-release document session-read implementation contract; runtime qualification remains open.
-
-REQ-SESSIONREAD-001 / AC-SESSIONREAD-001: Only document GET gains optional typed GetDocumentRequest.MinimumToken at generated native Id1, keeping Reference Id0 and alias. SDK explicit GetAsync(EntityRef, CommitToken, CancellationToken), HTTP/official MCP keyload_documents_get and Q1 CALL keyload_documents_get(@arguments) decode the exact same typed request via existing canonical catalog; absent option remains ordinary strong GET. This is not generic model/session cache support and does not add a dispatcher.
-
-REQ-SESSIONREAD-002 / AC-SESSIONREAD-002: The existing unique request/read grain obtains fresh native quorum barrier under original bounded ReplicaReadRoundExecutor timeout, including existing actual WaitForApplyAsync(barrier.Position). Afterwards document execution reloads persisted principal/grants and validates minimum token in the exact same native Store.Read cut as row/field authorization and document projection. Token must match database incarnation, exact atomic partition and current persisted ownership epoch; position must be positive and no greater than actual lastApplied at that cut. This barrier applies the current quorum commit cut, hence it already meets every previously acknowledged minimum token. A token beyond that fresh applied cut is explicitly rejected; there is no speculative wait for a caller-invented future position. No physical-lineage translation, stale-mode API or authority cache is added.
-
-REQ-SESSIONREAD-003 / AC-SESSIONREAD-003: Explicit existing TokenInvalidated category with distinct fixed safe reasons WrongIncarnation / OutOfScope / FuturePosition / InvalidPosition identifies token failures without exposing token values/credentials/records. Missing/corrupt applied authority is Corruption; unsupported ownership epoch is OwnershipLost or token invalidation per current placement witness policy. Persisted authorization is checked before token failure reasons; denial contains no row. Caller cancellation checked before admission and inside final cut, no partial result; native deadline/admission/drain unchanged. Former leader with no quorum cannot pass existing fresh barrier even for a valid historical token.
-
-REQ-SESSIONREAD-004 / AC-SESSIONREAD-004: Real ZoneTree local whole flows prove literal document/complete state+position unchanged after invalid incarnation/scope/future/position and pre-cancel, fresh authorized minimum succeeds and later revision continues. Real fixture-owned Aspire RF3 SDK+official MCP failover operation proves acknowledged write token→elected leader kill→token-bearing complete literal healthy read→all invalid variants fail→healthy token read; isolated former surviving leader/minority strong token read fails, both voter restoration and healthy read follow. Existing native receipt replay/Unknown scenarios remain separate and unchanged. Auth revocation must deny valid token then renewed persisted grant/healthy read.
-
-Ownership: Abstractions DocumentStorage DTO; Client overload; Core feature-local same-view validator and Documents reader; Orleans existing GrainCoreReadCapabilities routing; docs ClientApi/DocumentStorage/ClusterReplication + ADR017/036 amendment; unit DocumentStorage and RF3 ClusterReplication wholeflow. SQL Q1 CALL is exact typed operation envelope only; Q1 SELECT/AST and other read models do not accept session options in this stage. Same homogeneous current first-release cohort; native Id append/alias remains stable, no legacy reader/migration/runtime fallback. Root owns join/build/native discovery/test/Linux evidence and status; no qualification or closure inferred from authored source.
-
-## Proven epoch meaning before implementation
-
-DatabaseEngine.Token in Core/DatabaseEngine.cs obtains OwnershipEpoch from persisted ReadPlacementWitness.PlacementEpoch. AtomicPartitionPlacementReader Fallback/Explicit uses PhysicalShardCatalog.DefaultShard.PlacementEpoch; PhysicalShardCatalogRecordSerialization.InitialRecord initializes that physical-placement value. ReplicaElection.RunRound changes DurableReplicaLog term/vote, not physical catalog. Original authenticated 4e18 RF3 passed LeaderLossQueueScenario compares the entire pre-kill commit token to the actual replay token after elected leader kill. Hence elected leader failover keeps physical PlacementEpoch, and equality does not invalidate that acknowledged token. The new public wholeflow additionally checks a fresh postfailover command retains the same physical epoch/incarnation/atomic identity. Physical ownership movement with a changed placement epoch is explicitly unsupported by this minimal surface; it fails closed without invented lineage, and does not claim KL035/036/072 movement support.
-
-The current native fixture supports Kill/Restart and retains actual owner receipts.
-The authored authority-denial flow is a still-live surviving voter without quorum,
-not a network-isolated former leader while another majority stays live. That
-stronger KL021 authority scenario remains open until a bounded fixture-owned
-network partition contract exists; no manual Docker or new fault hook is added.
-Fresh barrier implementations are ReplicaReadRoundExecutor + ReplicaLeader.BarrierAsync:
-both use native Materializer.WaitForApplyAsync at their authenticated quorum cut.
-SDK method ownership is Features/DocumentStorage/Transport/DocumentSessionClient.cs.
-
-### Native MCP no-quorum boundary refinement
-
-McpHttpPipeline.RunAsync invokes DatabaseCredentialResolver.ReadAsync before
-native tool dispatch. Its fresh signed Authenticate read itself needs quorum.
-Therefore the no-quorum official caller must retain the actual native
-HttpRequestException HTTP503 rather than invent a CallToolResult error; SDK
-GET still asserts its actual typed OwnershipLost problem. The healthy
-restored token-bearing SDK/MCP/SQL results remain complete literal checks.
-This is not a tool outcome or session initialization success claim.
-
-The final no-quorum oracle retains both SDK's exact OwnershipLost/503/NoLeader
-problem and the official caller's actual native HTTP503 original exception,
-with its bounded five-field Problem body and credential/document privacy checks.
-It never converts that pre-tool HTTP failure into a fictitious tool result.
-
-SESSIONREAD-003 missing-applied authority regression: `DocumentSessionReadTests.Kl021MissingAppliedAuthorityFailsClosedAndRestoredNativeReadContinues` uses actual canonical indexed Apply, native record removal/restoration in the same owned ZoneTree store, exact Corruption, unchanged complete bytes/cut after failed read, and full healthy document continuation. Authored only; native execution remains required.
-
-## TASK-OWNER-DOCUMENT-1B-002 configured two-owner remote document read
-
-Prerequisite is the independently reviewed configured owner-directory stage now joined by root; this packet binds current root-owned lifecycle/configuration source. Original KL036/KL037 remain broader and open. ADR106/ADR100 govern ownership; existing native DocumentStorage/Authorization/ClientApi contracts govern caller output. All implementation/tests private; no native qualification from source.
-
-REQ-OWNER-DOC-001 / AC-OWNER-DOC-001: an explicit ephemeral two-rf3 RemoteDocumentReads=true selection requires RegisterPhysicalOwners=true. Default RF3 and membership-only/registration-only profiles are unchanged. Both groups independently complete native local SCAT and runtime-journal admission under their own current physical owner. A is the stable control/identity issuer and native persisted owner-directory/PMAP authority; B maintains independently persisted data, credentials/principals/policy and RF3 journals. A data-ready publication additionally requires actual locally verified owner registration; A membership-authority health remains the early startup gate, without an all-six cycle. This is not general remote admission/fanout or global policy replication.
-
-REQ-OWNER-DOC-002 / AC-OWNER-DOC-002: an actual persisted cluster administrator may create one immutable PMAP V1 explicit partition assignment to the exact registered B tuple using the existing bind operation/CAS. Unknown/changed owner/incarnation/voters/epoch or map revision fail closed. Preserve current native keys/aliases/IDs and default local mapping. Native local data execution on A for foreign placement rejects before effects/tokens. Only the document routing stage may resolve that foreign witness; it never treats caller-supplied physical identity or endpoint as authority. Other modalities/remote writes/assignment movement remain unsupported. Raw source and destination positions are never compared.
-
-REQ-OWNER-DOC-003 / AC-OWNER-DOC-003: existing SDK GetAsync/GetDocumentRequest, official keyload_documents_get and existing Q1 CALL reach the same native unique source RequestGrain/read actor. After fresh A quorum/credential/principal admission, one A read cut captures complete explicit PMAP tuple/revision, directory revision/current owner tuple, source principal ID/tenant/policy epoch. The source signs only identity/scope (no roles/grants/bearer secret) to a fixed configured B endpoint. Receiving B verifies domain-separated peer HMAC, exact configured control/destination identities, endpoint-voter/silo DNS/native protocol proof, fresh original bounded expiry, nonce/replay cache and at most8 owned active read frames before body retention. No probing/retry loop can retry a user operation invisibly.
-
-B loads its own current persisted matching principal ID+tenant, constructs a fresh B signed child request and actual native RequestContext identity, then executes through its existing unique RequestGrain/CQRS/read actor. A signed identity is not a grant: B applies its own DocumentsRead, row/field restrictions, revocation/expiry/policy epoch at the actual B store cut. Missing or denied B identity fails with the existing exact safe error. No principal/policy copying, admin shortcut, caller role or credential forwarding. Source group A is the explicitly configured identity issuer; IDs are in its canonical global namespace, while receiving grants remain independently persisted and administered. Broader global revocation/drain remains open.
-
-REQ-OWNER-DOC-004 / AC-OWNER-DOC-004: retain existing PreferLocal placement strategy and use pinned Orleans10.3.1 IPlacementDirector.PlacementHintKey only for these configured data-mode server-issued request contexts, scoped to the actual current receiving native SiloAddress; save/restore exact previous present/null/value state. Compatible native hint directs new unique actors; receiving envelope/current owner/incarnation and actual node/read-generation receipt verification still fail closed if activation placement/movement cannot honor that physical owner. Hint is routing, never authorization. Each read/effect remains native unique request-grain/CQRS; no parallel dispatcher.
-
-REQ-OWNER-DOC-005 / AC-OWNER-DOC-005: original source signed expiry/deadline/token dominates transport, B admission and child. B captures a generated bounded internal document+owner/read witness during the same authorized native read cut: actual node/incarnation/read-generation, partition owner/epoch, persisted principal policy epoch, local applied minimum and local Store.Position distinct. Existing optional minimum CommitToken is validated against this B placement/applied cut. Result retains only authorized projected DocumentResult. Source completes a fresh quorum read and rechecks original principal epoch/tenant plus exact PMAP/directory fence before retaining output; any change rejects with no partial result. There is no global snapshot, cross-owner token/position equality or automatic read retry.
-
-REQ-OWNER-DOC-006 / AC-OWNER-DOC-006: native node owner registers and bounds transport/read work, closes admission before shutdown, cancels and joins all original child/HTTP reader tasks before silo/store disposal; original primary and every cleanup failure retained. Source transport/decoder/scope failures are safe existing typed terminal errors; no false success or partial page. No user data/credential/inventory in logs/context diagnostics. Responses and native bodies use existing result/native byte caps plus a named fixed 8MiB transport bound before allocation (including private metadata); an otherwise permitted larger document truthfully fails bounded transport rather than truncating. At most8 active owned transport frames, a configured bounded native replay window, and exactly one selected configured destination endpoint per user read.
-
-Authored gates required: real ZoneTree bind/foreign local rejection/current read witness, fresh destination denial/revocation/no effect→literal healthy; actual six-silo SDK/official MCP/Q1 denied→B grant epoch advance→literal authorized field-redacted document; full original immutable B write receipt+same-ID replay/no extra revision/effect; owned B leader/node restart with native discovered namespace/image/endpoint proof and fresh literal routing result under original deadline. Actual runtime/census/image/PDB/Linux proof stays root-owned. General fanout, generic owner count, scheduler/performance/global policy/movement are not completed.
-
-Native primary source witnesses: https://raw.githubusercontent.com/dotnet/orleans/v10.3.1/src/Orleans.Runtime/Placement/PreferLocalPlacementDirector.cs and https://raw.githubusercontent.com/dotnet/orleans/v10.3.1/src/Orleans.Core/Placement/IPlacementDirector.cs. Native director checks exact compatible placement hint before local/random placement; directory/incarnation/receiver checks remain authority.
-
-Command actor prerequisite: opt-in configured data-mode uses key owner-v1:<canonical32lowerhex server-verified incarnation>:<unchanged canonical logical partition>. Native request signature/scope is verified before derivation; the configured local physical owner/incarnation and fresh persisted SCAT after quorum must match. Bootstrap alone may precede SCAT, still bound to actual local store incarnation/configured physical owner. The executor strictly parses and compares the complete derived key. Default RF3 uses original actor keys. This separates independently persisted A/B control/auth actors; it does not change atomic partition identity or authorize remote writes/movement.
-
-## Remote data-readiness join
-
-Only the explicit RemoteDocumentReads profile adds each native node `/health/ready` health check alongside the existing authority/membership checks. The original six-resource Aspire healthy wait must include completed local catalog/runtime-journal admission and (for A) completed directory registration before public SDK/MCP setup. Native peer probes continue to use their existing membership-ready trust boundary, avoiding an A-data-ready/B-registration cycle. Default membership-only and RF3 health contracts remain unchanged.
-
-## Native placement-hint byte admission
-
-The native serialized request-state bytes plus the selected native SiloAddress hint bytes must fit the unchanged MaximumContextBytes allowance before any RequestContext mutation. Principal native bytes retain their existing independent MaximumPrincipalBytes cap. Default no-hint requests retain their exact state admission. A hint is routing advice only; signed/local physical-owner validation still decides authority. Original cancellation and exact existing BudgetExceeded contract apply.
-
-## Fresh policy and native transport ownership join
-
-Source and destination each require their own current persisted DocumentsRead grant before physical placement/token diagnostics; source epoch/tenant/map/directory are rechecked after the remote reply. The destination child again loads fresh persisted identity at its actual quorum-backed read cut. The source transport owns both native HttpClient and SocketsHttpHandler directly; HttpClient borrows its handler, and shutdown joins all original work before observing both disposals and address-pin disposal. Current root physical-owner lifecycle/configuration fixes and ADR106 native integration appendix must survive this stage. SDK and official MCP both exercise existing Q1 CALL, with no new catalog/dialect entry.
-
-## Authored native operation trace and join boundaries
-
-AC-OWNER-DOC-002 → RemoteDocumentNativeOwnerTests.AcOwnerDoc002RegisteredRemoteMapRejectsLocalWriteAndReplaysFailureBeforeHealthyLocalEffect (real native registered map, retained exact failure replay, both full store images/cuts and independent literal healthy source document). AC-OWNER-DOC-003/005 → RemoteDocumentNativeOwnerTests.AcOwnerDoc003And005SourcePolicyChangeInvalidatesCapturedRouteWithoutDestinationEffect (actual policy epoch change, stale fence rejection/full state, fresh native route and complete healthy B document/witness). AC-OWNER-DOC-003/005/006 → RemoteDocumentNativeReadTests (real persisted B denial→epoch2 grant→literal read, unchanged original receipt replay/native reopen; exact original precanceled token/no result/full state→healthy). Cancellation authored here is admission cancellation, not an observed in-progress remote cancellation claim.
-
-AC-OWNER-DOC-001..006 → RemoteDocumentRf3Tests.AcOwnerDoc001To006DestinationFreshDenialGrantPublicReadReceiptReplayAndOwnedRestart: actual owned six-silo profile and image; fresh A identity/B no-grant SDK+official MCP denial with same-node cut invariance and literal B document; real B policy2 grant; SDK/MCP document read and both existing Q1 CALL routes under original B minimum receipt; complete immutable B receipt mutation/token/durability and same-ID official MCP replay; actual selected B node4 namespace kill/owned restart before fresh literal read/replay under unchanged original deadline; original clients/owned resources joined with retained primary/cleanup errors. This proves no availability while selected endpoint is stopped, generic voter failover or remote writes.
-
-Root integration: preserve current directory probe options/permit-before-lease drain and native lifecycle compiler fixes, build all generated native serializers/aliases, run genuine discovery to bind new parameterized identities/source ranges/DLL/PDB, execute normal/scalar native unit and ordinary (unexpanded local-image/coverage selection) six-silo RF3 filter /*/*/RemoteDocumentRf3Tests/*. Unit filters /*/*/RemoteDocumentNativeOwnerTests/* and /*/*/RemoteDocumentNativeReadTests/*. Existing public get/CALL schemas and catalog counts do not change. Owned private aliases and new internal GrainReadKind require fresh native generated compilation; no fabricated schemas/digests/UIDs are provided. MCP owned safe-detail parity packets are a join prerequisite for the exact denial oracle. Whole KL036/037 fanout/global policy/movement/performance and Linux qualification remain open.
-
-### Independent complete document/witness value oracle
-
-Independently literal DocumentResult and OwnedDocumentReadResultV1 comparisons use complete canonical JsonDefaults bytes, preserving every document reference/revision/JSON/redaction and private owner/policy/applied/storage-cut field. Native object-reference/backreference encoding is not treated as value equality between independently materialized objects. Original captured immutable receipt/replay bytes and literal mutation native bytes remain exact native comparisons; full canonical store images and cut invariance remain unchanged.
-
-
-### Remote native field-pointer fixture correction (R648)
-
-REQ/AC-OWNER-DOC-003/005/006 and REQ/AC-PQUERY-REMOTE-001..005 retain the existing bounded RFC 6901 field-grant/resource-policy contract. Remote native fixture field paths are `/title` and `/secret`; canonical stored JSON property names remain literal `title` and `secret`. Complete public redaction witnesses report `/secret`, matching the actual resource policy. No validation or authorization rule changes.
-
-The existing four RemoteDocumentNativeOwnerTests/RemoteDocumentNativeReadTests operations, five RemotePartitionQueryNativeTests operations, and RemotePartitionParallelCancellationTests operation retain their denial, fresh grant/policy change, native reopen/receipt replay, observed-work cancellation/no partial, complete unchanged images/separate cuts and literal healthy continuation assertions. This correction repairs shared real ConfigureResource seed admission; it adds no case identity or runtime qualification. Root must execute the existing native classes after a fresh build. ADR-100 and ADR-106 remain the owning read-cut/physical-owner boundaries; no boundary change requires a new ADR. Original R648 failures remain retained.
-
-
-### TASK-CRS-COHORT-NO-QUORUM-DETAIL-001
-
-REQ/AC-CRS-002/005 and REQ/AC-SESSIONREAD-003 preserve the existing authenticated fixed-voter cohort and explicit majority. Only the final aggregate compatible-count-below-majority branch in ReplicaCohortAdmission.EnsureCompatibleCohortAsync returns the existing OwnershipLost/NoLeader diagnostic. SDK reads and MCP's pre-tool authenticated read therefore retain the same established no-quorum safe problem. Individual invalid/unavailable discovery, local transport-not-ready, substituted signature, wrong identity and incompatible reachable peer retain their existing strict diagnostics and rejection; no new catch, retry, threshold, deadline or cache authority.
-
-Root owns this single Orleans branch and extends the existing StoppedSocketsRemoveFreshObservationsAndRequireACompatibleMajority native whole-flow to distinguish exact individual InvalidDiscovery from exact aggregate NoLeader, preserve actual stopped sockets/cache eviction/two-voter survival, and re-admit a fresh healthy signed cohort. Existing transition/signature/cancellation/shutdown controls and real KL021 SDK/official MCP no-quorum/body/privacy/restoration flow remain required. Stage order: docs, code and focused native normal/scalar, full build/format, current native case-source binding, delivered exact-source Linux RF3. Original46a4 safe-detail mismatch is retained; source diagnosis does not identify every historical initiating branch. ADR-082 owns cohort admission; ADR-017 owns public session-read authority.
-
-### TASK-CRS-TWO-RF3-LATE-DATA-ADMISSION-001: remote document readiness dependency
-
-The source-only Linux59 correction in [ClusterRouting](ClusterRouting.md#task-crs-two-rf3-late-data-admission-001-linux59-native-startup-correction) preserves REQ/AC-MEMBERSHIP-003/008 and REQ/AC-OWNER-DOC-001..006. Early Group A native authority health is the Group B startup dependency and must not include late database-ready admission. After all six native membership resources are Healthy, the fixture must independently require every actual discovered /health/ready endpoint returns200 before transferring the owned remote-document wave. Group B retains membership and database-ready health checks; all six retain exact configured identities and remote-read settings. Unchanged initiating cancellation/deadlines and owned client/container/storage/lock/root cleanup remain mandatory. No WaitForStart, invented readiness, additional process, topology, skip or budget change is allowed. TwoRf3RemoteReadResources owns health composition; TwoRf3MembershipWave/DataReadiness own final native endpoint admission; RemoteReadAuthorityDependenciesExcludeLateDataAdmission checks composition and existing AcOwnerDoc001To006DestinationFreshDenialGrantPublicReadReceiptReplayAndOwnedRestart is the mandatory native SDK/MCP/restart regression. Source-only analysis retains the original failed run37744013727 required cohort and unresolved other startup/diagnostic failures; parent integrator owns guarded docs-first join, solution build, native TUnit and fresh Linux RF3 proof. Rollback restores the readiness composition and fixture gate together; source is not a runtime PASS.
-
-R2 options/clock ownership correction: existing centrally bound, validated and registered `IOptions<TestExecutionOptions>` now owns `DatabaseReadinessPollInterval` (default100ms, existing positive bounded-duration validator). The fixture composition resolves that native options owner and its already registered `TimeProvider`, explicitly passes both to `TwoRf3MembershipDataReadiness`, and the operation uses only those supplied values. No operational constant or System clock selection remains in the wait helper. The original15-minute initiating token still bounds startup, every request and delay; status200/503/other failure rules and all owned cleanup remain unchanged. `RemoteReadAuthorityDependenciesExcludeLateDataAdmission` performs actual native Aspire composition and inspects emitted health annotations; classify it as ordinary supporting infrastructure, without assigning a functional product-contributor claim. Existing full public AcOwnerDoc001..006 remains the mandatory product regression.
-
-## TASK-DSTORE-SCOPED-PUBLIC-ORACLE-001 (2026-10-08, source-only)
-
-REQ/AC-DSTORE-004/009 retain the existing actual SDK/official MCP two-partition command, opposite-client replay, changed-content conflict and owned three-voter restart schedule. The complete oracle must independently check the original issued GUID, exact partition/mutations, full CommitReceipt and physical token (current authenticated placement incarnation/epoch and observed original position bounded by same-owner pre/post quorum cuts), full DocumentResult revision1/unredacted/empty redactions and exact literal JSON, and complete Ready MessageInspection (id, attempts0, state/version/sequence1, null scheduling/expiry/lease/failure, leaseVersion0, deliveryGeneration1, literal payload, empty-object headers). Each SDK/MCP value must independently equal the literal expected model, before and after restart; comparing the two callers alone cannot establish correctness. Retain stored complete receipt equality and every original negative/healthy flow, authorization, cancellation, resources, budgets and required Linux RF3 gate.
-
-The read-only placement/status observations before each original write and fresh same-owner postcommit Status bind true native physical identity and bound the observed original receipt position independently; native election/control entries can advance Applied, so no precommit+1 reservation is claimed. Existing complete document reads use that original MinimumToken through both SDK and official MCP before and after restart. These reads validate incarnation/partition/epoch/positive position/current quorum cut, not an independently predetermined effect index; they introduce no write, wait/retry, topology or public contract. Owning source: existing DocumentStorage/Assertions/ScopedCommandIdentityRf3Assertions.cs and new ScopedCommandIdentityRf3Oracle.cs; existing Helpers/ScopedCommandIdentityRf3Workflow.cs wires these expectations into the unchanged operation schedule. ADR002/011/017 already govern these current contracts; no new storage format, dependency, trust or lifecycle boundary. Source-only preparation is not acceptance. Exact-current build, required native suites and delivered Linux SDK/MCP RF3 reports remain open. The INDEX-PROCESS source-pending text is intentionally retained until actual current authenticated receipts establish its traceability; authored sources alone cannot change it to PASS.
-
-### TASK-MOVE-DOC-PUBLIC-TIMING-001: owned fixture expiry and cleanup
-
-REQ/AC-MOVE-DOC-PUBLIC-SETUP-001, REQ/AC-MOVE-DOC-UNCERTAIN-001 and REQ/AC-DSTORE-004/009 retain the current native protected movement public setup/replay/cancellation/restart contract under ADR-106. Before execution, the existing centrally registered and validated `IOptions<TestExecutionOptions>` owns dedicated protected fixture request lifetimes: setup50s, outcome25s and capture-cleanup30s, with positive validation and those exact maximum ceilings. Other fixtures' ApplicationCleanupTimeout is unchanged. The private DocumentStorage timing composition consumes that options owner and the already registered Application.Services TimeProvider; SetupPeer transfers the same timing owner to setup, outcome query and command-outcome helpers. Feature operations must never choose a System clock or independent operational duration. Original grant/effect absolute expiry, native MAC/body/pin checks, budgets and original whole-case token remain unchanged; query freshness does not renew an original effect. `ProtectedDocumentMovementOptionsTests.InvalidProtectedLifetimesRejectNativeCompositionBeforeHealthySixPeerFollowup` exercises actual native six-resource composition rejection for zero/above-ceiling settings and a healthy six-peer model followup; classify it as ordinary supporting infrastructure, not a functional product contributor. Existing ActualRetiredOwnersPreservePublicDocumentSdkMcpQ1CancellationReceiptsAndColdReplay and ActualUncertainParentUsesSenderRuntimeOutcomeWithoutSecondEffect exercise the whole native setup and joined teardown, retaining all primary/cleanup errors. This source-only fixture policy correction neither changes the product boundary nor establishes Linux RF3 qualification.
-
-
-## TASK-KL021-SESSION-READ-COMPLETE-001 native authority failure continuation
-
-REQ/AC-SESSIONREAD-003/004 and ADR-017 retain the existing token, same-cut authorization and fresh quorum barrier contracts. `DocumentSessionReadTests.Kl021CorruptAppliedAuthorityFailsClosedWithoutEffectsAndRestoredReadContinues` extends the real ZoneTree whole flow to a correctly encoded negative applied position and a truncated original native applied payload. Each failure must be Corruption with the exact safe owning diagnostic, leave the complete native key/value image and physical cut unchanged, restore the original native bytes, then return the complete original document and continue with a later indexed commit readable through both old and new acknowledged tokens. This supplements the existing missing-authority, invalid-token, cancellation and renewed-grant flows; it is not an alternative storage authority or position reservation.
-
-The existing fixture-owned RF3 invalid-token SDK and Q1 SDK reads explicitly assert unsuccessful responses with no document or JSON value, fixed TokenInvalidated reasons and HTTP400. No-quorum SDK reads explicitly assert unsuccessful responses with no value before the original OwnershipLost/503/NoLeader problem and actual official MCP pre-tool HTTP503 checks. All real SDK/MCP/Q1 healthy continuations, original deadlines, primary errors, namespace admission and owned cleanup remain mandatory. These source changes are authored only. KL-021 acceptance still requires native unit/recovery execution and the original required Linux RF3 failover, reachable former-leader isolation and healthy restoration reports for the frozen joined image; the original enum-only NetworkMode mismatch does not establish a safe admission change.
-
-### KL-021 strict namespace admission diagnostic
-
-REQ-SESSIONREAD-DIAG-001 / AC-SESSIONREAD-DIAG-001: a rejected actual Aspire-owned namespace retains the original strict admission exception and joined cleanup while emitting only fixed mismatch identity and presence/equality booleans for the native NetworkMode, attached network name and attached NetworkID. No raw Docker names, IDs, endpoint addresses, credentials, environment or user payloads enter this diagnostic. Equality to an attached ID is observation only and MUST NOT relax the exact existing NetworkMode-to-attached-name admission check.
-
-Original authenticated source `0f9e35b407a34c7a4c00fe15ce625a57244a8e3e`, run `37780189246`, attempt1 proves `Kl021AcknowledgedDocumentTokenSurvivesElectedFailoverAndRejectsInvalidReads` passed and `Kl021ReachableFormerLeaderRejectsMinimumTokenWhileOtherVotersAcknowledgeNewerTerm` failed during namespace startup with NetworkMode mismatch before its data flow. The existing schema1 diagnostic does not contain the actual mode/name/ID relation; no alias or authority defect is inferred. AC-SESSIONREAD-DIAG-001 maps to that same real fixture-owned RF3 case and manual review of its original native stderr on rejection. This observation exception cannot replace its required complete successful SDK/MCP/Q1 operation and restoration gate. The current diagnostic is authored, not executed. ADR: N/A; existing ADR-017 current session/ownership contract and unchanged native fault admission remain sufficient; no API, trust or topology change is introduced.
-
-
-### KL-021 Q1 official MCP negative result oracle
-
-REQ/AC-SESSIONREAD-003/004 additionally require invalid-token Q1 official MCP calls in `DocumentSessionReadRf3Tests.Kl021AcknowledgedDocumentTokenSurvivesElectedFailoverAndRejectsInvalidReads` to retain the same exact fixed safe token reason and no credential/full-document disclosure across the complete native result, including bounded text. The existing exact error-envelope, HTTP category, actual operation-grain identity and healthy SDK/MCP/Q1 continuation remain unchanged. This assertion refinement reuses the actual SQL invocation and is authored only; current-source Linux RF3 qualification remains required. ADR: N/A; no runtime, public or trust contract changes.
-
-
-### KL-021 complete former-leader strong-read refusal matrix
-
-REQ/AC-SESSIONREAD-002/003/004 and AC-MTOKEN-ISOLATION-005 require the actual reachable isolated former leader to refuse ordinary strong document reads with no minimum, reads with its original locally valid acknowledged token and reads with the newer surviving-majority acknowledged token. Each of these three exact requests runs through direct SDK GET, direct official MCP GET, Q1 SDK CALL and Q1 official MCP CALL. A rejected future minimum alone is insufficient: a barrier bypass could still serve the stale locally valid original document. SDK failures must be unsuccessful, contain no document/JSON value and retain exact OwnershipLost/503/NoLeader. Official MCP must retain its actual pre-tool HTTP503 exception, exact bounded five-field Problem and credential/original/later-document privacy; no fictitious tool error.
-
-`DocumentSessionIsolationRf3Tests.Kl021ReachableFormerLeaderRejectsMinimumTokenWhileOtherVotersAcknowledgeNewerTerm` supplies original ACK, real scoped namespace fault, different surviving-majority newer-term ACK, the complete closed three-minimum/four-transport refusal matrix, observed exact owned fault, restoration of only owned rules and all replicas, full literal current document through both acknowledged tokens and byte-identical replay of both immutable receipts. Existing native source/namespace admission, original linked2minute deadline, cancellation, cleanup and error ordering remain unchanged; no retry, deadline extension, admission alias or new public API. The same no-quorum helper adds real Q1 refusal to the existing elected-kill minority flow. This source refinement is authored only; acceptance requires the current-source original Linux RF3 report and complete successful restoration. ADR: N/A; the existing ADR-017 current read/namespace contract remains sufficient and no runtime boundary changes.
-
-
-### KL-021 native request roundtrip operation rejection
-
-REQ/AC-SESSIONREAD-001/003/004 require each existing invalid-minimum whole flow in `DocumentSessionReadTests.Kl021MinimumTokenRejectsInvalidAuthorityWithoutEffectsAndHealthyReadContinues` to execute the rejected document operation through the original direct typed request, the actual generated native binary request roundtrip and the actual public JSON request roundtrip. All three input paths must retain token rejection, unchanged complete native key/value image and storage cut, and full healthy document continuation. A positive roundtrip alone could hide a dropped optional MinimumToken because ordinary strong GET also succeeds; rejected real operations must fail if the minimum is lost. Later indexed commit and both acknowledged-token full reads remain unchanged. This is an operation regression, not a property/source check; native unit/scalar and current Linux qualification remain required. ADR: N/A; existing generated native Id0/Id1 and public JSON contracts are unchanged.
-
-
-### TASK-KL011-COMPOSITE-UNIQUE-RF3-001
-
-Freeze before implementation: REQ-DSTORE-002 / AC-DSTORE-002 additionally maps to **AC-DSTORE-COMPOSITE-RF3-001**. The actual Aspire-owned Docker RF3 database must configure a declared two-field partition-unique index and a server-persisted principal/key. Real .NET SDK and official MCP callers must independently observe exact literal rows/revisions, genuine declared composite-index AccessPath and a cut at least as new as each acknowledged mutation after insert, explicit replacement, patch, delete and reuse of the deleted unique tuple. All prior/deleted tuple memberships must be empty. A two-mutation batch that first changes an existing indexed document and then collides on the new tuple must fail Conflict with no partial document/index effects; replay through the other adapter retains the original safe failure. Equal composite tuples in two distinct atomic partitions remain allowed and their memberships independent. Persisted grant removal must deny both index queries and writes through the same existing caller identities; complete authorized rows/memberships remain unchanged. After persisted grant restoration a fresh mutation, full literal reads and stable successful receipt replay prove healthy continuation. SDK failures return no value; official failures retain exact safe envelopes and never expose the bearer credential or rejected document content.
-
-Canonical slice is DocumentStorage, not a new Indexing layer. IntegrationTests owns Features/DocumentStorage/Cases/CompositeUniqueRf3Tests.cs, Helpers/CompositeUniqueRf3Scenario.cs and CompositeUniqueRf3Flow.cs, Assertions/CompositeUniqueRf3Assertions.cs. Reuse existing public ConfigureResource/ConfigurePrincipal/Commit/Get/Query and official tools, original bounded deadline, unique persisted tenant/resource scope and shared fixture cleanup. ADR-002 owns atomic deltas/outcomes, ADR-011 owns process recovery; no new protocol, storage format, trust/dependency/topology or parser boundary is introduced. Native ordered-range images and independent post-crash reference models remain mandatory in ScalarIndexProcessRecoveryTests/CompositeIndexProcessRecoveryTests. A composite equality query is not evidence of an inequality seek; unsupported planner behavior remains unchanged. Frontend/new SDK APIs are N/A because existing operations already expose the contract. Private source readiness is not execution: full strict build, focused native RF3, current Linux normal/scalar/recovery and required full RF3 original reports remain necessary before KL-011 acceptance.
-
-
-### TASK-KL011-COMPOSITE-SPARSE-NATIVE-001
+### Composite sparse native
 
 REQ-DSTORE-002 / AC-DSTORE-002 additionally maps to **AC-DSTORE-COMPOSITE-SPARSE-001**: the existing declared IncludeNull/IncludeMissing flags independently control native composite index and partition-unique membership. A real ZoneTree store with persisted nonadministrator document grants must admit distinct explicit-null and missing-field tuples, reject duplicate live owners only for included tuples, and omit excluded tuples without inventing SQL null/missing index seeks. Every duplicate attempt checks original literal document visibility and complete document/index/unique/epoch/outbox domain bytes; failed outcomes may persist their own existing outcome/clock metadata but cannot stage a domain effect. Explicit replacement removes prior included sparse keys and writes new numeric composite keys atomically. Delete and reuse by another ID prove old unique ownership is gone, followed by literal native index/unique images and healthy authorized reads. Four explicit flag combinations are native functional tests, not mocks or a new storage implementation.
 
-Ownership: UnitTests/Features/DocumentStorage/Cases/CompositeSparseUniqueTests.cs and Assertions/CompositeSparseUniqueAssertions.cs. Existing TestDatabase owns actual files and native ZoneTree; DocumentCrudFixture uses existing persisted principal/command APIs. ADR-002/011 and current IndexDefinition fields already define this contract; no format, public API, alias, authorization or parser change is proposed. Existing RF3 SDK/official composite flow and original scalar/composite process ranges remain mandatory. Strict build, actual focused unit normal/scalar and current original Linux suites are required; this private packet claims no execution.
+## Exact current absence response boundary
 
-
-## TASK-KL021-FOLLOWER-SNAPSHOT-001: explicit bounded follower document reads
-
-The architecture KL-021 Work and section Fencing require a declared follower stale mode. TASK-KL021-DOCUMENT-SESSION-READ-001's sentence “No ... stale-mode API ... is added” is its initial homogeneous strong/minimum stage boundary, not a permanent prohibition. Preserve that completed-stage contract and all strong-read paths unchanged. This separate version1 capability is explicit and does not infer offline read authority.
-
-| Requirement | Acceptance and native operation evidence |
-| --- | --- |
-| REQ-FOLLOWERREAD-001: expose an explicit follower committed-snapshot operation, never silently downgrade strong GET. | AC-FOLLOWERREAD-001: ReadFollowerDocumentRequestV1(Version1, Reference, ReplicaId, MaximumLagPositions, optional MinimumToken) through native SDK, official MCP and Q1 CALL returns FollowerDocumentReadResultV1 with explicit mode, full nullable DocumentResult, actual captured DataToken, fresh AuthorizationToken, replica ID, captured/current term and measured position lag. Existing GetDocumentRequest/DocumentResult and strong routes remain byte-contract unchanged. Wrong version, missing/unknown/wrong-case fields, negative lag and nonfollower/wrong actual replica fail without value; healthy follower continuation succeeds. |
-| REQ-FOLLOWERREAD-002: raw document snapshot is bounded node-local committed data, never stale policy authority. | AC-FOLLOWERREAD-002: the unique request/read grain verifies/adopts normal signed identity and admission, observes native follower role/term, captures one actual local document/ownership/applied/generation cut, then completes the existing fresh quorum/apply barrier. Final Store.Read revalidates the original real credential witness and freshly reloads persisted principal, collection policy and current row access; authorize both captured and current row access and project captured JSON using current field policy. A current missing/deleted/invisible row cannot expose an older row. Revoked credentials/grants or newly protected fields prevent disclosure; restored persisted grants produce complete literal healthy results. Same node/owner incarnation/epoch/generation and native follower observations must remain valid; no remote owner substitution, stale policy cache or caller roles. |
-| REQ-FOLLOWERREAD-003: publish exact bounded cuts and token behavior. | AC-FOLLOWERREAD-003: DataToken comes from capture's actual positive canonical applied cut and placement witness; AuthorizationToken comes from final fresh authorized cut. Their exact atomic partition/incarnation/epoch agree; lag equals AuthorizationToken.Position minus DataToken.Position, nonnegative and <= caller's explicit nonnegative MaximumLagPositions. Lag counts physical replicated positions, including control entries, not seconds or document versions. A valid MinimumToken is checked by existing native validator against fresh authority and must also be met by DataToken; otherwise exact HistoryUnavailable/no value, never speculative wait/fallback. Invalid minimum retains existing TokenInvalidated reasons with authorization precedence. |
-| REQ-FOLLOWERREAD-004: preserve role/authority, cancellation, bounded ownership and native lifecycle. | AC-FOLLOWERREAD-004: actual native follower role/term/replica observations bracket capture; fresh final observation must still be follower on the selected replica. No quorum fails existing OwnershipLost before public value, even though document data is stale. Wrong owner, migration, restart/restore generation, corrupt applied metadata, cancellation while captured/barrier/final projection and lag exceedance reject without effects/partial data; snapshot is one request-owned bounded record, released on terminal/cancellation, no grain-owned storage handle or history cache. Actual Aspire RF3 proves stale literal cut under a native held read phase, fresh authorization denial/redaction/restoration, SDK/official MCP/Q1 interoperability and full receipt/strong-read healthy continuation. |
-
-Canonical ownership: DocumentStorage Abstractions Contracts/ReadFollowerDocumentRequestV1.cs and FollowerDocumentReadResultV1.cs, feature-local Serialization/FollowerDocumentAliases.cs; Core DocumentStorage Models/FollowerDocumentReadCapability.cs plus Execution/FollowerDocumentRead.cs and Validation/FollowerDocumentReadValidation.cs; Client DocumentStorage Transport/FollowerDocumentClient.cs. Orleans ClusterRouting feature-local Queries/FollowerDocumentReadExecution.cs and existing DatabaseReadGrain/GrainReadKind generated native catalog integration; Server ClientApi existing canonical HTTP/MCP catalog and safe fixed problem writer. Node-local PartitionHost/ZoneTree apply ownership and native ReplicaConsensus role/barrier remain unchanged. UnitTests DocumentStorage real ZoneTree operation matrix, native Orleans read operation controls and IntegrationTests DocumentStorage FollowerDocumentRf3Tests whole follower RF3 cases own evidence. Frontend N/A because the product caller surface is SDK/MCP/Q1.
-
-Compatibility: new separately named version1 operation `/v1/documents/read-follower` / `keyload_documents_read_follower`, new stable native aliases/Ids and append-only read-kind selection; existing DTOs/aliases/Ids/operations unchanged. All native SDK, official tools and Q1 use the one canonical typed decoder and normal dispatcher/request grain, no parallel transport. Homogeneous current first-release recompile, no persistent format migration or legacy fallback. Unsupported remote physical owner is explicit refusal until an owning forwarding contract is qualified.
-
-Stale data capture precedes the OPERATION barrier, not the mandatory endpoint authentication. The final authorization barrier is intentionally retained, including follower WaitForApply. Thus this mode provides an explicitly older selected data cut, not a quorum-free availability or latency improvement. Native role observations do not mint authority. Current policy/canonical row checks may make a captured record absent or more redacted; result metadata never pretends it was latest. Caller-selected lag does not allocate history; only one existing MaxDocumentBytes-bounded record and existing verified-read admission/deadline are retained. No new timer, retries, polling budget or unbounded buffering.
-
-Ordered stages: private source/native ownership and exact schema review; this REQ/AC and ADR017 contract frozen before implementation; coherent DTO/core/Orleans/catalog/SDK and native operation tests; root guarded source join and normal/scalar/source+PE/PDB discovery/full build; actual native Unit/recovery/RF3 originals; exact-source Linux complete gates before task closure. Root exclusively owns shared source/compiler/formatter/Git joins; private author owns full implementation and actual acceptance proof on explicit image grant. Original strong/minimum/refusal diagnostics and all historical/current original failures remain immutable. No code-present, local test, running-job, latency/performance, power-loss or production qualification claim.
-
-
-REQ-FOLLOWERREAD-005 / AC-FOLLOWERREAD-005 freezes the server-created native
-credential witness. The existing authenticated canonical gateway alone wraps the
-strict public DTO with DatabaseCredentialWitness(credential ID, 32-byte SHA256)
-from the original real bearer using the owning DatabaseEngine issuer. The same
-native verifier is shared by original Authenticate and final follower completion;
-there is no duplicated consumer verifier, role/credential input, public witness
-schema, raw-secret retention, diagnostic digest or parallel transport. Final
-same-view validation checks current actual key existence, verifier using native
-fixed-time comparison, revocation/expiry, unchanged principal binding, active
-principal and fresh policy/row authority. Private witness/capability/snapshot
-have stable generated Orleans aliases/Ids; the signed native payload binds the
-witness to the server-authenticated unique operation. Key deletion is a real
-node-local authority-corruption test because no public delete-key API is added;
-public RF3 credential revoke/restore exercises the same current verifier.
-
-| Criterion | Exact authored operation and required result |
-| --- | --- |
-| AC-FOLLOWERREAD-001 | FollowerDocumentSchemaTests.CanonicalSdkMcpAndSqlPayloadShareFullTypedRequestAndHideServerOnlyProof and ActualGeneratedClosedSchemasRequireExplicitFollowerAndLagAndDescribeSeparateCuts are required ordinary schema/native transport controls, not functional contributors. The independently frozen canonical MCP corpus becomes75 operations/31 body reads and real RF3 discovery matches the additional exact tool; the initial public gateway catalog remains3. FollowerDocumentAuthorityTests.UnsupportedPublicSelectorLeavesFullNativeStateAndValidSelectorContinues covers version/lag/blank replica failures. Every RF3 healthy continuation rejects a requested actual leader ID on the selected follower with no fallback, then returns a complete literal value. |
-| AC-FOLLOWERREAD-002/005 | FollowerDocumentReadTests.CapturedPrivateDocumentRequiresCurrentActualCredentialThenRestoredKeyContinues covers revoke/delete/replace/retarget/expiry; CapturedPrivateDocumentUsesRenewedGrantAndChangedFieldPolicyBeforeHealthyResume covers current grant and changed field policy; CurrentDeletedOrInvisibleRowCannotExposeAnOlderCapturedPrivateRow covers current tombstone and row visibility with restored full document. Full canonical image and Store.Position are retained for failed reads. FollowerDocumentAuthorityTests.CorruptNativeVerifierThenRevokedPrincipalCannotReleaseCapturedDocumentBeforeRestoration and NativeWitnessRoundTripPreservesServerProofButAlteredProofFailsWithoutStorageEffects cover current verifier/principal and exact private native proof. |
-| AC-FOLLOWERREAD-003 | FollowerDocumentReadTests.CapturedCommittedDocumentRetainsExplicitOldCutAndMinimumBeforeFullFreshContinuation proves an older full literal document, exact independent fixture data/authority tokens and lag, renewed minimum refusal, zero-lag refusal and fresh full result. InvalidMinimumOwnerGenerationAndCancellationLeaveCompleteNativeStateThenHealthyRead preserves existing invalid-minimum reason and actual node generation/owner/cancel no-effect. InvalidCanonicalAppliedCutCannotReleaseCapturedDocumentAndRestoredAuthorityContinues covers missing/negative actual native applied metadata. |
-| AC-FOLLOWERREAD-001..005 | FollowerDocumentRf3Tests owns28 independently provisioned real Aspire RF3 cases: HeldOldDocumentRetainsLiteralCutThenHealthyNativeMinimumAcrossEveryTransport(4); HeldPrivateDocumentRechecksPersistedAuthorityThenRestoredCallerResumes(8 credential/grant); HeldDocumentUsesChangedFieldPolicyThenRestoredFieldGrantResumes(4); HeldReadRefusesExcessLagOrJoinsCancellationBeforeHealthyResume(8); CapturedDataCannotBypassActualLostQuorumAndRestoredVotersResume(4). Each mode is direct SDK, official MCP, Q1 SDK or Q1 official MCP. Existing server-only AuthorizationReload hold is reached after actual local capture and before the operation barrier. Real SDK changes persisted state, actual native markers identify unique request/voter/silo and prove producer disposal/settlement; original caller is joined. Full literal old/redacted document or exact no-value safe refusal precedes full fresh follower and strong acknowledged-minimum continuation through all four callers. No-quorum kills only other owned voters, restores real Aspire nodes, verifies health and fresh signed discovery, then uses a new explicit actual follower request; it never makes the old captured value available offline. Existing wave/client/store/lock/root cleanup and deadlines are reused unchanged. |
-
-Full RF3 receipt expectation independently fixes original command GUID, actual
-placement incarnation/atomic partition/epoch, complete literal mutation and
-QuorumProcessDurable. Its observed native position is greater than the same-owner
-pre-write quorum cut and no larger than the post-write cut; no `+1` reservation is
-predicted. Follower full-response expectation fixes version/mode/replica/terms,
-physical token scopes, revision/JSON/redaction/policy epoch and lag equation,
-while original data/authority positions are bounded by actual same-owner native
-quorum Status observations. Current source StatusAsync includes the operation
-barrier before NodeAdministration reads native materialized state. A follower's
-bare consensus diagnostic is never a strong bound. Cancellation retains the
-actual native SDK Cancelled classification or official cancellation exception,
-no value, producer settlement and literal healthy continuation.
-
-```mermaid
-flowchart LR
-  P[Authenticated strict public DTO] --> W[Server creates signed native witness]
-  W --> G[Unique admitted request grain]
-  G --> S[Bounded local committed follower snapshot]
-  S --> B[Fresh native quorum and apply barrier]
-  B --> A[Same-view key principal policy current row and captured row]
-  A --> R[Explicit old data cut and fresh authorization cut]
-```
-
-Qualification state: all new implementation and cases are privately authored,
-uncompiled and unexecuted. Root alone joins guarded source/build/formatter/Git;
-actual native normal/scalar/full suites and current committed Linux RF3 original
-reports are required. Broader architecture KL021 remains OPEN: this initial
-operation supports DocumentStorage point reads only. Existing strong routes and
-all other native read kinds do not acquire a stale option; SQL SELECT/AST,
-multimodel query/stream/search/blob/event/queue/graph/time-series stale modes,
-and remote physical-owner forwarding remain unsupported pending their complete
-owning contract and qualification. Administration/authentication/placement and
-policy reads retain fresh authority; no stale credential/policy mode is planned.
-The exact private supported/unsupported read inventory is preserved alongside
-the packet and must not be replaced by a whole-task done claim.
-
-
-### TASK-KL021-FOLLOWER-ARM-SCHEMA-002
-
-REQ/AC-FOLLOWERREAD-001..005 and ADR-117 retain the original authenticated f80 source/run37861333290 attempt1 normal/scalar task failures: each original native union executed113 cases,84 passed and29 failed. All28 follower cases rejected the fixture-created AuthorizationReload arm before the held database flow because it included TargetVoter, a field the unchanged canonical probe contract permits only for CanonicalJournalFlushed. The fixture must submit the ordinary AuthorizationReload arm with its canonical extra fields null. Actual follower selection remains the independently chosen SDK/MCP endpoint and native request placement; the observed actual voter must still exactly equal the selected ReplicaId, and every full held-cut, credential/grant/field-policy/lag/cancellation/quorum refusal, producer settlement and healthy native-minimum continuation remains unchanged. No probe decoder, authority, route, error oracle, deadline or resource ownership change is allowed. This caller repair requires fresh complete current-source Linux task cells; original failures remain failures. The separate reachable former-leader namespace admission failure is not repaired or qualified by this change.
-
-Ownership: DocumentStorage FollowerDocumentRf3HeldFlow and this feature qualification contract. Existing ADR-017 and ADR-117 cover unchanged follower/read and native fixture boundaries; ADR: N/A for this exact fixture argument correction.
-
-
-### TASK-KL021-FOLLOWER-CANCELLATION-ORACLE-003
-
-REQ/AC-FOLLOWERREAD-001..005 retain the original source023 run37872325740 attempt1 task reports: normal113 executed/108 passed/5 failed and scalar113 executed/109 passed/4 failed. Two official-MCP cancellation cases fail while TUnit recursively inspects a disposed native linked CancellationTokenSource through CancellationToken equality; the SQL SDK case expects Cancelled although the unchanged client conservatively classifies CALL transport cancellation as UnknownWriteOutcome. These original failed reports remain immutable.
-
-Freeze the caller oracle before code: after the real held operation and original caller cancellation, require the original input token is canceled, no success/value, genuine native producer settlement, and the complete existing literal healthy follower/strong continuation. Official SDK OperationCanceledException must carry an actually canceled token; compare its safe boolean state, because the native SDK may own a distinct linked token and dispose its source before returning. Require no simultaneous Problem or official value. Direct typed SDK reads retain exact Cancelled; Q1 SDK CALL retains exact existing UnknownWriteOutcome and undefined JSON value, original privacy/status assertions, and no automatic retry. No transport classification, token lifetime, server cancellation, request grain, deadline, bounds, topology, probe or effect changes are permitted. Other exceptions remain failures.
-
-Root owns only FollowerDocumentRf3Assertions and its existing HeldFlow call site. ADR017 owns this unchanged follower/transport cancellation boundary; existing AC-SQLC-005 real Kestrel partial-body cancellation flows support the SQL classification. Actual four-transport RF3 held cancellation cases, their literal healthy continuation, exact current Linux task cells and complete mandatory suites remain the qualification proof. The separate original MCP initialization and exact namespace-cohort refusals remain open. Ordered stages: docs, guarded source join, solution build/format and related whole native client flows, current Linux RF3 original reports. Rollback removes the coherent fixture oracle amendment without changing the native SDK or product contracts. No isolated token/property test is added.
-
-
-### Original bounded task scope qualified at556c — 2026-10-09
-
-This scoped closeout accepts the original architecture task predicates at exact
-[source556c13ab](https://github.com/managedcode/KeyLoad/tree/556c13ab78c839df68b09dce1e9fc92bef576bfe),
-[run37891957916 attempt1](https://github.com/managedcode/KeyLoad/actions/runs/37891957916).
-It does not qualify the subsequently changed source. Every original API/ZIP digest,
-confined extracted file, raw native discovery UID/class/constructor/method/display/
-parameter/source identity, complete no-skip TRX/counters, source/PDB/Git hash and
-prepared/before/after image was authenticated. Original native20 argument, strict
-normal-null/scalar0 caller environment, child exits/readers/disposal and same-job
-source verification passed. No job-status inference or synthetic report is used.
-
-KL011 normal and scalar each executed the exact16-case union without failures
-or skips:11 native Unit, one mixed transaction conflict, one honestly ordinary
-MCP-envelope control, two genuine process scenarios and one complete Aspire RF3
-SDK/official MCP flow. REQ/AC-DSTORE-002, AC-DSTORE-INDEX-PROCESS-001,
-AC-DSTORE-COMPOSITE-PROCESS-001, AC-DSTORE-COMPOSITE-SPARSE-001 and
-AC-DSTORE-COMPOSITE-RF3-001 now bind scalar/composite equality and native ordered
-range images to independent reference models after insert/replacement/patch/
-delete/tombstone/crash. All four null/missing inclusion combinations retain exact
-unique scope; conflict atomically rolls back document/index/event/enqueue effects.
-The real RF3 flow preserves full literal membership/cuts and original receipts,
-delete/key reuse across different IDs, equal keys in distinct atomic partitions,
-persisted grant denial/no value and restoration with healthy stable retry.
-Declared native range scans do not claim unsupported inequality planner seeks.
-
-Normal job113694642562 artifact11599100919 ZIP SHA
-`62156129bd5a1371059aa8e740871e44ba133b2b025e75b5ca52d2fe2d813ec6`;
-scalar job113694642694 artifact11599665304 ZIP SHA
-`30d7d2a573f48cd102f9d6db44880c823ca00c81895cac4cad3e4c776814c408`.
-Each genuine server image is exact-source/run/attempt bound; original fixture
-cleanup and owned registry removal passed. The envelope control remains ordinary
-and contributes no product coverage. Original canonical receipts/source images
-are retained unchanged; later dirty source is not promoted by these results.
-
-All existing mandatory full-feature/source-suite/coverage/RF3 and separate
-endurance/performance/power-loss gates remain OPEN or retain their own authentic
-status; this closes only the stated original bounded task predicates. It neither
-waives their contracts nor claims broad StorageRecovery/DocumentStorage/product
-readiness. Current source repairs and additional feature requirements require
-fresh exact-source evidence. Root alone joins durable status/README provenance.
-
-
-## TASK-KL021-NATIVE-READ-COMPOSITION-001 — accepted whole-flow composition
-
-REQ/AC-SESSIONREAD-001..004, FOLLOWERREAD-001..005, REP-003/005/006, MTOKEN-004 and ISOLATION-005 preserve the original follower/session/committed-cut contract under [ADR-017](../ADR/ADR-017-ownership-session-tokens.md), ADR-007 and ADR-117. ReadRoundStoredNode validates actual RecoveryExecutionOptions before opening storage and passes the SAME validated IOptions to log/snapshot/materializer/consensus. The intentional unsupported2 selection must return exact native InvalidTopology before acquisition, then complete genuine3-node quorum/document/full receipt/replay/healthy state; it does not qualify a2-node topology. The remote-control case owns three actual stores, both real follower application/control reads, unchanged leader application-probe traffic and exact one control RPC. Preserve original deadline/token/cleanup ledger.
-
-ReplicaIsolationFlow calls official MCP AdminStatus through existing CallWithoutBodyAsync with actual empty arguments, matching its strict read-only schema. Persisted authentication, term/isolation/token/native authority, restored full literals/receipts and cold state remain. Original unrelated SDK discovery connection failures remain unclassified. Exact owned paths: tests/KeyLoad.RecoveryTests/ClusterReplication/Fixtures/ReadCuts/ReadRoundStoredNode.cs; Cases/ReadRoundProtocolTests.cs in that same slice; tests/KeyLoad.IntegrationTests/ClusterReplication/Scenarios/Faults/ReplicaIsolation/ReplicaIsolationFlow.cs. Frontend N/A; no product schema/topology/limits/provider/storage-format change. Root freezes/joins/docs/CI/Git; whole-task worker owns tests/failure repairs. Ordered stages: contract; source composition; coherent Linux compilation/format/native discovery; complete existing57 Unit/26 Recovery/30 RF3 declarations; normal/scalar-caller authentic source/image/report/cleanup qualification. These113 declarations are not invented native expanded cases/UIDs. Rollback removes only coherent fixture deltas, retaining native1/3 ADR-122/refusal/public schema and all required gates. Current compiled discovery and runtime remain OPEN.
-
-
-### TASK-KL021-FOLLOWER-COLD-REPLAY-001: full original receipt and cold-owner continuation
-
-REQ/AC-SESSIONREAD-002..004 and REQ/AC-FOLLOWERREAD-001..005 retain all original architecture KL-021 work and acceptance: fresh quorum/apply barrier, actual applied cut, explicit follower mode, token validation, acknowledged-minimum read after failover, former-leader strong refusal and invalid-incarnation rejection. The existing28 follower RF3 cases and113-case task declaration inventory remain unchanged. This stage closes two authored-flow gaps without qualifying them from source: retain the genuine acknowledged update command and its complete original receipt; replay that exact command after every complete healthy follower/strong-read continuation, compare complete public and native receipt bytes and require the complete later document to remain unchanged. The receipt oracle still independently fixes original GUID, physical placement incarnation/atomic partition/epoch, literal mutation/revision and QuorumProcessDurable; observed position is not a guessed reservation.
-
-Each existing four-transport no-quorum case additionally completes its original refusal and real voter restoration, chooses an actual signed-discovery follower, verifies the full healthy operation, then cold-restarts that same follower through the existing inspected Docker SIGKILL, exited-state and Aspire restart owner. Its admitted voter identity and persisted NodeId/incarnation must survive restart exactly; its nonreused read-generation fence and applied cut must not regress. Ordinary existing-store reopen retains the persisted generation; a verified snapshot tree replacement during recovery legitimately advances it. No pre-restart captured snapshot or cached authority is reused by the fresh read requests. Fresh official MCP owners execute all four explicit follower and acknowledged-minimum strong read routes, followed by byte-exact original receipt replay and full literal document continuation. Native restart receipts remain original and source-bound; successful forwarded reads alone cannot substitute for actual kill/restart/readiness/discovery. No retained client operation is invoked after AppHost disposal.
-
-Ownership: existing IntegrationTests DocumentStorage Models/FollowerDocumentRf3State.cs, Helpers/FollowerDocumentRf3HeldFlow.cs, FollowerDocumentRf3Continuation.cs and FollowerDocumentRf3QuorumFlow.cs, and Contracts/FollowerDocumentRf3FailureStage.cs. Root owns integration, Git, native build/format/discovery and Linux evidence. Ordered stages: this contract and ADR-017; guarded private test source; coherent Linux build and native census; complete original normal/scalar-caller113 outcomes, source/DLL/PDB/image binding and joined cleanup; required full-suite gates. Existing SDK/official MCP/Q1 calls, credentials, policy/token barriers, deadlines, selectors, native topology and cleanup remain unchanged; no production/public/persistence/trust or scheduler seam. Rollback removes only this additional test continuation coherently. Source-authored checks are not runtime qualification.
-
-These fixture-owned RF3 cases retain exclusive native scheduling: each owns three genuine Docker nodes, native image/preparation and process resources; heavy RF3 capacity is1. Ordinary independent functional tests retain the owner-selected50 native slots. Exclusive topology execution is a resource-ownership bound, not evidence that ordinary cases run concurrently. Original Kestrel nullable-response failures remain unclassified: source9c5/run37920436876 full-unit native stderr contains delayed or absent handler entry before cancelled SDK sends while workers remain available and no native server events pass existing filters. No CPU, transport, timer or timeout cause is inferred, no deadline/retry changes are made, and those original failures remain required fresh-source regressions.
-
-### TASK-DSTORE-NATIVE-COUNTER-ORACLE-001: first-write and existing-row operation proof
-
-REQ/AC-DSTORE-005 and REQ/AC-MTOKEN-007 retain the original source745f4e37/run37951115844 attempt1 normal/scalar full-unit failure: AcDstore005NewPutHasOneDocumentMissAndNoPayloadSizedPointRead expected ten borrowed point reads and observed nine. The corresponding replacement/patch/delete flow passed with ten. Actual AtomicPartitionRosterTransaction.PersistCandidates uses owned-value reads while creating the first row, whereas AtomicPartitionRosterOriginValidation.ReadBound performs one borrowed origin read for an existing row. ConfigureResource does not create that partition-roster entry. This causal distinction fixes the oracle, without adding a redundant product read or changing a counter.
-
-The two existing whole-operation cases must retain exact nine-read first writes and ten-read replacements/patches/deletes, with the original small/65,536-character payload delta and2,048-byte metadata tolerance. Capture counters immediately after the real command, before verification reads or replay. Then require the complete independently expected receipt against actual native identity/position and the original placement epoch, the complete public document or absence, the exact outbox tail, and same-command replay without another mutation or outbox entry. The seed and every measured mutation receive the same full operation checks. Existing real image/outbox, failure rollback, recovery and RF3 gates remain mandatory.
-
-Ownership: UnitTests/Features/DocumentStorage/Cases/DocumentMutationImageReadTests.cs and this feature specification. Existing ADR-035 and ADR-017 cover unchanged native counters and receipt authority; ADR: N/A for this fixture oracle correction. Ordered delivery: contract, semantic source edit, coherent diagnostics/build, native normal/scalar operation reports and complete required final qualification. Root owns integration and Git; parallel owners continue independent plan tasks. Rollback removes this coherent fixture/doc amendment. Source review is not runtime qualification.
-
-The cold fence oracle follows actual provider transitions: ZoneTreeIdentityFile.Open returns the existing persisted identity; ReplicaMaterializer.Recover calls ReplicaSnapshotStore.Recover, whose Incoming.Recover may finish a verified transfer through Complete and canonical.InstallSnapshot. ZoneTreeCheckpointGeneration.Prepare preserves NodeId/incarnation and persists checked ReadGeneration+1 only for replaceTree=true; compaction and ordinary reopen preserve it. IAtomicStore's protected-cut contract requires a nonreused generation or changed incarnation/node whenever replacement can reuse positions. Consequently cold healthy continuation requires exact NodeId/incarnation and nondecreasing generation/applied position, while the original production captured-snapshot-to-final-read generation equality remains exact. Allowing the documented replacement transition does not permit resuming old snapshot data, inventing a generation, restoring an old cache or weakening same-request authorization.
-
-Cold requests acquire their fresh cut through newly connected official MCP and SDK owners: VerifyResumedOwnersAsync obtains current resumed Status, and VerifyHealthyAsync obtains another actual current Status, constructs a new minimum from its applied position, and replaces the prior selector/minimum in the public request. Every follower route is bracketed by that fresh status and a new post-operation status with exact same incarnation/read generation and actual follower identity; FullAsync preserves its existing exact NodeId/term and bounded data/authority position checks. State.Before/Changed and the old captured snapshot are not used as cold request cuts. All strong routes independently execute their normal fresh barrier; original receipt tokens serve only as acknowledged floors during replay/document continuation, never as reusable read authority. No pre-restart cursor is reused.
-
-### TASK-KL091-PUBLIC-TRIAD-COLD-001
-
-TASK-KL091-PUBLIC-TRIAD-COLD-001 — REQ-DSTORE-004/006, REQ-MSG-005; AC-DSTORE-004/006, AC-MSG-005; ADR024/002.
-Existing TransactionTests and genuine CommandIdempotencyProcessRecoveryTests remain mandatory; no duplicate native process fixture or product behavior change. Extend the existing QueueProducerAtomicRf3Tests two arguments, original deadlines, response cancellation and two same-volume cold cycles. Configure an actual same-domain StreamSet and a separate-domain StreamSet through the original administrator; grants are persisted. Original and healthy batches stage document, actual event and queue mutations in one existing CommandRequest. Late queue quota/duplicate failure must leave document/event head/records/sequence/queue unchanged; an actual existing-stream NoStream refusal exercises the event precondition; foreign transaction-domain stream refuses before effects. Replays on SDK/MCP and both Q1 paths retain every original CommitReceipt field; actual stream head and full event records are compared across replay/cold/current epoch refusal. Independently validate stream identity, exact EventData, revision/generation and sequence; retain original native RecordedAt verbatim across reads/restarts. Read-cut/cursor values belong to each real read, are not falsely frozen across replicated log progress. Persisted demotion/restore keeps historical receipt rejection and fresh healthy continuation. Production contracts/aliases/Ids, RF3 storage, same-partition atomicity, quotas and deadlines are unchanged. Ordinary independent cases retain native concurrency. Source-only; root native build/discovery, Linux normal/scalar Unit/process and actual Docker SDK/MCP/Q1 two-cold gates remain required. Rollback removes additive test coverage only; no data migration.
-
-Actual source traceability (no UID or execution qualification):
-- Unit normal+scalar: TransactionTests.DocumentEventAndQueueCommitTogetherAndCommandRetryDoesNotRepeatEffects; UniqueConflictRollsBackDocumentIndexEventAndEnqueue; SameLiteralPartitionKeyCannotCrossTransactionDomains; MessagingTests.QueueQuotaFailureRollsBackProducerDocument. These preserve canonical same-domain commit, late document refusal, domain refusal and queue quota atomicity.
-- Genuine process cuts: EventAppendProcessRecoveryTests.AcEventCrash001002SeededProducerRecoversOneWholeCutAndStableReplay: HeaderWritten/0, PayloadWritten/0, JournalFlushed/0, MutationApplied/0, /3, /6, ApplyCompleted/0. EventAppendCrashScenario submits the real document/event/queue producer; EventAppendRecoveryOracle requires one whole cut, exact durable original outcome/outbox, changed-content refusal with unchanged native bytes, dedup and authorized healthy continuation.
-- Genuine acknowledged process/cold replay: CommandIdempotencyProcessRecoveryTests.AcDocument006OneHundredCommandRetriesSurviveRealProcessRestart; no duplicate process case is added.
-- Existing Docker leader/minority: ClusterTests.ReplicatedAtomicBatchSurvivesLeaderContainerKillAndMinorityRejectsWrites. Existing initial full mixed batch and leader-loss flow retained.
-- Deepened Docker public flow: QueueProducerAtomicRf3Tests.ActualMixedProducerBatchRefusalsAndOriginalResponseCancellationSurviveColdHealthyContinuation(bool cancelAfterResponse), exact existing Arguments(false) and Arguments(true), original McpCallerDeadline and ClusterFixture. Same original SDK response cancellation may return actual success or UnknownWriteOutcome; neither is fabricated. Official MCP independently reconciles the complete original receipt.
-- New event assertions compare every stable StreamHead/EventRecord field and original RecordedAt across real reads/replay/cold. Initial stream/id/EventData/revision/generation and original sequence1/healthy sequence2 are independent literals. RecordedAt is captured from the original native record, checked nonempty, and retained exactly; no invented clock equality. Dynamic read CutPosition/Cursor are never presented as stable business records.
-- Cross-domain refusal uses a genuinely configured foreign-domain resource, exact Conflict, no document/message/event effect, then a separately authorized read of that actual foreign domain proves the stream empty. This does not claim distributed atomicity.
-- Runtime gates OPEN: fresh root Release/analyzers/native discovery/current Source+PDB+case identities; Linux normal/scalar required Unit/process and actual SDK/official MCP/Q1 Docker two-cold flows; no current pass/runtime/native UID inferred from source. Entire required suites remain mandatory.
-
-## TASK-DSTORE-NONRETRY-BATCH-PREFLIGHT-001 — retain one mutation-image read
-
-REQ-DSTORE-005 / AC-DSTORE-005 and the existing recorded queue-retry contract require that a Batch with no `AdvanceQueueDeadline` mutation does not query retry outcome, principal, resource or physical placement a second time. The native normalized `NativeCommandPayload` already supplies the bounded, validated command value. A state-free inspection of that same native value may bypass only `PrepareQueueRetryInView` for nondefault mutation arrays containing no deadline mutation. Native error markers and default arrays preserve the existing path. The original ordered command outcome, persisted principal/policy, physical placement and mutation validation remain mandatory in `ApplyCommittedCommand`; no authority is cached or trusted from the client.
-
-Root observed both original `DocumentMutationImageReadTests` complete flows fail on delivered Linux source `da3e3f74` and current coherent local source `c67d4dac`: first Put performs15 borrowed reads instead of9, and an existing mutation16 instead of10. Native `QueueRetryPreparation` reads outcome/principal/authorization before finding an empty deadline retry inventory, causing the redundant preflight. Retain the existing9/10 counters, original paired13-byte/65,536-byte payload controls, complete literal receipt/document/outbox/replay and failure oracles; do not increase expected counters or budgets.
-
-Ordered implementation: freeze this cross-slice contract and Messaging join; root edits only Core/Messaging/Commands/QueueRetries/QueueRetryPreparation through Roslynk; run native document image/full authorization/failure and deadline/full-jitter/ordered-retry whole flows in normal/scalar against coherent compiled inputs; preserve original process recovery and complete delivered Linux RF3 gates. Existing ADR-017, ADR-035 and recorded-retry ADR-028 are sufficient; ADR: N/A because public/serialized/trust/storage/topology contracts and stateful authorization order do not change. No acceleration or task-closure claim follows from local counters. Rollback removes only the guarded state-free preflight selection; it does not rewrite records, outcomes, signed choices or journals.
-
-
-## TASK-CLIENT-RESULT-001 — successful typed absence
-
-# Exact current absence response boundary
-
-REQ-CLIENT-RESULT-001 / AC-CLIENT-RESULT-001 preserves successful absence with fresh persisted authorization, original cancellation, unchanged storage state and exact positive document/message/schedule/transfer/saga values. TASK-CLIENT-RESULT-001 is one coherent producer/API/consumer package join; partial wrappers are not deployable.
+REQ-CLIENT-RESULT-001 / AC-CLIENT-RESULT-001 preserves successful absence with fresh persisted authorization, original cancellation, unchanged storage state and exact positive document/message/schedule/transfer/saga values. Producer, API and consumer change together; partial wrappers are not deployable.
 
 Native proof: GrainCoreReadCapabilities has exactly six nullable domain branches: Document, Message, QueueTransfer, QueueTransferReceipt, RecurringSchedule, Saga. SDK GetAsync(two overloads), InspectAsync, QueueTransferClient(two extensions), RecurringSagaClientExtensions(two extensions) all use allowNullResult:true. McpReadCatalog independently declares these exact six output schemas nullable. Other domain reads remain unchanged. Existing OwnedDocumentReadResultV1 private identity data cannot be exposed as a public response.
 
@@ -739,175 +218,3 @@ Recommended current named responses (each sealed record, GenerateSerializer, sol
 The native storage/capability observations remain unchanged and nullable. The existing CanonicalOperationGateway, after successful original GrainValue decode and before its existing McpBoundedJson serialization, produces the named current public response for these six public read kinds. This single gateway already owns SDK HTTP, official MCP and SQL CALL reply shaping. No native peer response or underlying private transfer/receipt authority is restamped or wrapped; no changed grain kind, operation ordinal, storage family or request fields. The exact outer wrapper is included in the same MaximumDataReplyBytes check; no response-size exemption. Null native value yields nullable field, exact expected native type yields its unchanged record, and any other actual native type fails closed using existing RecoveryRequired/InvalidRequest. Original error paths never fabricate a successful outer value.
 
 Update SDK generic signatures, remove allowNullResult plumbing, and require every successfully decoded response to be nonnull. Update the six official MCP output schemas to their named nonnullable outer response; preserve field/body privacy and schema validation. Existing SQL CALL output is the same canonical response from this gateway; SQL SELECT domain rows and core query composition remain unchanged. No dual reader or compatibility route for prior unreleased JSON null shape. All current client examples/tests/actual typed CQRS consumers must use the nullable domain field deliberately, preserving prior successful absence versus failures. Native/core direct reads retain their existing APIs.
-
-All three Communication pins10.3.7 join only after the complete affected source/test chain compiles; actual published payloads are verified. Root owns the shared package/config/docs/source join. Focused original HTTP null/healthy/retry/cancellation tests, genuine official MCP absent/present/privacy tests, current SQL CALL full output and unchanged native/no-effect/replay/cold receipts prove only their actual scope. Required integrated Linux RF3/process and whole solution gates stay open. No new public status-only generic wrapper is introduced; status operations use nongeneric native Result where their actual meaning is status only.
-
-
-## TASK-KL021-RECEIVING-AUTHORITY-COLD-005 — original native minimum-token repair
-
-REQ/AC-SESSIONREAD-002..004 and ADR-017 retain the fresh quorum and same-cut
-authorization contract. REQ-SESSIONREAD-COLD-001 / AC-SESSIONREAD-COLD-001
-adds three complete native receiving-owner flows for missing, negative and
-truncated canonical AppliedBytes after an acknowledged document seed. The
-existing actual ZoneTree owner closes and reopens with the damaged selected
-row; repeated receiving reads return the existing exact Corruption detail, no
-document or witness, and preserve both complete store images and positions.
-Only the fixture's exact original AppliedBytes are restored. The complete
-pre-fault image must return with precisely two raw commits, retaining the
-original native identity, catalog, grants, document and outcomes.
-
-REQ-SESSIONREAD-COLD-002 / AC-SESSIONREAD-COLD-002 requires full literal
-projected document and receiving witness after repair, exact original complete
-command receipt Apply/Resolve replay without effects, a foreign receiving
-physical owner refusal and original cancellation without a result, followed
-by an authorized revision2 write, old/new minimum-token reads, full receipt
-replay and a second joined same-root cold owner. The independent destination
-incarnation/epoch, atomic identity, revisions, redacted fields and ProcessDurable
-receipt are fixed by the existing native fixture contract; local store position
-is independently retained. Source-owner complete state remains unchanged.
-
-Ownership: new UnitTests DocumentStorage Cases/DocumentSessionAuthorityColdTests,
-Helpers/DocumentSessionAuthorityColdTrial, DocumentSessionAuthorityFault,
-DocumentSessionAuthorityContinuation and Assertions/DocumentSessionAuthorityColdAssertions.
-Core0, public/SDK Result contracts0, existing fixtures0, bounds0, protocol0.
-No exception or owner is mocked and no scalar execution profile is introduced.
-The original source8e4 RF3 majority-write UnknownWriteOutcome cause remains
-unclassified; this source-proven missing native cold/repair/replay acceptance
-closure does not repair or qualify that failure. Root owns compilation, actual
-native discovery and normal SIMD-enabled runs; source-only Arguments establish
-no UID/count/PASS. Linux RF3, real process recovery, SDK/official MCP/bothQ1,
-power-loss and endurance gates remain separately required.
-
-
-The same bounded task extends existing DocumentSessionReadRf3Flow only after
-its genuine leader kill, second voter kill and original voter restarts. Preserve
-the actual revision2 CommandRequest; validate both complete native quorum
-receipts against literal mutation revisions, atomic identity and durability.
-Through the surviving real endpoint, freshly authenticate an official root MCP
-session and replay both actual commands through SDK, official MCP and both Q1
-CALL adapters using existing ReplayedAsync. Every complete receipt must equal
-its original and the complete existing OutboxStatus no-effect oracle must hold,
-then all four original minimum-token document routes return literal revision2.
-The supporting three local receiving-owner cases use native Apply and persisted
-AppliedBytes, not a ReplicaJournal or RF3 substitute. This addition preserves
-all original cancellation/authority/privacy/bounds and the original Linux
-majority-write UnknownWriteOutcome failure; its initiating cause remains unknown.
-The existing RF3 case identity/arguments and native inventory stay unchanged.
-
-
-## TASK-KL021-REMOTE-MINIMUM-ADMISSION-006 — destination authority on all public routes
-
-REQ/AC-SESSIONREAD-002..004 and REQ/AC-OWNER-DOC-003/005 require the actual
-receiving owner's persisted grant before any minimum-token result. The existing
-RemoteDocumentRf3Scenario has a genuine acknowledged B token and an A-authorized
-reader whose B principal has no grants; its initial denial previously used only
-SDK and official MCP ordinary GET. Add the same acknowledged minimum-token
-request through SDK, official MCP and both Q1 CALL adapters within the existing
-source/destination Applied-before/after bracket. Require exact PermissionDenied
-Problem, absent SDK/Q1 value, native official no-result error and no credential,
-private document or canary disclosure. Retain both original no-token refusals.
-
-The existing native B grant, four-route literal projected document, original
-complete receipt replay, genuine same-owner process kill/restart and four-route
-healthy continuation remain unchanged. Ownership: existing IntegrationTests
-DocumentStorage Helpers/RemoteDocumentRf3Scenario and NEW Assertions/
-RemoteDocumentSessionAuthorityRf3Assertions; bounded append DocumentStorage/ADR017.
-Core0, public SDK Result contracts0, fixtures0, topology0, bounds0, newCases0.
-This contract joins the previous native3/current SessionRF3 receipt packet as
-one source10 successor, preserving source8 and all original failure receipts.
-Root owns actual compile/discovery/Linux evidence. Original8e4 majority
-UnknownWriteOutcome cause remains unknown; source closure is not runtime PASS.
-
-
-## TASK-KL021-RECEIVING-AUTHORITY-COLD-005 — complete native identity oracle
-
-REQ/AC-SESSIONREAD-COLD-001 compares the full original StoreIdentity value across
-its genuine same-root cold reopen. Capture the complete generated native payload
-before the original AppliedBytes fault, then require byte-for-byte equality of
-the reopened identity. All nine native fields and the entire signing-key content
-remain checked; neither payload is logged. ReadOnlyMemory record equality checks
-buffer ownership after decoding and is not this persisted-value contract.
-
-DocumentSessionAuthorityColdTrial retains all three missing/negative/truncated
-arguments, both exact refusals, complete unchanged store images and positions,
-exact original repair, full Apply/Resolve receipt replay, foreign/cancellation
-refusal, literal revision2 continuation and second cold owner. Product contracts,
-fixtures, expected fields, bounds, deadlines and case identities are unchanged.
-Existing ADR-017 supplies the architecture; no new boundary or format is created.
-The original local150/146/4-failure report remains immutable. This correction is
-source only until the current helper's strict build and actual three native
-cases pass; it does not qualify the separate Linux RF3 or durability gates.
-
-
-## Native Server original lifetime compiler closure (R61)
-
-REQ-SESSIONREAD-NATIVE-TERMINAL-001 maps to AC-SESSIONREAD-NATIVE-TERMINAL-001: the internal nonserialized native terminal exception supports standard Exception constructors without granting terminal provenance. Only its typed original-native constructor records the original KeyLoadException, after the existing awaited native result and fresh authority validation. Controlled document and blob endpoint catch filters require this exact nonnull original before returning its definitive error; a generic message or inner exception cannot grant that classification. Preserve original pre-execution refusal, post-effect uncertainty, signed reply and cause semantics. Existing original controlled operation/refusal/replay and cold flows remain the verification targets; constructor/property-only tests are not acceptance. Current compiler, native execution and Linux RF3 gates remain open.
-
-REQ/AC-SESSIONREAD-002..004 and the existing bounded native model contract retain the original memoized ReplicaDiscoveryLifetime.StopAsync: original stopping cancellation, joined active operations, then idempotently guarded admission/replay/CTS cleanup. Explicit DisposeAsync awaits the same lifetime and exposes direct owned disposal without a second shutdown task. Every cleanup failure remains retained and later owned resources still close. Event-vector disposal preserves replay/callerMac/localMac order and endpoint reset; document runtime preserves receiver/client/work/endpoint shutdown order and complete actual task faults/cancellation. Immediate receiver admission is the existing zero-millisecond admission via native WaitAsync with the original caller token, with unchanged configured limits and original expiry. Native model wire/service visibility is internal; generated aliases, version, request IDs0..11, reply IDs0..5 and channel0/1 are unchanged. Named constants and LoggerMessage preserve original values, Error/default EventId/content-free diagnostic and exact uncertainty bool. Null error Signature remains refused. Existing original MAC mutation/roundtrip and full receiving operation controls remain mandatory. This is source-only compiler repair, not native/runtime/Linux qualification or a change to effects/Unknown classification; external effect-boundary work is a separate coherent union.
-
-
-## Native fixture full command-scope admission
-
-REQ-DSTORE-NATIVE-SCOPE-001 maps to AC-DSTORE-NATIVE-SCOPE-001 under REQ/AC-DSTORE-007/009: the original TestDatabaseReplicaAdmission retained-command shortcut matches exact command ID, ordinal persisted principal ID and CommandOutcomePartitionIdentity.Resolve full scope (Unknown/Global/Partition including full PartitionRef). It does not match fingerprint or kind independently: a changed body occupying the same resolved outcome identity must reach original fresh authorized ResolveOutcome and Conflict rather than append as a new identity. A different persisted principal/full scope may append its own genuine log entry and materialize its own independent outcome. The log/admission lock, commit, apply, cancellation and joined cleanup remain unchanged.
-
-REQ-DSTORE-NATIVE-SCOPE-002 maps to AC-DSTORE-NATIVE-SCOPE-002: native entry observations accept the actual original ReplicatedOperation for explicit scope. The historical Guid-only observation is valid only for one full retained identity; multiple principal/scope identities with that ID refuse InvalidOperationException instead of silently selecting another entry. Repeated entries of the same identity retain the original first-index observation.
-
-Canonical map: UnitTests ClusterReplication/Fixtures/TestDatabaseReplica/TestDatabaseReplicaAdmission.cs and existing TestDatabase.cs forwarding; feature acceptance belongs to DocumentStorage. DocumentCommandPrincipalColdReplayTests must prove TWO persisted principals sharing SAME GUID and full partition, independent complete original native entries/results/scoped outcomes, changed-body conflicts, unchanged exact outbox and TWO joined same-owner canonical+replica cold opens, then literal healthy continuation. The complete flow is specified in [NativePrincipalColdReplay](DocumentStorage/NativePrincipalColdReplay.md); R31 current-image native execution passed; Linux/RF3 and public-client qualification remain OPEN; original warm principal and two-partition flows remain unchanged. No production algorithm/schema/provider or direct-Apply replacement is added.
-
-```mermaid
-flowchart TD
-  Native[Actual normalized native operation] --> Scope[Existing full scope resolver plus principal and ID]
-  Scope --> Prior[Same identity retained native index]
-  Prior --> Resolve[Original fresh authorization and outcome or conflict]
-  Scope --> New[Different identity native append commit apply]
-  New --> Independent[Independent original scoped outcome]
-  Independent --> Observe[Explicit operation-scoped entry read]
-  Observe --> Cold[Planned two genuine same-owner cold opens]
-```
-
-Source joined; the R31 exact-image build and native companion group passed 17/17, including this principal cold replay flow. Linux/RF3, endurance, coverage and public-client qualification remain OPEN. Fixture defect is distinct from canonical product outcome scope.
-
-
-## Original composite-unique RF3 query uses current T-SQL
-
-TASK-KL011-COMPOSITE-QUERY-CURRENT-TSQL-001 / REQ-DSTORE-002 /
-AC-DSTORE-002 and AC-DSTORE-COMPOSITE-RF3-001 preserves the original
-Kl011CompositeUniqueDeltasRollbackScopeAndPersistedGrantRestorationMatchBothClients
-whole flow. Its single shared query changes retired LIMIT10 to SELECT TOP (10),
-keeping the quoted composite-unique collection, optional exact tuple predicate,
-ORDER BY id ASC and original AllowFullScan condition. The bound remains ten.
-
-Actual native SelectLowering enables document metadata for an ordinary source
-without model or join. ProjectionLowering accepts its one unqualified star.
-OrderingLowering retains ascending order and delegates the single id name to
-Names.Path with document metadata enabled; that owner preserves the existing
-SqlSyntax metadata mapping. WindowLowering accepts a native integer TOP, refuses
-percent/ties/approximate/offset combinations and enforces the original MaxResults
-limit. No compiler, metadata mapping, index/provider or bounds are changed here.
-
-All original SDK/official MCP full rows/revisions/redaction/cursor/index-path/cut
-checks remain exact, together with initial/replaced/patched/deleted/reused tuple
-memberships, empty obsolete and rollback tuple memberships, two-mutation Conflict
-rollback, exact original safe failure replay and private-canary exclusion.
-Distinct atomic-partition tuple independence, persisted grant removal/restore,
-full authorized state and fresh healthy successful receipt replay are unchanged.
-The original Case, arguments, mutation IDs, deadlines, scoped caller ownership
-and joined cleanup remain; no new Case or cold cycle is added.
-
-Original source319c/run38578269537 attempt1 KL011 failed the first positive
-RowsAsync19 after the actual original seed, reporting SDK Validation. Exact
-native fixture source uses retired LIMIT10 in the common query. This is a fixture
-syntax correction; product uniqueness/rollback/authorization and storage are not
-modified or claimed faulty. Final formatted-source guard rebase, fresh native
-checkOnly, compiler and exact-source Linux whole RF3 qualification remain OPEN.
-
-```mermaid
-flowchart LR
-    A[Valid bounded composite query] --> B[Complete mutation and tuple memberships]
-    B --> C[Atomic unique-conflict rollback and original replay]
-    C --> D[Independent partition scope and persisted deny restore]
-    D --> E[Full original healthy receipt and rows]
-```
-
-Canonical slice DocumentStorage, ADR002/011. Frontend/new API/package/storage
-format changes: N/A. SQL compiler/typed INSERT work stays with its existing owner.

@@ -5,8 +5,8 @@ namespace KeyLoad.IntegrationTests.Features.ClusterReplication.Cases;
 internal sealed class LocalImageProcessLifecycleTests
 {
     private const string Tag = "local-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-    private const string Receipt = "TestResults/rf3/local-images/image-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json";
-    private const string OverflowMessage = "Local RF3 image verifier output exceeded its bound.";
+    private const string Receipt = "TestResults/cluster/local-images/image-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json";
+    private const string OverflowMessage = "Local CLUSTER image verifier output exceeded its bound.";
 
     [Test]
     public async Task VerifierStopsActualNodeProcessWhenBoundedReaderOverflowsBeforeExit()
@@ -56,7 +56,7 @@ internal sealed class LocalImageProcessLifecycleTests
     }
 
     private static Task<string> RunVerifierAsync(string root, string script, CancellationToken cancellationToken)
-        => LocalRf3ImageIdentity.RunVerifierAsync(root, script, Tag, Receipt, cancellationToken);
+        => LocalClusterImageIdentity.RunVerifierAsync(root, script, Tag, Receipt, cancellationToken);
 
     private static string OverflowProgram(string terminated)
         => "import { writeFileSync } from 'node:fs';\n"

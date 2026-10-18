@@ -51,7 +51,7 @@ internal static class CredentialAuthorityFlow
     {
         var before = await DiscoveryAuthorityValues.ImageAsync(root, state.Document, token);
         var request = new ConfigureApiKeyRequest(state.Document.Identity.Credential);
-        var call = SqlRf3Protocol.Call(state.Document.Scenario.Partition, McpCallerTools.CredentialsConfigure,
+        var call = SqlClusterProtocol.Call(state.Document.Scenario.Partition, McpCallerTools.CredentialsConfigure,
             request, state.RepairCommandId);
         var sql = await McpCallerAssertions.SdkSuccessAsync(await root.ExecuteSqlAsync(call, token));
         await Assert.That(sql.ValueKind).IsEqualTo(JsonValueKind.Null);
@@ -74,7 +74,7 @@ internal static class CredentialAuthorityFlow
         catch (Exception acquisitionOrCleanup) when (NativeCqrsBoundaryErrors.IsNonFatal(acquisitionOrCleanup)) { failures.Add(acquisitionOrCleanup); }
         catch (Exception acquisitionOrCleanup) when (!NativeCqrsBoundaryErrors.IsNonFatal(acquisitionOrCleanup)) { failures.Add(acquisitionOrCleanup); }
         ServerFailureObserver.ThrowIfAny(failures);
-        await SqlRf3Protocol.EqualAsync(before, await DiscoveryAuthorityValues.ImageAsync(root, state.Document, token));
+        await SqlClusterProtocol.EqualAsync(before, await DiscoveryAuthorityValues.ImageAsync(root, state.Document, token));
     }
 
     private static async Task RefusedAsync(ClusterFixture fixture, KeyLoadClient root, KeyLoadClient reader,
@@ -96,7 +96,7 @@ internal static class CredentialAuthorityFlow
         var serialized = JsonSerializer.Serialize(rejected, JsonDefaults.Options);
         await Assert.That(serialized.Contains(document.Identity.Secret, StringComparison.Ordinal)).IsFalse();
         await Assert.That(serialized.Contains(McpDocumentProtocol.PrivateValue, StringComparison.Ordinal)).IsFalse();
-        await SqlRf3Protocol.EqualAsync(before, await DiscoveryAuthorityValues.ImageAsync(root, document, token));
+        await SqlClusterProtocol.EqualAsync(before, await DiscoveryAuthorityValues.ImageAsync(root, document, token));
     }
 
     internal static async Task ReplayAsync(KeyLoadClient root, CredentialAuthorityState state, CancellationToken token)
@@ -110,6 +110,6 @@ internal static class CredentialAuthorityFlow
             state.RepairCommandId, state.Document.Identity.Credential, token));
         await Assert.That(replay.IsSuccess).IsEqualTo(original.IsSuccess);
         await Assert.That(replay.Problem).IsEqualTo(original.Problem);
-        await SqlRf3Protocol.EqualAsync(before, await DiscoveryAuthorityValues.ImageAsync(root, state.Document, token));
+        await SqlClusterProtocol.EqualAsync(before, await DiscoveryAuthorityValues.ImageAsync(root, state.Document, token));
     }
 }

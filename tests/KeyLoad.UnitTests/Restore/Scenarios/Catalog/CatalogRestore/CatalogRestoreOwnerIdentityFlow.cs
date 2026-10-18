@@ -5,7 +5,7 @@ internal static class CatalogRestoreOwnerIdentityFlow
     private const string Backup = "owner-identity-backup";
     private const string Target = "owner-identity-target";
     private const string StagingPrefix = ".keyload-restore-*";
-    private const string InvalidMapping = "The restore configuration must map every original owner to a distinct new RF3 identity.";
+    private const string InvalidMapping = "The restore configuration must map every original owner to a distinct new CLUSTER identity.";
 
     internal static async Task RunAsync(bool reuseIncarnation, CancellationToken token)
     {

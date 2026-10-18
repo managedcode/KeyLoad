@@ -12,8 +12,8 @@ internal static class LiveReadBackpressureR49
     private const string DetailKey = "detail";
     private const long PositiveCutBoundary = 0;
 
-    internal static async Task RequireAsync(RequestCqrsRf3Callers administrator,
-        RequestCqrsRf3Callers reader, FeedLiveRf3Scenario scenario, ReadLiveQueryRequest original,
+    internal static async Task RequireAsync(RequestCqrsClusterCallers administrator,
+        RequestCqrsClusterCallers reader, FeedLiveClusterScenario scenario, ReadLiveQueryRequest original,
         CommitReceipt deletion, CancellationToken token)
     {
         var refused = original with
@@ -25,30 +25,30 @@ internal static class LiveReadBackpressureR49
             var result = await reader.Sdk.ReadLiveQueryAsync(refused, token);
             await Assert.That(result.IsSuccess).IsFalse();
             await Assert.That(result.Value).IsNull();
-            await SqlRf3Protocol.EqualAsync(Errors.Problem(ErrorCode.BudgetExceeded, FirstChangeDetail), result.Problem);
+            await SqlClusterProtocol.EqualAsync(Errors.Problem(ErrorCode.BudgetExceeded, FirstChangeDetail), result.Problem);
         }, token);
         await HealthyAsync(administrator, reader, scenario, original, deletion, false, token);
         await CurrentAsync(administrator, scenario, async () =>
         {
-            var reply = await reader.Mcp.CallAsync(FeedLiveRf3Protocol.LiveRead, refused, token);
+            var reply = await reader.Mcp.CallAsync(FeedLiveClusterProtocol.LiveRead, refused, token);
             await McpCallerAssertions.ErrorAsync(reply, ErrorCode.BudgetExceeded, dispatched: true);
             await Assert.That(reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
                 .GetProperty(DetailKey).GetString()).IsEqualTo(SafeBudgetDetail);
-            await McpCallerAssertions.DoesNotDiscloseAsync(reply, scenario.Identity.Secret, FeedLiveRf3Protocol.Secret);
+            await McpCallerAssertions.DoesNotDiscloseAsync(reply, scenario.Identity.Secret, FeedLiveClusterProtocol.Secret);
         }, token);
         await HealthyAsync(administrator, reader, scenario, original, deletion, true, token);
     }
 
-    private static async Task HealthyAsync(RequestCqrsRf3Callers administrator,
-        RequestCqrsRf3Callers reader, FeedLiveRf3Scenario scenario, ReadLiveQueryRequest original,
+    private static async Task HealthyAsync(RequestCqrsClusterCallers administrator,
+        RequestCqrsClusterCallers reader, FeedLiveClusterScenario scenario, ReadLiveQueryRequest original,
         CommitReceipt deletion, bool useMcp, CancellationToken token)
     {
         LiveQueryPage? delivered = null;
         await CurrentAsync(administrator, scenario, async () =>
         {
             delivered = await ReadAsync(reader, scenario, original, useMcp, token);
-            await PageAsync(delivered, [new(FeedLiveRf3Protocol.DeletedSequence, deletion.Token,
-                LiveQueryChangeKind.Remove, scenario.Reference, FeedLiveRf3Protocol.DeletedRevision, null)]);
+            await PageAsync(delivered, [new(FeedLiveClusterProtocol.DeletedSequence, deletion.Token,
+                LiveQueryChangeKind.Remove, scenario.Reference, FeedLiveClusterProtocol.DeletedRevision, null)]);
         }, token);
         var consumed = original with
         {
@@ -58,30 +58,30 @@ internal static class LiveReadBackpressureR49
             await PageAsync(await ReadAsync(reader, scenario, consumed, useMcp, token), []), token);
     }
 
-    private static async Task<LiveQueryPage> ReadAsync(RequestCqrsRf3Callers reader,
-        FeedLiveRf3Scenario scenario, ReadLiveQueryRequest request, bool useMcp, CancellationToken token)
+    private static async Task<LiveQueryPage> ReadAsync(RequestCqrsClusterCallers reader,
+        FeedLiveClusterScenario scenario, ReadLiveQueryRequest request, bool useMcp, CancellationToken token)
     {
         if (!useMcp)
         {
             return await McpCallerAssertions.SdkSuccessAsync(await reader.Sdk.ReadLiveQueryAsync(request, token));
         }
-        var reply = await reader.Mcp.CallAsync(FeedLiveRf3Protocol.LiveRead, request, token);
-        await McpCallerAssertions.DoesNotDiscloseAsync(reply, scenario.Identity.Secret, FeedLiveRf3Protocol.Secret);
+        var reply = await reader.Mcp.CallAsync(FeedLiveClusterProtocol.LiveRead, request, token);
+        await McpCallerAssertions.DoesNotDiscloseAsync(reply, scenario.Identity.Secret, FeedLiveClusterProtocol.Secret);
         return (await McpCallerAssertions.SuccessAsync<LiveQueryPage>(reply)).Value;
     }
 
     private static async Task PageAsync(LiveQueryPage page, LiveQueryChange[] expected)
     {
-        await SqlRf3Protocol.EqualAsync(expected, page.Changes.ToArray());
-        await Assert.That(page.ThroughSequence).IsEqualTo(FeedLiveRf3Protocol.DeletedSequence);
+        await SqlClusterProtocol.EqualAsync(expected, page.Changes.ToArray());
+        await Assert.That(page.ThroughSequence).IsEqualTo(FeedLiveClusterProtocol.DeletedSequence);
         await Assert.That(page.HasMore).IsFalse();
         await Assert.That(string.IsNullOrEmpty(page.Cursor)).IsFalse();
         await Assert.That(page.CutPosition).IsGreaterThan(PositiveCutBoundary);
     }
 
-    private static Task CurrentAsync(RequestCqrsRf3Callers administrator,
-        FeedLiveRf3Scenario scenario, Func<Task> operation, CancellationToken token)
-        => FeedLiveRf3NoEffects.RequireAsync(administrator, scenario,
-            FeedLiveRf3NoEffects.Rows(FeedLiveRf3Protocol.DeletedRevision, null),
-            FeedLiveRf3Protocol.DeletedSequence, operation, token);
+    private static Task CurrentAsync(RequestCqrsClusterCallers administrator,
+        FeedLiveClusterScenario scenario, Func<Task> operation, CancellationToken token)
+        => FeedLiveClusterNoEffects.RequireAsync(administrator, scenario,
+            FeedLiveClusterNoEffects.Rows(FeedLiveClusterProtocol.DeletedRevision, null),
+            FeedLiveClusterProtocol.DeletedSequence, operation, token);
 }

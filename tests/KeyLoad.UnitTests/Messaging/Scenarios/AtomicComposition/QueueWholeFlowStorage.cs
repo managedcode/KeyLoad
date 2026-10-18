@@ -24,7 +24,7 @@ internal static class QueueWholeFlowStorage
     internal static DatabaseEngine Open(ZoneTreeStore store) => new(store, new AuthorizationPolicy(),
         UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(),
         UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(),
-        UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance);
+        UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
 
     internal static OperationResult Apply<T>(DatabaseEngine database, OperationKind kind, T payload,
         Guid id, DateTimeOffset time) => database.Apply(new(id, kind, "root", time,

@@ -5,38 +5,10 @@ exposes the current hour only: its fresh-report checks are mandatory, while a
 changed public window leaves retained derived history explicitly UNQUALIFIED.
 An overall case PASS does not qualify durable public analytics history.
 
-## Current local results
-
-The corrected native pair passed on source `57cea6244b78b8f8663ca5e48bfea8e36ca9c91e`.
-Single-node cold completed in **104.61 seconds**; RF3 cold completed in
-**118.73 seconds** after the accepted single-node result. Each original native
-case passed once with zero failures/skips, joined caller/process/resource cleanup,
-unchanged source/DLL hashes and the same image-input digest. All original nodes
-were killed before any restart; actual restart receipts confirm one and three
-new runtime generations.
-
-Both runs preserve all three resources in each catalog model, original
-SQL/mixed-command/blob-stage envelopes, full receipts and values, same credentials,
-fresh grant revocation/repair and a new healthy write. The native public analytics
-reports remained in the same hour on all observed nodes and passed their original
-invariants; this does not prove exact historical-row retention or old-hour public
-history. The separate native captured-range component remains its own proof.
-
-Original local evaluations under `TestResults/stage61-native-join`:
-
-| Topology | Original terminal evaluation | SHA256 |
-| --- | --- | --- |
-| One node | `root-r516-all-model-1-node-native-cold-reopen.terminal-evaluation.original.json` | `1b856730af9ebf75c52336f4b52bd9a815900f2f9d255b7bfc59ae3d8cb2f86f` |
-| RF3 | `root-r517-all-model-3-node-native-cold-reopen.terminal-evaluation.original.json` | `2e72a40efda3100f9b2174d4c5bf54fb31045558c7dc82ce93e0e92c50ea2369` |
-
-The complete Linux functional lane now includes the original normal pair, native
-profile/selector controls and this cold pair, but its actual current-source
-execution remains unqualified until original GitHub results pass. These local
-results do not close DROP/resource catalog lifecycle, the 105-task plan,
-power-loss, security/endurance, performance or release gates.
+## Requirements
 
 REQ-DBCOLD-001 defines a separate selected recovery gate after the working
-single-instance/RF3 pair. It does not change either existing FunctionalDatabaseGateTests
+single-instance/cluster pair. It does not change either existing FunctionalDatabaseGateTests
 case, their 10,000-success minimum, their three-resource rotation or their current
 execution flow. Both optional cases use the existing 30-minute cancellation bound.
 The original current local compiler and runtime gates passed as recorded above;
@@ -47,8 +19,8 @@ container names and verified source/image selection. ContainerRuntimeControl own
 native fault-command kill receipts, exited identities, native Start acceptance,
 changed process generation and health settlement. All nodes exit before any starts;
 all native starts are accepted before quorum-health waits. Existing joined shutdown,
-retained failure evidence and released-storage checks remain mandatory. One voter is
-its actual development acknowledgement topology; three voters are actual RF3.
+retained failure evidence and released-storage checks remain mandatory. One replica is
+its actual development acknowledgement topology; three replicas are the default replicated cluster.
 The native ContainerRuntimeOwnedReceipt scenario namespace is reused unchanged;
 no new public, persisted or Orleans serializer alias is introduced.
 
@@ -59,25 +31,19 @@ The owning AppHost validator admits only the exact value true without nested chi
 it rejects a cold selection without faults or an admitted functional node count. All
 existing ephemeral=true, absolute owned data-root and exclusive-profile restrictions
 remain. Ordinary StartAsync selects cold=false and supplies neither argument, so the
-existing working single-instance/RF3 gates retain their no-fault profiles.
+existing working single-instance/cluster gates retain their no-fault profiles.
 
-This profile depends on the exact selected owning AppHost source correction and its
-native-command selection regressions. F1 found that the r3 fixture omitted native fault
-command registration while the prior functional validator also rejected ContainerFaults;
-r3 and its earlier clean source-review claims are superseded for that blocker. Adding
-only ContainerFaults, bypassing the validator or invoking Docker directly does not repair
-that original integration seam. The corrected local compiler/runtime evidence
-above supersedes that blocker; current-source Linux delivery remains open.
+This profile depends on the AppHost's native fault-command registration for the cold profile: the fixture registers the native fault command and the owning validator admits ContainerFaults together with the cold selection. Adding only ContainerFaults, bypassing the validator or invoking Docker directly does not satisfy it.
 
 REQ-DBCOLD-008 extends the existing manual Build and Tests workflow task
 functional-gates, preserving the original normal single-instance case then its
-original receipt, followed by the normal RF3 case then its original receipt. The
+original receipt, followed by the normal cluster case then its original receipt. The
 same task must next run the six native FunctionalColdReopenProfileTests controls
 and four native NativeTUnitSelectionTests controls with strict TRX evaluation and
 no skips. It then runs the exact single-instance cold case with a strict native
-one-case result and original receipt, followed by the exact RF3 cold case and its
+one-case result and original receipt, followed by the exact cluster cold case and its
 receipt. Existing source/executable/image verification, joined cleanup and every
-other mandatory suite remain unchanged. No ignored SourceN helper, new workflow
+other mandatory suite remain unchanged. No ignored helper, new workflow
 or fabricated 10,000-operation cold counter is an execution substitute. Linux CI
 runtime qualification remains OPEN until the actual original workflow outcomes.
 
@@ -87,12 +53,7 @@ Cold-only persisted writer, reader and tenant-local queue operator identities re
 their original private secrets in memory. All original SDK and official MCP caller
 scopes join disposal before kill; new discovered public sessions use those same
 credentials after restart. No identity or fixture is replaced and no store is copied.
-The original three-identity cold ledgers and source-bound results above remain
-historical evidence for their original scope. The current selected cold scenario
-adds five persisted identities to those same writer, reader and queue operator
-identities, for exactly eight identities total, under REQ-DBCOLD-005. Registering
-eight identities or passing the original three-identity cases does not establish
-current eight-user cold concurrency.
+The cold scenario adds five persisted identities to those same writer, reader and queue operator identities, for exactly eight identities total, under REQ-DBCOLD-005.
 
 | Model family | Actual native request and original retained result |
 | --- | --- |
@@ -149,8 +110,7 @@ exact reads pass, and every original model baseline is checked again. Existing
 scenario selectors, public endpoints, native ABI, topology profiles, lifecycle,
 receipts, limits and deadlines remain unchanged. This scope is the current cold
 eight-user scenario, not future user Analytics, DROP or broader lifecycle work.
-Source alone does not qualify either cold topology, Linux delivery, the complete
-105-task plan or performance.
+Source alone does not qualify either cold topology, Linux delivery or performance.
 
 REQ-DBCOLD-006 checks native operational analytics separately: each actual node owns
 one derived native engine. Both real SDK and official MCP dashboard reads always
@@ -188,7 +148,7 @@ all owned callers joined and positive SDK/MCP counters for every caller. Retain 
 original same-root restart/process receipts, complete original model and receipt
 comparisons, sequential constraint checks, fresh authorization denials/repair,
 healthy continuation and joined Aspire shutdown. Missing or failed caller evidence
-keeps this criterion open even if an older three-identity run passed. Local runtime
+keeps this criterion open. Local runtime
 results remain development evidence; exact-source Linux qualification is separate.
 
 AC-DBCOLD-003 keeps either optional gate open after any original failure, unexpected
@@ -196,41 +156,18 @@ effect, missing authoritative record, replay mismatch, invalid fresh analytics r
 or unknown cleanup result. A changed analytics public window leaves only that derived
 history observation UNQUALIFIED and cannot satisfy a retained-history claim.
 
-The original R502 strict solution build failed with seven test-source/analyzer
-errors and zero warnings: four named machine-key violations, two unused imports
-and the aggregate 233-code-line fixture limit violation. The scoped source repair
-uses named protocol constants, removes unused imports and moves cold coordination
-and storage-lock assertions to distinct feature-local helpers. It preserves all
-original operation and recovery oracles. The repaired R511 full solution build passed locally with zero warnings and zero
-errors. The original parallel R503/R504 native runs passed 45 unit cases and three
-process/native recovery cases without skips; this includes all six cold-profile
-and four selector controls. All contributing production, UnitTests, RecoveryTests
-and CrashHost source and DLL/PDB hashes remained exact after the final build, so
-those original results are retained without a repeated run. Their original local
-evidence is root-r512-cold-build-unit-recovery-contributor-evidence.original.json
-under TestResults/stage61-native-join. The corrected local cold pair passed as recorded above; exact-source Linux
-qualification remains OPEN. Process-kill proof does not establish power-loss durability, the complete
-105-task plan, production readiness or performance.
-
-The first original single-node R505 run failed before any cold action because the
-new fixture selected query dialect 2 for VALUES INSERT. The native compiler
-requires SqlOperationProtocol.DefaultQueryDialectVersion (1) for this operation.
-The fixture now uses that existing constant; SELECT remains dialect 2, and no
-production parser, supported-version check, request payload or result oracle was
-relaxed. The focused R514 IntegrationTests build passed with zero warnings/errors;
-only its DLL/PDB changed. The original failed report is retained. Corrected R516 passed before the matched
-R517 RF3 cold run; both original outcomes are recorded above.
+Local runtime results remain development evidence; exact-source Linux qualification is separate. Process-kill proof does not establish power-loss durability, production readiness or performance. The cold fixture uses the existing `SqlOperationProtocol.DefaultQueryDialectVersion` (1) for VALUES INSERT; SELECT remains dialect 2.
 
 The owning contracts remain ADR-117 native test entry, ADR-125 connection execution
-and ADR-136 physical partition ownership. No new ADR is required for
+and ADR-136 silo-local ZoneTree ownership. No new ADR is required for
 REQ-DBCOLD-005: it composes the existing owned public caller lifetimes with a fixed
-bounded test wave and retains the same native execution, transport trust, physical
+bounded test wave and retains the same native execution, transport trust, storage
 ownership and restart contracts. It introduces no product scheduling primitive,
 provider, topology, library, resource limit or compatibility fallback.
 
 ```mermaid
 flowchart LR
-    A[Existing Aspire 1 or 3 voters] --> B[Persist credentials and original model ledgers]
+    A[Existing Aspire 1 or 3 replicas] --> B[Persist credentials and original model ledgers]
     B --> C[Fixed eight owned SDK MCP callers and complete SQL reads]
     C --> D[Join original caller disposal]
     D --> E[Native kill every original node]

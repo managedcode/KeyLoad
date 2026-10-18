@@ -1,26 +1,20 @@
 # BenchmarkComparisons: native vector qualification
 
-## Current execution contract
+## Execution contract
 
 [ADR-142](../../ADR/ADR-142-shared-live-benchmark-sessions.md) and
-[SessionExecution](SessionExecution.md) supersede the per-cell runner, warmup,
-repetition, planner and report-production instructions in the retained source
-stages below. Current measurement jobs share one live native database/topology
-across separate TUnit cases, measure the initial load, and perform no per-case
-reset or reseeding. Historical implementation snapshots and immutable originals
-retain their original identities; retired runners and fixtures are not current
-qualification evidence.
+[SessionExecution](SessionExecution.md) define the measurement shape: current
+measurement jobs share one live native database/topology across separate TUnit cases,
+measure the initial load, and perform no per-case reset or reseeding. The dataset,
+operation-count, native capability, correctness, privacy, cancellation, resource,
+topology and provenance requirements below are mandatory. The seven document cases do
+not complete the required vector, graph, queue, event, time-series or physical
+100k-corpus coverage; family integration and exact-source native Linux qualification
+are separate gates. Warmup and repetition values in the closed profile identities below do not apply to session measurement, which uses no warmup and no per-case reset.
 
-The original dataset, operation-count, native capability, correctness, privacy,
-cancellation, resource, topology and provenance requirements remain mandatory.
-The current seven document cases do not complete the required vector, graph,
-queue, event, time-series or physical100k-corpus coverage. Family integration and
-exact-source native Linux qualification remain open.
-
-This contract implements the owner's 2026-10-05 request under
-[ADR-109](../../ADR/ADR-109-native-vector-comparisons.md). The Benchmarks producer
-and website consumer are in scope, including SurrealDB and HelixDB. Product SQL,
-storage, licensing and unrelated changes are outside this task.
+This contract implements [ADR-109](../../ADR/ADR-109-native-vector-comparisons.md). The
+Benchmarks producer and website consumer are in scope, including SurrealDB and HelixDB.
+Product SQL, storage, licensing and unrelated changes are outside it.
 
 ```mermaid
 flowchart LR
@@ -103,18 +97,18 @@ original Linux GitHub artifacts may populate website metrics.
 
 | Requirement | Measurable pass/fail criterion | Test/evidence mapping |
 |---|---|---|
-| REQ-VQ-001: complete real vector scale | AC-VQ-001: exact 24 closed profiles × applicable targets × 1/3 topology slots; 100k/1m actual record readback and ≥100k measured queries; invalid profiles/counts reject | `VectorProfileContractTests`, `VectorCorpusContractTests`, `VectorSelectionContractTests`; original native worker receipts |
+| REQ-VQ-001: complete real vector scale | AC-VQ-001: exact 24 closed profiles × applicable targets × 1/3 topology slots; 100k/1m actual record readback and ≥100k measured queries; invalid profiles/counts reject | `VectorProfileContractTests`, `VectorCorpusContractTests`; original native worker receipts |
 | REQ-VQ-002: native algorithms and quality | AC-VQ-002: exact/HNSW/IVFFlat metadata and actual PostgreSQL plans match requested method; independent expected IDs yield exact recall 1 and ANN ≥0.95; duplicate/filter/underfill failures reject | `VectorCorpusContractTests`, `VectorResponseContractTests`, `VectorIndexContractTests`, `PostgresVectorPayloadContractTests`, `PostgresVectorQueryContractTests`, `QdrantVectorContractTests`; actual PostgreSQL comparison cases and plan receipts |
 | REQ-VQ-003: filters and updates | AC-VQ-003: native 1% filters and mixed stable-90% searches return only eligible IDs; 10k acknowledged updates are read back after genuinely overlapping queries/writes; failure/cancellation invalidates cell | Native filtered/mixed flow cases; timed original query/update receipts |
-| REQ-VQ-004: trustworthy costs | AC-VQ-004: query p95/p99 and useful rate exclude ingestion/oracle/build; native index build ms is observed; separately scoped whole-run server RAM/resource observations and client counters are emitted with actual bounds | `VectorIndexContractTests`, `VectorExecutionPolicyContractTests`; native measurement/phase/resource flows, original cgroup/process sidecars |
+| REQ-VQ-004: trustworthy costs | AC-VQ-004: query p95/p99 and useful rate exclude ingestion/oracle/build; native index build ms is observed; separately scoped whole-run server RAM/resource observations and client counters are emitted with actual bounds | `VectorIndexContractTests`, `NativeComparisonAdapterPolicyTests`; native measurement/phase/resource flows, original cgroup/process sidecars |
 | REQ-VQ-005: new native engines | AC-VQ-005: SurrealDB and HelixDB use pinned real disk-backed native servers under Aspire; CRUD/vector/graph only where truly supported; readiness, loaded data, membership, ownership and teardown verified; unsupported native topology has null metrics/reason | Native comparison TUnit flows and image/source provenance; original Actions container logs |
 | REQ-VQ-006: same-family fairness | AC-VQ-006: corpus, query schedule, metric, filters, accuracy, resources and actual ACK/read contract match before rankings; controls remain explicitly small; unsupported capabilities never become zero-valued successes | Cross-engine corpus/contract validation, fairness review and original measured settings |
 | REQ-VQ-007: website-producing delivery | AC-VQ-007: readable isolated per-database groups feed strict complete source/run/attempt/profile/index-bound aggregation; missing/duplicate/mixed/fabricated results reject; site exposes scale/method/recall/build/p95/p99/server RAM and original evidence | Isolated plan/aggregate/admission/site browser TUnit tests; authentic Linux Benchmarks and Pages receipts |
 
-All test sources retain canonical `Features/BenchmarkComparisons/<Role>/`.
-Manual evidence exception: external provider timing, membership, disk durability
-claims, original artifact authority and Pages publication require the genuine
-Actions run and provider receipt; local tests cannot establish those claims.
+All test sources retain the canonical `BenchmarkComparisons/<Role>/` layout. Manual
+evidence exception: external provider timing, membership, disk durability claims,
+original artifact authority and Pages publication require the genuine Actions run and
+provider receipt; local tests cannot establish those claims.
 
 Run governance, restore, Release build, then the owning Aspire suites (`unit`,
 `comparison`, `site`), formatting and the final solution build. Native workloads
@@ -122,54 +116,35 @@ run in separate Linux jobs and the AppHost owns all resources and cleanup.
 Unexpected native errors and timeouts retain safe diagnostics and null metrics;
 they cannot cause fallback to a different algorithm, topology or prior cohort.
 
-Status: acceptance contract established; implementation and native qualification
-are pending. No new performance result is established by this document.
+No new performance result is established by this document; native qualification of
+the vector families is a separate acceptance gate.
 
-### Image preparation authority join
+## Image preparation authority
 
-TASK-VQ-JOB-001 implements AC-VQ-007 and the existing AC-ISO-006/007 authority
-contract. The image preparation job has no workload cell or evidence-profile
-selector; it must retain the canonical control cohort and authenticate the actual
-`Build Docker images` job. A database job must instead bind its exact canonical
-cell ID, job name and profile together, including preflight, vector, scaled and
-open-loop rows. Unknown, missing, mismatched or ambiguous selectors reject before
-transport or environment-file mutation. Image preparation with workload
-selectors also rejects. Actual GitHub run, attempt, source, executing-job and
-freshness checks remain unchanged after this selection.
+AC-VQ-007 and the AC-ISO-006/007 authority contract: the image preparation job has no
+workload cell or evidence-profile selector; it retains the canonical control cohort and
+authenticates the actual `Build Docker images` job. A database job instead binds its
+exact canonical cell ID, job name and profile together, including preflight, vector and
+scaled rows. Unknown, missing, mismatched or ambiguous selectors reject before
+transport or environment-file mutation, and image preparation with workload selectors
+also rejects. Actual GitHub run, attempt, source, executing-job and freshness checks
+are unchanged after this selection. Regression coverage exercises canonical image and
+worker selections, every row family, rejected mismatches and preservation of the input
+context through real Node/TUnit operations; the genuine `IsolatedGitHubCurrentJobTests`
+remain the Linux image-job authentication proof. The focused Aspire-owned unit
+regressions, canonical build/format and the actual image preparation job are required
+before this contract counts as qualified.
 
-The lead owns this contract and the final checks. The bounded tooling worker
-owns current-job selection and its real Node/TUnit operation regressions; no
-product, workflow-matrix or provider changes belong to that worker. Regression
-coverage must exercise canonical image and worker selections, every row family,
-rejected mismatches and preservation of the input context. The existing genuine
-`IsolatedGitHubCurrentJobTests` remains the Linux image-job authentication proof.
-Run the focused Aspire-owned unit regressions, canonical build/format and the
-actual image preparation job before claiming this join qualified.
+## Source fairness
 
-TASK-VQ-NEST-001 repairs the AC-VQ-005 native fixture startup join. The test-runner
-composer clears its outer open-loop environment selector with an empty value;
-a nested AppHost must interpret that cleared value as unselected even when its
-comparison suite is explicit. Explicit empty CLI arguments still reject before
-orchestration. Unmatched native rate/proof selectors, whitespace, noncanonical
-rates and conflicting scale/vector/filter selections still reject. The initial
-Aspire development run reproduced five native-flow failures in this selection
-boundary before any database started. A bounded composition worker owns only
-the selector normalization and new `NativeNestedAppHostSelectionTests`; the
-lead joins the existing real `NativeDatabaseDocumentFlowTests` and
-`NativeDatabaseVectorFlowTests`, unchanged strict open-loop regressions and
-final solution gates. This does not change any measured workload or grant
-native database authority to the test selector.
-
-## Source fairness review, 2026-10-06
-
-The active inventories contain two document scale profiles and 24 vector
-profiles, all limited to 100,000 or 1,000,000 records across the 11 engines.
-The 4,096-record control remains a separately labelled workload. Every measured
-vector adapter consumes the common corpus, query set, accuracy validator and
-concurrent update schedule. Native ingestion is checked by actual ordered
-record, payload and stored-vector readback; locally generated expected hashes
-cannot replace that check. Query throughput includes answer validation; update
-throughput includes native readback after acknowledgement and validation.
+The active inventories contain two document scale profiles and 24 vector profiles,
+all limited to 100,000 or 1,000,000 records across the 11 engines. The 4,096-record
+control is a separately labelled workload. Every measured vector adapter consumes the
+common corpus, query set, accuracy validator and concurrent update schedule. Native
+ingestion is checked by actual ordered record, payload and stored-vector readback;
+locally generated expected hashes cannot replace that check. Query throughput includes
+answer validation; update throughput includes native readback after acknowledgement and
+validation.
 
 PostgreSQL implements exact/HNSW/IVFFlat; Qdrant and SurrealDB implement
 exact/HNSW; HelixDB exposes its provider-native ANN mode. Other methods and
@@ -192,81 +167,46 @@ labelled request/configuration evidence; Qdrant does not expose a PostgreSQL-sty
 query plan through this adapter. `QdrantVectorContractTests` checks the distinct
 filtered/mixed predicates and the unfiltered request alongside index admission.
 
-Local inventory, JavaScript syntax, authored-asset bounds and governance checks
-pass. A whole-solution Release build and formatter passed before the final
-dispatch repairs and concurrent TimeProvider migration. A subsequent build
-rejected changes to UnitTests sources during compilation. The latest full build
-reports 63 diagnostics across native clock call-site joins and the independently
-owned BackupRestore publication work; it is not an authoritative passing final
-build. Fresh Aspire/TUnit suites and genuine Linux native
-scale runs have not qualified this source, and no new website figures are ready.
+## Typed native execution policy
 
-## Typed native execution policy join, 2026-10-06
+Native operation safety settings follow the typed runtime-policy rule. Immutable
+corpus/profile/index identities and workload cardinalities remain protocol values.
+Native HTTP response limits, batch capacity, cleanup deadlines, index-build deadlines
+and polling intervals come from centrally registered, validated
+`IOptions<NativeComparisonExecutionOptions>`. The comparison host composition owns
+binding from a source-controlled JSON section and rejects missing/invalid policy before
+target creation; target execution does not read configuration or the environment.
+Native adapters receive that typed policy, record effective limits with native index
+evidence, and await original operations and cleanup. Qdrant control ingestion also uses
+the configured native write-batch capacity rather than a separate hardcoded batch size;
+its corpus and measured query schedule keep their control contract. Policy does not
+select a different corpus, algorithm, recall target or native topology.
 
-The current runtime-policy rule applies to native operation safety settings.
-Immutable corpus/profile/index identities and workload cardinalities remain
-protocol values. Native HTTP response limits, batch capacity, cleanup deadlines,
-index-build deadlines and polling intervals must instead come from centrally
-registered, validated `IOptions<NativeComparisonExecutionOptions>`. The comparison
-host composition owns binding from a source-controlled JSON section and rejects
-missing/invalid policy before target creation; target execution does not read
-configuration or the environment. Native adapters receive that typed policy,
-record effective limits with native index evidence, and await original operations
-and cleanup. Qdrant control ingestion also uses the configured native write-batch
-capacity, rather than a separate hardcoded batch size; its corpus and measured
-query schedule retain their existing control contract. Policy does not select a different corpus, algorithm, recall target
-or native topology.
+AC-VQ-004/005/006 include invalid-policy rejection, actual effective settings and
+unchanged corpus/accuracy/native algorithm, tested through the real composed host. The
+adapter policy evidence writer lives in `Reporting/NativeComparisonAdapterEvidence.cs`;
+the options type delegates its evidence operation to that helper, preserving every
+property, binding, validation rule and report key/value while keeping the combined
+partial options type within the 200-code-line limit.
+`NativeComparisonAdapterPolicyTests` executes the actual binding, validation and
+evidence operation.
 
-TASK-VQ-POLICY-001: native adapter worker owns the shared options type/validation,
-central JSON/host registration and new SurrealDB/HelixDB target injection. Root
-owns Qdrant consumption and final integration; vector worker owns PostgreSQL
-vector consumption. Join compile and native flows only after composition binding
-and every new native execution owner use the same validated policy. Existing
-unrelated runtime-policy migration stays with its owning task. AC-VQ-004/005/006
-include invalid-policy rejection, actual effective settings and unchanged
-corpus/accuracy/native algorithm, tested through the real composed host.
-
-The adapter policy evidence writer is owned by
-`Reporting/NativeComparisonAdapterEvidence.cs`; the options type delegates its
-existing evidence operation to that helper. Preserve every property, binding,
-validation rule and report key/value while keeping the combined partial options
-type within the mandatory 200-code-line limit. `NativeComparisonAdapterPolicyTests`
-continues to execute the actual binding, validation and evidence operation.
-
-TASK-VQ-CLOCK-001 joins the owner's borrowed TimeProvider rule to AC-VQ-005/006.
-The actual target passes its provider to SurrealDB/HelixDB sessions, and the
-ForVector factory passes it to the per-profile vector runner. The validated
-vector execution wrapper remains instance-owned. Native flow tests observe the
-provider's real timer creation during a native session read and its UTC read
-during a cancelled vector runner call, then verify unchanged server readback.
-The observing provider forwards to the actual system clock/timers; it does not
-replace the database, transport or storage. The lead owns this contract and
-final verification; the native worker owns these bounded propagation joins and
-the native flow helper/tests. Defaults remain composition boundaries, and no
+AC-VQ-005/006 also cover the TimeProvider rule: the actual target passes its provider
+to SurrealDB/HelixDB sessions, and the ForVector factory passes it to the per-profile
+vector runner. The validated vector execution wrapper is instance-owned. Native flow
+tests observe the provider's real timer creation during a native session read and its
+UTC read during a cancelled vector runner call, then verify unchanged server readback.
+The observing provider forwards to the actual system clock/timers and does not replace
+the database, transport or storage. Defaults remain composition boundaries, and no
 measurement or resource contract changes.
 
-All isolated worker selectors and immutable-workload override detection are bound
-from the trusted `Benchmarks` section into `IOptions<ComparisonWorkerSelectionOptions>` by `ComparisonWorkerSelection.Read`
-composition, then parsed against the frozen profile inventory before allocating
-resources. An absent selector admits the existing control/scaled families; an
-invalid or simultaneous selector rejects the worker selection. The vector worker
-owns this small configuration join and its profile-selection regressions.
+## Image-model regression
 
-
-## Current Aspire image-model regression
-
-TASK-BC-CURRENT-IMAGE-MODEL-051 maps REQ/AC-VQ-005 and
-REQ/AC-BC-FAIL-005 under ADR-109. Original Linux job112392087984 at
-301181f failed two resource-model operations because their assertions assumed
-Aspire split registry from the image string. Preserve the actual current pinned
-image strings, SHA-256, tag semantics, persistent mounts, endpoints, health and
-runner dependencies. Match the pinned Aspire annotation representation and retain
-the exact fully qualified runner image reference. No server image, topology,
-version, schema or resource bound changes in this regression repair.
-
-The worker owns only IsolatedHelixDbResourceTests and
-IsolatedSurrealDbResourceTests in ComparisonTests/BenchmarkComparisons/Cases.
-Root reviews base/proposed hashes and complete operation assertions, then runs
-these model operations through the AppHost-owned comparison runner, with full
-solution/format and exact-source Linux isolated qualification still mandatory.
-A model pass does not prove a native image pull, loaded dataset or measurements.
+REQ/AC-VQ-005 and REQ/AC-BC-FAIL-005 (ADR-109) require the SurrealDB and HelixDB
+resource-model operations (`IsolatedHelixDbResourceTests`,
+`IsolatedSurrealDbResourceTests`) to match the pinned Aspire annotation representation
+and retain the exact fully qualified runner image reference, the actual pinned image
+strings, SHA-256, tag semantics, persistent mounts, endpoints, health and runner
+dependencies. No server image, topology, version, schema or resource bound changes.
+The model operations run through the AppHost-owned comparison runner; a model pass does
+not prove a native image pull, loaded dataset or measurements.

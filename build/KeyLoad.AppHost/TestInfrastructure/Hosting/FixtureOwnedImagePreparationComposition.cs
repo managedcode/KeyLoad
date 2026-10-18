@@ -6,7 +6,7 @@ namespace KeyLoad.AppHost.Features.TestInfrastructure;
 /// <summary>Composes the original AppHost without resuming a standalone suite owner.</summary>
 internal static class FixtureOwnedImagePreparationComposition
 {
-    private const string InvalidPreparationSelection = "Fixture-owned preparation requires the validated local RF3 image selection.";
+    private const string InvalidPreparationSelection = "Fixture-owned preparation requires the validated local CLUSTER image selection.";
 
     // Aspire's direct testing factory discovers the owning AppHost DCP metadata from this frame.
     [MethodImpl(MethodImplOptions.NoInlining)]
@@ -16,7 +16,7 @@ internal static class FixtureOwnedImagePreparationComposition
         ArgumentNullException.ThrowIfNull(createNativeBuilder);
         _ = SerializationExecutionRegistration.Process.Value;
         var builder = createNativeBuilder();
-        if (AppHostOptionsRegistration.Get(builder).Control.Value.Tests is not { LocalRf3ImageEnabled: true })
+        if (AppHostOptionsRegistration.Get(builder).Control.Value.Tests is not { LocalClusterImageEnabled: true })
         {
             throw new InvalidOperationException(InvalidPreparationSelection);
         }

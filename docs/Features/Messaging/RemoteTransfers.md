@@ -66,7 +66,7 @@ before using this proof to complete the source.
 | REQ-XFER-002: target effect and dedup receipt are atomic | AC-XFER-002: repeat/unknown-ACK/reopen gives one enqueue and byte-identical receipt; failed quota/auth creates neither effect nor receipt. `RemoteTransferDestinationTests` |
 | REQ-XFER-003: only authenticated committed receipt completes source | AC-XFER-003: wrong purpose/incarnation/principal/source/target/fingerprint/tampered receipt rejects; duplicate completion is stable; source stays pending on every target failure. `RemoteTransferReceiptTests` |
 | REQ-XFER-004: retention and resources cannot lose unresolved work | AC-XFER-004: exact/excess record/byte/token/work bounds, source message removal and destination ACK/retry preserve intent/dedup; no premature GC. `RemoteTransferRetentionTests` |
-| REQ-XFER-005: Orleans owns bounded coordination and real clients | AC-XFER-005: Orleans grain calls perform source/destination/completion without network I/O under the apply gate; restart/loss at each stage through .NET and official MCP clients on the replicated cluster yields one target effect. Planned `RemoteTransferRecoveryTests`/`RemoteTransferRf3Tests` |
+| REQ-XFER-005: Orleans owns bounded coordination and real clients | AC-XFER-005: Orleans grain calls perform source/destination/completion without network I/O under the apply gate; restart/loss at each stage through .NET and official MCP clients on the replicated cluster yields one target effect. Planned `RemoteTransferRecoveryTests`/`RemoteTransferClusterTests` |
 
 ## Ordered execution and ownership
 

@@ -82,23 +82,6 @@ internal sealed class StreamTraversalNativeTests
     }
 
     [Test]
-    public async Task ActualNativeLogicalBindingInvalidatesOriginalDirectoryFenceThenFreshColdTraversalIsHealthy()
-    {
-        using var fixture = new StreamReadResourceFixture(eventCount: StreamTraversalTestProtocol.Third, protectedFields: true);
-        var original = fixture.Traverse(fixture.Traversal(limit: StreamTraversalTestProtocol.First));
-        fixture.BindOriginalPlacement();
-        var boundCut = fixture.Cut();
-        var stale = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Traverse(fixture.Traversal(cursor: original.Cursor)));
-        await Assert.That(stale.Code).IsEqualTo(ErrorCode.CursorExpired);
-        await StreamTraversalNativeAssertions.UnchangedAsync(fixture, boundCut);
-        fixture.Reopen(new());
-        await StreamTraversalNativeAssertions.PageAsync(fixture.Traverse(fixture.Traversal()),
-            [StreamTraversalTestProtocol.First, StreamTraversalTestProtocol.Second, StreamTraversalTestProtocol.Third],
-            StreamTraversalTestProtocol.Third, false);
-        await StreamTraversalNativeAssertions.UnchangedAsync(fixture, boundCut);
-    }
-
-    [Test]
     public async Task SameOriginalConfiguredExpiryRefusesCursorWithoutEffectsThenFreshCompleteTraversalIsHealthy()
     {
         var clock = new StreamTraversalObservedClock(TimeProvider.System);

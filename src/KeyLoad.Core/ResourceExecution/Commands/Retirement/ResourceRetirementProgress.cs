@@ -50,7 +50,7 @@ public sealed partial class DatabaseEngine
         if (!ResourceRetirementValidation.Same(catalog, control.Catalog)
             || !ResourceRetirementValidation.Same(
                 KeyLoad.Core.Features.ClusterRouting.Serialization.PhysicalOwnerDirectorySerialization.Read(view), control.Directory)
-            || ReadInventoryPlacementRevision(view) != control.PlacementDirectoryRevision)
+            || control.PlacementDirectoryRevision != ResourceOwnerInventoryReadValidation.EmptyRevision)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, ResourceRetirementProtocol.Changed);
         }

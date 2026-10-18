@@ -12,7 +12,7 @@ internal static class TypedEndpointJoinAssertions
     internal const string ContinuedPrefix = "continued-";
     private const int NoAttempts = 0;
 
-    internal static async Task<TypedEndpointJoinModels> CaptureAsync(RequestCqrsRf3Callers admin,
+    internal static async Task<TypedEndpointJoinModels> CaptureAsync(RequestCqrsClusterCallers admin,
         PartitionRef partition, CancellationToken token)
     {
         var first = await PublicReadAssertions.DocumentAsync(await admin.Sdk.GetAsync(TypedEndpointJoinProtocol.From(partition), token));
@@ -30,8 +30,8 @@ internal static class TypedEndpointJoinAssertions
         }
         var graph = await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.TraverseAsync(
             new(partition, TypedEndpointJoinProtocol.Graph, TypedEndpointJoinProtocol.From(partition)), token));
-        await SqlRf3Protocol.EqualAsync(graph, await SqlRf3Protocol.McpAsync<global::KeyLoad.GraphTraversal>(admin.Mcp,
-            SqlRf3Protocol.Call(partition, McpCallerTools.GraphTraverse,
+        await SqlClusterProtocol.EqualAsync(graph, await SqlClusterProtocol.McpAsync<global::KeyLoad.GraphTraversal>(admin.Mcp,
+            SqlClusterProtocol.Call(partition, McpCallerTools.GraphTraverse,
                 new TraverseRequest(partition, TypedEndpointJoinProtocol.Graph, TypedEndpointJoinProtocol.From(partition))), token));
         var hiddenRecord = hidden ?? throw new InvalidOperationException(MissingSeedRecord);
         var hiddenGraph = await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.TraverseAsync(
@@ -75,7 +75,7 @@ internal static class TypedEndpointJoinAssertions
             };
             var link = new QueueGraphLink(new(partition, TypedEndpointJoinProtocol.FromCollection, fromId),
                 TypedEndpointJoinProtocol.To(partition), TypedEndpointJoinProtocol.Label, TypedEndpointJoinProtocol.Attributes);
-            await Assert.That(source.PayloadJson).IsEqualTo(DatabaseCompositionRf3Payload.OrdinalGolden(link));
+            await Assert.That(source.PayloadJson).IsEqualTo(DatabaseCompositionClusterPayload.OrdinalGolden(link));
         }
         var from = TypedEndpointJoinProtocol.From(partition);
         var to = TypedEndpointJoinProtocol.To(partition);
@@ -88,16 +88,16 @@ internal static class TypedEndpointJoinAssertions
         {
             edges.Add(Edge(TypedEndpointJoinProtocol.Prefix + TypedEndpointJoinProtocol.MatchedMessage, from, to));
         }
-        await SqlRf3Protocol.EqualAsync(new global::KeyLoad.GraphTraversal(
+        await SqlClusterProtocol.EqualAsync(new global::KeyLoad.GraphTraversal(
             joined ? [from, to] : [from], edges.ToImmutable()), models.Graph);
-        await SqlRf3Protocol.EqualAsync(new global::KeyLoad.GraphTraversal(
+        await SqlClusterProtocol.EqualAsync(new global::KeyLoad.GraphTraversal(
             [new(partition, TypedEndpointJoinProtocol.FromCollection, TypedEndpointJoinProtocol.Hidden)], []), models.HiddenGraph);
         if (continued)
         {
             var missing = new EntityRef(partition, TypedEndpointJoinProtocol.FromCollection, TypedEndpointJoinProtocol.Missing);
             await Assert.That(models.Missing).IsNotNull();
             await RowAsync(models.Missing!, missing, MissingJson);
-            await SqlRf3Protocol.EqualAsync(new global::KeyLoad.GraphTraversal([missing, to],
+            await SqlClusterProtocol.EqualAsync(new global::KeyLoad.GraphTraversal([missing, to],
                 [Edge(ContinuedPrefix + TypedEndpointJoinProtocol.MissingMessage, missing, to)]), models.MissingGraph);
         }
         else
@@ -107,13 +107,13 @@ internal static class TypedEndpointJoinAssertions
         }
     }
 
-    internal static async Task ReplayAsync(RequestCqrsRf3Callers callers,
+    internal static async Task ReplayAsync(RequestCqrsClusterCallers callers,
         CommandRequest command, CommitReceipt receipt, CancellationToken token)
     {
         var sql = TypedEndpointJoinProtocol.Sql(command);
-        await SqlRf3Protocol.EqualAsync(receipt, await SqlRf3Protocol.SdkAsync<CommitReceipt>(callers.Sdk, sql, token));
-        await SqlRf3Protocol.EqualAsync(receipt, await SqlRf3Protocol.McpAsync<CommitReceipt>(callers.Mcp, sql, token));
-        await SqlRf3Protocol.EqualAsync(receipt, await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.CommitAsync(command, token)));
+        await SqlClusterProtocol.EqualAsync(receipt, await SqlClusterProtocol.SdkAsync<CommitReceipt>(callers.Sdk, sql, token));
+        await SqlClusterProtocol.EqualAsync(receipt, await SqlClusterProtocol.McpAsync<CommitReceipt>(callers.Mcp, sql, token));
+        await SqlClusterProtocol.EqualAsync(receipt, await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.CommitAsync(command, token)));
     }
 
     internal static PutDocument RepairMissing(TypedEndpointJoinState state)
@@ -152,7 +152,7 @@ internal static class TypedEndpointJoinAssertions
         await Assert.That(actual.Metadata.SafeFailureCode).IsNull();
         await Assert.That(actual.HeadersJson).IsEqualTo(TypedEndpointJoinProtocol.Attributes);
         var to = TypedEndpointJoinProtocol.To(partition);
-        await Assert.That(actual.PayloadJson).IsEqualTo(DatabaseCompositionRf3Payload.OrdinalGolden(
+        await Assert.That(actual.PayloadJson).IsEqualTo(DatabaseCompositionClusterPayload.OrdinalGolden(
             new QueueGraphLink(to, to, TypedEndpointJoinProtocol.Label, TypedEndpointJoinProtocol.Attributes)));
     }
 }

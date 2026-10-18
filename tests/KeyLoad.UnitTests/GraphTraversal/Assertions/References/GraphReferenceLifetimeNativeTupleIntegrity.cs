@@ -8,7 +8,7 @@ using static KeyLoad.UnitTests.Features.GraphTraversal.GraphReferenceLifetimeNat
 
 namespace KeyLoad.UnitTests.Features.GraphTraversal;
 
-/// <summary>Proves Core.Apply corruption rollback without entering the RF3 append/materializer path.</summary>
+/// <summary>Proves Core.Apply corruption rollback without entering the CLUSTER append/materializer path.</summary>
 internal static class GraphReferenceLifetimeNativeTupleIntegrity
 {
     private const int FaultAndRepairCommits = 2;

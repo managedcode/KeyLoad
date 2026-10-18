@@ -1,5 +1,4 @@
 using KeyLoad.Clustering;
-using KeyLoad.Server.Features.BlobStorage;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.Options;
 
@@ -20,9 +19,6 @@ internal sealed class RemoteModelNativeClient : GrainServiceClient<IRemoteModelG
     private readonly ReplicaSiloDiscoveryState local;
     private readonly TimeProvider clock;
     private readonly ReplicaDiscoveryLifetime lifetime;
-    private readonly IRemoteModelNativeFaultObserver? faultObserver;
-    private readonly IRemoteModelNativeReplayObserver? replayObserver;
-    private readonly INativeControlledBlobBorrowObserver? blobObserver;
 
     public RemoteModelNativeClient(IServiceProvider services, PartitionHost partition,
         IOptions<NodeOptions> options, IOptions<OrleansMembershipOptions> membership,
@@ -35,15 +31,6 @@ internal sealed class RemoteModelNativeClient : GrainServiceClient<IRemoteModelG
         this.movement = movement;
         this.local = local;
         this.clock = clock;
-        faultObserver = this.options.RequestCqrsProbe.Enabled
-            ? services.GetService<Func<IRemoteModelNativeFaultObserver>>()?.Invoke()
-                ?? services.GetService(typeof(IRemoteModelNativeFaultObserver)) as IRemoteModelNativeFaultObserver : null;
-        replayObserver = this.options.RequestCqrsProbe.Enabled
-            ? services.GetService<Func<IRemoteModelNativeReplayObserver>>()?.Invoke()
-                ?? services.GetService(typeof(IRemoteModelNativeReplayObserver)) as IRemoteModelNativeReplayObserver : null;
-        blobObserver = this.options.RequestCqrsProbe.Enabled
-            ? services.GetService<Func<INativeControlledBlobBorrowObserver>>()?.Invoke()
-                ?? services.GetService(typeof(INativeControlledBlobBorrowObserver)) as INativeControlledBlobBorrowObserver : null;
         membership.Value.Validate();
         stopping = new();
         lifetime = new(stopping, DisposeOwnedResources);
@@ -100,22 +87,17 @@ internal sealed class RemoteModelNativeClient : GrainServiceClient<IRemoteModelG
             SenderSignature = sourceMac.SignNativeRequest(request)
         };
         var effects = RemoteModelNativeEffects.MayHaveEffects(request.Channel, request.Payload);
-        var (received, priorReplayEffects) = await RemoteModelNativeObservedExchange.ExecuteAsync(this, destination, address, request, sourceMac, maximumReplyBytes,
-            blobObserver, replayObserver, faultObserver, token).ConfigureAwait(false);
+        var received = await DispatchAsync(address, request, token).ConfigureAwait(false);
         RemoteModelNativeReply reply;
         try
         {
-            if (faultObserver is not null)
-            {
-                await faultObserver.AfterDispatchAsync(request, received, token).ConfigureAwait(false);
-            }
             reply = await VerifyReplyAsync(destination, request, received, maximumReplyBytes, token).ConfigureAwait(false);
         }
-        catch (Exception error) when ((effects || priorReplayEffects) && NativeCqrsBoundaryErrors.IsNonFatal(error))
+        catch (Exception error) when (effects && NativeCqrsBoundaryErrors.IsNonFatal(error))
         {
             throw Errors.Fail(ErrorCode.UnknownWriteOutcome, RemoteModelNativeProtocol.Unavailable, error);
         }
-        return RemoteModelNativeObservedExchange.Complete(reply, request, effects, priorReplayEffects);
+        return RemoteModelNativeObservedExchange.Complete(reply, request, effects);
     }
 
     internal Task<RemoteModelNativeReply> VerifyReplyAsync(RegisteredPhysicalOwnerV1 destination,
@@ -140,29 +122,6 @@ internal sealed class RemoteModelNativeClient : GrainServiceClient<IRemoteModelG
             throw Errors.Fail(effects ? ErrorCode.UnknownWriteOutcome : ErrorCode.OwnershipLost, RemoteModelNativeProtocol.Unavailable, error);
         }
     }
-
-    internal async Task RequireBeforeDispatchAsync(RegisteredPhysicalOwnerV1 destination,
-        RemoteModelNativeRequest request, RemoteDocumentMac sourceMac, CancellationToken token)
-    {
-        token.ThrowIfCancellationRequested();
-        await RequireCurrentAsync(destination, request.DestinationVoter, request.DestinationSiloAddress, token).ConfigureAwait(false);
-        await movement.RequireCallerAsync(request.CallerVoter, request.CallerSiloAddress, token).ConfigureAwait(false);
-        token.ThrowIfCancellationRequested();
-        if (!sourceMac.VerifyNativeRequest(request))
-        {
-            throw Errors.Fail(ErrorCode.Unauthenticated, RemoteModelNativeProtocol.InvalidProof);
-        }
-        if (request.ExpiresAt <= clock.GetUtcNow() || local.Read().SiloAddress != request.CallerSiloAddress)
-        {
-            throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteModelNativeProtocol.Unavailable);
-        }
-    }
-
-    internal Task<RemoteModelNativeReplayResult> ReplayCapturedAsync(RegisteredPhysicalOwnerV1 destination,
-        RemoteModelNativeRequest original, long maximumReplyBytes, RemoteModelNativeReplayVariation variation,
-        RemoteModelNativeReplayExchange owner, CancellationToken token)
-        => RemoteModelNativeReplayExecution.ExecuteAsync(this, destination, original, maximumReplyBytes,
-            variation, owner, options, partition, movement, local, clock, token);
 
     internal Task RequireCurrentAsync(RegisteredPhysicalOwnerV1 destination, string address, CancellationToken token)
         => RequireCurrentAsync(destination, destination.Owner.VoterIds[SelectedVoter], address, token);

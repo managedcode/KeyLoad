@@ -20,11 +20,11 @@ internal static class QueueLifecyclePublicCold
             await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(node, WaitBehavior.WaitOnResourceUnavailable, token);
         }
         var failures = new List<Exception>();
-        RequestCqrsRf3Callers? callers = null;
+        RequestCqrsClusterCallers? callers = null;
         NodeStatus? after = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            callers = await RequestCqrsRf3Callers.ConnectAsync(fixture.App, McpCallerProtocol.Node1, state.OperatorKey, token);
+            callers = await RequestCqrsClusterCallers.ConnectAsync(fixture.App, McpCallerProtocol.Node1, state.OperatorKey, token);
             after = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.StatusAsync(token));
             await Assert.That(after.NodeId).IsEqualTo(before.NodeId);
             await Assert.That(after.Incarnation).IsEqualTo(before.Incarnation);
@@ -48,7 +48,7 @@ internal static class QueueLifecyclePublicCold
         return after!;
     }
 
-    private static async Task FinalAsync(RequestCqrsRf3Callers callers, QueueLifecyclePublicState state, CancellationToken token)
+    private static async Task FinalAsync(RequestCqrsClusterCallers callers, QueueLifecyclePublicState state, CancellationToken token)
     {
         await QueueLifecyclePublicAssertions.TerminalAsync(callers, state, token);
         await QueueLifecyclePublicAssertions.LiteralAsync(callers, state, QueueLifecyclePublicProtocol.Healthy,

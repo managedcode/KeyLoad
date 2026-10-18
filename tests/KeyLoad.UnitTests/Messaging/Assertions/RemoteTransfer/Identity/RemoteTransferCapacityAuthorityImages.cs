@@ -30,7 +30,7 @@ internal static class RemoteTransferCapacityAuthorityImages
     private static async Task NativeRowsAsync(RemoteTransferDatabase fixture, RemoteTransferCapacityAuthorityCompleted item)
     {
         var transfer = item.Transfer;
-        var placement = fixture.Database.ReadAtomicPartitionPlacement(RemoteTransferDatabase.RootPrincipal, new(First, fixture.DestinationPartition));
+        var placement = fixture.Database.ReadAtomicPartitionPlacement(RemoteTransferDatabase.RootPrincipal, fixture.DestinationPartition);
         var maximum = new CommitToken(placement.Incarnation, fixture.DestinationPartition.AtomicPartitionId, long.MaxValue, placement.PlacementEpoch);
         var fingerprint = JsonData.Fingerprint(transfer.Mutation.Message);
         var verified = fixture.Database.Verify<RemoteTransferIntentClaims>(transfer.Intent.IntentToken);

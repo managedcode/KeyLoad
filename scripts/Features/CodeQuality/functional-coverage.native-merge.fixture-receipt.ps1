@@ -1,4 +1,4 @@
-$script:FcNativeFixtureReceipt = [ordered]@{ Invalid = 'The original RF3 fixture receipt is incomplete or mismatched.' }
+$script:FcNativeFixtureReceipt = [ordered]@{ Invalid = 'The original CLUSTER fixture receipt is incomplete or mismatched.' }
 
 function Assert-FcNativeFixtureReceipt([string] $Root, [object] $Fixture, [object] $Manifest,
     [object] $Run, [object[]] $Nodes, [object] $Bounds) {
@@ -8,7 +8,7 @@ function Assert-FcNativeFixtureReceipt([string] $Root, [object] $Fixture, [objec
         'sourceManifestSha256','caseIdentities','sourceImage','coverageImage','server','collector','nodes')
     if ($receipt.schemaVersion -ne 1 -or $receipt.fixtureId -cne $Fixture.fixtureId -or
         $receipt.functionalRunId -cne $Fixture.functionalRunId -or $receipt.functionalRunId -cne $Run.runId -or
-        $receipt.suite -cne 'rf3' -or $Run.suite -cne 'rf3' -or
+        $receipt.suite -cne 'cluster' -or $Run.suite -cne 'cluster' -or
         $receipt.sourceRevision -cne $Manifest.value.sourceRevision -or
         $receipt.sourceManifestSha256 -cne $Fixture.sourceManifestSha256 -or
         $read.file.sha256 -cne $Fixture.fixtureReceipt.sha256) { throw $script:FcNativeFixtureReceipt.Invalid }

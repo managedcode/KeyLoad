@@ -16,7 +16,6 @@ internal sealed class ControlledPartitionMovementNode : IDisposable
     private ControlledPartitionMovementNativeNode native;
     private readonly IOptions<DatabaseLimits> limits;
     private bool closed;
-    private IPartitionMovementCheckpointVerifier checkpointVerifier = UnavailablePartitionMovementCheckpointVerifier.Instance;
     internal ControlledPartitionMovementNode(PhysicalShardRecord owner,
         long maximumFixtureEntries = ControlledPartitionMovementNativeJournal.SupportingHistoryEntries, DatabaseLimits? limits = null)
     {
@@ -41,7 +40,6 @@ internal sealed class ControlledPartitionMovementNode : IDisposable
             global::KeyLoad.CrashHost.CrashExecutionOptions.BlobExecution(),
             global::KeyLoad.CrashHost.CrashExecutionOptions.NativeClaimsExecution(),
             global::KeyLoad.CrashHost.CrashExecutionOptions.TimeSeriesExecution(),
-            global::KeyLoad.CrashHost.CrashExecutionOptions.MovementCheckpoints(), checkpointVerifier,
             Database.EvaluationClock, PhysicalOwner);
 
     internal ZoneTreeStore Store => native.Store;
@@ -73,21 +71,13 @@ internal sealed class ControlledPartitionMovementNode : IDisposable
     internal void OpenAfterChild()
     {
         ObjectDisposedException.ThrowIf(closed, this);
-        native = new(root, PhysicalOwner, checkpointVerifier, maximumFixtureEntries: MaximumFixtureEntries, limits: limits);
-    }
-    internal void ReopenWithCheckpointVerifier(IPartitionMovementCheckpointVerifier verifier)
-    {
-        ArgumentNullException.ThrowIfNull(verifier);
-        ObjectDisposedException.ThrowIf(closed, this);
-        native.Dispose();
-        checkpointVerifier = verifier;
-        native = new(root, PhysicalOwner, checkpointVerifier, maximumFixtureEntries: MaximumFixtureEntries, limits: limits);
+        native = new(root, PhysicalOwner, maximumFixtureEntries: MaximumFixtureEntries, limits: limits);
     }
     internal void Reopen()
     {
         ObjectDisposedException.ThrowIf(closed, this);
         native.Dispose();
-        native = new(root, PhysicalOwner, checkpointVerifier, maximumFixtureEntries: MaximumFixtureEntries, limits: limits);
+        native = new(root, PhysicalOwner, maximumFixtureEntries: MaximumFixtureEntries, limits: limits);
     }
     internal KeyLoadException ReopenAfterExpectedCorruptApply()
     {
@@ -106,7 +96,7 @@ internal sealed class ControlledPartitionMovementNode : IDisposable
         {
             throw new InvalidOperationException("The original faulted apply worker did not retain its corruption.");
         }
-        native = new(root, PhysicalOwner, checkpointVerifier, maximumFixtureEntries: MaximumFixtureEntries, limits: limits);
+        native = new(root, PhysicalOwner, maximumFixtureEntries: MaximumFixtureEntries, limits: limits);
         return original;
     }
     public void Dispose()

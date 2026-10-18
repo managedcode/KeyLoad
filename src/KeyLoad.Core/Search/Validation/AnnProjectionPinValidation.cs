@@ -4,7 +4,6 @@ namespace KeyLoad.Core.Features.Search;
 
 internal static class AnnProjectionPinValidation
 {
-    private const int PlacementVersion = 1;
     private const string OwnerLost = "The ANN maintenance owner no longer matches the canonical placement.";
     private const string InvalidScope = "The ANN projection pin does not cover its canonical source.";
     private static readonly string[] Kinds = [MutationDiscriminatorNames.PutDocument,
@@ -53,7 +52,7 @@ internal static class AnnProjectionPinValidation
     internal static void RequireOwner(DatabaseEngine database, IKeyValueView view,
         PrincipalRecord principal, PartitionRef partition, AnnMaintenanceRequest request)
     {
-        var actual = database.ReadAtomicPartitionPlacement(view, principal.Id, new(PlacementVersion, partition));
+        var actual = database.ReadAtomicPartitionPlacement(view, principal.Id, partition);
         var expected = request.Placement;
         if (database.Store.Identity.NodeId != request.NodeId
             || database.Store.Identity.Incarnation != expected.Incarnation

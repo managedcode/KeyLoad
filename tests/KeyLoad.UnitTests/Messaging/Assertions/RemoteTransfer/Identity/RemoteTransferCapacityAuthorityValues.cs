@@ -12,7 +12,7 @@ internal static class RemoteTransferCapacityAuthorityValues
     internal static async Task<OperationResult> SubmitAsync(RemoteTransferDatabase fixture, CommandRequest request,
         long? originalAcceptPosition = null)
     {
-        var placement = fixture.Database.ReadAtomicPartitionPlacement(RemoteTransferDatabase.RootPrincipal, new(First, request.Partition));
+        var placement = fixture.Database.ReadAtomicPartitionPlacement(RemoteTransferDatabase.RootPrincipal, request.Partition);
         var token = new CommitToken(placement.Incarnation, request.Partition.AtomicPartitionId,
             checked(fixture.Store.Position + First), placement.PlacementEpoch);
         var expected = new CommitReceipt(request.CommandId, token,

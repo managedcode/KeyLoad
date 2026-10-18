@@ -91,7 +91,7 @@ internal static class AppliedOutcomeDefinitiveRefusalAssertions
 
     internal static CommitToken NextToken(DatabaseEngine db, ZoneTreeStore store, PartitionRef partition)
     {
-        var placement = db.ReadAtomicPartitionPlacement("root", new(1, partition));
+        var placement = db.ReadAtomicPartitionPlacement("root", partition);
         return new(placement.Incarnation, partition.AtomicPartitionId, checked(store.Position + 1), placement.PlacementEpoch);
     }
 

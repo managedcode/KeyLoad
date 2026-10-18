@@ -11,7 +11,7 @@ internal static class QueueByteSublimitPublicAssertions
     internal const string Healthy = "byte-healthy-third";
     internal const string Witness = "byte-admission-witness";
 
-    internal static async Task ImageAsync(RequestCqrsRf3Callers callers, QueueByteSublimitPublicState state,
+    internal static async Task ImageAsync(RequestCqrsClusterCallers callers, QueueByteSublimitPublicState state,
         MessageMetadata first, MessageMetadata second, CancellationToken token)
     {
         await QueueLeasedCancelPublicAssertions.MessageAsync(callers, state.Owner, First,
@@ -26,7 +26,7 @@ internal static class QueueByteSublimitPublicAssertions
         await Assert.That(witness.Revision).IsEqualTo(1L);
     }
 
-    internal static async Task RefuseAsync(RequestCqrsRf3Callers callers, QueueByteSublimitPublicState state,
+    internal static async Task RefuseAsync(RequestCqrsClusterCallers callers, QueueByteSublimitPublicState state,
         CommandRequest request, CancellationToken token)
     {
         var result = await callers.Sdk.CommitAsync(request, token);
@@ -46,7 +46,7 @@ internal static class QueueByteSublimitPublicAssertions
         state.Refusals.Add((request, original));
     }
 
-    internal static async Task HistoryAsync(RequestCqrsRf3Callers callers,
+    internal static async Task HistoryAsync(RequestCqrsClusterCallers callers,
         QueueByteSublimitPublicState state, CancellationToken token)
     {
         await QueueLifecyclePublicRoutes.ReplayAsync(callers, state.Owner, token);
@@ -60,14 +60,14 @@ internal static class QueueByteSublimitPublicAssertions
             await QueueLifecyclePublicRoutes.RefusedAsync(callers, state.Owner,
                 original.Request, ErrorCode.ResourceExhausted, token);
         }
-        await SagaTimeoutRf3Assertions.AssertSdkErrorAsync(
+        await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(
             await callers.Sdk.ReceiveAsync(state.Request, token), ErrorCode.StaleLease);
         await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(
             McpCallerTools.MessagesReceive, state.Request, token), ErrorCode.StaleLease, true);
         foreach (var action in new[] { DeliveryAction.Ack, DeliveryAction.Nack, DeliveryAction.Renew })
         {
             var old = new DeliveryCommand(Guid.NewGuid(), state.Owner.Lane, state.Delivery.Token, action);
-            await SagaTimeoutRf3Assertions.AssertSdkErrorAsync(await callers.Sdk.CompleteAsync(old, token), ErrorCode.StaleLease);
+            await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(await callers.Sdk.CompleteAsync(old, token), ErrorCode.StaleLease);
             await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(
                 McpCallerTools.MessagesComplete, old, token), ErrorCode.StaleLease, true);
         }

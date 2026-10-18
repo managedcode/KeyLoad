@@ -5,7 +5,7 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 internal sealed class Q2CapabilityWholeFlowTests
 {
     [Test]
-    public async Task AcKl045Q2001PreservedJsonAndNativeAst2FixturesExecuteCompleteLiteralJoin()
+    public async Task PreservedJsonAndNativeAst2FixturesExecuteCompleteLiteralJoin()
     {
         using var database = new TestDatabase();
         SqlInnerJoinRejectionFixture.Seed(database);
@@ -26,7 +26,7 @@ internal sealed class Q2CapabilityWholeFlowTests
     [Arguments("explain")]
     [Arguments("alias")]
     [Arguments("self")]
-    public async Task AcKl045Q2001RoundtrippedUnsupportedProfileDoesNoNativeReadAndFollowingAst2Completes(string kind)
+    public async Task RoundtrippedUnsupportedProfileDoesNoNativeReadAndFollowingAst2Completes(string kind)
     {
         using var database = new TestDatabase();
         SqlInnerJoinRejectionFixture.Seed(database);

@@ -224,7 +224,7 @@ function Get-PsmScriptInventory([string] $Root) {
         $item = Get-Item -LiteralPath $path -Force
         if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0 -or
             $item -isnot [IO.FileInfo]) { throw $script:Psm.InvalidInventory }
-        $include = (Test-FcTaskAcceptanceScriptName $item.Name) -or $item.Name -ceq '.dockerignore'
+        $include = $item.Name -ceq '.dockerignore'
         if ($item.Name.StartsWith('functional-coverage', [StringComparison]::Ordinal)) {
             $include = $false
             foreach ($extension in $script:Psm.ScriptExtensions) {
@@ -267,7 +267,7 @@ function Get-PsmManifest([string] $Root, [object[]] $ScriptInventory) {
     foreach ($item in @(
         [ordered]@{ suite = 'unit'; project = 'KeyLoad.UnitTests'; file = 'functional-coverage.test-image.unit.json' },
         [ordered]@{ suite = 'recovery'; project = 'KeyLoad.RecoveryTests'; file = 'functional-coverage.test-image.recovery.json' },
-        [ordered]@{ suite = 'rf3'; project = 'KeyLoad.IntegrationTests'; file = 'functional-coverage.test-image.rf3.json' }
+        [ordered]@{ suite = 'cluster'; project = 'KeyLoad.IntegrationTests'; file = 'functional-coverage.test-image.cluster.json' }
     )) {
         $bytes = ConvertTo-PsmJsonBytes $testImages[$item.project]
         if ($sidecarBytes -gt ($script:Psm.MaximumManifestBytes - $bytes.Length)) { throw $script:Psm.InvalidReceipt }
@@ -289,7 +289,7 @@ function Get-PsmManifest([string] $Root, [object[]] $ScriptInventory) {
         compiledTestsManifest = @(
             [ordered]@{ suite = 'unit'; fileName = 'functional-coverage.test-image.unit.json'; sha256 = $references[0].sha256 },
             [ordered]@{ suite = 'recovery'; fileName = 'functional-coverage.test-image.recovery.json'; sha256 = $references[1].sha256 },
-            [ordered]@{ suite = 'rf3'; fileName = 'functional-coverage.test-image.rf3.json'; sha256 = $references[2].sha256 }
+            [ordered]@{ suite = 'cluster'; fileName = 'functional-coverage.test-image.cluster.json'; sha256 = $references[2].sha256 }
         )
         compilationProducer = $producer
         contributors = @(Get-PsmCaseInventory $Root)

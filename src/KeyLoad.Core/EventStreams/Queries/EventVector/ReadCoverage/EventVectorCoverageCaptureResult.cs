@@ -8,7 +8,6 @@ public sealed partial class DatabaseEngine
     private static EventVectorCoverageCapture EventVectorCaptureResult(EventFeedControlRequest request,
         int groupOrdinal, PhysicalShardRecord sourceOwner, PrincipalRecord principal, StoreIdentity identity,
         long storeCut, long appliedCut, EventVectorCoverageCatalog catalog, EventVectorRosterReadResult roster,
-        EventVectorCoverageRow? directory, ImmutableArray<EventVectorCoverageRow>.Builder placements,
         ImmutableArray<EventVectorCoverageRow>.Builder heads, ReadOnlyMemory<byte> entries)
         => new()
         {
@@ -28,8 +27,6 @@ public sealed partial class DatabaseEngine
             EntryChecksum = EventVectorEntryEncoding.Digest(entries),
             PhysicalCatalog = catalog.CatalogRow,
             RegisteredOwnerRows = [catalog.OwnersRow],
-            PlacementRows = placements.ToArray(),
-            LogicalDirectory = directory,
             HasMore = false,
             AtomicPartitionRosterRows = roster.Rows.ToArray(),
             SourceHeadRows = heads.ToArray(),

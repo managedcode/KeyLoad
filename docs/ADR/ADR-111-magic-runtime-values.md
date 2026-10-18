@@ -34,10 +34,9 @@ flowchart LR
     Constants --> Gates[Real compiler regressions and strict build]
 ```
 
-Ordered implementation: TASK-CQ-LITERALS-001 read-only inventory; 002 lead-owned
-semantic rules/shared docs/configuration; 003 disjoint new compiler regressions;
-004 diagnostic-driven constant refactoring and lead-owned final integration. Lead planning
-freezes scope before write workers begin, reviews every diff and runs all gates.
+Ordered implementation: read-only inventory; semantic rules/shared docs/configuration;
+new compiler regressions; diagnostic-driven constant refactoring and final integration.
+Scope is frozen before writes, every diff is reviewed and all gates run.
 No runtime public signature, dependency, format, trust or topology change occurs.
 Rollout is a coherent rebuild. Rollback reverts these new rules and preserving
 constant extractions together; it never removes existing rules or persisted data.
@@ -46,7 +45,7 @@ Tests compile against real pinned SDK and framework metadata before diagnostic
 assertions. Verify exact spans, named constants, direct/nested arguments, aliases,
 overloads, generated paths and unrelated methods. Source-bound coverage inventory
 includes every new executable helper and both pipelines with unchanged80/70/90
-thresholds. Use only the Aspire-owned test entry, then formatter and final strict
-solution Release build. Complete existing unit/scalar/recovery/RF3 gates remain
+thresholds. Use only the native TUnit test entry, then formatter and final strict
+solution Release build. Complete existing unit/scalar/recovery/cluster gates remain
 mandatory. Baseline and new failures stay distinct and honest; no passing scoped
 check establishes complete-source or Linux qualification.

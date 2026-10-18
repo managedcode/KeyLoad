@@ -17,7 +17,7 @@ internal static class BlobPublishedRowReadFenceAssertions
     private const long FutureRevision = 2L;
     private const long BeyondFourBytes = 5L;
 
-    internal static async Task<OutboxStatus> BaselineAsync(RequestCqrsRf3Callers administrator, RequestCqrsRf3Callers creator,
+    internal static async Task<OutboxStatus> BaselineAsync(RequestCqrsClusterCallers administrator, RequestCqrsClusterCallers creator,
         BlobSupersessionPublicTrial.Version publication, CancellationToken token)
     {
         var baseline = await McpCallerAssertions.SdkSuccessAsync(
@@ -26,18 +26,18 @@ internal static class BlobPublishedRowReadFenceAssertions
         return baseline;
     }
 
-    internal static async Task ObserveAsync(RequestCqrsRf3Callers administrator, RequestCqrsRf3Callers creator,
+    internal static async Task ObserveAsync(RequestCqrsClusterCallers administrator, RequestCqrsClusterCallers creator,
         BlobSupersessionPublicTrial.Version publication, OutboxStatus baseline, CancellationToken token)
     {
         await BlobRowCreatorPublicAssertions.CurrentAsync(creator, publication, token);
-        await SqlRf3Protocol.EqualAsync(baseline, await McpCallerAssertions.SdkSuccessAsync(
+        await SqlClusterProtocol.EqualAsync(baseline, await McpCallerAssertions.SdkSuccessAsync(
             await administrator.Sdk.OutboxStatusAsync(publication.Begin.Blob.Partition, token)));
-        await SqlRf3Protocol.EqualAsync(baseline, (await McpCallerAssertions.SuccessAsync<OutboxStatus>(
+        await SqlClusterProtocol.EqualAsync(baseline, (await McpCallerAssertions.SuccessAsync<OutboxStatus>(
             await administrator.Mcp.CallAsync(McpCallerTools.OutboxStatus,
                 new GetOutboxStatusRequest(publication.Begin.Blob.Partition), token))).Value);
     }
 
-    internal static async Task RunAsync(RequestCqrsRf3Callers administrator, RequestCqrsRf3Callers other, RequestCqrsRf3Callers creator,
+    internal static async Task RunAsync(RequestCqrsClusterCallers administrator, RequestCqrsClusterCallers other, RequestCqrsClusterCallers creator,
         string credential, string privateValue, BlobSupersessionPublicTrial.Version publication,
         OutboxStatus baseline, CancellationToken token)
     {
@@ -55,14 +55,14 @@ internal static class BlobPublishedRowReadFenceAssertions
         }
     }
 
-    private static async Task FailureAsync(RequestCqrsRf3Callers caller, BlobReadRequest request,
+    private static async Task FailureAsync(RequestCqrsClusterCallers caller, BlobReadRequest request,
         ErrorCode code, string detail, string safeDetail, string credential, string privateValue,
         Func<Task> healthy, CancellationToken token)
     {
         var sdk = await caller.Sdk.ReadBlobRangeAsync(request, token);
         await Assert.That(sdk.IsFailed).IsTrue();
         await Assert.That(sdk.Value).IsNull();
-        await SqlRf3Protocol.EqualAsync(Errors.Problem(code, detail), sdk.Problem!);
+        await SqlClusterProtocol.EqualAsync(Errors.Problem(code, detail), sdk.Problem!);
         await healthy();
         var reply = await caller.Mcp.CallAsync(RangeTool, request, token);
         await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true);

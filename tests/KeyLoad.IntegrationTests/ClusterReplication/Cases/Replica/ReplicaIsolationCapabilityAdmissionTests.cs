@@ -12,7 +12,7 @@ internal sealed class ReplicaIsolationCapabilityAdmissionTests
     private const string Source = "fixture-source";
     private const string Network = "fixture-network";
     private static readonly Guid Incarnation = Guid.Parse("45c96938-9c08-4474-ab8e-186bfedffafc");
-    private const string RowPrefix = "{\"schemaVersion\":3,\"kind\":\"OwnedRf3NamespaceAdmission\",\"firstMismatch\":\"";
+    private const string RowPrefix = "{\"schemaVersion\":3,\"kind\":\"OwnedClusterNamespaceAdmission\",\"firstMismatch\":\"";
     private const string RowNetwork = "\",\"networkModePresent\":true,\"attachedNamePresent\":true,\"attachedIdPresent\":true,\"modeMatchesAttachedName\":false,\"modeMatchesAttachedId\":true,\"singleCapability\":";
 
     [Test]

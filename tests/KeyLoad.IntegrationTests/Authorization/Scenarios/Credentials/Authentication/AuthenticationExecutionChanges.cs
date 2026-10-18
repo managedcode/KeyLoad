@@ -54,6 +54,6 @@ internal static class AuthenticationExecutionChanges
     }
 
     private static async Task PersistAsync(KeyLoadClient root, PrincipalRecord expected, CancellationToken token)
-        => await SqlRf3Protocol.EqualAsync(expected,
+        => await SqlClusterProtocol.EqualAsync(expected,
             await McpCallerAssertions.SdkSuccessAsync(await root.ConfigurePrincipalAsync(Guid.NewGuid(), expected, token)));
 }

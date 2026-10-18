@@ -7,24 +7,24 @@ internal static class SubscriptionGroupLeaderFailoverFlow
 {
     private const int RequiredVoters = 3;
     private const int FirstNode = 0;
-    private const string LeaderMissing = "The actual RF3 leader was not reported.";
+    private const string LeaderMissing = "The actual CLUSTER leader was not reported.";
     private const string LeaderLossReason = "subscription-gap-leader-loss";
     internal static async Task RunAsync(ClusterFixture fixture, SubscriptionIndependentCheckpointR52State state,
         CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        var statuses = new NodeStatus[SubscriptionFilterRf3Protocol.Nodes.Length];
+        var statuses = new NodeStatus[SubscriptionFilterClusterProtocol.Nodes.Length];
         for (var index = FirstNode; index < statuses.Length; index++)
         {
             statuses[index] = ClusterReplicationTestSupport.Success(
-                await fixture.Client(SubscriptionFilterRf3Protocol.Nodes[index]).StatusAsync(token));
+                await fixture.Client(SubscriptionFilterClusterProtocol.Nodes[index]).StatusAsync(token));
             await Assert.That(statuses[index].Voters).IsEqualTo(RequiredVoters);
         }
         var originalLeader = new Uri(statuses[FirstNode].Leader
             ?? throw new InvalidOperationException(LeaderMissing));
-        var leader = SubscriptionFilterRf3Protocol.Nodes.Single(node =>
+        var leader = SubscriptionFilterClusterProtocol.Nodes.Single(node =>
             string.Equals(node, originalLeader.Host, StringComparison.Ordinal));
-        var survivors = SubscriptionFilterRf3Protocol.Nodes.Where(node => node != leader).ToArray();
+        var survivors = SubscriptionFilterClusterProtocol.Nodes.Where(node => node != leader).ToArray();
         var failures = new List<Exception>();
         var stopped = false;
         await ServerFailureObserver.ObserveAsync(async () =>

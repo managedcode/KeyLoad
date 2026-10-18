@@ -33,4 +33,4 @@ Implementation owners retain the canonical BenchmarkComparisons feature, isolate
 3. Authenticate source, run, attempt, job, artifact, inputs and terminal result for every planned slot.
 4. Publish only after complete current-cohort validation and required source/browser/coverage/provider gates.
 
-Root owns the shared plan, workflows, aggregate, Website and final integration. Target owners change only their named BenchmarkComparisons slices. Local source or development results are not delivered-source qualification.
+The shared plan, workflows, aggregate and Website have a single owner; target code changes only its named BenchmarkComparisons slices. Local source or development results are not delivered-source qualification.

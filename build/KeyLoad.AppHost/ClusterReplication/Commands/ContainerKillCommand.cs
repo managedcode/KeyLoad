@@ -3,7 +3,7 @@ using KeyLoad.AppHost.Hosting;
 
 namespace KeyLoad.AppHost.Features.ClusterReplication;
 
-/// <summary>Registers an abrupt fault only on explicitly selected, ephemeral RF3 test resources.</summary>
+/// <summary>Registers an abrupt fault only on explicitly selected, ephemeral CLUSTER test resources.</summary>
 internal static class ContainerKillCommand
 {
     private const string DisplayName = "Test SIGKILL";

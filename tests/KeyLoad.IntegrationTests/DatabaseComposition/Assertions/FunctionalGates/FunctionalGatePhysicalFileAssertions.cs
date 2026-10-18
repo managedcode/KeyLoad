@@ -30,7 +30,7 @@ internal static class FunctionalGatePhysicalFileAssertions
                 throw new InvalidOperationException(Failure);
             }
             var directory = await ReadMountAsync(container, Path.Combine(fixture.Root, name), token);
-            var status = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, name, fixture.AdminKey,
+            var status = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, name, fixture.AdminKey,
                 async caller =>
                 {
                     var sdk = await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.StatusAsync(token));

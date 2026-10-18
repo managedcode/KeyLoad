@@ -1,27 +1,29 @@
 # KeyLoad.Replication
 
-## Purpose and entry points
-- Owns cluster coordination, replication state machine, durable log, bootstrap and peer-security behavior.
-- Main types: `ClusterCoordinator`, `DurableRaftLog`, `ReplicatedStateMachine`, `ClusterBootstrap`, and `PeerSecurity` in the correspondingly named files.
+## Purpose, entry points and ownership
 
-## Ownership and boundaries
+- Owns the replica-copy path: copying committed records to the `KeyLoad:ReplicaCount` silo-local ZoneTree owners through ordinary Orleans grain/Grain Service calls with majority acknowledgement, plus the durable replica log and recovery behind it.
+- Main sources: `ClusterReplication/` and `StorageRecovery/` in this project.
 - Replication feature code belongs under `<SliceName>/` with matching `docs/Features/<SliceName>.md`; this project does not own Orleans activation routing or node-local physical storage.
-- Orleans is the cluster foundation and routes commands. Atomic partition identity is distinct from physical placement; node-local `PartitionHost` owns storage, journals, file locks and apply gate.
-- Existing consensus implementation and root-level files are migration debt under current root policy. Do not add DotNext cluster packages, weaken replica acknowledgements, or present process-kill recovery as power-loss durability.
-
-## Commands and evidence
-- GitHub Actions solution build: `dotnet build KeyLoad.slnx --no-restore --configuration Release`.
-- Replication/recovery behavior is exercised through the actual Aspire-owned caller after solution restore/build: `dotnet run --project build/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=recovery`, and the same caller with `--KeyLoadTests:Suite=rf3` for Docker RF3 SDK/MCP qualification. AppHost owns native test-runner execution and shutdown and, for RF3, every Docker voter and readiness dependency; direct test execution is not an alternative caller entry. Owner-authorized local runs are development evidence; exact-source Linux GitHub qualification with all required original artifacts remains mandatory.
-
-## Skills and protected risks
+- Microsoft Orleans does all clustering (membership, discovery, failure detection, directory, placement, activation migration, communication); this project adds none of its own and holds no consensus, leaders, votes, peer transport or peer authentication. The silo-local ZoneTree owner (node-local `PartitionHost`) owns storage, journals, file locks and apply gate; files never move with activations. See [ADR-136](../../docs/ADR/ADR-136-native-orleans-partition-ownership.md).
 - Owner-authorized applicable skill: global [Orleans](/Users/ksemenenko/.codex/skills/orleans/SKILL.md) 3.1.1; apply its state ownership and failure-model guidance. The prior bootstrap prohibition remains for other unapproved installations.
 - Applicable skills: none installed; skill installation is prohibited by owner direction.
-- Ordering, quorum, log durability, snapshot install and peer trust are protected boundaries. Qualification requires exact GitHub Actions artifacts and topology evidence.
+- Ordering, majority acknowledgement, log durability and recovery are protected boundaries. Qualification requires exact GitHub Actions artifacts and topology evidence.
 
-## Read-first and canonical slice ownership
-- Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
-- Owned slices: `ClusterReplication` and `StorageRecovery`; target paths: `ClusterReplication/` and `StorageRecovery/`.
-- `ClusterReplication/Execution/Submission/ClusterCoordinator.cs`, `ClusterReplication/Storage/DurableReplicaLog.cs`, `ClusterReplication/Execution/Recovery/ReplicaMaterializer.cs`, `ClusterReplication/Execution/Submission/ClusterCoordinator.cs`, and `ClusterReplication/Identity/PeerSecurity.cs` are current slice entry points.
-## Feature-local responsibility folders
+## Boundaries and protected risks
 
-- Every populated `<SliceName>/` source area MUST group feature-owned C# files in populated child folders by their actual responsibility (for example `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Serialization/`, `Validation/`, `Recovery/`, `Admission/`, `Lifecycle/`, `Storage/`, or `Execution/` where applicable). Do not leave a flat mix of roles or create empty placeholders. Keep each role local to its owning feature; preserve namespaces, public signatures, serialization aliases/IDs, and source bytes during structural moves. Keep genuine project composition roots and shared cross-feature building blocks outside feature slices.
+Follow the [root policy](../../AGENTS.md) and the owning feature specification. Keep changes in their actual owner, preserve unrelated work, and remove replaced code together with exclusive callers and fixtures. Use native Orleans calls for distributed execution and silo-local ZoneTree owners for files. Preserve persisted authorization, operation correctness, resource bounds, cancellation and joined shutdown. Never turn a static check or focused test into a claim of complete runtime qualification.
+
+## Commands and verification
+
+From the repository root:
+
+```sh
+dotnet build KeyLoad.slnx --no-restore --configuration Release -warnaserror
+```
+
+Use the root's complete solution, native TUnit, real process recovery and Aspire SDK/MCP gates as applicable. Local checks are development evidence; delivered-source qualification and public measurements require exact-source Linux GitHub artifacts. Do not weaken compiler, analyzer, source-identity, coverage or runtime assertions.
+
+## Skills
+
+Use the installed Orleans skill for Orleans design and the relevant installed formatting, Aspire or diagnostics skill when the task needs it. Follow explicit owner scope and dependency-adoption rules.

@@ -5,7 +5,7 @@ using static KeyLoad.UnitTests.Features.ResourceExecution.ResourceRetirementDrop
 
 namespace KeyLoad.UnitTests.Features.ResourceExecution;
 
-/// <summary>Local native engine and real WAL only; this is not a RF3 or positive D3/D4 retirement receipt.</summary>
+/// <summary>Local native engine and real WAL only; this is not a CLUSTER or positive D3/D4 retirement receipt.</summary>
 internal static class ResourceRetirementDropParentNativeFlow
 {
     internal static async Task RunAsync(TestDatabase fixture)

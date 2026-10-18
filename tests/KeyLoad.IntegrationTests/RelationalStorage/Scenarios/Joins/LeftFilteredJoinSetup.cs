@@ -29,7 +29,7 @@ internal static class LeftFilteredJoinSetup
         };
         foreach (var definition in new[] { left, right })
         {
-            await SqlRf3Protocol.SdkAsync<ResourceDefinition>(sdk, SqlRf3Protocol.Call(partition,
+            await SqlClusterProtocol.SdkAsync<ResourceDefinition>(sdk, SqlClusterProtocol.Call(partition,
                 McpCallerTools.ResourcesConfigure, new ConfigureResourceRequest(partition.TenantId,
                     partition.DatabaseId, definition), Guid.NewGuid()), token);
         }

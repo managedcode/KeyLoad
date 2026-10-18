@@ -10,10 +10,6 @@ internal static class ProductionSourceManifestScriptAssertions
     private const long MaximumScriptBytes = 33554432;
     private const int FirstIndex = 0;
     private const string ScriptPrefix = "functional-coverage";
-    private const string TaskScriptPrefix = "task-acceptance";
-    private const string TaskAdapterName = "task-acceptance.ps1";
-    private const string TaskVerifierName = "task-acceptance.verify.ps1";
-    private const string TaskContractName = "task-acceptance.contract.json";
     private const string DockerIgnoreName = ".dockerignore";
     private const string ScriptDirectory = "scripts/Features/CodeQuality";
     private const string NameProperty = "name";
@@ -62,8 +58,7 @@ internal static class ProductionSourceManifestScriptAssertions
             {
                 throw new InvalidOperationException();
             }
-            if ((item.Name.StartsWith(ScriptPrefix, StringComparison.Ordinal)
-                || item.Name.StartsWith(TaskScriptPrefix, StringComparison.Ordinal)) && !IsIncludedScript(item.Name))
+            if (item.Name.StartsWith(ScriptPrefix, StringComparison.Ordinal) && !IsIncludedScript(item.Name))
             {
                 throw new InvalidOperationException();
             }
@@ -77,9 +72,8 @@ internal static class ProductionSourceManifestScriptAssertions
     }
 
     private static bool IsIncludedScript(string name)
-        => name is TaskAdapterName or TaskVerifierName or TaskContractName
-            || name.StartsWith(ScriptPrefix, StringComparison.Ordinal)
-                && AllowedExtensions.Any(extension => name.EndsWith(extension, StringComparison.Ordinal));
+        => name.StartsWith(ScriptPrefix, StringComparison.Ordinal)
+            && AllowedExtensions.Any(extension => name.EndsWith(extension, StringComparison.Ordinal));
 
     private static async Task AssertFieldsAsync(JsonElement row)
     {

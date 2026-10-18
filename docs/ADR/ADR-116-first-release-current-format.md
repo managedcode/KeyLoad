@@ -1,283 +1,75 @@
 # ADR-116: one current format before the first release
 
-Status: Accepted, 2026-10-06. Owner: root integration. Related task: KL-043;
-requirements and measurable acceptance:
+Status: Accepted, 2026-10-06. Requirements and measurable acceptance:
 [StorageRecovery CurrentFormat](../Features/StorageRecovery/CurrentFormat.md).
 
 ## Decision
 
 Deliver and qualify one current native database contract for the first release.
-The root [owner super rule](../../AGENTS.md#super-rule-owner-only-migration-and-legacy-authorization)
-controls any separately requested migration or legacy scope. Product completion
+The root [data rules](../../AGENTS.md#data-authorization-and-integrations)
+exclude persisted-data migration and legacy readers. Product completion
 does not authorize adding such a path.
 
 Deliver one strict current native format. Remove obsolete old-format execution,
 tests, preparation resources, settings, routes and active documentation together.
 Keep current identity epoch7/WAL4/checkpoint5 bytes and native Orleans serialization
 unchanged. Preserve node-local ownership, current backup/restore, corrupt-format
-rejection, signed-purpose fencing, process recovery and genuine Aspire RF3 SDK/MCP.
+rejection, signed-purpose fencing, process recovery and genuine Aspire cluster SDK/MCP.
 Current stores are created with reader capability1 and magic `0x364449444C4B`;
 reject an absent/zero/unknown capability and remove unmarked-store conversion.
 Keep current outcome-v2 identity and locator integrity without old-key/old-frame
 fallbacks. Remove configuration migration commands and prior-KeyLoad binary/image
-compatibility fixtures; preserve external SQL protocol and actual current RF3
+compatibility fixtures; preserve external SQL protocol and actual current cluster
 failure/authorization/lifetime operations. Qualification must bind current source,
 runtime and original operation reports.
 
-The linked feature is the implementation contract: ordered stages, exact module
-ownership, consumer audit, bounded whole-operation tests and root join points.
-Root owns shared contracts, workflows, registry/coverage maps and final review.
-Luna workers prepare disjoint guarded source/test/doc packets only after their
-exact ownership and acceptance mappings are frozen.
+The linked feature is the implementation contract: ordered stages, exact module ownership, consumer audit, bounded whole-operation tests.
 
-Current node-root admission is REQ/AC-NATIVE-007 and TASK-SR-CURRENT-LAYOUT-044.
+Current node-root admission is REQ/AC-NATIVE-007.
 The linked feature freezes exact optional current entries, pre-mutation rejection,
 exclusive ownership and the second admission check before provider opens, with
-real rejection/preservation/healthy-follow-up operations. TASK-SR-CURRENT-MISSING-043
-retains the actual generated-native omission and every authenticated peer cohort
-path under AC-NATIVE-002/003; source inspection does not qualify their behavior.
+real rejection/preservation/healthy-follow-up operations. Every node reads its own
+local files with the single current-reader contract; a store with an absent, zero
+or unknown reader capability is rejected before any mutation.
 
-TASK-NATIVE-CURRENT-PEER-049 applies the single current-reader contract to
-ordinary, direct-resolution and cached cohort admission. The linked contract
-preserves majority availability for an existing catalog and the existing all-voter
-fresh-bootstrap gate; current capability failure cannot be retried as readiness.
-Keep server-owned paired-store evidence and original authenticated bytes. Signed
-socket unit controls and actual RF3 positive observations are distinct evidence;
-the omitted-native-field RF3 negative remains open until its fault boundary is
-specified and executed without an alternate peer or signing bypass.
-
-Rollout uses the current unreleased source on the intended current RF3 topology.
+Rollout uses the current unreleased source on the intended current cluster topology.
 No user stores are converted or deleted. Rollback restores a coherent source
 checkpoint; it never opens current data with an unsupported reader. Future
 released-format migration requires separate owner direction and an explicit ADR.
 
-TASK-CURRENT-SNAPSHOT-NATIVE-FILE-067 preserves the complete current native-file
-no-mutation oracle under AC-NATIVE-002/006. The test controls its live owner;
-the internal Storage.IO observation handle is read-only, validates regular-file
-identity and never acquires or releases the owner's advisory lock. It uses the
-validated storage buffer and reads all actual file bytes. The linked feature
-freezes this deterministic test boundary, original lock checks and full healthy
-follow-up. Concurrent-writer snapshot semantics and production lock bypasses are
-outside this contract. Root reviews and joins the API/platform change before
-enabled build/format and the actual Aspire whole-operation regression.
+The complete current native-file no-mutation oracle is preserved under AC-NATIVE-002/006. The test controls its live owner; the internal Storage.IO observation handle is read-only, validates regular-file identity and never acquires or releases the owner's advisory lock. It uses the validated storage buffer and reads all actual file bytes. The linked feature freezes this deterministic test boundary, original lock checks and full healthy follow-up. Concurrent-writer snapshot semantics and production lock bypasses are outside this contract.
 
 Required verification is the enabled full Release build, formatter, governance,
 native analyzers, actual Aspire normal/scalar and real process recovery, followed
-by exact-source Linux Docker/Aspire RF3 and functional coverage. This ADR remains
+by exact-source Linux Docker/Aspire cluster and functional coverage. This ADR remains
 Accepted until implementation, all mapped tests and delivery evidence exist.
 
 ```mermaid
 flowchart LR
   Scope[First release] --> Current[One current native format]
   Current --> Recovery[Current WAL backup checkpoint recovery]
-  Current --> RF3[Aspire RF3 signed SDK MCP]
+  Current --> Cluster[Aspire cluster SDK MCP]
   Unsupported[Unknown or corrupt input] --> Reject[Reject before mutation]
 ```
 
-## TASK-KL009-NATIVE-APPLY-SCOPE-001 (follower-owner implementation contract, 2026-10-07)
-
-REQ-REP-APPLY-SCOPE-001 / AC-REP-APPLY-SCOPE-001 binds original KL009 to a genuine node-local canonical apply owner and real independent replica-network progress. Preserve native ZoneTree, original ordered commit/apply gates, deterministic replay, bounded admission, RF3 acknowledgements and separate authenticated request grains. This is authored acceptance infrastructure; Linux/native execution and original task closure are not claimed.
-
-Docs-first current private-format boundary: all RequestCqrsProbe owner/arm/release/marker producers/readers select version2 and reject version1 without fallback, migration or mixed records. Original request/read phases retain exact original semantics with nullable new arm fields all null and marker EntryIndex/EntryTerm null. CanonicalJournalFlushed is Hold-only and requires complete four-scalar Partition, nonempty SourceRequestId, distinct nonempty SourceArmId and exact TargetVoter. CanonicalOutboundObserved, CanonicalIndependentAppendCompleted and CanonicalOwnerDisposed are unarmable observation-only phases. Canonical markers contain positive real entry index/term and the genuine original request actor ID. Release still addresses the exact arm/request identity. Keep original 32-arm, 400-file, 8-marker, 8192-record-byte, 1048576-aggregate-byte and depth4 ceilings, original component/principal byte bounds, hold/poll/admission/shutdown deadlines and validated configurable lower bounds. No status/receipt is invented.
-
-Identity bridge is bounded test control, never authority: the original real BeforeSubmit Hold publishes its actual signed-voter request actor marker. While held, the fixture writes a distinct canonical arm referencing that source BeforeSubmit arm, principal, stable Batch CommandId, observed actor ID, complete partition and an explicitly observed nonleader voter. Both arms retain their original immutable bytes until joined shutdown. The actual Channel worker opens its own synchronous scope from the genuine ReplicaEntry Id/index/term and exact physical voter plus active source arm. No request ExecutionContext/AsyncLocal propagation across Channel is assumed and no synthetic actor ID is created. Actual Database.Apply retains original persisted authorization, identity/fingerprint/replay and strict clock validation; only its construction-owned native JournalFlushed FaultObserver may hold that owner. Unmatched bootstrap/recovery/job/store work has no hold and the replica store gets no callback.
-
-Independent network evidence is produced only by actual PartitionReplicaGrainService.ExchangeAsync after peer request authentication, original readiness/admission/native endpoint validation and successful signed reply construction. Begin captures the same currently held follower owner; completion decodes only already-admitted request/result bytes and requires an accepted empty native Append, exact term and matched/next position, with prior/committed cuts covering the held genuine entry. Completion must still see that exact held scope. Failed/cancelled/rejected exchanges do not qualify. It emits one bounded presence marker, never credentials, payloads or invented counts. Actual ReplicaGrainServiceClient.InvokeAsync separately observes any external invocation originating in the explicit canonical apply scope; any such marker fails acceptance. The real native RPC boundary is used, not HTTP discovery or a replacement transport.
-
-The leader-owned draft cannot qualify this operation: ReplicaLeader owns rounds through WaitForApplyAsync, and that waiter synchronously reads canonical LastApplied. The accepted proof therefore holds a follower, leaves leader semaphores/cancellation untouched, and avoids node Status/State calls while held (they may read LastApplied under ProtocolGate). Discovery/leader identity is captured before the hold. Original health/readiness routes remain unchanged.
-
-Lifetime: the physical host owns bridge, real materializer worker, storage callback and DI observer. Real GrainService construction resolves the observer before accepting replica RPC, including followers without a local public request. One exact scope owns hold, origin observation and callback admission, restores its prior execution context, writes canonical-owner disposal and joins original callback lifecycle. Synchronous apply errors and scope cleanup errors both propagate, preserving original failures; no second commit, retry, lock change, cancellation clamp or timeout increase. Existing host stop cancels hold and joins callbacks/materializer before store disposal. The fixture releases both arms, joins the actual SDK operation and original request producer plus canonical owner before deleting owned controls/resources.
-
-Whole flow: actual Aspire current-image RF3, persisted non-admin principal and document+queue scope, original SDK atomic Batch, original signed BeforeSubmit marker, native follower JournalFlushed marker carrying real entry index/term, accepted authenticated Append settlement while held, and absent canonical-origin outbound evidence. Original leader SDK receipt must be successful under unchanged deadlines. Release the exact canonical arm and join its owner; verify independent literal complete document (reference/revision/JSON/redaction/empty fields) and queue inspection metadata/body/headers through SDK and official MCP. Assert exact receipt effects and native-byte same-ID SDK/MCP replay, changed-payload conflict with unchanged public state, then distinct healthy queue continuation. This proves the full scoped public projections, not a complete raw-store image or power-loss durability.
-
-Owned paths: Replication ClusterReplication real ApplyBatch/worker scope; Orleans ClusterReplication real GrainService incoming/outgoing transport; Server ClusterRouting existing private control codecs/lifecycle and observer composition; Server StorageRecovery physical host/native storage callback; AppHost ClusterRouting strict current owner reader; IntegrationTests ClusterRouting actual Aspire wave/probe/SDK/MCP helpers; UnitTests ClusterRouting bounded private codec-negative control. That unit codec case is supporting infrastructure, not a product coverage contributor. Root-only format/full build, genuine new census/source-image binding, focused native codec in normal/scalar, existing probe request/read/fault flows, new current-image RF3 operation and mandatory full normal/scalar/recovery/RF3 gates remain required. No numeric coverage or successful native execution is claimed. Rollback removes the same-current private diagnostics coherently; persisted database, replication/native binary/public JSON formats and authorities are unchanged.
-
-## TASK-KL043-CURRENT-FENCE-REPAIR-001 — exact current identity repair and cold continuation
-
-REQ-STORAGE-021 / AC-NATIVE-002 and REQ-STORAGE-007 / AC-NATIVE-001, under ADR-116: extend existing RuntimeJournalReaderFenceTests.AcNative002ZeroOrUnknownCapabilityRejectsWithoutFileMutation (both original capability arguments) and AcNative002UnsupportedIdentityMagicRejectsWithoutChangingNativeFiles. Preserve their exact FormatUnsupported refusal and complete original file inventory byte equality. Capture actual current StoreIdentity, committed position and original identity file before changing the capability/magic. After the rejected owner has disposed, restore only those exact fixture-owned original identity bytes; require byte identity, original NodeId/incarnation/signing/durability/pause/read-generation/key-codec/format/current reader capability, exact original position and original runtime record, and absence of the followup. Commit the actual independent followup through the same native ZoneTree owner; require one exact native position increment, close/reopen, and both original/followup literal values plus unchanged full authority. No promotion, new identity, adopted reader, legacy fixture or alternate format.
-
-Ownership: existing Unit StorageRecovery Cases/RuntimeJournalReaderFenceTests.cs and new Helpers/RuntimeJournalReaderRepairContinuation.cs only, with this feature and ADR116 append. Existing omitted-wire, lifecycle, snapshot, WAL rejection, process recovery and RF3 controls are retained. Production source, serialized fields/aliases/signatures, options/limits/timeouts, public routes, strict selectors/status/UIDs unchanged. Rollback removes this test-only continuation; immutable originals remain. Root alone joins/builds and executes native normal/scalar plus original mandatory recovery/RF3/Linux gates. This supporting node-local operation does not qualify omitted-field signed RF3 or paired-store preflight; those require their actual native boundaries and evidence. No runtime/UID/PASS claim.
-
-# TASK-KL043-PAIRED-CURRENT-PREFLIGHT-002 — boundary proposal before implementation
-
-REQ-STORAGE-021/024 and AC-NATIVE-002/003: CurrentFormat explicitly leaves paired-store preflight/no-mutation open. Native PartitionStores constructor admits actual node root, acquires original node.owner.lock, repeats root admission, then opens canonical completely before replica. ZoneTreeStoreInitializer.Open acquires store owner, reads actual identity, opens journal, validates prefix, opens provider, recovers/truncates valid incomplete tail and reclaims checkpoint files. RuntimeJournalStorePreparation.Prepare only checks identities after both providers open. Therefore canonical recovery effects may precede strict second-store identity refusal. This is a source-derived mechanism, not an executed failure/PASS.
-
-## Proposed smallest owning boundary
-
-Existing public ZoneTreeStore gains one thin void ValidateIdentityBeforeOpen(ZoneTreeStoreOptions options, IOptions<ZoneTreeStorageExecutionOptions> executionOptions), delegating a StorageRecovery-owned read-only helper. Resolve/validate SAME centrally supplied storage execution options and owner-configured incarnation/signing bytes; no fresh Options wrapper/default snapshot. Reuse actual bounded ZoneTreeIdentityFile.Read and Validate for present current identity, preserving original FormatUnsupported/Corruption/TokenInvalidated code/detail/precedence. Do not expose decoded signing bytes or a trusted capability/result. No runtime codec copy or new friend.
-
-For absent directories, pure validation returns without creation. For an existing identity-less directory, preserve original strict fresh/partial owner semantics: only empty directory or regular zero-length canonical owner.lock may be admitted as fresh. Factor the original ownership-independent empty-directory validation from RequireEmptyOwnedDirectory rather than introducing a second inventory/validator; actual live owner-handle validation remains mandatory on real creation. Missing identity with tree/journal/foreign/tmp inputs remains original FormatUnsupported. Unknown root entries/links retain earlier PartitionRootAdmission refusal. Existing identity metadata read retains existing no-link/byte/frame/native envelope/checksum/capability guards. No repair/adoption/write/recovery/truncation/chmod/publication during this method.
-
-PartitionStores invokes canonical then replica preflight after SAME node ownership and original second root admission, BEFORE chmod/provider opening/recovery. It supplies SAME actual per-store incarnation/signing configuration used by Open and SAME original centrally bound execution options. Reuse one feature-local store-options builder for preflight and Open; no configuration drift or new owner. Original providers still repeat native checks and acquire their original store locks. This does not promise protection against arbitrary foreign concurrent filesystem replacement. Preserve failure ledger/node ownership release and ordinary complete provider shutdown.
-
-## Finite native whole operations
-
-Create current canonical+replica stores using actual existing PartitionHostRecoveryFixture/HostReplicaStores (native storage/log/owner) and current production PartitionHost. Seed literal canonical data and real replica native term/log metadata, close all owners. Retain both exact identities and native positions. Append a genuinely encoded valid current successor frame only partially to canonical using existing actual native serializer/frame fixture, independently retaining complete acknowledged prefix. Change replica capability to zero/unknown or physically omit its current field using existing verified omission producer. Observe production host refusal; complete recursive pair/root inventory/bytes/modes/cuts unchanged, owner handles released. Restore ONLY exact original replica identity bytes, reopen SAME production host and require original normal canonical tail recovery, complete native replica cut/identity, real healthy command/write, close/reopen full literal values and signing/incarnation/policy authority.
-
-Add converse canonical-invalid case with valid replica; preserve original first-store exception and no mutation of either. Cover actual current fresh/valid partial layout with existing PartitionRootAdmission and lifecycle operations, not record getters. No bogus peer/signed endpoint or RF3 claim. Omitted-native-capability signed RF3 negative remains separate OPEN: existing socket tests publish server-signed records but do not prove physically omitted field from a real current six-owner discovery producer. Any future RF3 seam needs exact original producer/MAC-bound borrowed bytes and actual native endpoint with unchanged authentication, no alternate peer/re-signing authority.
-
-## Ownership and delivery
-
-Potential production paths: existing Storage.ZoneTree/ZoneTreeStore.cs thin delegate; owning StorageRecovery/Storage/ZoneTreeIdentityFile.cs factored original validator; new StorageRecovery/Validation/ZoneTreeIdentityPreflight.cs; Server/StorageRecovery/Storage/PartitionStores.cs and cohesive options helper only if required. Tests: new Unit StorageRecovery Cases/PartitionPairedIdentityPreflightTests.cs and Helpers/PartitionPairedIdentityPreflightTrial.cs; existing original fixture reused. Docs CurrentFormat/ADR116 append contract before source. No KL042, connection, exception/analyzer, public protocol, serializer aliases/IDs, status/strict native UID/count changes.
-
-Root reviews new owner API/ordering before implementation, joins guarded private packet, builds/discovers/executes native normal/scalar, full recovery and actual current-image RF3. Rollback restores source coherently and leaves actual store bytes untouched. No source-only acceptance claim.
-
-Root approved this exact owning paired boundary after review. Final public signature: public static void ValidateIdentityBeforeOpen(ZoneTreeStoreOptions options, IOptions<ZoneTreeStorageExecutionOptions> executionOptions). Thin delegate performs no creation/provider open; Storage-owned helper resolves original central policy and invokes existing identity reader/validator. New Unit source cases exercise zero/unknown replica and zero canonical with actual valid current canonical incomplete successor, original node lock retained and whole recursive paired bytes/modes inventory. No test execution/PASS claim.
-
-
-# TASK-KL043-SIGNED-NATIVE-CAPABILITY-OMISSION-002
-
-REQ-STORAGE-021/024 → AC-NATIVE-002/003 → ADR-116. PRIVATE source implementation; fresh Linux original source/image/native UID and real SDK/official MCP Docker RF3 gates remain required.
-
-The actual foreground credential Authenticate child is a permitted prerequisite of the original public operation. Selection requires SAME live HttpContext, original route class, actual ServerConnectionFeature.Id equal native GrainRequestContextState.ConnectionId, fresh child RequestId, Principal absent and CommandId.Empty. It borrows original cancellation and original task/connection owner. Background/no-parent/mismatched context cannot enroll. Do not add context fields, alter native cache freshness, force refresh, retry, poll or change timeouts.
-
-In a dedicated fixture-only ephemeral protected two-RF3 profile, mount one closed private diagnostic root into the original three A voters; the other group and every ordinary profile remain unselected. Original validated RequestProbeExecutionOptions impose record/file/aggregate/JSON/text ceilings; exact private file/directory modes, regular-file/no-link admission, owner/session identities and create-only atomic Flush(true) publication remain mandatory. One arm selects source voter, target voter and SDK or official MCP route class only, never roles/credential/command authority. Original six resources, image, storage keys, persisted policies and options are unchanged.
-
-Source callback runs after SAME native PeerSecurity.Sign before SAME Send. It records only actual nonce, server-owned HTTP trace/connection and Authenticate child IDs. Producer after successful original ValidateAsync and current native discovery serialization and before unchanged SignDiscovery may remove ONLY the actual generated field Id7 span via owning Orleans reader. Independently decode original/omitted bytes: all seven other fields equal, original capability current, omitted capability zero, actual field absent. Never copy a codec, fabricate a DTO/signature or publish raw payload/MAC.
-
-Consumer retains unchanged VerifyDiscovery, native decode and identity validation. Its protected callback records the matching original nonce and same foreground parent/child context plus decoded zero capability. Original strict cohort admission must refuse before database command dispatch. Marker alone grants no authority/receipt or acceptance. Missing witness, cached discovery, startup refusal, background read, post-MAC mutation, observer failure or cancellation fails qualification; original errors and cleanup ledger survive.
-
-Whole SDK and official MCP flows seed real persisted c1 credentials and complete linked native business corpus, join six processes/readers and 18 locks, retain actual original cuts, arm only the protected root, naturally cold-start the original same cohort and issue one real public command. Require causal source/producer/verified nonce witnesses, actual original refusal, no command outcome/effect and complete native/model/receipt cut allowing only proven native membership entries. Join original caller and six owners; preserve bounded original witness bytes under fixture-owned qualification artifacts, disarm exact own controls, restart SAME root/image/ports/keys and execute SAME original command successfully. Verify independent literal result, full seed SDK/MCP/Q1 reads, native original receipt and cold replay. No delayed/retried original claim or missing-marker promotion.
-
-Ownership: Replication Identity protected handler composition; Orleans ClusterReplication Discovery borrowed callback chain; Server ClusterReplication Serialization/Execution/Validation/Configuration/Transport; existing Server ClusterRouting hosting/ClientApi configuration composition; AppHost ClusterRouting closed profile; IntegrationTests StorageRecovery Cases/Helpers/Assertions/Configuration/Contracts with original TwoRf3 wave borrowed lifecycle. No shared connection implementation, format persistence, aliases/Ids, strict task selection/status/UID/count changes. Root alone joins/builds/runs/Git. Rollback removes the coherently enrolled test profile/borrowed hooks; persisted bytes and ordinary signing behavior remain unchanged.
-
-The actual existing OrleansNodeRequestExecutor executes EnsureCompatibleCohortAsync on the original call-local Authenticate prerequisite before invoking the same server-owned ConnectionGrain. ADR-125 governs this flow; no new activation, connection implementation, context field or authentication assertion is added. The outgoing source witness deliberately has null ProducerVoter and null RuntimeJournalReaderContract. Only the original authenticated target serialization/Id7 omission and original native consumer decode can populate the actual target/zero fields. Unselected callbacks perform bounded read-only peeks without taking the publication lock; only the exact selected native source/nonce acquires the original publication lock and complete immutable-owner inventory.
-
-Automated source identities (not native UIDs): NativeCapabilityOmissionRf3Tests.ForegroundSdkOrOfficialMcpOmittedCapabilityRefusesThenSameOwnerRepairAndColdReplay(false), and the same method(true). Both retain the complete original linked seed and original blob receipts, exact native no-effects cut, same command repair/healthy SDK + official MCP + both Q1 routes, and cold same-receipt replay. No movement scope/strict selector or count is changed.
-
-Joined failure cleanup retains the original diagnostic root and database roots and attempts the same bounded native inventory/copy under the original captured caller token. An already cancelled token or failed copy is an explicit cleanup failure, retained alongside the original failure; there is no replacement cleanup deadline, silent diagnostic success or root deletion. The successful repair path copies exact private owner/witness inventory into fixture-owned artifacts/qualification before deleting only its saved immutable controls and exclusive zero-length publication lock. The unchanged private snapshot/replication corpus is never exported with credentials. Natural cached discovery, missing causal witnesses and non-Windows mode/lock failures remain failed setup/qualification gates.
-
-## TASK-KL043-CURRENT-CHECKPOINT-REPAIR-003 — actual corruption to exact repair and restored cold authority
-
-REQ-STORAGE-007/021 → AC-NATIVE-001/002 → ADR-116/126. Extend the SAME zero-argument CurrentWalRejectionTests.CorruptCurrentCheckpointFailsWithoutChangingAnyStoreFile; no new case/Args/UID or product format. Retain genuine compacted current native checkpoint checksum corruption, exact Corruption and complete original refused file inventory unchanged. Capture actual original current identity, committed position and whole original journal before corrupting only the test-owned byte. Only after the rejected owner settles, restore those exact original journal bytes and verify byte equality; no conversion, repair API, adoption, alternative checksum or mutation of identity.
-
-Reopen SAME original owner, verify every StoreIdentity field including current reader capability, exact original cut and independent literal key/value, absent followup; commit distinct literal followup with exact one-position increment. Close/reopen and compare complete expected native raw key/value inventory and both literal values. Pause through actual existing native SetDispatchPaused, capture actual backup cut, and CreateBackup to an independently owned sibling fixture path. Restore through unchanged current native API with genuinely new incarnation and signing authority, new NodeId, paused dispatch and exact original data plus the existing native pause authority record/one restore transaction. Compare complete backup files before/after restore. Close/reopen restored owner and verify complete actual restored identity, exact restored cut, literal original/followup and unchanged complete restored records. Original source identity/cut remain separately verified; restore cannot impersonate original authority.
-
-Ownership: existing Unit StorageRecovery Cases/CurrentWalRejectionTests.cs and new cohesive Helpers/CurrentCheckpointRepairContinuation.cs, plus CurrentFormat and ADR116 additive appendix before C#. No production/schema/alias/IDs/default/limit/clock/policy/dispatcher or public routes change. Original strict refusal assertions stay. Fixture-owned paths/owners dispose before deletion; ordinary native50 remains. Existing paired preflight, omitted signed capability, process recovery and RF3 flows are independent mandatory gates; this native store operation does not qualify their public/RF3 authority or power-loss durability.
-
-Verify candidate isolated build/native preview and SAME original normal/scalar case plus original CurrentStoragePreservationTests and current NativeChecksumProfileRecoveryTests four-child flows; retain source/DLL/PDB/package and original TRX identities. Delivered exact-source Linux full recovery/RF3 gates stay OPEN. Rollback removes only this test continuation, preserves immutable original failed evidence and current product bytes. Authentic059 recovery289 passed and has no current-format storage failure; this is a source-proven missing repair/continuation oracle, not a claim about an old runtime cause.
-
-
-### TASK-KL043-CURRENT-MISSING-IDENTITY-REPAIR-004 — original identity repair and complete continuation
-
-REQ-STORAGE-007/021 → AC-NATIVE-001/002 → ADR-116/126. The existing `NativeMissingIdentityTests.AcIs004And008MissingIdentityPreservesActualTreeAndJournal(false/true)` operations retain the genuine raw write and optional native compaction, strict missing-identity `FormatUnsupported` refusal, complete recursive file/directory equality, and actual rejected-owner lock reacquisition and disposal. After those original assertions settle, the fixture restores only the exact original identity bytes captured from its own original owner; it does not regenerate identity, rewrite journal/tree data, adopt foreign files, or introduce compatibility behavior.
-
-The repaired same-root owner retains its exact original identity, reader contract, position and literal record; a distinct native write then proves healthy operation. The shared complete continuation checks every literal source/restored row, source cold reopen, paused backup, complete unchanged backup files, actual new restore identity/incarnation/signing authority, two restored cold opens and a final original-source reopen. The checkpoint repair caller preserves its original journal repair and delegates to the same unchanged continuation. Original case names, both arguments, native selection counts, quotas, cancellation and defaults remain unchanged.
-
-Ownership/join: this test-only four-path successor follows the immutable checkpoint-repair4 proposed helper and both appended documents; its missing-identity case preimage is the current native source. All rejected owner/inspection handles settle before repair, and every source/restored owner settles before fixture deletion. Source scope is Unit StorageRecovery Cases/NativeMissingIdentityTests and Helpers/CurrentCheckpointRepairContinuation, CurrentFormat and ADR-116. Rollback removes only this appended test stage; production formats and APIs are unchanged.
-
-Required evidence: original two arguments in normal/scalar TUnit against one frozen private image; integrated delivered-source compiler/analyzers and full Linux normal/scalar/process recovery, plus existing signed-capability public RF3 remain qualification gates. Local native-store operation evidence does not close whole KL-043 or RF3.
-
-
-### TASK-KL043-CURRENT-VERSION-REPAIR-005 — unknown-version refusal over actual retained data
-
-REQ-STORAGE-021/007 → AC-NATIVE-002/001 → ADR-116/126. Extend the original zero-argument `CurrentWalRejectionTests.UnsupportedIdentityVersionFailsBeforeJournalMutation` with a genuine original native write before its unchanged unsupported identity version 8 fault. Capture the current actual identity, committed position and complete original identity bytes from that same owner. Preserve the exact `FormatUnsupported` refusal and every original recursive file byte assertion. After the rejected owner settles, restore only those fixture-owned original identity bytes and assert exact byte equality; never rewrite journal/tree, construct replacement authority, convert a version or admit unsupported bytes.
-
-Use the existing unchanged complete current continuation: exact original identity/reader capability/cut and literal record, absent followup, actual distinct write with one-position increment, original source cold/full inventory, genuine paused backup with complete file preservation, native new-incarnation restore, two restored cold opens with full literal records and actual authority, then original source reread. The helper prerequisite is TASK-KL043-CURRENT-MISSING-IDENTITY-REPAIR-004; append these documents after its exact postimages. Existing checksum and missing-identity cases, all original case/Args/UID/counts, production code/format/aliases/IDs/defaults/quotas/clock/auth remain unchanged.
-
-Owned paths are Unit StorageRecovery Cases/CurrentWalRejectionTests and append-only CurrentFormat/ADR-116. Every actual open settles before repair or fixture deletion. Rollback removes only this test continuation and appendix. Required evidence is same frozen-image normal/scalar original full operation and companion refusal controls; integrated delivered-source build/formatter/analyzers and exact Linux recovery/public signed SDK/MCP RF3 remain OPEN, as does whole KL-043.
-
-The retained-journal refusal oracle is bound to the complete actual original journal captured after the genuine write, not the former empty-store journal. No journal bytes are modified during identity repair.
-
-
-### TASK-KL043-CURRENT-SNAPSHOT-AUTHORITY-006 — complete install and restored cold authority
-
-REQ-STORAGE-007/021 → AC-NATIVE-001/002 → ADR-116/126. Strengthen the SAME zero-argument CurrentStoragePreservationTests.CurrentMaintenanceCheckpointInstallBackupAndRestoreRetainCurrentFormat, retaining its actual snapshot corruption/Corruption/full original source-file inventory and original literal point reads. Bind all four original StorageSnapshot fields to independently expected source incarnation, Position1, AppliedPosition1 and three raw records. Actual successful InstallSnapshot retains source authority/cut and increments only original ReadGeneration by1; native Compact does not increment it. Verify every current identity field and complete source raw rows, including original last-applied1.
-
-Retain actual paused CreateBackup and compare complete recursive backup files before and after restore/healthy/cold. Restore through existing native API with a genuinely fresh chosen incarnation; require fresh NodeId/signing, original codec/durability/current reader capability, paused dispatch and preserved installed read generation. The native restore authority transaction deletes last-applied and adds paused state: require independent complete restored rows and exact backup cut+1. After original restored owner closes, commit a distinct literal native row through the same restored owner and require one-position increment. Two separate subsequent restored cold opens preserve full returned fresh authority and all exact literal rows; original source cold opens preserve source identity/cut/full rows. No dropped extra records or self-derived business oracle.
-
-This test-only four-path successor follows version-repair3 exact appended docs, preserving all prior stages. Scope: existing Unit StorageRecovery Cases/CurrentStoragePreservationTests, new cohesive Assertions/CurrentSnapshotAuthorityAssertions, CurrentFormat and ADR-116. Source snapshot/backup/restored paths remain original independently owned siblings. Every actual open settles before another same-root open or fixture deletion. No product format/public/schema/alias/field/default/quota/clock/authority change, no migration/adoption, and no KL035 replica snapshot/tail implementation changes. Rollback removes only these added assertions and appendix.
-
-Required evidence: private native compiler and full original normal/scalar companion operations on frozen source/images. Full integrated build/formatter/analyzers and original Linux current recovery plus signed SDK/official MCP RF3 remain OPEN; no power-loss, production or whole KL-043 qualification is inferred.
-
-
-### TASK-KL043-CURRENT-FRAME-REPAIR-007 — strict native frame refusal and exact owned repair
-
-REQ-STORAGE-021 / AC-NATIVE-002 and REQ-STORAGE-007 / AC-NATIVE-001, AC-NATIVE-005: the original three `OrleansWalCorruptionTests.AcWal003InvalidCurrentFrameOrUnsupportedSignatureLeavesFilesUnchanged` arguments retain their exact checksum/sequence/unsupported-signature frame, ErrorCode, current native serializer and case identity. Before fault installation the fixture captures its genuine empty current journal and complete identity. Strict refusal preserves the entire recursive file inventory; no native recovery accepts, translates or discards the corrupt frame. Only after the failed owner has disposed does the fixture restore the exact captured journal bytes and require the original identity bytes unchanged. The same current owner must reopen at position zero with no records, commit the independently literal original record, and continue through `CurrentCheckpointRepairContinuation.RequireCurrentAsync`: literal followup, complete raw rows, source cold, immutable backup, new restored identity, two restored cold opens and unchanged original source authority. This is fixture-owned repair of deliberately damaged bytes, not compatibility or a product repair API.
-
-Ownership: existing StorageRecovery Cases file plus feature Helpers/CurrentWalFrameRepairContinuation.cs; existing native Storage APIs and earlier continuation are borrowed unchanged. No production/schema/alias/ID/format/default/budget/clock/timeout change. Rollback removes this additive test continuation and appendix only. Required evidence: exact guarded independent reconstruction, original three argument discovery, whole corruption/current-format normal and scalar operations, integrated Linux recovery and signed-capability SDK/official MCP RF3. Local source/build/test evidence does not close whole KL043 or the Linux/RF3 gates.
-
-
-### TASK-KL043-CURRENT-PAYLOAD-REPAIR-008 — typed invalid binary payload whole-operation continuation
-
-REQ-STORAGE-021 / AC-NATIVE-002 and REQ-STORAGE-007 / AC-NATIVE-001, AC-NATIVE-005: extend only the twelve original `OrleansWalCorruptionTests.AcWal003ChecksummedInvalidBinaryFrameFailsWithoutApplyingAnyMutation` arguments. Preserve every original typed payload shape, native serializer, checksummed-frame production, exact Corruption refusal, zero committed position and both original absent-key assertions. Capture the actual current empty journal and identity before fixture fault installation, require every recursive corrupt file unchanged on refusal, then restore only the captured journal bytes after the failed owner disposes. The existing recovered owner must close before the new continuation opens. Require original identity bytes unchanged; reuse CurrentWalFrameRepairContinuation.RequireCurrentAsync for a complete empty-record read, same-authority literal healthy native commit and the original full source/cold/backup/new-incarnation/two restored-cold model oracles. This does not reinterpret or recover any invalid payload, truncate an unknown original file, change the serialized format, or add an adoption path.
-
-Owned source: existing StorageRecovery Cases/OrleansWalCorruptionTests.cs and Helpers/CurrentWalFrameRepairContinuation.cs. Existing 3-argument frame repair continues to write captured bytes then delegates the extracted current-open continuation; its body from actual current store open onward remains exact. No product/API/alias/Id/Args/count/clock/quota/default changes. Dependency is immutable TASK-KL043-CURRENT-FRAME-REPAIR-007. Rollback removes this additive continuation and documentation; strict negative native guards remain. Evidence requires original full corruption/current-format normal/scalar operations and exact source/PE/PDB coherence. Integrated Linux recovery and signed-capability SDK/official MCP Docker RF3, whole-task acceptance and current-source discovery remain OPEN.
-
-
-## TASK-KL043-CURRENT-CAPABILITY-REPAIR-COLD-012
-
-REQ-STORAGE-007/021/024 → AC-NATIVE-001/002/003 → ADR-116. Extend only the original RuntimeJournalReaderFenceTests zero/unknown (two original arguments), physically omitted current capability and unsupported magic operations. Retain original FormatUnsupported and complete refused inventory byte equality. The omitted input uses actual native generated-field omission; no alternate signer or compatibility reader. Capture original full StoreIdentity and actual committed position before corruption, restore only exact fixture-owned identity bytes after rejected owner disposal, then require complete original authority/cut, independent original record and absent followup before the genuine healthy write.
-
-After the original same-owner cold repair, capture genuine paused backup/VerifyBackup, exact original two raw runtime/followup rows and original native cut. Restore with a genuinely new incarnation/node/signing identity and current capability; require dispatch paused and exact three-row native inventory (two original literal records plus native system pause). Make one independent restored followup overwrite, close/reopen twice, check complete restored identity/cut/literal records, complete backup file bytes unchanged and original paused source identity/cut/records unchanged. Original case identities/Args, clocks, budgets, format/aliases and production remain unchanged. No new public fault/signing/inspection API, migration or compatibility path.
-
-Implementation ownership: original Cases/RuntimeJournalReaderFenceTests.cs; original Helpers/RuntimeJournalReaderRepairContinuation.cs; new Helpers/RuntimeJournalReaderRepairBackupContinuation.cs, all Unit StorageRecovery. First source docs/ADR, then guarded private overlay/build/native existing preview and new-file receipt, canonical original class normal/scalar; root integration and authentic Linux/SDK/MCP/RF3/recovery remain mandatory. This native owner operation is supporting coverage; signed wrong-purpose/public capability qualification remains OPEN. Rollback removes only added continuation, preserving actual original failures, immutable source proposals and every original refusal oracle.
-
-
-## TASK-KL043-CURRENT-HEADER-REPAIR-COLD-013
-
-REQ-STORAGE-007/021 → AC-NATIVE-001/002 → ADR-116. Preserve the SAME zero-argument UnsupportedWalHeaderTests.UnsupportedJournalMagicOnCurrentIdentityIsRejectedWithoutTruncation, genuine unsupported current journal magic, exact FormatUnsupported, no truncation and complete corrupt-file preservation. Capture the actual original current StoreIdentity, journal and identity bytes before corrupting only the test-owned journal. After failed open disposal, restore only those exact original journal bytes and invoke existing CurrentWalFrameRepairContinuation: exact identity/capability/empty cut; independent literal healthy commit; same-authority cold followup; full paused backup; new node/incarnation/signing authority; two restored cold opens and complete source/backup inventories unchanged.
-
-No new production API/codec, legacy/migration, signing seam, Args/UID/count, clocks/defaults/budgets or alternate provider. Original failure remains required before repair. Ownership is only the original StorageRecovery Unit case plus this Feature/ADR appendix. Ordered documentation dependency is immutable TASK-KL043-CURRENT-CAPABILITY-REPAIR-COLD-012; source code depends on already joined CurrentWalFrameRepairContinuation. Private native preview, existing owner compile, canonical original method normal/scalar and related current-frame flows are development evidence; integrated Linux/full recovery/public signed capability and wrong-purpose RF3 gates remain OPEN. Rollback removes only the appended continuation, preserving the original no-truncation refusal.
-
-
-## TASK-KL043-CAPABILITY-STAGE-EVIDENCE-014 — original operation failure attribution
-
-REQ-STORAGE-007/021 → AC-NATIVE-001/002 → ADR-116. The SAME original capability SDK/MCP Boolean case retains its original deadline, caller cancellation, six-owner startup, persisted authority, omission/no-effects, repair and cold healthy oracles. Its fixture records a closed original operation stage before existing awaits. On failure, one immutable bounded diagnostic is saved before cleanup, containing only the stage, selected route, actual cancellation flags and original exception types/native codes/stacks through the existing bounded privacy formatter. A distinct terminal diagnostic retains the complete original initiating/cleanup ledger after all original owned disposal awaits. Save failures append to that same ledger; no failure or missing marker becomes success. No extra readiness/query/poll/clock/default/budget/product telemetry work.
-
-Ownership: existing StorageRecovery Helpers/NativeCapabilityOmissionRf3Trial.cs and feature Diagnostics/NativeCapabilityOperationFailureEvidence.cs; existing ClusterFailureReceipts/BoundedDiagnosticLog/RemoteTransferStartupFailureLines are borrowed unchanged. The broad SeedCreate stage is not an internal registration cause; stage evidence does not qualify omitted capability or prove the old R139 cause. Original SDK first R139 cancellation remains retained and unattributed. Native private compile and original-method current-source execution are development gates; full exact-source Linux/public capability/wrong-purpose gates remain OPEN. Rollback removes only these diagnostic assignments/helper and appendages.
-
-R139's original MCP stack places failure inside WaveStart before it returns; retain that exact bounded fact separately from the unknown originating await. Enroll only this case's existing RemoteTransferStartupCallbacks.Failed before original startup disposal to capture the actual initiating exception once. An optional call-local test phase setter assigns closed constants before the original startup awaits; ordinary factories carry null and allocate no diagnostic callback. Original source/target/membership readiness, image checks, original token/deadline, returned Task and all cleanup ownership remain unchanged. No new resource, read, wait, retry, schema, purpose or product telemetry. The observer original CreateNew is attempted once; an outer failure cannot overwrite/retry it. Existing callback Join has no owned resources in this synchronous evidence-only fixture and is not a success/disposal witness.
-
-
-## TASK-KL043-SIGNED-PURPOSE-015 protected issuer/receiver operation
-
-REQ-NATIVE-PURPOSE-015: use only the original genuine current request issuer and receiver. The borrowed nonserialized observer is protected fixture ownership, selected one-shot by actual original foreground command/route/persisted subject and original cancellation. It cannot replace trusted roles, native signing or routing. Original scope is validated before the same single native Sign. Only Purpose is replaceable; all other original envelope fields and exact payload bytes remain unchanged.
-
-AC-NATIVE-PURPOSE-015: receiver performs the existing full native MAC and typed decode, then the unchanged scope check must refuse. The observer is called only for the actual KeyLoadException scope refusal AFTER successful native verification; it independently compares every original immutable field and exact payload digest with issuer evidence and requires only fixed unsupported Purpose plus exact TokenInvalidated. MAC/alias/expiry/body/ID/identity mismatch never emits qualifying witness. Original guard failure plus observer failure remain aggregated, no replacement.
-
-Implementation order: docs CurrentFormat + ADR116 first; internal interface ClusterRouting/Contracts/RequestExecution/IGrainRequestPurposeObserver; feature-local GrainRequestPurposeObservation owns pre-sign replacement and rejected scope ledger; original codec exposes only an internal init-only nullable borrowed observer, calls observation after original ValidateScope and before same Sign; original payload verification delegates to scope observation after actual database.Verify. No new aliases/Ids/enums/public surfaces. Ordinary null path retains all exact signing/verification bytes and checks, no observation allocation/IO/work.
-
-Protected Server owner stays within already admitted NativeDiscoveryOmission fixture profile and original private mounted root/options/lock/quota/inventory, with three distinct bounded purpose arm/issued/rejected JSON files. It uses actual HTTP PrincipalItem/ServerConnectionFeature/route/original RequestAborted, SAME original foreground command ID; never invent Authenticate parent or connection context. Actual receiver compares original source-issued fingerprint and complete original fields; only native payload SHA digest is written, never payload/token/signature/credential. Issuer/receiver facts do not authorize a request. Original stop/drain disposes native codec borrowing before owner/root deletion; failures retain owner. Existing omission case and witnesses remain independent.
-
-Supporting full native connection operation will prove real command refusal before any routed effect, whole canonical bytes/position unchanged, exact repair then same connection healthy command/receipt replay, close/drain and cold native records. Genuine six-owner SDK false/MCP true variant additionally requires full pre-cut/no-effect/repair/current auth/Q1/all6 state/two cold/native receipt and cleanup. Existing public routes, original Args/IDs/12min/default50, configured bounds and native Graph permissions unchanged. Linux RF3 remains OPEN until actual original cases execute. Heavy1 currently root-owned; no launch here.
-
-Rollback removes only added borrowed observation/profile files and purpose cases, keeping original guards and original R139 failures. Root sole live join/build/qualification. READY6 immutable; no invented UID/PASS. Constructor/registration/shared files guarded against current native predecessors; docs explicit additive union.
-
-
-TASK-KL043-SIGNED-PURPOSE-015 exact-cut refinement: The owning codec captures its original clock exactly ONCE per scope validation and passes the SAME incarnation/evaluatedAt/maximumFuture into the SAME pure GrainRequestScope.Validate. Only the MAC-verified path borrows its internal PurposeObserver. On actual KeyLoadException the observer receives this nonserialized cut and reuses the SAME native pure validator with only the known original Purpose restored; expiry/unknown alias/shape/subject/incarnation cannot qualify. No additional clock/IO/read/current policy or guard order change. Ordinary null path still executes only the original validator. This supersedes R1 receiver field-only causal observation; R1 immutable, not joined.
-
-
-### TASK-KL043-SIGNED-PURPOSE-PUBLIC-016
-
-REQ-NATIVE-PURPOSE-PUBLIC-016 / AC-NATIVE-PURPOSE-PUBLIC-016: separate protected one-shot foreground SDK/MCP purpose arm borrows original validated pre-sign/single Sign and actual MAC/decode/same-cut receiver observation. Exact original metadata and payload digest, restored-original-Purpose native scope success, full all-six no-effects, joined exact repair/current-auth/receipt/model/Q1/two-cold are mandatory. Original omission profile/Args/fields remain independent. No public/persisted schema/IDs/defaults/limits/time change or token/body export. Local supporting controls do not qualify public/Linux RF3; original R139 failures retained. Owner roles: ClusterReplication Contracts/Serialization/Execution and original codec composition, StorageRecovery fixture/callers/full healthy oracle. Root ordered join follows TASK015 producer/receiver; rollback removes purpose-only inventory/observer/cases.
-
-Selected source and MAC-verified receiver also decode the SAME original native CommandRequest and require exact inner/outer original CommandId before purpose witness; no payload/token export or dispatch. Decode/type/body mismatch is failed qualification.
-
-
-## TASK-KL043-SNAPSHOT-FENCE-018: original snapshot authority refusal and same-owner cold continuation
-
-REQ-STORAGE-007/021/024 and AC-NATIVE-001/002/003: deepen the SAME original CheckpointTests.ReplicaInstallReplacesOldKeysPreservesNodeIdentityAndRejectsStaleScope operation. Preserve genuine native install, exact stale OwnershipLost and foreign-incarnation TokenInvalidated. Both rejected original calls must retain complete recursive owner files, full current identity/reader capability, exact committed position, original snapshot bytes and independent installed rows. After actual original target/outsider disposal, require the same target identity and literal two-row cut; perform one healthy literal commit, close, and require two same-root cold opens with complete three-row data and obsolete-key absence. Feature-local CurrentSnapshotFenceAssertions and CurrentSnapshotFenceContinuation own the oracle. No production format, authority, API, IDs, Args, quotas, clock or deadline change; rollback is source-only. Canonical normal/scalar existing-method operations are development evidence; full current Linux/process/RF3 and whole KL043 acceptance remain required.
-
-
-## TASK-KL043-PURPOSE-ENROLLMENT-023: readonly protected startup enrollment
-
-REQ-KL043-PURPOSE-ENROLLMENT-READ-001 / AC-KL043-PURPOSE-ENROLLMENT-READ-001: AttachPurposeObserver inspects enrollment under the SAME local sync and complete bounded native Snapshot/immutable record validation; it does not acquire the cross-process publication writer lease. ReadPurposeEnrollment returns only the original fully decoded closed arm with exact session/voter validation, or absent observer when no arm exists. The owner retains exact receiver enrollment. No publication, claim, effect or authority is granted. Fixture arms remain owned immutable controls installed only after original owners join. Missing required records, partial/malformed/foreign/changed enrollment and unfamiliar files retain original refusal. Original publication.lock remains fully mode/zero-length/inventory validated. Every actual witness/BeforeSign/rejection writer retains unchanged exclusive LockedCore, atomic file publication, token and full native trust checks. No retry/sharing mode/default/deadline/schema/API change.
-
-Owning files: Server ClusterReplication Serialization/NativeDiscoveryOmissionFiles.cs and Execution/NativeDiscoveryOmissionOwner.cs; StorageRecovery complete native enrollment/purpose/refusal/repair/receipt/two-cold regression plus unchanged public SDK/MCP Boolean methods. Rollback is one coherent source/docs unit. R159 original active A node3 exact startup IOException chain is retained separately; do not infer R158/old503 causes. New private source/image normal/scalar controls and genuine six-owner public/Linux gates required; no source-only acceptance.
-
-The unchanged public signed-purpose Boolean operation now holds the SAME exclusive publication.lock across its original RestartArmed after genuinely stopped-owner ArmPurpose publication. Complete bounded file/byte/mode inventory (including unchanged zero-length lock) is compared before acquisition and after joined release; a second real exclusive writer is refused while held. Only readonly Attach can proceed. The lease is released before the original public command, causal MAC/decode/purpose witness, complete no-effects cut, exact owned repair, original receipt replay and both cold continuations. Original restart, inventory, lease-disposal and later fixture failures share the existing initiating/cleanup ledger. The capability-omission branch remains unchanged. No new case/Args/UID or assumed runtime success.
-
-Readonly enrollment R2 retains every original held-lease guard/restart/guard failure before lexical lease disposal, and records an unexpectedly successful competing writer before its own disposal. Existing ServerFailureObserver composes the real initiating and cleanup failures; a failed pre-restart guard prevents restart. This changes only fixture error ownership, preserving all guards and full original operations. R1 remains immutable.
-
-
-### TASK-KL043-REGISTRATION-MARKER-LOG-001 — protected original marker enrollment
-
-REQ-KL043-REGISTRATION-MARKER-LOG-001 / AC-KL043-REGISTRATION-MARKER-LOG-001: the existing protected NativeDiscoveryOmissionProfile enrolls ONLY its original A1..3 registration worker category at Information so the original Event1005 prerequisite is observable. Default Warning, B and ordinary/null profiles stay unchanged. PhysicalOwnerRegistrationRf3Observation still requires the SAME completion marker then SAME native registration-health success under original token/deadline; no marker synthesis, new read/poll, readiness or authority bypass. Current R161 actual SeedCreate cancellation and source-proven Information-versus-Warning contradiction are retained; the existing model missing-enrollment/no-file-mutation/repair control proves exact resource settings only, never RF3. Original SDK/MCP Boolean purpose/omission full refusal, exact repair, receipts and cold operations plus delivered Linux qualification remain required. AppHost owns category enrollment; Unit ClusterRouting owns the complete profile model control; root owns ordered integration after readonly enrollment R2 and actual execution gates. Rollback removes only this protected category override/supporting oracle; no schema/public/ID/default/quota/clock change.
-
-
-## KL043 public restored-target continuation ownership (2026-10-12)
-
-TASK-KL043-RESTORE-PUBLIC-COLD-001 implements REQ/AC-STORAGE-RESTORE-PUBLIC-COLD-001 under this current-format decision and ADR123. Successful missing documents retain the current nonnull DocumentReadResult outer record with null Document; the full existing SDK/official MCP/SQL restore operation compares that literal named response on all four original routes. No public schema, generated alias/field ID, absence semantics or format changes.
-
-The existing owner repeats its full restored-target cold continuation twice under its original deadline/token. Both turns reuse the same published target roots and original fresh signed command/receipt, invoke the original StartAsync(restore:false), and join Stop before comparing the complete canonical image with the one retained final cut. Original archive refusal/repair, operator exits, current persisted auth, paused dispatch/resume, secondary/model/event/inbox/outbox/queue/old-fence oracles and all original failures remain mandatory. No fixture startup/provider change or duplicate test declaration. Native preview is source evidence only; compiler, real six-silo RF3 and Linux qualification remain separate open gates. Existing ordinary stopped-store opens are explicitly outside this narrow oracle/cold-turn change.
+## Verification: local-store corruption and repair
+
+REQ-STORAGE-007/021 → AC-NATIVE-001/002/005. Whole operations on real current stores
+corrupt or alter one fixture-owned input, require the exact strict refusal
+(Corruption or FormatUnsupported) with the complete recursive file inventory unchanged,
+then restore only the captured original bytes after the rejected owner has settled. The
+covered faults are a corrupt compacted checkpoint checksum, a missing identity file, an
+unsupported identity version, an invalid or unsupported-signature journal frame and
+checksummed invalid binary payloads of every typed shape. After each repair the same
+owner must reopen with its exact original identity, reader capability and committed
+position, return the literal original record, accept a distinct healthy write with a
+one-position increment, and survive close/reopen with the complete raw key/value
+inventory. The continuation then pauses dispatch, takes a backup, compares the complete
+backup files before and after a restore through the unchanged native API with a
+genuinely new incarnation, signing authority and node identity, reopens the restored
+owner twice, and rereads the original source authority. A successful snapshot install
+retains source authority and increments only the read generation. No conversion, repair
+API, adoption, alternative checksum or identity regeneration is introduced; no
+production format, alias, field ID, default or quota changes. Process recovery and
+cluster flows are independent mandatory gates, and local native-store evidence
+qualifies neither them nor power-loss durability.

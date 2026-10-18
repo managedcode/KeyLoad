@@ -25,7 +25,7 @@ internal static class FunctionalGateColdSeed
                     new("reference", RelationalColumnType.Text)])
             };
             var definition = await FunctionalGateRelationalCalls.SqlSdkAsync<ResourceDefinition>(context, context.Administrator, create, token);
-            await SqlRf3Protocol.EqualAsync(expected, definition);
+            await SqlClusterProtocol.EqualAsync(expected, definition);
             var blob = await FunctionalGateColdBlobUpload.RunAsync(context, index, token);
             var beforeWrite = TimeProvider.System.GetUtcNow();
             var command = FunctionalGateColdMutations.Command(context, index, blob.Begin.Blob);

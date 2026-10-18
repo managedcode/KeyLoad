@@ -125,12 +125,12 @@ internal sealed class ContainerRestartFailureCaptureTests
             receipts.Save(scope.Path, bounded);
         }
 
-        var firstPath = System.IO.Path.Combine(scope.Path, "rf3-restart-failure-0001.log");
-        var lastRetainedPath = System.IO.Path.Combine(scope.Path, "rf3-restart-failure-0032.log");
-        var latestPath = System.IO.Path.Combine(scope.Path, "rf3-restart-failure.log");
+        var firstPath = System.IO.Path.Combine(scope.Path, "cluster-restart-failure-0001.log");
+        var lastRetainedPath = System.IO.Path.Combine(scope.Path, "cluster-restart-failure-0032.log");
+        var latestPath = System.IO.Path.Combine(scope.Path, "cluster-restart-failure.log");
         var files = Directory.GetFiles(scope.Path);
         await Assert.That(files).Count().IsEqualTo(MaximumReceipts + 1);
-        await Assert.That(File.Exists(System.IO.Path.Combine(scope.Path, "rf3-restart-failure-0033.log"))).IsFalse();
+        await Assert.That(File.Exists(System.IO.Path.Combine(scope.Path, "cluster-restart-failure-0033.log"))).IsFalse();
 
         var first = await ReadBoundedUtf8Async(firstPath);
         var lastRetained = await ReadBoundedUtf8Async(lastRetainedPath);

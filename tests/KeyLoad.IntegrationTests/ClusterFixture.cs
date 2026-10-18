@@ -2,7 +2,6 @@ using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
-using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.IntegrationTests.Features.CodeQuality;
 using KeyLoad.IntegrationTests.Features.Messaging;
 using KeyLoad.Query;
@@ -12,69 +11,56 @@ using static KeyLoad.IntegrationTests.Features.ClusterReplication.ClusterFixture
 
 namespace KeyLoad.IntegrationTests;
 
-/// <summary>Owns the real Aspire RF3 application shared by public SDK integration scenarios.</summary>
+/// <summary>Owns the real Aspire CLUSTER application shared by public SDK integration scenarios.</summary>
 internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKeyedDataSource
 {
     private static readonly TimeSpan StartupTimeout = TimeSpan.FromMinutes(2);
     private readonly RemoteTransferCoordinatorFixtureSelection? transferCoordinator;
     private readonly long? commandBytes;
-    private readonly Features.Authorization.FoundationOtlpRf3Selection? telemetry;
-    private readonly Features.Messaging.QueueDeadlineRf3Selection? queueDeadline;
-    private readonly Features.QueryExecution.PostgresRf3FixtureOwnership nativeSql = new();
+    private readonly Features.Authorization.FoundationOtlpClusterSelection? telemetry;
+    private readonly Features.Messaging.QueueDeadlineClusterSelection? queueDeadline;
+    private readonly Features.QueryExecution.PostgresClusterFixtureOwnership nativeSql = new();
     private readonly HttpAdmissionLimits? httpAdmission;
     private readonly DatabaseLimits? databaseLimits;
     private readonly int? snapshotThreshold;
     private readonly QueryExecutionOptions? queryExecution;
     private ClusterFixtureDiagnostics? diagnostics;
     private ContainerRuntimeControl? containerRuntime;
-    private NativeCoverageRf3FixtureOwner? coverage;
-    private LocalRf3ImageTestSession? localImageSession;
+    private NativeCoverageClusterFixtureOwner? coverage;
+    private LocalClusterImageTestSession? localImageSession;
     private bool localImageCleanupIncomplete;
-    private readonly bool isolateReplicaNamespace;
-    private ReplicaIsolationOwner? isolationOwner;
-    private ReplicaIsolationBuilderOwnership? isolationBuilder;
-    private bool isolationCleanupIncomplete;
     private readonly string coverageFixtureId = Guid.NewGuid().ToString("D");
-    private byte[] peerSecret = [];
-    internal ClusterFixtureSnapshotReadiness? SnapshotReadiness
-    {
-        get; private set;
-    }
     /// <summary>Receives the native keyed data-source identity before initialization.</summary>
     public string Key { get; set; } = string.Empty;
 
-    /// <summary>Creates the standard RF3 fixture for the shared TUnit class data source.</summary>
+    /// <summary>Creates the standard CLUSTER fixture for the shared TUnit class data source.</summary>
     public ClusterFixture()
     {
     }
 
-    internal ClusterFixture(Features.Authorization.FoundationOtlpRf3Selection selection)
-        => telemetry = Features.Authorization.FoundationOtlpRf3Configuration.Validate(selection);
+    internal ClusterFixture(Features.Authorization.FoundationOtlpClusterSelection selection)
+        => telemetry = Features.Authorization.FoundationOtlpClusterConfiguration.Validate(selection);
 
     internal ClusterFixture(RemoteTransferCoordinatorFixtureSelection selection)
         => transferCoordinator = RemoteTransferCoordinatorFixtureConfiguration.Validate(selection);
 
-    internal ClusterFixture(Features.Messaging.QueueDeadlineRf3Selection queueDeadline)
+    internal ClusterFixture(Features.Messaging.QueueDeadlineClusterSelection queueDeadline)
         => this.queueDeadline = queueDeadline;
 
-    internal ClusterFixture(Features.QueryExecution.PostgresRf3Selection selection)
+    internal ClusterFixture(Features.QueryExecution.PostgresClusterSelection selection)
         => nativeSql = new(selection);
 
-    /// <summary>Creates only the explicitly selected Linux native namespace fault cohort.</summary>
-    internal ClusterFixture(ReplicaIsolationProfile profile)
-        => isolateReplicaNamespace = ReplicaIsolationAdmission.Require(profile);
-
-    /// <summary>Creates an RF3 fixture with a smaller command admission budget.</summary>
+    /// <summary>Creates an CLUSTER fixture with a smaller command admission budget.</summary>
     /// <param name="commandBytes">The per-node retained command byte limit.</param>
     internal ClusterFixture(long commandBytes) => this.commandBytes = commandBytes;
 
-    /// <summary>Creates an RF3 fixture with explicit HTTP admission bounds.</summary>
+    /// <summary>Creates an CLUSTER fixture with explicit HTTP admission bounds.</summary>
     /// <param name="httpAdmission">The HTTP body and control-body limits for each node.</param>
     internal ClusterFixture(HttpAdmissionLimits httpAdmission)
         => this.httpAdmission = ClusterFixtureRuntimeInvocation.RequireAdmission(httpAdmission);
 
-    /// <summary>Creates an RF3 fixture with the server's typed database execution limits.</summary>
-    /// <param name="databaseLimits">The validated limits applied to every Aspire RF3 node.</param>
+    /// <summary>Creates an CLUSTER fixture with the server's typed database execution limits.</summary>
+    /// <param name="databaseLimits">The validated limits applied to every Aspire CLUSTER node.</param>
     internal ClusterFixture(DatabaseLimits databaseLimits)
         => this.databaseLimits = ClusterFixtureDatabaseLimits.Validate(databaseLimits);
 
@@ -82,12 +68,12 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
     internal ClusterFixture(DatabaseLimits databaseLimits, int snapshotThreshold) : this(databaseLimits)
         => this.snapshotThreshold = ClusterFixtureComposition.ValidateSnapshotThreshold(snapshotThreshold);
 
-    /// <summary>Creates an RF3 fixture with explicit database and additional query result bounds.</summary>
+    /// <summary>Creates an CLUSTER fixture with explicit database and additional query result bounds.</summary>
     internal ClusterFixture(DatabaseLimits databaseLimits, QueryExecutionOptions queryExecution)
         : this(databaseLimits)
         => this.queryExecution = ClusterFixtureQueryResultLimits.Validate(queryExecution);
 
-    /// <summary>Composes validated HTTP admission and query capabilities in the same Aspire RF3 cohort.</summary>
+    /// <summary>Composes validated HTTP admission and query capabilities in the same Aspire CLUSTER cohort.</summary>
     internal ClusterFixture(HttpAdmissionLimits httpAdmission, DatabaseLimits databaseLimits, QueryExecutionOptions queryExecution)
         : this(databaseLimits, queryExecution)
         => this.httpAdmission = ClusterFixtureRuntimeInvocation.RequireAdmission(httpAdmission);
@@ -122,24 +108,17 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
         try
         {
             using var preparation = new CancellationTokenSource(TimeSpan.FromMinutes(15), TimeProvider.System);
-            if (isolateReplicaNamespace)
-            {
-                await ReplicaIsolationAdmission.PreflightAsync(preparation.Token).ConfigureAwait(false);
-            }
-            localImageSession = await LocalRf3ImageTestSession.StartIfSelectedAsync(preparation.Token)
+            localImageSession = await LocalClusterImageTestSession.StartIfSelectedAsync(preparation.Token)
                 .ConfigureAwait(false);
             using var timeout = new CancellationTokenSource(StartupTimeout, TimeProvider.System);
-            coverage = await NativeCoverageRf3FixtureOwner.CreateAsync(coverageFixtureId, timeout.Token)
+            coverage = await NativeCoverageClusterFixtureOwner.CreateAsync(coverageFixtureId, timeout.Token)
                 .ConfigureAwait(false);
             var selection = ClusterFixtureComposition.PrepareArguments(Root, coverage, localImageSession?.Selection,
-                isolateReplicaNamespace, snapshotThreshold, Key);
+                snapshotThreshold);
             Root = selection.Root;
-            SnapshotReadiness = selection.Readiness;
-            var arguments = nativeSql.Prepare(Root, selection.Arguments);
+            var arguments = selection.Arguments;
             ColdStartObservation = ClusterFixtureApplicationStartup.ObserveColdStart(Root);
-            var (builder, isolationOwnership) = await ClusterFixtureComposition.CreateBuilderAsync(
-                arguments, telemetry, isolateReplicaNamespace, timeout.Token);
-            isolationBuilder = isolationOwnership;
+            var builder = await ClusterFixtureComposition.CreateBuilderAsync(arguments, telemetry, timeout.Token);
             ClusterFixtureComposition.ConfigureTestOverrides(builder, commandBytes, httpAdmission, databaseLimits, queryExecution);
             queueDeadline?.Configure(builder);
             nativeSql.Configure(builder, Root);
@@ -147,24 +126,13 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
             var containerNames = ClusterFixtureComposition.GetContainerNames(builder);
             var repository = ClusterFixtureDiagnostics.FindRepositoryRoot();
             ClusterFixtureComposition.ConfigureLogging(builder);
-            if (isolateReplicaNamespace)
-            {
-                isolationOwner = await ReplicaIsolationOwner.PrepareAsync(builder, Root, repository.FullName,
-                    containerNames, timeout.Token).ConfigureAwait(false);
-            }
-            App = isolationBuilder is null ? await builder.BuildAsync(timeout.Token)
-                : await isolationBuilder.BuildAsync(timeout.Token).ConfigureAwait(false);
+            App = await builder.BuildAsync(timeout.Token);
             containerRuntime = new(App, containerNames, repository.FullName, localImageSession?.Selection);
             diagnostics = new(App);
             diagnostics.Start(App.Services.GetRequiredService<ResourceLoggerService>());
-            (AdminKey, peerSecret, PhysicalShardId) = ClusterFixturePhysicalShardIdentity.ReadIdentity(Root);
-            diagnosticIncarnation = ClusterFixturePhysicalShardIdentity.ReadProfile(Root).Incarnation;
-            await ClusterFixtureApplicationStartup.StartOwnedAsync(App, repository.FullName, containerNames,
-                coverage, localImageSession?.Selection, isolationOwner, timeout.Token).ConfigureAwait(false);
-            if (isolationOwner is not null)
-            {
-                await isolationOwner.VerifyStartedAsync(App, timeout.Token).ConfigureAwait(false);
-            }
+            (AdminKey, _, PhysicalShardId) = ClusterFixturePhysicalShardIdentity.ReadIdentity(Root);
+            await ClusterFixtureApplicationStartup.StartAsync(App, repository.FullName, containerNames,
+                coverage, localImageSession?.Selection, timeout.Token).ConfigureAwait(false);
         }
         catch (Exception startupFailure)
         {
@@ -172,9 +140,6 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
             throw;
         }
     }
-
-    internal ReplicaIsolationOwner RequireReplicaIsolation() => isolationOwner
-        ?? throw new InvalidOperationException("This fixture does not own a native namespace fault cohort.");
 
     internal void RegisterNativeCoverageCase<TCase>(string methodName) => coverage?.RegisterCase<TCase>(methodName);
 
@@ -185,13 +150,9 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
     public KeyLoadClient Client(string node, string? key = null)
         => ClusterFixtureComposition.CreateClient(RequireApp(), node, key ?? AdminKey);
 
-    /// <summary>Writes bounded RF3 state, signed discovery and recent node-log diagnostics.</summary>
+    /// <summary>Writes bounded CLUSTER state, readiness and recent node-log diagnostics.</summary>
     /// <returns>A task that completes after the diagnostic artifact is written.</returns>
     public Task SaveFailureDiagnosticsAsync() => SaveFailureDiagnosticsAsync(RequireDiagnostics().LifetimeToken);
-
-    internal Task SaveReplicaIsolationFailureDiagnosticsAsync(string nativeCase)
-        => RequireDiagnostics().SaveOwnedAsync(peerSecret, AdminKey, diagnosticIncarnation, RequireReplicaIsolation().CreateFailureDirectory(nativeCase),
-            RequireDiagnostics().LifetimeToken);
 
     /// <summary>Kills the inspected Aspire-managed Docker container for a named test scenario.</summary>
     /// <param name="resourceName">The Aspire resource name to stop.</param>
@@ -214,15 +175,9 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
     {
         using var deadline = coverage?.CreateCleanupDeadline();
         using var localCleanup = localImageSession?.CreateApplicationCleanupCancellation();
-        using var faultCleanup = isolateReplicaNamespace
-            ? new CancellationTokenSource(RequestCqrsRf3Protocol.CleanupDeadline, TimeProvider.System) : null;
-        var token = deadline?.Token ?? localCleanup?.Token ?? faultCleanup?.Token ?? CancellationToken.None;
+        var token = deadline?.Token ?? localCleanup?.Token ?? CancellationToken.None;
         var failures = new List<Exception>();
-        if (isolationOwner is not null)
-        {
-            await CollectCleanupAsync(deadline, () => isolationOwner.RestoreAsync(token), failures).ConfigureAwait(false);
-        }
-        await SaveDiagnosticsAsync(diagnostics, peerSecret, AdminKey, diagnosticIncarnation, deadline, failures).ConfigureAwait(false);
+        await SaveDiagnosticsAsync(diagnostics, deadline, failures).ConfigureAwait(false);
         if (diagnostics is not null)
         {
             var disposal = diagnostics.DisposeAsync().AsTask();
@@ -233,17 +188,6 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
         App = null!;
         var (appStopped, stoppedNodes) = await ClusterFixtureApplicationShutdown.CollectAsync(
             ownedApp, deadline, coverage, containerRuntime is not null, failures, token).ConfigureAwait(false);
-        if (isolationBuilder is not null)
-        {
-            var disposal = isolationBuilder.DisposeAsync().AsTask();
-            await CollectCleanupAsync(deadline, disposal, failures).ConfigureAwait(false);
-        }
-        if (isolationOwner is not null)
-        {
-            await CollectCleanupAsync(deadline, () => isolationOwner.SettleAfterStopAsync(appStopped, token), failures)
-                .ConfigureAwait(false);
-        }
-        isolationCleanupIncomplete |= isolateReplicaNamespace && failures.Count > 0;
         var ownedLocalImage = localImageSession is not null;
         if (localImageSession is not null)
         {
@@ -252,8 +196,8 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
             localImageSession = null;
         }
         localImageCleanupIncomplete |= ownedLocalImage && failures.Count > 0;
-        localImageCleanupIncomplete = await nativeSql.JoinAndReleaseRootAsync(SnapshotReadiness, appStopped,
-            localImageCleanupIncomplete, isolationCleanupIncomplete, failures,
+        localImageCleanupIncomplete = await Features.QueryExecution.PostgresClusterFixtureOwnership.ReleaseRootAsync(
+            localImageCleanupIncomplete, failures,
             () => ClusterFixtureFailureRootRetention.For(this).ReleaseAsync(
                 () => DeleteOwnedRootAsync(coverage, Root, deadline, failures))).ConfigureAwait(false);
         await ClusterFixtureFailureRootRetention.For(this).CompleteAsync(Root,
@@ -261,14 +205,8 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
                 .CompleteAsync(appStopped, stoppedNodes, deadline, failures, token), failures).ConfigureAwait(false);
     }
 
-    internal Task<KeyLoad.Clustering.ReplicaSiloDiscovery> ReadSnapshotDiscoveryAsync(string node, CancellationToken token)
-        => RequestCqrsRf3SignedDiscovery.ReadAsync(RequireApp(), node,
-            ClusterFixturePhysicalShardIdentity.ReadProfile(Root).Incarnation, peerSecret, AdminKey, token);
-
-    private Guid diagnosticIncarnation;
-
     internal Task<string> SaveFailureDiagnosticsAsync(CancellationToken cancellationToken) =>
-        RequireDiagnostics().SaveAsync(peerSecret, AdminKey, diagnosticIncarnation, cancellationToken);
+        RequireDiagnostics().SaveAsync(cancellationToken);
 
     private ClusterFixtureDiagnostics RequireDiagnostics() => diagnostics
         ?? throw new InvalidOperationException(ClusterFixtureRuntimeInvocation.DiagnosticsUnavailable);

@@ -1,9 +1,8 @@
 # ADR-078: Bounded native full-text candidate generations
 
-Status: Accepted implementation contract 2026-10-03 under the owner's complete
-104-task instruction. Source implemented and locally verified; exact-source Linux
-and Docker RF3 qualification pending. Owner: integration lead.
-Related KL-029/039/097, REQ-ZT-003, REQ-FTS-001..006 / AC-FTS-001..006 in
+Status: Accepted. Source implemented and locally verified; exact-source Linux
+and Docker cluster qualification pending.
+Related: REQ-ZT-003, REQ-FTS-001..006 / AC-FTS-001..006 in
 [NativeFullTextProjection](../Features/Search/NativeFullTextProjection.md).
 
 ## Native provider and authority
@@ -15,7 +14,7 @@ ZoneTree remains centrally pinned1.9.8. Use its real public
 `IndexOfTokenRecordPreviousToken<ulong,ulong>` and primary native ZoneTree iterator;
 do not copy its implementation or use its unbounded/partial-cancellation search.
 Canonical records, policy, exact BM25 statistics/ranks, vector/RRF accumulation,
-selected payload projection, synchronous WAL and RF3 remain unchanged.
+selected payload projection, synchronous WAL and majority acknowledgement remain unchanged.
 
 This first provider generation is a correctness integration: canonical authorized
 corpus visitation remains the exact scoring and completeness oracle. Native
@@ -26,7 +25,7 @@ contracts and evidence; this stage does not close those distinct acceptance gate
 
 ## Closed generation contract
 
-One physical PartitionHost owns one disposable native projection manager under
+Each silo-local ZoneTree owner owns one disposable native projection manager under
 `<node-directory>/search-indexes`. Query code borrows a gate-scoped lease and never
 owns native storage handles. One manager admits one lease/build at a time with
 nonblocking admission; saturation returns `BudgetExceeded`, never holds an
@@ -157,61 +156,19 @@ derived-index reconstruction. Native canonical tree files may legitimately chang
 through reopen and maintenance; their physical byte identity is not the logical
 authority oracle, and no claim of immutable native file layout follows.
 
-## Delivery and integration
+## Delivery and verification
 
-1. Root freezes scope/protocol/interfaces, dependency pins, feature/ADR/task graph.
-2. TASK-FTS-QUERY: Luna owns SearchEngine/TextRanker joins only. Acquire and dispose
-   inside the same authorized cut; observe the already enumerated tokens and
-   verify all exact candidates. Default direct construction remains the explicit
-   exact oracle; deployed RF3 SearchEngine always receives the native manager.
-3. TASK-FTS-NATIVE: Luna owns new Server/Features/Search NativeText* files only,
-   actual native generation, bounded metadata/postings, receipts, lifetime,
-   cancellation and cleanup. Root owns PartitionHost / DI / csproj joins.
-4. TASK-FTS-TEST: Luna owns new UnitTests/Features/Search NativeText* real-store
-   tests and no source. Unicode/digits/empty/repeated terms, deliberate native
-   hash collisions, exact scores/ties, writes/deletes/policy changes, restart,
-   malformed metadata, saturation/cancel/bounds and healthy next request.
-5. Root reviews every diff, runs integrated build/formatter/governance and native
-   TUnit via Aspire. Add process-cut and genuine Docker RF3 .NET/official MCP
-   restart/failover parity evidence. Native Linux package-signature verification
-   and source/package provenance remain delivery gates.
-6. TASK-FTS-RECOVERY: Luna owns new CrashHost/RecoveryTests Features/Search
-   `NativeText*` files only. Root owns CrashHost dispatch, project references and
-   `Server/Features/Search/NativeTextFaultProtocol.cs`. The manager's optional
-   internal `Action<NativeTextFaultStage>` observer follows the optional token
-   hash argument and has no externally configurable effect. Five actual cuts
-   are OwnerFlushed, first NativePostingWritten, NativeInventoryFlushed after
-   native close and durable inventory, ManifestPublished after atomic rename,
-   and GenerationActivated before obsolete cleanup. First build and replacement
-   build process kills must preserve canonical authority/cut/raw records and
-   permit recognized ledger-based restart cleanup, native rebuild and exact
-   healthy search. Unknown/link/malformed ownership still fails closed without
-   deletion. Recovery trials run only as real TUnit processes under Aspire;
-   helper seeding/querying is test infrastructure, never an in-memory server.
-7. TASK-FTS-RF3: Luna owns new IntegrationTests/Features/Search `NativeTextRf3*`
-   cases and helpers only, using the actual Aspire Docker ClusterFixture,
-   KeyLoadClient and official MCP client. Independent expected branch ranks for
-   three persisted documents/vectors establish exact text and hybrid RRF scores,
-   Unicode normalization, updates/deletes and no premature Limit. Persisted row
-   and field-use denial, projected sensitive output and principal revocation
-   must agree across clients. Real loss and restart of a node container preserve
-   updated results through surviving clients and healthy following operations.
-   Separate read cuts are not falsely equated. Reuse existing bounded
-   fixture/client infrastructure without weakening deadlines or adding a
-   standalone Docker entry. This source is not cluster evidence until run.
-8. TASK-FTS-LIFETIME-REPAIR and TASK-FTS-SETTLEMENT-TEST use disjoint lifecycle
-   source and real native test ownership. Preserve failed-release ownership and
-   cancellation/settlement exception identities; root runs their actual Aspire
-   regression. TASK-FTS-CANONICAL-ORACLE extends only the real-process receipt and
-   assertions with the complete bounded canonical-state digest defined above.
+1. Query: acquire and dispose the manager inside the same authorized cut, observe the already enumerated tokens and verify all exact candidates. Default direct construction remains the explicit exact oracle; the deployed SearchEngine always receives the native manager.
+2. Native generation: actual native generation, bounded metadata/postings, receipts, lifetime, cancellation and cleanup live in new Server/Features/Search NativeText* files.
+3. Real-store tests cover Unicode/digits/empty/repeated terms, deliberate native hash collisions, exact scores/ties, writes/deletes/policy changes, restart, malformed metadata, saturation/cancel/bounds and a healthy next request.
+4. Process-cut and genuine Docker/Aspire cluster .NET/official MCP restart/failover parity evidence; native Linux package-signature verification and source/package provenance remain delivery gates.
+5. Recovery: the manager's optional internal `Action<NativeTextFaultStage>` observer follows the optional token hash argument and has no externally configurable effect. Five actual cuts are OwnerFlushed, first NativePostingWritten, NativeInventoryFlushed after native close and durable inventory, ManifestPublished after atomic rename, and GenerationActivated before obsolete cleanup. First build and replacement build process kills must preserve canonical authority/cut/raw records and permit recognized ledger-based restart cleanup, native rebuild and exact healthy search. Unknown/link/malformed ownership still fails closed without deletion. Recovery trials run only as real TUnit processes under Aspire; helper seeding/querying is test infrastructure, never an in-memory server.
+6. Cluster flow: independent expected branch ranks for three persisted documents/vectors establish exact text and hybrid RRF scores, Unicode normalization, updates/deletes and no premature Limit. Persisted row and field-use denial, projected sensitive output and principal revocation must agree across clients. Real loss and restart of a node container preserve updated results through surviving clients and healthy following operations. Separate read cuts are not falsely equated. Reuse existing bounded fixture/client infrastructure without weakening deadlines or adding a standalone Docker entry. This source is not cluster evidence until run.
+7. Lifetime repairs preserve failed-release ownership and cancellation/settlement exception identities with an actual Aspire regression; the real-process receipt and assertions include the complete bounded canonical-state digest defined above.
 
-Join conditions: source files obey400/type200/method64/depth3; no worker runs
-runtime checks or edits another scope. Root owns checks and milestone commits.
-Retain exact-SHA Linux/original test artifacts before accepting this stage.
-Rollback drops only recognized derived generations and uses the current binary and the exact oracle; canonical native records do not migrate.
-No production readiness, power-loss guarantee or performance winner is claimed.
+Source files obey the 400/200/64/depth-3 limits. Retain exact-SHA Linux/original test artifacts before accepting this stage. Rollback drops only recognized derived generations and uses the current binary and the exact oracle; canonical native records do not migrate. No production readiness, power-loss guarantee or performance winner is claimed.
 
-Incremental text checkpoints, selected maintained query generations and the KL-029
+Incremental text checkpoints, selected maintained query generations and the
 process-cut evidence are specified by REQ/AC-FTS-INC in
 [NativeFullTextProjection](../Features/Search/NativeFullTextProjection.md) and its
 linked Search specifications; this ADR retains the generation contract above.

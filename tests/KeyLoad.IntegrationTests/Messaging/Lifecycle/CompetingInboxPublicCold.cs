@@ -16,7 +16,7 @@ internal sealed class CompetingInboxPublicCold(ClusterFixture fixture)
     private readonly List<Evidence> originals = [];
     internal string Claim(IEnumerable<string> nodes)
     {
-        var scenario = ModelSqlRf3ColdOwnership.Require(fixture).Claim(fixture);
+        var scenario = ModelSqlClusterColdOwnership.Require(fixture).Claim(fixture);
         foreach (var node in nodes)
         {
             if (File.Exists(PathFor(scenario, node)))

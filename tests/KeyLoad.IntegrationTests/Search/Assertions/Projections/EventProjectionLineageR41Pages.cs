@@ -6,7 +6,7 @@ namespace KeyLoad.IntegrationTests.Features.Search;
 
 internal static class EventProjectionLineageR41Pages
 {
-    internal static async Task BothAsync(RequestCqrsRf3Callers reader, EventProjectionLineageR41State state, Func<Task> observe, CancellationToken token)
+    internal static async Task BothAsync(RequestCqrsClusterCallers reader, EventProjectionLineageR41State state, Func<Task> observe, CancellationToken token)
     {
         var query = new SearchRequest(state.Partition, EventProjectionLineageR41Protocol.Collection,
          VectorField: EventProjectionLineageR41Protocol.Vector, Vector: state.Replaced ? [0f, 1f] : [1f, 0f],
@@ -14,9 +14,9 @@ internal static class EventProjectionLineageR41Pages
         var expected = state.Replaced ? new[] { Row(state, EventProjectionLineageR41Protocol.Baseline, 1d / 61d), Row(state, EventProjectionLineageR41Protocol.Target, 1d / 62d) }
          : state.Deleted ? new[] { Row(state, EventProjectionLineageR41Protocol.Baseline, 1d / 61d) }
          : new[] { Row(state, EventProjectionLineageR41Protocol.Target, 1d / 61d), Row(state, EventProjectionLineageR41Protocol.Baseline, 1d / 62d) };
-        await SqlRf3Protocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(await reader.Sdk.SearchAsync(query, token)));
+        await SqlClusterProtocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(await reader.Sdk.SearchAsync(query, token)));
         await observe();
-        await SqlRf3Protocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<RankedDocument[]>(
+        await SqlClusterProtocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<RankedDocument[]>(
          await reader.Mcp.CallAsync(McpCallerTools.SearchExecute, query, token))).Value);
         await observe();
     }

@@ -15,11 +15,9 @@ internal static class NativeSearchTerminalPrivacy
         var identity = database.Store.Identity;
         var applied = budget.Read(view, KeySpace.AppliedBytes)
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, Missing);
-        var movementAuthorityAbsent = database.CaptureUnconfiguredMovementAbsence(view, budget);
         return new(identity.NodeId, identity.Incarnation, identity.FormatVersion, identity.ReadGeneration,
             database.Store.Position, NativeSerialization.Deserialize<long>(applied), principal.PolicyEpoch,
-            resource.SchemaVersion, ResourceHash(resource, budget), DatabaseEngine.ReadPlacementWitness(view, partition),
-            movementAuthorityAbsent);
+            resource.SchemaVersion, ResourceHash(resource, budget), DatabaseEngine.ReadPlacementWitness(view, partition));
     }
 
     internal static void Verify(DatabaseEngine database, string principalId, PartitionRef partition,

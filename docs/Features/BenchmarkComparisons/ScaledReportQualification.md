@@ -17,7 +17,7 @@ file hashing, process ownership and actual measurements remain the parent
 feature's separate gates. Do not implement them by synthesizing report fields.
 Backend, public API, frontend, persisted data and workflow surfaces are N/A:
 this stage changes local diagnostic validation and its real TUnit/Node tests.
-No new package, tool, public website figure or internal Benchmarks job is added.
+No package, tool, public website figure or internal Benchmarks job is added.
 
 ```mermaid
 flowchart LR
@@ -38,10 +38,8 @@ flowchart LR
 |REQ-SCALE-RPT-003|AC-SCALE-RPT-003|Validate without mutation, I/O, child launch or network; errors name fixed schema fields and do not echo supplied values|
 |REQ-SCALE-RPT-004|AC-SCALE-RPT-004|Exercise the real module in bounded actual Node processes through TUnit; controlled vectors never become native or provider proof|
 
-The intended module path is
-`scripts/Features/BenchmarkComparisons/scaled-storage-report.mjs`. That parser is
-not present in current source; its implementation and execution remain OPEN. When
-implemented under this contract, it will export:
+The module path is `scripts/Features/BenchmarkComparisons/scaled-storage-report.mjs`;
+its implementation and execution are open acceptance gates. It exports:
 
 - `validateScaledReport(report, engine, recordCount)` returns `undefined` only
   after validation; otherwise throws an `Error` with a fixed field diagnostic.
@@ -87,7 +85,7 @@ epsilons times max(1, absolute expected value). This checks normalized units;
 it does not invent or replace statistics. Memory must contain nonnegative finite
 bytes allocated per operation, nonnegative integer Gen0/1/2 collections and
 TotalOperations exactly1M. Managed allocation metadata is not native heap/RSS.
-Missing, failed, short, old-control, duplicate or extra cells fail the report.
+Missing, failed, short, control, duplicate or extra cells fail the report.
 
 ### AC-SCALE-RPT-002: complete cohort
 
@@ -117,7 +115,7 @@ the write, and parse its bounded bytes once in the real child. Arguments contain
 only the bounded probe program and module path; no request bytes, base64 chunks,
 temporary input file or second process owner. A valid controlled request over
 256KiB must execute through the actual child; a request over1MiB must reject
-before launch. Root extends the existing lifetime owner with one optional input
+before launch. The existing lifetime owner takes one optional input
 task, sharing its run/cancellation deadline. That original task participates in
 success, failure, cleanup and deferred release with the exit/output/error tasks;
 do not dispose its process or pipe before all originals settle.
@@ -133,32 +131,11 @@ must be checked. No fake HTTP/native provider, fake process or skipped case.
 |003|Success and every rejection preserve input; nonfinite values; sentinel diagnostics stay bounded and safe|Pure parsing cannot authenticate a provider or measured source|
 |004|Real TUnit launches owned Node, verifies exit/stdout/stderr/exact case set; bounded stdin request over256KiB succeeds and oversize request rejects before launch; cancellation/input failure uses the same original-task owner|Coverage collector/baseline is unavailable; no numeric coverage claim|
 
-Source boundaries and task graph are fixed before delegated implementation:
-
-|Task|Owner and exact scope|Dependencies and join|
-|---|---|---|
-|SCALE-Q0|Luna read-only original-schema research; private receipt only|Complete source-bound discovery; no measurement claim|
-|SCALE-QT3|Luna writes only NEW ScaledRawStorageReport* TUnit sources|Root-approved contract; independent of QI; acceptance-derived tests, no execution before coherent implementation and review|
-|SCALE-QI|Luna writes only NEW scaled-storage-report.mjs and cohesive same-prefix helpers|Root-approved contract; independent of QT3; no workflow/control/schema/contract edits; complete source/hashes|
-|SCALE-QS|Root owns existing IsolatedAggregateNodeProcess/Lifetime/Cleanup optional stdin extension and NEW input helper|Existing no-input behavior preserved; every original writer/exit/reader settles or remains charged in deferred release|
-|SCALE-QR|Strongest read-only full parser/test review|Complete QT/QI, actual original schema, source limits and privacy; no runtime claims|
-|SCALE-QG|Root sole join/verification/Git owner|Approved QR; build first, focused real Node TUnit, broader normal/scalar, format/governance, honest status|
-
-The actual pre-source full relevant baseline is recorded once in ScaledWorkloads;
-new parser tests are additional and unexecuted until the module is joined. Track
-each actual failure here with its original result, cause and preserving fix.
-Use TUnit/Microsoft.Testing.Platform and .NET10, never VSTest filters. Root runs
-the real focused `/*/*/*ScaledRawStorageReport*/*` filter after a fresh Release
-build, then required related/full gates and formatter. Local results are
-development evidence; delivered-source CI remains mandatory. Preserve originals.
-
-Root owns this contract/ADR/integration. Workers cannot invent fields, alter
-native workload/profile/settings, change controls or publish values. Stop on
-schema, process-owner, same-file or acceptance ambiguity. No skill installation.
-Rollback removes only this new parser and tests together; no product/persisted
-migration. Status: accepted implementation contract; tests/module/execution OPEN.
-
-Owner execution order2026-10-03: implement the complete source/test block first,
-self-review, then execute validation. QT3/QI/QS may implement concurrently in
-disjoint files; their joined result is reviewed together. Earlier stopped QT/QT2
-candidates remain unapproved and are not a source or qualification baseline.
+Use TUnit/Microsoft.Testing.Platform and .NET 10, never VSTest filters. The real
+focused `/*/*/*ScaledRawStorageReport*/*` filter runs after a fresh Release build,
+followed by the related/full gates and formatter. Local results are development
+evidence; delivered-source CI remains mandatory, and originals are preserved.
+Implementers cannot invent fields, alter native workload/profile/settings, change
+controls or publish values. Rollback removes only this parser and its tests together;
+no product/persisted migration is involved. The tests, module and execution are open
+acceptance gates.

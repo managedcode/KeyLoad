@@ -12,7 +12,7 @@ namespace KeyLoad.Server;
 [ConfigurationBinding]
 internal static class NativeRuntimeJournalRegistration
 {
-    internal const string ProviderName = "keyload-rf3-runtime-journal-v1";
+    internal const string ProviderName = "keyload-cluster-runtime-journal-v1";
     private const string BinaryFormat = "orleans-binary";
 
     internal static void Register(ISiloBuilder silo)

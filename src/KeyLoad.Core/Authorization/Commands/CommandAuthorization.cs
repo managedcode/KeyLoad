@@ -40,10 +40,6 @@ public sealed partial class DatabaseEngine
     {
         switch (operation.Kind)
         {
-            case OperationKind.ConfigurePlacementPolicy:
-            case OperationKind.PersistPlacementIntent:
-            case OperationKind.PlacementIntentPhase:
-                return AuthorizePlacementCommand(view, principal, operation);
             case OperationKind.Bm25CorpusPublicationPhase:
                 AuthorizeBm25CorpusPublication(view, principal, operation);
                 return null;
@@ -134,12 +130,11 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.OwnershipLost, StalePartitionOwnershipMessage);
         }
 
-        AuthorizeBatchMutations(view, principal, request, allowEmpty, BatchResourceAdmission.CurrentPhysicalOwner);
+        AuthorizeBatchMutations(view, principal, request, allowEmpty);
         return placement;
     }
 
-    private void AuthorizeExtendedMutation(IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation mutation,
-        BatchResourceAdmission admission)
+    private void AuthorizeExtendedMutation(IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation mutation)
     {
         if (mutation is UpsertAnalyticsEvents or DeleteAnalyticsEvents)
         {
@@ -148,7 +143,7 @@ public sealed partial class DatabaseEngine
         }
         if (mutation is InsertTypedRow insert)
         {
-            RequireTypedInsertPermissions(principal, partition, BatchResource(view, partition, insert.Collection, admission, ResourceKind.Collection));
+            RequireTypedInsertPermissions(principal, partition, BatchResource(view, partition, insert.Collection, ResourceKind.Collection));
             return;
         }
         if (mutation is AdvanceQueueDeadline deadline)

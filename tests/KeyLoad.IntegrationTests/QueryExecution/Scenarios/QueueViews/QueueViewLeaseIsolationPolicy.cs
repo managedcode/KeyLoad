@@ -5,7 +5,7 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
 internal static class QueueViewLeaseIsolationPolicy
 {
-    internal static async Task RunAsync(RequestCqrsRf3Callers root, RequestCqrsRf3Callers reader,
+    internal static async Task RunAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers reader,
         QueueViewLeaseIsolationState state, CancellationToken token)
     {
         await PersistAsync(root, state, false, QueueViewLeaseIsolationProtocol.DeniedEpoch, token);
@@ -14,16 +14,16 @@ internal static class QueueViewLeaseIsolationPolicy
         await QueueViewLeaseIsolationReads.RunAsync(root, reader, state, token);
     }
 
-    private static async Task PersistAsync(RequestCqrsRf3Callers root, QueueViewLeaseIsolationState state,
+    private static async Task PersistAsync(RequestCqrsClusterCallers root, QueueViewLeaseIsolationState state,
         bool inspect, long epoch, CancellationToken token)
     {
         var expected = state.Reader.Principal with
         {
             PolicyEpoch = epoch,
-            Grants = [new(state.Scenario.Partition.DatabaseId, SqlModelViewRf3Scenario.Queue,
+            Grants = [new(state.Scenario.Partition.DatabaseId, SqlModelViewClusterScenario.Queue,
                 Capability.Query | (inspect ? Capability.QueueInspect : Capability.None))]
         };
-        await SqlRf3Protocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(
+        await SqlClusterProtocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(
             await root.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), expected, token)));
     }
 }

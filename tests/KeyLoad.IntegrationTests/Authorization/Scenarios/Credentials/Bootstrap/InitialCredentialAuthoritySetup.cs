@@ -17,7 +17,7 @@ internal static class InitialCredentialAuthoritySetup
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
         MutationReceipt[] expected = [new(PutKind, McpDocumentProtocol.Collection,
             McpDocumentProtocol.Entity, McpCallerProtocol.FirstRevision)];
-        await SqlRf3Protocol.EqualAsync(expected, receipt.Mutations.ToArray());
+        await SqlClusterProtocol.EqualAsync(expected, receipt.Mutations.ToArray());
         var identity = await McpPersistedIdentity.CreateAsync(fixture, scenario.Partition, Capability.DocumentsRead, token);
         return new(new(scenario, command, receipt), identity);
     }

@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.AppHost.Features.ClusterRouting;
 
-/// <summary>Admits only explicit ephemeral RF3 protocol-test image overrides.</summary>
+/// <summary>Admits only explicit ephemeral CLUSTER protocol-test image overrides.</summary>
 [ConfigurationBinding]
 internal static class ProtocolCohortImages
 {

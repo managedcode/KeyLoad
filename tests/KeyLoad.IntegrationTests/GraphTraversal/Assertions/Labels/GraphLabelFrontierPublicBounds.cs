@@ -11,7 +11,7 @@ internal static class GraphLabelFrontierPublicBounds
     private const string VertexDetail = "The vertex visit budget was exhausted.";
     private const string SafeDetail = "The operation exceeds the available resource capacity.";
 
-    internal static async Task VerifyAsync(RequestCqrsRf3Callers admin, RequestCqrsRf3Callers reader,
+    internal static async Task VerifyAsync(RequestCqrsClusterCallers admin, RequestCqrsClusterCallers reader,
         GraphLabelFrontierPublicState state, CancellationToken token)
     {
         await GraphLabelFrontierPublicReads.MatrixAsync(admin, reader, state, token);
@@ -28,19 +28,19 @@ internal static class GraphLabelFrontierPublicBounds
         }
     }
 
-    private static async Task RefuseAsync(RequestCqrsRf3Callers admin, RequestCqrsRf3Callers reader,
+    private static async Task RefuseAsync(RequestCqrsClusterCallers admin, RequestCqrsClusterCallers reader,
         GraphLabelFrontierPublicState state, TraverseRequest request, string detail, CancellationToken token)
     {
         var result = await reader.Sdk.TraverseAsync(request, token);
         await Assert.That(result.IsFailed).IsTrue();
         await Assert.That(result.Value).IsNull();
-        await SqlRf3Protocol.EqualAsync(Errors.Problem(ErrorCode.BudgetExceeded, detail), result.Problem);
+        await SqlClusterProtocol.EqualAsync(Errors.Problem(ErrorCode.BudgetExceeded, detail), result.Problem);
         await GraphLabelFrontierPublicReads.MatrixAsync(admin, reader, state, token);
         var reply = await reader.Mcp.CallAsync(McpCallerTools.GraphTraverse, request, token);
         await McpCallerAssertions.ErrorAsync(reply, ErrorCode.BudgetExceeded, dispatched: true);
         await Assert.That(reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
             .GetProperty(DetailKey).GetString()).IsEqualTo(SafeDetail);
-        await McpCallerAssertions.DoesNotDiscloseAsync(reply, state.Seed.Reader.Secret, GraphIncomingRf3Scenario.PrivateMarker);
+        await McpCallerAssertions.DoesNotDiscloseAsync(reply, state.Seed.Reader.Secret, GraphIncomingClusterScenario.PrivateMarker);
         await GraphLabelFrontierPublicReads.MatrixAsync(admin, reader, state, token);
     }
 }

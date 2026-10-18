@@ -54,7 +54,7 @@ function Read-FcNativeProductPlan([string] $Root, [string] $Repository, [string]
     $census = Read-FcNativeUnitCensus $Root $Repository $value $manifest $images $inventory.value $statusRuns
     $suiteRuns = Read-FcNativeSuiteRuns $Root $Repository $value $manifest $images $contributors `
         $inventory.value $census $statusRuns
-    $fixtures = Read-FcNativeRf3Fixtures $Root $value $manifest $suiteRuns
+    $fixtures = Read-FcNativeClusterFixtures $Root $value $manifest $suiteRuns
     $allInputs = [Collections.Generic.List[object]]::new()
     foreach ($input in $suiteRuns.inputs) { $allInputs.Add($input) }
     foreach ($input in $fixtures.inputs) { $allInputs.Add($input) }
@@ -135,7 +135,7 @@ function Read-FcNativeDescriptor([string] $Root, [string] $Descriptor, [object] 
     finally { $json.Dispose() }
     $value = ConvertFrom-Json -InputObject ([Text.Encoding]::UTF8.GetString($jsonFile.bytes)) -AsHashtable -Depth 32
     Assert-FcNativeExactKeys $value @('schemaVersion','invocationId','evidenceRoot','sourceManifest','unitRunStatus','tool','bounds',
-        'unitCensus','suiteRuns','rf3Fixtures','outputDirectory')
+        'unitCensus','suiteRuns','clusterFixtures','outputDirectory')
     if (($value.schemaVersion -isnot [int] -and $value.schemaVersion -isnot [long]) -or $value.schemaVersion -ne 3 -or $value.invocationId -cnotmatch '\A[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\z' -or
         [IO.Path]::GetFullPath([string] $value.evidenceRoot) -cne [IO.Path]::GetFullPath($Root)) { throw $script:FcNativeMergeInput.InvalidDescriptor }
     Assert-FcNativeBounds $value.bounds $ExpectedBounds
@@ -154,8 +154,8 @@ function Read-FcNativeSuiteRuns([string] $Root, [string] $Repository, [object] $
                 [Globalization.CultureInfo]::InvariantCulture))
         }
     }
-    $expectedSuites.Add('recovery'); $expectedSuites.Add('rf3')
-    if ($Value.suiteRuns -isnot [array] -or $Value.suiteRuns.Count -ne $expectedSuites.Count -or $Value.rf3Fixtures -isnot [array]) {
+    $expectedSuites.Add('recovery'); $expectedSuites.Add('cluster')
+    if ($Value.suiteRuns -isnot [array] -or $Value.suiteRuns.Count -ne $expectedSuites.Count -or $Value.clusterFixtures -isnot [array]) {
         throw $script:FcNativeMergeInput.InvalidDescriptor
     }
     $seenSuites = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
@@ -263,37 +263,37 @@ function Read-FcNativeSuiteTrx([string] $Root, [object] $Run, [object[]] $Expect
     [ordered]@{ identities = @($trx.cases | ForEach-Object { [string] $_.caseIdentity } | Sort-Object) }
 }
 
-function Read-FcNativeRf3Fixtures([string] $Root, [object] $Value, [object] $Manifest, [object] $SuiteRuns) {
-    $rf3Runs = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
-    foreach ($run in $Value.suiteRuns) { if ($run.suite -ceq 'rf3') { [void] $rf3Runs.Add([string] $run.runId) } }
+function Read-FcNativeClusterFixtures([string] $Root, [object] $Value, [object] $Manifest, [object] $SuiteRuns) {
+    $clusterRuns = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    foreach ($run in $Value.suiteRuns) { if ($run.suite -ceq 'cluster') { [void] $clusterRuns.Add([string] $run.runId) } }
     $associations = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
     $paths = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
     $inputs = [Collections.Generic.List[object]]::new()
     $fixtureIds = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
     $imageIdentity = $null
-    foreach ($fixture in $Value.rf3Fixtures) {
-        $result = Read-FcNativeRf3Fixture $Root $Value $Manifest $SuiteRuns $fixture $rf3Runs $fixtureIds $associations $paths
+    foreach ($fixture in $Value.clusterFixtures) {
+        $result = Read-FcNativeClusterFixture $Root $Value $Manifest $SuiteRuns $fixture $clusterRuns $fixtureIds $associations $paths
         foreach ($input in $result.inputs) { $inputs.Add($input) }
         if ($null -eq $imageIdentity) { $imageIdentity = $result.imageIdentity }
         elseif ((ConvertTo-Json $imageIdentity -Compress) -cne (ConvertTo-Json $result.imageIdentity -Compress)) {
             throw $script:FcNativeMergeInput.InvalidReceipt
         }
     }
-    Assert-FcNativeRf3CaseCoverage $Value $SuiteRuns $associations
+    Assert-FcNativeClusterCaseCoverage $Value $SuiteRuns $associations
     [ordered]@{ inputs = $inputs.ToArray(); imageIdentity = $imageIdentity }
 }
 
-function Read-FcNativeRf3Fixture([string] $Root, [object] $Value, [object] $Manifest,
-    [object] $SuiteRuns, [object] $Fixture, [Collections.Generic.HashSet[string]] $Rf3Runs,
+function Read-FcNativeClusterFixture([string] $Root, [object] $Value, [object] $Manifest,
+    [object] $SuiteRuns, [object] $Fixture, [Collections.Generic.HashSet[string]] $ClusterRuns,
     [Collections.Generic.HashSet[string]] $FixtureIds, [Collections.Generic.HashSet[string]] $Associations,
     [Collections.Generic.HashSet[string]] $CoveragePaths) {
     Assert-FcNativeExactKeys $Fixture @('fixtureId','sourceRevision','sourceManifestSha256','functionalRunId',
         'caseIdentities','nodes','fixtureReceipt')
     if ($Fixture.fixtureId -cnotmatch '\A[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\z' -or
         -not $FixtureIds.Add([string] $Fixture.fixtureId) -or $Fixture.sourceRevision -cne $Manifest.value.sourceRevision -or
-        $Fixture.sourceManifestSha256 -cne $Manifest.file.sha256 -or -not $Rf3Runs.Contains([string] $Fixture.functionalRunId) -or
+        $Fixture.sourceManifestSha256 -cne $Manifest.file.sha256 -or -not $ClusterRuns.Contains([string] $Fixture.functionalRunId) -or
         $Fixture.caseIdentities -isnot [array] -or $Fixture.caseIdentities.Count -eq 0 -or
-        $Fixture.nodes -isnot [array] -or $Fixture.nodes.Count -ne $script:FcNativeMergeInput.Rf3NodeCount) {
+        $Fixture.nodes -isnot [array] -or $Fixture.nodes.Count -ne $script:FcNativeMergeInput.ClusterNodeCount) {
         throw $script:FcNativeMergeInput.InvalidDescriptor
     }
     $known = [Collections.Generic.HashSet[string]]::new([string[]] $SuiteRuns.cases[[string] $Fixture.functionalRunId], [StringComparer]::Ordinal)
@@ -303,13 +303,13 @@ function Read-FcNativeRf3Fixture([string] $Root, [object] $Value, [object] $Mani
             throw $script:FcNativeMergeInput.InvalidDescriptor
         }
     }
-    $nodeSet = Read-FcNativeRf3Nodes $Root $Value $Manifest $Fixture $CoveragePaths
+    $nodeSet = Read-FcNativeClusterNodes $Root $Value $Manifest $Fixture $CoveragePaths
     $run = @($Value.suiteRuns | Where-Object runId -ceq $Fixture.functionalRunId)[0]
     Assert-FcNativeFixtureReceipt $Root $Fixture $Manifest $run $nodeSet.nodes $Value.bounds
     [ordered]@{ inputs = $nodeSet.inputs; imageIdentity = $nodeSet.imageIdentity }
 }
 
-function Read-FcNativeRf3Nodes([string] $Root, [object] $Value, [object] $Manifest,
+function Read-FcNativeClusterNodes([string] $Root, [object] $Value, [object] $Manifest,
     [object] $Fixture, [Collections.Generic.HashSet[string]] $CoveragePaths) {
     $nodes = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
     $sessions = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
@@ -322,7 +322,7 @@ function Read-FcNativeRf3Nodes([string] $Root, [object] $Value, [object] $Manife
             $node.session -cnotmatch '\A[A-Za-z0-9._-]{1,64}\z' -or -not $sessions.Add([string] $node.session)) {
             throw $script:FcNativeMergeInput.InvalidDescriptor
         }
-        $result = Read-FcNativeRf3Node $Root $Value $Manifest $Fixture $node
+        $result = Read-FcNativeClusterNode $Root $Value $Manifest $Fixture $node
         if (-not $CoveragePaths.Add([string] $result.input.path)) { throw $script:FcNativeMergeInput.InvalidDescriptor }
         $inputs.Add($result.input)
         $nodeResults.Add([ordered]@{ descriptor = $node; evidence = $result })
@@ -335,7 +335,7 @@ function Read-FcNativeRf3Nodes([string] $Root, [object] $Value, [object] $Manife
     [ordered]@{ inputs = $inputs.ToArray(); imageIdentity = $identity; nodes = $nodeResults.ToArray() }
 }
 
-function Read-FcNativeRf3Node([string] $Root, [object] $Value, [object] $Manifest, [object] $Fixture, [object] $Node) {
+function Read-FcNativeClusterNode([string] $Root, [object] $Value, [object] $Manifest, [object] $Fixture, [object] $Node) {
     $context = Read-FcNativeJsonReference $Root $Node.contextManifest $Value.bounds.maximumManifestBytes $Value.bounds.maximumPathCharacters
     $terminal = Read-FcNativeJsonReference $Root $Node.terminal $Value.bounds.maximumManifestBytes $Value.bounds.maximumPathCharacters
     $coverage = Read-FcNativeHashReference $Root $Node.coverage $Value.bounds.maximumReportBytes $Value.bounds.maximumPathCharacters
@@ -349,9 +349,9 @@ function Read-FcNativeRf3Node([string] $Root, [object] $Value, [object] $Manifes
             node = $Node.node; path = $coverage.path; length = $coverage.length; sha256 = $coverage.sha256 } }
 }
 
-function Assert-FcNativeRf3CaseCoverage([object] $Value, [object] $SuiteRuns, [Collections.Generic.HashSet[string]] $Associations) {
-    $rf3Run = @($Value.suiteRuns | Where-Object suite -ceq 'rf3')[0]
-    $expected = @($SuiteRuns.cases[[string] $rf3Run.runId] | Sort-Object)
+function Assert-FcNativeClusterCaseCoverage([object] $Value, [object] $SuiteRuns, [Collections.Generic.HashSet[string]] $Associations) {
+    $clusterRun = @($Value.suiteRuns | Where-Object suite -ceq 'cluster')[0]
+    $expected = @($SuiteRuns.cases[[string] $clusterRun.runId] | Sort-Object)
     $actual = @($Associations | ForEach-Object { $_.Substring($_.IndexOf('|', [StringComparison]::Ordinal) + 1) } | Sort-Object)
     if ($actual.Count -ne $expected.Count -or ($actual -join "`n") -cne ($expected -join "`n")) {
         throw $script:FcNativeMergeInput.InvalidDescriptor

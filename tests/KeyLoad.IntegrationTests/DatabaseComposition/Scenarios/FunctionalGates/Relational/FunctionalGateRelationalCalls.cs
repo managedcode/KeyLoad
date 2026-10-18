@@ -8,14 +8,14 @@ namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
 internal static class FunctionalGateRelationalCalls
 {
-    internal static async Task<T> SqlSdkAsync<T>(FunctionalGateContext ctx, RequestCqrsRf3Callers caller,
+    internal static async Task<T> SqlSdkAsync<T>(FunctionalGateContext ctx, RequestCqrsClusterCallers caller,
         SqlOperationRequest request, CancellationToken token)
     {
         var actual = await ctx.SdkAsync(caller.Sdk.ExecuteSqlAsync(request, token));
         return actual.Deserialize<T>(JsonDefaults.Options)!;
     }
 
-    internal static Task<T> SqlMcpAsync<T>(FunctionalGateContext ctx, RequestCqrsRf3Callers caller,
+    internal static Task<T> SqlMcpAsync<T>(FunctionalGateContext ctx, RequestCqrsClusterCallers caller,
         SqlOperationRequest request, CancellationToken token)
         => ctx.McpAsync<T>(caller, SqlOperationProtocol.ToolName, request, token);
 
@@ -24,7 +24,7 @@ internal static class FunctionalGateRelationalCalls
             QueryDialectVersion: P.Dialect);
 
     internal static SqlOperationRequest Commit(CommandRequest command)
-        => SqlRf3Protocol.Call(command.Partition, McpCallerTools.DocumentsCommit, command)
+        => SqlClusterProtocol.Call(command.Partition, McpCallerTools.DocumentsCommit, command)
             with
         {
             CommandId = command.CommandId

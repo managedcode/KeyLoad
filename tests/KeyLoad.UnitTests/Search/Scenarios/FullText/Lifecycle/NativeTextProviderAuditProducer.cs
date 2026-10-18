@@ -38,7 +38,7 @@ internal static class NativeTextProviderAuditProducer
         ImmutableArray<Mutation> mutations, ImmutableArray<MutationReceipt> receipts)
     {
         var id = Guid.NewGuid();
-        var placement = owner.Database.ReadAtomicPartitionPlacement(Root, new(PlacementVersion, owner.Source.Partition));
+        var placement = owner.Database.ReadAtomicPartitionPlacement(Root, owner.Source.Partition);
         var expected = new CommitReceipt(id, new(placement.Incarnation, owner.Source.Partition.AtomicPartitionId,
             checked(owner.Store.Position + NextCommit), placement.PlacementEpoch), receipts, DurabilityProfile.ProcessDurable);
         var original = owner.Send(OperationKind.Batch, new CommandRequest(id, owner.Source.Partition, mutations), id);

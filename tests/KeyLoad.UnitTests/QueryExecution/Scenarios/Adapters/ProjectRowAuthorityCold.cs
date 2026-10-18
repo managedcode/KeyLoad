@@ -23,8 +23,7 @@ internal static class ProjectRowAuthorityCold
             try
             {
                 var create = TestDatabaseEngineFactory.Capture(UnitExecutionOptions.DatabaseLimits(),
-                    UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), null,
-                    db.MovementCheckpoints, db.Database.EvaluationClock);
+                    UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), null, db.Database.EvaluationClock);
                 var database = create(cold, null);
                 var engine = new QueryEngine(database, UnitExecutionOptions.QueryExecution());
                 await Assert.That(cold.Identity.NodeId).IsEqualTo(identity.NodeId);

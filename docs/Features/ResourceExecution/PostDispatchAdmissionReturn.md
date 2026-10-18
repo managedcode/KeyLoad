@@ -1,7 +1,6 @@
 # Post-dispatch admission return
 
-Status: authored source, unexecuted. KL-052 and
-[ClientApi AC-CLIENT-CONNECTION-002](../ClientApi.md) require actual canceled work
+[ClientApi AC-CLIENT-CONNECTION-002](../ClientApi.md) requires actual canceled work
 to release its original bounded owners. [ADR-125](../../ADR/ADR-125-connection-owned-execution.md)
 and [ADR-117](../../ADR/ADR-117-native-tunit-ci-entry.md) retain native connection
 execution and Aspire-owned qualification.
@@ -33,7 +32,7 @@ selected-cancellation tests without complete admission conservation.
 REQ-ADMISSION-POSTDISPATCH-003 / AC-ADMISSION-POSTDISPATCH-003:
 use the interrupted command's original GUID for the first healthy commit. Require
 its literal full mutation receipt, QuorumProcessDurable, actual signed incarnation,
-partition, ownership epoch and positive opaque commit cut. Full document reads
+partition and positive opaque commit cut. Full document reads
 use that actual minimum token. SDK and official MCP replay must retain the full
 public receipt, complete document and exact outbox. A single original document
 change increments outbox tail/count once; retained bytes are observed rather than
@@ -47,14 +46,14 @@ flowchart TD
  B --> C[Selected cancel or owned HTTP2 physical disconnect]
  C --> D[Original client and native producer settle]
  D --> E[Exact admission baseline and unchanged models]
- E --> F[Original GUID first healthy RF3 commit]
+ E --> F[Original GUID first healthy cluster commit]
  F --> G[SDK and official MCP full replay]
  G --> H[Two joined Aspire cold waves and full replay]
 ```
 
-The existing ConnectionRf3Scenario owns Aspire resources, readiness, real clients,
+The existing ConnectionClusterScenario owns Aspire resources, readiness, real clients,
 original operation tasks, producer settlement, private controls and evidence/root
 retention. Its actual shutdown must finish before resource deletion. This source
 adds no manual app or Docker deployment. Build/analyzers, discovery, actual
-execution and exact-source Linux RF3 qualification remain OPEN. No benchmark,
-power-loss, endurance, whole KL-052 or production-ready claim follows.
+execution and exact-source Linux cluster qualification remain OPEN. No benchmark,
+power-loss, endurance or production-ready claim follows.

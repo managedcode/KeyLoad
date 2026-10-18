@@ -63,13 +63,6 @@ internal static class McpDiscoveryProtocol
     internal const int DefaultQueryDialectVersion = 1;
     internal const string Search = "search";
     internal const string Version = "version";
-    internal const string ExpectedRevision = "expectedRevision";
-    internal const string PhysicalShardId = "physicalShardId";
-    internal const string Incarnation = "incarnation";
-    internal const string VoterIds = "voterIds";
-    internal const string PlacementEpoch = "placementEpoch";
-    internal const string DirectoryRevision = "directoryRevision";
-    internal const string IsFallback = "isFallback";
     internal const string Collection = "collection";
     internal const string Cursor = "cursor";
     internal const string Parameters = "parameters";

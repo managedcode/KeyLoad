@@ -10,7 +10,6 @@ internal static class FunctionalGateCompositionProtocol
     internal const int DeletedDocument = 3;
     internal const int DeletedTable = 4;
     internal const int Absent = 0;
-    internal const int PlacementVersion = 1;
     internal const string Table = "gate_sql_0";
     internal const string Kind = "composition";
     internal const string Point = "point";

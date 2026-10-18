@@ -57,7 +57,7 @@ internal static class ClusterRestoreImageMetadata
                 PlacementEpoch = owner.PlacementEpoch
             };
             if (!ClusterBackupMetadataEquality.Placement(expected, DatabaseEngine.ReadClusterBackupPlacement(
-                state.Target, original.Roster.Partition, state.Local.Target)))
+                original.Roster.Partition, state.Local.Target)))
             {
                 throw Errors.Fail(ErrorCode.Corruption, Invalid);
             }
@@ -71,13 +71,6 @@ internal static class ClusterRestoreImageMetadata
         if (state.Mappings.Length > SingleOwner)
         {
             keys.Add(PhysicalOwnerDirectorySerialization.Key());
-        }
-        foreach (var partition in state.Original.Partitions)
-        {
-            if (!partition.Placement.IsFallback)
-            {
-                keys.Add(AtomicPartitionPlacementSerialization.RowKey(partition.Roster.Partition));
-            }
         }
         if (state.Reset)
         {

@@ -90,7 +90,7 @@ internal sealed class SqlGraphSearchRejectionTests
         var engine = new QueryEngine(new KeyLoad.Core.DatabaseEngine(database.Store, new KeyLoad.Core.Features.Authorization.AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(new()
         {
             MaxQueryBytes = 512
-        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(), KeyLoad.Core.UnavailablePartitionMovementCheckpointVerifier.Instance), UnitExecutionOptions.QueryExecution());
+        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution()), UnitExecutionOptions.QueryExecution());
         var excessiveParameters = Enumerable.Range(0, 257)
             .ToDictionary(index => $"p{index}", index => System.Text.Json.JsonSerializer.SerializeToElement(index));
         const string textSql = SearchPrefix + "TEXT_MATCH('/text',@text,1), NULL" + GraphTail;

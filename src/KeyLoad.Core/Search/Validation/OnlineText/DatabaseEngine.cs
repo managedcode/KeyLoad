@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.Search;
 using KeyLoad.Storage;
 
@@ -30,8 +29,7 @@ public sealed partial class DatabaseEngine
         RequireNativeTextProjectionHistory(head, consumer.Checkpoint);
         var appliedBytes = view.ReadOwnedValue(KeySpace.AppliedBytes)
             ?? throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.InvalidPublication);
-        var placement = ReadAtomicPartitionPlacement(view, principal.Id,
-            new(AtomicPartitionPlacementProtocol.CurrentVersion, request.Consumer.Partition));
+        var placement = ReadAtomicPartitionPlacement(view, principal.Id, request.Consumer.Partition);
         var resourceSha = Convert.ToHexStringLower(SHA256.HashData(NativeSerialization.Serialize(resource)));
         if (command.DataEpoch != Store.Identity.FormatVersion || source.Incarnation != Store.Identity.Incarnation
             || source.AppliedPosition != NativeSerialization.Deserialize<long>(appliedBytes)

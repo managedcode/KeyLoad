@@ -7,7 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.GraphTraversal;
 internal sealed class GraphCycleFrontierPublicTests(ClusterFixture fixture)
 {
     [Test]
-    public async Task CyclesConvergingFrontiersAndDepthBoundsStayLiteralAcrossVisibilityRepairAndTwoRf3ColdCuts()
+    public async Task CyclesConvergingFrontiersAndDepthBoundsStayLiteralAcrossVisibilityRepairAndTwoClusterColdCuts()
     {
         using var deadline = McpCallerDeadline.Create();
         await GraphCycleFrontierPublicTrial.RunAsync(fixture, deadline.Token);

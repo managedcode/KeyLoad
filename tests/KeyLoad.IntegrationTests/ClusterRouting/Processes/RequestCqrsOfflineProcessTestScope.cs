@@ -39,7 +39,7 @@ internal sealed class RequestCqrsOfflineProcessTestScope : IAsyncDisposable
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    internal async Task<NodeEpochRf3OfflineResult> StartSuccessAsync()
+    internal async Task<NodeEpochClusterOfflineResult> StartSuccessAsync()
         => await Add(RequestCqrsOfflineProcessProtocol.StartSuccess()).ObserveResultAsync().ConfigureAwait(false);
 
     internal RequestCqrsOfflineProcessChildView StartCancellation()

@@ -16,12 +16,12 @@ internal static class FunctionalGateDropReplay
             await FunctionalGateDropAssertions.StaleAsync(context, table.OriginalReference,
                 () => FunctionalGateDropAssertions.FreshAsync(context, state, token), token);
             await FunctionalGateDropAssertions.FreshAsync(context, state, token);
-            foreach (var route in Enum.GetValues<DropLifecycleRf3Route>())
+            foreach (var route in Enum.GetValues<DropLifecycleClusterRoute>())
             {
                 var actual = await FunctionalGateDropCalls.InvokeAsync(context, table.ParentId,
                     table.Request, route, token);
                 await FunctionalGateDropAssertions.ResultAsync(table.ParentId, table.Request, actual);
-                await SqlRf3Protocol.EqualAsync(table.OriginalDrop, actual);
+                await SqlClusterProtocol.EqualAsync(table.OriginalDrop, actual);
                 await FunctionalGateDropAssertions.FreshAsync(context, state, token);
             }
             await NativeSubmissionColdAssertions.ReceiptAsync(table.FreshReceipt,

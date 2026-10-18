@@ -7,8 +7,8 @@ namespace KeyLoad.IntegrationTests.Features.Authorization;
 
 internal static class QueryOnlyEpochR46Refusals
 {
-    internal static async Task RequireAsync(RequestCqrsRf3Callers root,
-        RequestCqrsRf3Callers reader, QueryOnlyEpochR46State state, bool repaired, CancellationToken token)
+    internal static async Task RequireAsync(RequestCqrsClusterCallers root,
+        RequestCqrsClusterCallers reader, QueryOnlyEpochR46State state, bool repaired, CancellationToken token)
     {
         foreach (var page in state.GrantedPages)
         {
@@ -23,14 +23,14 @@ internal static class QueryOnlyEpochR46Refusals
         }
     }
 
-    private static async Task RequestAsync(RequestCqrsRf3Callers root,
-        RequestCqrsRf3Callers reader, QueryOnlyEpochR46State state, QueryRequest request,
+    private static async Task RequestAsync(RequestCqrsClusterCallers root,
+        RequestCqrsClusterCallers reader, QueryOnlyEpochR46State state, QueryRequest request,
         ErrorCode code, CancellationToken token)
     {
         var result = await reader.Sdk.QueryAsync(request, token);
         await Assert.That(result.IsSuccess).IsFalse();
         await Assert.That(result.Value).IsNull();
-        await SqlRf3Protocol.EqualAsync(Errors.Problem(code, code == ErrorCode.PermissionDenied
+        await SqlClusterProtocol.EqualAsync(Errors.Problem(code, code == ErrorCode.PermissionDenied
             ? QueryOnlyEpochR46Protocol.ScopeDetail : QueryOnlyEpochR46Protocol.CursorDetail), result.Problem);
         await PrivateAsync(JsonSerializer.Serialize(result), state.CurrentReader.Secret);
         await QueryOnlyEpochR46Current.RequireAsync(root, reader, state, token);
@@ -39,13 +39,13 @@ internal static class QueryOnlyEpochR46Refusals
         await Assert.That(reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
             .GetProperty(QueryOnlyEpochR46Protocol.DetailKey).GetString()).IsEqualTo(code == ErrorCode.PermissionDenied
                 ? QueryOnlyEpochR46Protocol.SafeScopeDetail : QueryOnlyEpochR46Protocol.SafeCursorDetail);
-        await McpCallerAssertions.DoesNotDiscloseAsync(reply, state.CurrentReader.Secret, ResourcePolicyUpdateRf3Protocol.SecretValue);
+        await McpCallerAssertions.DoesNotDiscloseAsync(reply, state.CurrentReader.Secret, ResourcePolicyUpdateClusterProtocol.SecretValue);
         await QueryOnlyEpochR46Current.RequireAsync(root, reader, state, token);
     }
 
     private static async Task PrivateAsync(string serialized, string credential)
     {
         await Assert.That(serialized.Contains(credential, StringComparison.Ordinal)).IsFalse();
-        await Assert.That(serialized.Contains(ResourcePolicyUpdateRf3Protocol.SecretValue, StringComparison.Ordinal)).IsFalse();
+        await Assert.That(serialized.Contains(ResourcePolicyUpdateClusterProtocol.SecretValue, StringComparison.Ordinal)).IsFalse();
     }
 }

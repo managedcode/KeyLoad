@@ -1,6 +1,6 @@
 # ADR-001: Atomic partition identity and affinity
 
-Status: Accepted; implementation and GitHub qualification pending. Related product source: [architecture sections 4, 18, 28, 37, and 41](../design/architecture-v0.3.uk.md).
+Status: Accepted; implementation and GitHub qualification pending. Related product source: [architecture sections 4, 18, 28, 37, and 41](../design/product-specification.md).
 
 ## Context
 
@@ -23,7 +23,8 @@ This makes authorization, command routing, transaction scope, and idempotency ag
 1. Freeze canonical identity fields, catalog binding validation, and token lineage before changing routing.
 2. Add real tests for cross-domain key reuse, valid shared resources, authorization, and stable command scope.
 3. Implement in `src/KeyLoad.Abstractions/ClusterRouting/` and `src/KeyLoad.Core/ClusterRouting/`; route via the connection grain and the logical partition grain. Preserve the silo-local ZoneTree owner's ownership of stores and locks.
-4. Create resources under the canonical catalog binding and reject ambiguous or absent bindings.5. GitHub Actions must run TUnit, recovery, and the Aspire replicated cluster through .NET and MCP SDKs; compare stable outcomes across failover. Root owns shared resolver/contracts; worker joins only after exact tests and changed paths are reported.
+4. Create resources under the canonical catalog binding and reject ambiguous or absent bindings.
+5. GitHub Actions must run TUnit, recovery, and the Aspire replicated cluster through .NET and MCP SDKs; compare stable outcomes across failover.
 
 Dependencies: [ADR-002](ADR-002-command-idempotency.md), [ADR-004](ADR-004-committed-read-views.md), and [ADR-005](ADR-005-canonical-keyspace-codec.md). Verification: named catalog tests plus the repository GitHub CI matrix; no local test qualification. Stop if a source binding, token lineage, or multi-resource atomic scope is ambiguous.
 

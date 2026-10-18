@@ -1,4 +1,0 @@
-namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
-
-internal sealed record PartitionWriterOrleansImage(string Node, string[] Canonical, long CanonicalPosition,
-    byte[] CanonicalIdentity, string[] Replica, long ReplicaPosition, byte[] ReplicaIdentity);

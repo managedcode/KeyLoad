@@ -75,10 +75,6 @@ That's what we're building: **one place for context, one place for the work that
 
 > **Development preview.** Production qualification is still open.
 
-| Plan tasks | Accepted | In progress |
-|---|---|---|
-| **105** | **20** | **85** |
-
 ```mermaid
 flowchart LR
     Build["Implement<br/>in progress"] --> Check["Qualify<br/>in progress"] --> Release["Release<br/>gated"]
@@ -88,50 +84,34 @@ flowchart LR
     class Release gated
 ```
 
-**Accepted** = original task criteria passed for a recorded source. **In source** = implemented, with qualification open. Later changes require fresh checks.
+**Accepted** = criteria passed for a recorded source. **In source** = implemented, with qualification open. Later changes require fresh checks.
 
-[KL-105](docs/Features/BenchmarkComparisons/DotnetProfiling.md) adds .NET profiling with `dotnet-diagnostics-mcp`, measured bottleneck repairs and matched verification; its acceptance remains open.
+Current focus: removing the self-written cluster code so that Orleans alone runs the cluster ([ADR-136](docs/ADR/ADR-136-native-orleans-partition-ownership.md)).
 
-Оновлена normal-пара [функціональних перевірок](docs/Features/DatabaseComposition/FunctionalDatabaseGates.md) **прийнята локально на frozen cohort `afee6834`**: R600 ONE виконав **10 302 успішні операції** (SDK 5315, MCP 4987) за 442,619 с; після нього R602 three-replica — **10 306** (SDK 5317, MCP 4989) за 1176,958 с. Обидва запуски мають 41 хвилю, вісім workload-користувачів, одного оператора та три ресурси на модель. Використано справжні SDK, official MCP SDK і вибрані T-SQL операції; source, DLL та image inputs збігаються. Прийняття спирається на terminal PASS, original TRX, joined shutdown і перевірки звільнення ресурсів. Це локальний development proof; ONE не має replica fault tolerance. Час виконання не є benchmark або performance claim. Три persisted time-series sets і node operational analytics не означають три користувацькі analytics stores.
-
-The earlier resource-lifetime and analytics-root repair checkpoint passed its strict solution build, all **45 selected native whole-operation tests**, all **three selected process/native recovery tests**, and the actual SDK/MCP three-replica authorization scenario through all-three-node same-root cold restart. These are local development proofs. Earlier scenarios and failures retain their original source scope; whole-product and Linux qualification remain open.
-
-Поточний foundation-пакет виправляє ONE placement DI, межі resource inventory, графові effect bindings, replay-очікування та heartbeat під час довгого command preparation. **R751** раніше зібрав Unit/Integration/Recovery з реальними залежностями без warnings/errors. Новіший **R762 strict Unit + actual dependencies: 0 warnings / 0 errors за 116,46 с** належить записаному diagnostic snapshot; у R759 product, Integration і Recovery зібралися, але весь command завершився двома Unit analyzer errors, які потім виправлено. Чотири тимчасові capture-зміни вже видалені; fresh final-source build, full solution та Linux qualification залишаються OPEN.
-
-Оригінальний попередній **R739: 154/216 PASS, 62 FAIL, 0 SKIP** збережений. **R756:** 56/57 related Unit rows і 6/6 privacy/closed-cause rows пройшли; після виправлення одного composition setup **R761: 12/12 PASS за 8,37 с** у повному відповідному класі. **R763: 21/21 related process-recovery PASS за 56,15 с** на поточному записаному snapshot. **R760 native connection control досі FAIL до business execution за 17,13 с**: первинна відмова виникає в native graph transition check; точна причина в KeyLoad registration або owning dependency ще досліджується. Приватні exception messages/stacks не публікуються, тимчасового capture-коду в checkpoint немає. Ці focused результати не закривають full Unit/Recovery, public ONE/three-replica/cold/files чи 105-task acceptance. Raw coverage 27,30% належить старому невдалому focused-прогону лише 7 production modules і не є поточним повним покриттям.
-
-Окремий benchmark-пакет переходить до 22 shared sessions (11 баз × 1/3 вузли), починаючи із семи document-сценаріїв та вимірюваного початкового завантаження 1 млн записів без warmup/reseed. Новий пакет із 47 файлів видаляє obsolete standalone intensive/report/progress paths, зберігає справжні native algorithms/adapters та змістовні ledger/receipt/failure перевірки, і виправляє збереження original operation/retention/disposal failures. Ще 8 ComparisonTests-файлів виправляють три actual Linux compiler diagnostics у native capture disposal та responsibility split без підняття caps. Benchmark build/tests/measurements виконуються лише в Linux CI; повна model/client matrix та benchmark qualification залишаються OPEN.
-
-The separate [all-model cold-reopen pair](docs/Features/DatabaseComposition/FunctionalDatabaseColdReopen.md) also passed on `57cea624`: **one node in 104.61 seconds, then three-replica in 118.73 seconds**. After all original nodes restarted through Aspire, both clients replayed the original SQL, mixed-model and blob-stage commands with complete receipt/value checks, then verified persisted grant revocation, repair and a healthy write. These tests keep the same physical roots and credentials. They use three cold-only identities and do not claim the normal gate's eight-user concurrency.
-
-Поточний пакет зберігає ownership native команд, streams і result retention до оригінальних Prepare/cleanup/settlement бар’єрів; його повна strict SDK збірка пройшла, а runtime ще відкритий. Додано Aspire-сценарій фізично окремих файлів вузлів, захист живої папки від конкурентного відкриття, CI gate та 16 негативних profile-перевірок із healthy native model. **Успішний одночасний доступ усіх silo до тих самих ZoneTree-файлів залишається OPEN**: pinned ZoneTree і поточний exclusive owner не мають підтвердженого контракту цього режиму. Відмова через lock не закриває цей критерій; builder model не є виконаним Docker three-replica сценарієм.
-
-R638 інтегрував у canonical source `DROP TABLE`/resource recreate, користувацькі AnalyticsStore, lifetime-bound зв’язки моделей і розширені normal/cold SDK/MCP/T-SQL сценарії. Їхня спільна збірка пройшла R697; виконання залишається **OPEN**; старі normal/cold PASS не кваліфікують нові тіла сценаріїв. Локальні normal-перевірки не завершують unified SQL, Linux fault/endurance/security/performance/release або production qualification. Початковий [task acceptance](docs/implementation/status.json) незмінний: **105 tasks / 20 accepted / 85 in progress**; діє [foundation-first plan](docs/Features/RepositoryGovernance/FoundationDelivery.md).
+[.NET profiling](docs/Features/BenchmarkComparisons/DotnetProfiling.md) with `dotnet-diagnostics-mcp` guides measured bottleneck repairs.
 
 
 | Workstream | What it does and why | State | Remaining work |
 |---|---|---|---|
 | **Records & indexes** | CRUD and revision checks keep records consistent | ✓ Accepted | [Recovery and fault gates](docs/Features/StorageRecovery.md) |
-| **Backup & restore** | Recover a saved local database | ✓ Local scope | [three-replica cluster restore drills](docs/Features/BackupRestore.md) |
+| **Backup & restore** | Recover a saved local database | ✓ Local scope | [Cluster restore drills](docs/Features/BackupRestore.md) |
 | **Atomic batches** | Commit related writes together; retry without duplicates | ✓ Accepted | [Cross-partition composition](docs/Features/DatabaseComposition.md) |
 | **Graphs** | Store relationships and traverse agent knowledge | ✓ Accepted | [Cross-partition graphs](docs/Features/GraphTraversal.md) |
 | **Time series** | Samples, ranges and aggregates track history | ✓ Accepted | [Chunk and scale checks](docs/Features/TimeSeries.md) |
 | **Search** | Exact vectors, hybrid ranking and Explain retrieve context | ✓ Accepted | [ANN, rebuilds and freshness](docs/Features/Search.md) |
 | **SQL & tables** | Selected T-SQL `SELECT`, canonical `EXEC` and closed model `INSERT` lower to shared typed plans | ◐ In source | [Full SQL, foreign keys and client protocol](docs/Features/QueryExecution.md) |
 | **Queues & events** | Leases, history and queue ↔ graph flows drive agent work | ◐ In source | [Failure, security and recovery checks](docs/Features/Messaging.md) |
-| **SDK & MCP** | SDK, tool discovery, CLI and admin connect callers | ◐ In source | [Gateway and official MCP three-replica checks](docs/Features/ClientApi/ToolDiscovery.md) |
+| **SDK & MCP** | SDK, tool discovery, CLI and admin connect callers | ◐ In source | [Gateway and official MCP cluster checks](docs/Features/ClientApi/ToolDiscovery.md) |
 | **Authorization** | ASP.NET Core authentication and persisted row/field policies protect context | ◐ In source | [Adversarial and revocation checks](docs/Features/Authorization.md) |
-| **Replication & Orleans** | Configurable copies, follower reads and partition movement | ◐ In source | [Fault, restart and runtime checks](docs/Features/ClusterRouting.md) |
+| **Orleans cluster** | Orleans runs the cluster and copies data to the configured number of replicas | ◐ In source | [Remove self-written cluster code; fault and restart checks](docs/Features/ClusterRouting.md) |
 | **RAM & SIMD** | Bounded caches and CPU vectorization target lower memory/latency | ◐ In progress | [Comparable Linux measurements](docs/implementation/memory-performance.md) |
-| **Production** | Qualified database and operator guidance | ○ Gated | Full SIMD-enabled unit, recovery, three-replica, coverage, performance, endurance and power-loss gates |
+| **Production** | Qualified database and operator guidance | ○ Gated | Full SIMD-enabled unit, recovery, cluster, coverage, performance, endurance and power-loss gates |
 
-KL‑029 now satisfies its original projection rebuild, checkpoint recovery and stale-revision criteria on Linux at `7e94024c`: **58 Unit + 18 real process recovery + 9 Aspire three-replica cases passed, zero failed or skipped**. The [original acceptance audit](docs/implementation/kl-029-linux-acceptance-20261013.json) binds source, native UIDs, TRX, DLL/PDB, images and joined processes. Current shared changes still require fresh complete qualification.
+Full product functional coverage remains **unqualified**. Load tests and benchmarks contribute no coverage. Public performance figures require original GitHub measurements; process-kill tests do not prove power-loss durability.
 
-Full product functional coverage remains **unqualified**. The last measured 45-case native whole-operation Unit cohort passed and measured **11.16% production lines /7.79% branches**. This focused selection does not establish full-product coverage or a trend against different selections. Load tests and benchmarks contribute no coverage. Public performance figures require original GitHub measurements; process-kill tests do not prove power-loss durability.
+Complete Linux cluster, recovery, fault and coverage qualification remains open; see the [current status](docs/implementation/status.json).
 
-Implementation is progressing across SQL and the connected data models. Complete Linux cluster, recovery, fault and coverage qualification remains open; see the [canonical implementation status](docs/implementation/status.json).
-
-[Task tracker](docs/implementation/status.json) · [SQL conformance](docs/implementation/sql-client-conformance.json) · [Coverage](docs/Features/CodeQuality.md) · [Benchmark methodology](docs/Features/BenchmarkComparisons/Methodology.md) · [Published benchmarks](https://www.keyload.cloud/#benchmarks)
+[Status](docs/implementation/status.json) · [SQL conformance](docs/implementation/sql-client-conformance.json) · [Coverage](docs/Features/CodeQuality.md) · [Benchmark methodology](docs/Features/BenchmarkComparisons/Methodology.md) · [Published benchmarks](https://www.keyload.cloud/#benchmarks)
 
 ## One database, connected models
 
@@ -170,7 +150,7 @@ The current composition API uses .NET `CommitAsync`, SQL `EXEC keyload_documents
 | Boundary | Current contract |
 |---|---|
 | Atomicity | The same atomic partition and transaction domain (`PartitionRef`); the batch succeeds or rolls back together |
-| Queue readsтобін  | Composition does not lease or ACK messages |
+| Queue reads | Composition does not lease or ACK messages |
 | Files | Blobs remain part of the same database, with separate upload and publication operations |
 | Preview limits | Full declarative SQL, the native SQL-client protocol and cross-partition composition are still in development; production guarantees remain under qualification |
 
@@ -189,19 +169,19 @@ flowchart LR
 
 Each actual connection reuses one Orleans grain and admits bounded parallel operations and commands. Every operation has its own signed identity, fresh persisted authorization, cancellation and stream cleanup; completed requests are not retained. Disconnect or idle expiry closes admission, joins the original work and requests native deactivation.
 
-Connection execution under [ADR-125](docs/ADR/ADR-125-connection-owned-execution.md) passed eight local native flows and five real SDK/official MCP Aspire Docker three-replica flows. Complete Linux fault, endurance and performance qualification remains open. This transport ownership does not deliver native SQL session compatibility. Partition grains route to node-local storage owners; moving a grain does not move its storage handles. Writes require a persisted majority of the configured physical replicas (three by default). See the [architecture map](docs/Architecture.md) and [grain lifetime contract](docs/Features/ClusterRouting/ExecutionPrimitives.md#connection-and-request-lifetimes).
+Orleans does all of the clustering: membership, discovery, placement, activation migration, communication between silos and scaling. Every silo has its own ZoneTree that owns its files; partition grains reach it on their own node or on other nodes through Orleans calls, and a write is copied to the configured number of replicas and acknowledged by a majority. Storage files never move with grain activations. Background work (queues, ANN, time series) runs in Orleans stateless workers that buffer events and flush them on a timer. See [ADR-136](docs/ADR/ADR-136-native-orleans-partition-ownership.md) and the [architecture map](docs/Architecture.md).
 
 ## Why .NET, Orleans and ZoneTree
 
 | Foundation | Why we use it |
 |---|---|
 | [.NET 10](https://github.com/dotnet/runtime) | C# end to end, pooled buffers, `Span<T>` and native SIMD intrinsics; speedups need measurements |
-| [Orleans](https://github.com/dotnet/orleans) | Request isolation, membership, routing and generated binary serialization; experimental directory/repartitioning remain under qualification |
+| [Orleans](https://github.com/dotnet/orleans) | The whole cluster: membership, routing, placement, migration, communication, data copies through grain calls and generated binary serialization |
 | [ZoneTree](https://github.com/ZoneTree/ZoneTree) | Embedded ordered storage and a write-ahead log for every model; data stays on its node |
 | [ZoneTree.FullTextSearch](https://github.com/ZoneTree/ZoneTree.FullTextSearch) | Native full-text indexing on the same storage foundation |
 | [Aspire](https://github.com/dotnet/aspire) | Owns Docker cluster startup, readiness and cleanup |
 
-**Orleans moves the routing; ZoneTree keeps the data in place.**
+**Orleans runs the cluster; ZoneTree keeps each node's data in place.**
 
 ## Quick start
 
@@ -229,26 +209,22 @@ started registry or server containers are required. An explicitly configured
 `KeyLoad__ContainerImages__Server` still selects the pinned image; qualification
 and benchmark profiles retain their separate image/provenance requirements.
 
-**3. Choose silo membership and replication independently**
+**3. Choose the number of silos and copies**
 
-The default is three silos and three physical replicas. For five Orleans silos
-with three voting copies of the initial partition:
+The default is three silos and three copies. For five Orleans silos with three
+copies of the data:
 
 ```bash
 KeyLoad__SiloCount=5 KeyLoad__ReplicaCount=3 aspire start --apphost build/KeyLoad.AppHost/KeyLoad.AppHost.csproj --no-build --non-interactive
 ```
 
-`SiloCount` controls the total cluster processes. `ReplicaCount` controls
-physical storage owners and voting membership, and must be between one and
-`SiloCount`. Additional silos participate in native Orleans membership and the
-distributed directory; they do not expose database operations or own storage.
-Database grains are placed on replica-bearing silos. Counts of 1, 2, 3 and 5 are
-accepted, including even replica groups. A write requires a majority: one of
-one, both of two, two of three, or three of five. One replica has no replica
-fault tolerance; two replicas cannot acknowledge writes with either unavailable.
+`SiloCount` is the number of Orleans silos. `ReplicaCount` is the number of
+copies of the data and must be between one and `SiloCount`. A write requires a
+majority of copies: one of one, both of two, two of three, or three of five.
+One copy has no fault tolerance; with two copies a write cannot be acknowledged
+while either is unavailable.
 
-This selects a fixed topology at startup, not live replica reconfiguration.
-Do not change a persisted database's replica group by editing these settings.
+Both values are read at startup; there is no live resizing or data movement.
 Node data and private development credentials remain in `data/cluster/`.
 HTTP ports start at `5101`; keep the data directory between restarts.
 Stop owned resources with `aspire stop --non-interactive`.
@@ -374,7 +350,7 @@ Feature code uses `Features/<SliceName>/<Responsibility>/` across the solution.
 | [`src/KeyLoad.Cli`](src/KeyLoad.Cli) | Command-line tool for operators and workers |
 | [`build/KeyLoad.AppHost`](build/KeyLoad.AppHost) | Aspire host for the local cluster and every test suite |
 | [`src/KeyLoad.Abstractions`](src/KeyLoad.Abstractions) | Shared public contracts |
-| `src/KeyLoad.Core`, `Query`, `Orleans`, `Replication`, `Security`, `Storage.*` | Database engine, SQL, cluster, replication, permissions and storage |
+| `src/KeyLoad.Core`, `Query`, `Clustering`, `Replication`, `Storage.ZoneTree`, `Diagnostics` | Database engine, SQL, Orleans grains, replica calls, storage and phase telemetry |
 | [`tests/`](tests) | Unit, crash-recovery, three-node and website tests ([TUnit](https://github.com/thomhurst/TUnit)) |
 | [`benchmarks/`](benchmarks) | Comparisons with other databases, plus microbenchmarks |
 | [`site/`](site) | Source for [keyload.cloud](https://www.keyload.cloud/) |
@@ -382,7 +358,7 @@ Feature code uses `Features/<SliceName>/<Responsibility>/` across the solution.
 
 ### Contributing
 
-Start with the [architecture map](docs/Architecture.md), the [feature specs](docs/Features) and [repository rules](AGENTS.md). After building, run a functional suite (`unit`, `recovery`, `rf3`, `analyzers` or `site`):
+Start with the [architecture map](docs/Architecture.md), the [feature specs](docs/Features) and [repository rules](AGENTS.md). After building, run a functional suite (`unit`, `recovery`, `cluster`, `analyzers` or `site`):
 
 ```bash
 node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=unit
@@ -392,7 +368,7 @@ node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=unit
 dotnet format KeyLoad.slnx --verify-no-changes --no-restore
 ```
 
-Native TUnit fixtures own Aspire startup and cleanup; `rf3` uses real .NET and official MCP clients against three Docker nodes. Benchmark builds, checks and measurements run exclusively in GitHub's Benchmarks workflow.
+Native TUnit fixtures own Aspire startup and cleanup; the `cluster` suite uses real .NET and official MCP clients against the Aspire-owned Docker cluster (three silos by default). Benchmark builds, checks and measurements run exclusively in GitHub's Benchmarks workflow.
 
 </details>
 

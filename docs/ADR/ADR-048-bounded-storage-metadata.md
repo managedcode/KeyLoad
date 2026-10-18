@@ -27,11 +27,8 @@ flowchart LR
 
 Implementation contract:
 
-1. Lead owns brainstorm/acceptance/plan, this ADR, feature/architecture/status and
-   exactly two private ZoneTreePersistenceFormat budget constants. W owns only
-   the named identity/backup readers/restore and NEW finite reader/Metadata* tests
-   in the task graph. Archive before and author real public/filesystem regressions
-   before production writes. Read-only V is strongest final review, no execution.
+1. Exactly two private ZoneTreePersistenceFormat budget constants and the named identity/backup readers/restore change, with NEW finite reader/Metadata* tests. Archive before and author real public/filesystem regressions
+   before production writes.
 2. Reader opens one real FileStream, rejects length above budget before allocating,
    and reads at most budget+1 bytes into one finite owned region. An authoritative
    count and final length reject growth above limit. Return a memory slice without
@@ -49,7 +46,7 @@ Implementation contract:
    explicit supplement for deterministic growth bounds and single-owned-region
    read; no fake stream/seam or racy test substitutes for actual runtime evidence.
 5. Normal strict storage/UnitTests/full builds,400/200/64/3, canonical formatter,
-   governance/import/diff, then stable exact-SHA GitHub TUnit/recovery/RF3 SDK/MCP
+   governance/import/diff, then stable exact-SHA GitHub TUnit/recovery/cluster SDK/MCP
    and all required gates. Collector/raw numeric coverage remains separately
    unfinished until configured and verified. Record source versus executed proof
    before this ADR can become Implemented.
@@ -59,6 +56,6 @@ fails. The current stored schema/version and writer output remain exact; persist
 data, public signatures and dependencies are unchanged.
 Rollout is the coherent private reader/restore/test unit. Rollback reverts it and
 its constants, never changes durable files or introduces a fallback. Whole-backup
-concurrent modification, cluster-cut restore, power loss, endurance and measured
+concurrent modification, multi-silo restore, power loss, endurance and measured
 physical I/O remain outside this private optimization. Dependency ownership and
 node-local storage/grain-routing boundaries remain mandatory.

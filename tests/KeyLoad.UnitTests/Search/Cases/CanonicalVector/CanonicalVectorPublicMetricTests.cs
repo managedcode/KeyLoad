@@ -4,7 +4,7 @@ using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
-/// <summary>KL027: persisted exact top-k across all metrics, cancellation and healthy reuse.</summary>
+/// <summary>persisted exact top-k across all metrics, cancellation and healthy reuse.</summary>
 internal sealed class CanonicalVectorPublicMetricTests
 {
     private const string Collection = "public-metric-oracle";
@@ -18,7 +18,7 @@ internal sealed class CanonicalVectorPublicMetricTests
     [Arguments(DistanceMetric.DotProduct)]
     [Arguments(DistanceMetric.Cosine)]
     [Arguments(DistanceMetric.Euclidean)]
-    public async Task Kl027NativeExactTopKMatchesLiteralMetricOrderAndCanceledReadPreservesEveryDocument(
+    public async Task NativeExactTopKMatchesLiteralMetricOrderAndCanceledReadPreservesEveryDocument(
         DistanceMetric metric)
     {
         using var database = new TestDatabase();

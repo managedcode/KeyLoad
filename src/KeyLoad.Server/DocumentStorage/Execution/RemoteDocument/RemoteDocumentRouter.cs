@@ -24,13 +24,6 @@ internal sealed class RemoteDocumentRouter(OrleansNode node, PartitionHost parti
                 using var original = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken,
                     operation.ShutdownToken, originalExpiry.Token);
                 var work = new ReadExecutionBudget(limits, clock, original.Token);
-                var controlled = await new ControlledDocumentSourceRead(node, partition, nodeOptions, limits, client, clock)
-                    .TryReadAsync(envelope, principal.Id, request, work, binding, original.Token).ConfigureAwait(false);
-                if (controlled.Routed)
-                {
-                    document = controlled.Document;
-                    return;
-                }
                 var ordinary = await new OrdinaryDocumentLifetimeSourceRead(node, partition, nodeOptions, limits, client, clock)
                     .TryReadAsync(envelope, principal.Id, request, work, binding, original.Token).ConfigureAwait(false);
                 document = ordinary.Routed ? ordinary.Document

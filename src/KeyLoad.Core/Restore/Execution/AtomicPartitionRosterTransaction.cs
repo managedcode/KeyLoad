@@ -1,7 +1,6 @@
 using System.Collections.Immutable;
 using KeyLoad.Core.Features.BackupRestore.Serialization;
 using KeyLoad.Core.Features.BackupRestore.Validation;
-using KeyLoad.Core.Features.ClusterRouting.Authorization;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Storage;
@@ -9,7 +8,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Core.Features.BackupRestore.Execution;
 
-internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransaction, IPartitionMovementReadScope, IResourceOwnerInventoryContext, IAtomicCommitCandidateValidation, IResourceEffectObservation, IResourceEffectCompletion
+internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransaction, IResourceOwnerInventoryContext, IAtomicCommitCandidateValidation, IResourceEffectObservation, IResourceEffectCompletion
 {
     private const int NoCandidates = 0;
     private readonly IAtomicTransaction inner;
@@ -18,13 +17,6 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
     {
         get;
     }
-    bool IPartitionMovementReadScope.MovementAuthorityAbsent
-    {
-        get; set;
-    }
-    private bool movementViewChanged;
-    bool IPartitionMovementReadScope.CanReuseCommittedMovementAbsence => !movementViewChanged;
-    bool IPartitionMovementReadScope.CanPublishCommittedMovementAbsence => false;
     private readonly IOptions<DatabaseLimits> limits;
     private readonly long storePosition;
     private readonly long appliedIndex;
@@ -64,9 +56,7 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
     public void Put(byte[] key, byte[] value)
     {
         cleanupScope?.RequireMutation(key, hasValue: true);
-        var candidate = PrepareCandidate(key, value, hasValue: true);
-        ((IPartitionMovementReadScope)this).MovementAuthorityAbsent = false;
-        movementViewChanged = true;
+        var candidate = PrepareCandidate(key);
         inner.Put(key, value);
         RetainCandidate(candidate);
     }
@@ -74,17 +64,13 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
     public void Delete(byte[] key)
     {
         cleanupScope?.RequireMutation(key, hasValue: false);
-        var candidate = PrepareCandidate(key, [], hasValue: false);
-        ((IPartitionMovementReadScope)this).MovementAuthorityAbsent = false;
-        movementViewChanged = true;
+        var candidate = PrepareCandidate(key);
         inner.Delete(key);
         RetainCandidate(candidate);
     }
 
     public void Reset()
     {
-        ((IPartitionMovementReadScope)this).MovementAuthorityAbsent = false;
-        movementViewChanged = true;
         candidates.Clear();
         cleanupScope = null;
         inventory.Reset();
@@ -166,10 +152,10 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
         }
     }
 
-    private Candidate? PrepareCandidate(byte[] key, byte[] value, bool hasValue)
+    private Candidate? PrepareCandidate(byte[] key)
     {
         ArgumentNullException.ThrowIfNull(key);
-        if (!AtomicPartitionRosterKeyValidation.TryReadCandidate(key, value, hasValue, out var partition)
+        if (!AtomicPartitionRosterKeyValidation.TryReadCandidate(key, out var partition)
             || partition is null)
         {
             return null;

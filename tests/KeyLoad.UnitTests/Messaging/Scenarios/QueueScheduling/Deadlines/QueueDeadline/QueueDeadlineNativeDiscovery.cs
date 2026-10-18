@@ -18,8 +18,7 @@ internal static class QueueDeadlineNativeDiscovery
             }),
             UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(),
             UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(),
-            UnitExecutionOptions.TimeSeriesExecution(), UnitExecutionOptions.MovementCheckpoints(),
-            UnavailablePartitionMovementCheckpointVerifier.Instance, timeProvider: clock);
+            UnitExecutionOptions.TimeSeriesExecution(), timeProvider: clock);
         var original = QueueRetryColdAssertions.LaneBytes(fixture.Store, lane);
         var identity = NativeSerialization.Serialize(fixture.Store.Identity);
         var position = fixture.Store.Position;

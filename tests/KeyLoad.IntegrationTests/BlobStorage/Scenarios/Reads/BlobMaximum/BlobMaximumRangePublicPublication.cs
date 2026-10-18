@@ -17,17 +17,13 @@ internal static class BlobMaximumRangePublicPublication
     internal static byte[] Bytes(long offset, int count)
         => Enumerable.Range(0, count).Select(index => checked((byte)(((offset + index) * 17 + 3) % 251))).ToArray();
 
-    internal static async Task<BlobMaximumRangePublicState> CreateAsync(RequestCqrsRf3Callers callers, CancellationToken token)
+    internal static async Task<BlobMaximumRangePublicState> CreateAsync(RequestCqrsClusterCallers callers, CancellationToken token)
     {
-        var scenario = await RelationalSqlRf3Scenario.CreateAsync(callers.Sdk, token);
-        var blob = new BlobRef(scenario.Partition, RelationalSqlRf3Tokens.Blobs, ObjectId);
-        var placementRequest = new AtomicPartitionPlacementReadRequest(1, scenario.Partition);
-        var placement = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ReadAtomicPartitionPlacementAsync(placementRequest, token));
-        await SqlRf3Protocol.EqualAsync(placement, (await McpCallerAssertions.SuccessAsync<AtomicPartitionPlacementResolution>(
-            await callers.Mcp.CallAsync(McpCallerTools.AdminPartitionPlacementRead, placementRequest, token))).Value);
+        var scenario = await RelationalSqlClusterScenario.CreateAsync(callers.Sdk, token);
+        var blob = new BlobRef(scenario.Partition, RelationalSqlClusterTokens.Blobs, ObjectId);
         var begin = new BeginBlobUploadRequest(Guid.NewGuid(), blob, Guid.NewGuid(), Length, 0L);
         var begun = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.BeginBlobUploadAsync(begin, token));
-        await SqlRf3Protocol.EqualAsync(new BlobUploadInfo(blob, begin.UploadId, Length, 0L, 0, 0L,
+        await SqlClusterProtocol.EqualAsync(new BlobUploadInfo(blob, begin.UploadId, Length, 0L, 0, 0L,
             begun.Value.ExpiresAt, BlobUploadStatus.Active, begun.Value.IntegrityHash), begun.Value);
         var parts = new WriteBlobPartRequest[3];
         var written = new BlobCommitResult<BlobUploadInfo>[3];
@@ -39,15 +35,15 @@ internal static class BlobMaximumRangePublicPublication
             parts[ordinal] = new(Guid.NewGuid(), blob, begin.UploadId, ordinal, bytes, sha);
             written[ordinal] = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.WriteBlobPartAsync(parts[ordinal], token));
             hash = Next(hash, ordinal, bytes.Length, sha);
-            await SqlRf3Protocol.EqualAsync(new BlobUploadInfo(blob, begin.UploadId, Length, 0L, ordinal + 1,
+            await SqlClusterProtocol.EqualAsync(new BlobUploadInfo(blob, begin.UploadId, Length, 0L, ordinal + 1,
                 Math.Min((long)(ordinal + 1) * PartBytes, Length), begun.Value.ExpiresAt, BlobUploadStatus.Active, hash), written[ordinal].Value);
         }
         var complete = new CompleteBlobUploadRequest(Guid.NewGuid(), blob, begin.UploadId, hash);
         var completed = (await McpCallerAssertions.SuccessAsync<BlobCommitResult<BlobMetadata>>(
             await callers.Mcp.CallAsync("keyload_blobs_complete_upload", complete, token))).Value;
-        await SqlRf3Protocol.EqualAsync(new BlobMetadata(blob, 1L, begin.UploadId, Length, 3,
+        await SqlClusterProtocol.EqualAsync(new BlobMetadata(blob, 1L, begin.UploadId, Length, 3,
             hash, new RowAccess(), completed.Value.UpdatedAt), completed.Value);
-        var state = new BlobMaximumRangePublicState(begin, begun, parts, written, complete, completed, placement);
+        var state = new BlobMaximumRangePublicState(begin, begun, parts, written, complete, completed);
         await BlobMaximumRangePublicAssertions.ReceiptAsync(begun.Receipt, begin.CommandId, state);
         for (var index = 0; index < 3; index++)
         {

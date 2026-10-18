@@ -43,8 +43,7 @@ internal static class SqlEventReferenceJoinBudget
             UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(),
             UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(),
             UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.BlobExecution(),
-            UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(),
-            UnitExecutionOptions.MovementCheckpoints(), UnavailablePartitionMovementCheckpointVerifier.Instance);
+            UnitExecutionOptions.NativeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
         return new(owner, UnitExecutionOptions.QueryExecution(execution));
     }
     private static async Task BytesAsync(TestDatabase database)

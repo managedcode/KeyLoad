@@ -7,8 +7,8 @@ internal static class GraphPathRebindR44Trial
 {
     internal static async Task RunAsync(ClusterFixture fixture, CancellationToken token)
     {
-        var seed = await GraphPathRf3Scenario.CreateAsync(fixture, token);
-        var identity = await GraphPathRf3Scenario.GrantLabelUseAsync(fixture, seed, token);
+        var seed = await GraphPathClusterScenario.CreateAsync(fixture, token);
+        var identity = await GraphPathClusterScenario.GrantLabelUseAsync(fixture, seed, token);
         var state = new GraphPathRebindR44State(seed, identity);
         await OwnedAsync(fixture, state, async (admin, reader) =>
         {
@@ -16,8 +16,8 @@ internal static class GraphPathRebindR44Trial
             await GraphPathRebindR44Replay.VerifyAsync(admin, reader, state, token);
             await GraphPathRebindR44Commands.ReplaceAsync(admin, state, 2, token);
             state.Stale = new(Guid.NewGuid(), state.Seed.Partition,
-                [new UpsertEdge(GraphPathRf3Scenario.Graph, "0-sa", state.S, state.A,
-                    GraphPathRf3Scenario.Label, "{}", 1L)]);
+                [new UpsertEdge(GraphPathClusterScenario.Graph, "0-sa", state.S, state.A,
+                    GraphPathClusterScenario.Label, "{}", 1L)]);
             await GraphPathRebindR44Replay.VerifyAsync(admin, reader, state, token);
         }, token);
         await ColdAsync(fixture, state, token);
@@ -37,8 +37,8 @@ internal static class GraphPathRebindR44Trial
     }
 
     private static async Task OwnedAsync(ClusterFixture fixture, GraphPathRebindR44State state,
-        Func<RequestCqrsRf3Callers, RequestCqrsRf3Callers, Task> operation, CancellationToken token)
-        => _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
-            async admin => await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2,
+        Func<RequestCqrsClusterCallers, RequestCqrsClusterCallers, Task> operation, CancellationToken token)
+        => _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
+            async admin => await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2,
                 state.Identity.Secret, async reader => { await operation(admin, reader); return true; }, token), token);
 }

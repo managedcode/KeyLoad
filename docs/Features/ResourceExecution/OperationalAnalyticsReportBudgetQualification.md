@@ -1,6 +1,6 @@
 # Native analytics report-byte refusal and joined recovery
 
-Parent: [OperationalAnalytics](OperationalAnalytics.md), [native operation qualification](OperationalAnalyticsNativeQualification.md), [ADR-134](../../ADR/ADR-134-node-owned-derived-analytics.md). This is a private native component regression for KL040 resource policy. It does not activate the normal server sampler or bypass the pending NativeResourceKernel ownership/admission contract.
+Parent: [OperationalAnalytics](OperationalAnalytics.md), [native operation qualification](OperationalAnalyticsNativeQualification.md), [ADR-134](../../ADR/ADR-134-node-owned-derived-analytics.md). This is a private native component regression for resource policy. It does not activate the normal server sampler.
 
 REQ-ANALYTICS-BYTE-TEST-001 / AC-ANALYTICS-002,004,006,007 maps to `OperationalAnalyticsBudgetTests.ActualNativeReportByteRefusalLatchesOriginalFailureThenJoinedEngineReopensHealthyAndTwoColdConserveCanonicalState`. The actual validated options admit MaximumReportBytes=1. The actual engine ingests the existing original ConfigureResource1/PutDocument2 positions and explicit17/12 arithmetic control, flushes, and executes its native rollup query. The resulting report cannot fit one byte; the genuine projection throws the independent expected InvalidOperationException message. No injected error, fake provider, clock, native hold, production activation or second governor creates this refusal.
 
@@ -22,4 +22,4 @@ flowchart TD
  G --> H[Known closed canonical resources then original root removed]
 ```
 
-This adopted component passes the current full compiler/analyzers/formatter and its actual complete R288 operation. [Stage89](../../implementation/qualification-stage89-foundation.md) records the original selected report and coverage. Complete Linux qualification and uncovered native cleanup/error branches remain OPEN. An actual primitive close-failure path is not fabricated or claimed. Queue-full/drop, contended query admission, native timeout, retention/storage failure, RF3 sampler/current SDK/official MCP/OTel and production worker activation remain separate OPEN gates. Existing r209 original50 selection and all admitted source bodies remain unchanged. No performance or production-readiness claim follows.
+Complete Linux qualification and uncovered native cleanup/error branches remain OPEN. An actual primitive close-failure path is not fabricated or claimed. Queue-full/drop, contended query admission, native timeout, retention/storage failure, replicated-cluster sampler/current SDK/official MCP/OTel and production worker activation remain separate OPEN gates. All admitted source bodies remain unchanged. No performance or production-readiness claim follows.

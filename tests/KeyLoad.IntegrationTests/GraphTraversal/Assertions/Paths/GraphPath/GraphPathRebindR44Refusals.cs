@@ -11,13 +11,13 @@ internal static class GraphPathRebindR44Refusals
     private const string RevisionDetail = "The expected revision does not match.";
     private const string McpRevisionDetail = "The database operation could not be completed.";
 
-    internal static async Task StaleAsync(RequestCqrsRf3Callers admin, RequestCqrsRf3Callers reader,
+    internal static async Task StaleAsync(RequestCqrsClusterCallers admin, RequestCqrsClusterCallers reader,
         GraphPathRebindR44State state, CancellationToken token)
     {
         var sdk = await admin.Sdk.CommitAsync(state.Stale, token);
         await Assert.That(sdk.IsFailed).IsTrue();
         await Assert.That(sdk.Value).IsNull();
-        await SqlRf3Protocol.EqualAsync(Errors.Problem(ErrorCode.RevisionConflict, RevisionDetail), sdk.Problem);
+        await SqlClusterProtocol.EqualAsync(Errors.Problem(ErrorCode.RevisionConflict, RevisionDetail), sdk.Problem);
         await GraphPathRebindR44Reads.MatrixAsync(admin, reader, state, token);
         var reply = await admin.Mcp.CallAsync(McpCallerTools.DocumentsCommit, state.Stale, token);
         await McpCallerAssertions.ErrorAsync(reply, ErrorCode.RevisionConflict, dispatched: true);
@@ -26,7 +26,7 @@ internal static class GraphPathRebindR44Refusals
         await GraphPathRebindR44Reads.MatrixAsync(admin, reader, state, token);
     }
 
-    internal static async Task BoundsAsync(RequestCqrsRf3Callers admin, RequestCqrsRf3Callers reader,
+    internal static async Task BoundsAsync(RequestCqrsClusterCallers admin, RequestCqrsClusterCallers reader,
         GraphPathRebindR44State state, CancellationToken token)
     {
         foreach (var request in new[] { state.Request(state.T) with { MaxVertices = state.VertexCap - 1 },
@@ -37,7 +37,7 @@ internal static class GraphPathRebindR44Refusals
             await Assert.That(result.Value).IsNull();
             await Assert.That(result.Problem!.ErrorCode).IsEqualTo(ErrorCode.BudgetExceeded.ToString());
             await GraphPathRebindR44Reads.MatrixAsync(admin, reader, state, token);
-            await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(GraphPathRf3Scenario.DirectTool, request, token),
+            await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(GraphPathClusterScenario.DirectTool, request, token),
                 ErrorCode.BudgetExceeded, dispatched: true);
             await GraphPathRebindR44Reads.MatrixAsync(admin, reader, state, token);
         }

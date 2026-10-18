@@ -53,9 +53,6 @@ public sealed partial class DatabaseEngine
             case OperationKind.EventFeedControl:
                 ObserveEventControlLifetime(view, Payload<EventVectorControlPhase>(operation));
                 return;
-            case OperationKind.PartitionMovementPhase:
-                ObserveControlledResourceEffects(view, operation);
-                return;
             default:
                 if (ObserveCatalogResourceEffect(view, operation) || ObserveProjectionResourceEffects(view, principal, operation)
                     || IsResourceFreeNativeOperation(operation.Kind))

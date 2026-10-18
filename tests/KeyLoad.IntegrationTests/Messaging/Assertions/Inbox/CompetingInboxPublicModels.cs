@@ -5,7 +5,7 @@ namespace KeyLoad.IntegrationTests.Features.Messaging;
 
 internal static class CompetingInboxPublicModels
 {
-    internal static async Task RequireAsync(CompetingInboxPublicState state, RequestCqrsRf3Callers root, CancellationToken token)
+    internal static async Task RequireAsync(CompetingInboxPublicState state, RequestCqrsClusterCallers root, CancellationToken token)
     {
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => ItemAsync(state, root, CompetingInboxPublicProtocol.First,
@@ -20,7 +20,7 @@ internal static class CompetingInboxPublicModels
             state.HasHealthy ? CompetingInboxPublicProtocol.FinalOutboxRecords : CompetingInboxPublicProtocol.FirstOutboxRecords, false, token), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
-    private static async Task ItemAsync(CompetingInboxPublicState state, RequestCqrsRf3Callers root,
+    private static async Task ItemAsync(CompetingInboxPublicState state, RequestCqrsClusterCallers root,
         string input, string effect, string json, long sequence, CancellationToken token)
     {
         var failures = new List<Exception>();
@@ -50,7 +50,7 @@ internal static class CompetingInboxPublicModels
         await ServerFailureObserver.ObserveAsync(() => StreamAsync(state, root, effect, json, sequence, token), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
-    private static async Task StreamAsync(CompetingInboxPublicState state, RequestCqrsRf3Callers root,
+    private static async Task StreamAsync(CompetingInboxPublicState state, RequestCqrsClusterCallers root,
         string id, string json, long sequence, CancellationToken token)
     {
         var reference = new StreamRef(state.Partition, CompetingInboxPublicProtocol.Streams, id);
@@ -86,7 +86,7 @@ internal static class CompetingInboxPublicModels
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
-    internal static async Task OutboxAsync(CompetingInboxPublicState state, RequestCqrsRf3Callers root,
+    internal static async Task OutboxAsync(CompetingInboxPublicState state, RequestCqrsClusterCallers root,
         long records, bool capture, CancellationToken token)
     {
         var status = await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.OutboxStatusAsync(state.Partition, token));

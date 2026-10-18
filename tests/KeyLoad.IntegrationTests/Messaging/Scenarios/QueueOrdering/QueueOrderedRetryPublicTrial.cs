@@ -11,11 +11,11 @@ internal static class QueueOrderedRetryPublicTrial
         using var deadline = McpCallerDeadline.Create();
         var state = await SeedAsync(fixture, route, parkedHead, deadline.Token);
         var failures = new List<Exception>();
-        RequestCqrsRf3Callers? callers = null;
+        RequestCqrsClusterCallers? callers = null;
         NodeStatus? before = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            callers = await RequestCqrsRf3Callers.ConnectAsync(fixture.App, McpCallerProtocol.Node1, state.Caller.OperatorKey, deadline.Token);
+            callers = await RequestCqrsClusterCallers.ConnectAsync(fixture.App, McpCallerProtocol.Node1, state.Caller.OperatorKey, deadline.Token);
             await QueueOrderedRetryPublicInitial.RunAsync(callers, state, deadline.Token);
             await DeniedAsync(fixture, state, deadline.Token);
             await QueueOrderedRetryPublicContinuation.RunAsync(callers, state, deadline.Token);
@@ -32,11 +32,11 @@ internal static class QueueOrderedRetryPublicTrial
     private static async Task<QueueOrderedRetryPublicState> SeedAsync(ClusterFixture fixture, int route, QueueParkedHeadPolicy parkedHead, CancellationToken token)
     {
         var failures = new List<Exception>();
-        RequestCqrsRf3Callers? root = null;
+        RequestCqrsClusterCallers? root = null;
         QueueOrderedRetryPublicState? state = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            root = await RequestCqrsRf3Callers.ConnectAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, token);
+            root = await RequestCqrsClusterCallers.ConnectAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, token);
             state = await QueueOrderedRetryPublicSeed.RunAsync(root, route, parkedHead, token);
         }, failures);
         if (root is not null)
@@ -49,10 +49,10 @@ internal static class QueueOrderedRetryPublicTrial
     private static async Task DeniedAsync(ClusterFixture fixture, QueueOrderedRetryPublicState state, CancellationToken token)
     {
         var failures = new List<Exception>();
-        RequestCqrsRf3Callers? denied = null;
+        RequestCqrsClusterCallers? denied = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            denied = await RequestCqrsRf3Callers.ConnectAsync(fixture.App, McpCallerProtocol.Node1, state.Caller.DeniedKey, token);
+            denied = await RequestCqrsClusterCallers.ConnectAsync(fixture.App, McpCallerProtocol.Node1, state.Caller.DeniedKey, token);
             var command = new CommandRequest(Guid.NewGuid(), state.Caller.Partition,
                 [new RedriveQueueMessage(state.Caller.Lane.Queue, QueueOrderedRetryPublicProtocol.First,
                     QueueOrderedRetryPublicProtocol.Seven, QueueOrderedRetryPublicProtocol.One)]);

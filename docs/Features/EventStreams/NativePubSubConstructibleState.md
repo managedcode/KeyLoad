@@ -6,9 +6,9 @@ AC-EVENT-PUBSUB-CAS-STATE-001: preserve real scratch overflow and original Budge
 
 REQ-EVENT-PUBSUB-CAS-STATE-002: compose the single test successor after immutable scratch Source3 and native fresh-state Source4. No product/public codec/aliases/IDs or native activator are modified.
 
-AC-EVENT-PUBSUB-CAS-STATE-002: exact predecessor hash guards the replacement test; the actual current test type must remain native NotFound at authoring. Private patch check/apply and posthash receipts are source evidence only. Actual compiler, TUnit, native UID, Linux, RF3 and recovery gates remain OPEN.
+AC-EVENT-PUBSUB-CAS-STATE-002: exact predecessor hash guards the replacement test; the actual current test type must remain native NotFound at authoring. Private patch check/apply and posthash receipts are source evidence only. Actual compiler, TUnit, native UID, Linux, cluster and recovery gates remain OPEN.
 
-Source map: tests/KeyLoad.UnitTests/EventStreams/Cases/Event/EventFeedPubSubScratchFailureTests.cs. Requirements map to ActualRegisteredSerializerScratchRefusalKeepsCompleteCasStateAndHealthyReplacement, with unchanged direct writer cases. The disposable provider proof is independent of canonical persisted EventStreams/RF3 durability.
+Source map: tests/KeyLoad.UnitTests/EventStreams/Cases/Event/EventFeedPubSubScratchFailureTests.cs. Requirements map to ActualRegisteredSerializerScratchRefusalKeepsCompleteCasStateAndHealthyReplacement, with unchanged direct writer cases. The disposable provider proof is independent of canonical persisted EventStreams/cluster durability.
 
 REQ-EVENT-PUBSUB-CAS-STATE-003: actual registered provider and storage cleanup must preserve original test/body and every real constructor/disposal failure, including genuine fatal failures; no cleanup can replace the initiating failure.
 

@@ -18,23 +18,23 @@ internal sealed class FunctionalGateUsers : IAsyncDisposable
     private const string AuthId = "auth-grant-probe";
     private const string AuthJson = "{\"gate\":\"persisted-auth\",\"value\":31}";
     private const string EpochFence = "The principal policy changed since this command was evaluated.";
-    private readonly List<RequestCqrsRf3Callers> callers = [];
+    private readonly List<RequestCqrsClusterCallers> callers = [];
     private readonly List<McpPersistedIdentity> identities = [];
-    private RequestCqrsRf3Callers? queueAdministrator;
+    private RequestCqrsClusterCallers? queueAdministrator;
 
-    internal RequestCqrsRf3Callers QueueAdministrator => queueAdministrator
+    internal RequestCqrsClusterCallers QueueAdministrator => queueAdministrator
         ?? throw new InvalidOperationException("The persisted queue operator is not connected.");
-    internal RequestCqrsRf3Callers Writer => callers[0];
-    internal RequestCqrsRf3Callers Reader => callers[ReaderStart];
-    internal IReadOnlyList<RequestCqrsRf3Callers> Callers => callers;
-    internal IReadOnlyList<RequestCqrsRf3Callers> Writers => callers.Take(WriterCount).ToArray();
-    internal IReadOnlyList<RequestCqrsRf3Callers> Readers => callers.Skip(ReaderStart).Take(WriterCount).ToArray();
+    internal RequestCqrsClusterCallers Writer => callers[0];
+    internal RequestCqrsClusterCallers Reader => callers[ReaderStart];
+    internal IReadOnlyList<RequestCqrsClusterCallers> Callers => callers;
+    internal IReadOnlyList<RequestCqrsClusterCallers> Writers => callers.Take(WriterCount).ToArray();
+    internal IReadOnlyList<RequestCqrsClusterCallers> Readers => callers.Skip(ReaderStart).Take(WriterCount).ToArray();
     internal IReadOnlyList<PrincipalRecord> WriterPrincipals => identities.Take(WriterCount).Select(item => item.Principal).ToArray();
     internal IReadOnlyList<string> WriterPrincipalIds => identities.Take(WriterCount).Select(item => item.Principal.Id).ToArray();
     internal IReadOnlyList<string> ReaderPrincipalIds => identities.Skip(ReaderStart).Take(WriterCount).Select(item => item.Principal.Id).ToArray();
 
     internal static async Task<FunctionalGateUsers> CreateAsync(FunctionalGateFixture fixture,
-        RequestCqrsRf3Callers administrator, PartitionRef partition, CancellationToken token)
+        RequestCqrsClusterCallers administrator, PartitionRef partition, CancellationToken token)
     {
         var owner = new FunctionalGateUsers();
         try
@@ -53,12 +53,12 @@ internal sealed class FunctionalGateUsers : IAsyncDisposable
                 };
                 var persisted = await McpCallerAssertions.SdkSuccessAsync(
                     await administrator.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), expected, token));
-                await SqlRf3Protocol.EqualAsync(expected, persisted);
+                await SqlClusterProtocol.EqualAsync(expected, persisted);
                 owner.identities.Add(identity with
                 {
                     Principal = persisted
                 });
-                owner.callers.Add(await RequestCqrsRf3Callers.ConnectAsync(fixture.App,
+                owner.callers.Add(await RequestCqrsClusterCallers.ConnectAsync(fixture.App,
                     fixture.NodeNames[index % fixture.NodeNames.Length], identity.Secret, token));
             }
             owner.queueAdministrator = await FunctionalGateQueueAdministrator.CreateAsync(fixture, administrator, partition, token);
@@ -123,10 +123,10 @@ internal sealed class FunctionalGateUsers : IAsyncDisposable
             CommandId = Guid.NewGuid()
         };
         var receipt = await context.SdkAsync(callers[DeniedIndex].Sdk.CommitAsync(admitted, token));
-        await SqlRf3Protocol.EqualAsync(receipt, await context.McpAsync<CommitReceipt>(callers[DeniedIndex],
+        await SqlClusterProtocol.EqualAsync(receipt, await context.McpAsync<CommitReceipt>(callers[DeniedIndex],
             McpCallerTools.DocumentsCommit, admitted, token));
         await Assert.That(receipt.CommandId).IsEqualTo(admitted.CommandId);
-        await SqlRf3Protocol.EqualAsync(new MutationReceipt[] { new("putDocument", probe.Collection, probe.Id, FirstRevision) },
+        await SqlClusterProtocol.EqualAsync(new MutationReceipt[] { new("putDocument", probe.Collection, probe.Id, FirstRevision) },
             receipt.Mutations.ToArray());
         var present = new DocumentReadResult(new(probe, FirstRevision, AuthJson, false, []));
         await FunctionalGateUserAssertions.EqualDocumentAsync(context, callers[DeniedIndex], probe, present, token);
@@ -152,9 +152,9 @@ internal sealed class FunctionalGateUsers : IAsyncDisposable
         var cleanup = new CommandRequest(Guid.NewGuid(), context.Partition,
             [new DeleteDocument(probe.Collection, probe.Id, ExpectedRevision: FirstRevision)]);
         var cleanupReceipt = await context.SdkAsync(context.Administrator.Sdk.CommitAsync(cleanup, token));
-        await SqlRf3Protocol.EqualAsync(cleanupReceipt, await context.McpAsync<CommitReceipt>(context.Administrator,
+        await SqlClusterProtocol.EqualAsync(cleanupReceipt, await context.McpAsync<CommitReceipt>(context.Administrator,
             McpCallerTools.DocumentsCommit, cleanup, token));
-        await SqlRf3Protocol.EqualAsync(new MutationReceipt[] { new("deleteDocument", probe.Collection, probe.Id, FirstRevision + 1) },
+        await SqlClusterProtocol.EqualAsync(new MutationReceipt[] { new("deleteDocument", probe.Collection, probe.Id, FirstRevision + 1) },
             cleanupReceipt.Mutations.ToArray());
         await FunctionalGateUserAssertions.EqualDocumentAsync(context, callers[DeniedIndex], probe, absent, token);
         await FunctionalGateUserAssertions.EqualDocumentAsync(context, context.Administrator, context.Anchor, anchor, token);
@@ -168,7 +168,7 @@ internal sealed class FunctionalGateUsers : IAsyncDisposable
             Grants = Grants(context.Partition.DatabaseId, capabilities, identities[index % WriterCount].Principal.Id)
         };
         var actual = await context.SdkAsync(context.Administrator.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), expected, token));
-        await SqlRf3Protocol.EqualAsync(expected, actual);
+        await SqlClusterProtocol.EqualAsync(expected, actual);
         identities[index] = identities[index] with
         {
             Principal = actual

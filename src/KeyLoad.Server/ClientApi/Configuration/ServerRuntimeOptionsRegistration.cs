@@ -17,8 +17,6 @@ internal static class ServerRuntimeOptionsRegistration
     {
         CoreRuntimeOptionsRegistration.AddCoreRuntimeOptions(services, configuration);
         RegisterClusterExecution(services, configuration);
-        RegisterPartitionMovement(services, configuration);
-        RegisterTenantPlacement(services, configuration);
         RegisterStorageExecution(services, configuration);
         RegisterHostExecution(services, configuration);
         RegisterNodeProjections(services, configuration);
@@ -26,41 +24,14 @@ internal static class ServerRuntimeOptionsRegistration
         return services;
     }
 
-    private static void RegisterPartitionMovement(IServiceCollection services, IConfiguration configuration)
-    {
-        var section = configuration.GetSection(PartitionMovementExecutionOptions.SectionName);
-        if (section.Value is not null)
-        {
-            throw new OptionsValidationException(Options.DefaultName, typeof(PartitionMovementExecutionOptions),
-                [PartitionMovementExecutionOptions.ValidationMessage]);
-        }
-        services.AddOptions<PartitionMovementExecutionOptions>()
-            .Bind(section, binding => binding.ErrorOnUnknownConfiguration = true).ValidateOnStart();
-    }
-
-    private static void RegisterTenantPlacement(IServiceCollection services, IConfiguration configuration)
-    {
-        var section = configuration.GetSection(TenantPlacementExecutionOptions.SectionName);
-        if (section.Value is not null)
-        {
-            throw new OptionsValidationException(Options.DefaultName, typeof(TenantPlacementExecutionOptions),
-            [TenantPlacementExecutionOptionsValidator.Invalid]);
-        }
-        services.AddOptions<TenantPlacementExecutionOptions>()
-            .Bind(section, binding => binding.ErrorOnUnknownConfiguration = true).ValidateOnStart();
-        services.AddSingleton<IValidateOptions<TenantPlacementExecutionOptions>, TenantPlacementExecutionOptionsValidator>();
-    }
-
     private static void RegisterClusterExecution(IServiceCollection services, IConfiguration configuration)
     {
         services.AddDueCoordinationOptions(configuration);
         services.AddOptions<NativeDurableJobOptions>().Bind(configuration.GetSection(NativeDurableJobOptions.SectionName))
             .Validate(options => options.IsValid(), NativeDurableJobOptions.ValidationMessage).ValidateOnStart();
-        services.AddOptions<ReplicaExecutionOptions>()
-            .Bind(configuration.GetSection(ReplicaExecutionOptions.SectionName))
-            .Validate(options => options.IsValid(), ReplicaProtocol.InvalidLimits).ValidateOnStart();
-        services.AddOptions<ReplicaTransportOptions>().Bind(configuration.GetSection(ReplicaTransportOptions.SectionName))
-            .Validate(options => options.IsValid(), ReplicaTransportOptions.ValidationMessage).ValidateOnStart();
+        services.AddOptions<ReplicaCopyOptions>().Bind(configuration.GetSection(ReplicaCopyOptions.SectionName))
+            .Validate(options => options.SiloCount > 0 && options.ReplicaCount > 0
+                && options.ReplicaCount <= options.SiloCount, "Invalid silo or data-copy count.").ValidateOnStart();
         services.AddOptions<OrleansMembershipOptions>()
             .Bind(configuration.GetSection(OrleansMembershipOptions.SectionName))
             .Validate(options => options.IsValid(), OrleansMembershipOptions.ValidationMessage).ValidateOnStart();
@@ -81,8 +52,6 @@ internal static class ServerRuntimeOptionsRegistration
             .Validate(options => options.IsValid(), ZoneTreeStorageExecutionOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<ZoneTreePointCacheExecutionOptions>().Bind(configuration.GetSection(ZoneTreePointCacheExecutionOptions.SectionName))
             .Validate(options => options.IsValid(), ZoneTreePointCacheExecutionOptions.ValidationMessage).ValidateOnStart();
-        services.AddOptions<RequestProbeExecutionOptions>().Bind(configuration.GetSection(RequestProbeExecutionOptions.SectionName))
-            .Validate(options => options.IsValid(), RequestProbeExecutionOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<NativeAnnExecutionOptions>().Bind(configuration.GetSection(NativeAnnExecutionOptions.SectionName))
             .Validate(options => options.IsValid(), NativeAnnExecutionOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<NativeTextExecutionOptions>().Bind(configuration.GetSection(NativeTextExecutionOptions.SectionName))
@@ -125,12 +94,6 @@ internal static class ServerRuntimeOptionsRegistration
         services.AddOptions<NodeOptions>().Bind(configuration.GetSection(ServerProtocol.ConfigurationSection))
             .PostConfigure(node => ConfigureNode(node, configuration)).ValidateOnStart();
         services.AddSingleton<IValidateOptions<NodeOptions>, NodeOptionsValidator>();
-        services.AddOptions<ReplicaConfiguration>();
-        services.AddSingleton<IOptionsFactory<ReplicaConfiguration>, ReplicaConfigurationFactory>();
-        services.AddOptions<ReplicaReplayLimits>();
-        services.AddSingleton<IOptionsFactory<ReplicaReplayLimits>, ReplicaReplayOptionsFactory>();
-        services.AddOptions<ReplicaPeerOptions>();
-        services.AddSingleton<IOptionsFactory<ReplicaPeerOptions>, ReplicaPeerOptionsFactory>();
         services.AddOptions<CommandAdmissionLimits>();
         services.AddSingleton<IOptionsFactory<CommandAdmissionLimits>>(provider =>
             new NodeOptionsProjectionFactory<CommandAdmissionLimits>(provider.GetRequiredService<IOptions<NodeOptions>>(),
@@ -156,11 +119,7 @@ internal static class ServerRuntimeOptionsRegistration
     internal static void ConfigureNode(NodeOptions node, IConfiguration configuration)
     {
         var section = configuration.GetSection(ServerProtocol.ConfigurationSection);
-        PhysicalGroupTrustValidator.ValidateConfiguration(section, node.PhysicalGroupTrust);
-        node.RequestCqrsProbe = RequestCqrsProbeOptionsReader.Read(configuration,
-            node.CreateReplicaConfiguration(Path.GetFullPath(node.DataDirectory)), node.AllowPrivateNetworkHttp);
-        node.MovementFrameObservation = MovementFrameObservationOptionsReader.Read(configuration, node);
-        node.NativeDiscoveryOmission = NativeDiscoveryOmissionOptionsReader.Read(configuration, node);
+        node.Validate();
     }
 
 }

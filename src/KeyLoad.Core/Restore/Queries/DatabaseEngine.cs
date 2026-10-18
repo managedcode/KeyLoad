@@ -9,7 +9,6 @@ public sealed partial class DatabaseEngine
 {
     private const long ClusterBackupNoAppliedIndex = 0;
     private const string ClusterBackupConfiguredOwnerRequired = "Cluster capture requires its actual configured physical owner.";
-    private const string ClusterBackupActiveMovement = "Cluster capture cannot omit unsettled partition movement authority.";
 
     /// <summary>Reads complete native catalog metadata inside the actual provider-owned archive gate.</summary>
     /// <param name="view">Borrowed same-cut view supplied only by the native capture owner.</param>
@@ -51,18 +50,13 @@ public sealed partial class DatabaseEngine
         {
             work.Check();
             var partition = entry.Value.Entry.Partition;
-            if (admitted.ReadOwnedValue(PartitionMoveParentKeys.Active(partition)) is not null)
-            {
-                throw Errors.Fail(ErrorCode.RecoveryRequired, ClusterBackupActiveMovement);
-            }
-            var placement = ResolveRegisteredPlacement(admitted, partition, catalog.DefaultShard);
+            var placement = ResolveRegisteredPlacement(partition, catalog.DefaultShard);
             var scope = census.Partitions[partition];
             partitions.Add(new(ClusterBackupOwnerCut.CurrentVersion, entry.Value.Entry, entry.Value.Digest, placement, applied, scope.Count, scope.Digest));
         }
-        var directory = AtomicPartitionPlacementSerialization.ReadDirectory(admitted);
         var registered = PhysicalOwnerDirectorySerialization.Read(admitted);
         var result = new ClusterBackupOwnerCut(ClusterBackupOwnerCut.CurrentVersion, captureId, configuredPhysicalOwner,
-            catalog, directory, position, applied, partitions.ToImmutable(), census.Digest, registered, identity.NodeId);
+            catalog, position, applied, partitions.ToImmutable(), census.Digest, registered, identity.NodeId);
         work.CheckResult(result);
         work.Check();
         return result;

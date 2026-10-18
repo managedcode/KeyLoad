@@ -5,7 +5,7 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
 internal static class QueueViewLeaseIsolationCancellation
 {
-    internal static Task RunAsync(RequestCqrsRf3Callers root, RequestCqrsRf3Callers reader,
+    internal static Task RunAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers reader,
         QueueViewLeaseIsolationState state, CancellationToken token)
         => QueueViewLeaseIsolationImages.ObserveAsync(root, state, async () =>
         {

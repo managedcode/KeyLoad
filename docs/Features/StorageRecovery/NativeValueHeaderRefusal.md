@@ -21,4 +21,4 @@ flowchart LR
  Healthy --> Cold[Two full same-root cold cuts]
 ```
 
-The empty native-value path may fail in native IsDeleted before these readers and is explicitly unqualified here. Native good-cache hits bypass raw tree validation; this trial deliberately performs no point read before corrupting an uncached original runtime and does not claim detecting external corruption hidden behind an existing valid cache hit. Source only; compiler/style/native/Linux/process/RF3/coverage and all performance/power-loss gates remain OPEN.
+The empty native-value path may fail in native IsDeleted before these readers and is explicitly unqualified here. Native good-cache hits bypass raw tree validation; this trial deliberately performs no point read before corrupting an uncached original runtime and does not claim detecting external corruption hidden behind an existing valid cache hit. Linux, process, replicated-cluster, coverage, performance and power-loss gates are separate.

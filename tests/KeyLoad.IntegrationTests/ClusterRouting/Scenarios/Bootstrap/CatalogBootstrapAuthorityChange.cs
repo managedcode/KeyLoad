@@ -7,7 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterRouting;
 
 internal static class CatalogBootstrapAuthorityChange
 {
-    internal static async Task RunAsync(ClusterFixture fixture, RequestCqrsRf3Callers survivor,
+    internal static async Task RunAsync(ClusterFixture fixture, RequestCqrsClusterCallers survivor,
         string variant, CancellationToken token)
     {
         var command = Guid.NewGuid();
@@ -32,11 +32,11 @@ internal static class CatalogBootstrapAuthorityChange
             Revoked = variant == P.PrincipalRevoked,
             PolicyEpoch = P.ChangedEpoch
         };
-        await SqlRf3Protocol.EqualAsync(principal, await McpCallerAssertions.SdkSuccessAsync(
+        await SqlClusterProtocol.EqualAsync(principal, await McpCallerAssertions.SdkSuccessAsync(
             await survivor.Sdk.ConfigurePrincipalAsync(command, principal, token)));
         var principalArgs = McpOfficialClient.Arguments(new ConfigurePrincipalRequest(principal));
         principalArgs.Add(McpCallerProtocol.CommandId, command);
-        await SqlRf3Protocol.EqualAsync(principal, (await McpCallerAssertions.SuccessAsync<PrincipalRecord>(
+        await SqlClusterProtocol.EqualAsync(principal, (await McpCallerAssertions.SuccessAsync<PrincipalRecord>(
             await survivor.Mcp.Client.InvokeKeyLoadToolAsync(McpCallerTools.PrincipalsConfigure, principalArgs, token))).Value);
     }
 }

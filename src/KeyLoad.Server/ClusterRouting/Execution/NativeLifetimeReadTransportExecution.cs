@@ -13,8 +13,7 @@ internal static class NativeLifetimeReadTransportExecution
 
     internal static bool Handles(RemoteModelNativeChannel channel)
         => channel is RemoteModelNativeChannel.ResourceLifetimeRead
-            or RemoteModelNativeChannel.ResourceLifetimeAnnRead or RemoteModelNativeChannel.ResourceLifetimeBlobOutcome
-            or RemoteModelNativeChannel.EventVector;
+            or RemoteModelNativeChannel.ResourceLifetimeAnnRead or RemoteModelNativeChannel.EventVector;
 
     internal static async Task<RemoteModelNativeReply> ExecuteAsync(NativeRequestWorkOwner owner,
         DatabaseEngine database, RemoteModelNativeRequest request,

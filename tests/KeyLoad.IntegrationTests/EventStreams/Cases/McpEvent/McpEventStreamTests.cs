@@ -3,8 +3,8 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.EventStreams;
 
-/// <summary>AC-MCP-002/005/007 and AC-EVENT-004/005/006 real RF3 EventStreams parity.</summary>
-/// <param name="fixture">The initialized actual Docker/Aspire RF3 application.</param>
+/// <summary>AC-MCP-002/005/007 and AC-EVENT-004/005/006 real CLUSTER EventStreams parity.</summary>
+/// <param name="fixture">The initialized actual Docker/Aspire CLUSTER application.</param>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class McpEventStreamTests(ClusterFixture fixture)

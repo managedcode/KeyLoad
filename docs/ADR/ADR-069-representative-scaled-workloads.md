@@ -57,7 +57,7 @@ vendor constructor/close faults are explicit evidence gaps, not test-double proo
 ## Full comparison and delivery gates
 
 REQ-SCALE-007 requires the subsequent genuine authorized .NET SDK and official
-MCP operations through Aspire RF3 for supported ordered/range, index and bounded
+MCP operations through Aspire cluster for supported ordered/range, index and bounded
 complex-query workloads, exact result/count/digest checks, error/cancel/recovery
 flows, and at least 100,000 measured operations at both required scales. The raw
 ZoneTree lane does not close this product gate. Native image, actual dataset,
@@ -83,13 +83,13 @@ Automated acceptance remains mapped to the owning specification:
 | REQ-SCALE-004 / AC-SCALE-004 | Every measured call performs and validates one million native reads at exact 100K/1M scales |
 | REQ-SCALE-005 / AC-SCALE-005 | Complete eight-cell ZoneTree profile, separate counts/operations/iterations, minimum duration and original reports |
 | REQ-SCALE-006 / AC-SCALE-006 | Local raw originals stay development-only; full comparison evidence comes from authenticated isolated Linux GitHub cells |
-| REQ-SCALE-007 / AC-SCALE-007 | Real RF3 SDK/MCP product workload cohort with equal native correctness and resource contracts; currently open until proven |
-| REQ-SCALE-008 / AC-SCALE-008 | Full current-source build, normal/scalar/recovery/RF3, coverage, fault and required quality gates; no skipped or synthetic success |
+| REQ-SCALE-007 / AC-SCALE-007 | Real cluster SDK/MCP product workload cohort with equal native correctness and resource contracts; currently open until proven |
+| REQ-SCALE-008 / AC-SCALE-008 | Full current-source build, normal/scalar/recovery/cluster, coverage, fault and required quality gates; no skipped or synthetic success |
 
 Source review, a valid report parser, local BDN, or a completed child exit does not
 qualify native data, process settlement, performance, coverage or durability.
-The status and each open qualification boundary remain in the feature spec and
-`docs/implementation/status.json`; no universal winner or production-readiness
+The status and each open qualification boundary remain in the feature spec;
+no universal winner or production-readiness
 claim follows from this diagnostic lane.
 
 ```mermaid
@@ -110,5 +110,5 @@ performance claims. Full product comparison continues to require comparable
 native execution and public caller evidence. Rollback removes only the diagnostic
 profile and its implementation after preserving source and original evidence; it
 does not alter ZoneTree authority, WAL, Orleans request/partition ownership,
-production RF3 topology, public APIs or stored data. It cannot remove correctness,
+production cluster topology, public APIs or stored data. It cannot remove correctness,
 recovery, coverage or delivery gates.

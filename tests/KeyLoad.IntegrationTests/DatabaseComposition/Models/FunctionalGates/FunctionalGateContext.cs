@@ -6,9 +6,9 @@ namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
 /// <summary>Shares actual public callers and counts only completed successful database operations.</summary>
 internal sealed record FunctionalGateContext(
-    RequestCqrsRf3Callers Administrator,
-    RequestCqrsRf3Callers Writer,
-    RequestCqrsRf3Callers Reader,
+    RequestCqrsClusterCallers Administrator,
+    RequestCqrsClusterCallers Writer,
+    RequestCqrsClusterCallers Reader,
     PartitionRef Partition,
     EntityRef Anchor,
     int ResourceCount)
@@ -17,7 +17,7 @@ internal sealed record FunctionalGateContext(
     private long sdkOperations;
     private long mcpOperations;
 
-    internal RequestCqrsRf3Callers QueueAdministrator { get; init; } = null!;
+    internal RequestCqrsClusterCallers QueueAdministrator { get; init; } = null!;
     internal FunctionalGateReferenceBindings ReferenceBindings { get; init; } = new();
     internal EntityRef Bind(EntityRef reference) => ReferenceBindings.Bind(reference);
     internal string WriterPrincipalId { get; init; } = string.Empty;
@@ -57,7 +57,7 @@ internal sealed record FunctionalGateContext(
         Interlocked.Increment(ref sdkOperations);
     }
 
-    internal async Task<T> McpAsync<T>(RequestCqrsRf3Callers caller, string tool, object request,
+    internal async Task<T> McpAsync<T>(RequestCqrsClusterCallers caller, string tool, object request,
         CancellationToken cancellationToken)
     {
         var reply = await caller.Mcp.CallAsync(tool, request, cancellationToken);
@@ -66,7 +66,7 @@ internal sealed record FunctionalGateContext(
         return result.Value;
     }
 
-    internal async Task<T> McpHeaderAsync<T>(RequestCqrsRf3Callers caller, string tool, object request,
+    internal async Task<T> McpHeaderAsync<T>(RequestCqrsClusterCallers caller, string tool, object request,
         Guid commandId, CancellationToken cancellationToken)
     {
         var arguments = McpOfficialClient.Arguments(request);
@@ -77,7 +77,7 @@ internal sealed record FunctionalGateContext(
         return result.Value;
     }
 
-    internal async Task<T> McpWithoutBodyAsync<T>(RequestCqrsRf3Callers caller, string tool,
+    internal async Task<T> McpWithoutBodyAsync<T>(RequestCqrsClusterCallers caller, string tool,
         CancellationToken cancellationToken)
     {
         var reply = await caller.Mcp.CallWithoutBodyAsync(tool, cancellationToken);
@@ -86,7 +86,7 @@ internal sealed record FunctionalGateContext(
         return result.Value;
     }
 
-    internal async Task McpStatusAsync(RequestCqrsRf3Callers caller, string tool, object request,
+    internal async Task McpStatusAsync(RequestCqrsClusterCallers caller, string tool, object request,
         CancellationToken cancellationToken)
     {
         await McpCallerAssertions.StatusAsync(await caller.Mcp.CallAsync(tool, request, cancellationToken));

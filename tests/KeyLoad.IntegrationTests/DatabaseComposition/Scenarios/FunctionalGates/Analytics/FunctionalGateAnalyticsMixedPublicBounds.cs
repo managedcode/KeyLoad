@@ -20,7 +20,7 @@ internal static class FunctionalGateAnalyticsMixedPublicBounds
         await McpCallerAssertions.ErrorAsync(await context.Reader.Mcp.CallAsync(
             McpCallerTools.GraphTraverse, request, token), ErrorCode.BudgetExceeded, dispatched: true);
         await HealthyAsync(context, state, original, receipt, before, token);
-        var sql = SqlRf3Protocol.Call(context.Partition, McpCallerTools.GraphTraverse, request);
+        var sql = SqlClusterProtocol.Call(context.Partition, McpCallerTools.GraphTraverse, request);
         await SqlSdkAsync(await context.Reader.Sdk.ExecuteSqlAsync(sql, token));
         await HealthyAsync(context, state, original, receipt, before, token);
         await McpCallerAssertions.ErrorAsync(await context.Reader.Mcp.CallAsync(

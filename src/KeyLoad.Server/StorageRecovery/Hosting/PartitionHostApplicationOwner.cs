@@ -6,8 +6,8 @@ namespace KeyLoad.Server;
 
 /// <summary>Silo-local original physical opening and shutdown; native service initialization publishes the one owner.</summary>
 internal sealed class PartitionHostApplicationOwner(ServerRuntimeOptions options, IAuthorizationPolicy authorization,
-    CommandAdmissionGovernor admission, TimeProvider clock, ILogger<ReplicaConsensus> logger, OrleansNode? node = null,
-    ServerConnectionRegistry? connections = null, ReplicaTransportLifecycle? transport = null,
+    CommandAdmissionGovernor admission, TimeProvider clock, ILogger<PartitionHost> logger, IGrainFactory grains, OrleansNode? node = null,
+    ServerConnectionRegistry? connections = null,
     OperationalAnalyticsRuntime? analytics = null, UserAnalyticsRuntime? userAnalytics = null)
     : IPartitionStoragePublication, IAsyncDisposable
 {
@@ -25,7 +25,6 @@ internal sealed class PartitionHostApplicationOwner(ServerRuntimeOptions options
     private Func<Task>[]? storageProducerCallbacks;
     private Task[]? storageProducerJoins;
     private bool connectionsJoined = connections is null;
-    private bool transportJoined = transport is null;
     private bool storageProducersJoined = true;
 
     /// <inheritdoc />
@@ -52,7 +51,7 @@ internal sealed class PartitionHostApplicationOwner(ServerRuntimeOptions options
     }
 
     internal bool CanReleaseRoot => Volatile.Read(ref connectionsJoined)
-        && Volatile.Read(ref transportJoined) && Volatile.Read(ref storageProducersJoined)
+        && Volatile.Read(ref storageProducersJoined)
         && (analytics?.CanReleasePhysical ?? true) && (userAnalytics?.CanReleasePhysical ?? true)
         && (node?.HasJoinedRequestWork ?? true) && ownership.CanReleaseRoot;
 
@@ -106,7 +105,7 @@ internal sealed class PartitionHostApplicationOwner(ServerRuntimeOptions options
 
     private async Task OpenCoreAsync()
     {
-        var opened = await PartitionHost.OpenAsync(options, authorization, admission, clock, logger, ownership)
+        var opened = await PartitionHost.OpenAsync(options, authorization, admission, clock, logger, grains, ownership)
             .ConfigureAwait(false);
         lock (lifecycle)
         {
@@ -158,13 +157,7 @@ internal sealed class PartitionHostApplicationOwner(ServerRuntimeOptions options
         }
         // Node stop closes the actual journal scheduling token before these original producers are joined.
         await JoinStorageProducersAsync(failures).ConfigureAwait(false);
-        if (transport is not null)
-        {
-            var prior = failures.Count;
-            await ServerFailureObserver.ObserveAsync(() => transport.StopAsync(CancellationToken.None), failures)
-                .ConfigureAwait(false);
-            Volatile.Write(ref transportJoined, failures.Count == prior);
-        }
+
         if (analytics is not null)
         {
             await ServerFailureObserver.ObserveAsync(() => analytics.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
@@ -174,7 +167,7 @@ internal sealed class PartitionHostApplicationOwner(ServerRuntimeOptions options
             await ServerFailureObserver.ObserveAsync(() => userAnalytics.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         }
         if (!(analytics?.CanReleasePhysical ?? true) || !(userAnalytics?.CanReleasePhysical ?? true)
-            || !Volatile.Read(ref connectionsJoined) || !Volatile.Read(ref transportJoined)
+            || !Volatile.Read(ref connectionsJoined)
             || !Volatile.Read(ref storageProducersJoined) || node is { HasJoinedRequestWork: false })
         {
             failures.Add(Errors.Fail(ErrorCode.OwnershipLost, NativeBorrowersUnjoined));

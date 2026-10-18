@@ -6,16 +6,16 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
 internal static class QueueViewLeaseIsolationRefusals
 {
-    internal static Task DeniedAsync(RequestCqrsRf3Callers root, RequestCqrsRf3Callers reader,
+    internal static Task DeniedAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers reader,
         QueueViewLeaseIsolationState state, CancellationToken token)
         => QueueViewLeaseIsolationImages.ObserveAsync(root, state, async () =>
         {
             await AllAsync(reader, state, state.Scenario.QueueSql(), state.Scenario.QueueAst(), ErrorCode.PermissionDenied, token);
             await QueueViewLeaseIsolationProblems.SdkAsync(await reader.Sdk.InspectAsync(
-                state.Scenario.Inspect(SqlModelViewRf3Scenario.FirstMessageId), token), ErrorCode.PermissionDenied);
+                state.Scenario.Inspect(SqlModelViewClusterScenario.FirstMessageId), token), ErrorCode.PermissionDenied);
         }, token);
 
-    internal static async Task InputsAsync(RequestCqrsRf3Callers root, RequestCqrsRf3Callers reader,
+    internal static async Task InputsAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers reader,
         QueueViewLeaseIsolationState state, CancellationToken token)
     {
         await QueueViewLeaseIsolationImages.ObserveAsync(root, state, async () =>
@@ -29,7 +29,7 @@ internal static class QueueViewLeaseIsolationRefusals
                 Query = state.Scenario.QueueAst().Query with
                 {
                     Filter = new Comparison(new FieldOperand(QueueViewLeaseIsolationProtocol.PayloadPath),
-                        QueueViewLeaseIsolationProtocol.EqualityOperator, ValueOperand.Create(SqlModelViewRf3Scenario.QueueCanary))
+                        QueueViewLeaseIsolationProtocol.EqualityOperator, ValueOperand.Create(SqlModelViewClusterScenario.QueueCanary))
                 }
             };
             await AllAsync(reader, state, sql, ast, ErrorCode.PermissionDenied, token);
@@ -44,7 +44,7 @@ internal static class QueueViewLeaseIsolationRefusals
         }, token);
     }
 
-    private static async Task AllAsync(RequestCqrsRf3Callers caller, QueueViewLeaseIsolationState state,
+    private static async Task AllAsync(RequestCqrsClusterCallers caller, QueueViewLeaseIsolationState state,
         QueryRequest sql, AstQueryRequest ast, ErrorCode code, CancellationToken token)
     {
         await QueueViewLeaseIsolationProblems.SdkAsync(await caller.Sdk.QueryAsync(sql, token), code);

@@ -6,12 +6,12 @@ Set-StrictMode -Version Latest
 . (Join-Path $PSScriptRoot '../CodeQuality/functional-coverage.native-merge.trx.ps1')
 $method = 'MillionAcknowledgedDocumentsRemainCorrectDuringSdkAndOfficialMcpReads'
 $expected = @([ordered]@{
-    className = 'KeyLoad.IntegrationTests.Features.DocumentStorage.HeavyDocumentLoadRf3Tests'
+    className = 'KeyLoad.IntegrationTests.Features.DocumentStorage.HeavyDocumentLoadClusterTests'
     methodName = $method
     instanceName = $method
 })
 try {
-    $result = Read-FcNativeTrx $Path 'rf3-heavy-load' $expected
+    $result = Read-FcNativeTrx $Path 'cluster-heavy-load' $expected
     if ($result.testCount -ne 1) { throw 'The functional gate requires exactly one original test.' }
     $result | ConvertTo-Json -Depth 8 -Compress
 } catch {

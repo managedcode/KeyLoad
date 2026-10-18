@@ -2,9 +2,9 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
-internal sealed class QueueViewLeaseIsolationState(SqlModelViewRf3Scenario scenario, McpPersistedIdentity reader)
+internal sealed class QueueViewLeaseIsolationState(SqlModelViewClusterScenario scenario, McpPersistedIdentity reader)
 {
-    internal SqlModelViewRf3Scenario Scenario { get; } = scenario;
+    internal SqlModelViewClusterScenario Scenario { get; } = scenario;
     internal McpPersistedIdentity Reader { get; } = reader;
     internal ReceiveRequest? Claim
     {

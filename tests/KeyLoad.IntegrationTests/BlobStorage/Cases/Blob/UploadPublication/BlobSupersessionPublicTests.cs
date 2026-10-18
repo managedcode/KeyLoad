@@ -5,6 +5,6 @@ namespace KeyLoad.IntegrationTests.Features.BlobStorage;
 internal sealed class BlobSupersessionPublicTests(ClusterFixture fixture)
 {
     [Test]
-    public Task SameBlobSupersessionPreservesFullReceiptsAndCurrentRangesAcrossTwoRf3ColdCycles()
+    public Task SameBlobSupersessionPreservesFullReceiptsAndCurrentRangesAcrossTwoClusterColdCycles()
         => BlobSupersessionPublicTrial.RunAsync(fixture, TestContext.Current!.Execution.CancellationToken);
 }

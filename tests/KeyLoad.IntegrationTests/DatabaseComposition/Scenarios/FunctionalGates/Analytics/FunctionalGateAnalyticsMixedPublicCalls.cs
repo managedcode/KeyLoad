@@ -12,7 +12,7 @@ internal static class FunctionalGateAnalyticsMixedPublicCalls
     {
         var sdk = await context.SdkAsync(original);
         var mcp = await context.McpAsync<T>(context.Reader, tool, request, token);
-        var sql = SqlRf3Protocol.Call(context.Partition, tool, request);
+        var sql = SqlClusterProtocol.Call(context.Partition, tool, request);
         var sqlSdk = await FunctionalGateCompositionCalls.SqlAsync<T>(context, sql, official: false, write: false, token);
         var sqlMcp = await FunctionalGateCompositionCalls.SqlAsync<T>(context, sql, official: true, write: false, token);
         return [sdk, mcp, sqlSdk, sqlMcp];
@@ -22,13 +22,13 @@ internal static class FunctionalGateAnalyticsMixedPublicCalls
         FunctionalGateAnalyticsMixedPublicState state, CommandRequest command, CancellationToken token)
     {
         var original = await context.SdkAsync(context.Writer.Sdk.CommitAsync(command, token));
-        await FunctionalGateCompositionCalls.ReceiptAsync(context, original, command.CommandId, state.Effects, token);
+        await FunctionalGateCompositionCalls.ReceiptAsync(context, original, command.CommandId, state.Effects);
         await ReceiptAsync(context, state, original, await context.McpAsync<CommitReceipt>(context.Writer,
-            McpCallerTools.DocumentsCommit, FunctionalGateAnalyticsIdentity.Wire(command), token), token);
+            McpCallerTools.DocumentsCommit, FunctionalGateAnalyticsIdentity.Wire(command), token));
         await ReceiptAsync(context, state, original, await FunctionalGateCompositionCalls.CommandAsync(
-            context, FunctionalGateAnalyticsIdentity.Rebuild(command), official: false, token), token);
+            context, FunctionalGateAnalyticsIdentity.Rebuild(command), official: false, token));
         await ReceiptAsync(context, state, original, await FunctionalGateCompositionCalls.CommandAsync(
-            context, FunctionalGateAnalyticsIdentity.Rebuild(command), official: true, token), token);
+            context, FunctionalGateAnalyticsIdentity.Rebuild(command), official: true, token));
         return original;
     }
 
@@ -55,10 +55,10 @@ internal static class FunctionalGateAnalyticsMixedPublicCalls
     }
 
     private static async Task ReceiptAsync(FunctionalGateContext context, FunctionalGateAnalyticsMixedPublicState state,
-        CommitReceipt expected, CommitReceipt actual, CancellationToken token)
+        CommitReceipt expected, CommitReceipt actual)
     {
         await FunctionalGateUserAnalyticsAssertions.EqualAsync(actual, expected);
-        await FunctionalGateCompositionCalls.ReceiptAsync(context, actual, expected.CommandId, state.Effects, token);
+        await FunctionalGateCompositionCalls.ReceiptAsync(context, actual, expected.CommandId, state.Effects);
     }
 
     private static async Task ProblemAsync(string? code, int? status)

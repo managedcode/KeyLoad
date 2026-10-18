@@ -6,7 +6,7 @@ namespace KeyLoad.IntegrationTests.Features.Search;
 
 internal static class NativeTextNestedWildcardPublicAssertions
 {
-    internal static async Task PhaseAsync(RequestCqrsRf3Callers reader, RequestCqrsRf3Callers administrator,
+    internal static async Task PhaseAsync(RequestCqrsClusterCallers reader, RequestCqrsClusterCallers administrator,
         NativeTextNestedWildcardPublicScenario state, int visibility, CancellationToken token)
     {
         var before = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.OutboxStatusAsync(state.Partition, token));
@@ -16,17 +16,17 @@ internal static class NativeTextNestedWildcardPublicAssertions
             NativeTextNestedWildcardPublicScenario.ArrayPolicy] : visibility == 1
             ? [NativeTextNestedWildcardPublicScenario.ArrayPolicy] : [];
         await PageAsync(reader, state, json, hidden, token);
-        await SqlRf3Protocol.EqualAsync(state.Receipt,
+        await SqlClusterProtocol.EqualAsync(state.Receipt,
             await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.CommitAsync(state.Original, token)));
         await PageAsync(reader, state, json, hidden, token);
-        await SqlRf3Protocol.EqualAsync(state.Receipt, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
+        await SqlClusterProtocol.EqualAsync(state.Receipt, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
             await administrator.Mcp.CallAsync(McpCallerTools.DocumentsCommit, state.Original, token))).Value);
         await PageAsync(reader, state, json, hidden, token);
         await PageAsync(administrator, state, NativeTextNestedWildcardPublicScenario.Full, [], token);
         await OutboxAsync(administrator, state.Partition, before, token);
     }
 
-    internal static async Task DeniedAsync(RequestCqrsRf3Callers reader, RequestCqrsRf3Callers administrator,
+    internal static async Task DeniedAsync(RequestCqrsClusterCallers reader, RequestCqrsClusterCallers administrator,
         NativeTextNestedWildcardPublicScenario state, CancellationToken token)
     {
         var before = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.OutboxStatusAsync(state.Partition, token));
@@ -43,23 +43,23 @@ internal static class NativeTextNestedWildcardPublicAssertions
         }
     }
 
-    private static async Task PageAsync(RequestCqrsRf3Callers callers, NativeTextNestedWildcardPublicScenario state,
+    private static async Task PageAsync(RequestCqrsClusterCallers callers, NativeTextNestedWildcardPublicScenario state,
         string json, string[] hidden, CancellationToken token)
     {
         RankedDocument[] expected = [new(new(new(state.Partition, NativeTextNestedWildcardPublicScenario.Collection, "a"),
             1L, json, hidden.Length != 0, [.. hidden]), 1d / 61d)];
-        await SqlRf3Protocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(
+        await SqlClusterProtocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(
             await callers.Sdk.SearchAsync(state.Request(), token)));
-        await SqlRf3Protocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<RankedDocument[]>(
+        await SqlClusterProtocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<RankedDocument[]>(
             await callers.Mcp.CallAsync(McpCallerTools.SearchExecute, state.Request(), token))).Value);
     }
 
-    private static async Task OutboxAsync(RequestCqrsRf3Callers administrator, PartitionRef partition,
+    private static async Task OutboxAsync(RequestCqrsClusterCallers administrator, PartitionRef partition,
         OutboxStatus expected, CancellationToken token)
     {
-        await SqlRf3Protocol.EqualAsync(expected,
+        await SqlClusterProtocol.EqualAsync(expected,
             await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.OutboxStatusAsync(partition, token)));
-        await SqlRf3Protocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<OutboxStatus>(
+        await SqlClusterProtocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<OutboxStatus>(
             await administrator.Mcp.CallAsync(McpCallerTools.OutboxStatus, new GetOutboxStatusRequest(partition), token))).Value);
     }
 }

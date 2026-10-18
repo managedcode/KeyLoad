@@ -3,7 +3,7 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 internal sealed class SqlLeftFilteredJoinTests
 {
     [Test]
-    public async Task AcKl095LeftPredicateJoinRefusesThenRepairsLiteralParameterizedPagesAndReplaysAcrossTwoColdCuts()
+    public async Task LeftPredicateJoinRefusesThenRepairsLiteralParameterizedPagesAndReplaysAcrossTwoColdCuts()
     {
         using var database = new TestDatabase();
         var seed = SqlLeftFilteredJoinFixture.Seed(database);

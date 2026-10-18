@@ -11,14 +11,13 @@ namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 
 internal static class ClusterFixtureComposition
 {
-    private const string InvalidContainerModel = "The Aspire model must expose exactly the three named RF3 container resources.";
+    private const string InvalidContainerModel = "The Aspire model must expose exactly the three named CLUSTER container resources.";
     private const int MinimumSnapshotThreshold = 1;
-    private const string NamespaceProfileConflict = "The native namespace fault cohort cannot mix local-image or covered selection.";
     private const string SnapshotProfileConflict = "Heavy load snapshot settings cannot mix qualification profiles.";
 
-    internal static (string Root, string[] Arguments, ClusterFixtureSnapshotReadiness? Readiness) PrepareArguments(
-        string root, KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageRf3FixtureOwner? coverage,
-        LocalRf3ImageSelection.Selection? localImage, bool isolateReplicaNamespace, int? snapshotThreshold, string? key)
+    internal static (string Root, string[] Arguments) PrepareArguments(
+        string root, KeyLoad.IntegrationTests.Features.CodeQuality.NativeCoverageClusterFixtureOwner? coverage,
+        LocalClusterImageSelection.Selection? localImage, int? snapshotThreshold)
     {
         var arguments = coverage?.CreateArguments() ??
             [$"{ClusterFixtureProtocol.DataRootArgument}{root}", ClusterFixtureProtocol.EphemeralArgument,
@@ -32,25 +31,20 @@ internal static class ClusterFixtureComposition
         {
             arguments = [.. arguments, .. localImage.CreateWaveArguments()];
         }
-        if (isolateReplicaNamespace && (localImage is not null || coverage is not null))
-        {
-            throw new InvalidOperationException(NamespaceProfileConflict);
-        }
         arguments = ApplySnapshotThreshold(arguments, snapshotThreshold,
-            coverage is not null || localImage is not null || isolateReplicaNamespace);
-        var readiness = ClusterFixtureSnapshotReadiness.Create(key, root, isolateReplicaNamespace);
-        return (root, readiness?.Apply(arguments) ?? arguments, readiness);
+            coverage is not null || localImage is not null);
+        return (root, arguments);
     }
 
-    internal static async Task<(IDistributedApplicationTestingBuilder Builder, ReplicaIsolationBuilderOwnership? Isolation)> CreateBuilderAsync(
-        string[] arguments, KeyLoad.IntegrationTests.Features.Authorization.FoundationOtlpRf3Selection? telemetry,
-        bool isolateReplicaNamespace, CancellationToken token)
+    internal static async Task<IDistributedApplicationTestingBuilder> CreateBuilderAsync(
+        string[] arguments, KeyLoad.IntegrationTests.Features.Authorization.FoundationOtlpClusterSelection? telemetry,
+        CancellationToken token)
     {
         var builder = telemetry is null
             ? await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(arguments, token)
             : await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_AppHost>(
-                KeyLoad.IntegrationTests.Features.Authorization.FoundationOtlpRf3Configuration.Options(telemetry.Value), arguments, token);
-        return (builder, isolateReplicaNamespace ? new ReplicaIsolationBuilderOwnership(builder) : null);
+                KeyLoad.IntegrationTests.Features.Authorization.FoundationOtlpClusterConfiguration.Options(telemetry.Value), arguments, token);
+        return builder;
     }
 
     internal static KeyLoadClient CreateClient(DistributedApplication application, string node, string key)

@@ -3,23 +3,23 @@ namespace KeyLoad.UnitTests.Features.TestInfrastructure;
 internal static class NativePublicCohortSelectionProgram
 {
     internal const string FinalSource = """
-        const finalPublicCohortFilter = "/*/*/(BlobActiveUploadSlotPublicTests|BlobArchiveActivePublicTests|BlobBoundedRetirementPublicTests|BlobCompleteCasPublicTests|BlobEmptySlotPublicTests|BlobListRowPolicyPublicTests|BlobObjectKeyLifetimePublicTests|BlobPartialReadBoundaryPublicTests|BlobPublicCancellationTests|BlobReadPolicyPublicTests|BlobRejectedContentPublicTests|BlobReservationQuotaPublicTests|BlobRestoredReclaimPublicTests|BlobRowCreatorPublicTests|BlobScopedUploadIdentityPublicTests|BlobSupersessionPublicTests|CurrentOwnershipTokenAfterMovementRf3Tests|DeclarativeCompositionReverseQuotaRf3Tests|GraphVertexPublicWholeFlowTests|NativeTextDistinctTermsPublicTests|NativeTextEmptyMaintainedPublicTests|NativeTextFreshSchemaGenerationPublicTests|NativeTextNestedWildcardPublicTests|NativeTextNonStringTransitionsPublicTests|NativeTextNormalizationPublicTests|NativeTextPartitionGenerationPublicTests|NativeTextProtectedPublicColdTests|NativeTextRawReadPolicyPublicTests|NativeTextRequestRefusalPublicTests|NativeTextRowOwnershipPublicTests|NativeTextSelectedSchemaPublicTests|PartitionMovementFencedAbortRf3Tests|PhysicalShardPartitionMovementRf3Tests|PostgresDecimalRf3WholeFlowTests|PostgresErrorReplyReceiverRf3Tests|PostgresInt16Rf3WholeFlowTests|PostgresNativeSessionRf3Tests|PostgresPortalOwnershipRf3Tests|PostgresPositiveExecuteRf3Tests|ProjectionPublicColdTests|QueueLeaseFencingRf3Tests|QueueLifecyclePublicRf3Tests|SqlFetchCountRf3WholeFlowTests|SqlNullDistinctRf3WholeFlowTests|SqlNullOrderingRf3WholeFlowTests|SqlOffsetRf3WholeFlowTests|SubscriptionPhasePublicColdTests|TenantCapacityPlacementRf3Tests|TenantDedicatedOwnerRf3Tests|TenantPackingActivationRf3Tests|TypedEndpointJoinRf3Tests)/*";
+        const finalPublicCohortFilter = "/*/*/(BlobActiveUploadSlotPublicTests|BlobBoundedRetirementPublicTests|BlobCompleteCasPublicTests|BlobEmptySlotPublicTests|BlobListRowPolicyPublicTests|BlobObjectKeyLifetimePublicTests|BlobPartialReadBoundaryPublicTests|BlobReadPolicyPublicTests|BlobRejectedContentPublicTests|BlobReservationQuotaPublicTests|BlobRowCreatorPublicTests|BlobScopedUploadIdentityPublicTests|BlobSupersessionPublicTests|DeclarativeCompositionReverseQuotaClusterTests|GraphVertexPublicWholeFlowTests|NativeTextDistinctTermsPublicTests|NativeTextNestedWildcardPublicTests|NativeTextNonStringTransitionsPublicTests|NativeTextNormalizationPublicTests|NativeTextProtectedPublicColdTests|NativeTextRawReadPolicyPublicTests|NativeTextRequestRefusalPublicTests|NativeTextRowOwnershipPublicTests|PostgresDecimalClusterWholeFlowTests|PostgresErrorReplyReceiverClusterTests|PostgresInt16ClusterWholeFlowTests|PostgresNativeSessionClusterTests|PostgresPortalOwnershipClusterTests|PostgresPositiveExecuteClusterTests|ProjectionPublicColdTests|QueueLeaseFencingClusterTests|QueueLifecyclePublicClusterTests|SqlFetchCountClusterWholeFlowTests|SqlNullDistinctClusterWholeFlowTests|SqlNullOrderingClusterWholeFlowTests|SqlOffsetClusterWholeFlowTests|SubscriptionPhasePublicColdTests|TypedEndpointJoinClusterTests)/*";
         const finalPublicCohortArgs = Object.freeze(publicCohortArgs.map(value =>
           value.startsWith('--KeyLoadTests:Filter=') ? '--KeyLoadTests:Filter=' + finalPublicCohortFilter : value));
         const finalPublicCohortInputBytes = JSON.stringify(finalPublicCohortArgs);
         const finalPublicCohort = nativeSelection(finalPublicCohortArgs, publicCohortEnvironment);
         let finalPublicCohortUnsupportedCount = 0;
         for (const badFilter of [
-          '/*/*/PostgresInt16Rf3WholeFlowTests/*',
+          '/*/*/PostgresInt16ClusterWholeFlowTests/*',
           finalPublicCohortFilter.replace('BlobActiveUploadSlotPublicTests|', ''),
           finalPublicCohortFilter.replace('BlobActiveUploadSlotPublicTests', 'BlobActiveUploadSlotPublicTests*'),
-          finalPublicCohortFilter.replace('BlobActiveUploadSlotPublicTests|BlobArchiveActivePublicTests',
-            'BlobArchiveActivePublicTests|BlobActiveUploadSlotPublicTests'),
+          finalPublicCohortFilter.replace('BlobActiveUploadSlotPublicTests|BlobBoundedRetirementPublicTests',
+            'BlobBoundedRetirementPublicTests|BlobActiveUploadSlotPublicTests'),
           finalPublicCohortFilter.replace(')/*', '|OtherCase)/*'),
           finalPublicCohortFilter + ' ']) {
           try { nativeSelection([localArgs[0], '--KeyLoadTests:Filter=' + badFilter, localArgs[2]], {}); }
           catch (failure) {
-            if (failure.message !== 'Invalid native local RF3 image selection.') throw failure;
+            if (failure.message !== 'Invalid native local CLUSTER image selection.') throw failure;
             finalPublicCohortUnsupportedCount++; continue;
           }
           throw new Error('Unsupported final public cohort filter was accepted.');
@@ -33,7 +33,7 @@ internal static class NativePublicCohortSelectionProgram
         """;
 
     internal const string SuccessorSource = """
-        const nextPublicCohortFilter = "/*/*/(BlobActiveUploadSlotPublicTests|BlobArchiveActivePublicTests|BlobBoundedRetirementPublicTests|BlobCompleteCasPublicTests|BlobEmptySlotPublicTests|BlobListRowPolicyPublicTests|BlobObjectKeyLifetimePublicTests|BlobPartialReadBoundaryPublicTests|BlobPublicCancellationTests|BlobReadPolicyPublicTests|BlobRejectedContentPublicTests|BlobReservationQuotaPublicTests|BlobRestoredReclaimPublicTests|BlobRowCreatorPublicTests|BlobScopedUploadIdentityPublicTests|BlobSupersessionPublicTests|CurrentOwnershipTokenAfterMovementRf3Tests|DeclarativeCompositionReverseQuotaRf3Tests|GraphVertexPublicWholeFlowTests|NativeTextDistinctTermsPublicTests|NativeTextEmptyMaintainedPublicTests|NativeTextFreshSchemaGenerationPublicTests|NativeTextNestedWildcardPublicTests|NativeTextNonStringTransitionsPublicTests|NativeTextNormalizationPublicTests|NativeTextPartitionGenerationPublicTests|NativeTextProtectedPublicColdTests|NativeTextRawReadPolicyPublicTests|NativeTextRequestRefusalPublicTests|NativeTextRowOwnershipPublicTests|NativeTextSelectedSchemaPublicTests|PartitionMovementFencedAbortRf3Tests|PhysicalShardPartitionMovementRf3Tests|PostgresDecimalRf3WholeFlowTests|PostgresErrorReplyReceiverRf3Tests|PostgresNativeSessionRf3Tests|PostgresPortalOwnershipRf3Tests|PostgresPositiveExecuteRf3Tests|ProjectionPublicColdTests|QueueLeaseFencingRf3Tests|QueueLifecyclePublicRf3Tests|SqlFetchCountRf3WholeFlowTests|SqlNullDistinctRf3WholeFlowTests|SqlNullOrderingRf3WholeFlowTests|SqlOffsetRf3WholeFlowTests|SubscriptionPhasePublicColdTests|TenantCapacityPlacementRf3Tests|TenantDedicatedOwnerRf3Tests|TenantPackingActivationRf3Tests|TypedEndpointJoinRf3Tests)/*";
+        const nextPublicCohortFilter = "/*/*/(BlobActiveUploadSlotPublicTests|BlobBoundedRetirementPublicTests|BlobCompleteCasPublicTests|BlobEmptySlotPublicTests|BlobListRowPolicyPublicTests|BlobObjectKeyLifetimePublicTests|BlobPartialReadBoundaryPublicTests|BlobReadPolicyPublicTests|BlobRejectedContentPublicTests|BlobReservationQuotaPublicTests|BlobRowCreatorPublicTests|BlobScopedUploadIdentityPublicTests|BlobSupersessionPublicTests|DeclarativeCompositionReverseQuotaClusterTests|GraphVertexPublicWholeFlowTests|NativeTextDistinctTermsPublicTests|NativeTextNestedWildcardPublicTests|NativeTextNonStringTransitionsPublicTests|NativeTextNormalizationPublicTests|NativeTextProtectedPublicColdTests|NativeTextRawReadPolicyPublicTests|NativeTextRequestRefusalPublicTests|NativeTextRowOwnershipPublicTests|PostgresDecimalClusterWholeFlowTests|PostgresErrorReplyReceiverClusterTests|PostgresNativeSessionClusterTests|PostgresPortalOwnershipClusterTests|PostgresPositiveExecuteClusterTests|ProjectionPublicColdTests|QueueLeaseFencingClusterTests|QueueLifecyclePublicClusterTests|SqlFetchCountClusterWholeFlowTests|SqlNullDistinctClusterWholeFlowTests|SqlNullOrderingClusterWholeFlowTests|SqlOffsetClusterWholeFlowTests|SubscriptionPhasePublicColdTests|TypedEndpointJoinClusterTests)/*";
         const nextPublicCohortArgs = Object.freeze(publicCohortArgs.map(value =>
           value.startsWith('--KeyLoadTests:Filter=') ? '--KeyLoadTests:Filter=' + nextPublicCohortFilter : value));
         const nextPublicCohortInputBytes = JSON.stringify(nextPublicCohortArgs);
@@ -43,13 +43,13 @@ internal static class NativePublicCohortSelectionProgram
           '/*/*/BlobEmptySlotPublicTests/*',
           nextPublicCohortFilter.replace('BlobActiveUploadSlotPublicTests|', ''),
           nextPublicCohortFilter.replace('BlobActiveUploadSlotPublicTests', 'BlobActiveUploadSlotPublicTests*'),
-          nextPublicCohortFilter.replace('BlobActiveUploadSlotPublicTests|BlobArchiveActivePublicTests',
-            'BlobArchiveActivePublicTests|BlobActiveUploadSlotPublicTests'),
+          nextPublicCohortFilter.replace('BlobActiveUploadSlotPublicTests|BlobBoundedRetirementPublicTests',
+            'BlobBoundedRetirementPublicTests|BlobActiveUploadSlotPublicTests'),
           nextPublicCohortFilter.replace(')/*', '|OtherCase)/*'),
           nextPublicCohortFilter + ' ']) {
           try { nativeSelection([localArgs[0], '--KeyLoadTests:Filter=' + badFilter, localArgs[2]], {}); }
           catch (failure) {
-            if (failure.message !== 'Invalid native local RF3 image selection.') throw failure;
+            if (failure.message !== 'Invalid native local CLUSTER image selection.') throw failure;
             nextPublicCohortUnsupportedCount++; continue;
           }
           throw new Error('Unsupported successor public cohort filter was accepted.');
@@ -66,7 +66,7 @@ internal static class NativePublicCohortSelectionProgram
         import { existsSync as publicSelectionPathExists } from 'node:fs';
         import { randomUUID as publicSelectionIdentity } from 'node:crypto';
         import { dirname as publicSelectionDirectory, resolve as publicSelectionPath } from 'node:path';
-        const publicCohortFilter = "/*/*/(BlobArchiveActivePublicTests|BlobBoundedRetirementPublicTests|BlobListRowPolicyPublicTests|BlobPartialReadBoundaryPublicTests|BlobPublicCancellationTests|BlobReadPolicyPublicTests|BlobRejectedContentPublicTests|BlobReservationQuotaPublicTests|BlobRestoredReclaimPublicTests|BlobRowCreatorPublicTests|BlobSupersessionPublicTests|CurrentOwnershipTokenAfterMovementRf3Tests|DeclarativeCompositionReverseQuotaRf3Tests|GraphVertexPublicWholeFlowTests|NativeTextDistinctTermsPublicTests|NativeTextNestedWildcardPublicTests|NativeTextNormalizationPublicTests|NativeTextProtectedPublicColdTests|NativeTextRawReadPolicyPublicTests|NativeTextRequestRefusalPublicTests|NativeTextRowOwnershipPublicTests|NativeTextSelectedSchemaPublicTests|PartitionMovementFencedAbortRf3Tests|PhysicalShardPartitionMovementRf3Tests|PostgresNativeSessionRf3Tests|PostgresPortalOwnershipRf3Tests|PostgresPositiveExecuteRf3Tests|ProjectionPublicColdTests|QueueLeaseFencingRf3Tests|QueueLifecyclePublicRf3Tests|SqlFetchCountRf3WholeFlowTests|SqlNullOrderingRf3WholeFlowTests|SqlOffsetRf3WholeFlowTests|SubscriptionPhasePublicColdTests|TenantCapacityPlacementRf3Tests|TenantDedicatedOwnerRf3Tests|TenantPackingActivationRf3Tests|TypedEndpointJoinRf3Tests)/*";
+        const publicCohortFilter = "/*/*/(BlobBoundedRetirementPublicTests|BlobListRowPolicyPublicTests|BlobPartialReadBoundaryPublicTests|BlobReadPolicyPublicTests|BlobRejectedContentPublicTests|BlobReservationQuotaPublicTests|BlobRowCreatorPublicTests|BlobSupersessionPublicTests|DeclarativeCompositionReverseQuotaClusterTests|GraphVertexPublicWholeFlowTests|NativeTextDistinctTermsPublicTests|NativeTextNestedWildcardPublicTests|NativeTextNormalizationPublicTests|NativeTextProtectedPublicColdTests|NativeTextRawReadPolicyPublicTests|NativeTextRequestRefusalPublicTests|NativeTextRowOwnershipPublicTests|PostgresNativeSessionClusterTests|PostgresPortalOwnershipClusterTests|PostgresPositiveExecuteClusterTests|ProjectionPublicColdTests|QueueLeaseFencingClusterTests|QueueLifecyclePublicClusterTests|SqlFetchCountClusterWholeFlowTests|SqlNullOrderingClusterWholeFlowTests|SqlOffsetClusterWholeFlowTests|SubscriptionPhasePublicColdTests|TypedEndpointJoinClusterTests)/*";
         const publicCohortResults = 'TestResults/native-public-selection-' + publicSelectionIdentity();
         const publicCohortResultsPath = publicSelectionPath(publicSelectionDirectory(process.argv[1]),
           '../../..', publicCohortResults);
@@ -83,16 +83,16 @@ internal static class NativePublicCohortSelectionProgram
         const publicCohort = nativeSelection(publicCohortArgs, publicCohortEnvironment);
         let publicCohortUnsupportedCount = 0;
         for (const badFilter of [
-          '/*/*/SqlOffsetRf3WholeFlowTests/*',
-          publicCohortFilter.replace('BlobArchiveActivePublicTests|', ''),
-          publicCohortFilter.replace('BlobArchiveActivePublicTests', 'BlobArchiveActivePublicTests*'),
-          publicCohortFilter.replace('BlobArchiveActivePublicTests|BlobBoundedRetirementPublicTests',
-            'BlobBoundedRetirementPublicTests|BlobArchiveActivePublicTests'),
+          '/*/*/SqlOffsetClusterWholeFlowTests/*',
+          publicCohortFilter.replace('BlobBoundedRetirementPublicTests|', ''),
+          publicCohortFilter.replace('BlobBoundedRetirementPublicTests', 'BlobBoundedRetirementPublicTests*'),
+          publicCohortFilter.replace('BlobBoundedRetirementPublicTests|BlobListRowPolicyPublicTests',
+            'BlobListRowPolicyPublicTests|BlobBoundedRetirementPublicTests'),
           publicCohortFilter.replace(')/*', '|OtherCase)/*'),
           publicCohortFilter + ' ']) {
           try { nativeSelection([localArgs[0], '--KeyLoadTests:Filter=' + badFilter, localArgs[2]], {}); }
           catch (failure) {
-            if (failure.message !== 'Invalid native local RF3 image selection.') throw failure;
+            if (failure.message !== 'Invalid native local CLUSTER image selection.') throw failure;
             publicCohortUnsupportedCount++; continue;
           }
           throw new Error('Unsupported public cohort filter was accepted.');

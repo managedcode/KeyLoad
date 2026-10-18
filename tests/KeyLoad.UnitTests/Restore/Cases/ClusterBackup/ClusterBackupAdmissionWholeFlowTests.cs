@@ -1,6 +1,6 @@
 namespace KeyLoad.UnitTests.Features.BackupRestore;
 
-/// <summary>Supporting native owner admission controls; genuine successful cluster capture remains RF3.</summary>
+/// <summary>Supporting native owner admission controls; genuine successful cluster capture remains CLUSTER.</summary>
 internal sealed class ClusterBackupAdmissionWholeFlowTests
 {
     /// <summary>Accepted direct native producers saturate the quota, then settle and ordinary backup continues.</summary>

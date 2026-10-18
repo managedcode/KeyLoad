@@ -10,10 +10,8 @@ internal static class NativeCqrsProgressPayloadShape
     {
         var count = (progress.AnnPhase is null ? EmptyPayloads : SinglePayload)
             + (progress.TextPhase is null ? EmptyPayloads : SinglePayload)
-            + (progress.MovePhase is null ? EmptyPayloads : SinglePayload)
             + (progress.OnlineTextPhase is null ? EmptyPayloads : SinglePayload)
-            + (progress.EventFeedTail is null ? EmptyPayloads : SinglePayload)
-            + (progress.PlacementIntent is null ? EmptyPayloads : SinglePayload);
+            + (progress.EventFeedTail is null ? EmptyPayloads : SinglePayload);
         if (count != SinglePayload)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);

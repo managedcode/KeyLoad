@@ -1,114 +1,39 @@
 # KeyLoad architecture and ownership map
 
-Owner correction 2026-10-17 consolidates implementation libraries by actual ownership:
-authorization evaluation is in Core; local archive transfer and native file IO are
-in Storage.ZoneTree; server-only health, discovery, resilience and OpenTelemetry
-composition are in Server. The former Security, Artifacts/BackupRestore, Storage.IO
-and ServiceDefaults projects are removed, with no forwarding assemblies.
+Read the root and nearest project-local AGENTS.md before changing this solution.
+The product specification is [product-specification.md](design/product-specification.md).
+The [documentation index](README.md) lists the canonical Feature specifications;
+each owning Feature defines stable REQ/AC, callers, boundaries, flows, tests and a
+Mermaid diagram. The [ADR catalog](ADR/README.md) records decisions with their
+implementation contracts. This document is a navigation map, not a replacement
+specification or a readiness claim: the diagrams show ownership and contracts,
+not proof that every target is implemented or qualified.
 
-The remaining runtime projects have distinct consumers and responsibilities:
-Abstractions (shared contracts), Client (external SDK), Cli (operator executable),
-Core (database semantics), Query (SQL compilation), Clustering (Orleans routing),
-Replication (replica protocol), Storage.ZoneTree (physical storage), Server (host),
-and Diagnostics (BCL-only bounded phase telemetry shared by storage and replication).
-Diagnostics stays independent to avoid making low-level storage depend on domain
-execution or the server host. Test runners, the crash-test process, compiler
-analyzers and Aspire AppHost retain their distinct execution boundaries.
-Benchmark entry, generated-consumer fixtures, native comparison library and TUnit
-comparison host retain their actual external-consumer and process boundaries.
-This source consolidation does not establish runtime qualification.
+## Product
 
-Process entry points show initialization, mode selection, composition and lifetime
-in Program.cs. Owner correction 2026-10-17 replaces forwarding-only application
-wrappers; KLD0020 and its real compiler regressions enforce the visible entry.
+KeyLoad is **one database for AI agents**. Documents, typed tables, graphs, blobs,
+queues, events, vectors/search and time series coexist in one database and
+reference one another through canonical identities. Logical tables, collections
+and queues organize that one database; they are not isolated model silos.
 
-Owner correction 2026-10-17: `src/` contains runtime product code only.
-Compiler rules live in `analyzers/`; Aspire AppHost and shared build targets
-live in `build/`. Tests and benchmarks retain their separate roots. Runtime
-Diagnostics and ServiceDefaults remain part of the running database server.
-
-Owner correction 2026-10-17: every C# project under `src/`, `tests/` and
-`benchmarks/` places named slices directly under its project directory as
-`<project>/<SliceName>/<Role>/`, with thematic folders retained inside `Cases/`.
-The intermediate project `Features/` directory is removed. This supersedes prior
-project-layout examples below; namespaces and persisted identities stay stable.
-Script, site and documentation module paths retain their existing layout.
-
-Test support uses explicit `Scenarios/`, `Fixtures/`, `Assertions/`, `Contracts/`,
-`Lifecycle/`, `Observations/`, `Serialization/` and other concrete roles. Related
-subjects are grouped beneath the role, for example `Search/Scenarios/FullText/`
-and `Search/Assertions/FullText/`. Generic `Helpers/` folders are removed.
-Executable entry points and shared project composition keep their own locations.
-
-The owner-selected [foundation-first delivery contract](Features/RepositoryGovernance/FoundationDelivery.md)
-and [all-105 dependency graph](implementation/foundation-dependencies.json) control
-execution order. Native Orleans, node-local ZoneTree/RF3, current persisted identity,
-bounded connections and native OpenTelemetry precede broad model expansion;
-comparative measurement, complete audits and release qualification follow it.
-Implementation milestones never replace whole-task acceptance.
-
-[Shared benchmark sessions](Features/BenchmarkComparisons/SessionExecution.md)
-under [ADR-142](ADR/ADR-142-shared-live-benchmark-sessions.md) replace per-scenario
-workers with one live Aspire topology per database and native node count. Many
-real TUnit cases share that topology, starting with a measured million-record
-load. The current redesign removes the superseded pipeline; implementation,
-complete model-family coverage and exact-source Linux qualification remain open.
-
-[ADR-136](ADR/ADR-136-native-orleans-partition-ownership.md) assigns physical
-ZoneTree opening and joined lifetime to a silo-local Grain Service under one
-native host. Logical partition grains route through Orleans to current physical
-owners; placement and permitted activation movement do not transfer files.
-Native membership, directory, services, streams and scheduling are reused by their
-actual contracts. Orleans transactional grain state and canonical ZoneTree/RF3
-database atomicity have separate provider and qualification requirements.
-
-[ResourceExecution TimeProvider](Features/ResourceExecution/TimeProvider.md) and
-[ADR-115](ADR/ADR-115-time-provider.md) require explicitly owned clocks for UTC
-timestamps, monotonic budgets, delays and timers. Composition selects the native
-system provider; tests may control the same native API while retaining real
-database/storage/replication operations. Implementation verification is pending.
-
-[ADR-113](ADR/ADR-113-centralized-runtime-options.md) requires the complete runtime
-literal migration and centralized validated native IOptions for operational policy.
-Immutable endpoint/method/format identities use constants/nameof; timeout and
-resource policies flow to their actual execution owners through typed options.
-
-[ADR-111](ADR/ADR-111-magic-runtime-values.md) extends the source-owned CodeQuality
-rules with enabled errors for native runtime durations, timeout arguments, string
-comparisons and format tokens. Domain-named constants preserve the exact values;
-broader literal-policy and whole-solution qualification remain separately tracked.
-
-[ADR-108](ADR/ADR-108-typed-synchronization.md) and CodeQuality REQ-CQ-010 require
-native Orleans turn scheduling for activation state and System.Threading.Lock for
-necessary synchronous node-local/service gates. Awaited exclusion uses
-SemaphoreSlim.WaitAsync. Compiler rule KLD0034 rejects object/Monitor gates;
-storage/apply ownership and RF3 durability contracts remain unchanged.
-
-Owner clarification 2026-10-03 makes composition the core product:
-**one database for AI agents**, where documents, typed tables, graphs, blobs,
-queues, events, vectors/search and time series coexist and reference one another.
-SQL is the familiar shared language for combining those models in one request.
+SQL is the familiar shared language for combining those models in one bounded
+request. T-SQL syntax is parsed with Microsoft ScriptDOM and lowered into closed
+typed operations ([ADR-130](ADR/ADR-130-microsoft-scriptdom-tsql.md)); SQL, the
+.NET SDK and MCP all reach the same authorized bounded database operations
+([ADR-054](ADR/ADR-054-central-sql.md), [ADR-065](ADR/ADR-065-full-sql-client-compatibility.md),
+[versioned conformance inventory](implementation/sql-client-conformance.json)).
 The motivating flows are queue messages -> referenced entities -> knowledge graph,
-and graph relationships -> queued actions. Logical resources organize one database.
+and graph relationships -> queued actions, owned by
 [DatabaseComposition](Features/DatabaseComposition.md) and
-[ADR-067](ADR/ADR-067-composable-agent-database.md) own the first bounded server
-derivation stage through the existing atomic command and SQL CALL. Full
-declarative SQL and client protocol remain mandatory under ADR-065.
-
-Current parallel implementation contracts are [DueCoordination](Features/Messaging/DueCoordination.md)
-under ADR-094 (leader hints through fresh authorized Orleans CQRS requests),
-[OnlineGenerationLifetime](Features/Search/OnlineGenerationLifetime.md) under
-ADR-095 (bounded native index leases and retirement, original KL-039), and
-[GlobalBranchWindows](Features/Search/GlobalBranchWindows.md) under ADR-096
-(bounded per-modality merge before RRF, original KL-057). Each remains open until
-its mapped acceptance evidence exists. [NativeReadCuts](Features/StorageRecovery/NativeReadCuts.md)
-under ADR-097 supplies the next provider-owned L2-A snapshot lifetime primitive;
-delta retention/catalog cutover and actual multi-shard fan-out remain required.
+[ADR-067](ADR/ADR-067-composable-agent-database.md). Typed rows reuse collection
+entity storage so graph and vector references keep one identity
+([RelationalStorage](Features/RelationalStorage.md),
+[ADR-055](ADR/ADR-055-typed-relational-rows.md)).
 
 ```mermaid
 flowchart LR
-    Caller[Agent SQL SDK MCP] --> Connection[Server owned Orleans connection grain]
-    Connection --> Tx[Authorized same partition ordered RF3 ZoneTree transaction]
+    Caller[Agent SQL SDK MCP] --> Connection[Orleans connection grain]
+    Connection --> Tx[Authorized same partition ordered ZoneTree transaction]
     Tx --> Source[Ready queue links or visible graph traversal]
     Source --> Refs[Canonical document and typed row references]
     Refs --> Effects[Graph edges or queued actions]
@@ -125,35 +50,257 @@ classDiagram
     DatabaseEngine --> ReadExecutionBudget : cumulative deterministic bounds
 ```
 
-Owner clarification2026-10-02: KeyLoad is one server/database for AI agents with
-linked documents, relational rows, graph, vectors/text search, events, queues,
-time series and files/blobs. SQL is the central versioned language. The first
-unified invocation/typed-row stage is specified by [ADR-054](ADR/ADR-054-central-sql.md)
-and [ADR-055](ADR/ADR-055-typed-relational-rows.md); qualification remains pending.
-Typed rows reuse Collection entity storage so graph/vector references retain one
-identity. [RelationalStorage](Features/RelationalStorage.md) defines schemas and
-native constraints; QueryExecution owns the SQL adapter over canonical operations.
+## Cluster and execution concept
 
-Owner clarification2026-10-03 requires full SQL and a client connection protocol.
-[ADR-065](ADR/ADR-065-full-sql-client-compatibility.md) extends the existing stages
-with explicit typed execution/native-client gates and
-[versioned conformance inventory](implementation/sql-client-conformance.json).
-[ADR-130](ADR/ADR-130-microsoft-scriptdom-tsql.md) selects Microsoft ScriptDOM T-SQL native parsing and closed typed lowering. Previous handwritten lexical plans are retired; original authority, typed identity, envelope1 and storage contracts remain. Complete T-SQL execution and client qualification are pending. The existing PostgreSQL wire/Npgsql session is a separately qualified transport, not a PostgreSQL grammar or SQL Server TDS promise. The selected text index is ZoneTree.FullTextSearch, using its centrally pinned
-native APIs under node-local ownership. [NativeFullTextProjection](Features/Search/NativeFullTextProjection.md)
-defines the integration, correctness, recovery, resource and performance gates.
-Provider selection is fixed; acceleration requires comparable measurements.
+Microsoft Orleans is the cluster
+([ADR-136](ADR/ADR-136-native-orleans-partition-ownership.md),
+[ADR-036](ADR/ADR-036-orleans-foundation.md)). Orleans does all of the
+clustering: membership, silo discovery, failure detection, the distributed grain
+directory, placement, activation migration and repartitioning, internal
+communication (grain calls, Grain Service calls and Orleans streams), timers,
+reminders, durable jobs and scaling. KeyLoad adds no clustering mechanism of its
+own; scaling means adding silos to the Orleans cluster.
+
+- **Connection grain.** Every connected client has one Orleans grain
+  ([ADR-125](ADR/ADR-125-connection-owned-execution.md),
+  [connection ownership](Features/ClientApi.md#persistent-connection-ownership)).
+  Each operation carries its own verified identity, fresh persisted
+  authorization, bounded admission, cancellation and idempotent command outcome.
+  The connection grain never caches trusted roles and never owns storage.
+- **Partition grains.** A logical partition grain is an ordinary Orleans grain
+  that serializes and routes the commands of one logical (atomic) partition.
+- **Silo-local ZoneTree owner.** A Grain Service is per silo and always local.
+  Every silo hosts one ZoneTree owner Grain Service that maintains that node's
+  own ZoneTree and owns its files: ZoneTree stores, WAL/journals, file locks and
+  ordered apply. Other code on the same node obtains ZoneTree from it through
+  dependency injection. The owner opens the files once through the native silo
+  lifecycle and closes them at silo shutdown. Files never move with grain
+  activations; a migrated grain simply calls the owners again.
+- **Copies.** The writer finds the target silos through native Orleans
+  membership (`IClusterMembershipService` / `IManagementGrain`) and sends the
+  write through ordinary Orleans calls to the ZoneTree owner Grain Services on
+  `KeyLoad:ReplicaCount` silos. The write is acknowledged after a majority of
+  those copies confirm durable local apply. `ReplicaCount` is positive, defaults
+  to 3 and is not larger than `KeyLoad:SiloCount`
+  ([ADR-143](ADR/ADR-143-independent-silo-replica-topology.md)). A copy that was
+  offline catches up by reading committed records from another copy through
+  Orleans calls.
+- **Request flow.** Public API (HTTP, .NET SDK, MCP, SQL) -> connection grain ->
+  partition grains -> ZoneTree owner on the same node or on other nodes through
+  Orleans -> results are gathered -> returned to the caller.
+- **Background work.** Queue deadlines, due and recurring work, remote
+  transfers, ANN projection and time-series chunk work never check leadership.
+  Orleans `[StatelessWorker]` grains (one or many activations, each with its own
+  identity) accept events, buffer them in memory and, on an Orleans timer whose
+  interval is a typed option (for example 5 seconds), write the batch through
+  the normal grain -> ZoneTree owner path.
+- **Identifiers.** Every grain key and every identifier for objects, counters
+  and storage keys comes from one shared helper per identity kind. Keys are
+  case-sensitive.
+
+```mermaid
+flowchart LR
+    Caller[HTTP SDK MCP SQL caller] --> Api[Public API and ASP.NET Core authentication]
+    Api --> Connection[Connection grain one per client]
+    Connection --> Partition[Logical partition grain]
+    Connection --> Gather[Gather results from several partitions]
+    Partition -.->|finds target silos| Membership[Native Orleans membership]
+    Partition -->|Orleans call| OwnerA[ZoneTree owner on silo A]
+    Partition -->|Orleans call| OwnerB[ZoneTree owner on silo B]
+    Partition -->|Orleans call| OwnerC[ZoneTree owner on silo C]
+    Gather -->|Orleans calls| OwnerA
+    Gather -->|Orleans calls| OwnerB
+    OwnerA --> FilesA[(Local ZoneTree files)]
+    OwnerB --> FilesB[(Local ZoneTree files)]
+    OwnerC --> FilesC[(Local ZoneTree files)]
+    Events[Background events] --> Worker[StatelessWorker grain buffer]
+    Worker -->|Orleans timer batch| Partition
+```
+
+Credentials and authorization policies are persisted in the database; callers
+never supply trusted roles. Standard ASP.NET Core authentication admits HTTP,
+SDK and MCP callers, and ManagedCode.Orleans.Identity carries the verified
+call-local identity between grains. OpenTelemetry logs, traces and metrics come
+from the native Orleans, ASP.NET Core and Aspire integrations without
+credentials, payloads or unbounded labels. Native Orleans execution and
+scheduling choices are mapped per grain and method in
+[ExecutionPrimitives](Features/ClusterRouting/ExecutionPrimitives.md) and
+[ADR-110](ADR/ADR-110-native-orleans-execution-primitives.md); the broader
+[Orleans capability review](Features/ClusterRouting/CapabilityReview.md) covers
+Streams, transactions, durable jobs and per-silo services. Orleans
+transactional grain state does not by itself make ZoneTree writes atomic; it
+needs a provider that participates in the canonical ZoneTree commit.
+
+## Runtime projects and process entry
+
+Runtime projects under `src/` have distinct consumers and responsibilities:
+Abstractions (shared contracts), Client (external SDK), Cli (operator
+executable), Core (database semantics and authorization evaluation), Query (SQL
+compilation, search and change feeds), Clustering (Orleans grains and routing),
+Replication (copies through Orleans calls to `ReplicaCount` ZoneTree owners),
+Storage.ZoneTree (physical storage, local archive transfer and native file IO),
+Server (host composition, public API, health, service discovery, resilience and
+OpenTelemetry) and Diagnostics (BCL-only bounded phase telemetry shared by
+storage and replication). Diagnostics stays independent so low-level storage
+does not depend on domain execution or the server host.
+
+`src/` contains runtime product code only. Compiler rules live in `analyzers/`;
+the Aspire AppHost and shared build targets live in `build/`; tests and
+benchmarks keep their own roots. Test runners, the crash-test process, compiler
+analyzers, the AppHost, benchmark entry, generated-consumer fixtures, the native
+comparison library and the TUnit comparison host keep their distinct execution
+boundaries.
+
+Each `Program.cs` shows initialization, mode selection, host composition, run and
+joined shutdown; compiler rule KLD0020 rejects forwarding-only entry wrappers.
+Runtime code reads time through an owned `TimeProvider`
+([TimeProvider](Features/ResourceExecution/TimeProvider.md),
+[ADR-115](ADR/ADR-115-time-provider.md)), operational policy through validated
+typed options ([ADR-113](ADR/ADR-113-centralized-runtime-options.md)), runtime
+identities through named constants ([ADR-111](ADR/ADR-111-magic-runtime-values.md))
+and synchronization through native Orleans turns, `System.Threading.Lock` or
+`SemaphoreSlim.WaitAsync` ([ADR-108](ADR/ADR-108-typed-synchronization.md)).
+
+## Complete repository boundary
+
+All KeyLoad-owned backend, clients, contracts, frontend, tests, infrastructure and
+docs live here and are versioned together. Independently owned ManagedCode
+dependencies remain in their owning repositories; repair, release and verified
+NuGet publication follow root policy.
+
+| Project/module | Purpose and entry points | Canonical slices / protected boundary |
+|---|---|---|
+| src/KeyLoad.Abstractions | CommandRequest.cs, PartitionRef.cs, Mutation.cs and `<SliceName>/` contract folders | Shared public and storage contracts for every canonical slice. |
+| src/KeyLoad.Core | DatabaseEngine.cs, AtomicCommandCommit.cs, DocumentStorage/Execution/Documents.cs, Messaging/Execution/Messaging.cs, GraphTraversal/, TimeSeries/, Search/ | Node-local engine, authorization evaluation and atomic transactions; model effects share the ordered native commit. |
+| src/KeyLoad.Diagnostics | ResourceExecution/Models/DatabasePhaseKind.cs, ResourceExecution/Models/DatabasePhaseSnapshot.cs | ResourceExecution; BCL-only callback-free scalar phase observations, with no database state, public control endpoint or framework dependency. |
+| src/KeyLoad.Storage.ZoneTree | ZoneTreeStore.cs, StorageRecovery/Execution/ZoneTreeStoreRuntime.cs, StorageRecovery/Recovery/ZoneTreeCheckpointManager.cs | StorageRecovery and Restore; files, WAL, checkpoints and local archives stay with the silo-local ZoneTree owner. |
+| src/KeyLoad.Query | QueryExecution/Queries/QueryEngine.cs, QueryExecution/Execution/SqlParser.cs, Search/Queries/QueryExecution/SearchEngine.cs, ChangeFeeds/Queries/LiveQueryExecutor.cs | QueryExecution, Search, ChangeFeeds; one authorized typed AST and bounded read cut. |
+| src/KeyLoad.Replication | ClusterReplication/ | ClusterReplication; sends each write through Orleans calls to the ZoneTree owners of `ReplicaCount` silos and acknowledges after majority durable local apply. |
+| src/KeyLoad.Clustering | ClusterRouting/Grains/ConnectionGrain.cs, ClusterRouting/Grains/CommandPartitionGrain.cs, ClusterRouting/Queries/Connections/ConnectionReadExecution.cs, `<SliceName>/GrainServices/` | ClusterRouting; connection and partition grains route through Orleans to the silo-local ZoneTree owners. |
+| src/KeyLoad.Server | Program.cs, NodeOptions.cs, ClientApi/, ClusterRouting/Hosting/SiloHosting/OrleansNode.cs | Composition root, Orleans host and public API; caller identity never supplies trusted roles. |
+| src/KeyLoad.Client | KeyLoadClient.cs, QueryExecution/Queries/KeyLoadQuery.cs | ClientApi transport; business operations mirror the same canonical slices as core, contracts, API and tests. |
+| src/KeyLoad.Cli | Program.cs, ClientApi/Transport/CliClientApi.cs, Restore/Commands/CliBackupRestore.cs | Administrative entry point with typed ClientApi and backup/restore owners. |
+| build/KeyLoad.AppHost | Program.cs, BenchmarkComparisons/Resources/SessionTopology/BenchmarkResources.cs | ClusterReplication, ClusterRouting, TestInfrastructure, BenchmarkComparisons and CodeQuality; Aspire owns cluster resources, readiness, test dependencies and shutdown. |
+| tests/KeyLoad.UnitTests | TestDatabase.cs and `<SliceName>/` folders | Matching product slices; contract and engine regressions. |
+| tests/KeyLoad.RecoveryTests | StorageRecovery/, ClusterReplication/Cases/Replica/ReplicaProcessRecoveryTests.cs | StorageRecovery, ClusterReplication, ClusterRouting; actual child-process recovery. |
+| tests/KeyLoad.CrashHost | Program.cs, ClusterReplication/Execution/Faults/ReplicaCrashScenario.cs | Shared real-process recovery harness, never a product replacement. |
+| tests/KeyLoad.IntegrationTests | ClusterFixture.cs, ClusterReplication/Cases/Cluster/ClusterTests.cs, ResourceExecution/Cases/AdmissionClusterTests.cs | Aspire-owned cluster fixtures; business cases mirror their owning slices through the real .NET SDK and official MCP client. |
+| tests/KeyLoad.ComparisonTests | BenchmarkComparisons/ | BenchmarkComparisons; real engine/container correctness and measurements. |
+| benchmarks/KeyLoad.Benchmarks | Program.cs | BenchmarkComparisons; embedded microbenchmark development, no public claim without CI evidence. |
+| benchmarks/KeyLoad.BenchmarkScenarios | BenchmarkComparisons/Benchmarks/EmbeddedBenchmarks.cs | BenchmarkComparisons; [ADR-047](ADR/ADR-047-embedded-benchmark-host.md) public fixture library for the external generated consumer. |
+| benchmarks/KeyLoad.Comparisons | BenchmarkComparisons/Session/, Targets/ | BenchmarkComparisons; public library with shared workload/oracle and official engine clients. |
+| benchmarks/KeyLoad.ComparisonHost | BenchmarkComparisons/Session/ | BenchmarkComparisons; native TUnit C# client workload container under [ADR-117](ADR/ADR-117-native-tunit-ci-entry.md). |
+| site | Features/BenchmarkComparisons/index.html, bootstrap.mjs; scripts/build.mjs | BenchmarkComparisons; product introduction and public views of qualified GitHub JSON. |
+| tests/KeyLoad.SiteTests | KeyLoad.SiteTests.csproj, BenchmarkComparisons/ | BenchmarkComparisons; TUnit suite over the actual Node modules and authentic GitHub report files. |
+| .github/workflows | build-and-tests.yml, benchmarks.yml, website.yml, release.yml | RepositoryGovernance, BenchmarkComparisons, ReleaseDelivery; separate build/test, benchmark, website and release workflows. |
+| scripts | Features/RepositoryGovernance/verify.mjs, Features/BenchmarkComparisons/session-plan.mjs | RepositoryGovernance and BenchmarkComparisons; static repository verification and benchmark session tooling with Node built-ins. |
+| analyzers/KeyLoad.Analyzers | KeyLoad.Analyzers.csproj, CodeQuality/ | CodeQuality; source-owned Roslyn diagnostics attached to compilation, never runtime storage or routing. |
+| tests/KeyLoad.Analyzers.Tests | KeyLoad.Analyzers.Tests.csproj, CodeQuality/ | CodeQuality; real Roslyn/Orleans metadata regressions. |
+| docs | design/, Features/, ADR/, implementation/ | Product specification and canonical slice/decision records. |
+
+```mermaid
+flowchart TB
+    SDK[Public .NET SDK and CLI] --> Server[Server gateway and identity]
+    MCP[Official MCP SDK surface] --> Server
+    Server --> Orleans[Connection and partition grains]
+    Orleans --> Owners[Silo-local ZoneTree owner on every silo]
+    Owners --> Core[Atomic engine and ordered apply]
+    Core --> Storage[ZoneTree journals and files]
+    Core --> Models[Documents events queues graph search series blobs]
+    Aspire[Aspire Docker lifecycle] --> Owners
+    CI[GitHub Actions qualification] --> Aspire
+    CI --> JSON[Raw comparison JSON with source SHA]
+    JSON --> Site[README charts and Pages site]
+```
+
+## Feature ownership convention
+
+Every C# project under `src/`, `tests/` and `benchmarks/` places named slices
+directly under its project directory as `<project>/<SliceName>/<Role>/`. Each
+slice groups actual responsibilities in populated role folders such as
+`Grains/`, `Commands/`, `Queries/`, `Models/`, `Contracts/`, `Streaming/`,
+`Identity/`, `Serialization/` and `Topology/`; a slice is an ownership boundary,
+not a flat file collection. Test support uses explicit `Scenarios/`, `Fixtures/`,
+`Assertions/`, `Contracts/`, `Lifecycle/`, `Observations/` and `Serialization/`
+roles, with related subjects grouped beneath the role (for example
+`Search/Scenarios/FullText/`); thematic folders stay inside `Cases/`. Scripts,
+site and documentation keep their module paths. Namespaces, Orleans aliases and
+field IDs stay stable across structural moves. The owner contract and checks are
+in [RepositoryGovernance](Features/RepositoryGovernance.md) and
+[ADR-032](ADR/ADR-032-mcaf-governance.md).
+
+Canonical slice names use PascalCase consistently: RepositoryGovernance,
+BenchmarkComparisons, DatabaseComposition, DocumentStorage, RelationalStorage,
+EventStreams, Messaging, GraphTraversal, TimeSeries, Search, QueryExecution,
+Authorization, ChangeFeeds, StorageRecovery, ClusterReplication, ClusterRouting,
+ClientApi, BackupRestore (project folder `Restore/`), BlobStorage,
+ResourceExecution, InternalSerialization, AdminDashboard, AnalyticsStore,
+CodeQuality, ReleaseDelivery and TestInfrastructure. Their owning contracts and
+navigation are in the [Feature index](README.md). Shared entry points,
+composition roots, truly shared contracts and global infrastructure may remain
+outside slice folders. A non-applicable surface is recorded as N/A with its
+reason in the feature spec. Shared atomic commit and outcome dispatch stay
+outside slice folders because they join multiple mutation families
+([ADR-042](ADR/ADR-042-admission-resource-ownership.md)).
+
+## Shared request contracts
+
+```mermaid
+sequenceDiagram
+    participant Caller as SDK or MCP caller
+    participant API as Public API
+    participant Conn as Connection grain
+    participant Part as Partition grain
+    participant Owners as ZoneTree owners on ReplicaCount silos
+    Caller->>API: Typed operation and credentials
+    API->>Conn: Verified subject and bounded request
+    Conn->>Conn: Fresh persisted authorization
+    Conn->>Part: Ordered command for one logical partition
+    Part->>Owners: Orleans calls with the command
+    Owners-->>Part: Durable local apply confirmations
+    Part-->>Conn: Outcome after majority of copies
+    Conn-->>API: Public result
+    API-->>Caller: Contract result
+```
+
+```mermaid
+classDiagram
+    class KeyLoadClient
+    class CommandRequest
+    class PartitionRef
+    class ConnectionGrain
+    class CommandPartitionGrain
+    class DatabaseEngine
+    class IKeyValueView
+    class IAtomicTransaction
+    KeyLoadClient --> CommandRequest
+    CommandRequest --> PartitionRef
+    ConnectionGrain --> CommandPartitionGrain : one logical partition
+    CommandPartitionGrain --> DatabaseEngine : Orleans calls to silo-local owners
+    DatabaseEngine --> IKeyValueView
+    DatabaseEngine --> IAtomicTransaction
+```
+
+Official MCP and simple agent adapters belong to [ClientApi](Features/ClientApi.md)
+and [ADR-039](ADR/ADR-039-official-mcp-agent-api.md); business operations keep
+their own Feature owners. The MCP host exposes bounded search/route/invoke tools
+through ManagedCode.MCPGateway and ManagedCode.MarkdownLd.Kb tool-metadata graphs
+([ToolDiscovery](Features/ClientApi/ToolDiscovery.md),
+[ADR-104](ADR/ADR-104-mcp-gateway-tool-discovery.md)); the graph holds public
+operation documentation only. Streamed results and long operations use
+ManagedCode.Communication CQRS `IAsyncEnumerable` contracts through Orleans
+([NativeCqrs](Features/ClusterRouting/NativeCqrs.md),
+[ADR-082](ADR/ADR-082-native-cqrs-streams.md)). Native enumeration does not move
+node-owned storage or replace persisted authority.
+
+## SQL and relational model
 
 [ADR-132](ADR/ADR-132-native-create-table-command-identity.md) defines the
-[bounded CREATE TABLE operation](Features/RelationalStorage/CreateTable.md),
-caller-stable SQL command identity and the existing connection-owned execution
-path. Canonical typed resources remain in ZoneTree behind the ordered RF3 apply
-gate. Complete DDL and SQL/client qualification remain open.
-
-[ADR-068](ADR/ADR-068-native-benchmark-gate-repair.md) preserves isolated benchmark
-startup authority: original bounded job discovery joins authenticated metadata for
-the same job ID before native allocation. Still-queued metadata has three bounded
-captures; identity/state failures remain failures. Kurrent metadata/leader gates
-and complete native cohort/site qualification remain open.
+[bounded CREATE TABLE operation](Features/RelationalStorage/CreateTable.md) with a
+caller-stable SQL command identity on the connection-owned execution path.
+Canonical typed resources stay in ZoneTree behind the ordered apply gate. The
+PostgreSQL wire/Npgsql session is a separately qualified transport, not a
+PostgreSQL grammar or SQL Server TDS promise.
 
 ```mermaid
 classDiagram
@@ -169,10 +316,10 @@ classDiagram
 flowchart LR
     Agent[AI agent SQL SDK MCP] --> Server[One server API]
     Server --> SQL[Versioned TSQL SELECT and EXEC compiler]
-    SQL --> Gateway[Existing signed Orleans gateway]
-    Gateway --> Host[Connection routed node local PartitionHost RF3]
-    Host --> Entity[Canonical documents and typed rows]
-    Host --> Models[Graph search events queues series blobs]
+    SQL --> Gateway[Connection grain]
+    Gateway --> Owners[Partition grains and silo-local ZoneTree owners]
+    Owners --> Entity[Canonical documents and typed rows]
+    Owners --> Models[Graph search events queues series blobs]
     Entity --> Models
 ```
 
@@ -186,266 +333,31 @@ classDiagram
     RelationalRowValidation --> DocumentRecord : validates final row image
 ```
 
-The additive [AdminDashboard](Features/AdminDashboard.md) slice under [ADR-051](ADR/ADR-051-admin-dashboard.md) hosts the runtime read-only console in `src/KeyLoad.Server/AdminDashboard/Assets/`, with shared Abstractions DTOs, Core catalog/queue readers, matching Client SDK and UnitTests/IntegrationTests slices. It borrows the connection actors with call-local authorized reads and node-local administration; physical observations are explicitly per node. The public benchmark `site/` remains its own surface. Both surfaces share one light visual identity under [ADR-053](ADR/ADR-053-unified-visual-identity.md): the console owns the canonical `brand.css`/`logo.svg`, and the site keeps byte-identical mirrors checked by SiteTests. Exact-SHA dashboard unit/RF3/native browser cases pass and retained desktop/mobile images are visually reviewed; complete recovery/comparison and numeric coverage qualification remains open.
-
-[SiteMetadata](Features/BenchmarkComparisons/SiteMetadata.md) extends that identity
-with mirrored PNG/ICO exports, static landing SEO/OG/Twitter/JSON-LD and an authored
-share card. The existing static builder owns root delivery and crawl files; the
-console's finite embedded shell owns only its exact icon routes and noindex.
-Source assets and local rendering do not establish indexing or publication.
-
-```mermaid
-flowchart LR
-    Admin[Same origin admin console] --> API[AdminDashboard API and MCP]
-    API --> Request[Connection grain]
-    Request --> Read[Call-local authorized read execution]
-    Read --> Core[Bounded catalog and queue readers]
-    Read --> Node[Node local file and process observer]
-```
-
-Read the root and nearest project-local AGENTS.md before changing this solution. The product specification is [architecture v0.3](design/architecture-v0.3.uk.md). This document is a navigation map, not a replacement specification or a readiness claim.
-
-The [documentation index](README.md) is the complete entry point for 25 canonical Feature specifications. Each owning Feature defines stable REQ/AC, callers, boundaries, flows, existing or planned tests and a Mermaid diagram. The [ADR catalog](ADR/README.md) records decisions with status and implementation contracts. The [coverage catalog](implementation/documentation-coverage.json) maps the canonical KL tasks; [status.json](implementation/status.json) remains the single implementation-status authority.
-
-Current mandatory policy requires an Orleans RF3 database, node-local PartitionHost storage ownership, connection grains with isolated operations, distributed grain directory and activation migration, TUnit tests, Docker/Aspire RF3 execution and real .NET SDK plus official MCP SDK callers. Atomic partitions remain separate from physical replica placement. Credentials and trusted authorization are persisted server-side.
-
-Owner correction 2026-10-09 and [ADR-125](ADR/ADR-125-connection-owned-execution.md)
-select one Orleans grain per actual connection, with bounded parallel independent
-operations and commands. Each call has fresh signed identity and persisted
-authorization; readers execute in call-local helpers. Completing a call releases
-its resources. Disconnect/idle expiry joins original work and closes the activation.
-[Connection ownership](Features/ClientApi.md#persistent-connection-ownership) and
-[execution lifetimes](Features/ClusterRouting/ExecutionPrimitives.md#connection-and-request-lifetimes)
-retain open native-client, activation-count and matched Linux RAM/performance gates.
-
-Native Orleans execution/scheduling choices are mapped per grain and method in
-[ClusterRouting ExecutionPrimitives](Features/ClusterRouting/ExecutionPrimitives.md)
-and [ADR-110](ADR/ADR-110-native-orleans-execution-primitives.md). Bounded
-interchangeable workers, advisory OneWay hints, selective operation-control
-interleaving and persistent one-time jobs are candidate joins; connection stream interleaving and reliable serial partition/due paths are source-present.
-Runtime/provider/fault and matched performance evidence are pending.
-The owner's broad [Orleans capability review](Features/ClusterRouting/CapabilityReview.md)
-maps Streams/pub-sub, native transactional storage, durable state/jobs, per-silo
-services/lifecycle and operational controls against current source. Native
-messaging remains a candidate post-commit delivery path; native transactions need
-an explicit ZoneTree/RF3 prepare/commit/read-visibility adapter contract.
-
-Owner direction2026-10-05 accepts [ClientApi ToolDiscovery](Features/ClientApi/ToolDiscovery.md)
-under [ADR-104](ADR/ADR-104-mcp-gateway-tool-discovery.md). The official MCP host
-will expose three bounded search/route/invoke tools, backed by native
-ManagedCode.MCPGateway and ManagedCode.MarkdownLd.Kb tool metadata graphs.
-Fresh persisted authentication and the existing typed signed Orleans execution
-remain authoritative. The graph contains public operation documentation only;
-KeyLoad data continues using node-local ZoneTree RF3 owners. Source and actual
-caller qualification are pending.
-
-The owner also requires ManagedCode.Communication native CQRS IAsyncEnumerable
-results and long operations through Orleans. [NativeCqrs](Features/ClusterRouting/NativeCqrs.md)
-and [ADR-082](ADR/ADR-082-native-cqrs-streams.md) first qualify the actual Graph
-filter/enumerator context and cleanup join. Current request RPCv1 returns bounded
-Task replies; the stream RPC/transport and durable-operation contracts remain
-pending. Native enumeration does not transfer node-owned storage or supply
-persisted authority, retry receipts or durability.
-
 [ResourcePolicyUpdates](Features/Authorization/ResourcePolicyUpdates.md) and
-[ADR-093](ADR/ADR-093-resource-policy-updates.md) freeze policy-only CAS through
-the existing RF3 metadata ConfigureResource path. Advancing its resource version
-invalidates existing read/index fences; physical schema and placement remain
-separate migrations. Implementation and public qualification are in progress.
+[ADR-093](ADR/ADR-093-resource-policy-updates.md) define policy-only CAS through
+the replicated ConfigureResource path; advancing a resource version invalidates
+existing cursors and index fences, and physical schema changes stay separate.
 
-[ADR-052](ADR/ADR-052-timeseries-bounded-aggregates.md) accepts the additive
-[TimeSeries](Features/TimeSeries.md) latest/aggregate/window slice. New typed
-Abstractions DTOs mirror Client/Server/Core TimeSeries owners and real matching
-UnitTests/IntegrationTests. Core uses the published ManagedCode.TimeSeries library
-inside one budgeted storage cut; shared StorageRecovery reverse visitors support
-bounded latest. Orleans request routing and node-local storage ownership remain.
-The additive source and real SDK/MCP regression paths are present; this contract
-remains Accepted while exact-SHA full qualification and broader product gates are
-retained separately in implementation status.
+## Storage, atomic commit and recovery
 
-```mermaid
-classDiagram
-    class TimeSeriesReadOperations
-    class SampleLatestReader
-    class SampleAggregateReader
-    class SampleAggregateWindowReader
-    class SampleAggregateAccumulator
-    class BudgetedReadView
-    class ZoneTreeRangeReader
-    TimeSeriesReadOperations --> BudgetedReadView : one gated operation budget
-    TimeSeriesReadOperations --> SampleLatestReader
-    TimeSeriesReadOperations --> SampleAggregateReader
-    TimeSeriesReadOperations --> SampleAggregateWindowReader
-    SampleLatestReader --> ZoneTreeRangeReader : descending first live key
-    SampleAggregateReader --> SampleAggregateAccumulator : published native sums
-    SampleAggregateWindowReader --> SampleAggregateAccumulator : bounded windows
-```
+ZoneTree is the canonical storage for every KeyLoad-owned model and
+ZoneTree.FullTextSearch is the selected derived text index
+([ADR-071](ADR/ADR-071-canonical-zonetree-providers.md),
+[NativeFullTextProjection](Features/Search/NativeFullTextProjection.md)). The
+silo-local ZoneTree owner keeps native WAL, ordered apply and file ownership on
+its node. Current storage accepts only the formats in
+[CurrentFormat](Features/StorageRecovery/CurrentFormat.md) and rejects
+unsupported or corrupt versions before effects
+([ADR-011](ADR/ADR-011-current-native-format.md),
+[ADR-116](ADR/ADR-116-first-release-current-format.md)). Process-kill recovery
+tests do not prove power-loss durability.
 
-## Complete repository boundary
-
-The optional bounded diagnostic workstream is accepted in
-[ADR-063](ADR/ADR-063-bounded-database-phase-profiling.md). The fixed bank and
-17 actual public/request/replication/provider phase joins are implemented in source. Process
-mode remains disabled by default; the remaining15 joins, private capture and
-native phase/resource measurements remain open.
-
-```mermaid
-classDiagram
-    class DatabasePhaseKind
-    class DatabasePhaseOutcome
-    class DatabasePhaseBank
-    class DatabasePhaseSnapshot
-    class PrivateNodeExporter
-    DatabasePhaseKind --> DatabasePhaseBank : fixed source boundary
-    DatabasePhaseOutcome --> DatabasePhaseBank : actual owned result
-    DatabasePhaseBank --> DatabasePhaseSnapshot : detached cumulative capture
-    PrivateNodeExporter --> DatabasePhaseSnapshot : outside database gates
-```
-
-All KeyLoad-owned backend, clients, contracts, frontend, tests, infrastructure and docs live here and are versioned together. Independently owned ManagedCode dependencies remain in their owning repositories; repair/release/verified NuGet publication follows root policy.
-
-| Project/module | Purpose and entry points | Canonical slices / protected boundary |
-|---|---|---|
-| src/KeyLoad.Abstractions | Contracts.cs, Features/<SliceName>/Contracts/, Storage/Contracts/StorageContracts.cs; Features/BackupRestore/Contracts/AtomicPartitionCatalogEntry.cs | Shared public/storage contracts; DocumentStorage, EventStreams, Messaging, Authorization, Search, GraphTraversal and the generated BackupRestore roster entry. |
-| src/KeyLoad.Core | DatabaseEngine.cs, Features/DocumentStorage/Execution/Documents.cs, Features/EventStreams/Execution/Events.cs, Features/Messaging/Execution/Messaging.cs, Features/GraphTraversal/, Features/TimeSeries/, Features/Search/; Features/BackupRestore/Execution/AtomicPartitionRosterTransaction.cs | Node-local engine and atomic transactions; model effects and first-write logical partition registration share the ordered native commit. Complete current roster capture and cluster backup qualification remain required. |
-| src/KeyLoad.Diagnostics | Features/ResourceExecution/Models/DatabasePhaseKind.cs, Features/ResourceExecution/Models/DatabasePhaseSnapshot.cs and fixed bank | ResourceExecution; ADR-063 BCL-only callback-free scalar phase observations. No database state, public control endpoint or framework dependency; source integration and genuine native profiling pending. |
-| src/KeyLoad.Storage.ZoneTree | ZoneTreeStore.cs; Features/StorageRecovery/Execution/ZoneTreeStoreRuntime.cs and Features/StorageRecovery/Recovery/ZoneTreeCheckpointManager.cs | StorageRecovery and BackupRestore; file/WAL/checkpoint ownership stays node-local. |
-| src/KeyLoad.Query | Features/QueryExecution/Queries/QueryEngine.cs, Features/QueryExecution/Execution/SqlParser.cs, Search/Queries/QueryExecution/SearchEngine.cs; Features/ChangeFeeds/Queries/LiveQueryExecutor.cs behind Features/ChangeFeeds/Execution/LiveQueries.cs facade | QueryExecution, Search, ChangeFeeds; one authorized typed AST and bounded read cut. |
-| src/KeyLoad.Replication | ClusterReplication/Execution/Submission/ClusterCoordinator.cs, Features/ClusterReplication/Storage/DurableReplicaLog.cs, ClusterReplication/Execution/Recovery/ReplicaMaterializer.cs | ClusterReplication, StorageRecovery; ordered durable apply and quorum authority behind the active Orleans server composition; delivered-SHA RF3 qualification pending. |
-| src/KeyLoad.Clustering | Features/ClusterRouting/Grains/{ConnectionGrain,CommandPartitionGrain}.cs; Queries/ConnectionReadExecution.cs; Topology/ReplicaMembershipTable.cs | ClusterRouting; active server composition routes through grains while node-local hosts own storage; forced activation-migration qualification pending. |
-| src/KeyLoad.Server | Program.cs, NodeOptions.cs, Features/ClientApi/, ClusterRouting/Hosting/SiloHosting/OrleansNode.cs and feature API files | Composition root and public API; caller identity never supplies trusted roles. |
-| src/KeyLoad.Client | KeyLoadClient.cs, Features/QueryExecution/Queries/KeyLoadQuery.cs | ClientApi shared transport; business operations mirror the same canonical slices as core/contracts/API/tests. |
-| src/KeyLoad.Cli | Program.cs, Features/ClientApi/Hosting/KeyLoadCliApplication.cs, Features/ClientApi/Transport/CliClientApi.cs and Features/BackupRestore/Commands/CliBackupRestore.cs | Composition-only administrative entry point and typed ClientApi/BackupRestore feature owners. |
-| build/KeyLoad.AppHost | Program.cs, BenchmarkComparisons/Resources/SessionTopology/BenchmarkResources.cs | ClusterReplication, ClusterRouting, TestInfrastructure, BenchmarkComparisons and CodeQuality test-only collector preparation; Aspire owns resource lifecycle. |
-| tests/KeyLoad.UnitTests | TestDatabase.cs and focused test files | Matching product slices; pure contract/engine regression evidence. |
-| tests/KeyLoad.RecoveryTests | Features/StorageRecovery/Cases/RecoveryTests.cs, Features/ClusterReplication/Cases/ReplicaPersistenceTests.cs, Features/ClusterReplication/Cases/ReplicaProcessRecoveryTests.cs, Features/ClusterRouting/ | StorageRecovery, ClusterReplication, ClusterRouting; actual child-process recovery and current outcome-v2 scoped-locator integrity; current source qualification pending. |
-| tests/KeyLoad.CrashHost | Program.cs, ClusterReplication/Execution/Faults/ReplicaCrashScenario.cs | Shared real-process recovery harness, never a product replacement. |
-| tests/KeyLoad.IntegrationTests | ClusterFixture.cs, Features/ClusterReplication/Cases/ClusterTests.cs, Features/ResourceExecution/Cases/AdmissionClusterTests.cs | ClusterReplication and ClientApi shared fixtures; CodeQuality scopes actual server collector export; business cases mirror their owning canonical slices with real RF3/.NET and required MCP flows. |
-| tests/KeyLoad.ComparisonTests | Features/BenchmarkComparisons/ | BenchmarkComparisons; real engine/container correctness and measurements, including the separate TimeSeries profile under ADR-050. |
-| benchmarks/KeyLoad.Benchmarks | Program.cs | BenchmarkComparisons; embedded microbenchmark development, no public CI claim without CI evidence. |
-| benchmarks/KeyLoad.BenchmarkScenarios | Features/BenchmarkComparisons/Benchmarks/EmbeddedBenchmarks.cs | BenchmarkComparisons; ADR-047 public fixture library for external generated consumer, source joined with a clean enabled host build; real GitHub Dry execution pending. |
-| benchmarks/KeyLoad.Comparisons | Features/BenchmarkComparisons/Session/; Features/BenchmarkComparisons/Targets/ | BenchmarkComparisons; public library with shared workload/oracle and official engine clients. |
-| benchmarks/KeyLoad.ComparisonHost | Features/BenchmarkComparisons/Session/ | BenchmarkComparisons; native TUnit C# client workload container under ADR-117, retaining Aspire dependencies and original measurements; runtime qualification pending. |
-| site | Features/BenchmarkComparisons/index.html, bootstrap.mjs, measurement-loader.mjs; scripts/build.mjs | BenchmarkComparisons; product introduction, conceptual Three.js RF3 view and public views of qualified GitHub JSON; website workflow is separate from benchmark execution. |
-| tests/KeyLoad.SiteTests | KeyLoad.SiteTests.csproj, Features/BenchmarkComparisons/ | BenchmarkComparisons; independently buildable TUnit suite invokes actual Node modules and authentic GitHub report files. |
-| .github/workflows | build-and-tests.yml, benchmarks.yml, release.yml, website.yml | RepositoryGovernance, BenchmarkComparisons, ReleaseDelivery; separate build/test, benchmark, release, and website workflows. |
-| scripts/Features/BenchmarkComparisons | session-plan.mjs, session-github-collect.mjs, session-aggregate-cli.mjs | BenchmarkComparisons; ADR-040/BC028 authenticated-metadata and same-ZIP proof tooling, implementation pending. |
-| docs | design/, implementation/, Features/, ADR/ | Product specification, evidence and canonical slice/decision records. |
-
-[ADR-049](ADR/ADR-049-genuine-neo4j-harness.md) retains genuine Neo4j protocol,
-acknowledgement and ownership regressions inside the existing Aspire lifecycle.
-The current setup-failure regression calls `BenchmarkSession.LoadAsync` and the
-six later native session operations, requiring truthful failed prerequisites
-and preserving the owned fixture. It also checks the actual native parser and
-sanitized error code. Exact-source Linux qualification remains a separate gate;
-the former ComparisonRunner/schema3 route is retired by ADR-142.
-
-```mermaid
-classDiagram
-    class ComparisonTests
-    class Neo4jHarnessRegression
-    class BenchmarkSession
-    class Neo4jTarget
-    class Neo4jQueryResponse
-    ComparisonTests --> Neo4jHarnessRegression : existing Aspire endpoint
-    Neo4jHarnessRegression --> BenchmarkSession : real load and failed prerequisites
-    BenchmarkSession --> Neo4jTarget : native target contract
-    Neo4jTarget --> Neo4jQueryResponse : parsed acknowledgement
-    Neo4jHarnessRegression --> Neo4jQueryResponse : real protocol input checks
-```
-| scripts | Features/RepositoryGovernance/verify.mjs | RepositoryGovernance; real-repository static verification with Node built-ins. |
-| analyzers/KeyLoad.Analyzers | KeyLoad.Analyzers.csproj, Features/CodeQuality/ | CodeQuality; source-owned Roslyn diagnostics attached to compilation, never runtime storage/routing. |
-| tests/KeyLoad.Analyzers.Tests | KeyLoad.Analyzers.Tests.csproj, Features/CodeQuality/ | CodeQuality; real Roslyn/Orleans metadata regressions, TUnit and CI-only execution. |
-
-## Feature ownership convention
-
-Each vertical slice groups actual responsibilities in populated local role folders;
-`Features/<SliceName>/` is an ownership boundary, not a flat file collection.
-KeyLoad.Clustering now separates routing grains, commands, queries, models, contracts,
-streaming, identity, serialization, diagnostics and topology. Its replication slice
-separates grain services, discovery, transport, authentication, replay and wire models;
-ResourceExecution separates cache-control models, contracts, serialization,
-authentication and validation. AdminDashboard and BlobStorage own query capabilities
-in `Queries/`. The structure preserves namespaces, aliases/Ids and runtime behavior.
-The owner contract and checks are in [RepositoryGovernance](Features/RepositoryGovernance.md)
-and [ADR-032](ADR/ADR-032-mcaf-governance.md).
-
-Canonical slice names use PascalCase consistently: RepositoryGovernance, BenchmarkComparisons, DocumentStorage, RelationalStorage, EventStreams, Messaging, GraphTraversal, TimeSeries, Search, QueryExecution, Authorization, ChangeFeeds, StorageRecovery, ClusterReplication, ClusterRouting, ClientApi, BackupRestore, BlobStorage, ResourceExecution, CodeQuality and TestInfrastructure. Their owning contracts and navigation are in the [Feature index](README.md).
-
-The embedded microbenchmark boundary follows Accepted ADR-047; it is peripheral
-runner qualification and does not replace the first product server's RF3 topology.
-The real generated child requires an externally visible unsealed library fixture:
-
-[ADR-071](ADR/ADR-071-canonical-zonetree-providers.md) fixes ZoneTree storage
-and ZoneTree.FullTextSearch derived text indexes. Candidate engine code and
-discarded evaluation plans are removed; native WAL, node-local ownership, RF3
-and all correctness/resource/qualification contracts remain mandatory.
-The independent [ScaledWorkloads](Features/BenchmarkComparisons/ScaledWorkloads.md)
-under [ADR-069](ADR/ADR-069-representative-scaled-workloads.md) adds actual
-exactly 100,000 and 1,000,000 actual full-keyspace records, with at least
-100,000 measured operations per applicable workload cell and explicit resource,
-value, durability and provider gates. Mandatory public index, complex-query and
-native topology/RF3 stages remain open. Tiny hot-key controls remain labelled
-microbenchmarks and cannot qualify the required scales.
-Local ZoneTree microbenchmarks use the actual generated consumer for development.
-Full native database comparisons retain isolated Linux runners and the required
-resource, correctness, recovery and multi-node qualification gates.
-
-```mermaid
-classDiagram
-    class BenchmarkApplication
-    class BenchmarkComparisonRunner
-    class EmbeddedBenchmarks
-    class GeneratedBenchmarkRunner
-    class ZoneTreeStore
-    BenchmarkApplication --> BenchmarkComparisonRunner : dispatches arguments
-    BenchmarkComparisonRunner --> EmbeddedBenchmarks : selects fixture assembly
-    GeneratedBenchmarkRunner --|> EmbeddedBenchmarks : upstream generated inheritance
-    EmbeddedBenchmarks --> ZoneTreeStore : owns actual embedded fixture storage
-```
-
-Target feature-owned paths are `<project-or-module>/Features/<SliceName>/`; tests mirror that name under their project roots; feature docs are `docs/Features/<SliceName>.md`. Shared entry points, composition roots, truly shared contracts and global infrastructure may remain outside feature folders. A non-applicable surface must be recorded as N/A with its reason in the feature spec.
-
-[CodeQuality](Features/CodeQuality.md) is a compile-time slice defined by [ADR-033](ADR/ADR-033-code-quality.md). Central SDK/style analysis and source-owned Roslyn rules produce compiler/IDE findings and per-project SARIF reports. This build infrastructure has no database runtime or persistence surface.
-
-[ADR-043](ADR/ADR-043-comparison-library-host.md) owns the preserving comparative
-library/sole-CLI split. Tests retain the same public harness assembly/API and Aspire
-retains its comparisons resource/configuration; source is joined but combined build
-and qualification remain pending. [ADR-044](ADR/ADR-044-benchmark-immutable-contracts.md)
-now accepts the separate immutable harness collection and CLR naming migration,
-with valid JSON/configuration values and all real engine gates preserved.
-
-[ADR-045](ADR/ADR-045-postgres-schema-ownership.md) accepts owned transient
-PostgreSQL benchmark schemas and constant commands. Existing public target calls
-retain exact workloads; typed context and a matching owner marker guard cleanup.
-Real regression helpers share the existing Aspire PG container after measurement;
-implementation and GitHub qualification remain pending.
-
-```mermaid
-flowchart LR
-    AppHost[comparisons Aspire resource] --> ComparisonHost[TUnit C# client workload]
-    ComparisonHost --> ComparisonLibrary[Public harness library]
-    ComparisonTests[Real TUnit and engine tests] --> ComparisonLibrary
-```
-
-[ResourceExecution](Features/ResourceExecution.md) and [ADR-035](ADR/ADR-035-memory-performance.md)
-define the current memory/performance repair contract. Common budgets belong to
-shared node-local building blocks; operation behavior stays in its canonical
-feature slice. [ClientApi](Features/ClientApi.md) owns HTTP response streaming.
-Scoped document/vector visitors feed QueryExecution and Search without raw pages;
-GraphTraversal retains cut-scoped visibility decisions. The shared canonical JSON
-writer streams fingerprints to a hash and preserves exact signatures. The located
-[repair inventory](implementation/memory-performance.md) records every open join.
-Implementation and real qualification are in progress; read-only findings do not
-establish measured speed, bounded process RSS or production readiness.
-
-Shared atomic commit/outcome dispatch remains outside feature folders because it
-joins multiple mutation families. Document CRUD handlers and transaction-scoped
-image carriers now belong to `Core/Features/DocumentStorage/`; admission/inbox
-ownership belongs to `Core/Features/ResourceExecution/` under [ADR-042](ADR/ADR-042-admission-resource-ownership.md).
-The existing oversized aggregate DatabaseEngine partial type remains the explicit,
-time-bounded ADR-041 handler-extraction deviation; splitting files alone does not
-satisfy the type limit.
+Document CRUD handlers and transaction-scoped image carriers belong to
+`Core/DocumentStorage/`; admission and inbox ownership belong to
+`Core/ResourceExecution/`. The oversized aggregate `DatabaseEngine` partial type
+is a recorded handler-extraction deviation
+([ADR-041](ADR/ADR-041-read-only-public-collections.md)); splitting files alone
+does not satisfy the type limit.
 
 ```mermaid
 classDiagram
@@ -462,6 +374,78 @@ classDiagram
     DocumentMutationResult --> DocumentRecord : staged After
     DocumentMutationResult --> MutationReceipt : exact receipt
 ```
+
+```mermaid
+classDiagram
+    ZoneTreeTransaction --> ZoneTreeJournalCodec : prepares binary payload
+    ZoneTreeJournalPublication --> ZoneTreeJournalCodec : validated payload
+    ZoneTreeJournalRecovery --> ZoneTreeJournalCodec : complete checked decode
+    ZoneTreeJournalCodec --> ZoneTreeJournalMutation : stable generated fields
+    ZoneTreeStoreInitializer --> ZoneTreeIdentityFile : current format writer fence
+```
+
+[NativeReadCuts](Features/StorageRecovery/NativeReadCuts.md) under
+[ADR-097](ADR/ADR-097-native-read-cut-leases.md) supplies provider-owned snapshot
+lifetimes for bounded reads. A real-process inspector checks an original store
+without the normal runtime, then releases it for a normal reopen:
+
+```mermaid
+classDiagram
+    class ExistingStoreInspectorProcess
+    class ExistingStoreInspector
+    class ExistingStoreInspectorProtocol
+    class ZoneTreeExistingStore
+    ExistingStoreInspectorProcess --> ExistingStoreInspectorProtocol : bounded stdin
+    ExistingStoreInspector --> ExistingStoreInspectorProtocol : safe receipt
+    ExistingStoreInspector --> ZoneTreeExistingStore : owns guarded runtime
+    ExistingStoreInspectorProcess --> ExistingStoreInspector : original child lifetime
+```
+
+Public chunked blobs and partial reads belong to
+[BlobStorage](Features/BlobStorage.md) and
+[ADR-038](ADR/ADR-038-chunked-blob-storage.md); backup archive pieces are a
+separate storage protocol.
+
+## Internal serialization
+
+[ADR-060](ADR/ADR-060-native-internal-serialization.md) and
+[InternalSerialization](Features/InternalSerialization.md) require native
+generated Orleans payloads with stable aliases and field IDs across owned
+persistence, grain requests/replies, copies sent to ZoneTree owners and signed
+claims. Public HTTP/MCP JSON, exact user content, frozen canonical fingerprint
+identities, sortable keys, raw ZoneTree values, fixed checksum framing and blob
+bytes keep their concrete protocols. Native generated bytes are not canonical
+hashes for unordered values. Readers reject unsupported formats before effects.
+
+```mermaid
+flowchart LR
+    Public[Public JSON protocol] --> Typed[Attributed owned DTOs]
+    Typed --> Native[Cached Orleans codecs and pooled sessions]
+    Native --> Records[Typed records and versioned metadata]
+    Native --> Calls[Grain call payloads and copies]
+    Native --> Claims[Signed native claims]
+    Records --> Files[Node local ZoneTree and atomic WAL]
+    Typed --> Identity[Frozen canonical fingerprint material]
+```
+
+```mermaid
+classDiagram
+    NativeSerialization --> NativePayload : versioned generated root
+    NativeSerialization --> NativeSerializerProviders : cached official providers
+    NativePayload --> NativeJsonValue : structural DOM surrogate
+    ZoneTreeIdentityFile --> ZoneTreeMetadataBinary : explicit format fence
+    GrainRequestEnvelope --> GrainValue : attributed native boundary
+```
+
+## Query, search and read budgets
+
+[ResourceExecution](Features/ResourceExecution.md) and
+[ADR-035](ADR/ADR-035-memory-performance.md) own common budgets in shared
+node-local building blocks; operation behavior stays in its canonical slice.
+[ClientApi](Features/ClientApi.md) owns HTTP response streaming. Scoped document
+and vector visitors feed QueryExecution and Search without raw pages;
+GraphTraversal keeps cut-scoped visibility decisions. The shared canonical JSON
+writer streams fingerprints to a hash and preserves exact signatures.
 
 ```mermaid
 classDiagram
@@ -503,6 +487,150 @@ classDiagram
     ZoneTreeStoreRuntime --> ZoneTreeBackupRestore : verified local backup
 ```
 
+Native search scheduling follows
+[ADR-081](ADR/ADR-081-awaited-native-search-execution.md): one analytical
+reservation spans the complete awaited read and native settlement while the
+connection grain yields. Index generations have bounded native leases and
+retirement ([OnlineGenerationLifetime](Features/Search/OnlineGenerationLifetime.md));
+global retrieval merges bounded per-modality windows before RRF
+([GlobalBranchWindows](Features/Search/GlobalBranchWindows.md)). SIMD execution
+uses native .NET vector intrinsics with scalar code only for bounded tails and
+independent correctness oracles ([Search](Features/Search.md)); acceleration
+claims need comparable GitHub measurements.
+
+[ADR-019](ADR/ADR-019-managed-ann.md), [ManagedAnn](Features/Search/ManagedAnn.md)
+and [ManagedAnnSeed](Features/Search/ManagedAnnSeed.md) define the managed ANN
+candidate: a private builder copies bounded canonical vector input captured in
+one node-local read cut into owned packed arrays, and each search uses its own
+admitted scratch with the exact metric implementation. ANN projection updates
+are background work under the StatelessWorker pattern above.
+
+```mermaid
+classDiagram
+    AnnSeedCollector --> ReadExecutionBudget : one charged canonical cut
+    AnnSeedCollector --> AnnSeed : owned snapshot input
+    AnnSeed --> PackedAnnBuilder : later explicit integration
+    AnnWorkBudget --> ReadExecutionBudget : work and elapsed checks
+    PackedAnnBuilder --> PackedAnnGraph : actual level offsets
+    PackedAnnBuilder --> PackedAnnVectors : owned bounded blocks
+    PackedAnnBuilder --> PackedAnnIndex : complete immutable state
+    PackedAnnIndex --> AnnWorkBudget : per call admission
+    PackedAnnIndex --> PreparedSimilarity : unchanged scores
+    PackedAnnIndex --> AnnSearchResult : candidates mode and counters
+```
+
+## Time series
+
+[ADR-052](ADR/ADR-052-timeseries-bounded-aggregates.md) defines the
+[TimeSeries](Features/TimeSeries.md) latest/aggregate/window slice. Typed
+Abstractions DTOs mirror Client, Server and Core owners. Core uses the published
+ManagedCode.TimeSeries library inside one budgeted storage cut, and shared
+StorageRecovery reverse visitors support bounded latest reads. Chunk work runs
+under the StatelessWorker background pattern.
+
+```mermaid
+classDiagram
+    class TimeSeriesReadOperations
+    class SampleLatestReader
+    class SampleAggregateReader
+    class SampleAggregateWindowReader
+    class SampleAggregateAccumulator
+    class BudgetedReadView
+    class ZoneTreeRangeReader
+    TimeSeriesReadOperations --> BudgetedReadView : one gated operation budget
+    TimeSeriesReadOperations --> SampleLatestReader
+    TimeSeriesReadOperations --> SampleAggregateReader
+    TimeSeriesReadOperations --> SampleAggregateWindowReader
+    SampleLatestReader --> ZoneTreeRangeReader : descending first live key
+    SampleAggregateReader --> SampleAggregateAccumulator : published native sums
+    SampleAggregateWindowReader --> SampleAggregateAccumulator : bounded windows
+```
+
+## Memory and caches
+
+[ADR-058](ADR/ADR-058-orleans-coordinated-cache-memory.md) keeps RAM acceleration
+under the ResourceExecution slice. The common retained pool and the embedded
+positive point-value cache are disposable node-local state over committed
+ZoneTree data. Cached state never replaces persisted authorization, committed
+ZoneTree state or the majority acknowledgement of copies, and it never moves
+files or handles.
+
+```mermaid
+classDiagram
+    class ICacheMemoryBudget {
+        TryReserve(bytes, entries)
+        GetSnapshot()
+    }
+    class ICacheMemoryReservation {
+        Bytes
+        Entries
+        Dispose()
+    }
+    class CacheMemoryBudget
+    class CacheMemoryLimits
+    CacheMemoryBudget ..|> ICacheMemoryBudget
+    ICacheMemoryBudget --> ICacheMemoryReservation
+    CacheMemoryBudget --> CacheMemoryLimits
+    class ICacheReadPermit {
+        IsCurrentAcceptance(receipt)
+    }
+    ZoneTreeStore --> ZoneTreeStoreRuntime
+    ZoneTreeStoreRuntime --> ZoneTreePointCacheLifecycle
+    ZoneTreePointCacheLifecycle --> ZoneTreePointCacheControl
+    ZoneTreePointCacheControl --> ZoneTreePointCacheControlState
+    ZoneTreePointCacheControlState --> ICacheReadPermit
+    ZoneTreePointCacheControlState --> ZoneTreePointCacheBinding
+    ZoneTreePointCacheBinding --> ZoneTreePointCache
+    ZoneTreePointCache --> ICacheMemoryBudget
+```
+
+## Diagnostics
+
+[ADR-063](ADR/ADR-063-bounded-database-phase-profiling.md) defines the optional
+bounded database phase bank. Process mode is disabled by default; private
+capture runs outside database gates.
+
+```mermaid
+classDiagram
+    class DatabasePhaseKind
+    class DatabasePhaseOutcome
+    class DatabasePhaseBank
+    class DatabasePhaseSnapshot
+    DatabasePhaseKind --> DatabasePhaseBank : fixed source boundary
+    DatabasePhaseOutcome --> DatabasePhaseBank : actual owned result
+    DatabasePhaseBank --> DatabasePhaseSnapshot : detached cumulative capture
+```
+
+## Admin console and website identity
+
+The [AdminDashboard](Features/AdminDashboard.md) slice under
+[ADR-051](ADR/ADR-051-admin-dashboard.md) hosts the read-only console in
+`src/KeyLoad.Server/AdminDashboard/Assets/`, with shared Abstractions DTOs, Core
+catalog/queue readers and a matching Client SDK. It uses the connection grain
+with call-local authorized reads; physical observations are reported per node.
+The public `site/` is its own surface. Both share one visual identity under
+[ADR-053](ADR/ADR-053-unified-visual-identity.md): the console owns the canonical
+`brand.css`/`logo.svg` and the site keeps byte-identical mirrors.
+[SiteMetadata](Features/BenchmarkComparisons/SiteMetadata.md) adds mirrored
+PNG/ICO exports, static landing SEO/OG/JSON-LD and a share card.
+
+```mermaid
+flowchart LR
+    Admin[Same origin admin console] --> API[AdminDashboard API and MCP]
+    API --> Request[Connection grain]
+    Request --> Read[Call-local authorized read execution]
+    Read --> Core[Bounded catalog and queue readers]
+    Read --> Node[Node local file and process observer]
+```
+
+## Code quality
+
+[CodeQuality](Features/CodeQuality.md) is a compile-time slice defined by
+[ADR-033](ADR/ADR-033-code-quality.md). Central SDK/style analysis and
+source-owned Roslyn rules produce compiler/IDE findings and per-project SARIF
+reports; builds always run with warnings as errors. This build infrastructure has
+no database runtime or persistence surface.
+
 ```mermaid
 flowchart LR
     Rules[CodeQuality rule sources] --> Analyzer[KeyLoad.Analyzers]
@@ -526,154 +654,19 @@ classDiagram
     DiagnosticAnalyzer --> Diagnostic
 ```
 
-The existing flat/layered feature files are migration debt, not compliant target structure. [ADR-032](ADR/ADR-032-mcaf-governance.md) records actual paths, owners, target layout, verification and removal date. New feature-owned work must use the target convention. No runtime code is moved by the governance bootstrap.
+## Benchmark comparisons
 
-The owner's SIMD clarification maps to Search's Accepted ADR-035 validation-only
-stage: portable .NET JIT intrinsic finite-value checks, unchanged metric grouping,
-scalar tails and same-source hardware-disabled GitHub proof. ZoneTree remains the
-node-local native storage engine; Orleans remains the routing/isolation and bounded
-independent-work parallelism foundation. No Rust/FFI or unmeasured numerical/atomic
-parallel reduction is introduced. [Search](Features/Search.md) and
-[BenchmarkComparisons](Features/BenchmarkComparisons.md) keep source, correctness
-and measured performance evidence distinct.
-
-Public chunked blobs and partial reads have canonical source implementations under [BlobStorage](Features/BlobStorage.md) and Accepted [ADR-038](ADR/ADR-038-chunked-blob-storage.md). Official MCP and simple agent adapters belong to [ClientApi](Features/ClientApi.md) and Accepted [ADR-039](ADR/ADR-039-official-mcp-agent-api.md); business operations retain their existing Feature owners. The typed .NET blob lifecycle/range adapter and SQL CALL join are specified in [central SQL evidence](implementation/central-sql.md). Exact delivered-SHA qualification remains required; private snapshot chunks and backup archive pieces are separate storage protocols.
-
-```mermaid
-flowchart TB
-    SDK[Public .NET SDK and CLI] --> Server[Server gateway and identity]
-    MCP[Required official MCP SDK surface] --> Server
-    Server --> Orleans[Orleans request and routing grains]
-    Orleans --> Hosts[Three node-local PartitionHosts]
-    Hosts --> Core[Atomic engine and ordered apply]
-    Core --> Storage[ZoneTree journals and files]
-    Core --> Models[Documents events queues graph search]
-    Aspire[Aspire Docker lifecycle] --> Hosts
-    CI[GitHub Actions qualification] --> Aspire
-    CI --> JSON[Raw comparison JSON with source SHA]
-    JSON --> Site[README charts and Pages site]
-```
-
-## Fresh website evidence boundary (BC028)
-
-The separate Pages consumer uses trusted control-workflow source, authentic
-successful exact-attempt comparison execution and one digest-verified archive.
-Publication qualifies current trusted-main website source independently from the
-separate inspected measured-source checkout; candidate validation cannot deploy.
-Unrelated database-workflow failure is outside the site-only boundary. Complete
-site qualification and repeated website/evidence freshness proof precede Pages.
-See [BenchmarkComparisons](Features/BenchmarkComparisons.md),
-[ADR-040](ADR/ADR-040-static-site-threejs-evidence.md) and publication acceptance.
-
-```mermaid
-flowchart LR
-    CI[Actual comparison producer] --> ZIP[Immutable report archive]
-    API[Authenticated run job artifact metadata] --> Gate[Evidence Node tooling]
-    ZIP --> Gate
-    Gate --> Setup[Real BCL qualification inputs]
-    Setup --> Tests[Full TUnit Chrome native coverage]
-    Tests --> Build[Raw JSON and publication receipt]
-    Build --> Recheck[Freshness proof]
-    Recheck --> Pages[Separate Pages deploy]
-```
-
-```mermaid
-classDiagram
-    SiteGitHubArchiveSetup --> SiteGitHubArchiveReader
-    SiteGitHubArchiveReader --> SiteGitHubArchiveReceipt
-    TUnitSession --> SiteCoverageSourceManifestWriter
-    TUnitSession --> SiteGitHubEvidenceScope
-    SiteGitHubEvidenceScope --> GitHubEvidenceCLI
-    GitHubEvidenceCLI --> GitHubEvidenceRuns
-    GitHubEvidenceCLI --> GitHubEvidenceProof
-```
-
-## Shared request contracts
-
-```mermaid
-sequenceDiagram
-    participant Caller as SDK caller
-    participant API as Public gateway
-    participant Grain as Request/routing grain
-    participant Host as Node-local PartitionHost
-    participant Replica as Replica quorum
-    Caller->>API: Typed operation and authenticated identity
-    API->>Grain: Authorized bounded request
-    Grain->>Host: Route to physical owner
-    Host->>Replica: Ordered replicated command
-    Replica-->>Host: Acknowledgement at required durability barrier
-    Host-->>Grain: Outcome from node-local apply
-    Grain-->>API: Public result
-    API-->>Caller: Contract result
-```
-
-```mermaid
-classDiagram
-    class KeyLoadClient
-    class CommandRequest
-    class PartitionRef
-    class DatabaseEngine
-    class IKeyValueView
-    class IAtomicTransaction
-    class ClusterCoordinator
-    class CommandRouterGrain
-    KeyLoadClient --> CommandRequest
-    CommandRequest --> PartitionRef
-    CommandRouterGrain --> ClusterCoordinator
-    ClusterCoordinator --> DatabaseEngine
-    DatabaseEngine --> IKeyValueView
-    DatabaseEngine --> IAtomicTransaction
-```
-
-## Current implementation and qualification gaps
-
-The product design retains historical DotNext-candidate and standalone-first text beneath the current owner clarification. Current AGENTS policy supersedes those choices. The current server source composes a node-local PartitionHost with the Orleans silo, distributed grain directory, activation repartitioner and connection grains with isolated operations under [ADR-125](ADR/ADR-125-connection-owned-execution.md). The three-node Aspire graph is present. No current integration case forces activation migration and verifies node-local storage ownership afterward; delivered-source GitHub qualification is pending. TUnit package/test migration and persisted principal/API-key verifier, grant, feed and paused local restore behavior are source-present. Public BlobStorage and official MCP/agent contracts are Accepted and source-present, with exact delivered-SHA qualification pending. The diagrams show mandatory ownership and delivery boundaries; they do not claim every target is implemented. Current build/formatter prerequisites and their exact historical source cuts are recorded in [CodeQuality evidence](implementation/code-quality.md); full solution and delivered-SHA qualification remain open.
-
-The successful [GitHub CI baseline 36926803549](https://github.com/managedcode/KeyLoad/actions/runs/36926803549) measured commit 9c570f8c33a7a9667507a8e1c0ca68860de3be45. It does not qualify later uncommitted work, power-loss durability, endurance or production readiness. See [implementation status](implementation/status.json), [durability audit](implementation/durability-audit.md), [comparative benchmark contract](implementation/comparative-benchmarks.md), [RepositoryGovernance](Features/RepositoryGovernance.md) and [ADR-032](ADR/ADR-032-mcaf-governance.md).
-
-## TimeSeries comparison boundary
-
-The Accepted [ADR-034 caller-composition continuation](ADR/ADR-034-cluster-comparisons.md)
-repairs three actual RF3 endpoint bindings, authenticated Rabbit management client
-ownership and PostgreSQL public event readback. The existing nine-engine,
-Single/Replicated, Docker load-generator and six-profile contracts remain open;
-retained failed-run raw timings do not establish a performance winner. The
-[owning feature](Features/BenchmarkComparisons.md) contains exact disjoint tasks,
-criteria, native evidence and integration boundaries.
-
-[ADR-050](ADR/ADR-050-timeseries-timescale-comparison.md) adds a separate profile
-using the real KeyLoad RF3 SDK, digest-pinned TimescaleDB, and
-ManagedCode.TimeSeries as an explicitly in-memory aggregation library. It keeps
-schema3 engine counts intact and reports each arm's storage and acknowledgement
-guarantees separately. Implementation and exact-SHA CI proof are pending.
-
-```mermaid
-flowchart LR
-    Corpus[Deterministic UTC samples] --> RF3[KeyLoad RF3 via SDK]
-    Corpus --> Timescale[TimescaleDB via Npgsql]
-    Corpus --> MCTS[ManagedCode.TimeSeries memory aggregation]
-    RF3 --> Oracle[Separate result and guarantees]
-    Timescale --> Oracle
-    MCTS --> Oracle
-```
-
-## Isolated Linux comparison execution
-
-[ADR-142](ADR/ADR-142-shared-live-benchmark-sessions.md) and the canonical
-[shared session contract](Features/BenchmarkComparisons/SessionExecution.md)
-replace per-scenario workers with exactly two measurement jobs per database:
-one native node and three native nodes. The current eleven-database inventory
-has 22 measurement workers. Each worker owns one live Aspire topology and runs
-separate real native TUnit cases against it. Production retains its RF3 contract.
-
-The initial million-record load is measured. The current seven-case source
-includes indexing, sequential and deterministic random reads, search, concurrent
-create/delete/update/read/search streams of 100,000 operations each, and final
-record verification. There is no warmup, per-case reset, reseeding or restart.
-One preparation job builds the common source-bound runner and images; workers
-import those artifacts. Original per-case outcomes, native TRX, runtime/image
-identities and resource observations feed one authenticated complete-cohort
-aggregation. Failed or incomplete cohorts cannot refresh published metrics.
+[Shared benchmark sessions](Features/BenchmarkComparisons/SessionExecution.md)
+under [ADR-142](ADR/ADR-142-shared-live-benchmark-sessions.md) run exactly two
+measurement jobs per database: one native node and three native nodes. Each job
+owns one live Aspire topology and runs separate real native TUnit cases against
+it, starting with a measured million-record load. Original per-case outcomes,
+native TRX, runtime/image identities and resource observations feed one
+authenticated complete-cohort aggregation; failed or incomplete cohorts cannot
+refresh published metrics. Scales are exactly 100,000 and 1,000,000 records
+([ScaledWorkloads](Features/BenchmarkComparisons/ScaledWorkloads.md),
+[ADR-069](ADR/ADR-069-representative-scaled-workloads.md)). The
+[owning feature](Features/BenchmarkComparisons.md) holds the criteria.
 
 ```mermaid
 flowchart LR
@@ -686,359 +679,93 @@ flowchart LR
     Aggregate --> Site[Qualified website metrics]
 ```
 
-Superseded per-cell dispatch, repetition runners and report readers are removed
-without a compatibility reader. Historical ADRs and immutable result artifacts
-retain their original identities; they do not qualify this implementation.
-Native adapters, deterministic corpora, correctness oracles, bounded cancellation
-and joined ownership checks remain reusable prerequisites. The current seven
-document cases do not qualify vector, graph, queue, event or time-series family
-performance. Complete family integration and exact-source Linux build, native
-correctness, recovery, RF3, resource and publication gates remain open.
-
-## Atomic WAL binary serialization
-
-[ADR-007](ADR/ADR-007-replica-consensus-bootstrap.md) and REQ/AC-REP-051 refine
-ClusterReplication checkpoint publication: one physical DurableReplicaLog owns the
-protocol gate shared by term/suffix planning and metadata publication. Its
-materializer borrows that gate, owns ordered apply and canonical image IO, and
-drains before the log owner closes the gate. Canonical snapshot IO stays outside
-the protocol gate; no storage ownership moves with Orleans activations. Source
-regressions use actual ZoneTree Create/Complete and node lifecycle; repaired-SHA
-native recovery/RF3/intensive qualification remains required.
-
-```mermaid
-classDiagram
-    IDurableReplicaLog <|.. DurableReplicaLog
-    DurableReplicaLog *-- SemaphoreSlim : owns ProtocolGate
-    ReplicaMaterializer --> IDurableReplicaLog : borrows gate
-    ReplicaState --> ReplicaMaterializer : protocol planning
-    ReplicaSnapshotStore --> IDurableReplicaLog : publishes verified metadata
-    ReplicaMaterializer --> ReplicaSnapshotStore : canonical IO under apply ownership
-```
-
-[ADR-057](ADR/ADR-057-orleans-atomic-wal.md) records an earlier WAL-only source qualified by mandatory native gates at cf630751/run37084177131. Its journal3/identity4/checkpoint2 values and promotion behavior describe that historical source only; they are not supported current formats or a conversion path. Current storage accepts the formats in [CurrentFormat](Features/StorageRecovery/CurrentFormat.md), preserves native raw-byte ZoneTree WAL and node-local physical ownership, and rejects unsupported versions before effects. The whole isolated comparison cohort also retains failed preflight gates; the historical result does not qualify current source.
-
-The staged [ADR-058](ADR/ADR-058-orleans-coordinated-cache-memory.md) keeps RAM
-acceleration under the canonical ResourceExecution slice across shared contracts,
-Core, provider, Orleans/Server composition and tests. The common retained pool
-and explicitly configured embedded positive point-value cache are implemented
-in source, with coherence fences and real-file regression cases. Server RF3
-composition remains cold while the authenticated cluster-control contract and
-implementation remain open. ADR-058 R69 approves only a local opened-store
-factory, exact accepted-receipt validation and finite binding prerequisites.
-R81 adds a zero-wait actual canonical owner/health observation returning only
-NodeId/incarnation/control RuntimeId. It cannot certify full silo readiness or a
-lease; native poison and physical storage ownership remain authoritative.
-The accepted [R82 v1 contract](Features/ResourceExecution/CacheControlV1.md)
-adds only unused immutable generated metadata and bounded shape/transcript/
-authentication/correlation primitives under Orleans/Features/ResourceExecution.
-Dedicated bytes and exact original-request binding preserve existing database
-and replica formats; final integrated source and native qualification are pending.
-Positive point-value caches remain disposable provider state; logical policy grains and actual
-per-silo services must authenticate physical host IDs and leases before cluster
-admission. They never move files/handles or replace current authorization/read
-barriers. Cluster-control source, native cache correctness, coverage and matched
-performance qualification remain open; development builds do not close those gates.
-
-```mermaid
-classDiagram
-    class ICacheMemoryBudget {
-        TryReserve(bytes, entries)
-        GetSnapshot()
-    }
-    class ICacheMemoryReservation {
-        Bytes
-        Entries
-        Dispose()
-    }
-    class CacheMemoryBudget
-    class CacheMemoryLimits
-    CacheMemoryBudget ..|> ICacheMemoryBudget
-    ICacheMemoryBudget --> ICacheMemoryReservation
-    CacheMemoryBudget --> CacheMemoryLimits
-    class ICacheReadPermit {
-        IsCurrentAcceptance(receipt)
-    }
-    class ZoneTreePointCacheControl {
-        TryReadOwnerIdentity(identity)
-        TryApply(receipt)
-        Retire(withdrawnRevision)
-        CloseAdmission()
-    }
-    ZoneTreeStore --> ZoneTreeStoreRuntime
-    ZoneTreeStoreRuntime --> ZoneTreePointCacheLifecycle
-    ZoneTreePointCacheLifecycle --> ZoneTreePointCacheControl
-    ZoneTreePointCacheControl --> ZoneTreePointCacheControlState
-    ZoneTreePointCacheControl --> ZoneTreePointCacheOwnerObservation
-    ZoneTreePointCacheOwnerObservation --> ZoneTreePointCacheOwnerIdentity
-    ZoneTreePointCacheOwnerObservation --> ZoneTreeStoreRuntime : actual reader and health
-    ZoneTreePointCacheControlState --> ICacheReadPermit
-    ZoneTreePointCacheControlState --> ZoneTreePointCacheBinding
-    ZoneTreePointCacheBinding --> ZoneTreePointCache
-    ZoneTreePointCache --> ICacheMemoryBudget
-```
-
-```mermaid
-classDiagram
-    class CacheControlWire {
-        TryEncodeSigned(message)
-        TryEncodeForSigning(message)
-    }
-    class CacheControlAuthenticator {
-        TrySign(message)
-        TryAuthenticate(message)
-        Dispose()
-    }
-    class CacheControlCorrelation {
-        TryCreate(request)
-        TryMatch(request, reply)
-    }
-    CacheControlWire --> CacheControlShape : complete preflight
-    CacheControlWire --> CacheControlDigest : canonical raw bytes
-    CacheControlAuthenticator --> CacheControlWire : dedicated transcripts
-    CacheControlAuthenticator --> CacheReadyProof : nested authentication
-    CacheControlCorrelation --> CacheControlHeaderComparison : exact echo
-    CacheControlCorrelation --> CachePhysicalBinding : own physical target
-    CacheGrantRequest --> CacheReadyProof : fixed three slots
-    CacheGrantReply --> CacheReplyCorrelation : original signed request digest
-```
-
-These unused wire helpers have no receiver or server caller. The class map records
-source ownership; it does not establish a lease, RF3 cache admission or performance.
-
-```mermaid
-classDiagram
-    ZoneTreeTransaction --> ZoneTreeJournalCodec : prepares binary payload
-    ZoneTreeJournalPublication --> ZoneTreeJournalCodec : validated payload
-    ZoneTreeJournalRecovery --> ZoneTreeJournalCodec : complete checked decode
-    ZoneTreeJournalCodec --> ZoneTreeJournalMutation : stable generated fields
-    ZoneTreeStoreInitializer --> ZoneTreeIdentityFile : format4 writer fence
-```
-
-The isolated CI cell setup/teardown are colocated executable infrastructure under
-`.github/workflows/Features/BenchmarkComparisons/`, each with local policy.
-They import the common native image and retain authenticated job/image evidence;
-only the caller's real TUnit cell runs database operations. Complete raw workers
-stay in immutable GitHub artifacts; Pages receives a bounded derived projection
-and exact original manifest after all270 raw reports validate.
+[ADR-043](ADR/ADR-043-comparison-library-host.md) keeps the comparison library
+separate from the sole workload host;
+[ADR-044](ADR/ADR-044-benchmark-immutable-contracts.md) and
+[ADR-045](ADR/ADR-045-postgres-schema-ownership.md) own immutable harness
+contracts and transient PostgreSQL schemas.
+[ADR-049](ADR/ADR-049-genuine-neo4j-harness.md) keeps genuine Neo4j protocol and
+acknowledgement checks inside the Aspire lifecycle, and
+[ADR-050](ADR/ADR-050-timeseries-timescale-comparison.md) compares KeyLoad time
+series with TimescaleDB and ManagedCode.TimeSeries, reporting each arm's storage
+and acknowledgement guarantees separately.
 
 ```mermaid
 flowchart LR
-    Build[Source-bound native image roundtrip] --> Preflight[27 separate Linux jobs]
-    Preflight --> CRUD[108 separate CRUD jobs]
-    CRUD --> Specialized[162 separate specialized jobs]
-    Specialized --> Capture[Authenticated jobs and artifacts]
-    Capture --> Raw[Complete raw aggregate]
-    Raw --> Compact[Bounded derived website projection]
-```
-
-## Native internal serialization
-
-[ADR-060](ADR/ADR-060-native-internal-serialization.md) and
-[InternalSerialization](Features/InternalSerialization.md) require native generated
-Orleans payloads with stable aliases and field IDs across owned persistence,
-replication, grain requests/replies, membership and signed claims. The owner-directed resumption installs the reviewed native source after rebasing
-against current work. Shared collection/reference/depth/graph/DOM validation and
-missing-identity/backup-cut regressions are being integrated before exact-source
-GitHub qualification. Historical isolated compilation and WAL-only qualification
-do not establish expanded runtime, fault or performance results.
-
-Public HTTP/MCP JSON, exact user content, frozen canonical fingerprint identities,
-sortable keys, raw ZoneTree values, fixed checksum/HMAC framing and blob bytes
-retain their concrete protocols. Native generated bytes are not canonical hashes
-for unordered values. The current data epoch is 7, journal version 4,
-checkpoint version 5 and backup version 2. Current homogeneous native payloads,
-KLT2 and replica2 retain their explicit format fences. Readers reject unsupported
-formats before effects; Compact preserves opaque current records.
-[CurrentFormat](Features/StorageRecovery/CurrentFormat.md) and
-[ADR-011](ADR/ADR-011-current-native-format.md) define strict admission,
-read-only identity and capability validation, ordered current journal recovery,
-backup validation and bounded restore. New-incarnation blob restore normalizes
-only current authority metadata, with persisted accounting and phase fences.
-Current process recovery and genuine Docker/Aspire RF3 qualification remain
-required at the delivered source. The owner contract is
-[ADR-116](ADR/ADR-116-first-release-current-format.md).
-
-```mermaid
-flowchart LR
-    Public[Public JSON protocol] --> Typed[Attributed owned DTOs]
-    Typed --> Native[Cached Orleans codecs and pooled sessions]
-    Native --> Records[Typed records and versioned metadata]
-    Native --> Peers[Grain and replica binary payloads]
-    Native --> Claims[Signed native claims]
-    Records --> Files[Node local ZoneTree and atomic WAL]
-    Peers --> Admission[Signature scope and bounded native inspection]
-    Typed --> Identity[Frozen canonical fingerprint material]
+    AppHost[comparisons Aspire resource] --> ComparisonHost[TUnit C# client workload]
+    ComparisonHost --> ComparisonLibrary[Public harness library]
+    ComparisonTests[Real TUnit and engine tests] --> ComparisonLibrary
 ```
 
 ```mermaid
 classDiagram
-    NativeSerialization --> NativePayload : versioned generated root
-    NativeSerialization --> NativeSerializerProviders : cached official providers
-    NativePayload --> NativeJsonValue : structural DOM surrogate
-    ZoneTreeIdentityFile --> ZoneTreeMetadataBinary : explicit format fence
-    ReplicaProtocolCodec --> ReplicaEntryBatch : exact encoded byte accounting
-    GrainRequestEnvelope --> GrainValue : attributed native boundary
+    class ComparisonTests
+    class Neo4jHarnessRegression
+    class BenchmarkSession
+    class Neo4jTarget
+    class Neo4jQueryResponse
+    ComparisonTests --> Neo4jHarnessRegression : existing Aspire endpoint
+    Neo4jHarnessRegression --> BenchmarkSession : real load and failed prerequisites
+    BenchmarkSession --> Neo4jTarget : native target contract
+    Neo4jTarget --> Neo4jQueryResponse : parsed acknowledgement
 ```
-
-## Isolated read/control admission integration
-
-[ADR-036](ADR/ADR-036-orleans-foundation.md) TASK-ISO-021 separates signed
-application ReadProbe/ReadBarrier admission from trusted native membership
-ControlReadBarrier and heartbeat reserve. ClusterReplication owns real consensus
-rounds/strict new-method guards; Orleans ClusterReplication owns signed
-classification/replay snapshots, and ClusterRouting owns the same node-owned
-consensus membership read. Production RF3, operation-context isolation, persisted
-authorization, ordered apply and node-local ZoneTree ownership remain required.
 
 ```mermaid
 flowchart LR
-  Request[Authorized operation on connection grain] --> AppRead[Application read barrier]
-  AppRead --> Probe[Signed empty ReadProbe]
-  Probe --> ReadPool[Bounded ReadBarrier pool]
-  Membership[Native membership table] --> Control[Trusted control read]
-  Control --> Heartbeat[Signed control barrier and empty Append]
-  Heartbeat --> Critical[Reserved Critical pool]
-  ReadPool --> Receiver[Node owned consensus and apply]
-  Critical --> Receiver
-  Receiver --> Store[Committed ZoneTree read cut]
+    Corpus[Deterministic UTC samples] --> KeyLoad[KeyLoad cluster via SDK]
+    Corpus --> Timescale[TimescaleDB via Npgsql]
+    Corpus --> MCTS[ManagedCode.TimeSeries memory aggregation]
+    KeyLoad --> Oracle[Separate result and guarantees]
+    Timescale --> Oracle
+    MCTS --> Oracle
 ```
 
-Numeric quota/configuration logs retain actual pool evidence; they cannot alone
-prove successful control execution under pressure. Native Linux one-node/three-node and genuine
-Docker/Aspire RF3/fault gates remain required before performance/publication.
-
-
-Native time-series target adapters, deterministic phase/attempt primitives,
-clock contracts and correctness oracles remain under BenchmarkComparisons.
-The superseded standalone Run/report orchestration and its warmup/five-repetition
-accounting are retired by ADR-142. Meaningful ACK, ordering and failure-fact
-assertions remain required. Time-series integration into the shared session and
-its actual native Linux performance evidence remain pending.
-
-## Database term-read hot path
-
-The accepted [ClusterReplication term metadata contract](Features/ClusterReplication/ReplicaTermMetadata.md)
-and [ADR-061](ADR/ADR-061-bounded-replica-term-metadata.md) retain both public
-authorized quorum cuts, the fixed RF3/node-local storage boundary and every ACK,
-WAL, snapshot and strict error rule. Only one physical-log scalar term observation
-is reused at the same gated provider position/authority. Source discovery does
-not establish the contribution of any stage to native latency.
-
-```mermaid
-flowchart LR
-    SDK[Public SDK or MCP] --> Auth[Fresh authentication on connection grain]
-    Auth --> AuthCut[Authorized RF3 quorum cut]
-    AuthCut --> Credentials[Persisted credential and principal]
-    Credentials --> Request[Fresh operation on same connection grain]
-    Request --> OperationCut[Authorized RF3 operation cut]
-    OperationCut --> Host[Node local PartitionHost]
-    Host --> Log[Physical replica log]
-    Log --> Store[Actual ZoneTree read gate and health]
-    Store --> Term[One scalar term observation at exact authority and cut]
-```
+Embedded ZoneTree microbenchmarks
+([ADR-047](ADR/ADR-047-embedded-benchmark-host.md)) use the actual generated
+consumer for local development and never qualify the required scales.
 
 ```mermaid
 classDiagram
-    class PartitionHost
-    class DurableReplicaLog
-    class ReplicaTermObservation
-    class IAtomicStore
+    class BenchmarkComparisonRunner
+    class EmbeddedBenchmarks
+    class GeneratedBenchmarkRunner
     class ZoneTreeStore
-    PartitionHost --> DurableReplicaLog : physical owner
-    DurableReplicaLog --> ReplicaTermObservation : one scalar cell under typed Lock
-    DurableReplicaLog --> IAtomicStore : gated read and durable commit
-    ZoneTreeStore ..|> IAtomicStore
+    BenchmarkComparisonRunner --> EmbeddedBenchmarks : selects fixture assembly
+    GeneratedBenchmarkRunner --|> EmbeddedBenchmarks : upstream generated inheritance
+    EmbeddedBenchmarks --> ZoneTreeStore : owns actual embedded fixture storage
 ```
 
-Implementation/new real-store term regressions, delivered-SHA native full gates
-and matched performance/server profiles remain pending. Per-request Orleans
-actors never own the cell or files. No distributed data-cache enablement is
-inferred from this separate private log optimization.
-
-## Intensive TimeSeries executable input ownership
-
-The staged [ADR059 input contract](ADR/ADR-059-isolated-intensive-timeseries.md)
-links the closed6-preflight/30-cell family plan to one native engine/group and
-private host settings. AppHost owns selected resource composition, Host owns
-validated input/lifetime, Comparisons owns common corpus/oracles/attempts, and
-ComparisonTests owns later actual member/copy/SDK/MCP qualification. Existing
-productionRF3 and270 comparison contracts remain. Input source/model readiness
-does not establish native copies, completed measurements or publication.
+[ADR-080](ADR/ADR-080-benchmark-failure-isolation.md) keeps the full planned-cell
+inventory while terminal workload failures coexist with successful measurements:
+a failed job stays failed, has a null report and shows no numeric result.
 
 ```mermaid
 flowchart LR
-    Configuration[Selected family configuration] --> Plan[FamilyPlan and original contract hash]
-    Plan --> Resources[AppHost native group and one runner]
-    Plan --> Settings[ComparisonHost validated private settings]
-    Resources --> Native[Pending actual member ACK and copy checks]
-    Settings --> Native
-    Native --> Raw[Original settled run JSON]
-    Raw --> Cohort[Pending authenticated complete family and site]
-```
-
-```mermaid
-classDiagram
-    class TimeSeriesIntensiveFamilyPlan
-    class IsolatedTimeSeriesBenchmarkResources
-    class TimeSeriesIntensiveHostSettings
-    class TimeSeriesIntensiveHostNativeSettings
-    class ComparisonExecutionIdentity
-    TimeSeriesIntensiveFamilyPlan --> IsolatedTimeSeriesBenchmarkResources
-    TimeSeriesIntensiveFamilyPlan --> TimeSeriesIntensiveHostSettings
-    TimeSeriesIntensiveHostSettings --> TimeSeriesIntensiveHostNativeSettings
-    TimeSeriesIntensiveHostSettings --> ComparisonExecutionIdentity
-```
-
-
-SG009P adds a private real-process qualification boundary for the original-store
-inspection guard (ADR-059 / REQ-STORAGE-015 / AC-SG009P-001..004). Root owns the
-facade/friends/dispatch; child owns guarded original handles, parent owns existing
-outer lock and original process/pipe settlement. Native benchmark control and
-physical business-copy verification remain separate undelivered joins.
-
-```mermaid
-flowchart LR
-    Unit[Real file TUnit fixture] --> Parent[Existing outer lock and process owner]
-    Parent --> Protocol[Bounded private input]
-    Protocol --> Crash[Original Release CrashHost inspector]
-    Crash --> Guard[Original store guard]
-    Guard --> Facts[Safe actual identity data errors]
-    Facts --> Join[Actual exit and both readers]
-    Join --> Reopen[Release then normal reopen]
-```
-
-```mermaid
-classDiagram
-    class ExistingStoreInspectorProcess
-    class ExistingStoreInspector
-    class ExistingStoreInspectorProtocol
-    class ZoneTreeExistingStore
-    ExistingStoreInspectorProcess --> ExistingStoreInspectorProtocol : bounded stdin
-    ExistingStoreInspector --> ExistingStoreInspectorProtocol : safe receipt
-    ExistingStoreInspector --> ZoneTreeExistingStore : owns guarded runtime
-    ExistingStoreInspectorProcess --> ExistingStoreInspector : original child lifetime
+  Job[Independent native Aspire cell] --> Result[Measured or failed null report]
+  GitHub[Actual job steps and immutable artifact] --> Proof[Same source run attempt validation]
+  Result --> Proof
+  Proof --> Aggregate[Complete planned-cell aggregate]
+  Aggregate --> Qualification[Site tests browser coverage freshness]
+  Qualification --> Site[Values or no data and original job links]
 ```
 
 ## Delivery workflows
 
 [ADR-064](ADR/ADR-064-workflow-release-delivery.md) and
 [ADR-062](ADR/ADR-062-workflow-separation.md) define exactly four workflows.
-`build-and-tests.yml` (`Build and Tests`) owns PR/main/manual build, format, rules, analyzers,
-normal/scalar units, current process recovery and genuine Docker/Aspire RF3
-SDK/MCP qualification. `benchmarks.yml` (`Benchmarks`) owns the complete isolated
-Linux database groups and authenticated aggregation. Its settled final dispatch
-triggers `website.yml` (`Website`), which owns its own main/manual triggers,
-content/browser/source/coverage gates and Pages publication. Website metrics
-require a complete comparable authenticated cohort; unavailable measurements
-remain explicit. `release.yml` (`Release`) owns the separate release contract.
-
-[ReleaseDelivery](Features/ReleaseDelivery.md) owns `release.yml` (`Release`): an
-immutable UTC version reservation `vM.m.yyMMdd.N`, full build/packages, self-contained
-Linux server/CLI RF3 distribution and actual versioned Docker exports. Publication
-requires successful exact-source CI, verifies asset hashes, and creates immutable
-tag, GHCR images and GitHub Release. Packaging does not establish runtime/endurance
-qualification. Provider and exact-SHA proof remain separate from source integration.
+`build-and-tests.yml` (`Build and Tests`) owns PR/main/manual build, format,
+rules, analyzers, unit, process recovery and Docker/Aspire cluster SDK/MCP tests;
+benchmark contracts run only in Benchmarks
+([ADR-117](ADR/ADR-117-native-tunit-ci-entry.md)). `benchmarks.yml`
+(`Benchmarks`) owns the isolated Linux database groups and authenticated
+aggregation and ends with a bounded dispatch of `website.yml` (`Website`).
+Website publishes independently on trusted main changes or manual dispatch and
+uses the newest ready authenticated benchmark aggregate when one exists
+([ADR-112](ADR/ADR-112-independent-website-publication.md)). `release.yml`
+(`Release`) stays manual ([ReleaseDelivery](Features/ReleaseDelivery.md)): an
+immutable UTC version `vM.m.yyMMdd.N`, packages, self-contained server/CLI
+distribution and versioned images built by the .NET SDK `PublishContainer`
+target. Packaging does not establish runtime or endurance qualification.
 
 ```mermaid
 flowchart LR
@@ -1055,83 +782,6 @@ flowchart LR
     Gate --> Publish
 ```
 
-## Awaited native search execution
-
-Native Search scheduling follows [ADR-081](ADR/ADR-081-awaited-native-search-execution.md):
-one analytical reservation spans the complete awaited default-scheduler read and
-native settlement while the Orleans connection grain yields. Physical handles,
-committed state and authorization remain node-local/canonical. Genuine RF3
-liveness qualification is required before claiming the scheduler repair delivered.
-
-## Managed ANN computational candidate
-
-[ADR-019](ADR/ADR-019-managed-ann.md) and [ManagedAnn](Features/Search/ManagedAnn.md)
-define the immutable Query/Search computational candidate. A private builder
-copies bounded canonical vector input into owned packed arrays. Each search uses
-its own admitted scratch and the existing exact metric implementation. This
-candidate is not connected to public search; node-local projection persistence,
-source-cut replay and authorized public approximation require their separate
-accepted contracts and actual qualification.
-
-[ManagedAnnSeed](Features/Search/ManagedAnnSeed.md) freezes the R2A input boundary:
-Core/Search captures persisted authority, copied full-space visible vectors and
-scalar source/applied/outbox witnesses inside one node-local read cut. Its private
-ordinal sort and exact-bit hash run after releasing the storage gate, under finite
-owned/peak/work limits. No signing key, full document, view or store handle escapes.
-This local seed is historical input, not current authorization, pinned replay or
-a published ANN generation. Orleans projection coordination and public native
-CQRS/identity integration require their subsequent accepted contracts and gates.
-The R2A local development checkpoint passed 34/34 actual Aspire normal and scalar
-cases after full Release/formatter/governance checks; source/runtime inventory
-proof and retained originals are linked from the seed spec. Persistent projection,
-current public authorization and delivered-source Linux/RF3 acceptance stay open.
-
-```mermaid
-classDiagram
-    AnnSeedCollector --> ReadExecutionBudget : one charged canonical cut
-    AnnSeedCollector --> AnnSeed : owned historical input
-    AnnSeed --> PackedAnnBuilder : later explicit integration
-    AnnWorkBudget --> ReadExecutionBudget : work and elapsed checks
-    PackedAnnBuilder --> PackedAnnGraph : actual level offsets
-    PackedAnnBuilder --> PackedAnnVectors : owned bounded blocks
-    PackedAnnBuilder --> PackedAnnIndex : complete immutable state
-    PackedAnnIndex --> AnnWorkBudget : per call admission
-    PackedAnnIndex --> PreparedSimilarity : unchanged scores
-    PackedAnnIndex --> AnnSearchResult : candidates mode and counters
-```
-
-## Independent benchmark failure publication
-
-[ADR-080](ADR/ADR-080-benchmark-failure-isolation.md) and
-[BenchmarkComparisons](Features/BenchmarkComparisons.md) preserve the full native
-planned-cell inventory while allowing terminal workload failures to coexist with
-successful measurements. The original GitHub job/step remains failed, its bounded
-worker envelope has a null report, and the site has no numeric result for that
-cell. The aggregate and site jobs explicitly wait for all matrices and run after
-failures; image authority, authenticated artifacts, fairness, full website
-qualification and freshness remain mandatory. KeyLoad engine repair is separate.
-
-```mermaid
-flowchart LR
-  Job[Independent native Aspire cell] --> Result[Measured or failed null report]
-  GitHub[Actual job steps and immutable artifact] --> Proof[Same source run attempt validation]
-  Result --> Proof
-  Proof --> Aggregate[Complete planned-cell aggregate]
-  Aggregate --> Qualification[Site tests browser coverage freshness]
-  Qualification --> Site[Values or no data and original job links]
-```
-
-## Independent optional benchmark website publication
-
-[ADR-112](ADR/ADR-112-independent-website-publication.md) and
-[REQ/AC-BC-WEB-001..007](Features/BenchmarkComparisons.md) let Website publish website
-source independently. The latest ready authenticated benchmark aggregate enriches
-the website when available; absence emits no metric catalog or figures. Content
-and measured artifacts have distinct complete applicable qualification, and
-predeploy rechecks actual website/control source plus ready-data identity or null.
-The final own-main Benchmarks job only dispatches the independent Website workflow;
-Website authenticates and awaits that run's completion before selecting ready data.
-
 ```mermaid
 flowchart LR
   Source[Website source] --> Website[Separate Website qualification]
@@ -1143,26 +793,5 @@ flowchart LR
   Fresh --> Pages[Pages]
 ```
 
-Source implementation and actual qualification/publication evidence are tracked
-in the feature specification. This architecture contract alone is not deployment
-proof. Existing benchmark/db/RF3 gates remain separate and mandatory.
-
-Build and Tests (`build-and-tests.yml`) retains solution build and ordinary tests. Website
-(`website.yml`) has no build/test workflow dependency; Benchmarks produces JSON
-and Release remains manual. This four-workflow correction supersedes the earlier
-three-workflow map without changing database qualification.
-
-Owner correction 2026-10-06: benchmark unit contracts and their exclusive helpers
-are owned by `tests/KeyLoad.ComparisonTests/BenchmarkComparisons/UnitContracts/`
-and run only in Benchmarks. `KeyLoad.UnitTests` owns functional database tests.
-Build and Tests compiles the complete solution and runs functional
-analyzer/unit/scalar/recovery/RF3 gates; RF3 prepares only the server image.
-See TestInfrastructure REQ/AC-TEST-PIPELINE-001 and ADR-074.
-
-Owner correction 2026-10-17: ordinary deployment selects silo count and physical
-copy count independently through `SiloCount` and `ReplicaCount`, retaining the
-3/3 default and all RF3 gates. Additional silos host native Orleans infrastructure
-without advertising database grains or opening storage. Product images are
-published by the .NET SDK PublishContainer target, orchestrated by Aspire;
-there is no product Dockerfile or root .dockerignore. Specialized fault/coverage
-instrumentation retains its separate test context. See [ADR-143](ADR/ADR-143-independent-silo-replica-topology.md).
+Delivered-source qualification comes only from exact-source Linux GitHub runs
+with their original artifacts; local runs are development evidence.

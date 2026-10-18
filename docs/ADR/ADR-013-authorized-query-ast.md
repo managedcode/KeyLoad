@@ -1,6 +1,6 @@
 # ADR-013: One authorized query AST across interfaces
 
-Status: Accepted; full equivalence qualification pending. Related product source: [sections 13, 23–26, and 29–30](../design/architecture-v0.3.uk.md); current implementation is tracked in [QueryExecution](../Features/QueryExecution.md).
+Status: Accepted; full equivalence qualification pending. Related product source: [sections 13, 23–26, and 29–30](../design/product-specification.md); current implementation is tracked in [QueryExecution](../Features/QueryExecution.md).
 
 ## Context and decision
 
@@ -12,7 +12,7 @@ One execution contract avoids permission and ranking discrepancies between inter
 
 ## Related requirements
 
-QueryExecution [REQ-QUERY-004](../Features/QueryExecution.md#повний-query-contract)/[AC-QUERY-004](../Features/QueryExecution.md#повний-query-contract), [REQ-QUERY-005](../Features/QueryExecution.md#повний-query-contract)/[AC-QUERY-005](../Features/QueryExecution.md#повний-query-contract), [REQ-QUERY-006](../Features/QueryExecution.md#повний-query-contract)/[AC-QUERY-006](../Features/QueryExecution.md#повний-query-contract), and [REQ-QUERY-007](../Features/QueryExecution.md#повний-query-contract)/[AC-QUERY-007](../Features/QueryExecution.md#повний-query-contract) cover capability/version rejection, cross-interface AST semantics, planner/cursor security, and explicitly planned extensions; baseline requirements REQ-QUERY-001..003 remain applicable. DocumentStorage `REQ-DSTORE-003`; Search `REQ-SR-001..005`. [ADR-012](ADR-012-sql-dialect.md) owns SQL syntax; [ADR-010](ADR-010-query-budgets-security.md) budgets/security and [ADR-014](ADR-014-principals-rbac-row-policy.md) authorization rules apply.
+QueryExecution [REQ-QUERY-004](../Features/QueryExecution.md)/[AC-QUERY-004](../Features/QueryExecution.md), [REQ-QUERY-005](../Features/QueryExecution.md)/[AC-QUERY-005](../Features/QueryExecution.md), [REQ-QUERY-006](../Features/QueryExecution.md)/[AC-QUERY-006](../Features/QueryExecution.md), and [REQ-QUERY-007](../Features/QueryExecution.md)/[AC-QUERY-007](../Features/QueryExecution.md) cover capability/version rejection, cross-interface AST semantics, planner/cursor security, and explicitly planned extensions; baseline requirements REQ-QUERY-001..003 remain applicable. DocumentStorage `REQ-DSTORE-003`; Search `REQ-SR-001..005`. [ADR-012](ADR-012-sql-dialect.md) owns SQL syntax; [ADR-010](ADR-010-query-budgets-security.md) budgets/security and [ADR-014](ADR-014-principals-rbac-row-policy.md) authorization rules apply.
 
 ## Implementation contract
 
@@ -20,7 +20,7 @@ QueryExecution [REQ-QUERY-004](../Features/QueryExecution.md#повний-query-
 2. Add differential TUnit fixtures for SQL/JSON/C# success, denial, NULL/edge cases, ordering/ties, cursor, budget exhaustion, and unsupported constructs.
 3. Own shared AST in `src/KeyLoad.Abstractions/QueryExecution/`; adapters in `src/KeyLoad.Query/QueryExecution/`; authorization and operators remain with their owning security/search/data slices.
 4. Rollout adds an AST version only with compatible capability negotiation. Rollback disables that version; no interface may retain an independent weaker executor as a fallback.
-5. GitHub CI runs semantic TUnit and real RF3 SDK calls across supported interfaces; root joins Query, Authorization, and Search owners on exact result/error comparisons.
+5. GitHub CI runs semantic TUnit and real cluster SDK calls across supported interfaces; exact result/error comparisons across interfaces are required.
 
 Dependencies: [ADR-010](ADR-010-query-budgets-security.md), [ADR-012](ADR-012-sql-dialect.md), [ADR-014](ADR-014-principals-rbac-row-policy.md), [ADR-015](ADR-015-sensitive-data-lineage.md), [ADR-018](ADR-018-global-rank-fusion.md), [ADR-019](ADR-019-managed-ann.md), and [ADR-020](ADR-020-independent-query-contexts.md). Stop if a mapping changes a security barrier or unsupported syntax becomes executable without planned tests.
 

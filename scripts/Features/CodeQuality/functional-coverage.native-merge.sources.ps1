@@ -17,7 +17,7 @@ function Assert-FcNativeProductSourceTrees([object] $Manifest, [object] $Bounds)
 
 function Assert-FcNativeTestSourceImages([object] $Images, [object] $Bounds) {
     $seen = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
-    foreach ($suite in @('unit','recovery','rf3')) {
+    foreach ($suite in @('unit','recovery','cluster')) {
         $image = $Images[$suite]
         if (-not $seen.Add([string] $image.path)) { continue }
         $identity = $image.identity

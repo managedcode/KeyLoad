@@ -7,8 +7,8 @@ namespace KeyLoad.IntegrationTests.Features.Messaging;
 
 internal static class CompetingInboxPublicRace
 {
-    internal static async Task RunAsync(CompetingInboxPublicState state, RequestCqrsRf3Callers sdk,
-        RequestCqrsRf3Callers official, CancellationToken token)
+    internal static async Task RunAsync(CompetingInboxPublicState state, RequestCqrsClusterCallers sdk,
+        RequestCqrsClusterCallers official, CancellationToken token)
     {
         var delivery = await CompetingInboxPublicSeed.ReceiveAsync(state, sdk, CompetingInboxPublicProtocol.First, token);
         state.Candidates = [state.Processing(delivery, CompetingInboxPublicProtocol.Effect, state.Json(CompetingInboxPublicProtocol.FirstCandidate)),
@@ -62,13 +62,13 @@ internal static class CompetingInboxPublicRace
         ServerFailureObserver.ThrowIfAny(failures);
     }
     private static async Task<Result<CommitReceipt>> FirstAsync(CompetingInboxPublicState state,
-        RequestCqrsRf3Callers sdk, Task release, CancellationToken token)
+        RequestCqrsClusterCallers sdk, Task release, CancellationToken token)
     {
         await release.WaitAsync(token);
         return await sdk.Sdk.CommitProcessingAsync(state.Candidates[CompetingInboxPublicProtocol.FirstCandidate], token);
     }
     private static async Task<CallToolResult> SecondAsync(CompetingInboxPublicState state,
-        RequestCqrsRf3Callers official, Task release, CancellationToken token)
+        RequestCqrsClusterCallers official, Task release, CancellationToken token)
     {
         await release.WaitAsync(token);
         return await official.Mcp.CallAsync(McpCallerTools.MessagesProcess,

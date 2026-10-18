@@ -113,8 +113,8 @@
         <ul class="stage-pins" aria-label="What the illustration stands for">
           <li><b>MCP</b> server built in</li>
           <li><b>SQL</b> shared language</li>
-          <li><b>RF3</b> three replicas</li>
-          <li><b>Orleans</b> grain per connection</li>
+          <li><b>Orleans</b> runs the cluster</li>
+          <li><b>Grain</b> per connection</li>
         </ul>
         <div class="scene-caption-row">
           <figcaption id="scene-caption"><span class="caption-kicker">Every model. One connected database.</span><small class="scene-reference">Built for the whole agent workflow. <a href="https://learn.microsoft.com/dotnet/orleans/overview#what-are-grains" target="_blank" rel="noreferrer">Explore Orleans ↗</a></small></figcaption>
@@ -125,7 +125,7 @@
         <li><strong>Connected models</strong><span>Documents, rows, graphs and queued work share references and persisted permissions.</span></li>
         <li><strong>MCP built in</strong><span>Agents query, read and write through the built-in MCP server, under the same permissions.</span></li>
         <li><strong>Policy in the database</strong><span>Credentials and authorization live server-side; callers cannot claim trusted roles.</span></li>
-        <li><strong>.NET 10 · Orleans · RF3</strong><span>Three replicas of your data, each on its own node.</span></li>
+        <li><strong>.NET 10 · Orleans · ZoneTree</strong><span>Orleans runs the cluster and copies your data to several nodes, three by default.</span></li>
       </ul>
     </section>
 
@@ -196,9 +196,9 @@
       <div class="anatomy-grid">
         <ol class="anatomy-steps">
           <li><span class="step-no" aria-hidden="true">01</span><div><h3>The agent calls a tool</h3><p>An MCP tool call or SDK command arrives with a credential the database verifies against its own stored policy.</p></div></li>
-          <li><span class="step-no" aria-hidden="true">02</span><div><h3>A grain takes the request</h3><p>Every request runs in its own Orleans grain, which invokes only the database grains it needs.</p></div></li>
+          <li><span class="step-no" aria-hidden="true">02</span><div><h3>The connection grain takes it</h3><p>Each connected client has its own Orleans grain. It calls the partition grains and ZoneTree on this node or on other nodes.</p></div></li>
           <li><span class="step-no" aria-hidden="true">03</span><div><h3>The partition commits atomically</h3><p>The document, its event and the follow-up job are written together, or none of them are.</p></div></li>
-          <li><span class="step-no" aria-hidden="true">04</span><div><h3>Three replicas store it</h3><p>A majority of the three node-local replicas persists the commit before the call returns.</p></div></li>
+          <li><span class="step-no" aria-hidden="true">04</span><div><h3>Copies on several nodes</h3><p>Orleans carries the write to the ZoneTree of each replica node. A majority of copies persists it before the call returns.</p></div></li>
         </ol>
         <div class="terminal kl-graphite">
           <article class="code-card"><header><span class="code-tag">MCP</span>Agent · SQL read over MCP</header><pre><code><span class="tok-key">tool</span>  keyload_query_execute
@@ -243,15 +243,14 @@
         <div class="engine-copy">
           <p class="eyebrow">Built on .NET 10 and Orleans</p>
           <h2 id="engine-title">A grain per connection. Parallel operations.</h2>
-          <p>Orleans gives each connection one grain that runs bounded parallel operations and commands, with separate request identities and fresh authorization. It finds the right partition through a distributed grain directory. Grains can move between nodes to balance load; ZoneTree files, write-ahead logs and the ordered commit gate stay with each node's PartitionHost.</p>
-          <p class="engine-note">Activation-migration qualification is still in progress.</p>
+          <p>Orleans runs the whole cluster: membership, placement, migration and the calls between nodes. Each connection gets one grain that runs bounded parallel operations with fresh authorization. Grains reach ZoneTree on their own node or on other nodes, gather the results and return them. Every node keeps its own ZoneTree files and write-ahead log; grains may move, files stay.</p>
           <a class="text-link" href="https://github.com/managedcode/KeyLoad/blob/main/docs/Features/ClusterRouting.md">Cluster routing contract <span aria-hidden="true">↗</span></a>
         </div>
         <ol class="stack" aria-label="Request path through the engine">
           <li class="layer"><span class="layer-tag">Callers</span><span class="layer-body"><span class="pill">MCP server</span><span class="pill">.NET SDK</span><span class="pill">SQL</span></span></li>
           <li class="layer"><span class="layer-tag">Connection grain</span><span class="layer-body">One Orleans grain per connection, with bounded parallel operations</span></li>
-          <li class="layer"><span class="layer-tag">Partition grains</span><span class="layer-body">Atomic partitions, routed not pinned</span></li>
-          <li class="layer layer--hosts"><span class="layer-tag">PartitionHost × 3</span><span class="hosts"><span class="host"><b>Node A</b>ZoneTree · WAL<small>apply gate</small></span><span class="host"><b>Node B</b>ZoneTree · WAL<small>apply gate</small></span><span class="host"><b>Node C</b>ZoneTree · WAL<small>apply gate</small></span></span></li>
+          <li class="layer"><span class="layer-tag">Partition grains</span><span class="layer-body">Atomic partitions, placed and moved by Orleans</span></li>
+          <li class="layer layer--hosts"><span class="layer-tag">ZoneTree on every node</span><span class="hosts"><span class="host"><b>Node A</b>ZoneTree · WAL<small>apply gate</small></span><span class="host"><b>Node B</b>ZoneTree · WAL<small>apply gate</small></span><span class="host"><b>Node C</b>ZoneTree · WAL<small>apply gate</small></span></span></li>
         </ol>
       </div>
     </section>
@@ -295,7 +294,7 @@
     <section class="ledger" aria-labelledby="ledger-title">
       <header class="section-head">
         <div><p class="eyebrow">Qualification status</p><h2 id="ledger-title">Built in public.<br>Progress you can inspect.</h2></div>
-        <p class="section-intro">The original plan has 104 tasks. Source implementation and accepted qualification are separate milestones. Follow the live tracker for what is ready and what remains.</p>
+        <p class="section-intro">Source implementation and accepted qualification are separate milestones. The README status shows what is ready and what remains.</p>
       </header>
       <div class="ledger-grid">
         <article class="ledger-col ledger-col--open"><h3>Ready to inspect</h3><ul>
@@ -308,11 +307,10 @@
           <li>Production readiness</li>
           <li>Power-loss durability; process-kill tests do not prove it</li>
           <li>Endurance and overload behavior</li>
-          <li>Qualified activation migration</li>
-          <li>A performance winner</li>
+                    <li>A performance winner</li>
         </ul></article>
       </div>
-      <div class="status-links"><a class="text-link" href="https://github.com/managedcode/KeyLoad#project-status">Explore the 104-task plan <span aria-hidden="true">↗</span></a><a class="text-link" href="https://github.com/managedcode/KeyLoad/actions">Review current checks <span aria-hidden="true">↗</span></a></div>
+      <div class="status-links"><a class="text-link" href="https://github.com/managedcode/KeyLoad#project-status">Read the project status <span aria-hidden="true">↗</span></a><a class="text-link" href="https://github.com/managedcode/KeyLoad/actions">Review current checks <span aria-hidden="true">↗</span></a></div>
     </section>
 
     <section class="methodology-section" id="methodology" aria-labelledby="methodology-title">
@@ -329,7 +327,7 @@
 
     <section class="reproduce" aria-labelledby="reproduce-title">
       <div class="reproduce-inner kl-graphite">
-        <div><p class="eyebrow">Source available, reproducible inputs</p><h2 id="reproduce-title">Inspect the code. Run the suite.</h2><p>GitHub Actions starts the RF3 cluster and comparison engines in Docker through Aspire.</p></div>
+        <div><p class="eyebrow">Source available, reproducible inputs</p><h2 id="reproduce-title">Inspect the code. Run the suite.</h2><p>GitHub Actions starts the KeyLoad cluster and comparison engines in Docker through Aspire.</p></div>
         <div class="command-box"><span class="prompt" aria-hidden="true">$</span><code>gh workflow run benchmarks.yml --repo managedcode/KeyLoad --ref main</code><button id="copy-command" type="button" aria-label="Copy benchmark workflow command">Copy</button></div>
       </div>
     </section>

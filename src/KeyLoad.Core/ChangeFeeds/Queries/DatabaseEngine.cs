@@ -57,7 +57,7 @@ public sealed partial class DatabaseEngine
         }
         if (names.Length == ProjectionAcceptsEmptyResourcesLength)
         {
-            foreach (var resource in PartitionMoveResources.Capture(view, partition, Limits))
+            foreach (var resource in PartitionResourceCatalog.Capture(view, partition, Limits))
             {
                 _ = BindAuthorizedReadResource(view, partition, resource.Name);
             }

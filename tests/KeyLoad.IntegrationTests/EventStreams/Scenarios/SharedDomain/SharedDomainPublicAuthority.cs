@@ -13,7 +13,7 @@ internal static class SharedDomainPublicAuthority
             Grants = [],
             PolicyEpoch = RevokedEpoch
         };
-        await MessagingRf3Identity.UpdateAsync(fixture, revoked, token);
+        await MessagingClusterIdentity.UpdateAsync(fixture, revoked, token);
         state.Identity = state.Identity with
         {
             Principal = revoked
@@ -25,7 +25,7 @@ internal static class SharedDomainPublicAuthority
         {
             PolicyEpoch = RestoredEpoch
         };
-        await MessagingRf3Identity.UpdateAsync(fixture, restored, token);
+        await MessagingClusterIdentity.UpdateAsync(fixture, restored, token);
         state.Identity = state.Identity with
         {
             Principal = restored

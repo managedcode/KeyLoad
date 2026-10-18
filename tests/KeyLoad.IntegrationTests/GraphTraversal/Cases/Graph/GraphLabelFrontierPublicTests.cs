@@ -7,7 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.GraphTraversal;
 internal sealed class GraphLabelFrontierPublicTests(ClusterFixture fixture)
 {
     [Test]
-    public async Task OrdinalLabelsChargeExcludedCandidatesAndRetainRevisionReplacementAcrossTwoRf3ColdCuts()
+    public async Task OrdinalLabelsChargeExcludedCandidatesAndRetainRevisionReplacementAcrossTwoClusterColdCuts()
     {
         using var deadline = McpCallerDeadline.Create();
         await GraphLabelFrontierPublicTrial.RunAsync(fixture, deadline.Token);

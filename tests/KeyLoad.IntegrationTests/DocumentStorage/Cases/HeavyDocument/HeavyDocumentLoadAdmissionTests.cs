@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.IntegrationTests.Features.DocumentStorage;
 
-/// <summary>AC-METH-005: broad, disabled or covered native selections fail before acquiring a private RF3 fixture.</summary>
+/// <summary>AC-METH-005: broad, disabled or covered native selections fail before acquiring a private CLUSTER fixture.</summary>
 internal sealed class HeavyDocumentLoadAdmissionTests
 {
     private const string BroadFilter = "/*/*/*/*";
@@ -74,10 +74,10 @@ internal sealed class HeavyDocumentLoadAdmissionTests
                 configuration[HeavyDocumentLoadAdmission.CoveragePreparationEnvironment] = "[]";
                 break;
             case "coverage-mode":
-                configuration[NativeCoverageRf3FixtureProtocol.ModeEnvironment] = NativeCoverageRf3FixtureProtocol.Mode;
+                configuration[NativeCoverageClusterFixtureProtocol.ModeEnvironment] = NativeCoverageClusterFixtureProtocol.Mode;
                 break;
             case "coverage-setting":
-                configuration[CoverageSetting] = NativeCoverageRf3FixtureProtocol.Mode;
+                configuration[CoverageSetting] = NativeCoverageClusterFixtureProtocol.Mode;
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(invalid));

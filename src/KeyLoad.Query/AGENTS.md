@@ -1,28 +1,28 @@
 # KeyLoad.Query
 
-- Owner correction 2026-10-11 requires native SIMD on every supported product execution. The current shared hardware guard rejects unsupported hardware; Search uses native vector blocks and bounded remainder tails. Retire active `unit-scalar` or forced-disabled-intrinsics qualification below while preserving complete normal operation tests and immutable original historical evidence. Current native TUnit selection is ADR-117; fixtures retain Aspire lifecycle ownership.
+## Purpose, entry points and ownership
 
-## Purpose and entry points
 - Owns query parsing, validation, execution, search and live-query behavior.
 - Entry points/types: `QueryExecution/Execution/SqlParser.cs`, `QueryExecution/Validation/QuerySemantics/QueryValidation.cs`, `QueryExecution/Queries/QueryEngine.cs`, `Search/Queries/QueryExecution/SearchEngine.cs`, `ChangeFeeds/Execution/LiveQueries.cs`, and query AST definitions.
-
-## Ownership and boundaries
-- Query feature work belongs under `<SliceName>/` with matching canonical feature documentation. Query code consumes abstractions and database capabilities; it does not own storage, command routing, credentials, or physical placement.
-- Current root-level feature sources are migration debt; keep parsing, validation and execution contracts explicit and avoid leaking implementation-specific storage details through public query contracts.
+- Query feature work belongs under `<SliceName>/` with matching canonical feature documentation. Query code consumes abstractions and database capabilities; it does not own storage, command routing, or credentials.
 - Search and query authorization must honor persisted database policy; callers cannot provide trusted roles.
-
-## Commands and evidence
-- GitHub Actions solution build: `dotnet build KeyLoad.slnx --no-restore --configuration Release`.
-- Owner correction2026-10-03 requires query tests through `dotnet run --project build/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=unit`, or `unit-scalar`; public clients use `rf3` through that same AppHost entry. Preserve every complete suite, native artifacts and AppHost-owned resource cleanup. Local development is authorized; delivered-source Linux GitHub qualification remains mandatory.
-
-## Skills and protected risks
 - Applicable skills: none installed; skill installation is prohibited by owner direction.
 - Preserve resource budgets, cancellation, validation and error semantics. Local Aspire results are development evidence; qualification requires exact-source Linux GitHub Actions artifacts and every required gate.
 
-## Read-first and canonical slice ownership
-- Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
-- Owned slices: `QueryExecution`, `Search`, and `ChangeFeeds`; target paths: `QueryExecution/`, `Search/`, and `ChangeFeeds/`.
-- Keep parsing, execution, search and live-query behavior in the matching named slice; shared entry points remain composition/building blocks only.
-## Feature-local responsibility folders
+## Boundaries and protected risks
 
-- Every populated `<SliceName>/` source area MUST group feature-owned C# files in populated child folders by their actual responsibility (for example `Models/`, `Contracts/`, `Commands/`, `Queries/`, `Serialization/`, `Validation/`, `Recovery/`, `Admission/`, `Lifecycle/`, `Storage/`, or `Execution/` where applicable). Do not leave a flat mix of roles or create empty placeholders. Keep each role local to its owning feature; preserve namespaces, public signatures, serialization aliases/IDs, and source bytes during structural moves. Keep genuine project composition roots and shared cross-feature building blocks outside feature slices.
+Follow the [root policy](../../AGENTS.md) and the owning feature specification. Keep changes in their actual owner, preserve unrelated work, and remove replaced code together with exclusive callers and fixtures. Use native Orleans calls for distributed execution and silo-local ZoneTree owners for files. Preserve persisted authorization, operation correctness, resource bounds, cancellation and joined shutdown. Never turn a static check or focused test into a claim of complete runtime qualification.
+
+## Commands and verification
+
+From the repository root:
+
+```sh
+dotnet build KeyLoad.slnx --no-restore --configuration Release -warnaserror
+```
+
+Use the root's complete solution, native TUnit, real process recovery and Aspire SDK/MCP gates as applicable. Local checks are development evidence; delivered-source qualification and public measurements require exact-source Linux GitHub artifacts. Do not weaken compiler, analyzer, source-identity, coverage or runtime assertions.
+
+## Skills
+
+Use the installed Orleans skill for Orleans design and the relevant installed formatting, Aspire or diagnostics skill when the task needs it. Follow explicit owner scope and dependency-adoption rules.

@@ -13,7 +13,7 @@ internal static class AnnLifetimeNativeRead
             var bounded = work.CreateView(view);
             var principal = source.Database.Principal(bounded, AnnLifetimeNativeProtocol.Reader, source.Database.EvaluationClock.GetUtcNow());
             var definition = source.Database.Resource(bounded, source.Partition, AnnSeedTestSupport.Collection, ResourceKind.Collection);
-            var definitions = PartitionMoveResources.Capture(bounded, source.Partition, source.Database.Limits);
+            var definitions = PartitionResourceCatalog.Capture(bounded, source.Partition, source.Database.Limits);
             var coverage = PartitionControlLifetimeCoverage.Capture(bounded, source.Partition, definitions, source.Database.Limits.MaxBatchBytes);
             return new(definition, coverage, principal, definitions);
         });

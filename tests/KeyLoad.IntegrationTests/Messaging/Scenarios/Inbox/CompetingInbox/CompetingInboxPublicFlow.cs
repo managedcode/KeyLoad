@@ -38,14 +38,14 @@ internal static class CompetingInboxPublicFlow
             await ServerFailureObserver.ObserveAsync(() => WaveAsync(state, token), failures);
         }
         using var cleanup = new CancellationTokenSource(
-            KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsRf3Protocol.CleanupDeadline, state.Clock);
+            KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterProtocol.CleanupDeadline, state.Clock);
         await ServerFailureObserver.ObserveAsync(() => state.Cold.RequireAsync(cleanup.Token), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
     private static async Task BeforePolicyAsync(CompetingInboxPublicState state,
-        KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsRf3Callers root,
-        KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsRf3Callers sdk,
-        KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsRf3Callers official, CancellationToken token)
+        KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers root,
+        KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers sdk,
+        KeyLoad.IntegrationTests.Features.ClusterRouting.RequestCqrsClusterCallers official, CancellationToken token)
     {
         var failures = new List<Exception>();
         for (var index = 0; index < state.Candidates.Length; index++)

@@ -10,7 +10,7 @@ internal static class BlobListRowPolicyPublicPublication
 {
     internal static readonly string[] Ids = ["a-hidden", "b-visible", "c-hidden", "d-visible"];
 
-    internal static async Task<BlobSupersessionPublicTrial.Version[]> CreateAsync(RequestCqrsRf3Callers admin,
+    internal static async Task<BlobSupersessionPublicTrial.Version[]> CreateAsync(RequestCqrsClusterCallers admin,
         PartitionRef partition, CancellationToken token)
     {
         var versions = new BlobSupersessionPublicTrial.Version[Ids.Length];
@@ -22,10 +22,10 @@ internal static class BlobListRowPolicyPublicPublication
         return versions;
     }
 
-    private static async Task<BlobSupersessionPublicTrial.Version> PublishAsync(RequestCqrsRf3Callers admin,
+    private static async Task<BlobSupersessionPublicTrial.Version> PublishAsync(RequestCqrsClusterCallers admin,
         PartitionRef partition, int index, CancellationToken token)
     {
-        var blob = new BlobRef(partition, RelationalSqlRf3Tokens.Blobs, Ids[index]);
+        var blob = new BlobRef(partition, RelationalSqlClusterTokens.Blobs, Ids[index]);
         var owner = index % 2 == 0 ? BlobListRowPolicyPublicTrial.OwnerB : BlobListRowPolicyPublicTrial.OwnerA;
         byte[] bytes = [checked((byte)(index + 11)), checked((byte)(index + 31))];
         var begin = new BeginBlobUploadRequest(Guid.NewGuid(), blob, Guid.NewGuid(), bytes.LongLength, 0, new RowAccess(owner));
@@ -42,7 +42,7 @@ internal static class BlobListRowPolicyPublicPublication
         await Assert.That(completed.Value.PartCount).IsEqualTo(1);
         await Assert.That(completed.Value.VersionId).IsEqualTo(begin.UploadId);
         await Assert.That(completed.Value.IntegrityHash).IsEqualTo(hash);
-        await SqlRf3Protocol.EqualAsync(begin.Access, completed.Value.Access);
+        await SqlClusterProtocol.EqualAsync(begin.Access, completed.Value.Access);
         return new(begin, begun, part, written, complete, completed);
     }
 }

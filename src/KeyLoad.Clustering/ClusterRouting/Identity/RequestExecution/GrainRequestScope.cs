@@ -31,10 +31,10 @@ internal static class GrainRequestScope
         if (!NativeAdministratorAuthenticationScope.Validate(request)
             && !TextMaintenanceChildScope.Validate(request) && !MultiLaneReceiveChildScope.Validate(request)
             && !AnnProjectionJobChildScope.Validate(request) && !ResourceRetirementCommandScope.Validate(request) && !ResourceRetirementReadScope.Validate(request)
-            && !AnnMaintenanceChildScope.Validate(request) && !ResourceOwnerInventoryReadScope.Validate(request) && !TenantPlacementRequestScope.Validate(request)
+            && !AnnMaintenanceChildScope.Validate(request) && !ResourceOwnerInventoryReadScope.Validate(request)
             && !Bm25RequestScope.Validate(request) && !RemoteGraphRequestScope.Validate(request) && !AnnProjectionObservationScope.Validate(request)
-            && !EventVectorRequestScope.Validate(request) && !OnlineTextRequestScope.Validate(request) && !PartitionMovementRequestScope.Validate(request)
-            && !DocumentLifetimeReadScope.Validate(request) && !ControlledBlobReadScopeV2.Validate(request) && !ControlledBlobOutcomeReadScopeV2.Validate(request)
+            && !EventVectorRequestScope.Validate(request) && !OnlineTextRequestScope.Validate(request)
+            && !DocumentLifetimeReadScope.Validate(request)
             && !QueryLifetimeReadScope.Validate(request) && !AnnProjectionLifetimeObservationScope.Validate(request)
             && !RemoteTransferRequestScope.Validate(request))
         {

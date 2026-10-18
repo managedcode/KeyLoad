@@ -1,6 +1,6 @@
 function Get-FcScriptInventory {
     @((Get-ChildItem -LiteralPath $PSScriptRoot -File | Where-Object {
-        (Test-FcTaskAcceptanceScriptName $_.Name) -or $_.Name -like 'functional-coverage*.ps1'
+        $_.Name -like 'functional-coverage*.ps1'
     } | Sort-Object Name) | ForEach-Object {
         [ordered]@{ name = $_.Name; sha256 = Get-FcHash $_.FullName }
     })

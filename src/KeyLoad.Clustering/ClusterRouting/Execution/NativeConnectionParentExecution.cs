@@ -28,17 +28,6 @@ internal static class NativeConnectionParentExecution
         {
             return await EventVectorParentExecution.ExecuteAdmitAsync(request, services, clock, codec, context, writer, purpose.WorkBinding).ConfigureAwait(true);
         }
-        if (request.Envelope.CommandKind == OperationKind.ApplyPlacementIntent)
-        {
-            var result = await PlacementIntentParentExecution.ExecuteAsync(request, services, clock, writer).ConfigureAwait(true);
-            return GrainReplyFactory.ParentValue(result, options, writer.CancellationToken);
-        }
-        if (request.Envelope.CommandKind == OperationKind.MovePartition)
-        {
-            var result = await PartitionMoveParentExecution.ExecuteAsync(request, services, clock, codec,
-                context, writer).ConfigureAwait(true);
-            return GrainReplyFactory.ParentValue(result, options, writer.CancellationToken);
-        }
         if (request.Envelope.CommandKind == OperationKind.MaintainOnlineTextIndex)
         {
             var result = await OnlineTextExecution.ExecuteAsync(request, executeChild, services, codec,

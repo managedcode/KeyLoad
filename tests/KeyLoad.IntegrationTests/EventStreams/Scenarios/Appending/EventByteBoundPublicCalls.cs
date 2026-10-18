@@ -6,8 +6,8 @@ namespace KeyLoad.IntegrationTests.Features.EventStreams;
 
 internal static class EventByteBoundPublicCalls
 {
-    internal static async Task<(StreamPage Sdk, StreamPage Mcp)> ReadAsync(RequestCqrsRf3Callers admin,
-        RequestCqrsRf3Callers reader, EventByteBoundPublicState state, ReadStreamRequest request,
+    internal static async Task<(StreamPage Sdk, StreamPage Mcp)> ReadAsync(RequestCqrsClusterCallers admin,
+        RequestCqrsClusterCallers reader, EventByteBoundPublicState state, ReadStreamRequest request,
         int[] indices, bool more, long? snapshot, CancellationToken token)
     {
         var sdk = await McpCallerAssertions.SdkSuccessAsync(await reader.Sdk.ReadStreamAsync(request, token));
@@ -22,12 +22,12 @@ internal static class EventByteBoundPublicCalls
         return (sdk, mcp);
     }
 
-    internal static async Task ReplayAsync(RequestCqrsRf3Callers admin, EventByteBoundPublicState state, CancellationToken token)
+    internal static async Task ReplayAsync(RequestCqrsClusterCallers admin, EventByteBoundPublicState state, CancellationToken token)
     {
-        await SqlRf3Protocol.EqualAsync(state.Receipt,
+        await SqlClusterProtocol.EqualAsync(state.Receipt,
             await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.CommitAsync(state.Command, token)));
         await EventByteBoundPublicCurrent.ObserveAsync(admin, state, token);
-        await SqlRf3Protocol.EqualAsync(state.Receipt, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
+        await SqlClusterProtocol.EqualAsync(state.Receipt, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
             await admin.Mcp.CallAsync(McpCallerTools.DocumentsCommit, state.Command, token))).Value);
         await EventByteBoundPublicCurrent.ObserveAsync(admin, state, token);
     }

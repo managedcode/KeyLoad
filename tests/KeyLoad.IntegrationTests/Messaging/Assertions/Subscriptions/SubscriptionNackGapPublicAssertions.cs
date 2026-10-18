@@ -10,7 +10,7 @@ internal static class SubscriptionNackGapPublicAssertions
         SubscriptionDeliveryCommand request, long position, long version, CancellationToken token)
     {
         var result = await McpCallerAssertions.SdkSuccessAsync(await sdk.CompleteSubscriptionAsync(request, token));
-        await SubscriptionFilterRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(
+        await SubscriptionFilterClusterAssertions.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(
             await mcp.CallAsync(McpCallerTools.SubscriptionsComplete, request, token))).Value, result);
         await Assert.That(result.CommandId).IsEqualTo(request.CommandId);
         await Assert.That(result.Mutations).IsEquivalentTo(new MutationReceipt[] {
@@ -24,13 +24,13 @@ internal static class SubscriptionNackGapPublicAssertions
     {
         foreach (var saved in original.History)
         {
-            await SubscriptionFilterRf3Assertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
+            await SubscriptionFilterClusterAssertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
                 await sdk.CompleteSubscriptionAsync(saved.Request, token)), saved.Receipt);
-            await SubscriptionFilterRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(
+            await SubscriptionFilterClusterAssertions.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(
                 await mcp.CallAsync(McpCallerTools.SubscriptionsComplete, saved.Request, token))).Value, saved.Receipt);
         }
         await SubscriptionPhasePublicAssertions.ReceiveFailureAsync(sdk, mcp, original.Request, ErrorCode.StaleLease, token);
-        await SubscriptionFilterRf3Assertions.HistoryAsync(sdk, mcp, original.Request.Subscription.Source, original.Source, token);
+        await SubscriptionFilterClusterAssertions.HistoryAsync(sdk, mcp, original.Request.Subscription.Source, original.Source, token);
     }
 
     internal static async Task StaleAsync(KeyLoadClient sdk, McpOfficialClient mcp,
@@ -47,14 +47,14 @@ internal static class SubscriptionNackGapPublicAssertions
             await Assert.That(failure.Problem.Detail).IsEqualTo("The subscription delivery lease is stale.");
             await Assert.That(failure.Value).IsNull();
             var repeated = await sdk.CompleteSubscriptionAsync(request, token);
-            await SubscriptionFilterRf3Assertions.EqualAsync(repeated.Problem, failure.Problem);
+            await SubscriptionFilterClusterAssertions.EqualAsync(repeated.Problem, failure.Problem);
             await Assert.That(repeated.Value).IsNull();
             var reply = await mcp.CallAsync(McpCallerTools.SubscriptionsComplete, request, token);
             await McpCallerAssertions.ErrorAsync(reply, ErrorCode.StaleLease, true);
             var envelope = reply.StructuredContent ?? throw new InvalidOperationException("The stale lease envelope is absent.");
             await Assert.That(envelope.GetProperty(McpCallerProtocol.Error).GetProperty(McpCallerProtocol.ProblemDetail).GetString())
                 .IsEqualTo("The database operation could not be completed.");
-            await SubscriptionFilterRf3Assertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
+            await SubscriptionFilterClusterAssertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
                 await sdk.SubscriptionStatusAsync(group, token)), before);
         }
         await OriginalAsync(sdk, mcp, original, token);

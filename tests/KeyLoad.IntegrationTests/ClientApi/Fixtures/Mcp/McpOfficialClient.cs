@@ -27,7 +27,7 @@ internal sealed class McpOfficialClient : IAsyncDisposable
     internal McpClient Client => client ?? throw new InvalidOperationException(McpCallerProtocol.MissingClient);
 
     /// <summary>Connects using discovery-first stateless HTTP and the supplied actual bearer credential.</summary>
-    /// <param name="fixture">The real initialized RF3 cluster.</param>
+    /// <param name="fixture">The real initialized CLUSTER cluster.</param>
     /// <param name="node">The actual Aspire endpoint resource.</param>
     /// <param name="key">The actual credential, or null to test a missing bearer header.</param>
     /// <param name="cancellationToken">The external bounded caller lifetime.</param>

@@ -19,7 +19,7 @@ internal static class C1OutcomeInspectionProcessStartInfo
     {
         const string CreateResultText = "bin";
 
-        if (mode is not C1OutcomeInspectionProtocol.Mode and not NativeInstallFrameInspectionProtocol.Mode
+        if (mode is not C1OutcomeInspectionProtocol.Mode
             and not C1SubmissionOutcomeInspectionProtocol.Mode
             and not global::KeyLoad.CrashHost.Features.ClusterReplication.C1SubmissionJournalInspectionProtocol.Mode)
         {

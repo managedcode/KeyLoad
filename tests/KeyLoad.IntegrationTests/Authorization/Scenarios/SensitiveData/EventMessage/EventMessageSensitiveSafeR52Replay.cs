@@ -6,7 +6,7 @@ namespace KeyLoad.IntegrationTests.Features.Authorization;
 
 internal static class EventMessageSensitiveSafeR52Replay
 {
-    internal static async Task ReceiveAsync(RequestCqrsRf3Callers root, RequestCqrsRf3Callers caller,
+    internal static async Task ReceiveAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers caller,
         EventMessageSensitiveSafeR52State state, object request, object original, string id, CancellationToken token)
     {
         foreach (var route in QueueLifecyclePublicProtocol.Routes)
@@ -18,7 +18,7 @@ internal static class EventMessageSensitiveSafeR52Replay
         }
     }
 
-    internal static async Task ReceiptsAsync(RequestCqrsRf3Callers root, RequestCqrsRf3Callers worker,
+    internal static async Task ReceiptsAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers worker,
         EventMessageSensitiveSafeR52State state, CancellationToken token)
     {
         foreach (var route in QueueLifecyclePublicProtocol.Routes)
@@ -27,7 +27,7 @@ internal static class EventMessageSensitiveSafeR52Replay
             {
                 var actual = await QueueLifecyclePublicRoutes.CallAsync(root, route, state.Model.Partition,
                     McpCallerTools.DocumentsCommit, command, () => root.Sdk.CommitAsync(command, token), token);
-                await SqlRf3Protocol.EqualAsync(receipt, actual);
+                await SqlClusterProtocol.EqualAsync(receipt, actual);
                 await EventMessageSensitiveSafeR52Current.RequireAsync(root, state, token);
             }
             foreach (var (command, receipt) in state.Completions)
@@ -44,7 +44,7 @@ internal static class EventMessageSensitiveSafeR52Replay
                     actual = await QueueLifecyclePublicRoutes.CallAsync(worker, route, state.Model.Partition,
                         McpCallerTools.MessagesComplete, queue, () => worker.Sdk.CompleteAsync(queue, token), token);
                 }
-                await SqlRf3Protocol.EqualAsync(receipt, actual);
+                await SqlClusterProtocol.EqualAsync(receipt, actual);
                 await EventMessageSensitiveSafeR52Current.RequireAsync(root, state, token);
             }
         }

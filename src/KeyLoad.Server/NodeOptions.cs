@@ -1,212 +1,64 @@
 using System.Net;
-using KeyLoad.Clustering;
-using KeyLoad.Replication;
-using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.Server;
 
-/// <summary>Fixed cluster configuration and private physical node settings.</summary>
+/// <summary>Native Orleans hosting identity and the files exclusively owned by this silo.</summary>
 [ConfigurationOptions]
 internal sealed record NodeOptions
 {
-    /// <summary>Directory owned exclusively by one process, independent of grain placement.</summary>
-    public string DataDirectory { get; init; } = NodeDefaults.DataDirectory;
-    /// <summary>Stable configured voter identity and authenticated discovery HTTP origin.</summary>
-    public string PublicEndpoint { get; init; } = NodeDefaults.PublicEndpoint;
-    /// <summary>Fixed physical replica origins including the local origin, independent of Orleans membership.</summary>
-    public IReadOnlyList<string> Peers { get; init; } = [];
-    /// <summary>Trusted startup opt-in for isolated benchmark fixed groups of one or three voters.</summary>
-    public bool BenchmarkTopology
-    {
-        get; init;
-    }
-    /// <summary>Explicit development-only single physical voter; acknowledgement has no replica fault tolerance.</summary>
-    public bool DevelopmentSingleVoter
-    {
-        get; init;
-    }
-    /// <summary>Orleans cluster identity, shared by every voter.</summary>
-    public string ClusterId { get; init; } = NodeDefaults.ClusterId;
-    /// <summary>Independent physical shard identity shared by every configured voter and stable across restart.</summary>
-    public Guid PhysicalShardId
-    {
-        get; init;
-    }
-    /// <summary>Database incarnation, stable across process restarts and snapshot catch-up.</summary>
-    public Guid Incarnation
-    {
-        get; init;
-    }
-    /// <summary>Base64 database signing credential; stored only in the private node catalog.</summary>
+    /// <summary>Private directory containing this silo's ZoneTree files.</summary>
+    public string DataDirectory { get; init; } = "data/node";
+    /// <summary>Public API origin, independent of Orleans membership and data-copy selection.</summary>
+    public string PublicEndpoint { get; init; } = "http://127.0.0.1:5100";
+    /// <summary>Native Orleans silo name.</summary>
+    public string SiloName { get; init; } = Environment.MachineName;
+    /// <summary>Native Orleans cluster identity.</summary>
+    public string ClusterId { get; init; } = "keyload";
+    /// <summary>Number of provisioned Orleans silos.</summary>
+    public int SiloCount { get; init; } = 1;
+    /// <summary>Number of persisted data copies required for acknowledgement.</summary>
+    public int ReplicaCount { get; init; } = 1;
+    /// <summary>Database incarnation, stable across silo restarts.</summary>
+    public Guid Incarnation { get; init; }
+    /// <summary>Database signing credential, shared only by trusted storage owners.</summary>
     public string SigningKey { get; init; } = string.Empty;
-    /// <summary>Base64 peer HMAC credential; public callers cannot send replica control requests.</summary>
-    public string PeerSecret { get; init; } = string.Empty;
-    /// <summary>Initial root credential, used only when canonical storage is fresh.</summary>
+    /// <summary>Initial root credential, used only when the canonical store is fresh.</summary>
     public string AdminKey { get; init; } = string.Empty;
-    /// <summary>Native Orleans silo port; no public Orleans gateway is exposed.</summary>
-    public int SiloPort { get; init; } = NodeDefaults.SiloPort;
-    /// <summary>Routable silo IP or DNS name resolved on process startup.</summary>
-    public string SiloAddress { get; init; } = NodeDefaults.SiloAddress;
-    /// <summary>Permits plaintext discovery/public HTTP on explicit loopback development origins.</summary>
-    public bool AllowLoopbackHttp
-    {
-        get; init;
-    }
-    /// <summary>Permits HTTP on the explicitly isolated Docker/Aspire development network.</summary>
-    public bool AllowPrivateNetworkHttp
-    {
-        get; init;
-    }
-    /// <summary>Committed entries between canonical checkpoints.</summary>
-    public int SnapshotThreshold { get; init; } = NodeDefaults.SnapshotThreshold;
-    /// <summary>Lower randomized election bound, longer than an individual peer RPC.</summary>
-    public int LowerElectionTimeoutMilliseconds { get; init; } = NodeDefaults.LowerElectionMilliseconds;
-    /// <summary>Upper randomized election bound.</summary>
-    public int UpperElectionTimeoutMilliseconds { get; init; } = NodeDefaults.UpperElectionMilliseconds;
-    /// <summary>Overall Orleans peer RPC deadline, including bounded generation rediscovery.</summary>
-    public int PeerRpcTimeoutMilliseconds { get; init; } = NodeDefaults.RpcMilliseconds;
-    /// <summary>Data and reserved control admission limits.</summary>
+    /// <summary>Native Orleans silo port.</summary>
+    public int SiloPort { get; init; } = 11_111;
+    /// <summary>Routable native silo address.</summary>
+    public string SiloAddress { get; init; } = "127.0.0.1";
+    /// <summary>Bounded command admission.</summary>
     public CommandAdmissionLimits CommandAdmission { get; init; } = new();
-    /// <summary>Public HTTP request body and concurrency limits.</summary>
+    /// <summary>Bounded public HTTP admission.</summary>
     public HttpAdmissionLimits HttpAdmission { get; init; } = new();
-    /// <summary>Independent MCP body, native serialization and retained-output byte pools.</summary>
+    /// <summary>Bounded MCP request, serialization and retained output pools.</summary>
     public McpMemoryLimits McpMemory { get; init; } = new();
-    /// <summary>Independent bounded authenticated nonce pools per fixed voter.</summary>
-    public ReplicaReplayLimits ReplayAdmission { get; init; } = new();
-    public global::KeyLoad.Server.Features.BlobStorage.NativeBlobWireProbeOptions NativeBlobWireProbe { get; init; } = new();
-    internal RequestCqrsProbeOptions RequestCqrsProbe { get; set; } = new(false, null, string.Empty);
-    internal NativeDiscoveryOmissionOptions NativeDiscoveryOmission { get; set; } = NativeDiscoveryOmissionOptions.Disabled;
-    internal MovementFrameObservationOptions MovementFrameObservation { get; set; } = MovementFrameObservationOptions.Disabled;
-    /// <summary>Explicit physical-group trust independent of the native Orleans membership provider.</summary>
-    public PhysicalGroupTrustOptions PhysicalGroupTrust { get; init; } = new();
-    /// <summary>Optional existing persisted technical subject for distinct-owner queue transfer admission; null is unavailable.</summary>
-    public string? RemoteTransferPrincipalId
-    {
-        get; init;
-    }
+    /// <summary>Persisted technical subject for authorized queue transfer, when configured.</summary>
+    public string? RemoteTransferPrincipalId { get; init; }
 
-    /// <summary>Rejects invalid identity, timing, transport and admission settings before opening files.</summary>
+    /// <summary>Rejects invalid startup settings before opening files.</summary>
     public void Validate()
     {
         ArgumentNullException.ThrowIfNull(CommandAdmission);
         ArgumentNullException.ThrowIfNull(HttpAdmission);
-        ArgumentNullException.ThrowIfNull(ReplayAdmission);
         ArgumentNullException.ThrowIfNull(McpMemory);
-        ArgumentNullException.ThrowIfNull(PhysicalGroupTrust);
         CommandAdmission.Validate();
         HttpAdmission.Validate();
         McpMemory.Validate();
-        ValidatePeers();
-        if (PhysicalShardId == Guid.Empty || Incarnation == Guid.Empty
-            || SecretLength(SigningKey) != ReplicaTransportProtocol.SecretBytes
-            || SecretLength(PeerSecret) != ReplicaTransportProtocol.SecretBytes
-            || AdminKey is null || AdminKey.Length < NodeDefaults.MinimumAdminCharacters
-            || !AdminKey.StartsWith(NodeDefaults.AdminPrefix, StringComparison.Ordinal)
-            || SiloPort is <= IPEndPoint.MinPort or > IPEndPoint.MaxPort)
+        new KeyLoad.Replication.ReplicaCopyOptions { SiloCount = SiloCount, ReplicaCount = ReplicaCount }.Validate();
+        Span<byte> secret = stackalloc byte[32];
+        if (Incarnation == Guid.Empty || string.IsNullOrWhiteSpace(DataDirectory)
+            || string.IsNullOrWhiteSpace(SiloName) || string.IsNullOrWhiteSpace(ClusterId)
+            || string.IsNullOrWhiteSpace(SiloAddress) || SiloPort is <= IPEndPoint.MinPort or > IPEndPoint.MaxPort
+            || !Convert.TryFromBase64String(SigningKey, secret, out var length) || length != secret.Length
+            || AdminKey is null || AdminKey.Length < 32 || !AdminKey.StartsWith("root.", StringComparison.Ordinal))
         {
-            throw new InvalidOperationException(NodeDefaults.InvalidIdentity);
+            throw new InvalidOperationException("The native silo identity or database credentials are invalid.");
         }
-        var configuration = CreateReplicaConfiguration(Path.GetFullPath(DataDirectory));
-        configuration.Validate();
-        PhysicalGroupTrustValidator.Validate(PhysicalGroupTrust, this);
         if (RemoteTransferPrincipalId is not null)
         {
-            global::KeyLoad.Core.JsonData.Identifier(RemoteTransferPrincipalId);
+            KeyLoad.Core.JsonData.Identifier(RemoteTransferPrincipalId);
         }
-        RequestCqrsProbeOptionsReader.Validate(RequestCqrsProbe, configuration, AllowPrivateNetworkHttp);
-        MovementFrameObservationOptionsReader.Validate(MovementFrameObservation, this);
-        NativeDiscoveryOmissionOptionsReader.Validate(NativeDiscoveryOmission, this);
-    }
-
-    private void ValidatePeers()
-    {
-        if (Peers is null || DevelopmentSingleVoter && (BenchmarkTopology || !AllowPrivateNetworkHttp && !AllowLoopbackHttp)
-            || (DevelopmentSingleVoter ? Peers.Count != NodeDefaults.DevelopmentVoters : BenchmarkTopology
-                ? Peers.Count is not (NodeDefaults.MinimumBenchmarkVoters or NodeDefaults.MaximumBenchmarkVoters)
-                : Peers.Count == NodeDefaults.EmptyPeers)
-            || Peers.Distinct(StringComparer.Ordinal).Count() != Peers.Count
-            || !Peers.Contains(PublicEndpoint, StringComparer.Ordinal)
-            || string.IsNullOrWhiteSpace(DataDirectory) || string.IsNullOrWhiteSpace(SiloAddress))
-        {
-            throw new InvalidOperationException(NodeDefaults.InvalidPeers);
-        }
-        foreach (var peer in Peers)
-        {
-            if (!Uri.TryCreate(peer, UriKind.Absolute, out var uri) || !ValidOrigin(uri))
-            {
-                throw new InvalidOperationException(NodeDefaults.InvalidPeers);
-            }
-        }
-        if (IPAddress.TryParse(SiloAddress, out var address)
-            && (address.Equals(IPAddress.Any) || address.Equals(IPAddress.IPv6Any)
-                || Peers.Any(peer => !new Uri(peer).IsLoopback) && IPAddress.IsLoopback(address)))
-        {
-            throw new InvalidOperationException(NodeDefaults.InvalidAddress);
-        }
-    }
-
-    private bool ValidOrigin(Uri uri) => (uri.Scheme == Uri.UriSchemeHttps
-        || uri.Scheme == Uri.UriSchemeHttp && (AllowPrivateNetworkHttp || AllowLoopbackHttp && uri.IsLoopback))
-        && string.IsNullOrEmpty(uri.UserInfo) && string.IsNullOrEmpty(uri.Query) && string.IsNullOrEmpty(uri.Fragment)
-        && uri.AbsolutePath == NodeDefaults.OriginPath;
-
-    private static int SecretLength(string? encoded)
-    {
-        const int SecretLengthEmptyResult = 0;
-        const int SecretLengthAbsentCount = 0;
-
-        if (encoded is null)
-        {
-            return SecretLengthEmptyResult;
-        }
-        Span<byte> bytes = stackalloc byte[ReplicaTransportProtocol.SecretBytes];
-        return Convert.TryFromBase64String(encoded, bytes, out var count) ? count : SecretLengthAbsentCount;
-    }
-
-    /// <summary>Creates the immutable replica scope without storage or an Orleans client.</summary>
-    /// <param name="directory">The full physical node directory.</param>
-    [ConfigurationBinding]
-    public ReplicaConfiguration CreateReplicaConfiguration(string directory) => new(PublicEndpoint, [.. Peers], directory, Incarnation)
-    {
-        BenchmarkTopology = BenchmarkTopology,
-        DevelopmentSingleVoter = DevelopmentSingleVoter,
-        SnapshotThreshold = SnapshotThreshold,
-        LowerElectionTimeout = TimeSpan.FromMilliseconds(LowerElectionTimeoutMilliseconds),
-        UpperElectionTimeout = TimeSpan.FromMilliseconds(UpperElectionTimeoutMilliseconds),
-        RpcTimeout = TimeSpan.FromMilliseconds(PeerRpcTimeoutMilliseconds)
-    };
-
-    /// <summary>Creates fixed discovery endpoints and bounded HMAC replay limits.</summary>
-    /// <param name="connectTimeout">The centrally validated peer-discovery connection bound.</param>
-    [ConfigurationBinding]
-    public ReplicaPeerOptions CreatePeerOptions(TimeSpan connectTimeout) => new(Peers.ToDictionary(peer => peer, peer => new Uri(peer), StringComparer.Ordinal),
-        Convert.FromBase64String(PeerSecret), ClusterId)
-    {
-        ConnectTimeout = connectTimeout,
-        ReplayLimits = ReplayAdmission,
-        MaxControlPayloadBytes = CommandAdmission.MaxControlPayloadBytes
-    };
-
-    private static class NodeDefaults
-    {
-        internal const string DataDirectory = "data/node";
-        internal const string PublicEndpoint = "http://127.0.0.1:5100";
-        internal const string ClusterId = "keyload";
-        internal const string SiloAddress = "127.0.0.1";
-        internal const string AdminPrefix = "root.";
-        internal const string OriginPath = "/";
-        internal const string InvalidIdentity = "Cluster identity, credentials or silo port are invalid.";
-        internal const string InvalidPeers = "Cluster origins require distinct fixed voters, private development HTTP or HTTPS, and a local member.";
-        internal const string InvalidAddress = "A remote voter requires a routable advertised silo address.";
-        internal const int EmptyPeers = 0;
-        internal const int DevelopmentVoters = 1;
-        internal const int MinimumBenchmarkVoters = 1;
-        internal const int MaximumBenchmarkVoters = 3;
-        internal const int SiloPort = 11_111;
-        internal const int SnapshotThreshold = 1_024;
-        internal const int LowerElectionMilliseconds = 4_000;
-        internal const int UpperElectionMilliseconds = 8_000;
-        internal const int RpcMilliseconds = 2_000;
-        internal const int MinimumAdminCharacters = 32;
     }
 }

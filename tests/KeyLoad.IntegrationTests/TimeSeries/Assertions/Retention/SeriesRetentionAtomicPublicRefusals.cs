@@ -6,7 +6,7 @@ namespace KeyLoad.IntegrationTests.Features.TimeSeries;
 
 internal static class SeriesRetentionAtomicPublicRefusals
 {
-    internal static async Task AllAsync(RequestCqrsRf3Callers administrator, RequestCqrsRf3Callers reader,
+    internal static async Task AllAsync(RequestCqrsClusterCallers administrator, RequestCqrsClusterCallers reader,
         SeriesRetentionAtomicPublicState state, CancellationToken token)
     {
         await RefusedAsync(administrator, reader, state, state.ConflictSdk, ErrorCode.Conflict,
@@ -19,7 +19,7 @@ internal static class SeriesRetentionAtomicPublicRefusals
             SeriesRetentionAtomicPublicExpected.FloorDetail, true, token);
     }
 
-    private static async Task RefusedAsync(RequestCqrsRf3Callers administrator, RequestCqrsRf3Callers reader,
+    private static async Task RefusedAsync(RequestCqrsClusterCallers administrator, RequestCqrsClusterCallers reader,
         SeriesRetentionAtomicPublicState state, CommandRequest command, ErrorCode error, string detail,
         bool mcpFirst, CancellationToken token)
     {
@@ -38,17 +38,17 @@ internal static class SeriesRetentionAtomicPublicRefusals
         await SeriesRetentionAtomicPublicCurrent.AssertAsync(administrator, reader, state, token);
     }
 
-    private static async Task SdkAsync(RequestCqrsRf3Callers administrator, CommandRequest command,
+    private static async Task SdkAsync(RequestCqrsClusterCallers administrator, CommandRequest command,
         ErrorCode error, string detail, CancellationToken token)
     {
         var reply = await administrator.Sdk.CommitAsync(command, token);
         await Assert.That(reply.IsFailed).IsTrue();
         await Assert.That(reply.Value).IsNull();
         await Assert.That(reply.Problem).IsNotNull();
-        await SqlRf3Protocol.EqualAsync(Errors.Problem(error, detail), reply.Problem!);
+        await SqlClusterProtocol.EqualAsync(Errors.Problem(error, detail), reply.Problem!);
     }
 
-    private static async Task McpAsync(RequestCqrsRf3Callers administrator, CommandRequest command,
+    private static async Task McpAsync(RequestCqrsClusterCallers administrator, CommandRequest command,
         ErrorCode error, CancellationToken token)
     {
         var reply = await administrator.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token);

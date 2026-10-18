@@ -1,6 +1,6 @@
 namespace KeyLoad.IntegrationTests.Features.EventStreams;
 
-/// <summary>Named public values for genuine EventStreams RF3 callers.</summary>
+/// <summary>Named public values for genuine EventStreams CLUSTER callers.</summary>
 internal static class McpEventStreamTokens
 {
     internal const string TenantPrefix = "mcp-event-tenant-";

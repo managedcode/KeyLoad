@@ -17,7 +17,7 @@ internal static class PolicyEpochPublicProtocol
     internal const int CompleteLimit = 2;
     internal const long SeedRevision = 1;
     internal const string SecondId = "policy-page-witness";
-    internal const string SecondJson = "{\"name\":\"page witness\",\"secret\":\"resource-policy-rf3-private-value\"}";
+    internal const string SecondJson = "{\"name\":\"page witness\",\"secret\":\"resource-policy-cluster-private-value\"}";
     internal const string FirstSafeJson = "{\"name\":\"policy witness\"}";
     internal const string SecondSafeJson = "{\"name\":\"page witness\"}";
     internal const string Scan = "bounded-full-scan";
@@ -25,13 +25,13 @@ internal static class PolicyEpochPublicProtocol
     internal static readonly string[] Nodes = [ClientApi.McpCallerProtocol.Node1,
         ClientApi.McpCallerProtocol.Node2, ClientApi.McpCallerProtocol.Node3];
     internal static QueryRequest Request(PartitionRef partition, string? cursor = null)
-        => new(partition, "SELECT TOP (1) * FROM \"" + ResourcePolicyUpdateRf3Protocol.Collection + "\"" + " ORDER BY id",
+        => new(partition, "SELECT TOP (1) * FROM \"" + ResourcePolicyUpdateClusterProtocol.Collection + "\"" + " ORDER BY id",
             AllowFullScan: true, Cursor: cursor);
     internal static QueryRequest Complete(PartitionRef partition)
-        => new(partition, "SELECT TOP (2) * FROM \"" + ResourcePolicyUpdateRf3Protocol.Collection + "\"" + " ORDER BY id",
+        => new(partition, "SELECT TOP (2) * FROM \"" + ResourcePolicyUpdateClusterProtocol.Collection + "\"" + " ORDER BY id",
             AllowFullScan: true);
     internal static AstQueryRequest Ast(PartitionRef partition, string? cursor = null)
-        => new(partition, new SelectQuery(ResourcePolicyUpdateRf3Protocol.Collection, null,
+        => new(partition, new SelectQuery(ResourcePolicyUpdateClusterProtocol.Collection, null,
             [new(AstStar,
                 AstStar)], null,
             [new(AstMetadataIdPath, false)], QueryLimit),

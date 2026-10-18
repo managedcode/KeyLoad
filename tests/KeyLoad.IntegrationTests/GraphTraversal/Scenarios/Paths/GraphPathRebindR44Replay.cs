@@ -6,16 +6,16 @@ namespace KeyLoad.IntegrationTests.Features.GraphTraversal;
 
 internal static class GraphPathRebindR44Replay
 {
-    internal static async Task VerifyAsync(RequestCqrsRf3Callers admin, RequestCqrsRf3Callers reader,
+    internal static async Task VerifyAsync(RequestCqrsClusterCallers admin, RequestCqrsClusterCallers reader,
         GraphPathRebindR44State state, CancellationToken token)
     {
         await GraphPathRebindR44Reads.MatrixAsync(admin, reader, state, token);
         foreach (var original in state.Originals)
         {
-            await SqlRf3Protocol.EqualAsync(original.Receipt, await McpCallerAssertions.SdkSuccessAsync(
+            await SqlClusterProtocol.EqualAsync(original.Receipt, await McpCallerAssertions.SdkSuccessAsync(
                 await admin.Sdk.CommitAsync(original.Command, token)));
             await GraphPathRebindR44Reads.MatrixAsync(admin, reader, state, token);
-            await SqlRf3Protocol.EqualAsync(original.Receipt, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
+            await SqlClusterProtocol.EqualAsync(original.Receipt, (await McpCallerAssertions.SuccessAsync<CommitReceipt>(
                 await admin.Mcp.CallAsync(McpCallerTools.DocumentsCommit, original.Command, token))).Value);
             await GraphPathRebindR44Reads.MatrixAsync(admin, reader, state, token);
         }

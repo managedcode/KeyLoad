@@ -13,7 +13,7 @@ internal sealed class ClusterFailureReceiptsTests
     private const string FirstLine = "first bounded failure";
     private const string SecondLine = "second bounded failure";
     private const string TailLine = "bounded tail";
-    private const string FilePrefix = "rf3-failure-";
+    private const string FilePrefix = "cluster-failure-";
     private const string FileSuffix = ".log";
 
     [Test]

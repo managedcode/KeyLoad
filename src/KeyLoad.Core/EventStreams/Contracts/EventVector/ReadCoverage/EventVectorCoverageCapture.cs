@@ -89,15 +89,6 @@ internal sealed record EventVectorCoverageCapture
     [Orleans.Id(15)]
     public EventVectorCoverageRow[] RegisteredOwnerRows { get; init; } = [];
 
-    [Orleans.Id(16)]
-    public EventVectorCoverageRow[] PlacementRows { get; init; } = [];
-
-    [Orleans.Id(17)]
-    public EventVectorCoverageRow? LogicalDirectory
-    {
-        get; init;
-    }
-
     [Orleans.Id(18)]
     public bool HasMore
     {

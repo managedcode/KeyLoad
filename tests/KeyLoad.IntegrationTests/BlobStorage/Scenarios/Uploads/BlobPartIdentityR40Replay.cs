@@ -14,7 +14,7 @@ internal static class BlobPartIdentityR40Replay
     private const string DetailProperty = "detail";
     private const string ChangedDetail = "The command ID was already used with different content.";
 
-    internal static async Task RunAsync(RequestCqrsRf3Callers callers, BlobPartIdentityR40State state, CancellationToken token)
+    internal static async Task RunAsync(RequestCqrsClusterCallers callers, BlobPartIdentityR40State state, CancellationToken token)
     {
         await ChangedAsync(callers, state, token);
         await OriginalAsync(callers, state, state.Begin, state.Begun, BeginTool, ct => callers.Sdk.BeginBlobUploadAsync(state.Begin, ct), token);
@@ -29,16 +29,16 @@ internal static class BlobPartIdentityR40Replay
         }
     }
 
-    private static async Task OriginalAsync<T>(RequestCqrsRf3Callers callers, BlobPartIdentityR40State state,
+    private static async Task OriginalAsync<T>(RequestCqrsClusterCallers callers, BlobPartIdentityR40State state,
         object request, T expected, string tool, Func<CancellationToken, Task<Result<T>>> call, CancellationToken token)
     {
-        await SqlRf3Protocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(await call(token)));
+        await SqlClusterProtocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(await call(token)));
         await BlobPartIdentityR40Assertions.CurrentAsync(callers, state, token);
-        await SqlRf3Protocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<T>(await callers.Mcp.CallAsync(tool, request, token))).Value);
+        await SqlClusterProtocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<T>(await callers.Mcp.CallAsync(tool, request, token))).Value);
         await BlobPartIdentityR40Assertions.CurrentAsync(callers, state, token);
     }
 
-    private static async Task ChangedAsync(RequestCqrsRf3Callers callers, BlobPartIdentityR40State state, CancellationToken token)
+    private static async Task ChangedAsync(RequestCqrsClusterCallers callers, BlobPartIdentityR40State state, CancellationToken token)
     {
         var result = await callers.Sdk.WriteBlobPartAsync(state.Changed, token);
         await Assert.That(result.IsFailed).IsTrue();

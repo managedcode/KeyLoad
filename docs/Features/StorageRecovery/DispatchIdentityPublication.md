@@ -8,7 +8,7 @@ AC-IDENTITY-PUBLISH-001: BOTH pause and resume directions must fail on a genuine
 
 AC-IDENTITY-PUBLISH-002: Dispose original owner and reopen the same root twice. Both native opens require the full original identity with only the requested DispatchPaused bit changed, the complete independently expected original+fresh rows in order and exact position2. Each body, original store close and fixture cleanup is separately retained by existing ServerFailureObserver; no new timeouts, fake provider/tasks or syscall injection.
 
-Actual writer boundary: temporary FileStream is disposed before File.Move, and no further code/cleanup follows the move within Write. This correction addresses the deterministic pre-Move directory failure; it does not claim arbitrary filesystem rename failure disambiguation, power-loss atomicity or post-Move fault qualification, and adds no speculative poison/reset. Existing checkpoint generation poison/error behavior is a separate Root-owned repair; this packet does not change it. Existing native format, read generation, ownership, journals, replication and public wire operations remain unchanged.
+Actual writer boundary: temporary FileStream is disposed before File.Move, and no further code/cleanup follows the move within Write. This correction addresses the deterministic pre-Move directory failure; it does not claim arbitrary filesystem rename failure disambiguation, power-loss atomicity or post-Move fault qualification, and adds no speculative poison/reset. Existing checkpoint generation poison/error behavior is separate and unchanged here. Existing native format, read generation, ownership, journals and public wire operations remain unchanged.
 
 ```mermaid
 flowchart LR
@@ -20,4 +20,4 @@ flowchart LR
  F --> G[Release original gate]
 ```
 
-Tests are genuine native store/filesystem operation regressions. Compiler/style/analyzers, actual Linux execution and original storage/recovery/RF3 qualification remain OPEN. UI/SDK/MCP N/A for this private storage stage. No existing Case/UID/body is changed; no active source/doc write is performed by authoring this SourceN packet.
+Tests are genuine native store/filesystem operation regressions; Linux execution and storage/recovery/replicated-cluster qualification are separate gates. UI/SDK/MCP N/A for this private storage stage.

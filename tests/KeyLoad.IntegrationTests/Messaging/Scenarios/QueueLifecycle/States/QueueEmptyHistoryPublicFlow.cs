@@ -10,16 +10,16 @@ internal static class QueueEmptyHistoryPublicFlow
     internal static async Task RunAsync(ClusterFixture fixture, bool mcpFirst)
     {
         using var deadline = McpCallerDeadline.Create();
-        var owner = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
+        var owner = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey,
             root => QueueLifecyclePublicSeed.RunAsync(root, mcpFirst ? QueueLifecyclePublicProtocol.Mcp : QueueLifecyclePublicProtocol.Sdk,
                 deadline.Token), deadline.Token);
-        var state = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, owner.OperatorKey,
+        var state = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, owner.OperatorKey,
             callers => StartAsync(callers, owner, deadline.Token), deadline.Token);
-        await ModelSqlRf3Cold.RunAsync(fixture, deadline.Token);
-        await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node3, owner.OperatorKey,
+        await ModelSqlClusterCold.RunAsync(fixture, deadline.Token);
+        await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node3, owner.OperatorKey,
             callers => FirstColdAsync(callers, state, deadline.Token), deadline.Token);
-        await ModelSqlRf3Cold.RunAsync(fixture, deadline.Token);
-        await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, owner.OperatorKey,
+        await ModelSqlClusterCold.RunAsync(fixture, deadline.Token);
+        await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, owner.OperatorKey,
             callers => SecondColdAsync(callers, state, deadline.Token), deadline.Token);
     }
 
@@ -27,7 +27,7 @@ internal static class QueueEmptyHistoryPublicFlow
         => new(QueueLifecyclePublicProtocol.Queue, id, QueueLifecyclePublicProtocol.Payload,
             QueueLifecyclePublicProtocol.Headers, OrderingKey: QueueLifecyclePublicProtocol.Ordering);
 
-    private static async Task<QueueEmptyHistoryPublicState> StartAsync(RequestCqrsRf3Callers callers,
+    private static async Task<QueueEmptyHistoryPublicState> StartAsync(RequestCqrsClusterCallers callers,
         QueueLifecyclePublicState owner, CancellationToken token)
     {
         var request = new ReceiveRequest(Guid.NewGuid(), owner.Lane, MaxMessages: 1);
@@ -47,7 +47,7 @@ internal static class QueueEmptyHistoryPublicFlow
         return state;
     }
 
-    private static async Task<bool> FirstColdAsync(RequestCqrsRf3Callers callers,
+    private static async Task<bool> FirstColdAsync(RequestCqrsClusterCallers callers,
         QueueEmptyHistoryPublicState state, CancellationToken token)
     {
         await QueueEmptyHistoryPublicAssertions.ReadyAsync(callers, state, false, token);
@@ -62,7 +62,7 @@ internal static class QueueEmptyHistoryPublicFlow
         return true;
     }
 
-    private static async Task<bool> SecondColdAsync(RequestCqrsRf3Callers callers,
+    private static async Task<bool> SecondColdAsync(RequestCqrsClusterCallers callers,
         QueueEmptyHistoryPublicState state, CancellationToken token)
     {
         await QueueEmptyHistoryPublicAssertions.ReadyAsync(callers, state, true, token);
@@ -94,7 +94,7 @@ internal static class QueueEmptyHistoryPublicFlow
         return true;
     }
 
-    private static async Task SettleAsync(RequestCqrsRf3Callers callers, QueueEmptyHistoryPublicState state,
+    private static async Task SettleAsync(RequestCqrsClusterCallers callers, QueueEmptyHistoryPublicState state,
         string expectedId, long sequence, CancellationToken token)
     {
         var request = new ReceiveRequest(Guid.NewGuid(), state.Owner.Lane, MaxMessages: 1,
@@ -129,7 +129,7 @@ internal static class QueueEmptyHistoryPublicFlow
         await Assert.That(receipt.CommandId).IsEqualTo(ack.CommandId);
         await Assert.That(receipt.Mutations).IsEquivalentTo(new MutationReceipt[] {
             new("Ack", state.Owner.Lane.Queue, expectedId, 3L) }, CollectionOrdering.Matching);
-        await SagaTimeoutRf3Assertions.AssertSdkErrorAsync(await callers.Sdk.ReceiveAsync(request, token), ErrorCode.StaleLease);
+        await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(await callers.Sdk.ReceiveAsync(request, token), ErrorCode.StaleLease);
         await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(
             McpCallerTools.MessagesReceive, request, token), ErrorCode.StaleLease, true);
     }

@@ -19,12 +19,7 @@ internal sealed class CompetingInboxPublicState(ClusterFixture fixture, bool equ
     } = new(CompetingInboxPublicProtocol.TenantPrefix + Guid.NewGuid().ToString(CompetingInboxPublicProtocol.GuidFormat),
         CompetingInboxPublicProtocol.DatabaseName, CompetingInboxPublicProtocol.Domain, Guid.NewGuid().ToString(CompetingInboxPublicProtocol.GuidFormat));
     internal QueueLaneRef Lane => new(Partition, CompetingInboxPublicProtocol.Input);
-    internal AtomicPartitionPlacementResolution Placement
-    {
-        get;
-        set;
-    } = null!;
-    internal MessagingRf3Identity Identity
+    internal MessagingClusterIdentity Identity
     {
         get;
         set;

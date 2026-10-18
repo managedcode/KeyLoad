@@ -8,7 +8,7 @@ internal sealed class LocalImageOptions
 {
     private const string ProvenanceKey = "KEYLOAD_IMAGE_PROVENANCE";
     private const string ReceiptKey = "KEYLOAD_LOCAL_IMAGE_RECEIPT";
-    private const string ChildKey = "KEYLOAD_LOCAL_RF3_IMAGE_CHILD";
+    private const string ChildKey = "KEYLOAD_LOCAL_CLUSTER_IMAGE_CHILD";
     private const string GithubReceiptKey = "KEYLOAD_IMAGE_RECEIPT";
     private const string GithubRevisionKey = "GITHUB_SHA";
     private const string GithubActionsKey = "GITHUB_ACTIONS";

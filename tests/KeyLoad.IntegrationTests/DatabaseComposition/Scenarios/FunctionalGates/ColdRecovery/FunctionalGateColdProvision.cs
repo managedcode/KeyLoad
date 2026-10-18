@@ -6,7 +6,7 @@ namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
 internal static class FunctionalGateColdProvision
 {
-    internal static async Task<FunctionalGateColdState> CreateAsync(RequestCqrsRf3Callers administrator, CancellationToken token)
+    internal static async Task<FunctionalGateColdState> CreateAsync(RequestCqrsClusterCallers administrator, CancellationToken token)
     {
         var suffix = Guid.NewGuid().ToString("N");
         var partition = new PartitionRef("functional-cold-" + suffix, "models", "models", suffix);
@@ -15,7 +15,7 @@ internal static class FunctionalGateColdProvision
         {
             var request = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, definition);
             var id = Guid.NewGuid();
-            await SqlRf3Protocol.EqualAsync(definition, await McpCallerAssertions.SdkSuccessAsync(
+            await SqlClusterProtocol.EqualAsync(definition, await McpCallerAssertions.SdkSuccessAsync(
                 await administrator.Sdk.ConfigureResourceAsync(id, request, token)));
         }
         var read = Capability.DocumentsRead | Capability.Query | Capability.EventsRead | Capability.QueueInspect
@@ -34,7 +34,7 @@ internal static class FunctionalGateColdProvision
         return await FunctionalGateAnalyticsProvision.RunAsync(administrator, state, token);
     }
 
-    internal static async Task<McpPersistedIdentity> IdentityAsync(RequestCqrsRf3Callers administrator,
+    internal static async Task<McpPersistedIdentity> IdentityAsync(RequestCqrsClusterCallers administrator,
         PartitionRef partition, Capability capabilities, bool queueOperator, CancellationToken token)
     {
         var identity = await McpPersistedIdentity.CreateAsync(administrator.Sdk, partition,
@@ -54,7 +54,7 @@ internal static class FunctionalGateColdProvision
             Grants = [.. grants]
         };
         var observed = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), expected, token));
-        await SqlRf3Protocol.EqualAsync(expected, observed);
+        await SqlClusterProtocol.EqualAsync(expected, observed);
         return identity with
         {
             Principal = observed

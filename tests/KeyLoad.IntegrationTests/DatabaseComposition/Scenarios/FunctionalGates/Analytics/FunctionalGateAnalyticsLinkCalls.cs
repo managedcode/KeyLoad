@@ -9,7 +9,7 @@ internal static class FunctionalGateAnalyticsLinkCalls
         MutationReceipt effect, CancellationToken token)
     {
         var original = await context.SdkAsync(context.Administrator.Sdk.CommitAsync(command, token));
-        await FunctionalGateCompositionCalls.ReceiptAsync(context, original, command.CommandId, [effect], token);
+        await FunctionalGateCompositionCalls.ReceiptAsync(context, original, command.CommandId, [effect]);
         await FunctionalGateUserAnalyticsAssertions.EqualAsync(await context.McpAsync<CommitReceipt>(context.Administrator,
             McpCallerTools.DocumentsCommit, FunctionalGateAnalyticsIdentity.Wire(command), token), original);
         var sql = FunctionalGateRelationalCalls.Commit(command);
@@ -27,7 +27,7 @@ internal static class FunctionalGateAnalyticsLinkCalls
             context.Administrator.Sdk.ReadAnalyticsEventsAsync(request, token)), expected);
         await FunctionalGateUserAnalyticsAssertions.EqualAsync(await context.McpAsync<AnalyticsEventsPage>(context.Administrator,
             AnalyticsStoreProtocol.ReadTool, request, token), expected);
-        var sql = SqlRf3Protocol.Call(context.Partition, AnalyticsStoreProtocol.ReadTool, request);
+        var sql = SqlClusterProtocol.Call(context.Partition, AnalyticsStoreProtocol.ReadTool, request);
         await FunctionalGateUserAnalyticsAssertions.EqualAsync(await FunctionalGateRelationalCalls.SqlSdkAsync<AnalyticsEventsPage>(
             context, context.Administrator, sql, token), expected);
         await FunctionalGateUserAnalyticsAssertions.EqualAsync(await FunctionalGateRelationalCalls.SqlMcpAsync<AnalyticsEventsPage>(
@@ -42,7 +42,7 @@ internal static class FunctionalGateAnalyticsLinkCalls
             context.Administrator.Sdk.AggregateAnalyticsAsync(request, token)), expected);
         await FunctionalGateUserAnalyticsAssertions.EqualAsync(await context.McpAsync<AnalyticsAggregateResult>(context.Administrator,
             AnalyticsStoreProtocol.AggregateTool, request, token), expected);
-        var sql = SqlRf3Protocol.Call(context.Partition, AnalyticsStoreProtocol.AggregateTool, request);
+        var sql = SqlClusterProtocol.Call(context.Partition, AnalyticsStoreProtocol.AggregateTool, request);
         await FunctionalGateUserAnalyticsAssertions.EqualAsync(await FunctionalGateRelationalCalls.SqlSdkAsync<AnalyticsAggregateResult>(
             context, context.Administrator, sql, token), expected);
         await FunctionalGateUserAnalyticsAssertions.EqualAsync(await FunctionalGateRelationalCalls.SqlMcpAsync<AnalyticsAggregateResult>(

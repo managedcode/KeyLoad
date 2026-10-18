@@ -1,4 +1,4 @@
-# KL078 canonical sequence regression refusal and exact repair
+# Canonical sequence regression refusal and exact repair
 
 REQ/AC-CHUNK-007/008/010/012 and AC-CHUNK-002/003 require append to preserve the positive canonical sample sequence and enrolled correction identity. `SampleSequenceIntegrityTests.CanonicalCounterRegressionRefusesNativeAppendThenExactRepairCorrectionReplayAndTwoCold` uses the genuine native-replica TestDatabase, configured canonical chunk window, original open/append/seal, actual native serialized regressed counter (-1 and positive1), original failed committed apply and exact repair. The existing SampleMetadataIntegrity fault matrix covers retention/rollup metadata, not this sequence-counter gap; it stays unchanged.
 
@@ -21,4 +21,4 @@ flowchart LR
     Cold --> Join[Join original native owners then delete root]
 ```
 
-This is a supporting native storage/replica-admission operation, not Docker RF3 or production HTTP/MCP/auth middleware qualification. Actual original runtime, strict compiler/analyzer, Linux whole KL078 groups, process cuts and bytes/sample/rewrite-cost/allocation gates remain OPEN. Existing current principal/authorization, scopes/read cuts, real native ManagedCode.TimeSeries10.1.2 and required normal SIMD remain unchanged. Parent [TimeSeries](../TimeSeries.md), [ADR124](../../ADR/ADR-124-native-time-series-chunks.md), [ADR052](../../ADR/ADR-052-timeseries-bounded-aggregates.md).
+This is a supporting native storage/replica-admission operation, not Docker cluster or production HTTP/MCP/auth middleware qualification. Actual original runtime, strict compiler/analyzer, Linux whole-operation groups, process cuts and bytes/sample/rewrite-cost/allocation gates remain OPEN. Existing current principal/authorization, scopes/read cuts, real native ManagedCode.TimeSeries10.1.2 and required normal SIMD remain unchanged. Parent [TimeSeries](../TimeSeries.md), [ADR124](../../ADR/ADR-124-native-time-series-chunks.md), [ADR052](../../ADR/ADR-052-timeseries-bounded-aggregates.md).

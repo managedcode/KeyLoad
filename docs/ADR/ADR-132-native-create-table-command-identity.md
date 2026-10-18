@@ -10,7 +10,7 @@
 
 SQL is KeyLoad's common language for authorized bounded database operations. The selected ScriptDOM 180.140.0 admission and existing native connection execution remain authoritative. A declarative CREATE needs an original caller-owned mutation identity and atomic create-only behavior; an existence preflight followed by ConfigureResource would not provide that behavior. No server-generated Guid, Configure no-op reinterpretation, old-parser fallback, migration or new dispatcher is introduced.
 
-This decision delivers one closed CREATE TABLE profile. It does not qualify full SQL, general SQL Server CONTEXT_INFO semantics, PostgreSQL SQL compatibility, transactions spanning independent calls, power-loss durability or Linux/RF3 acceptance.
+This decision delivers one closed CREATE TABLE profile. It does not qualify full SQL, general SQL Server CONTEXT_INFO semantics, PostgreSQL SQL compatibility, transactions spanning independent calls, power-loss durability or Linux/cluster acceptance.
 
 ## Declarative schema contract
 
@@ -50,7 +50,7 @@ sequenceDiagram
     alt Same original command
         CatalogHost-->>Caller: Original complete outcome, no reapplication
     else Absent resource
-        CatalogHost->>CatalogHost: Canonical resource + original outcome through RF3 barriers
+        CatalogHost->>CatalogHost: Canonical resource + original outcome through majority barriers
         CatalogHost-->>Caller: Complete ResourceDefinition
     else Different original command, existing resource
         CatalogHost-->>Caller: Conflict; original failed outcome retained
@@ -62,14 +62,6 @@ sequenceDiagram
 
 SqlCreateTableWholeFlowTests.CallerStableCreateOnlySchemaConstraintRepairAndOriginalOutcomeReplayAcrossTwoColdOwners covers genuine native compile/apply, malformed and unsupported schema refusal, exact-token cancellation, schema/row repair, independent full SQL and AST rows, original successful/failed native outcome bytes, policy epochs, full raw state/cut conservation after replay, and two actual ZoneTree cold owners with fresh healthy writes.
 
-SqlCreateTableRf3WholeFlowTests.OriginalCallerIdentityCreatesOnlyOnceAcrossSdkOfficialMcpNativeSessionAndTwoColdOwners covers real SDK, official MCP and Npgsql sessions on the fixture-owned Aspire Docker RF3 topology: same original success/failure replay, a genuine two-Guid CREATE race, one-shot arm misuse, current persisted permission denial/restoration, authentic original-producer AuthorizationReload hold/cancellation/ProducerDisposed settlement, full literal rows, separate minimum-token receipt reads and two owned three-node cold waves. Public conservation assertions cover their declared complete document/outbox image. They do not independently prove RF3 physical raw-image conservation or physical query-owner/cut correlation.
+SqlCreateTableClusterWholeFlowTests.OriginalCallerIdentityCreatesOnlyOnceAcrossSdkOfficialMcpNativeSessionAndTwoColdOwners covers real SDK, official MCP and Npgsql sessions on the fixture-owned Aspire Docker cluster topology: same original success/failure replay, a genuine two-Guid CREATE race, one-shot arm misuse, current persisted permission denial/restoration, authentic original-producer AuthorizationReload hold/cancellation/ProducerDisposed settlement, full literal rows, separate minimum-token receipt reads and two owned three-node cold waves. Public conservation assertions cover their declared complete document/outbox image. They do not independently prove physical raw-image conservation across nodes.
 
-The current prepared source union has actual guarded compound native applied=N plus exact NotFound/creation NotSupported receipts for 37 proposed roles and a finite source-only peer closure. Those receipts prove preimage admission and creation fallback eligibility, not semantic compilation. Root source integration, whole formatter/build, original meaningful TUnit operations, process recovery and real Linux Aspire RF3 gates remain OPEN until their actual retained executions complete. No current task, protocol, full-SQL or durability qualification is inferred from this ADR.
-
-## Accepted VALUES ownership-fence extension
-
-The owner-approved ordinary INSERT extension is specified in [Ordinary typed SQL INSERT](../Features/RelationalStorage/OrdinarySqlInsert.md). SqlOperationRequest appends nullable positive OwnershipEpoch at stable field Id 8; Ids 0–7, aliases and existing defaults remain unchanged. Omission retains initial epoch 1. Only ordinary VALUES lowers the caller's explicit fence unchanged into the existing canonical Batch CommandRequest. No server-generated epoch, old-Guid rebinding, administrative privilege for row insertion, retry heuristic or new routing/dispatcher is introduced. CREATE and EXEC retain their original envelope semantics and refuse this separate outer fence.
-
-For this closed extension, SET CONTEXT_INFO accepts its original 16-byte Guid or 24 bytes containing that RFC4122 display-order Guid followed by the exact positive Int64 epoch encoded as 16 hexadecimal big-endian/display-order characters. Catalog admission charges the complete 16/24 bytes before storing either value; it takes and clears both together before target compilation. Replacement, error Sync, settlement, cancellation and disconnect release both, while normal successful Sync preserves an unused arm. The current persisted subject, permissions, principal epoch, signed command and physical apply-gate fence remain authoritative. A 24-byte arm is not permission or prior history, and is not a general SQL Server context contract.
-
-Actual moved-owner native and public whole-operation drafts distinguish caller fencing from discovery: the fixture's administrator captures genuine published placement solely for independent receipt assertions; the writer remains a persisted nonadministrator and explicitly supplies epoch 2. Automatic authorized nonadministrator epoch discovery/routing, full protocol interoperability, Linux RF3, cancellation/resource and durability qualification remain OPEN until actual joined evidence. Existing CREATE-specific 16-byte controls and original qualification history remain intact.
+Source integration, whole formatter/build, original meaningful TUnit operations, process recovery and real Linux Aspire cluster gates remain OPEN until their actual retained executions complete. No current task, protocol, full-SQL or durability qualification is inferred from this ADR.

@@ -9,7 +9,7 @@ internal static class BlobSelectiveReadR43Reads
     private const string Tool = "keyload_blobs_read_range";
     private const string Detail = "The principal cannot perform this operation in this scope.";
     private const string DetailKey = "detail";
-    internal static async Task MatrixAsync(RequestCqrsRf3Callers admin, RequestCqrsRf3Callers reader,
+    internal static async Task MatrixAsync(RequestCqrsClusterCallers admin, RequestCqrsClusterCallers reader,
         BlobSelectiveReadR43State state, bool firstDenied, CancellationToken token)
     {
         for (var index = 0; index < 2; index++)
@@ -22,11 +22,11 @@ internal static class BlobSelectiveReadR43Reads
             {
                 await Assert.That(sdk.IsFailed).IsTrue();
                 await Assert.That(sdk.Value).IsNull();
-                await SqlRf3Protocol.EqualAsync(Errors.Problem(ErrorCode.PermissionDenied, Detail), sdk.Problem);
+                await SqlClusterProtocol.EqualAsync(Errors.Problem(ErrorCode.PermissionDenied, Detail), sdk.Problem);
             }
             else
             {
-                await SqlRf3Protocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(sdk));
+                await SqlClusterProtocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(sdk));
             }
             await CurrentAsync(admin, state, token);
             var reply = await reader.Mcp.CallAsync(Tool, request, token);
@@ -40,12 +40,12 @@ internal static class BlobSelectiveReadR43Reads
             }
             else
             {
-                await SqlRf3Protocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<BlobReadResult>(reply)).Value);
+                await SqlClusterProtocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<BlobReadResult>(reply)).Value);
             }
             await CurrentAsync(admin, state, token);
         }
     }
-    internal static async Task CurrentAsync(RequestCqrsRf3Callers admin,
+    internal static async Task CurrentAsync(RequestCqrsClusterCallers admin,
         BlobSelectiveReadR43State state, CancellationToken token)
     {
         for (var index = 0; index < 2; index++)
@@ -54,19 +54,19 @@ internal static class BlobSelectiveReadR43Reads
             var bytes = BlobSelectiveReadR43State.Bytes(index);
             var request = new BlobReadRequest(version.Begin.Blob, 1L, 0L, bytes.Length);
             var expected = new BlobReadResult(version.Completed.Value, 0L, bytes);
-            await SqlRf3Protocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(
+            await SqlClusterProtocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(
                 await admin.Sdk.ReadBlobRangeAsync(request, token)));
-            await SqlRf3Protocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<BlobReadResult>(
+            await SqlClusterProtocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<BlobReadResult>(
                 await admin.Mcp.CallAsync(Tool, request, token))).Value);
         }
-        await SqlRf3Protocol.EqualAsync(state.Outbox, await OutboxAsync(admin, state, token));
+        await SqlClusterProtocol.EqualAsync(state.Outbox, await OutboxAsync(admin, state, token));
     }
-    internal static async Task<OutboxStatus> OutboxAsync(RequestCqrsRf3Callers admin,
+    internal static async Task<OutboxStatus> OutboxAsync(RequestCqrsClusterCallers admin,
         BlobSelectiveReadR43State state, CancellationToken token)
     {
         var partition = state.Versions[0].Begin.Blob.Partition;
         var sdk = await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.OutboxStatusAsync(partition, token));
-        await SqlRf3Protocol.EqualAsync(sdk, (await McpCallerAssertions.SuccessAsync<OutboxStatus>(
+        await SqlClusterProtocol.EqualAsync(sdk, (await McpCallerAssertions.SuccessAsync<OutboxStatus>(
             await admin.Mcp.CallAsync(McpCallerTools.OutboxStatus, new GetOutboxStatusRequest(partition), token))).Value);
         return sdk;
     }

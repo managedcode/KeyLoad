@@ -4,7 +4,7 @@ namespace KeyLoad.IntegrationTests.Features.Messaging;
 internal static class SubscriptionIndependentCheckpointR52Flow
 {
     internal static async Task<SubscriptionIndependentCheckpointR52State> StartAsync(
-        ClusterFixture fixture, SubscriptionFilterRf3Seed seed, CancellationToken token)
+        ClusterFixture fixture, SubscriptionFilterClusterSeed seed, CancellationToken token)
     {
         var state = new SubscriptionIndependentCheckpointR52State(seed);
         await SubscriptionIndependentCheckpointR52Callers.RunAsync(fixture, state, async (sdk, mcp, admin, official) =>

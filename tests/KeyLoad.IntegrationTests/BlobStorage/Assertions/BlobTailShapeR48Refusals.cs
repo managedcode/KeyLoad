@@ -10,7 +10,7 @@ internal static class BlobTailShapeR48Refusals
     private const string InvalidDetail = "The blob request or policy is invalid.";
     private const string SafeDetail = "The database operation could not be completed.";
 
-    internal static async Task BothAsync(RequestCqrsRf3Callers callers,
+    internal static async Task BothAsync(RequestCqrsClusterCallers callers,
         BlobTailShapeR48State state, CancellationToken token)
     {
         foreach (var request in state.Requests)
@@ -18,7 +18,7 @@ internal static class BlobTailShapeR48Refusals
             var result = await callers.Sdk.WriteBlobPartAsync(request, token);
             await Assert.That(result.IsFailed).IsTrue();
             await Assert.That(result.Value).IsNull();
-            await SqlRf3Protocol.EqualAsync(Errors.Problem(ErrorCode.Validation, InvalidDetail), result.Problem!);
+            await SqlClusterProtocol.EqualAsync(Errors.Problem(ErrorCode.Validation, InvalidDetail), result.Problem!);
             await BlobPartIdentityR40Assertions.CurrentAsync(callers, state.Original, token);
             var reply = await callers.Mcp.CallAsync(BlobPartIdentityR40Replay.PartTool, request, token);
             await McpCallerAssertions.ErrorAsync(reply, ErrorCode.Validation, dispatched: true);

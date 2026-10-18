@@ -1,4 +1,5 @@
 using OpenTelemetry;
+using KeyLoad.Replication;
 
 namespace KeyLoad.Server;
 
@@ -8,9 +9,22 @@ namespace KeyLoad.Server;
 /// <param name="loggerFactory">The borrowed native logger factory.</param>
 /// <param name="owner">The same silo-local owner retained through opening and eventual joined physical close.</param>
 internal sealed class PartitionStorageGrainService(GrainId grainId, Silo silo, ILoggerFactory loggerFactory,
-    PartitionHostApplicationOwner owner) : GrainService(grainId, silo, loggerFactory), IPartitionStorageGrainService
+    PartitionHostApplicationOwner owner) : GrainService(grainId, silo, loggerFactory), ISiloDatabaseService
 {
     private readonly PartitionHostApplicationOwner owner = owner;
+
+    public Task<SiloStorageCut> ReadCutAsync(CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var database = owner.Borrow().Database;
+        return Task.FromResult(database.Store.Read(_ => new SiloStorageCut(database.Store.Identity.Incarnation, database.Store.Position)));
+    }
+
+    public Task<ReplicatedOperation> PrepareAsync(ReplicatedOperation operation, CancellationToken cancellationToken)
+        => Task.FromResult(owner.Borrow().Database.PrepareStorageOperation(operation, cancellationToken));
+
+    public Task<OperationResult> ApplyAsync(ReplicatedOperation operation, CancellationToken cancellationToken)
+        => Task.FromResult(owner.Borrow().Database.ApplyStorageOperation(operation, cancellationToken));
 
     /// <inheritdoc />
     public override Task Init(IServiceProvider serviceProvider)

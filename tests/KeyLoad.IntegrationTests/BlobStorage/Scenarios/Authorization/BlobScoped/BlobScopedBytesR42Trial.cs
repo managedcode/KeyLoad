@@ -7,7 +7,7 @@ internal static class BlobScopedBytesR42Trial
 {
     internal static async Task RunAsync(ClusterFixture fixture, CancellationToken token)
     {
-        var states = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, async callers =>
+        var states = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, async callers =>
         {
             var states = await BlobScopedBytesR42Seed.CreateAsync(callers, token);
             foreach (var state in states.Take(4))
@@ -25,7 +25,7 @@ internal static class BlobScopedBytesR42Trial
         for (var cold = 0; cold < 2; cold++)
         {
             await NativeTextProtectedPublicColdRestart.RunAsync(fixture, token);
-            _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, async callers =>
+            _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, async callers =>
             {
                 await BlobScopedBytesR42Assertions.CurrentAsync(callers, states, token);
                 await BlobScopedBytesR42Replay.RunAsync(callers, states, token);

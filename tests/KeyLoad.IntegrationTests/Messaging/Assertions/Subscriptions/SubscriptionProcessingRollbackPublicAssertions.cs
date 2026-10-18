@@ -17,7 +17,7 @@ internal static class SubscriptionProcessingRollbackPublicAssertions
         {
             CommandId = Guid.NewGuid(),
             Effects = [SubscriptionInboxPublicAssertions.Effects[0],
-                new PutDocument(SubscriptionFilterRf3Protocol.Collection, Second, "{\"n\":2}", MissingRevision)]
+                new PutDocument(SubscriptionFilterClusterProtocol.Collection, Second, "{\"n\":2}", MissingRevision)]
         };
         for (var repeat = 0; repeat < 2; repeat++)
         {
@@ -25,14 +25,14 @@ internal static class SubscriptionProcessingRollbackPublicAssertions
             foreach (var id in new[] { First, Second })
             {
                 await Assert.That(await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(
-                    new(failed.Subscription.Source.Partition, SubscriptionFilterRf3Protocol.Collection, id), token))).IsNull();
+                    new(failed.Subscription.Source.Partition, SubscriptionFilterClusterProtocol.Collection, id), token))).IsNull();
             }
-            await SubscriptionFilterRf3Assertions.StatusAsync(sdk, mcp, failed.Subscription, 1L, 0L, false, token);
-            await SubscriptionFilterRf3Assertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
+            await SubscriptionFilterClusterAssertions.StatusAsync(sdk, mcp, failed.Subscription, 1L, 0L, false, token);
+            await SubscriptionFilterClusterAssertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
                 await sdk.ReceiveSubscriptionAsync(claim, token)), claimed);
-            await SubscriptionFilterRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<ReceiveSubscriptionResult>(
+            await SubscriptionFilterClusterAssertions.EqualAsync((await McpCallerAssertions.SuccessAsync<ReceiveSubscriptionResult>(
                 await mcp.CallAsync(McpCallerTools.SubscriptionsReceive, claim, token))).Value, claimed);
-            await SubscriptionFilterRf3Assertions.HistoryAsync(sdk, mcp, failed.Subscription.Source, source, token);
+            await SubscriptionFilterClusterAssertions.HistoryAsync(sdk, mcp, failed.Subscription.Source, source, token);
         }
         return failed;
     }
@@ -44,7 +44,7 @@ internal static class SubscriptionProcessingRollbackPublicAssertions
             ?? throw new InvalidOperationException("The original failed subscription processing request is absent.");
         await RefusalAsync(sdk, mcp, failed, token);
         await SubscriptionInboxPublicAssertions.DocumentsAsync(sdk, failed.Subscription, token);
-        await SubscriptionFilterRf3Assertions.HistoryAsync(sdk, mcp, failed.Subscription.Source, state.Source, token);
+        await SubscriptionFilterClusterAssertions.HistoryAsync(sdk, mcp, failed.Subscription.Source, state.Source, token);
     }
 
     private static async Task RefusalAsync(KeyLoadClient sdk, McpOfficialClient mcp,
@@ -57,9 +57,9 @@ internal static class SubscriptionProcessingRollbackPublicAssertions
         await Assert.That(result.Problem!.ErrorCode).IsEqualTo(ErrorCode.RevisionConflict.ToString());
         await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.SubscriptionsProcess, request, token),
             ErrorCode.RevisionConflict, true);
-        await SubscriptionFilterRf3Assertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
+        await SubscriptionFilterClusterAssertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
             await sdk.SubscriptionStatusAsync(request.Subscription, token)), before);
-        await SubscriptionFilterRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<SubscriptionInfo>(
+        await SubscriptionFilterClusterAssertions.EqualAsync((await McpCallerAssertions.SuccessAsync<SubscriptionInfo>(
             await mcp.CallAsync(McpCallerTools.SubscriptionsStatus, new GetSubscriptionRequest(request.Subscription), token))).Value, before);
     }
 }

@@ -26,7 +26,7 @@ internal static class QueueEnqueueProcessRecovery
         await Assert.That(operation.PrincipalId).IsEqualTo(CrashFixtureValues.Principal);
         await Assert.That(operation.Kind).IsEqualTo(OperationKind.Batch);
         await QueueClaimAckRecoveryAssertions.EqualAsync(owner.NormalizeOperation(operation), operation);
-        var placement = owner.ReadAtomicPartitionPlacement(CrashFixtureValues.Principal, new(QueueEnqueueCrashProtocol.First, command.Partition));
+        var placement = owner.ReadAtomicPartitionPlacement(CrashFixtureValues.Principal, command.Partition);
         await Assert.That(target.Incarnation).IsEqualTo(placement.Incarnation);
         await Assert.That(target.OwnershipEpoch).IsEqualTo(placement.PlacementEpoch);
         await Assert.That(target.AtomicPartitionId).IsEqualTo(command.Partition.AtomicPartitionId);

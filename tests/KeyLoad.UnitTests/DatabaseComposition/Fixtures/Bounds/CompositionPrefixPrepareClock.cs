@@ -49,7 +49,7 @@ internal static class CompositionPrefixPrepareClock
             });
         }, token);
 
-    // Existing six independently owned local native stores, not RF3 or remote-voter qualification.
+    // Existing six independently owned local native stores, not CLUSTER or remote-voter qualification.
     internal static Task RetirementAsync() => ResourceRetirementPreparationValidationFixture.RunAsync(async (state, token) =>
     {
         await ResourceRetirementAttemptAdmissionFlow.ExecuteAsync(state, token);

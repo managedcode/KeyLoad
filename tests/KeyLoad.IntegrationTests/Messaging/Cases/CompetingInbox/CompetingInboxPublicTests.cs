@@ -10,7 +10,7 @@ internal sealed class CompetingInboxPublicTests
     [Arguments(false)]
     public async Task SeparatelyIssuedSdkAndOfficialMcpCompeteForOneInboxThenCurrentInputRepairAndTwoCold(bool equivalent)
     {
-        using var deadline = new CancellationTokenSource(RequestCqrsRf3Protocol.ParentDeadline, TimeProvider.System);
+        using var deadline = new CancellationTokenSource(RequestCqrsClusterProtocol.ParentDeadline, TimeProvider.System);
         using var joined = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, TestContext.Current!.Execution.CancellationToken);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>

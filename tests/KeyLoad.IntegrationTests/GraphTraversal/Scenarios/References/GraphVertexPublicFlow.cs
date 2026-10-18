@@ -7,12 +7,12 @@ internal static class GraphVertexPublicFlow
 {
     internal static async Task Run(ClusterFixture fixture, CancellationToken token)
     {
-        var seed = await GraphIncomingRf3Scenario.CreateAsync(fixture, token);
+        var seed = await GraphIncomingClusterScenario.CreateAsync(fixture, token);
         var state = new GraphVertexPublicState(seed);
         await Owned(fixture, state, async callers =>
         {
             var initial = GraphVertexPublicCommands.Command(state,
-                new PutDocument(GraphIncomingRf3Scenario.Collection, GraphVertexPublicState.NewId, GraphVertexPublicState.Json),
+                new PutDocument(GraphIncomingClusterScenario.Collection, GraphVertexPublicState.NewId, GraphVertexPublicState.Json),
                 GraphVertexPublicCommands.Upsert(state, seed.Target, 0L));
             await GraphVertexPublicCommands.Commit(callers, state, initial,
                 [GraphVertexPublicCommands.PutReceipt(1L), GraphVertexPublicCommands.EdgeReceipt(state, 1L)], token);
@@ -20,17 +20,17 @@ internal static class GraphVertexPublicFlow
             await GraphVertexPublicAssertions.Models(callers, state, token);
             await GraphVertexPublicCommands.Refuse(callers, state, initial with
             {
-                Mutations = [new PutDocument(GraphIncomingRf3Scenario.Collection, GraphVertexPublicState.WitnessId, GraphVertexPublicState.Json)]
+                Mutations = [new PutDocument(GraphIncomingClusterScenario.Collection, GraphVertexPublicState.WitnessId, GraphVertexPublicState.Json)]
             }, ErrorCode.Conflict, token);
             var missing = GraphVertexPublicCommands.Command(state,
-                new PutDocument(GraphIncomingRf3Scenario.Collection, GraphVertexPublicState.WitnessId, GraphVertexPublicState.Json),
+                new PutDocument(GraphIncomingClusterScenario.Collection, GraphVertexPublicState.WitnessId, GraphVertexPublicState.Json),
                 GraphVertexPublicCommands.Upsert(state, seed.Target with
                 {
                     Id = GraphVertexPublicState.MissingId
                 }, 1L));
             await GraphVertexPublicCommands.Refuse(callers, state, missing, ErrorCode.NotFound, token);
             var stale = GraphVertexPublicCommands.Command(state,
-                new PutDocument(GraphIncomingRf3Scenario.Collection, GraphVertexPublicState.WitnessId, GraphVertexPublicState.Json),
+                new PutDocument(GraphIncomingClusterScenario.Collection, GraphVertexPublicState.WitnessId, GraphVertexPublicState.Json),
                 GraphVertexPublicCommands.Upsert(state, state.NewVertex, 0L));
             await GraphVertexPublicCommands.Refuse(callers, state, stale, ErrorCode.RevisionConflict, token);
             await GraphVertexPublicCommands.Commit(callers, state,
@@ -73,8 +73,8 @@ internal static class GraphVertexPublicFlow
     }
 
     private static async Task Owned(ClusterFixture fixture, GraphVertexPublicState state,
-        Func<RequestCqrsRf3Callers, Task> action, CancellationToken token)
-        => _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, fixture.AdminKey,
+        Func<RequestCqrsClusterCallers, Task> action, CancellationToken token)
+        => _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, fixture.AdminKey,
             async callers =>
             {
                 await action(callers);

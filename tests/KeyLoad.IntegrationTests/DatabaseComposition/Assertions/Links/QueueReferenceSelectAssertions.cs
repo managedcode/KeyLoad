@@ -12,12 +12,12 @@ internal static class QueueReferenceSelectAssertions
     private const string MessageIdFieldKey = "message_id";
     private const string ScoreFieldKey = "score";
     private const string CustomerNameFieldKey = "customer_name";
-    internal static async Task PageAsync(RequestCqrsRf3Callers callers, QueueReferenceSelectState state,
+    internal static async Task PageAsync(RequestCqrsClusterCallers callers, QueueReferenceSelectState state,
         bool masked, CancellationToken token)
     {
         var direct = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.QueryAsync(QueueReferenceSelectProtocol.Request(state.Partition), token));
-        var sql = await SqlRf3Protocol.SdkAsync<QueryPage>(callers.Sdk, QueueReferenceSelectProtocol.Operation(state.Partition), token);
-        var official = await SqlRf3Protocol.McpAsync<QueryPage>(callers.Mcp, QueueReferenceSelectProtocol.Operation(state.Partition), token);
+        var sql = await SqlClusterProtocol.SdkAsync<QueryPage>(callers.Sdk, QueueReferenceSelectProtocol.Operation(state.Partition), token);
+        var official = await SqlClusterProtocol.McpAsync<QueryPage>(callers.Mcp, QueueReferenceSelectProtocol.Operation(state.Partition), token);
         var query = (await McpCallerAssertions.SuccessAsync<QueryPage>(await callers.Mcp.CallAsync(
             McpCallerTools.QueryExecute, QueueReferenceSelectProtocol.Request(state.Partition), token))).Value;
         await Assert.That(direct.Cursor).IsNull();
@@ -45,8 +45,8 @@ internal static class QueueReferenceSelectAssertions
             await Assert.That(json.RootElement.GetProperty(ScoreFieldKey).GetInt32()).IsEqualTo(7);
             await Assert.That(json.RootElement.GetProperty(CustomerNameFieldKey).GetString()).IsEqualTo(masked ? null : item.Name);
         }
-        await RelationalSqlRf3JoinPageAssertions.SameRowsAsync(direct, sql);
-        await RelationalSqlRf3JoinPageAssertions.SameRowsAsync(direct, official);
-        await RelationalSqlRf3JoinPageAssertions.SameRowsAsync(direct, query);
+        await RelationalSqlClusterJoinPageAssertions.SameRowsAsync(direct, sql);
+        await RelationalSqlClusterJoinPageAssertions.SameRowsAsync(direct, official);
+        await RelationalSqlClusterJoinPageAssertions.SameRowsAsync(direct, query);
     }
 }

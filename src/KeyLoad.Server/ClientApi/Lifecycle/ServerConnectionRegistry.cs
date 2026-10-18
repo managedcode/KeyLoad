@@ -14,7 +14,6 @@ internal sealed class ServerConnectionRegistry(IServiceProvider services,
 
     internal async Task RunAsync(BaseConnectionContext transport, Func<Task> next)
     {
-        var errorProbe = global::Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetService<PostgresErrorDeliveryProbe>(services);
         ServerConnectionFeature feature;
         lock (gate)
         {
@@ -35,7 +34,6 @@ internal sealed class ServerConnectionRegistry(IServiceProvider services,
         {
             connections.Remove(feature.Id);
         }
-        ServerFailureObserver.Observe(() => errorProbe?.Joined(feature.Id, failures), failures);
         if (failures.Count == ServerConnectionProtocol.NoFailures)
         {
             feature.Completion.TrySetResult();

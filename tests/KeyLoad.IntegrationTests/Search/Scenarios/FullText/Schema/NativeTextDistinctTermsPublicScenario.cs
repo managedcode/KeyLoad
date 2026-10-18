@@ -14,17 +14,17 @@ internal static class NativeTextDistinctTermsPublicScenario
 
     internal static CommandRequest Seed(PartitionRef partition)
         => new(Guid.NewGuid(), partition,
-        [new PutDocument(NativeTextRf3Scenario.Collection, First, FirstJson, 0L),
-         new PutDocument(NativeTextRf3Scenario.Collection, Second, SecondJson, 0L),
-         new PutDocument(NativeTextRf3Scenario.Collection, Plain, PlainJson, 0L)]);
+        [new PutDocument(NativeTextClusterScenario.Collection, First, FirstJson, 0L),
+         new PutDocument(NativeTextClusterScenario.Collection, Second, SecondJson, 0L),
+         new PutDocument(NativeTextClusterScenario.Collection, Plain, PlainJson, 0L)]);
 
     internal static CommandRequest Change(PartitionRef partition)
-        => new(Guid.NewGuid(), partition, [new PatchDocument(NativeTextRf3Scenario.Collection, First,
+        => new(Guid.NewGuid(), partition, [new PatchDocument(NativeTextClusterScenario.Collection, First,
             [new("/text", PatchKind.Set, "\"common rare common rare\"")], 1L)]);
 
     internal static CommandRequest Delete(PartitionRef partition)
-        => new(Guid.NewGuid(), partition, [new DeleteDocument(NativeTextRf3Scenario.Collection, Second, 1L)]);
+        => new(Guid.NewGuid(), partition, [new DeleteDocument(NativeTextClusterScenario.Collection, Second, 1L)]);
 
     internal static CommandRequest Repair(PartitionRef partition)
-        => new(Guid.NewGuid(), partition, [new PutDocument(NativeTextRf3Scenario.Collection, First, HealthyJson, 2L)]);
+        => new(Guid.NewGuid(), partition, [new PutDocument(NativeTextClusterScenario.Collection, First, HealthyJson, 2L)]);
 }

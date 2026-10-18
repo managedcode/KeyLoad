@@ -14,7 +14,7 @@ internal static class FunctionalGateDropAssertions
         await Assert.That(actual.Receipt.Token.Incarnation).IsNotEqualTo(Guid.Empty);
         await Assert.That(actual.Receipt.Token.Position).IsGreaterThan(P.Absent);
         await Assert.That(actual.Receipt.Token.OwnershipEpoch).IsGreaterThan(P.Absent);
-        await SqlRf3Protocol.EqualAsync(new DropTableResult(request.TenantId, request.DatabaseId,
+        await SqlClusterProtocol.EqualAsync(new DropTableResult(request.TenantId, request.DatabaseId,
             request.ResourceName, new(actual.Receipt.CommandId, actual.Receipt.Token, [],
                 DurabilityProfile.QuorumProcessDurable)), actual);
         await NativeSubmissionColdAssertions.ReceiptAsync(actual.Receipt,
@@ -27,17 +27,17 @@ internal static class FunctionalGateDropAssertions
         foreach (var table in state.Tables)
         {
             var expected = new DocumentReadResult(table.Fresh);
-            await SqlRf3Protocol.EqualAsync(expected, await context.SdkAsync(
+            await SqlClusterProtocol.EqualAsync(expected, await context.SdkAsync(
                 context.Reader.Sdk.GetAsync(table.Fresh.Reference, token)));
-            await SqlRf3Protocol.EqualAsync(expected, await context.McpAsync<DocumentReadResult>(context.Reader,
+            await SqlClusterProtocol.EqualAsync(expected, await context.McpAsync<DocumentReadResult>(context.Reader,
                 McpCallerTools.DocumentsGet, new GetDocumentRequest(table.Fresh.Reference), token));
             var absent = table.Fresh.Reference with
             {
                 Id = table.OriginalReference.Id
             };
-            await SqlRf3Protocol.EqualAsync(new DocumentReadResult(null), await context.SdkAsync(
+            await SqlClusterProtocol.EqualAsync(new DocumentReadResult(null), await context.SdkAsync(
                 context.Reader.Sdk.GetAsync(absent, token)));
-            await SqlRf3Protocol.EqualAsync(new DocumentReadResult(null),
+            await SqlClusterProtocol.EqualAsync(new DocumentReadResult(null),
                 await context.McpAsync<DocumentReadResult>(context.Reader, McpCallerTools.DocumentsGet,
                     new GetDocumentRequest(absent), token));
         }

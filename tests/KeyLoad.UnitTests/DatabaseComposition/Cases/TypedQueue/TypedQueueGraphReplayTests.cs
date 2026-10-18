@@ -7,7 +7,7 @@ internal sealed class TypedQueueGraphReplayTests
     private const int IdFault = 2;
 
     [Test]
-    public async Task AcKl095TypedSavedEndpointFaultRefusesOriginalReplayThenRepairsAcrossDirtyAndHealthyColdOwners()
+    public async Task TypedSavedEndpointFaultRefusesOriginalReplayThenRepairsAcrossDirtyAndHealthyColdOwners()
     {
         foreach (var from in new[] { true, false })
         {

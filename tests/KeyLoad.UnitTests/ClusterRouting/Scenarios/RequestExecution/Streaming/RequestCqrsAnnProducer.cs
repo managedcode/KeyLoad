@@ -81,7 +81,6 @@ internal static class RequestCqrsAnnProducer
         {
             AnnPhase = fault == RequestCqrsAnnFault.UnexpectedPhase ? AnnMaintenancePhase.Release : AnnMaintenancePhase.Configure,
             TextPhase = fault == RequestCqrsAnnFault.MixedText ? TextIndexMaintenancePhase.Configure : null,
-            MovePhase = fault == RequestCqrsAnnFault.MixedMove ? PartitionMovePhase.Prepared : null,
             OnlineTextPhase = fault == RequestCqrsAnnFault.MixedOnline ? OnlineTextPhase.Captured : null,
             EventFeedTail = fault == RequestCqrsAnnFault.MixedTail
                 ? new(RequestCqrsAnnTestData.Version, new()

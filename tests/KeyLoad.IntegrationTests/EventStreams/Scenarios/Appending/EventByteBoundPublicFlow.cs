@@ -8,7 +8,7 @@ internal static class EventByteBoundPublicFlow
 {
     internal static async Task RunAsync(ClusterFixture fixture, CancellationToken token)
     {
-        var state = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
+        var state = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
             fixture.AdminKey, async admin =>
             {
                 var seeded = await EventByteBoundPublicSeed.CreateAsync(fixture, admin, token);
@@ -17,8 +17,8 @@ internal static class EventByteBoundPublicFlow
             }, token);
         for (var cold = 0; cold < 2; cold++)
         {
-            await FeedLiveRf3Cold.RestartAsync(fixture, token);
-            _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
+            await FeedLiveClusterCold.RestartAsync(fixture, token);
+            _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
                 fixture.AdminKey, async admin =>
                 {
                     await WithReaderAsync(fixture, admin, state, false, token);
@@ -27,9 +27,9 @@ internal static class EventByteBoundPublicFlow
         }
     }
 
-    private static Task<bool> WithReaderAsync(ClusterFixture fixture, RequestCqrsRf3Callers admin,
+    private static Task<bool> WithReaderAsync(ClusterFixture fixture, RequestCqrsClusterCallers admin,
         EventByteBoundPublicState state, bool capture, CancellationToken token)
-        => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, state.Reader.Secret,
+        => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, state.Reader.Secret,
             async reader =>
             {
                 await EventByteBoundPublicCurrent.ObserveAsync(admin, state, token);

@@ -95,7 +95,7 @@ public sealed partial class DatabaseEngine
         var catalog = PhysicalShardCatalogRecordSerialization.Read(view)
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, InvalidEventVectorControlAuthority);
         PhysicalShardCatalogValidation.ValidateCatalog(catalog);
-        var placement = ResolveRegisteredPlacement(view, request.ControlPartition, catalog.DefaultShard);
+        var placement = ResolveRegisteredPlacement(request.ControlPartition, catalog.DefaultShard);
         var owner = ResolveRegisteredPlacementOwner(view, catalog.DefaultShard,
             placement.PhysicalShardId, ErrorCode.OwnershipLost);
         _ = StreamTraversalPlacement(view, request.ControlPartition, owner);

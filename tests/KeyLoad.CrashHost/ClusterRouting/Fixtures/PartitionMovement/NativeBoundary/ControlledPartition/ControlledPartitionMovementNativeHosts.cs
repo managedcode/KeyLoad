@@ -21,14 +21,13 @@ internal sealed partial class ControlledPartitionMovementNativeHosts : IAsyncDis
 
     internal ControlledPartitionMovementNativeHosts(ControlledPartitionMovementNativeHostSettings settings,
         NativeLocalhostClusteringOptions localhost,
-        Func<int, IGrainPartitionMovementSealedOperationObserver>? observerFactory = null,
         Func<int, IDatabaseAuthenticationExecutionObserver>? authenticationObserverFactory = null,
         Func<int, IGrainRequestPhaseObserver>? phaseObserverFactory = null,
         IGrainRequestPurposeObserver? purposeObserver = null)
     {
         this.settings = settings;
         this.localhost = localhost;
-        observers = new(observerFactory, authenticationObserverFactory, phaseObserverFactory, purposeObserver);
+        observers = new(authenticationObserverFactory, phaseObserverFactory, purposeObserver);
     }
 
     internal ControlledPartitionMovementNativeHost Source => nodes[SourceIndex];
@@ -39,33 +38,26 @@ internal sealed partial class ControlledPartitionMovementNativeHosts : IAsyncDis
     internal string Root => settings.Root;
 
     internal static Task<ControlledPartitionMovementNativeHosts> CreateAsync(CancellationToken cancellationToken)
-        => ControlledPartitionMovementNativeHostFactory.CreateAsync(null, cancellationToken);
-
-    internal static Task<ControlledPartitionMovementNativeHosts> CreateAsync(
-        Func<int, IGrainPartitionMovementSealedOperationObserver> observerFactory, CancellationToken cancellationToken)
-    {
-        ArgumentNullException.ThrowIfNull(observerFactory);
-        return ControlledPartitionMovementNativeHostFactory.CreateAsync(observerFactory, cancellationToken);
-    }
+        => ControlledPartitionMovementNativeHostFactory.CreateAsync(cancellationToken);
 
     internal static Task<ControlledPartitionMovementNativeHosts> CreateWithAuthenticationObserverAsync(
         Func<int, IDatabaseAuthenticationExecutionObserver> observerFactory, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(observerFactory);
-        return ControlledPartitionMovementNativeHostFactory.CreateAsync(null, observerFactory, null, null, null, null, null, null, cancellationToken);
+        return ControlledPartitionMovementNativeHostFactory.CreateAsync(observerFactory, null, null, null, null, null, null, cancellationToken);
     }
 
     internal static Task<ControlledPartitionMovementNativeHosts> CreateWithPhaseObserverAsync(
         Func<int, IGrainRequestPhaseObserver> observerFactory, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(observerFactory);
-        return ControlledPartitionMovementNativeHostFactory.CreateAsync(null, null, observerFactory, null, null, null, null, null, cancellationToken);
+        return ControlledPartitionMovementNativeHostFactory.CreateAsync(null, observerFactory, null, null, null, null, null, cancellationToken);
     }
 
     internal static Task<ControlledPartitionMovementNativeHosts> CreateWithMaximumBatchBytesAsync(
         int maximumBatchBytes, CancellationToken cancellationToken)
     {
-        return ControlledPartitionMovementNativeHostFactory.CreateAsync(null, null, null, maximumBatchBytes, null, null, null, null, cancellationToken);
+        return ControlledPartitionMovementNativeHostFactory.CreateAsync(null, null, maximumBatchBytes, null, null, null, null, cancellationToken);
     }
 
     internal void RetainCreationFailure(Exception original) => creationFailure = original;
@@ -82,7 +74,7 @@ internal sealed partial class ControlledPartitionMovementNativeHosts : IAsyncDis
         {
             var nodeIndex = index;
             nodes.Add(await ControlledPartitionMovementNativeHost.CreateAsync(settings.Arguments(index), localhost,
-            observers.Sealed(index), observers.Authentication(index), phaseObserver: observers.Phase(index), purposeObserver: observers.Purpose,
+            observers.Authentication(index), phaseObserver: observers.Phase(index), purposeObserver: observers.Purpose,
                 configureServices: configureNode is null ? null : (services, node) => configureNode(nodeIndex, services, node),
                 startupCancellation: startupCancellation).ConfigureAwait(false));
         }

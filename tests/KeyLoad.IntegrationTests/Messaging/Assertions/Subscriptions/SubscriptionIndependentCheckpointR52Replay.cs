@@ -20,7 +20,7 @@ internal static class SubscriptionIndependentCheckpointR52Replay
     {
         if (state.PolicyEpoch == 1)
         {
-            await SubscriptionFilterRf3Assertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
+            await SubscriptionFilterClusterAssertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
                 await sdk.CommitAsync(state.Seed.Publish, token)), state.Seed.PublishReceipt);
         }
         else
@@ -31,7 +31,7 @@ internal static class SubscriptionIndependentCheckpointR52Replay
         var reply = await mcp.CallAsync(McpCallerTools.DocumentsCommit, state.Seed.Publish, token);
         if (state.PolicyEpoch == 1)
         {
-            await SubscriptionFilterRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(reply)).Value, state.Seed.PublishReceipt);
+            await SubscriptionFilterClusterAssertions.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(reply)).Value, state.Seed.PublishReceipt);
         }
         else
         {
@@ -40,10 +40,10 @@ internal static class SubscriptionIndependentCheckpointR52Replay
         await SubscriptionIndependentCheckpointR52Current.RunAsync(state, sdk, mcp, admin, official, token);
         if (state.HealthyPublish is { } publish)
         {
-            await SubscriptionFilterRf3Assertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
+            await SubscriptionFilterClusterAssertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
                 await sdk.CommitAsync(publish, token)), state.HealthyReceipt);
             await SubscriptionIndependentCheckpointR52Current.RunAsync(state, sdk, mcp, admin, official, token);
-            await SubscriptionFilterRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(
+            await SubscriptionFilterClusterAssertions.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(
                 await mcp.CallAsync(McpCallerTools.DocumentsCommit, publish, token))).Value, state.HealthyReceipt);
             await SubscriptionIndependentCheckpointR52Current.RunAsync(state, sdk, mcp, admin, official, token);
         }
@@ -57,7 +57,7 @@ internal static class SubscriptionIndependentCheckpointR52Replay
             var result = await sdk.CompleteSubscriptionAsync(saved.Request, token);
             if (saved.Epoch == state.PolicyEpoch)
             {
-                await SubscriptionFilterRf3Assertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(result), saved.Receipt);
+                await SubscriptionFilterClusterAssertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(result), saved.Receipt);
             }
             else
             {
@@ -67,7 +67,7 @@ internal static class SubscriptionIndependentCheckpointR52Replay
             var reply = await mcp.CallAsync(McpCallerTools.SubscriptionsComplete, saved.Request, token);
             if (saved.Epoch == state.PolicyEpoch)
             {
-                await SubscriptionFilterRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(reply)).Value, saved.Receipt);
+                await SubscriptionFilterClusterAssertions.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(reply)).Value, saved.Receipt);
             }
             else
             {
@@ -91,7 +91,7 @@ internal static class SubscriptionIndependentCheckpointR52Replay
             {
                 await Assert.That(result.IsFailed).IsTrue();
                 await Assert.That(result.Value).IsNull();
-                await SubscriptionFilterRf3Assertions.EqualAsync(result.Problem, saved.Failure.Problem);
+                await SubscriptionFilterClusterAssertions.EqualAsync(result.Problem, saved.Failure.Problem);
             }
             await SubscriptionIndependentCheckpointR52Current.RunAsync(state, sdk, mcp, admin, official, token);
             await SubscriptionIndependentCheckpointR52Refusals.McpAsync(

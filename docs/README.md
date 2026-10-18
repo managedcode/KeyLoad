@@ -1,72 +1,62 @@
-# Документація KeyLoad
+# KeyLoad documentation
 
-Головна ідея — одна база для AI-агентів: документи, типізовані таблиці, графи,
-блоби, черги, події, пошук і часові ряди співіснують і доступні один одному через
-канонічні посилання. SQL — знайома спільна мова для їх поєднання. Наприклад,
-один bounded запит читає повідомлення черги, знаходить пов'язані сутності й
-записує зв'язки у граф знань; зворотний напрямок створює завдання з графа.
-[DatabaseComposition](Features/DatabaseComposition.md) / [ADR-067](ADR/ADR-067-composable-agent-database.md)
-визначають перший atomic server stage та відділяють його від повного declarative SQL.
+KeyLoad is one database for AI agents: documents, typed tables, graphs, blobs, queues, events, search and time series live in one database and reference one another. SQL is the shared language for combining them; the .NET SDK and the built-in MCP server reach the same authorized operations.
 
-KeyLoad поєднує документи, історію подій, надійну доставку, граф, часові ряди та пошук у спільному transaction/authorization/recovery середовищі. Почніть із [карти архітектури](Architecture.md); owning contracts нижче пояснюють поведінку конкретних функцій. [Продуктова специфікація](design/architecture-v0.3.uk.md) зберігає повний задум, але поточні [обов'язкові правила](../AGENTS.md) мають пріоритет над її старими DotNext/standalone-first choices.
+The cluster is Microsoft Orleans. Orleans does membership, placement, activation migration, communication between silos and scaling, and data is copied to replicas through ordinary Orleans calls. Every silo has its own ZoneTree that owns its files. A public request goes to one Orleans grain per connected client, which calls the ZoneTree owner on its own node or on other nodes, gathers the results and returns them. See [ADR-136](ADR/ADR-136-native-orleans-partition-ownership.md).
 
-## Функції продукту
-
-| Canonical Feature | Що описує контракт |
-|---|---|
-| [DatabaseComposition](Features/DatabaseComposition.md) | Одна база: bounded queue→entity→graph і graph→queue atomic derivation через SQL CALL/SDK/MCP; full declarative SQL та RF3 qualification pending |
-| [DocumentStorage](Features/DocumentStorage.md) | JSON CRUD/PATCH/CAS, strict scalar/unique indexes, domain-bound atomic batch та persisted command outcomes |
-| [RelationalStorage](Features/RelationalStorage.md) | Типізовані рядки в canonical entity storage, primary/type/null та native unique constraints; JOIN/FK — наступні незавершені етапи |
-| [EventStreams](Features/EventStreams.md) | Expected-revision append, generation/EventId dedup and ordered safe replay; aggregate snapshots remain planned |
-| [Messaging](Features/Messaging.md) | Durable queues, scheduled/leased work, fenced ACK/NACK/renew, inbox, topics/groups/contiguous checkpoints; planned remote/recurring workflows |
-| [GraphTraversal](Features/GraphTraversal.md) | Atomic edge/adjacency, visible directed bounded BFS; planned cross-partition/ranked graph operations |
-| [TimeSeries](Features/TimeSeries.md) | UTC/sequence samples, idempotency, inclusive bounded ranges; planned retention/aggregates/rollups/chunks and isolated Timescale/ManagedCode comparison |
-| [Search](Features/Search.md) | Exact vector та request-time lexical/hybrid search, policy/bounds; planned providers, ANN і global retrieval |
-| [QueryExecution](Features/QueryExecution.md) | Bounded Q1 SQL, shared authorized AST, JSON/C# equivalence, Explain/cursors; planned extended/distributed operators |
-| [Authorization](Features/Authorization.md) | Persisted identity/API-key verifiers, tenant/resource/row/field grants, PII omission/use rules, epochs і worker privacy |
-| [ChangeFeeds](Features/ChangeFeeds.md) | Atomic outbox, protected resumable CDC, scalar snapshot+tail, projection checkpoints/pins/generation fencing |
-| [BackupRestore](Features/BackupRestore.md) | Verified local backup/artifacts, clean-target restore, new identity/paused dispatch; planned full cluster-cut recovery |
-| [BlobStorage](Features/BlobStorage.md) | Chunked user blobs/partial reads and typed SDK source present; Accepted protocol, exact-SHA qualification pending |
-
-## Cluster, callers і delivery
-
-| Canonical Feature | Що описує контракт |
-|---|---|
-| [ClusterReplication](Features/ClusterReplication.md) | Orleans RF3 durable protocol, quorum/read barriers, snapshots, minority denial та protected control capacity |
-| [ClusterRouting](Features/ClusterRouting.md) | Distinct request grain, distributed directory and activation movement, membership, atomic identity/physical placement; forced-movement qualification pending |
-| [StorageRecovery](Features/StorageRecovery.md) | Node-local stores/journals/locks/apply/read lifetime, codec/checkpoints/corruption і process recovery |
-| [InternalSerialization](Features/InternalSerialization.md) | Generated Orleans DTO closure, current internal binary formats and strict fail-closed boundaries; prior-format conversion is outside current scope, exact-source qualification pending |
-| [ClientApi](Features/ClientApi.md) | Typed .NET/CLI transport і retries/errors; official MCP/simple agent source and Accepted mapping, qualification pending |
-| [AdminDashboard](Features/AdminDashboard.md) | Захищена read-only адмінпанель: фізичні розміри файлів, фактичний HTTP throughput, каталог/документи/blob metadata та черги без споживання; GitHub qualification pending |
-| [ResourceExecution](Features/ResourceExecution.md) | Bounded work/memory/lifetimes, multi-tenant admission/control reserve та honest metrics/telemetry |
-| [BenchmarkComparisons](Features/BenchmarkComparisons.md) | Same-corpus correctness, Docker/Aspire native topologies, free-engine scope та graphs тільки з successful GitHub JSON |
-| [CodeQuality](Features/CodeQuality.md) | Central SDK/style/Roslyn analysis, named-symbol/SOLID limits та retained diagnostics |
-| [TestInfrastructure](Features/TestInfrastructure.md) | TUnit/MTP, actual process recovery і Docker RF3 .NET/MCP suites, versions/platforms та release gates |
-| [ReleaseDelivery](Features/ReleaseDelivery.md) | Four separate workflows: build/tests, isolated benchmarks, release, and website generation from authenticated completed-run results |
-| [RepositoryGovernance](Features/RepositoryGovernance.md) | MCAF policy preservation, local ownership, REQ/AC/ADR, bounded agent tasks і documentation coverage |
-
-Owning Feature-специфікації включають окремий ReleaseDelivery контракт. Кожна містить requirements/acceptance, applicable ADRs, current/target slice map, positive/negative/edge/error flows та test/evidence boundaries. Frontend або інші N/A surfaces мають конкретну причину; required future capability не зникає з контракту через відсутність source.
+Start with the [architecture map](Architecture.md). The [product specification](design/product-specification.md) describes the whole product; the [repository rules](../AGENTS.md) take precedence.
 
 ```mermaid
 flowchart LR
-    Entry[README and architecture map] --> Feature[Owning Feature with REQ and AC]
-    Feature --> ADR[Unique ADR with implementation contract]
-    ADR --> Source[Actual source or explicit planned paths]
-    Feature --> Tests[Named existing or planned tests]
-    Source --> Evidence[Exact delivered GitHub evidence]
+    Readme[README and architecture map] --> Feature[Feature spec with REQ and AC]
+    Feature --> Adr[ADR with the decision]
+    Adr --> Source[Source code]
+    Feature --> Tests[TUnit tests]
+    Source --> Evidence[GitHub Actions evidence]
     Tests --> Evidence
-    Backlog[Canonical task tracker] --> Feature
 ```
 
-## Рішення, джерела та стан
+## Data models
 
-- [ADR index](ADR/README.md) описує рішення та їхню ідентичність. Accepted означає рішення/контракт; Implemented вимагає поточної implementation/tests/docs та verification evidence.
-- [Canonical task tracker](implementation/status.json) є canonical джерелом implementation status; [coverage catalog](implementation/documentation-coverage.json) мапить кожну KL-задачу на Feature та ADR і не підміняє tracker.
-- [Durability audit](implementation/durability-audit.md) та [comparison contract](implementation/comparative-benchmarks.md) визначають вимоги до перевірок і незакриті qualification gates.
-- Детальні existing designs: [Q1](design/query-q1.md), [admission](design/command-admission.md), [bounded reads](design/bounded-reads.md), [replica snapshots](design/replica-snapshots.md), [feeds](design/change-feeds.md). Feature/ADR links визначають owning acceptance; ці матеріали не оголошують майбутні протоколи готовими.
+| Feature | Contract |
+|---|---|
+| [DatabaseComposition](Features/DatabaseComposition.md) | One database: queue → entity → graph and graph → queue derivations through SQL, SDK and MCP |
+| [DocumentStorage](Features/DocumentStorage.md) | JSON CRUD, PATCH and CAS, strict scalar and unique indexes, atomic batches and persisted command outcomes |
+| [RelationalStorage](Features/RelationalStorage.md) | Typed rows in canonical entity storage with primary key, type, null and unique constraints |
+| [EventStreams](Features/EventStreams.md) | Expected-revision append, EventId deduplication and ordered replay |
+| [Messaging](Features/Messaging.md) | Durable queues, scheduled and leased work, fenced ACK/NACK/renew, inbox, topics and consumer groups |
+| [GraphTraversal](Features/GraphTraversal.md) | Atomic edges and adjacency, bounded directed traversal and shortest paths |
+| [TimeSeries](Features/TimeSeries.md) | Samples, bounded ranges, aggregates, retention, rollups and chunks |
+| [Search](Features/Search.md) | Exact vectors, full-text (ZoneTree.FullTextSearch), ANN and hybrid search under the same authorization |
+| [BlobStorage](Features/BlobStorage.md) | Chunked blobs with partial reads |
+| [AnalyticsStore](Features/AnalyticsStore.md) | User analytics events on ZoneTree.Analytics |
+| [ChangeFeeds](Features/ChangeFeeds.md) | Atomic outbox, resumable change feeds and projection checkpoints |
+| [QueryExecution](Features/QueryExecution.md) | T-SQL through ScriptDOM, one authorized query AST, budgets, Explain and cursors |
 
-У source є data/auth/feed/backup, public BlobStorage та official MCP/agent можливості з Accepted contracts; current-format restore, Orleans/Docker RF3 та SDK/MCP flows потребують delivered-source qualification. Нові SQL/typed-row joins мають окремий [реєстр доказів](implementation/central-sql.md). [Історичний CI 36926803549](https://github.com/managedcode/KeyLoad/actions/runs/36926803549) на `9c570f8c33a7a9667507a8e1c0ca68860de3be45` не кваліфікує пізніші зміни.
+## Cluster, callers and platform
 
-Product qualification і всі load/test results беруться лише з GitHub Actions; graphs — тільки з raw successful JSON із SHA/run/profile/topology/guarantees. Документальний/static review не доводить швидкість, power-loss durability, numeric coverage/complexity або production readiness. Метод цієї документаційної роботи: [ADR-037](ADR/ADR-037-documentation-coverage.md).
+| Feature | Contract |
+|---|---|
+| [ClusterRouting](Features/ClusterRouting.md) | Orleans does all clustering: one grain per connection, partition grains, calls to the silo-local ZoneTree owner on any node, stateless workers for background work |
+| [ClusterReplication](Features/ClusterReplication.md) | Copies through Orleans Grain Service calls to `ReplicaCount` silos found through native membership, majority acknowledgement, catch-up through Orleans |
+| [StorageRecovery](Features/StorageRecovery.md) | The silo-local ZoneTree owner: stores, journals, locks, ordered apply, read lifetimes and process recovery |
+| [BackupRestore](Features/BackupRestore.md) | Verified backup of a node's ZoneTree files and clean-target restore |
+| [InternalSerialization](Features/InternalSerialization.md) | Generated Orleans serialization and the current internal binary formats |
+| [Authorization](Features/Authorization.md) | Persisted credentials and grants, row and field policy, policy epochs |
+| [ClientApi](Features/ClientApi.md) | .NET SDK, CLI and the official MCP server with on-demand tool discovery |
+| [AdminDashboard](Features/AdminDashboard.md) | Read-only admin console |
+| [ResourceExecution](Features/ResourceExecution.md) | Bounded work, memory, admission and telemetry |
+| [CodeQuality](Features/CodeQuality.md) | Analyzers, formatting, maintainability limits and functional coverage |
+| [TestInfrastructure](Features/TestInfrastructure.md) | TUnit with Aspire-owned Docker clusters, real .NET SDK and official MCP clients |
+| [BenchmarkComparisons](Features/BenchmarkComparisons.md) | Equal-workload comparisons with other databases; published figures only from GitHub Actions JSON |
+| [ReleaseDelivery](Features/ReleaseDelivery.md) | The Build and Tests, Benchmarks, Website and Release workflows |
+| [RepositoryGovernance](Features/RepositoryGovernance.md) | Repository rules, local ownership and REQ/AC/ADR traceability |
 
-Проміжні JSON-звіти агентів, development checkpoints і копії результатів окремих CI-запусків видалено. У `implementation/` залишено п’ять канонічних JSON: статус, карту документаційної traceability, запис перевірки структури репозиторію та два SQL-інвентарі. Оригінальні результати перевірок належать GitHub Actions та його артефактам; історичні твердження у Feature/ADR не кваліфікують поточний checkout.
+## Decisions and status
+
+- [ADR index](ADR/README.md): every architecture decision. *Accepted* means the decision is in force; implementation and qualification are tracked in the feature specs.
+- [Current status](implementation/status.json): a short record of the product state and the open qualification gates.
+- [Durability audit](implementation/durability-audit.md) and [benchmark principles](implementation/comparative-benchmarks.md).
+- Designs: [Q1 queries](design/query-q1.md), [command admission](design/command-admission.md), [bounded reads](design/bounded-reads.md), [change feeds](design/change-feeds.md).
+
+Qualification evidence comes only from GitHub Actions runs and their original artifacts for the exact source. A document review proves no speed, power-loss durability, coverage or production readiness.

@@ -47,8 +47,7 @@ public sealed partial class DatabaseEngine
                 throw Errors.Fail(ErrorCode.TokenInvalidated, ResourceRetirementProtocol.Changed);
             }
             ResourceRetirementPreparationEvidence.Owner(view, reservation, Limits);
-            var status = new ResourceRetirementOwnerStatusV1(reservation, CaptureRetirementStatusCut(view),
-                ResourceRetirementMovementSnapshot.Capture(view, OperationLimitsOptions));
+            var status = new ResourceRetirementOwnerStatusV1(reservation, CaptureRetirementStatusCut(view), []);
             ResourceRetirementPreparationValidation.Status(status, Limits);
             return status;
         });

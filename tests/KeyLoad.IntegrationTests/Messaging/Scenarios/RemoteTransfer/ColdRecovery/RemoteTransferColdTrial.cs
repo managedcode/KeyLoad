@@ -31,10 +31,10 @@ internal static class RemoteTransferColdTrial
             original = await RemoteTransferColdStages.CreateAsync(sdk, mcp, seed, token);
         }, token);
         var created = original ?? throw new InvalidOperationException(RemoteTransferColdProtocol.Missing);
-        await QueueProducerRf3Cold.RestartAsync(fixture, token);
+        await QueueProducerClusterCold.RestartAsync(fixture, token);
         await RemoteTransferColdCallers.WithAsync(fixture, seed, async (sdk, mcp) =>
         {
-            await QueueProducerRf3Assertions.ReplayAsync(sdk, mcp, seed.Create, created.Receipt, token);
+            await QueueProducerClusterAssertions.ReplayAsync(sdk, mcp, seed.Create, created.Receipt, token);
         }, token);
         await RemoteTransferColdRefusals.ExecuteAsync(fixture, seed, created.Intent, token);
         var accept = seed.Accept(created.Intent);
@@ -45,12 +45,12 @@ internal static class RemoteTransferColdTrial
             accepted = await RemoteTransferColdStages.AcceptAsync(sdk, mcp, seed, created.Intent, accept, RemoteTransferColdProtocol.OriginalReadySequence, token);
         }, token);
         var target = accepted ?? throw new InvalidOperationException(RemoteTransferColdProtocol.Missing);
-        await QueueProducerRf3Cold.RestartAsync(fixture, token);
+        await QueueProducerClusterCold.RestartAsync(fixture, token);
         var complete = seed.Complete(target.Proof);
         CommitReceipt? completed = null;
         await RemoteTransferColdCallers.WithAsync(fixture, seed, async (sdk, mcp) =>
         {
-            await QueueProducerRf3Assertions.ReplayAsync(sdk, mcp, accept, target.Receipt, token);
+            await QueueProducerClusterAssertions.ReplayAsync(sdk, mcp, accept, target.Receipt, token);
             await RemoteTransferColdAssertions.SourceAsync(sdk, mcp, seed, created.Intent, token);
             await RemoteTransferColdAssertions.ReceiptAsync(sdk, mcp, seed, target.Proof, token);
             await RemoteTransferColdAssertions.MessageAsync(sdk, mcp, seed,
@@ -59,12 +59,12 @@ internal static class RemoteTransferColdTrial
                 target.Proof, complete, token);
         }, token);
         ArgumentNullException.ThrowIfNull(completed);
-        await QueueProducerRf3Cold.RestartAsync(fixture, token);
+        await QueueProducerClusterCold.RestartAsync(fixture, token);
         await RemoteTransferColdCallers.WithAsync(fixture, seed, async (sdk, mcp) =>
         {
             await RemoteTransferColdRefusals.OriginalEpochRefusedAsync(sdk, mcp, seed, token);
-            await QueueProducerRf3Assertions.ReplayAsync(sdk, mcp, accept, target.Receipt, token);
-            await QueueProducerRf3Assertions.ReplayAsync(sdk, mcp, complete, completed, token);
+            await QueueProducerClusterAssertions.ReplayAsync(sdk, mcp, accept, target.Receipt, token);
+            await QueueProducerClusterAssertions.ReplayAsync(sdk, mcp, complete, completed, token);
             await RemoteTransferColdAssertions.SourceAsync(sdk, mcp, seed, created.Intent with
             {
                 State = QueueTransferState.Delivered,

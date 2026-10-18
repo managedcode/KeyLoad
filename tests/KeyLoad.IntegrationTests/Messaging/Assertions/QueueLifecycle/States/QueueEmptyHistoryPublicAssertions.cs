@@ -9,7 +9,7 @@ internal static class QueueEmptyHistoryPublicAssertions
     internal const string First = "empty-history-first";
     internal const string Sibling = "empty-history-sibling";
 
-    internal static async Task OriginalAsync(RequestCqrsRf3Callers callers,
+    internal static async Task OriginalAsync(RequestCqrsClusterCallers callers,
         QueueEmptyHistoryPublicState state, CancellationToken token)
     {
         await Assert.That(state.EmptyResult.RequestId).IsEqualTo(state.EmptyRequest.RequestId);
@@ -24,7 +24,7 @@ internal static class QueueEmptyHistoryPublicAssertions
         await QueueLifecyclePublicRoutes.ReplayAsync(callers, state.Owner, token);
     }
 
-    internal static async Task ChangedAsync(RequestCqrsRf3Callers callers,
+    internal static async Task ChangedAsync(RequestCqrsClusterCallers callers,
         QueueEmptyHistoryPublicState state, CancellationToken token)
     {
         var changed = state.EmptyRequest with
@@ -32,7 +32,7 @@ internal static class QueueEmptyHistoryPublicAssertions
             MaxMessages = 2
         };
         var refusal = await callers.Sdk.ReceiveAsync(changed, token);
-        await SagaTimeoutRf3Assertions.AssertSdkErrorAsync(refusal, ErrorCode.Conflict);
+        await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(refusal, ErrorCode.Conflict);
         await Assert.That(refusal.Value).IsNull();
         var problem = JsonSerializer.SerializeToElement(refusal.Problem, JsonDefaults.Options);
         if (state.ChangedProblem is { } saved)
@@ -47,13 +47,13 @@ internal static class QueueEmptyHistoryPublicAssertions
             McpCallerTools.MessagesReceive, changed, token), ErrorCode.Conflict, true);
     }
 
-    internal static Task MessageAsync(RequestCqrsRf3Callers callers, QueueEmptyHistoryPublicState state,
+    internal static Task MessageAsync(RequestCqrsClusterCallers callers, QueueEmptyHistoryPublicState state,
         string id, MessageMetadata metadata, bool body, CancellationToken token)
         => QueueLeasedCancelPublicAssertions.MessageAsync(callers, state.Owner, id,
             new(metadata, body ? QueueLifecyclePublicProtocol.CanonicalPayload : null,
                 body ? QueueLifecyclePublicProtocol.Headers : null), token);
 
-    internal static async Task ReadyAsync(RequestCqrsRf3Callers callers,
+    internal static async Task ReadyAsync(RequestCqrsClusterCallers callers,
         QueueEmptyHistoryPublicState state, bool firstSettled, CancellationToken token)
     {
         await MessageAsync(callers, state, First, firstSettled
@@ -63,7 +63,7 @@ internal static class QueueEmptyHistoryPublicAssertions
             new(Sibling, MessageState.Ready, 0, 1L, 2L, null, null), true, token);
     }
 
-    internal static async Task TerminalAsync(RequestCqrsRf3Callers callers, QueueEmptyHistoryPublicState state,
+    internal static async Task TerminalAsync(RequestCqrsClusterCallers callers, QueueEmptyHistoryPublicState state,
         bool healthy, CancellationToken token)
     {
         await MessageAsync(callers, state, First,

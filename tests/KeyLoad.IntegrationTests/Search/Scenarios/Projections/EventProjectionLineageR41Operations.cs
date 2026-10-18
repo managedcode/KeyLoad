@@ -6,13 +6,13 @@ namespace KeyLoad.IntegrationTests.Features.Search;
 
 internal static class EventProjectionLineageR41Operations
 {
-    internal static async Task ApplyAsync(RequestCqrsRf3Callers worker, EventProjectionLineageR41State state, CancellationToken token)
+    internal static async Task ApplyAsync(RequestCqrsClusterCallers worker, EventProjectionLineageR41State state, CancellationToken token)
     {
         state.Original = await McpCallerAssertions.SdkSuccessAsync(await worker.Sdk.CommitAsync(state.Projection, token));
         await ReceiptAsync(state, state.Projection, state.Original,
          [new(EventProjectionLineageR41Protocol.Projection, EventProjectionLineageR41Protocol.Collection, EventProjectionLineageR41Protocol.Target, 1L)]);
     }
-    internal static async Task DeleteAsync(RequestCqrsRf3Callers admin, EventProjectionLineageR41State state, CancellationToken token)
+    internal static async Task DeleteAsync(RequestCqrsClusterCallers admin, EventProjectionLineageR41State state, CancellationToken token)
     {
         var command = new CommandRequest(Guid.NewGuid(), state.Partition,
          [new DeleteDocument(EventProjectionLineageR41Protocol.Collection, EventProjectionLineageR41Protocol.Source, 1L)]);
@@ -22,7 +22,7 @@ internal static class EventProjectionLineageR41Operations
         state.Successes.Add((command, receipt));
         state.Deleted = true;
     }
-    internal static async Task ReplaceAsync(RequestCqrsRf3Callers admin, EventProjectionLineageR41State state, CancellationToken token)
+    internal static async Task ReplaceAsync(RequestCqrsClusterCallers admin, EventProjectionLineageR41State state, CancellationToken token)
     {
         var command = new CommandRequest(Guid.NewGuid(), state.Partition,
          [new PutVector(EventProjectionLineageR41Protocol.Collection,EventProjectionLineageR41Protocol.Target,
@@ -37,10 +37,10 @@ internal static class EventProjectionLineageR41Operations
      CommitReceipt receipt, MutationReceipt[] mutations)
     {
         await Assert.That(receipt.CommandId).IsEqualTo(request.CommandId);
-        await SqlRf3Protocol.EqualAsync(new CommitToken(state.Placement.Incarnation, state.Partition.AtomicPartitionId,
-         receipt.Token.Position, state.Placement.PlacementEpoch), receipt.Token);
+        await SqlClusterProtocol.EqualAsync(new CommitToken(receipt.Token.Incarnation, state.Partition.AtomicPartitionId,
+         receipt.Token.Position, receipt.Token.OwnershipEpoch), receipt.Token);
         await Assert.That(receipt.Token.Position).IsGreaterThan(0L);
         await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
-        await SqlRf3Protocol.EqualAsync(mutations, receipt.Mutations.ToArray());
+        await SqlClusterProtocol.EqualAsync(mutations, receipt.Mutations.ToArray());
     }
 }

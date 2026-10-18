@@ -1,11 +1,10 @@
-using KeyLoad.Core.Features.ClusterRouting.Authorization;
 using KeyLoad.Core.Features.ResourceExecution.Execution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.ResourceExecution;
 
 /// <summary>Charges one read operation before borrowed storage data is copied or consumed.</summary>
-internal sealed class BudgetedReadView : IKeyValueView, IPartitionMovementReadScope, IResourceLifetimeReadBindingView,
+internal sealed class BudgetedReadView : IKeyValueView, IResourceLifetimeReadBindingView,
     IResourceEffectObservation
 {
     private readonly IKeyValueView view;
@@ -31,30 +30,6 @@ internal sealed class BudgetedReadView : IKeyValueView, IPartitionMovementReadSc
             observation.ObserveResource(partition, lifetime);
         }
     }
-
-    private bool movementAuthorityAbsent;
-    bool IPartitionMovementReadScope.MovementAuthorityAbsent
-    {
-        get => view is IPartitionMovementReadScope scope ? scope.MovementAuthorityAbsent
-            : view is not IAtomicTransaction && movementAuthorityAbsent;
-        set
-        {
-            if (view is IPartitionMovementReadScope scope)
-            {
-                scope.MovementAuthorityAbsent = value;
-            }
-            else if (view is not IAtomicTransaction)
-            {
-                movementAuthorityAbsent = value;
-            }
-        }
-    }
-    bool IPartitionMovementReadScope.CanReuseCommittedMovementAbsence
-        => view is IPartitionMovementReadScope scope ? scope.CanReuseCommittedMovementAbsence
-            : view is not IAtomicTransaction;
-    bool IPartitionMovementReadScope.CanPublishCommittedMovementAbsence
-        => view is IPartitionMovementReadScope scope ? scope.CanPublishCommittedMovementAbsence
-            : view is not IAtomicTransaction;
 
     /// <summary>Creates a view whose lifetime is bounded by the wrapped storage action.</summary>
     /// <param name="view">The underlying view, valid only in its current storage action.</param>

@@ -64,7 +64,7 @@ internal static class ConcurrentPrincipalPolicyContinuation
         {
             var actual = await McpCallerAssertions.SdkSuccessAsync(
                 await root.ConfigurePrincipalAsync(Guid.NewGuid(), expected, token));
-            await SqlRf3Protocol.EqualAsync(expected, actual);
+            await SqlClusterProtocol.EqualAsync(expected, actual);
             return actual;
         });
 
@@ -100,6 +100,6 @@ internal static class ConcurrentPrincipalPolicyContinuation
         McpDocumentScenario second, global::System.Text.Json.JsonElement expected, CancellationToken token)
     {
         var actual = await ConcurrentPrincipalAuthorityAssertions.CaptureAsync(fixture, first, second, token);
-        await SqlRf3Protocol.EqualAsync(expected, actual);
+        await SqlClusterProtocol.EqualAsync(expected, actual);
     }
 }

@@ -3,7 +3,6 @@ using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Query;
 using KeyLoad.Replication;
-using KeyLoad.Server.Features.BlobStorage;
 using ManagedCode.Communication.Orleans.Converters;
 using ManagedCode.Orleans.Identity.Core.Serializations;
 using Orleans.Serialization;
@@ -55,7 +54,6 @@ internal static class OrleansPartitionServiceRegistration
         services.AddSingleton(provider => new SearchEngine(Host(provider).Database,
             provider.GetRequiredService<ServerRuntimeOptions>().Core.QueryExecution, Host(provider).TextProjection,
             Host(provider).AnnMaintenance, provider.GetService<IQueryReadCutObserver>()));
-        NativeBlobWireProbeRegistration.Register(services, options);
         services.AddSerializer(serialization => serialization
             .AddAssembly(typeof(GrainRequestProgress).Assembly)
             .AddAssembly(typeof(CqrsStreamChunkSurrogateConverter<GrainRequestProgress, GrainOperationReply>).Assembly)

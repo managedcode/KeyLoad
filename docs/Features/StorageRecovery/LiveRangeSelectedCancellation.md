@@ -16,4 +16,4 @@ flowchart LR
  Healthy --> Cold[Two native cold full-state checks]
 ```
 
-Only ignored SourceN; actual compiler/style/native tests/Linux/process/RF3/coverage gates OPEN. No fabricated error or task and no performance, power-loss or full-task qualification claim.
+No fabricated error or task; no performance, power-loss or full-task qualification claim follows, and the Linux/process/replicated-cluster/coverage gates are separate.

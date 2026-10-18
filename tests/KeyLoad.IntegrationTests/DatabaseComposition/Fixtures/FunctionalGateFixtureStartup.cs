@@ -30,7 +30,7 @@ internal static class FunctionalGateFixtureStartup
     }
 
     internal static List<string> Arguments(string root, int nodes, bool coldReopen, bool exclusiveOwnerContention,
-        LocalRf3ImageSelection.Selection? selection)
+        LocalClusterImageSelection.Selection? selection)
     {
         var arguments = new List<string>
         {

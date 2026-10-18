@@ -31,7 +31,7 @@ internal static class QueueDeadlinePoisonPrefixSeed
     private static async Task<(ReplicatedOperation Operation, OperationResult Result)> ApplyAsync(DatabaseEngine database,
         ZoneTreeStore store, CommandRequest command, DateTimeOffset time)
     {
-        var placement = database.ReadAtomicPartitionPlacement(QueueDeadlinePoisonPrefixProtocol.Root, new(QueueDeadlinePoisonPrefixProtocol.First, command.Partition));
+        var placement = database.ReadAtomicPartitionPlacement(QueueDeadlinePoisonPrefixProtocol.Root, command.Partition);
         var expected = new CommitReceipt(command.CommandId, new(placement.Incarnation,
             command.Partition.AtomicPartitionId, checked(store.Position + QueueDeadlinePoisonPrefixProtocol.First), placement.PlacementEpoch),
             command.Mutations.Select(value => new MutationReceipt(QueueDeadlinePoisonPrefixProtocol.EnqueueReceipt, ((EnqueueMessage)value).Queue,

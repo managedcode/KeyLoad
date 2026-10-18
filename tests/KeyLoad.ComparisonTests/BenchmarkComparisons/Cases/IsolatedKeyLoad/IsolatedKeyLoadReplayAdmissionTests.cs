@@ -11,7 +11,7 @@ internal sealed class IsolatedKeyLoadReplayAdmissionTests
     private const string Forward = Prefix + "ForwardPerVoter";
     private const string Read = Prefix + "ReadBarrierPerVoter";
     private const string Data = Prefix + "DataAppendPerVoter";
-    private const long Rf3Bound = 835_584;
+    private const long ClusterBound = 835_584;
     private const long Maximum = 1_048_576;
 
     /// <summary>AC-ISO-003/005 and AC-REP-006: every actual benchmark resource receives the fixed bounded profile.</summary>
@@ -39,10 +39,10 @@ internal sealed class IsolatedKeyLoadReplayAdmissionTests
         var total = (long)expected.CriticalPerVoter + expected.ForwardPerVoter
             + expected.ReadBarrierPerVoter + expected.DataAppendPerVoter;
         await Assert.That(total * count).IsLessThan(Maximum);
-        await Assert.That(total * 3).IsEqualTo(Rf3Bound);
+        await Assert.That(total * 3).IsEqualTo(ClusterBound);
     }
 
-    /// <summary>The production RF3 composition retains original replay defaults.</summary>
+    /// <summary>The production CLUSTER composition retains original replay defaults.</summary>
     [Test]
     public async Task ProductionResourcesDoNotReceiveBenchmarkReplayOverrides()
     {

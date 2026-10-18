@@ -16,4 +16,4 @@ flowchart LR
   C --> E[Original complete report assertions]
 ```
 
-Ownership: tests/KeyLoad.ComparisonTests/BenchmarkComparisons/Helpers and UnitContracts/Helpers. Public API, production storage, UI, new libraries and topology: N/A; this change restructures existing compilation controls only. Main owns combined build and verification. Benchmark execution and performance qualification remain Linux GitHub Actions only; source review is not runtime or performance qualification.
+Ownership: tests/KeyLoad.ComparisonTests/BenchmarkComparisons/Helpers and UnitContracts/Helpers. Public API, production storage, UI, new libraries and topology: N/A; this change restructures existing compilation controls only. Benchmark execution and performance qualification remain Linux GitHub Actions only; source review is not runtime or performance qualification.

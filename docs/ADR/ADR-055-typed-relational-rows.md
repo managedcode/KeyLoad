@@ -1,12 +1,10 @@
 # ADR-055: Typed relational rows in canonical entity storage
 
-Status: Accepted under owner direction2026-10-02; implementation/qualification pending.
+Status: Accepted; implementation/qualification pending.
 
-Pre-delivery naming refinement: CA1720 rejected the new public enum members
-Int64/Decimal in candidate6cfdadf38. Use WholeNumber (signed 64-bit integer) and
-FixedPoint (exact .NET decimal range/scale). Preserve their ordinal values and
-all scalar correctness contracts. This fixes the public identifiers rather than
-suppressing the analyzer.
+The public column-type enum members are WholeNumber (signed 64-bit integer) and
+FixedPoint (exact .NET decimal range/scale), chosen to satisfy CA1720 rather than
+suppress the analyzer. Their ordinal values and all scalar correctness contracts are fixed.
 
 ## Decision
 
@@ -55,14 +53,14 @@ flowchart LR
 
 REQ-REL-001/002/003 -> AC-AISQL-002–004/009/010 in
 [RelationalStorage](../Features/RelationalStorage.md) and this ADR.
-Ordered tasks:004 freezes metadata DTOs;005 writes real-ZoneTree schema/row/
-atomicity/linkage regression sources then validators;008 joins configuration and
-PUT/PATCH validation once per final image, client/MCP/RF3/evidence.
+Ordered contract: freeze the metadata DTOs; write real-ZoneTree schema/row/
+atomicity/linkage regression sources, then the validators; join configuration and
+PUT/PATCH validation once per final image, client/MCP/replicated-cluster/evidence.
 
-Root owns optional ResourceDefinition metadata and new immutable schema DTOs at
-Abstractions/Features/RelationalStorage/, shared configuration/PUT/PATCH hooks,
-all docs/SDK/routing joins. Worker owns only Core/Features/RelationalStorage/
-validators and UnitTests/Features/RelationalStorage/ tests. Read views, physical
+Optional ResourceDefinition metadata and the new immutable schema DTOs live at
+Abstractions/Features/RelationalStorage/, with the shared configuration/PUT/PATCH hooks;
+validators live in Core/Features/RelationalStorage/ and tests in
+UnitTests/Features/RelationalStorage/. Read views, physical
 storage, grain ownership and existing mutation/public JSON values remain unchanged.
 
 New resources opt in with the typed schema; changed resource schemas fail strict
@@ -73,13 +71,13 @@ active source cannot validate or serve it; never silently discard a schema.
 
 Tests map each column type/null/unknown/duplicate/primary condition, revision and
 protected-write denial, unique conflict, full mixed-batch rollback, persistence
-reopen, graph/vector row linkage, RF3 SDK/MCP SQL equivalence. CI only, no doubles.
-GitHub build/format/analyzer/governance/units/recovery/RF3 and coverage evidence
-join through root. Performance is validation of one final image plus existing
+reopen, graph/vector row linkage, replicated-cluster SDK/MCP SQL equivalence. CI only, no doubles.
+GitHub build/format/analyzer/governance/units/recovery/replicated-cluster and coverage evidence
+are required. Performance is validation of one final image plus existing
 native indexes; speed/scale requires dedicated same-workload GitHub measurements.
 
 
-## TASK-REL-UNIQUE-ROLLBACK-REPLAY-COLD-001
+## Unique rollback replay across cold reopen
 
 REQ-REL-002 / AC-AISQL-004 under ADR055 extend SAME AcAisql004PatchConflictAndDeleteRetainNativeUniqueAndRevisionContract after all original conflict, stale revision, delete and unique-name reuse assertions. This typed-row stage does not claim foreign keys/defaults/cascades/arbitrary joins/full SQL.
 
@@ -89,7 +87,7 @@ Corrected fresh command retains original PATCH and inserts third/namegamma under
 
 Join original store, same-directory native reopen with original validated options and configured factory, exact NodeId/incarnation/nondecreasing ReadGeneration/full native bytes/physical cut. Reuse both exact original commands/time: old failed result and healthy full receipt remain byte-equal without new domain effects/outcome writes. Full typed SQL indexed rows remain independently literal. Then genuine revision3→4 PATCH of second count2→3 proves cold write health and produces new independent patchDocument receipt, original new-ID replay and complete final SQL rows/outbox horizon; cold store joins before original fixture cleanup. Retain initiating and cleanup failures with original observer/lexical store ownership.
 
-No product/API/serializer/format/limits/deadline/trust/provider change; no migration/fallback/source-oracle expectation. Core atomic gate remains authoritative. Native checkOnly + pernewpath NS/reconstruction are source only. Exact original Unit method/UID/deadline unchanged; required normal SIMD native50 compilation/formatter/analyzers/fresh discovery/runtime and Linux/process/RF3/coverage gates remain OPEN.
+No product/API/serializer/format/limits/deadline/trust/provider change; no migration/fallback/source-oracle expectation. Core atomic gate remains authoritative. Native checkOnly + pernewpath NS/reconstruction are source only. Exact original Unit method/UID/deadline unchanged; required normal SIMD native50 compilation/formatter/analyzers/fresh discovery/runtime and Linux/process/cluster/coverage gates remain OPEN.
 
 ## Q2 retained primary identity observation
 

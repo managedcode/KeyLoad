@@ -9,19 +9,16 @@ namespace KeyLoad.Server.Features.Messaging;
 
 internal sealed class RemoteTransferCommandRouter(OrleansNode node, PartitionHost partition,
     IOptions<NodeOptions> options, IOptions<DatabaseLimits> limits, RemoteDocumentClient client,
-    RemoteDocumentWorkOwner owner, TimeProvider clock, IControlledDocumentCommandRouter? ordinary)
+    RemoteDocumentWorkOwner owner, TimeProvider clock)
     : IControlledDocumentCommandRouter
 {
     public async Task<OperationResult?> TryExecuteAsync(GrainRequestEnvelope envelope,
-        ReadOnlyMemory<byte> payload, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken,
-        Func<CancellationToken, ValueTask>? grantSettled = null,
-        Func<CancellationToken, ValueTask>? outcomeObserved = null)
+        ReadOnlyMemory<byte> payload, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(binding);
         if (envelope.CommandKind != OperationKind.Batch)
         {
-            return ordinary is null ? null : await ordinary.TryExecuteAsync(envelope, payload, binding,
-            cancellationToken, grantSettled, outcomeObserved).ConfigureAwait(false);
+            return null;
         }
         var failures = new List<Exception>();
         OperationResult? result = null;
@@ -37,8 +34,7 @@ internal sealed class RemoteTransferCommandRouter(OrleansNode node, PartitionHos
             }, failures).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);
-        return result ?? (ordinary is null ? null : await ordinary.TryExecuteAsync(envelope, payload, binding,
-            cancellationToken, grantSettled, outcomeObserved).ConfigureAwait(false));
+        return result;
     }
 
     private async Task<OperationResult?> ExecuteAtCutAsync(GrainRequestEnvelope envelope,

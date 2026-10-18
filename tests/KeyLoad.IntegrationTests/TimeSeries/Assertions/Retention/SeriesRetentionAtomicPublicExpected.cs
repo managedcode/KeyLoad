@@ -17,7 +17,7 @@ internal static class SeriesRetentionAtomicPublicExpected
     internal const int SampleLimit = 3;
     internal const int MaximumDeletes = 2;
     internal const int WindowLimit = 3;
-    internal static DateTimeOffset At => TimeSeriesRf3Scenario.Start;
+    internal static DateTimeOffset At => TimeSeriesClusterScenario.Start;
     internal static DateTimeOffset FloorAt => At.AddTicks(1);
     internal static DateTimeOffset FreshAt => At.AddTicks(2);
     internal static DateTimeOffset End => At.AddTicks(3);
@@ -62,14 +62,14 @@ internal static class SeriesRetentionAtomicPublicExpected
             new(FloorAt, FreshAt, new(1L, 5D, 5D, 5D, 5D)),
             new(FreshAt, End, state.Advanced ? new(1L, 7D, 7D, 7D, 7D) : new(0L, 0D, null, null, null))]);
     internal static ReadSamplesRequest Range(SeriesRetentionAtomicPublicState state)
-        => new(state.Scenario.Partition, TimeSeriesRf3Scenario.Set, Series, At, End, SampleLimit);
+        => new(state.Scenario.Partition, TimeSeriesClusterScenario.Set, Series, At, End, SampleLimit);
     internal static ReadLatestSampleRequest LatestRequest(SeriesRetentionAtomicPublicState state)
-        => new(state.Scenario.Partition, TimeSeriesRf3Scenario.Set, Series);
+        => new(state.Scenario.Partition, TimeSeriesClusterScenario.Set, Series);
     internal static ReadSampleRetentionRequest RetentionRequest(SeriesRetentionAtomicPublicState state)
-        => new(state.Scenario.Partition, TimeSeriesRf3Scenario.Set, Series);
+        => new(state.Scenario.Partition, TimeSeriesClusterScenario.Set, Series);
     internal static AggregateSamplesRequest AggregateRequest(SeriesRetentionAtomicPublicState state)
-        => new(state.Scenario.Partition, TimeSeriesRf3Scenario.Set, Series, At, End, SampleLimit);
+        => new(state.Scenario.Partition, TimeSeriesClusterScenario.Set, Series, At, End, SampleLimit);
     internal static AggregateSampleWindowsRequest WindowsRequest(SeriesRetentionAtomicPublicState state)
-        => new(state.Scenario.Partition, TimeSeriesRf3Scenario.Set, Series, At, End,
-            TimeSeriesRf3Scenario.OneTick, SampleLimit, WindowLimit);
+        => new(state.Scenario.Partition, TimeSeriesClusterScenario.Set, Series, At, End,
+            TimeSeriesClusterScenario.OneTick, SampleLimit, WindowLimit);
 }

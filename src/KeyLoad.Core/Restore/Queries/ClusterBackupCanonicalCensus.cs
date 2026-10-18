@@ -43,7 +43,7 @@ internal static class ClusterBackupCanonicalCensus
             var range = view.VisitRange([], limits.MaxScanRecords, (key, value) =>
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                if (AtomicPartitionRosterKeyValidation.TryReadCandidate(key, value, hasValue: true, out var partition)
+                if (AtomicPartitionRosterKeyValidation.TryReadCandidate(key, out var partition)
                     && partition is not null && !entries.ContainsKey(partition))
                 {
                     throw Errors.Fail(ErrorCode.Corruption, MissingScope);

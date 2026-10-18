@@ -14,12 +14,12 @@ internal static class FunctionalGateColdDropReplay
             var model = original.Models.Single(value => value.Index == table.Index);
             await FunctionalGateDropAssertions.StaleAsync(context, table.OriginalReference,
                 () => FunctionalGateColdDropAssertions.AllAsync(context, state, token), token);
-            foreach (var route in Enum.GetValues<DropLifecycleRf3Route>())
+            foreach (var route in Enum.GetValues<DropLifecycleClusterRoute>())
             {
                 var actual = await FunctionalGateDropCalls.InvokeAsync(context, table.ParentId,
                     table.Request, route, token);
                 await FunctionalGateDropAssertions.ResultAsync(table.ParentId, table.Request, actual);
-                await KeyLoad.IntegrationTests.Features.QueryExecution.SqlRf3Protocol.EqualAsync(
+                await KeyLoad.IntegrationTests.Features.QueryExecution.SqlClusterProtocol.EqualAsync(
                     table.OriginalDrop, actual);
                 await FunctionalGateColdDropAssertions.AllAsync(context, state, token);
             }

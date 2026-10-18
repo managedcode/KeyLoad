@@ -39,7 +39,7 @@ internal sealed class NativeCoverageImageMaterializationTests
         var original = await File.ReadAllBytesAsync(invocation.Path, token).ConfigureAwait(false);
         await Assert.That(File.GetUnixFileMode(invocation.Path))
             .IsEqualTo(UnixFileMode.UserRead | UnixFileMode.UserWrite);
-        await Assert.ThrowsExactlyAsync<IOException>(() => NativeCoverageRf3InvocationWriter.WriteCreateOnlyAsync(
+        await Assert.ThrowsExactlyAsync<IOException>(() => NativeCoverageClusterInvocationWriter.WriteCreateOnlyAsync(
             invocation.Path, NativeCoverageImageConstants.SentinelBytes, fixture.Options.Coverage.Value.ReadBufferBytes, token));
         await Assert.That((await File.ReadAllBytesAsync(invocation.Path, token).ConfigureAwait(false)).AsSpan().SequenceEqual(original)).IsTrue();
         await Assert.That(File.GetUnixFileMode(invocation.Path))

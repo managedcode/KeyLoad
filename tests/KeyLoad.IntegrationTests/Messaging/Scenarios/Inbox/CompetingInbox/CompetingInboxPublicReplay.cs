@@ -5,8 +5,8 @@ namespace KeyLoad.IntegrationTests.Features.Messaging;
 
 internal static class CompetingInboxPublicReplay
 {
-    internal static async Task RunAsync(CompetingInboxPublicState state, RequestCqrsRf3Callers root,
-        RequestCqrsRf3Callers sdk, RequestCqrsRf3Callers official, CancellationToken token)
+    internal static async Task RunAsync(CompetingInboxPublicState state, RequestCqrsClusterCallers root,
+        RequestCqrsClusterCallers sdk, RequestCqrsClusterCallers official, CancellationToken token)
     {
         var failures = new List<Exception>();
         foreach (var (request, receipt) in state.Producers)

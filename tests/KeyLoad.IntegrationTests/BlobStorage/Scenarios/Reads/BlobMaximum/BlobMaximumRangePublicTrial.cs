@@ -9,7 +9,7 @@ internal static class BlobMaximumRangePublicTrial
 {
     internal static async Task RunAsync(ClusterFixture fixture, CancellationToken token)
     {
-        var state = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
+        var state = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
             fixture.AdminKey, async callers =>
             {
                 var publication = await BlobMaximumRangePublicPublication.CreateAsync(callers, token);
@@ -19,7 +19,7 @@ internal static class BlobMaximumRangePublicTrial
         for (var cycle = 0; cycle < 2; cycle++)
         {
             await ColdAsync(fixture, token);
-            _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2,
+            _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2,
                 fixture.AdminKey, async callers =>
                 {
                     await BlobMaximumRangePublicReplay.RequireAsync(callers, state, token);

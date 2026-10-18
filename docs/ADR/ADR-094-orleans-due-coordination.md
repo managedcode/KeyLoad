@@ -1,9 +1,9 @@
 # ADR-094: Orleans StatelessWorker coordination of due queue, recurring and saga work
 
-Status: Accepted for S2 implementation; qualification pending.
+Status: Accepted; implementation and runtime qualification pending.
 Date: 2026-10-04.
 
-KL-100's S1 commands persist schedules and Waiting sagas but have no autonomous
+Canonical queue commands persist schedules and Waiting sagas but have no autonomous
 runtime. Adopt the bounded discovery, StatelessWorker batching, request and retry
 contract in [DueCoordination](../Features/Messaging/DueCoordination.md),
 REQ/AC-DUE-001..004 and REQ/AC-JOBS-005. Existing canonical records and ordered
@@ -14,9 +14,7 @@ sweep forever.
 ## Decision
 
 Due queue deadlines, recurring schedules and saga timeouts are advanced by Orleans
-`[StatelessWorker]` grains. They never check leadership: there is no `IsLeaderAsync`
-gate, leader hint, coordinator election or singleton coordinator, and no work runs in
-a hosted timer outside Orleans.
+`[StatelessWorker]` grains. Their buffers and periodic flush callbacks belong to the native activation lifecycle.
 
 1. A bounded number of StatelessWorker activations accept due hints (discovered from
    the canonical scheduled/lease/message-meta and schedule/saga records) and buffer
@@ -41,7 +39,7 @@ Implementation contract:
    Grains/Contracts/Execution for the StatelessWorker, timer and batching; tests
    live in the Messaging UnitTests slice. Native records keep their aliases and
    field IDs; new hint DTOs have explicit v1 aliases and stable generated IDs; no
-   persisted or public S1 discriminator changes.
+   persisted or public discriminator changes.
 2. All writes use the existing connection-owned execution and the bounded
    ManagedCode Communication CQRS consumer. No direct Apply, copied dispatcher or
    hosted timer outside Orleans is allowed.
@@ -49,11 +47,10 @@ Implementation contract:
    current creator authority, duplicate delivery from several workers and stable
    unknown-response retry. Aspire SDK/official MCP tests observe autonomous
    emission and expiry, duplicates, silo loss and restart, revocation,
-   cancellation and healthy following calls. S1 process-cut tests remain mandatory
+   cancellation and healthy following calls. Process-cut tests remain mandatory
    and prove only process durability.
-4. Root integrates, reviews, builds, formats, runs the Aspire suites and retains
-   exact-source Linux artifacts before full KL-100 closure. Scoped tests and code
-   presence do not close S2.
+4. The change is built, formatted and run through the Aspire suites, and exact-source Linux artifacts are retained before full closure. Scoped tests and code
+   presence do not qualify the runtime.
 
 Dependencies: ADR-092, existing queue admission, native request and identity
 boundaries, [ADR-110](ADR-110-native-orleans-execution-primitives.md) and
@@ -84,7 +81,7 @@ IDs. A caller retry of an existing command ID replays its original terminal rece
 Canonical occurrence IDs, monotonic schedule state, saga revision CAS and serializer
 aliases/IDs remain stable.
 
-## Queue deadline advancement (REQ-MSG-004 / AC-MSG-004, REQ-MSG-092-DEADLINE)
+## Queue deadline advancement (REQ-MSG-004 / AC-MSG-004, REQ-MSG-DEADLINE-ADVANCE)
 
 The additive `AdvanceQueueDeadline` Batch mutation uses QueueConsume, fresh persisted
 worker-input permissions, the signed native EvaluatedAt and an exact

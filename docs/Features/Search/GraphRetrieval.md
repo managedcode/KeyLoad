@@ -1,36 +1,12 @@
 # GraphRetrieval within Search
 
-Root accepts this ordered implementation contract on 2026-10-04 for KL-055 and
-the same-partition exact branch of KL-056. [ADR-090](../../ADR/ADR-090-graph-search.md)
-implements architecture sections26.2–26.4. This contract retains the original
-SQL, distributed ranking, performance and RF3 qualification requirements.
+[ADR-090](../../ADR/ADR-090-graph-search.md) implements architecture sections 26.2–26.4 for the same-partition exact branch of graph retrieval. The SQL, distributed ranking, performance and replicated-cluster qualification requirements are retained.
 
-TASK-GSEARCH-RF3-RANK-FAILOVER preserves REQ/AC-GSEARCH-003/006 and ADR-090
-after original run37242346547. Luna cluster_wave owns only a private overlay of
-GraphSearchRf3Tests, SqlGraphSearchRf3Assertions, GraphSearchRf3LeaderLossTests and
-a feature-local bounded survivor-status helper if needed. Preserve exact corpus,
-policy, projected results, expansion, public SDK/official MCP parity and faults.
-The independent graph branch sorts shortest hops then full EntityRef and feeds
-one-based ordinal ranks to weightedRrfV1. Equal-hop alpha and beta therefore
-contribute1/(60+1) and1/(60+2); adding one-hop delta precedes two-hop gamma,
-giving ranks3 and4. Do not use hop distance as the final fused ordinal rank.
-Derive the SQL fixture's complete expected order from its declared corpus, never
-from production ranking output. Before the single post-leader-loss mutation,
-use both real surviving administrator SDK Status calls under the existing finite
-eventual-observation contract to witness a successful current quorum, compatible
-RF3 routing and an agreeing non-null survivor leader. Keep the continuously
-running voter identities and existing scoped kill/restart/catch-up assertions.
-This witness is test ordering, not a product retry or an authorization repair:
-original report says OwnershipLost and does not establish its root cause.
-Issue one unchanged mutation/command only after the witness; never turn an
-uncertain outcome into a new-ID retry or swallow the actual write error.
-Root owns joins, verification and the exact original evidence. Existing ADR-090
-and cluster fault contract suffice; no new public/data/topology contract.
-Private review and compiler success cannot close the required real RF3 gate.
+The independent graph branch sorts shortest hops then full EntityRef and feeds one-based ordinal ranks to weightedRrfV1. Equal-hop alpha and beta contribute 1/(60+1) and 1/(60+2); adding one-hop delta precedes two-hop gamma, giving ranks 3 and 4. Hop distance is not the final fused ordinal rank, and the SQL fixture's complete expected order is derived from its declared corpus, never from production ranking output. A graph write issued after a node loss uses one unchanged command; an uncertain outcome is never retried under a new ID.
 
 ## Versioned public contract
 
-G1 adds an explicit `GraphSearchRequest` and `GraphSearchResult`; it does not
+The graph executor adds an explicit `GraphSearchRequest` and `GraphSearchResult`; it does not
 change the exact array reply of existing Search. HTTP `/v1/search/graph`, SDK
 `GraphSearchAsync` and official MCP `keyload_search_graph` invoke the same isolated
 Orleans request/read grain and one canonical authorized storage read cut.
@@ -55,7 +31,7 @@ The generated v1 records, with sequential native IDs starting at0, are:
 
 Every new record uses `GenerateSerializer`, stable IDs and a literal purpose
 alias `keyload.contract.<kebab-type-name>.v1` held in feature-owned constants.
-No existing IDs/aliases are reused. Root owns application capability admission.
+No existing IDs/aliases are reused.
 
 All walks are outgoing, in the Search partition and a configured graph in the
 same tenant/database. Depth0..16, vertices1..10000, examined edges1..50000,
@@ -75,7 +51,7 @@ with no truncated success or exact/completeness claim.
 | REQ-GSEARCH-003: deterministic deduplicated shortest-hop ranking | AC-GSEARCH-003: graph score1/(1+shortestHops), multi-seed BFS, cycles/convergent paths contribute once per full EntityRef; weightedRrfV1 text/vector/graph matches independent exhaustive small-corpus oracle, including missing/zero-weight branches and ordinal ties. `GraphSearchOracleTests` |
 | REQ-GSEARCH-004: explicit bounded expansion output | AC-GSEARCH-004: only selected final hits seed expansion; context uses its own current collection/row/field policy, deduplicated shortest hops, explicit SelectedHits completeness and shared combined reply bounds. `GraphSearchExpansionTests` |
 | REQ-GSEARCH-005: bounded versioned admission | AC-GSEARCH-005: null/default/cross-partition seeds, invalid labels/versions/weights, exact work/byte boundaries, cancellation and next healthy request are covered. Label identifiers use the existing nonblank UTF-8 byte bound and reject control characters; internal spaces remain valid. No edge attributes or whole intermediate JSON are retained by reachability. `GraphSearchBudgetTests`, `GraphSearchInvalidWalkShapeTests`, `GraphSearchReachabilitySortBudgetTests` |
-| REQ-GSEARCH-006: public cluster and SQL parity qualification | AC-GSEARCH-006: .NET and official MCP clients agree on genuine Aspire RF3 after policy/write/fault changes, and versioned SQL SEARCH compiles equivalent operators. Planned `GraphSearchRf3Tests` and SQL conformance fixtures; G2, not closed by G1 |
+| REQ-GSEARCH-006: public cluster and SQL parity qualification | AC-GSEARCH-006: .NET and official MCP clients agree on genuine Aspire cluster after policy/write/fault changes, and versioned SQL SEARCH compiles equivalent operators. Planned `GraphSearchClusterTests` and SQL conformance fixtures; the SQL SEARCH profile, not closed by the graph executor |
 
 Scope intersects AllowedIds at branch output before ranking/fusion. Text corpus
 statistics remain the complete authorized corpus. Traversal never applies that
@@ -94,40 +70,22 @@ distances. Scope and Retriever include authorized seeds at hop0.
 No hidden-traversal privilege is introduced. Missing
 canonical adjacency/edge corruption propagates rather than becoming a hidden hit.
 
-## Ordered stages, ownership and evidence
+## Stages and evidence
 
-1. Root freezes this contract and ADR before coding, owns shared Core Query
-   friend visibility, public transport/read-kind joins and central versioning.
-2. Luna lifecycle_wave owns new Abstractions Search graph contract files, new
-   Core GraphTraversal same-cut reachability helpers and their internal
-   DatabaseEngine bridge, Query Search graph executor, and mapped new UnitTests.
-   It may refactor SearchEngine's existing private ranking/projection/validation
-   into shared Search helpers and extend the existing request sizer generically;
-   preserve all F1 behavior and tests. No Core vector/lineage edits.
-3. Core returns only bounded EntityRef-to-shortest-hop metadata through a narrow
-   internal borrowed-view bridge. Query uses WithQueryView exactly once and
-   passes that view, freshly resolved principal and one budget to every branch.
-   Do not call public Traverse/Search/Get inside the cut or acquire a second cut.
-4. Root self-reviews the integrated diff, builds/formats, then executes mapped
-   development tests through actual Aspire while other Luna features continue.
-   Record original results and commit the completed coherent stage honestly.
-5. G2 adds equivalent SQL operators, native public RF3 fault cases and remaining
-   whole-task qualification. Cross-partition traversal remains unavailable in
-   G1; KL-038/057 and adaptive ANN are separate dependencies.
+1. The contract and ADR are frozen before coding; shared Core Query friend visibility, public transport/read-kind joins and central versioning are integrated once.
+2. New Abstractions Search graph contract files, Core GraphTraversal same-cut reachability helpers with their internal DatabaseEngine bridge, the Query Search graph executor and the mapped unit tests implement the graph executor. SearchEngine's private ranking/projection/validation may be refactored into shared Search helpers and the request sizer extended generically while preserving all public allowlist behavior; there are no Core vector/lineage edits.
+3. Core returns only bounded EntityRef-to-shortest-hop metadata through a narrow internal borrowed-view bridge. Query uses WithQueryView exactly once and passes that view, the freshly resolved principal and one budget to every branch; public Traverse/Search/Get are never called inside the cut and no second cut is acquired.
+4. The SQL SEARCH profile adds equivalent SQL operators, public cluster cases and the remaining whole-task qualification. Cross-partition traversal is unavailable in the graph executor; distributed ranking is specified in [GlobalBranchWindows](GlobalBranchWindows.md) and adaptive ANN in [FilteredRetrieval](FilteredRetrieval.md).
 
-There are no new dependencies or stored-format migrations in G1. Rollout admits
-only nodes supporting the new capability before serving the endpoint; rollback
-rejects unsupported graph requests, never silently drops an operator. Interactive
-UI N/A: this is a SDK/SQL/MCP database capability. Current evidence is source
-implementation in progress; no runtime or performance qualification is claimed.
+There are no new dependencies or stored-format migrations in the graph executor. Rollout admits only nodes supporting the new capability before serving the endpoint; unsupported graph requests are rejected, never silently dropped. Interactive UI is N/A: this is an SDK/SQL/MCP database capability.
 
-## G2: versioned SQL SEARCH profile
+## Versioned SQL SEARCH profile
 
 This is a bounded Q1.Search.v1 profile of the shared SQL language, not full SQL
 conformance or a SQL client connection protocol. The dedicated typed
 `SqlGraphSearchRequest(Version, QueryRequest Query)` uses native IDs0/1 and alias
 `keyload.contract.sql-graph-search-request.v1`. Version must be1, Cursor must be
-null and AllowFullScan must be explicitly true. Root joins the native read kind,
+null and AllowFullScan must be explicitly true. The native read kind,
 HTTP `/v1/query/search`, SDK `SearchSqlAsync` and official MCP
 `keyload_query_search`; all return the existing GraphSearchResult. Current
 application capability3 admits it. Existing scalar QueryPage is unchanged.
@@ -164,51 +122,29 @@ No clause can be silently ignored or manufacture a different identity scope.
 Use the existing bounded tokenizer/token cursor and named constants, preserve
 their whole-SQL token/depth/byte limits, and cap JSON parameters/the complete
 request before building arrays. Parser output is exactly GraphSearchRequest;
-the final G1 validation remains authoritative. Execute solely through
+the final graph-executor validation remains authoritative. Execute solely through
 SearchEngine.GraphSearchAsync with the original principal and cancellation.
 There is no second traversal implementation, extra store read or SQL-specific
 authorization path. Manifest ReadProfiles adds `graph-search-v1`, while its Q1
 baseline and honest scalar conformance inventory remain unchanged.
 
-AC-GSEARCH-006 maps G2 syntax and real-store direct/SQL equivalence to new
+AC-GSEARCH-006 maps SQL SEARCH syntax and real-store direct/SQL equivalence to new
 `SqlGraphSearchParserTests`, `SqlGraphSearchParityTests` and
 `SqlGraphSearchRejectionTests` in QueryExecution/Cases with Helpers fixtures.
 Cover all operator combinations, multi-seed/different-collection intermediates,
 empty labels/allowlist, zero weights, exact lowering and invalid parameter/budget
-cases. Root extends genuine Aspire RF3 SDK/official MCP parity with policy,
-write and fault changes before closing the criterion. Public UI N/A.
+cases. Genuine Aspire replicated-cluster SDK/official MCP parity with policy, write and fault changes closes the criterion. Public UI N/A.
 
-Root freezes this contract/ADR and owns public adapters/capability/central docs.
-Luna lifecycle_wave owns new Abstractions QueryExecution SQL-search DTO, Query
-QueryExecution parser/validation/executor/manifest profile joins and mapped new
-Unit QueryExecution tests, preserving G1 source and unrelated SQL behavior.
-It escalates unsupported grammar or public contract changes rather than inventing
-fallback syntax. Root reviews/builds/runs actual Aspire gates and commits the
-verified stage while other feature workers continue.
+### SQL SEARCH public cluster tests
 
-### G2 public RF3 test stage
+AC-GSEARCH-006 requires the Aspire replicated cluster, discovered endpoints, persisted grants and the real .NET SDK and official MCP clients (`GraphSearchClusterTests`, `SqlGraphSearchClusterTests`). They assert independent expected IDs, ranks and context on direct and SQL replies, multi-seed and other-collection intermediates, explicit denials and policy/write changes, plus a scoped node-loss case with committed-state verification and bounded cleanup.
 
-Luna lifecycle_wave now owns only new
-`tests/KeyLoad.IntegrationTests/Search/Cases/Graph/GraphSearchRf3Tests.cs`
-and graph-specific `Helpers/` or `Assertions/` files, plus new
-`Features/QueryExecution/Cases/SqlGraphSearchRf3Tests.cs` and matching
-SQL-graph-specific helpers. AC-GSEARCH-006 requires the actual shared Aspire
-Docker RF3 fixture, discovered endpoints, persisted grants, real .NET SDK and
-official MCP clients. Assert independent expected IDs, ranks and context on
-direct/SQL replies, multi-seed and other-collection intermediates, explicit
-denials and policy/write changes. Add a scoped fixture-supported leader-loss
-case with committed-state verification and bounded cleanup. Shared topology,
-fixtures, central contracts and production sources remain root-owned. Workers
-author and self-review tests without building or running them; root reviews,
-builds and executes them through AppHost before recording any runtime result.
+## Three-way exact fusion qualification
 
-## G3: three-way exact fusion qualification
-
-Root freezes the same-partition KL-056 test stage on 2026-10-04 under
-REQ-GSEARCH-003/006 and AC-GSEARCH-003/006. The existing G1 executor and G2 SQL
+This stage covers REQ-GSEARCH-003/006 and AC-GSEARCH-003/006. The existing graph executor and SQL SEARCH
 lowering remain the implementation contract; no new public or stored contract
 is introduced. Three-way means text, exact vectors and graph retrieval in one
-authorized bounded read cut. Global multi-partition ranks remain KL-057.
+authorized bounded read cut. Global multi-partition ranks are specified in GlobalBranchWindows.
 
 Use a genuine persisted corpus with deliberately different text, cosine-vector
 and shortest-hop rankings, a missing branch contribution, converging graph paths,
@@ -224,17 +160,7 @@ vertices outside the result collection. Current persisted row/field/graph-label
 denial and revocation cannot be bypassed by a zero weight or empty allowed set.
 Expansion context stays separate and contributes no fusion score.
 
-Luna lifecycle_wave owns only new `ThreeWayHybrid*` UnitTests/Search and
-IntegrationTests/Search files in their Cases, Helpers, Assertions or Models roles.
-Author against real ZoneTree/Core/Query and the shared Aspire RF3 fixture, using
-actual .NET and official MCP clients for direct and SQL parity. Keep the next
-stage in `/private/tmp/keyload-three-way-fusion-20261004` while root runs the
-current compiled gates; provide an absent/base/post-hash patch manifest. Root
-owns review, source joins, Release/formatter/governance and Aspire execution.
-Failures escalate with the owning production path and smallest counterexample;
-workers cannot change semantics, suppress tests or edit shared fixtures. Source
-or local development success does not close Linux RF3, distributed ranking,
-scale, endurance or performance requirements.
+The tests (`ThreeWayHybrid*`, unit and integration) run against real ZoneTree/Core/Query and the Aspire replicated cluster, using the actual .NET and official MCP clients for direct and SQL parity. Distributed ranking, scale, endurance and performance remain separate requirements.
 
 ```mermaid
 flowchart LR
@@ -249,25 +175,6 @@ flowchart LR
 ```
 
 
-## TASK-GSEARCH-RF3-LEADER-READINESS-001 — authoritative survivor read before one immutable write
+## Graph write durability across node loss
 
-REQ/AC-GSEARCH-006 under ADR090 preserves actual leader-loss committed-graph durability. Original Linux run37655841124 0c2f RF3 failed177/180: this case21.2319229s fails at AddReachableDocumentAsync CommitAsync, after status-only quorum wait and before read/restart. Original TRX reports OwnershipLost but not its safe detail/native server origin; retain that limitation. Source confirms NodeStatus.RoutingReady means HasCompatibleCohort and Leader means consensus LeaderId, not ready-leader read/commit authority. Therefore status agreement alone is insufficient write oracle. Do not assert unobserved original server cause.
-
-Before scoped kill, freeze exactly one immutable addition CommandRequest (delta document plus second-seed→delta edge). Under original caller deadline, wait survivor status agreement and select that actual surviving elected leader, not an arbitrary survivor. Require genuine public administrative GetDocument read of original second-seed, exercising native authoritative read barrier/current persisted policy/catalog. A readiness probe may remain pending only for exact OwnershipLost with ReplicaProtocol.NoLeader safe detail; other errors, authorization/catalog denials and cancellation fail immediately. Assert original literal document/entity/revision/redaction, then original literal three-hit authorized graph. No write is retried to establish readiness.
-
-Submit frozen addition once. Definitive OwnershipLost and every other non-Unknown error fail; only actual UnknownWriteOutcome permits one bounded same-byte/same-ID receipt reconciliation, no loop/new GUID/client retry policy. Verify exact two mutation receipts, nonempty partition/incarnation/position and QuorumProcessDurable. Explicit later SDK/official-MCP administrative replay uses identical original command and requires byte-identical complete receipt. Genuine graph-search readers/MCP preserve full literal four document references/revisions/JSON/redaction/weighted ranks, and a bounded native canonical Traverse from original second seed returns exact four vertices/three full literal edge records. After original stopped node restart, all three nodes replay original receipt and return those complete graph literals without duplicate edge revision or derived document effect.
-
-Ownership IntegrationTests/Search existing fixture/kill/restart/discovered clients and original error-preserving cleanup. No product/dependency/public contract/timeouts/whitelists/LocalImage catalog changes. Ordered docs→private tests→root guarded join/build/focused native original case/full180cohort; preserve original TRX/error and source/image receipts. Actual Linux rerun remains required; source repair is not qualification. Rollback removes only this readiness/oracle amendment and test helpers.
-
-
-## TASK-KL033-AUTHORIZED-HYBRID-EXPLAIN-001
-
-REQ-SEARCH-EXPLAIN-001 / AC-SEARCH-EXPLAIN-001: opt-in SearchRequest.Explain (native Id12, default false) adds optional RankedDocument.Explanation (Id2, omitted JSON when absent), shared by ordinary and graph retrieval via GraphSearchRequest.Search. Typed v1 SearchHitExplanation contains FusionConstant and at most three ordered SearchBranchContribution records: fixed Text/Vector/Graph enum, actual one-based native rank after existing authorization/allowlist/graph scope and deterministic branch order, configured weight, exact weight/(FusionConstant+rank) double contribution. Final score remains the existing deterministic RankedDocument.Score; branch contributions use the same existing arithmetic evaluation/order. No raw similarity, term statistics, hidden candidate IDs, paths, query payload, private inventory or new ranking algorithm. Contributions describe only actual positive-weight fused branches; default ranking/JSON remains unchanged, including current zero-weight behavior.
-
-REQ-SEARCH-EXPLAIN-002 / AC-SEARCH-EXPLAIN-002: capture actual already-computed contribution values only when requested; maximum three ordered contributions per authorized canonical EntityRef, candidate count constrained by existing native branch work/window bounds. Before retaining each contribution, exact serialized contribution bytes cumulatively must fit existing MaximumResultBytes; an oversized individual contribution uses existing result-byte error, cumulative capture overflow gives BudgetExceeded with safe detail The search explanation byte budget is exceeded. Selected-hit contribution lookup checks the original shared read budget/cancellation; no new readcut, principal reload, dispatcher or unbounded enumeration. Include complete metadata in existing exact cumulative result byte measurement before retaining each hit and final array. Budget rejection/cancellation exposes no partial success and does not mutate canonical store.
-
-REQ-SEARCH-EXPLAIN-003 / AC-SEARCH-EXPLAIN-003: real ZoneTree wholeflows compare independent weighted Text/Vector/Graph scores/contributions, ordinal ties, allowed-candidate changes, denied field/hidden entity privacy, original cancellation/fullstore+cut/no partial then full literal healthy. Real RF3 SDK/official MCP and Q1 CALL graph-search operation carries actual opt-in typed request and complete result metadata through existing routes/schema; no new operation tool or named SQL dialect syntax. Qrels/window acceptance remains separately bound to approved cohort and existing internal GlobalBranchWindows contract; allowlist changes are not advertised as measured relevance-window qualification. No rerank/BM25/public candidate-window knob introduced.
-
-Ownership: Abstractions Search/Contracts; Query Search/Queries existing fusion+projection+ordinary/graph execution; owning Unit/Integration Search flow roles. Native aliases and existing IDs retained; new aliases keyload.search.hit-explanation.v1 and keyload.search.branch-contribution.v1. No persisted format migration/fallback; new typed fields must be rebuilt together. Root joins/builds/runs all native and Linux gates; no source-authored PASS or KL033 closure. Rollback removes opt-in field/metadata and authored flows only before release, without modifying raw authority/provider.
-
-R2 test ownership: DeniedExplainAndOriginalCancellationReturnNoPartialResultBeforeHealthyLiteralRead now cancels the original caller token synchronously from the existing owning TimeProvider only after same-store native RangeExaminedBytes increases. No asynchronous polling, sleeps, record padding, production hook or fake storage. Joined SearchEngine worker settles before fullstore/cut checks and healthy literal flow. Existing approved qrels/window gate remains separate.
+REQ/AC-GSEARCH-006 under ADR-090: a graph addition (a delta document plus an edge from the second seed) is frozen as one immutable CommandRequest before one node is stopped. It is submitted once; only an actual UnknownWriteOutcome permits one bounded same-byte, same-ID receipt reconciliation and any other error fails, so no write is retried under a new GUID. A genuine administrative GetDocument read of the second seed exercises the authoritative read barrier, current persisted policy and catalog before the write. The exact two mutation receipts, nonempty partition/incarnation/position and QuorumProcessDurable are verified, and an SDK/official MCP replay of the identical command returns a byte-identical receipt. Graph-search readers and MCP return the full literal four documents, references, revisions, JSON, redaction and weighted ranks, and a bounded canonical Traverse from the second seed returns exactly four vertices and three literal edge records. After the stopped node restarts, all nodes replay the original receipt and return those complete graph literals with no duplicate edge revision or derived document effect.

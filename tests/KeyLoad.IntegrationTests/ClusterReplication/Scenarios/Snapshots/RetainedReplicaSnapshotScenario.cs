@@ -34,7 +34,7 @@ internal static class RetainedReplicaSnapshotScenario
             }
             catch (Exception diagnosticsFailure) when (IsNonFatalCleanupFailure(diagnosticsFailure))
             {
-                failure.Data[Rf3DiagnosticsFailureKey] = diagnosticsFailure;
+                failure.Data[ClusterDiagnosticsFailureKey] = diagnosticsFailure;
             }
             if (replica is not null && !replicaRestarted)
             {
@@ -139,7 +139,7 @@ internal static class RetainedReplicaSnapshotScenario
         }
         catch (Exception restartFailure) when (IsNonFatalCleanupFailure(restartFailure))
         {
-            failure.Data[Rf3RestartFailureKeyPrefix + replica.Name] = restartFailure;
+            failure.Data[ClusterRestartFailureKeyPrefix + replica.Name] = restartFailure;
         }
         if (state is null)
         {
@@ -155,7 +155,7 @@ internal static class RetainedReplicaSnapshotScenario
         }
         catch (Exception readinessFailure) when (IsNonFatalCleanupFailure(readinessFailure))
         {
-            failure.Data[Rf3ReadinessFailureKey] = readinessFailure;
+            failure.Data[ClusterReadinessFailureKey] = readinessFailure;
         }
     }
 

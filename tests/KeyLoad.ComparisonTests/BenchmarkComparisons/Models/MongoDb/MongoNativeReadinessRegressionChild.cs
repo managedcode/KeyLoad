@@ -28,7 +28,6 @@ internal sealed record MongoNativeReadinessRegressionChild(string Name, string I
             [MongoNativeReadinessRegressionProtocol.SourceLabel] = source,
             [MongoNativeReadinessRegressionProtocol.RunLabel] = run,
             [MongoNativeReadinessRegressionProtocol.AttemptLabel] = attempt,
-            [MongoNativeReadinessRegressionProtocol.TaskLabel] = MongoNativeReadinessRegressionProtocol.Task,
             [MongoNativeReadinessRegressionProtocol.FixtureLabel] = fixture
         };
         var environment = new Dictionary<string, string>(StringComparer.Ordinal)

@@ -55,14 +55,12 @@ internal static class SubscriptionGroupLeaderFailoverCallers
         var empty = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReceiveSubscriptionAsync(request, token));
         await Assert.That(empty.RequestId).IsEqualTo(request.RequestId);
         await Assert.That(empty.Deliveries).IsEmpty();
-        await SubscriptionFilterRf3Assertions.EqualAsync(empty.Status,
+        await SubscriptionFilterClusterAssertions.EqualAsync(empty.Status,
             SubscriptionIndependentCheckpointR52Current.Expected(state, state.Seed.Independent));
         await Assert.That(empty.Token.AtomicPartitionId).IsEqualTo(state.Seed.Independent.Source.Partition.AtomicPartitionId);
-        await Assert.That(empty.Token.Incarnation).IsEqualTo(state.Placement!.Incarnation);
-        await Assert.That(empty.Token.OwnershipEpoch).IsEqualTo(state.Placement.PlacementEpoch);
         await Assert.That(empty.Token.Position).IsGreaterThan(NoCommitPosition);
         await SubscriptionIndependentCheckpointR52Current.RunAsync(state, sdk, mcp, administrator, official, token);
-        await SubscriptionFilterRf3Assertions.EqualAsync((await McpCallerAssertions.SuccessAsync<ReceiveSubscriptionResult>(
+        await SubscriptionFilterClusterAssertions.EqualAsync((await McpCallerAssertions.SuccessAsync<ReceiveSubscriptionResult>(
             await mcp.CallAsync(McpCallerTools.SubscriptionsReceive, request, token))).Value, empty);
         await SubscriptionIndependentCheckpointR52Current.RunAsync(state, sdk, mcp, administrator, official, token);
         await SubscriptionIndependentCheckpointR52Replay.RunAsync(state, sdk, mcp, administrator, official, token);

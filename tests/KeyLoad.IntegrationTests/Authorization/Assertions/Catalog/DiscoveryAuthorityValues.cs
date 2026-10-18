@@ -15,7 +15,7 @@ internal static class DiscoveryAuthorityValues
         await session.Client.ListToolsAsync(cancellationToken: token);
         var first = await PublicReadAssertions.RequiredDocumentAsync(await session.CallAsync(
             McpCallerTools.DocumentsGet, new GetDocumentRequest(state.Scenario.Reference), token));
-        await SqlRf3Protocol.EqualAsync(Expected(state), first.Value);
+        await SqlClusterProtocol.EqualAsync(Expected(state), first.Value);
         return first.RequestId;
     }
 
@@ -25,18 +25,18 @@ internal static class DiscoveryAuthorityValues
         var before = await ImageAsync(root, state, token);
         var sdk = await PublicReadAssertions.DocumentAsync(await reader.GetAsync(state.Scenario.Reference, token));
         await Assert.That(sdk).IsNotNull();
-        await SqlRf3Protocol.EqualAsync<DocumentResult?>(Expected(state), sdk);
+        await SqlClusterProtocol.EqualAsync<DocumentResult?>(Expected(state), sdk);
         var official = await PublicReadAssertions.RequiredDocumentAsync(await session.CallAsync(
             McpCallerTools.DocumentsGet, new GetDocumentRequest(state.Scenario.Reference), token));
-        await SqlRf3Protocol.EqualAsync(Expected(state), official.Value);
-        await SqlRf3Protocol.EqualAsync(before, await ImageAsync(root, state, token));
+        await SqlClusterProtocol.EqualAsync(Expected(state), official.Value);
+        await SqlClusterProtocol.EqualAsync(before, await ImageAsync(root, state, token));
     }
 
     internal static async Task<DiscoveryAuthorityImage> ImageAsync(KeyLoadClient root, DiscoveryAuthorityState state, CancellationToken token)
     {
         var document = await PublicReadAssertions.DocumentAsync(await root.GetAsync(state.Scenario.Reference, token));
         await Assert.That(document).IsNotNull();
-        await SqlRf3Protocol.EqualAsync<DocumentResult?>(Expected(state), document);
+        await SqlClusterProtocol.EqualAsync<DocumentResult?>(Expected(state), document);
         var outbox = await McpCallerAssertions.SdkSuccessAsync(await root.OutboxStatusAsync(state.Scenario.Partition, token));
         return new(document, outbox);
     }
@@ -44,11 +44,11 @@ internal static class DiscoveryAuthorityValues
     internal static async Task ReplayAsync(KeyLoadClient root, DiscoveryAuthorityState state, CancellationToken token)
     {
         var original = state.OriginalRepairResult ?? throw new InvalidOperationException(DiscoveryAuthorityProtocol.MissingRepairResult);
-        await SqlRf3Protocol.EqualAsync(state.Repaired, original);
+        await SqlClusterProtocol.EqualAsync(state.Repaired, original);
         var before = await ImageAsync(root, state, token);
         var replay = await McpCallerAssertions.SdkSuccessAsync(await root.ConfigurePrincipalAsync(
             state.RepairCommandId, state.Repaired, token));
-        await SqlRf3Protocol.EqualAsync(original, replay);
-        await SqlRf3Protocol.EqualAsync(before, await ImageAsync(root, state, token));
+        await SqlClusterProtocol.EqualAsync(original, replay);
+        await SqlClusterProtocol.EqualAsync(before, await ImageAsync(root, state, token));
     }
 }

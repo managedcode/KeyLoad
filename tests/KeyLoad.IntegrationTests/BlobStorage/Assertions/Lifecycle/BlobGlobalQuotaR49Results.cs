@@ -10,28 +10,26 @@ internal static class BlobGlobalQuotaR49Results
     {
         await Assert.That(receipt.CommandId).IsEqualTo(id);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(state.Partition.AtomicPartitionId);
-        await Assert.That(receipt.Token.Incarnation).IsEqualTo(state.Placement.Incarnation);
-        await Assert.That(receipt.Token.OwnershipEpoch).IsEqualTo(state.Placement.PlacementEpoch);
         await Assert.That(receipt.Token.Position).IsGreaterThan(0L);
         await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);
         await Assert.That(receipt.Mutations.IsEmpty).IsTrue();
     }
-    internal static async Task ReplayAsync<T>(RequestCqrsRf3Callers callers, string tool, object request,
+    internal static async Task ReplayAsync<T>(RequestCqrsClusterCallers callers, string tool, object request,
         T expected, Func<CancellationToken, Task<Result<T>>> sdk, BlobGlobalQuotaR49State state, CancellationToken token)
     {
-        await SqlRf3Protocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(await sdk(token)));
+        await SqlClusterProtocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(await sdk(token)));
         await BlobGlobalQuotaR49Current.RunAsync(callers, state, token);
-        await SqlRf3Protocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<T>(await callers.Mcp.CallAsync(tool, request, token))).Value);
+        await SqlClusterProtocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<T>(await callers.Mcp.CallAsync(tool, request, token))).Value);
         await BlobGlobalQuotaR49Current.RunAsync(callers, state, token);
     }
-    internal static async Task FailureAsync<T>(RequestCqrsRf3Callers callers, string tool, object request,
+    internal static async Task FailureAsync<T>(RequestCqrsClusterCallers callers, string tool, object request,
         Func<CancellationToken, Task<Result<T>>> sdk, ErrorCode code, string detail,
         BlobGlobalQuotaR49State state, CancellationToken token)
     {
         var result = await sdk(token);
         await Assert.That(result.IsFailed).IsTrue();
         await Assert.That(result.Value).IsNull();
-        await SqlRf3Protocol.EqualAsync(Errors.Problem(code, detail), result.Problem);
+        await SqlClusterProtocol.EqualAsync(Errors.Problem(code, detail), result.Problem);
         await BlobGlobalQuotaR49Current.RunAsync(callers, state, token);
         var reply = await callers.Mcp.CallAsync(tool, request, token);
         await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true);

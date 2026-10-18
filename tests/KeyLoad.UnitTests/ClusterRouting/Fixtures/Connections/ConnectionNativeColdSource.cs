@@ -2,7 +2,6 @@ using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.CrashHost.Features.ClusterRouting;
 using KeyLoad.Server;
-using KeyLoad.Server.Features.ClusterRouting;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using Microsoft.Extensions.DependencyInjection;
@@ -48,8 +47,7 @@ internal sealed class ConnectionNativeColdSource
         var core = options.Core;
         var database = new DatabaseEngine(store, authorization, core.DatabaseLimits,
             core.DueWork, core.EventSource, core.Messaging, core.GraphExecution, core.ChangeFeedExecution,
-            core.BlobExecution, core.NativeClaimsExecution, core.TimeSeriesExecution, core.MovementCheckpoints,
-            new PartitionMovementCheckpointVerifier(options.Node, options.ReplicaConfiguration, options.GrainRouting),
+            core.BlobExecution, core.NativeClaimsExecution, core.TimeSeriesExecution,
             Clock, physicalOwner)
         {
             Durability = durability

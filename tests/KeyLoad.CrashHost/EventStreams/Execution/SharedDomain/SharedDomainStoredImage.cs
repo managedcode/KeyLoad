@@ -1,4 +1,3 @@
-using KeyLoad.Core.Features.ClusterRouting.Serialization;
 using KeyLoad.Storage;
 using static KeyLoad.CrashHost.Features.EventStreams.SharedDomainProtocol;
 
@@ -36,7 +35,6 @@ internal static class SharedDomainStoredImage
         return (values.Length >= ScopeComponentCount && Equals(values[TenantComponent], partition.TenantId)
             && Equals(values[DatabaseComponent], partition.DatabaseId) && Equals(values[DomainComponent], partition.TransactionDomainId)
             && Equals(values[PartitionKeyComponent], partition.PartitionKey))
-            || key.SequenceEqual(AtomicPartitionPlacementSerialization.RowKey(partition))
             || key.SequenceEqual(AtomicPartitionRosterRestoreOriginSerialization.EntryKey(partition))
             || key.SequenceEqual(AtomicPartitionRosterRestoreOriginSerialization.OriginKey(partition));
     }

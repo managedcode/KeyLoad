@@ -6,7 +6,7 @@ namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 /// <summary>Preserves the shared fixture diagnostic/root cleanup and actual stage-failure collection semantics.</summary>
 internal static class ClusterFixtureResourceCleanup
 {
-    internal static async Task SaveDiagnosticsAsync(ClusterFixtureDiagnostics? diagnostics, byte[] peerSecret, string adminCredential, Guid incarnation,
+    internal static async Task SaveDiagnosticsAsync(ClusterFixtureDiagnostics? diagnostics,
         NativeCoverageCleanupDeadline? deadline, List<Exception> failures)
     {
         if (diagnostics is not { } owned)
@@ -14,10 +14,10 @@ internal static class ClusterFixtureResourceCleanup
             return;
         }
         await CollectCleanupAsync(deadline,
-            () => owned.SaveAsync(peerSecret, adminCredential, incarnation, deadline?.Token ?? owned.LifetimeToken), failures).ConfigureAwait(false);
+            () => owned.SaveAsync(deadline?.Token ?? owned.LifetimeToken), failures).ConfigureAwait(false);
     }
 
-    internal static async Task DeleteOwnedRootAsync(NativeCoverageRf3FixtureOwner? coverage, string root,
+    internal static async Task DeleteOwnedRootAsync(NativeCoverageClusterFixtureOwner? coverage, string root,
         NativeCoverageCleanupDeadline? deadline, List<Exception> failures)
     {
         if (coverage is null)

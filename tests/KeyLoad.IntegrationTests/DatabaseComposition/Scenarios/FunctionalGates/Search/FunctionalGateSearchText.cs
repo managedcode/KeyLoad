@@ -47,7 +47,7 @@ internal static class FunctionalGateSearchText
 
     private static async Task RequireWaitAsync(CommitToken minimum, WaitForIndexResult result)
     {
-        await SqlRf3Protocol.EqualAsync(minimum with
+        await SqlClusterProtocol.EqualAsync(minimum with
         {
             Position = result.AppliedToken.Position
         }, result.AppliedToken);

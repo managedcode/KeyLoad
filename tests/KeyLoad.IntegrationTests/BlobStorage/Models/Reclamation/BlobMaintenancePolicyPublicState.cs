@@ -3,10 +3,9 @@ using KeyLoad.IntegrationTests.Features.ClientApi;
 namespace KeyLoad.IntegrationTests.Features.BlobStorage;
 
 internal sealed class BlobMaintenancePolicyPublicState(BlobRef blob, McpPersistedIdentity identity,
-    BlobBoundedRetirementPublicPublication.Published original, AtomicPartitionPlacementResolution placement)
+    BlobBoundedRetirementPublicPublication.Published original)
 {
     internal BlobRef Blob { get; } = blob;
-    internal AtomicPartitionPlacementResolution Placement { get; } = placement;
     internal McpPersistedIdentity Identity { get; } = identity;
     internal BlobBoundedRetirementPublicPublication.Published Original { get; } = original;
     internal DeleteBlobRequest DeniedDelete { get; } = new(Guid.NewGuid(), blob, 1L);

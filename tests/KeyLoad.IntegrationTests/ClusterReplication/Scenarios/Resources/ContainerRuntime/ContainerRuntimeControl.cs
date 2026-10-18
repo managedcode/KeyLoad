@@ -14,12 +14,12 @@ namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 internal sealed class ContainerRuntimeControl(
     DistributedApplication app,
     IReadOnlyDictionary<string, string> containerNames,
-    string repositoryRoot, LocalRf3ImageSelection.Selection? localImageSelection = null)
+    string repositoryRoot, LocalClusterImageSelection.Selection? localImageSelection = null)
 {
     private readonly ConcurrentDictionary<string, ContainerRestartOwnership> restartOwners = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, ContainerRuntimeKillReceipt> pendingReceipts = new(StringComparer.Ordinal);
     private readonly ClusterFailureReceipts restartFailureReceipts = new(ClusterFailureReceiptKind.Restart);
-    private const string RestartDiagnosticsFailureKey = "KeyLoad.Rf3RestartDiagnosticsFailure";
+    private const string RestartDiagnosticsFailureKey = "KeyLoad.ClusterRestartDiagnosticsFailure";
 
     /// <summary>Kills the inspected full container ID and waits until the same named container is exited.</summary>
     /// <param name="resourceName">The actual Aspire resource to kill.</param>

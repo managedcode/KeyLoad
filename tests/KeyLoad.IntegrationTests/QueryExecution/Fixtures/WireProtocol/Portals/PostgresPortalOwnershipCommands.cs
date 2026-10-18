@@ -14,13 +14,6 @@ internal static class PostgresPortalOwnershipCommands
     internal static Task MissingAsync(Stream stream, byte type, byte[] payload, CancellationToken token)
         => PostgresPortalOwnershipReplies.RefusedAsync(stream, type, payload,
             PostgresPortalOwnershipProtocol.Validation, token);
-    internal static async Task ExecuteAsync(Stream stream, PostgresRf3State state, string name, CancellationToken token)
-    {
-        await PostgresPortalOwnershipReplies.SendAsync(stream, PostgresPortalOwnershipProtocol.Execute,
-            PostgresPortalOwnershipFrames.Execute(name), token);
-        await PostgresPortalOwnershipAssertions.PageAsync(state,
-            await PostgresPortalOwnershipReplies.PageAsync(stream, token));
-    }
     internal static async Task DescribeAsync(Stream stream, string name, CancellationToken token)
     {
         await PostgresPortalOwnershipReplies.SendAsync(stream, PostgresPortalOwnershipProtocol.Describe,

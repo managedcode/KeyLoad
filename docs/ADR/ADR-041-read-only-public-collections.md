@@ -1,7 +1,7 @@
 # ADR-041: read-only public collections with stable wire bytes
 
 Status: Accepted implementation contract; implementation and qualification pending.
-Owner: KeyLoad integration lead under the existing strict-analysis and complete
+Owner: KeyLoad under the existing strict-analysis and complete
 memory/read-work repair directions. Related: ADR-033, ADR-035, ADR-036.
 
 ## Problem and decision
@@ -38,19 +38,16 @@ identity. Caller mutation after construction cannot change the store identity or
 signatures. Existing identity/reopen checks and a caller-buffer mutation regression
 cover this provider configuration extension.
 
-Accepted runtime repair TASK-RUNTIME-STORAGE-W / AC-ROC-002/004/005 and
-AC-PSW-002..004 restores that nullable-null contract at the owning producer.
-Run37005805424 at6949fa0 demonstrates Delete projected as a live empty value by
-ZoneTreeTransaction.PrepareChanges. The worker first authors NEW real-store
-StorageRecovery/TombstoneValueTests, then changes only that projection to preserve
-an explicit nullable null. Keep legitimate empty Put, reader/replay/format/version,
-cache/copy and flush/apply order, and null frame overhead=2 identical. Lead owns
-docs/source review/build/formatter and exact-SHA full GitHub unit/process recovery/
-RF3 SDK/MCP joins. WAL byte equality, borrowed/owned absence, range, empty value,
+AC-ROC-002/004/005 and AC-PSW-002..004 restore the nullable-null contract at the
+owning producer: Delete is projected by ZoneTreeTransaction.PrepareChanges as an
+explicit nullable null, never a live empty value (real-store
+StorageRecovery/TombstoneValueTests). Keep legitimate empty Put, reader/replay/
+format/version, cache/copy and flush/apply order, and null frame overhead=2
+identical. WAL byte equality, borrowed/owned absence, range, empty value,
 reopen and snapshot counts are mandatory. Rollback reverts the projection and
 keeps regressions.
 
-The lead owns strict converter registration in JsonDefaults and new Abstractions
+Strict converter registration lives in JsonDefaults and new Abstractions
 Features/ResourceExecution converter files. ImmutableArray conversion delegates
 the complete element/array protocol to System.Text.Json's T[] serializer with the
 same options. Only freshly deserialized private arrays may be attached through
@@ -77,7 +74,7 @@ identical. Compilation does not establish persisted-format guarantees beyond the
 The Client query factory also moves from KeyLoadQuery<T>.From to the non-generic
 KeyLoadQuery.From<T> to resolve the actual strict CA1000 prerequisite. Keep the
 same initial AST and instance builder behavior, with an internal constructor and
-one factory under Client/Features/QueryExecution. All QueryAdapter/LiveQuery/RF3
+one factory under Client/Features/QueryExecution. All QueryAdapter/LiveQuery/cluster
 SDK callers and README examples use the current factory. The generated query JSON
 remains identical. No alias, second builder algorithm or analyzer suppression.
 
@@ -107,147 +104,24 @@ flowchart LR
 | REQ-ROC-002: exact wire/signed/persisted identity | AC-ROC-002: handcrafted base64/tombstone/empty/nullable/vector/polymorphic sequence fixtures round-trip to identical bytes and hashes; invalid required null/missing/default values reject | TUnit serializer/fingerprint goldens and existing retry/frame/recovery suites |
 | REQ-ROC-003: owned input/results and efficient dense vectors | AC-ROC-003: freeze once, independent scan buffers, no per-score array conversion, unchanged exact ranks/scores | Real ZoneTree ownership and Search golden/allocation cases; source allocation review |
 | REQ-ROC-004: one accurate owned-read API | AC-ROC-004: ReadOwnedValue retains hit/miss/independent buffers; no interface Get or alias | Interface/reflection and real provider read/counter cases, combined compile |
-| REQ-ROC-005: all callers and persisted policies use the current contracts | AC-ROC-005: SDK/query/core/storage/security/replication/tests/comparisons compile with unchanged success/negative/error behavior | Exact GitHub full TUnit/recovery/RF3 SDK/MCP; no skipped/fake qualification |
-| REQ-ROC-006: honest source verification and delivery | AC-ROC-006: strict build/format/governance and delivered-SHA CI succeed; docs disclose CLR break/evidence | Lead combined review, exact SHA/run/jobs/artifacts |
+| REQ-ROC-005: all callers and persisted policies use the current contracts | AC-ROC-005: SDK/query/core/storage/security/cluster/tests/comparisons compile with unchanged success/negative/error behavior | Exact GitHub full TUnit/recovery/replicated-cluster SDK/MCP; no skipped/fake qualification |
+| REQ-ROC-006: honest source verification and delivery | AC-ROC-006: strict build/format/governance and delivered-SHA CI succeed; docs disclose CLR break/evidence | Combined review, exact SHA/run/jobs/artifacts |
 
 UI N/A: programmatic contracts. Wire/format conversion N/A: the exact current
 wire shape and bytes are mandatory. Compilation is not throughput or resource proof; AC-MP-011 remains.
 
-## Ordered implementation and ownership
-
-1. Lead accepts this rationale/criteria/plan before coding. Full existing-main CI
-   36936319423 is historical only. A compile-only temporary C# probe verifies
-   nullable ImmutableArray collection expressions, AsMemory, SIMD span constructor
-   and byte-memory interop; no program/test execution or runtime proof.
-2. TASK-MP-010E authors NEW UnitTests/Features/ResourceExecution collection/wire/
-   ownership regressions first, then edits only Abstractions property types and
-   the ReadOwnedValue declaration. Preserve all existing XML/docs and concurrent
-   contract extraction. No consumer/config/docs worker edits.
-3. Lead reviews the schema diff and owns integration. Assign disjoint Core/Query/
-   Security and Storage/Client/test caller stages only after schema joins. Serialize
-   EventSources/BudgetedReadView after TASK-MP-007H. Protect native routing/replication
-   and comparison owners until their completed results are inspected and joined.
-   TASK-MP-010F-W owns Query and Security.Project plus matching query/search tests;
-   TASK-MP-010G-W owns ZoneTree/Client plus matching storage/client unit tests;
-   its provider scope includes the nullable signing-key option and its ownership
-   regression, without weakening identity verification or key-length rules.
-   It also owns the non-generic Client query factory; TASK-MP-010F-W adapts its
-   already assigned QueryAdapter/LiveQuery unit callers, and the lead integrates
-   native RF3 callers and README examples.
-   TASK-MP-010H-W owns Core business source plus matching business unit tests.
-   This includes the explicitly identified generic ChangeFeeds page sequence and
-   its existing real-store projection/continuation assertions.
-   The lead alone integrates DatabaseEngine, KeySpace, ReadExecutionBudget and
-   BudgetedReadView, native/recovery/comparison joins and shared docs/config.
-4. Lead's strict converter stage must join before collection-property integration. Required-
-   default validation retains typed rejection and persisted policy.
-   IAuthorizationPolicy.Project takes IReadOnlyList<SensitiveFieldPolicy>, allowing
-   array and immutable resource-policy callers through one existing algorithm.
-   Keep its out-array projection buffer within an owned result boundary.
-5. Compile actual dependencies with every analyzer, inspect every error, then
-   format/static gates. GitHub runs full TUnit/recovery/RF3 SDK/MCP and resource
-   assertions for the delivered SHA; development checks do not qualify runtime.
-6. Update requirement/task/test/evidence chain, inspect every worker diff and
-   combined state, deliver stable scoped source under existing authorization.
-   Stay Accepted until every AC/gate is met.
-
-Workers stop on ambiguity/overlap, unsupported serializer/default behavior, extra
-vector copies, changed golden bytes/hashes or dependency defects. No local tests,
-stale-reference build, new package, force/protection bypass or severity change.
-Lead owns shared contracts/config/docs and final integration/review.
-
 ## Rollout, rollback and verification
 
-### Accepted maintainability join
+### DatabaseEngine size deviation
 
-TASK-MP-010K extends the already owned Query scope to extract SqlParser's current
-tokenization and precedence-expression responsibilities into cohesive internal
-Features/QueryExecution helpers. Do not rewrite its dialect. Keep token limit
-evaluation, escaping, quoted identifiers, alias binding, precedence/depth, parameter
-handling and every unsupported/invalid/budget error in the same order. Author
-direct parser golden/negative boundary cases first; existing real-store SQL/AST
-regressions remain required. Every new helper/type stays within 200 LOC, functions
-within 50, files within 400 and nesting within three, with named syntax/budget
-constants. The sole public SqlParser API stays the same. Lead reviews extraction
-and combined build/CI; no worker exception or skipped assertions.
-
-TASK-MP-010I additionally extracts DatabaseEngine's oversized shared source into
-cohesive commit/outcome, authorization, operation dispatch and resource-validation
-units. New feature-owned helpers use their canonical Features paths. Preserve
-transaction reset/retry/watermark ordering, principal policy, configured clock,
-exact errors and fingerprint bytes. Add first real-store command/outcome/invalid
-collection cases when behavior guards change. No before-image optimization is
-mixed into this prerequisite stage; its distinct inventory item remains open.
-The lead alone owns these shared files, registration and consumer joins.
-Exact lead-owned extraction files: Core DatabaseEngine.cs, AtomicCommandCommit.cs,
-CommandOutcomes.cs, OperationProtocol.cs, OperationDispatcher.cs,
-AtomicMutationApplication.cs; Features/Authorization/DatabaseAuthentication.cs,
-CommandAuthorization.cs and PrincipalConfiguration.cs;
-Features/ResourceExecution/ResourceConfiguration.cs;
-Features/Messaging/SubscriptionCommandDispatch.cs;
-Features/ChangeFeeds/ProjectionCommandDispatch.cs; and
-Features/ClusterReplication/MembershipContracts.cs. These hold extracted existing
-behavior only. ResourceProtocolFailureTests covers explicit null resource,
-retention and queue-policy protocol inputs through the real commit path. Existing
-RespectNullableAnnotations rejection must persist a Validation outcome without
-partial catalog effects, and retry/watermark/fingerprint behavior must survive the
-extraction. This is regression coverage of the existing serializer boundary; it
-does not establish a newly reproduced null-protocol defect.
-
-The existing DatabaseEngine partial type exceeds type_max_loc across its
-business files. Cohesive source extraction does not make that aggregate compliant.
-Record this bounded existing deviation under exception_policy: owner integration
-lead, affected existing DatabaseEngine partial declarations only, removal target
-2026-11-01. The target is a <=200-LOC shared engine coordinating typed feature
-handlers under their canonical slices with the same node-local atomic transaction
-and persisted authorization boundary. Do not expand this deviation with new
-behavior or claim the aggregate type limit passes. In this prerequisite stage,
-split shared responsibilities, enforce <=400 files and <=64 functions, and retain
-the aggregate-type refactoring as open complexity evidence. Verification requires
-the real numeric gate plus full real-store/recovery/RF3 behavior after extraction.
-
-TASK-MP-010H-W/010F-W/010G-W may split their already assigned compact test
-files into cohesive internal TUnit classes under the owning Features paths when
-the mandatory formatter exposes existing size/style/documentation errors. Preserve
-every test and assertion, names or stable AC links, and real fixture setup. Delete
-the replaced root test declaration in the same change; no copied parallel suite.
-This is an explicit source refactor to ADR-032's target, not an exception to its layout.
-Workers do not edit any unassigned test, shared fixture, docs, config or policy.
-
-The lead's narrow BenchmarkComparisons join owns only the three changed DTO inputs
-in Targets/KeyLoadTarget.cs: PutVector values, seeded graph CommandRequest mutations
-and SearchRequest vector. Freeze the existing input sequence once into its required
-immutable contract; preserve generated data, IDs, options, workload topology,
-ranking/oracle/report behavior and every existing comparison assertion. Other
-comparison implementation, profiles and reporting remain with their current owner.
-Existing actual KeyLoad RF3 comparison scenarios and strict compilation prove the
-join in GitHub; a compile fix is not a new performance measurement.
-
-### Accepted UnitTests caller prerequisite join
-
-TASK-MP-010O-W extends AC-ROC-003/004/006 and AC-MP-012 without a new product
-contract. analyzer_tests owns only root FrameBudgetTests and its target
-Features/StorageRecovery replacement/helpers, plus
-Features/ResourceExecution/ReadBudgetAllocationTests. Allocate each test's owned
-byte[] request key once, construct the existing read-only StorageMutation from it,
-and use ReadOwnedValue for retained comparison/assertion reads. Preserve all twelve
-base64 boundary trials, exact WAL header/payload offsets and bytes, rejection and
-unchanged-position/state assertions, and every existing read/result/cancellation
-allocation bound. Move/split the frame suite into its canonical slice, remove the
-original declaration, keep internal TUnit types and exact scenario discovery. No
-assertion weakening, doubles, production/config/native/comparison edits or local
-test execution. These are known compile mismatches, not observed failing tests.
-The lead alone owns shared TestDatabase visibility/constants/real-system-clock
-prerequisites and the exact ordered-byte wire assertion. Tests can compile only
-after their real benchmark/server/native dependencies join; disabled-reference
-builds are not proof. Runtime evidence remains exact-SHA GitHub qualification.
+The existing DatabaseEngine partial type exceeds type_max_loc across its business files; cohesive extraction under canonical feature paths does not make the aggregate compliant. This bounded existing deviation (exception_policy) covers the existing DatabaseEngine partial declarations only, with removal target 2026-11-01: a shared engine of at most 200 lines coordinating typed feature handlers under their canonical slices with the same silo-local atomic transaction and persisted authorization boundary. Do not expand it with new behavior or claim the aggregate type limit passes; files stay within 400 lines and functions within 64. Verification requires the real numeric gate plus full real-store, recovery and replicated-cluster behavior after extraction. Existing ResourceProtocolFailureTests cover explicit null resource, retention and queue-policy inputs through the real commit path, and retry, watermark and fingerprint behavior must survive extraction.
 
 Rebuild all solution binaries together and deploy only after exact GitHub proof.
 Valid persisted JSON/frame data needs no conversion. Rollback restores contracts
 and all consumers as one verified source unit, with no shim or mixed binaries.
 Invalid required null/default input rejects explicitly; nullable fields retain
 their old null meaning. Real retry/fingerprint/frame/checksum/process-recovery,
-hidden/redacted policy and RF3 SDK/MCP regressions are required. Coverage/complexity
+hidden/redacted policy and cluster SDK/MCP regressions are required. Coverage/complexity
 remain mandatory and unverified until the required collection/gates run.
 
 Primary guidance: [CA1819](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1819),

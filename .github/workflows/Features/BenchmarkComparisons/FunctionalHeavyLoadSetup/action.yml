@@ -1,5 +1,5 @@
-name: Functional RF3 heavy-load setup
-description: Prepare source-bound images and the existing native functional RF3 runner.
+name: Functional CLUSTER heavy-load setup
+description: Prepare source-bound images and the existing native functional CLUSTER runner.
 inputs:
   bundle-artifact-id:
     description: Same-source immutable Docker image bundle
@@ -33,6 +33,6 @@ runs:
     - name: Restore .NET packages
       shell: bash
       run: dotnet restore KeyLoad.slnx
-    - name: Build functional RF3 tests
+    - name: Build functional CLUSTER tests
       shell: bash
       run: dotnet build tests/KeyLoad.IntegrationTests --no-restore --configuration Release -warnaserror

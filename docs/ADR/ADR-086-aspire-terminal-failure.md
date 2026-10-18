@@ -2,7 +2,7 @@
 
 Status: Accepted implementation contract; local development regressions passed;
 delivered-source Linux qualification pending.
-Date: 2026-10-04. Related: REQ/AC-TEST-012..014, ADR-074, ADR-085.
+Date: 2026-10-04. Related: REQ/AC-TEST-012..014, ADR-085, ADR-117.
 
 ## Decision
 
@@ -27,7 +27,7 @@ startup. Retain the initiating exception rather than replacing it with sibling
 cancellation. Existing stop/dispose and bounded diagnostic retention remain the
 owner's finally responsibility. No detached task or new timeout increase.
 
-Startup readiness for the shared RF3 fixture explicitly uses native
+Startup readiness for the shared cluster fixture explicitly uses native
 StopOnResourceUnavailable and cancels/joins other startup waits when one fails.
 This startup guard ends at initial readiness. Continuous comparison guards end
 at runner completion, before intentional node loss/restart regression scenarios.
@@ -36,27 +36,11 @@ database jobs continue their own workloads after another database fails.
 
 ## Implementation and verification
 
-1. Root owns requirements, this ADR, shared integration and Git delivery.
-2. progress_runner owns only new AppHost Features/TestInfrastructure native
-   lifecycle helpers and new ComparisonTests Features/TestInfrastructure tests.
-   Genuine Aspire notifications cover terminal/missing-exit, live dependency
-   failure, successful/failed bootstrap, no dependencies, cancellation and task
-   settlement. Native failures settle within five seconds of event publication.
-3. Root joins TestSuiteApplication, IsolatedNativeCase and shared ClusterFixture
-   startup, with any necessary test friend visibility. vector_runtime reviews
-   required resources and planned fault boundaries read-only. Concurrent engine
-   CQRS/current recovery code and its dedicated wave fixtures remain with their owner.
-4. Build/format/governance and focused TUnit tests through the canonical Aspire
-   entry, then retain exact-source Linux CI reports. Full unit/scalar/recovery/RF3
-   and native benchmark qualification remain required; unrelated failures are
-   reported honestly. Source/native service tests do not prove a Docker crash
-   was exercised. A real failure artifact supplies environmental-path evidence.
+1. Requirements and this ADR precede the native lifecycle helpers.
+2. New AppHost Features/TestInfrastructure native lifecycle helpers and new ComparisonTests Features/TestInfrastructure tests use genuine Aspire notifications: terminal/missing-exit, live dependency failure, successful/failed bootstrap, no dependencies, cancellation and task settlement. Native failures settle within five seconds of event publication.
+3. Build/format/governance and focused TUnit tests run through the canonical Aspire entry, then exact-source Linux CI reports are retained. Full unit/scalar/recovery/cluster and native benchmark qualification remain required; unrelated failures are reported honestly. Source/native service tests do not prove a Docker crash was exercised. A real failure artifact supplies environmental-path evidence.
 
-Graph: CONTRACT -> NATIVE HELPERS/TESTS -> JOINS -> REVIEW -> EVIDENCE.
-Acceptance mapping is in TestInfrastructure. No production contract, package,
-stored-data format or topology changes. Rollback reverts only these lifecycle joins
-and helpers; the canonical Aspire entry and existing outcomes remain required.
-Frontend N/A: developer and CI lifecycle only.
+Acceptance mapping is in TestInfrastructure. No production contract, package, stored-data format or topology changes. Rollback reverts only these lifecycle joins and helpers; the canonical Aspire entry and existing outcomes remain required. Frontend N/A: developer and CI lifecycle only.
 
 ```mermaid
 flowchart LR

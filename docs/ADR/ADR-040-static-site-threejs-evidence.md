@@ -1,10 +1,10 @@
 # ADR-040: static product website, conceptual Three.js and qualified evidence
 
 Status: Accepted. Website and renderer source are present. Implementation and
-qualification status are owned by the active [implementation status](../implementation/status.json);
-this decision does not claim delivery acceptance. Owner:
+qualification status are owned by the feature specifications and exact-source Linux
+evidence; this decision does not claim delivery acceptance. Owner:
 BenchmarkComparisons. Related REQ-BC-011..018, 024/025, 027..029 and
-REQ-BC-WEB-001..007 and REQ/AC/TASK-BC-PRESENTATION-005 in
+REQ-BC-WEB-001..007 and REQ/AC-BC-PRESENTATION-005 in
 [BenchmarkComparisons](../Features/BenchmarkComparisons.md), with current vector
 and workload details in [VectorQualification](../Features/BenchmarkComparisons/VectorQualification.md)
 and [ScaledWorkloads](../Features/BenchmarkComparisons/ScaledWorkloads.md).
@@ -16,9 +16,9 @@ BenchmarkComparisons slice. Product text, navigation, accessible evidence and a
 poster remain available without JavaScript, browser graphics, reduced motion or
 WebGPU. The lazy Three.js figure is conceptual: it must not imply live node
 readiness, replication timing, traffic or measurement values. The current hero
-illustrates composable models around one database; it does not depict physical
-RF3 membership. Logical partitions remain distinct from physical hosts that own
-node-local storage.
+illustrates composable models around one database; it does not depict the
+replicated cluster topology. Logical partitions remain distinct from the silo-local
+ZoneTree owners that own node-local storage.
 
 Use the pinned same-origin Three.js 0.186.1 MIT distribution, one lazy
 WebGPURenderer and its native WebGL2 backend selection; use public lifecycle/error
@@ -85,7 +85,7 @@ qualify numerical coverage.
 
 Build and Tests, Benchmarks, Website and Release remain four distinct workflows.
 Build and Tests owns the full solution build and required ordinary, scalar,
-recovery and Aspire RF3 suites. Website runs independently on trusted own-main
+recovery and Aspire cluster suites. Website runs independently on trusted own-main
 source pushes and manual dispatch; it does not wait for Build and Tests or a
 successful benchmark job. The final Benchmarks job sends one bounded dispatch to
 the separate Website workflow after aggregation dependencies settle, including
@@ -148,7 +148,7 @@ Every local build, static check, browser review and Aspire-owned development tes
 is labeled development evidence. Delivered-source qualification is exact-SHA
 Linux GitHub evidence with no skipped required cases. The real site suite uses
 TUnit and actual Node and Chrome processes through the owner's test workflow.
-Package, data format, public API, RF3 topology, benchmark workload and database
+Package, data format, public API, cluster topology, benchmark workload and database
 storage decisions remain outside this ADR.
 
 ## Consequences and rollback
@@ -160,11 +160,10 @@ Rollback restores a coherent site asset/source set and retains the last verified
 publication and immutable inputs. It never restores a publisher bypass, synthetic
 metrics or weakened coverage, source, browser or provenance gates.
 
-## Current original-artwork presentation contract, 2026-10-09
+## Original-artwork presentation contract
 
-REQ/AC/TASK-BC-PRESENTATION-005 in the Feature specification supersedes the earlier
-carousel, silo/grain, client-box and repeated-mark hero illustrations. The owner
-selected `site/Features/BenchmarkComparisons/assets/agent-context.png` directly:
+REQ/AC-BC-PRESENTATION-005 in the Feature specification defines the hero illustration
+(`site/Features/BenchmarkComparisons/assets/agent-context.png`):
 a central three-layer steel/glass database, human agent above it, upper-left
 table/SQL, upper-right graph, left-middle time series, right-middle vector cloud,
 lower-left event orbits, front-left queued cards, front-right file folders and
@@ -177,28 +176,25 @@ No generic client boxes, repeated scene logo, visible client/silo captions or
 alternative silo/grain interpretation remain in this current contract.
 
 The actual geometry graph supplies `data-scene-models=8`, `data-scene-agents=1`,
-`data-scene-links=8` and `data-scene-clients=0`; attributes do not fabricate RF3
-membership. All nine model names remain in a semantic sr-only list, with SQL
+`data-scene-links=8` and `data-scene-clients=0`; attributes do not fabricate cluster
+membership state. All nine model names remain in a semantic sr-only list, with SQL
 combined visually with the table. Existing renderer/vendor fidelity, no external
 requests, native motion/pause/visibility/disposal, responsive accessibility and
-coverage gates remain unchanged. No packages are added. Database RF3 topology,
-request grains, node-local storage, SQL conformance and measurement semantics
+coverage gates remain unchanged. No packages are added. Database cluster topology,
+connection grains, silo-local storage, SQL conformance and measurement semantics
 are outside this presentation task.
 
-Ordered implementation and join contract:
+Implementation contract:
 
-1. Establish Feature REQ/AC/TASK-BC-PRESENTATION-005 and this ADR before source writes.
-2. Root constructs and batches native geometry in `scene-geometry.mjs`, integrates
-   semantics in `index.html`/`scene.css` and actual graph attributes through
+1. Native geometry is constructed and batched in `scene-geometry.mjs`, semantics are
+   integrated in `index.html`/`scene.css` and actual graph attributes through
    `scene-lifecycle.mjs`/`scene-observers.mjs`; existing lifecycle behavior remains.
-3. The disjoint fallback worker updates only the canonical builder asset inventory
-   and original fallback path; the test worker updates only the existing native
-   BenchmarkComparisons TUnit/Chrome scene/asset assertions. The contract worker
-   owns only the Feature specification and this ADR. Root reviews every join.
-4. Native tests inspect actual rendered desktop/mobile frames, geometry counts,
+2. The canonical builder asset inventory and original fallback path, and the existing
+   native BenchmarkComparisons TUnit/Chrome scene/asset assertions, are updated with it.
+3. Native tests inspect actual rendered desktop/mobile frames, geometry counts,
    original fallback delivery, accessible names, motion/pause and renderer budgets.
    Screenshot/motion judgment remains the explicit visual-composition exception.
-5. Show the completed local animated preview and obtain owner approval before
+4. Show the completed local animated preview and obtain owner approval before
    commit/push under site policy. Genuine exact-source Linux Website qualification
    and a real Pages provider receipt remain separate delivery gates.
 

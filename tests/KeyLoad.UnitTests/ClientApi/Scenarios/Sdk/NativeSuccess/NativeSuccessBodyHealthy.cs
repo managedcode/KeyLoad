@@ -8,7 +8,7 @@ internal static class NativeSuccessBodyHealthy
     internal static async Task RunAsync(NativeSuccessBodyState state, CancellationToken token)
     {
         var placement = state.Scenario.Fixture.Database.Database.ReadAtomicPartitionPlacement(D.Root,
-            new(D.PlacementVersion, state.Endpoint.Healthy.Partition));
+            state.Endpoint.Healthy.Partition);
         var result = await NativeSuccessBodyStages.CompleteAsync(state,
             state.Client.CommitAsync(state.Endpoint.Healthy, token), NativeSuccessBodyStep.HealthyWrite, token);
         await Assert.That(result.IsSuccess).IsTrue();

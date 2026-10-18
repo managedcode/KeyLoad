@@ -1,112 +1,23 @@
 # GitHub Actions workflows
 
-## Mandatory SIMD execution, owner correction 2026-10-11
+## Purpose, entry points and ownership
 
-- SIMD is always enabled in the product. This explicit correction supersedes active `unit-scalar`, disabled-intrinsics and normal/scalar matrix requirements above. Execute every ordinary unit, process-recovery, RF3, coverage and benchmark contract through its normal native SIMD image; retain actual original historical reports without relabelling or reusing them as current qualification.
-- Preserve the complete functional case inventory, native TUnit50, five confined coverage groups, 80/70/90 thresholds, source/PE/PDB/TRX provenance, real Aspire topology, authentication and cleanup. Performance comparisons use matched competitor workloads and original previous-code measurements, never a current product SIMD-disable switch.
+Owns the four delivery workflows: `build-and-tests.yml`, `benchmarks.yml`, `website.yml` and `release.yml`. Build and Tests owns functional qualification; Benchmarks owns isolated database measurements and authenticated aggregation; Website owns independent site qualification and Pages publication; Release owns explicitly authorized packaging and publication. Preserve pinned actions, source identities, original artifacts, needs-gated publication and least-privilege permissions.
 
-## Build and Tests scope, owner correction 2026-10-06
+## Boundaries and protected risks
 
-- Build and Tests executes only solution builds, repository checks and KeyLoad functional tests. Benchmark/comparison cases and their progress, entry, counter and image-preparation checks belong exclusively to Benchmarks. Keep benchmark contracts in KeyLoad.ComparisonTests, not KeyLoad.UnitTests; retain their assertions and execution in Benchmarks. RF3 functional qualification builds only the KeyLoad server image, never a benchmark load-generator image. This explicit owner correction supersedes earlier benchmark-correctness placement in ordinary CI.
+Follow the [root policy](../../AGENTS.md) and the owning feature specification. Keep changes in their actual owner, preserve unrelated work, and remove replaced code together with exclusive callers and fixtures. Use native Orleans calls for distributed execution and silo-local ZoneTree owners for files. Preserve persisted authorization, operation correctness, resource bounds, cancellation and joined shutdown. Never turn a static check or focused test into a claim of complete runtime qualification.
 
-## Purpose and entry points
-- Owns repository CI qualification and GitHub Pages publication workflows.
-- Canonical workflows: `ci.yml` (restore, Release build, TUnit unit/integration/recovery suites and comparison artifact production) and `pages.yml` (verified artifact download, site checks/build and Pages deployment).
-- Latest owner correction 2026-10-03 supersedes the historical placements above and ADR-062's five-workflow scope: exactly `ci.yml` (`CI`) combines build/rules/unit/scalar/recovery/RF3 for PR/push/manual checks; `benchmarks.yml` (`Benchmarks`) owns all load/comparison/TimeSeries checks followed by aggregate-gated website qualification and publication; `release.yml` (`Release`) builds all packages and actual database images/distribution and creates the release/tag `v<major>.<minor>.<yyMMdd>.<daily-build>`. Remove standalone Tests/Website/governance/per-feature benchmark workflows. Preserve authentic historical KeyLoad CI report bytes and run identity independently of the current CI name; newer CI build/test runs are not historical measurement producers.
+## Commands and verification
 
-## Ownership and boundaries
-- Workflow changes belong to the feature or infrastructure contract they implement and must preserve the repository's single-repository, canonical-slice architecture. Workflow YAML is delivery infrastructure, not a place to hide missing product behavior.
-- Delivered-source qualification must run in GitHub Actions. Owner correction 2026-10-03 permits local development tests through the same Aspire-owned entry point; those results cannot replace exact-source Linux qualification. Do not add local qualification shortcuts, skipped suites, fake runtime proof, unaudited performance values, or claims beyond the run's actual SHA and artifacts.
-- Keep permissions least-privileged, actions pinned, secrets out of logs, and Pages evidence bound to the successful source run/revision.
+From the repository root:
 
-## Commands and evidence
-- CI build commands are the workflow's actual invocations: `dotnet build KeyLoad.slnx --no-restore --configuration Release`. Owner correction 2026-10-03 requires every test caller to invoke `dotnet run --project build/KeyLoad.AppHost --no-build --no-restore --configuration Release -- --KeyLoadTests:Suite=<suite>` for the closed `analyzers`, `unit`, `unit-scalar`, `recovery`, `rf3`, `comparison` and `site` suites. Direct `dotnet test` is only the AppHost-composed child runner. AppHost owns Docker RF3 resources, discovered endpoints, readiness, runner dependencies, execution and shutdown; unit and recovery runners use that entry without requiring a fictitious RF3 topology. Preserve native reports, coverage, every required suite and exact-source Linux evidence.
-- Pages invokes `node --test site/scripts/measurements.test.mjs` and `node site/scripts/build.mjs` against the downloaded comparison artifact. Dispatch/inspect using the root workflow, retain run/job URLs, exact SHA and artifacts. These checks are not to be run locally as substitutes for CI qualification.
+```sh
+dotnet build KeyLoad.slnx --no-restore --configuration Release -warnaserror
+```
 
-## Skills and protected risks
-- Applicable skills: none installed; skill installation is prohibited by owner direction.
-- Never bypass branch protections, expose tokens, downgrade a required suite, or conflate build success with RF3, recovery, endurance or production readiness.
+Use the root's complete solution, native TUnit, real process recovery and Aspire SDK/MCP gates as applicable. Local checks are development evidence; delivered-source qualification and public measurements require exact-source Linux GitHub artifacts. Do not weaken compiler, analyzer, source-identity, coverage or runtime assertions.
 
-## Read-first and canonical slice ownership
-- Read the [root policy](../../AGENTS.md), [architecture map](../../docs/Architecture.md), [RepositoryGovernance feature](../../docs/Features/RepositoryGovernance.md), and [ADR-032](../../docs/ADR/ADR-032-mcaf-governance.md) first.
-- Owned slices: `RepositoryGovernance` and `BenchmarkComparisons`; target paths: `Features/RepositoryGovernance/` and `Features/BenchmarkComparisons/`.
-- Workflow edits are shared delivery infrastructure for these slices; retain the exact evidence provenance and permission boundaries.
-- `pages.yml` currently invokes Node’s `node --test` runner; this conflicts with root policy requiring TUnit for all tests and is migration debt, not permission to add another framework.
+## Skills
 
-## ADR-040 site qualification migration
-- Existing Node command listings above are the preserved historical baseline. Root TUnit policy controls their replacement with the full independently buildable `tests/KeyLoad.SiteTests` suite in `pages.yml`. Its explicit validation-only mode qualifies candidate website source against downloaded successful-main-CI historical reports and uploads review artifacts without deploying.
-- Validation and publication jobs retain least privileges and separate website-source and measured-source revisions. Publication must continue to use qualified measured-source checkout and cannot infer current database qualification from a historical site test. A validation result never authorizes DNS or public deployment.
-
-## Fresh-evidence publication extension
-- The owner's subsequent separate post-test deployment request is REQ/AC-BC-028 under ADR-040 and the publication acceptance/execution contract in `docs/Features/BenchmarkComparisons.md`. Preserve every prior policy and measured-source checkout; this new task authorizes the publication workflow after its complete gates. DNS remains excluded.
-- `pages.yml` MUST use trusted selection, one complete qualification/build path and a needs-gated deploy-only job. Only deployment receives Pages/OIDC writes. Qualification MUST retain all existing tests, native thresholds, real Chrome, format and governance without skips or fake transport.
-- Publish MUST require the highest authenticated own-main-push CI run/current attempt itself successful, exact successful comparison job/steps, one immutable unexpired artifact and verified same-archive bytes; newer unsuccessful work blocks refresh. Recheck the complete tuple immediately before deployment. Historical pinning is validation-only.
-- Record actual checkout source separately from triggering/control workflow SHA. Published measurements and report hashes MUST match the downloaded qualified JSON; successful workflow/provider/live evidence is required before claiming publication.
-
-## Owner-directed site-only boundary, 2026-10-02
-- The owner's explicit subsequent instruction to finish only the website supersedes the earlier BC028 conservative-B/equal-website-and-measured-SHA task restrictions above. Preserve those records; the current implementation contract is the BenchmarkComparisons publication acceptance/execution contract and ADR-040. Inspect measured source in a separate sibling checkout; qualify current trusted-main website source independently and record every revision accurately.
-- Select the highest successful actual comparison job by main-push run number and descending attempt history, independent of unrelated job or overall workflow conclusion. After selecting success, missing/expired/ambiguous artifacts and invalid reports MUST fail without fallback. Recheck both current website source and the exact evidence tuple before deployment.
-- The separate pages.yml MUST trigger on main site/** changes, producer workflow completion and manual dispatch. workflow_run arrives after the enclosing workflow; do not claim an individual-job webhook. Full website qualification and least privileges remain mandatory; database implementation and DNS remain outside this task.
-
-## Isolated native comparison publication
-- ADR-142 replaces the retired per-cell producer with 22 shared-session workers: eleven databases, each on native one-node and three-node jobs. The current session-v1 inventory requires seven original native TUnit case outcomes per worker. Authenticate the complete current session archives and preparation/runtime/image evidence before website use; retain exact byte hashes before/after tests and around the final builder. Historical originals keep their identities and cannot qualify the replacement producer.
-- Capture actual Pages executor context; never impersonate another job environment. Historical pins are validation-only. Derive the exact executed dependency manifest through session-source-closure.mjs and compare every path/hash between trusted control and website source; separately inspect the session measured source. Do not retain a fixed path count from a retired producer.
-- Retain full site/TUnit/browser/native coverage/no-skip gates. Qualification timeout180min and deployment freshness90min accommodate the bounded same-route provider rate protocol. Both native evidence freshness checks and current website SHA must pass immediately before needs-gated least-privilege Pages deployment.
-
-## Owner-directed integrated publication and release, 2026-10-03
-
-- Owner correction 2026-10-04 separates native comparisons and their authenticated metrics JSON from Chrome/browser/site qualification. A separate website-build action may follow JSON aggregation or be triggered in CI; the latest owner clarification explicitly permits an end-of-Benchmarks static build and supersedes the interim prohibition. The selected CI website consumer runs independently on own-main push/manual and completed Benchmarks workflow_run events, uses the newest completed own-main push/manual benchmark with a successful authenticated aggregate, and never falls back after invalid latest evidence. Authenticate workflow_run triggers separately from the selected latest producer; retain measured/control/website identities, every website gate, failed/null semantics, freshness and the three-workflow limit. Website failure cannot block database JSON production.
-- The latest three-pipeline instruction explicitly supersedes the separate pages.yml placement above. Move its complete qualification/deploy stages behind the successful Benchmarks aggregate, bind current producer run/attempt/SHA directly from GitHub's executor context, and recheck that tuple before deployment. Historical validation pins cannot impersonate this current producer.
-- Release uses UTC daily version reservation, immutable source-bound tags, actual database image/package/distribution hashes and an idempotent GitHub Release. Limit contents/packages write permissions to the publication job; reservation/build/test jobs remain read-only. Do not publish a failed build, overwrite an existing tag/image/release asset, bypass required checks or claim runtime qualification from packaging.
-
-## Shared parallel Benchmarks and readable steps
-- The latest owner correction places the actual pinned TimeSeries image test and retained facts in common image preparation, with no standalone feature branch. Keep all existing workload checks and isolated native measurements; staged intensive TimeSeries measurements remain explicitly pending.
-- One common preparation job builds the exact-source solution, images and compiled test runtime once and executes all required preparation checks. Named database matrices import that same authenticated image/runtime bundle and depend on preparation, not on one another. Each database has two independent native topology jobs; the aggregate joins every database group, preparation and the required functional heavy-load gate before website dispatch.
-- Every authored job/step in the three workflows and used composites has a concrete readable name, including checkout, SDK setup, restore/build/test and uploads. Change displayed-name validators/oracles atomically; preserve stable internal job IDs, authenticated artifacts and all historical report bytes. Explicit owner direction supersedes earlier frozen displayed labels, without relaxing any identity, workload, topology, permission, coverage or publication gate.
-
-## Owner-directed failed-cell publication, 2026-10-04
-- ADR-080 and the latest explicit owner instruction supersede the all-success cohort requirement: finish every independent workload and publish authenticated successful measurements while failed workloads retain null reports and actual failed job/workload conclusions. Keep complete planned-cell artifact accounting, successful image authority, full site qualification, exact source/run/attempt identity and least privileges. Unrelated KeyLoad build/runtime failures do not by themselves skip aggregation or website jobs; missing/corrupt evidence and failed site gates still block publication.
-
-## Latest completed result eligibility, 2026-10-04
-- Latest benchmark metrics means the newest completed own-main push/manual Benchmarks producer with success/failure conclusion. Pending, skipped and canceled workflows have no completed comparison cohort and MUST NOT displace ready JSON. Exclude them before choosing the latest eligible producer; then reject its missing/corrupt/failed aggregate without older fallback. A canceled workflow_run event still cannot authorize publication. This refines the latest-result rule without accepting incomplete or fabricated measurements.
-
-## Independent website queue, 2026-10-04
-- CI website generation MUST NOT wait for unrelated ordinary CI/RF3 execution from another run. Push/manual CI runs use their own run identity; PR keeps its existing ref-based cancellation. Website qualification and deployment use separate bounded job concurrency groups with cancel-in-progress=false, preserving source/latest-evidence freshness and all gates. This implements the owner-authorized independent website action without canceling database or test work.
-
-## Separate database matrices, 2026-10-04
-- Owner correction2026-10-17 and ADR-142 require one named matrix per database with exactly two measurement jobs, native one-node and three-node: eleven groups and22 workers. Each owns one live Aspire topology and executes seven separately named native TUnit cases, including the measured initial million-record load, on that same database without warmup, reset, reseeding or restart between cases. Keep bounded16-client operation lanes, actual100000 operations per applicable lane, original failed/null or genuine native-unavailable outcomes, exact source/run/attempt/job/TRX/report/image/DLL/PDB provenance and complete authenticated aggregation. The remaining canonical model families and physical100k-corpus qualification stay open; seven document cases do not replace them. This supersedes only retired per-cell/control/scale dispatch and repeated setup instructions; every native functional, recovery, RF3, resource and publication gate remains mandatory.
-
-## Feature-local executable artifacts
-- This module uses the root-approved fully colocated executable-artifact convention: keep each feature-owned script, website module or workflow with its canonical feature/artifact and its existing entry point. C# Grains/Models folders are N/A here because this module contains executable web, shell or YAML artifacts. Preserve source-bound historical receipts; update live consumers when solution source paths move.
-
-## Independent website publication, owner correction 2026-10-06
-- Website source changes MUST independently build, qualify and publish the website in CI without waiting for a benchmark run. Use the newest completed own-main Benchmarks producer whose authenticated aggregate is ready when one exists; a run with no successful aggregate is not available website data. If no ready producer exists, publish the qualified product website with no benchmark figures or synthetic measurement artifacts. New ready benchmark JSON MUST automatically trigger a fresh website build/publication. This rule-specific correction supersedes mandatory benchmark availability and newest-failed-producer blocking in the earlier publication rules; corrupt/expired/unauthenticated evidence, provider errors, website test failures and stale source still fail closed. Preserve exactly three workflows, independent CI website jobs, original metric provenance and full metric/archive/browser/coverage gates whenever metrics are included. The no-metrics route has its own complete asset/browser/source/coverage qualification; measurement-only tests and archive gates are N/A to an artifact which includes no measurements, never reported as passed or replaced with fabricated inputs.
-
-## Separate Website workflow, owner correction 2026-10-06
-
-- The owner's explicit correction supersedes the earlier three-workflow limit and every CI/Benchmarks website placement: `Build and Tests` (`ci.yml`) owns full solution build, repository checks and ordinary tests; `Website` (`website.yml`) independently owns site qualification/build/Pages on trusted main pushes, manual dispatch and completed Benchmarks events. `Benchmarks` and manual `Release` retain their existing scopes. Website uses ready authenticated metrics when available and publishes the fully qualified content-only site when none exist; all applicable source, browser, coverage, freshness and permission gates remain mandatory.
-
-## Final Benchmarks Website trigger, owner clarification 2026-10-06
-
-- Benchmarks ends with only a bounded dispatch of `website.yml` on main, after its aggregation dependencies settle even when benchmark work fails. Keep site building, tests and Pages entirely in Website; remove its `workflow_run` subscription. Only the final trigger job receives `actions: write`. Website authenticates an optional triggering run against GitHub and waits boundedly for completion before its existing newest-ready selection; no input supplies trusted measurements. Push/manual Website publication and all original qualification/freshness gates remain independent.
-
-## Build and Tests workflow filename, owner direction 2026-10-06
-
-- The canonical Build and Tests workflow is `.github/workflows/build-and-tests.yml`, renamed from `ci.yml`. Dispatch with `gh workflow run build-and-tests.yml --repo managedcode/KeyLoad --ref main`. This supersedes earlier active filename/dispatch references only; preserve all build/test gates, stable job IDs, permissions and historical evidence.
-
-## Current first-release Website contract, owner corrections 2026-10-06
-
-- The current four workflows are Build and Tests (`build-and-tests.yml`), Benchmarks (`benchmarks.yml`), Website (`website.yml`) and prepared manual Release (`release.yml`). Only Website builds, qualifies and publishes the site on trusted main push/manual; Benchmarks ends with a bounded Website dispatch and Website has no `workflow_run` executor subscription. These explicit owner corrections supersede every earlier three-workflow, filename, executor, placement and completion-subscription clause; every unrelated suite, permission and qualification rule remains mandatory.
-- The sole current measured producer is the ADR-142 session-v1 contract:22 workers from11 databases x native node counts[1,3], each with seven source-bound native TUnit case outcomes. Build the common exact-source compiled runtime and images once, import their authenticated bundles in workers, and retain all original per-case samples, native TRX, runtime identities and resource observations. Derive the executed dependency manifest from session-source-closure.mjs rather than a historical fixed path count. Retire superseded readers, schemas and exclusive fixtures without a legacy fallback. Complete workload-family integration and exact-source Linux qualification remain open. Preserve bounded authenticated REST/artifact provenance, exact source/input hashes, failed/null accounting, strict selected-evidence rejection, freshness and unchanged80/70/90 coverage thresholds.
-- When no current authenticated producer is ready, qualify the complete content-only site without figures. Real native TUnit/Node/Chrome operations, no skips in each applicable suite, source/coverage inventories and needs-gated least-privilege Pages remain required. Local tests enter the same Aspire-owned AppHost and are development evidence; genuine exact-source Linux/provider proof closes delivery. Controlled rejection inputs cannot become published measurements.
-
-## Native TUnit entry, owner correction 2026-10-07
-- ADR-117 supersedes the earlier outer AppHost caller requirements: CI starts TUnit directly after build with Detailed output. Test fixtures own Aspire infrastructure startup, readiness, client operations and cleanup. scripts/Features/TestInfrastructure/run-tests.mjs only selects native test arguments/environment; it cannot execute database workloads. RF3 coverage preparation belongs to the TUnit session lifecycle. Preserve every original qualification/artifact gate and separate Benchmarks ownership.
-
-## Website automatic trigger scope, owner correction 2026-10-08
-
-- Website main pushes MUST be filtered to site and actual qualification/build/publication inputs; database-only pushes MUST NOT enqueue it. Benchmarks' final bounded dispatch MUST require all producer prerequisites, database matrices and aggregate to succeed. Website MUST authenticate successful terminal completion of a supplied triggering producer before proceeding. This explicit correction supersedes unfiltered push and failed-producer dispatch clauses only; preserve the existing manual/final-dispatch executor, independent site push path, optional metrics, bounded waits, immutable provenance, all qualification/freshness checks and least privileges.
-
-## Native benchmark methodology, owner direction 2026-10-09
-
-- ADR-122, ADR-142 and Methodology require actual native1/3 topology and one canonical workload inventory within each shared live session. Active two-node dispatch/admission is removed; RF3 majority remains2. Preserve authenticated original failure/null and resource/source/provenance gates; each additional model family requires complete native operation/correctness evidence before numerical website rendering. The current seven document cases do not qualify the remaining families. Executed source closure reflects every transitive input, with unchanged80/70/90 coverage thresholds.
+Use the installed Orleans skill for Orleans design and the relevant installed formatting, Aspire or diagnostics skill when the task needs it. Follow explicit owner scope and dependency-adoption rules.

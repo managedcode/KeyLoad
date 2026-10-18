@@ -15,7 +15,7 @@ internal sealed class EventFeedTailStreamShape(Guid requestId, EventFeedControlR
     {
         if (chunk.Sequence != count || chunk.ProgressResult is not { IsSuccess: true, Value: not null } result
             || result.Problem is not null || result.Value is not { } progress || progress.RequestId != requestId
-            || progress.AnnPhase is not null || progress.TextPhase is not null || progress.MovePhase is not null
+            || progress.AnnPhase is not null || progress.TextPhase is not null
             || progress.OnlineTextPhase is not null || progress.EventFeedTail is not { Version: Version } next
             || chunk.Final is not null || chunk.EventId is not null || chunk.Message is not null
             || chunk.EventType != CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>.ResolveEventType(chunk.Kind))

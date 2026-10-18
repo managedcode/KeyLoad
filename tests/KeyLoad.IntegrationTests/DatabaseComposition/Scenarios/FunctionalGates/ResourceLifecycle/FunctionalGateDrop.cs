@@ -18,7 +18,7 @@ internal static class FunctionalGateDrop
         var receipt = await context.SdkAsync(context.Administrator.Sdk.CommitAsync(original, token));
         await FunctionalGateCompositionCalls.ReceiptAsync(context, receipt, original.CommandId,
             [.. P.Tables.Select(name => new MutationReceipt(P.PutKind, name,
-                FunctionalGateDropRows.OriginalId, P.Initial))], token);
+                FunctionalGateDropRows.OriginalId, P.Initial))]);
         var references = await CaptureAsync(context, token);
         var analyticsLink = await FunctionalGateAnalyticsLinkLifecycle.PrepareAsync(context, token);
         var drops = new DropTableResult[P.TableCount];
@@ -27,14 +27,14 @@ internal static class FunctionalGateDrop
         {
             var request = Request(context, index);
             drops[index] = await FunctionalGateDropCalls.InvokeAsync(context, parents[index], request,
-                (DropLifecycleRf3Route)index, token);
+                (DropLifecycleClusterRoute)index, token);
             await FunctionalGateDropAssertions.ResultAsync(parents[index], request, drops[index]);
         }
         var tables = ImmutableArray.CreateBuilder<FunctionalGateDropTable>();
         foreach (var index in Enumerable.Range(P.First, P.TableCount))
         {
             var create = new SqlOperationRequest(context.Partition, P.Create[index], CommandId: Guid.NewGuid());
-            await SqlRf3Protocol.EqualAsync(P.Definition(context.Partition, index),
+            await SqlClusterProtocol.EqualAsync(P.Definition(context.Partition, index),
                 await FunctionalGateRelationalCalls.SqlSdkAsync<ResourceDefinition>(context,
                     context.Administrator, create, token));
             var expectedLifetime = FunctionalGateCreationLifetime.Create(context, create.CommandId!.Value,
@@ -71,7 +71,7 @@ internal static class FunctionalGateDrop
         var receipt = await context.McpAsync<CommitReceipt>(context.Administrator,
             McpCallerTools.DocumentsCommit, command, token);
         await FunctionalGateCompositionCalls.ReceiptAsync(context, receipt, command.CommandId,
-            [new(P.PutKind, reference.Collection, reference.Id, P.Initial)], token);
+            [new(P.PutKind, reference.Collection, reference.Id, P.Initial)]);
         var bound = await FunctionalGateEntityReferences.CaptureRecreatedAsync(context,
             context.Administrator, original, new(reference, P.Initial, json, false, []), token);
         await Assert.That(bound.Lifetime).IsEqualTo(expectedLifetime);

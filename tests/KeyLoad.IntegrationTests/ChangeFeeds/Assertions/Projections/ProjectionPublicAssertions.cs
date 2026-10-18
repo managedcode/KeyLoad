@@ -54,7 +54,7 @@ internal static class ProjectionPublicAssertions
         return status;
     }
 
-    internal static async Task ErrorAsync(RequestCqrsRf3Callers caller, CommitProjectionBatchRequest request,
+    internal static async Task ErrorAsync(RequestCqrsClusterCallers caller, CommitProjectionBatchRequest request,
         ErrorCode code, CancellationToken token)
     {
         var result = await caller.Sdk.CommitProjectionAsync(request, token);

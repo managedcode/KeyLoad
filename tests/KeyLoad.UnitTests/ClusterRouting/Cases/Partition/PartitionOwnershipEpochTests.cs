@@ -80,32 +80,6 @@ internal sealed class PartitionOwnershipEpochTests
         await Assert.That(OutcomeStoreOracle.ReadPartition(database.Store, database.Partition, "root", commandId)).IsNull();
     }
 
-    [Test]
-    public async Task CorruptPlacementOwnerTupleFailsBeforeOutcomeOrPartitionMutation()
-    {
-        using var database = new TestDatabase();
-        database.Configure(Resource, ResourceKind.Collection);
-        var owner = database.Store.Read(view => PhysicalShardCatalogRecordSerialization.Read(view)!.DefaultShard);
-        database.Store.Commit((transaction, _) =>
-        {
-            transaction.PutRecord(AtomicPartitionPlacementSerialization.DirectoryKey(),
-                new AtomicPartitionPlacementDirectoryV1(1, 1, 1));
-            transaction.PutRecord(AtomicPartitionPlacementSerialization.RowKey(database.Partition),
-                new AtomicPartitionPlacementV1(1, database.Partition, owner.PhysicalShardId, 1,
-                    owner.Incarnation, owner.VoterIds, owner.PlacementEpoch + 1));
-            return true;
-        });
-        var before = database.Store.Position;
-        var commandId = Guid.NewGuid();
-        var exception = Assert.ThrowsExactly<KeyLoadException>(() => Submit(database, commandId, 1));
-
-        await Assert.That(exception.Code).IsEqualTo(ErrorCode.Corruption);
-        await Assert.That(database.Store.Position).IsEqualTo(before);
-        await Assert.That(OutcomeStoreOracle.ReadPartition(database.Store, database.Partition, "root", commandId)).IsNull();
-        await Assert.That(database.Store.Read(view => view.GetRecord<DocumentRecord>(
-            DocumentStorageKeys.RecordKey(database.Partition, Resource, "future")))).IsNull();
-    }
-
     private static OperationResult Submit(TestDatabase database, Guid commandId, long epoch)
     {
         var request = new CommandRequest(commandId, database.Partition,

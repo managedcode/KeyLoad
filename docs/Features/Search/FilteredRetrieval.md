@@ -1,11 +1,8 @@
 # FilteredRetrieval within Search
 
-Root accepts this implementation contract on 2026-10-04 for KL-032/060.
-Decision: [ADR-087](../../ADR/ADR-087-filtered-retrieval.md). The original
-architecture acceptance criteria remain mandatory; this is an ordered delivery
-contract, not a declaration that the tasks are qualified.
+Decision: [ADR-087](../../ADR/ADR-087-filtered-retrieval.md). Filtered retrieval has three layers: the public allowlist, the computational adaptive planner and the declared public approximation.
 
-## Public stage F1 and acceptance
+## Public allowlist and acceptance
 
 `SearchRequest.AllowedIds`, native field11, is an optional immutable array of
 canonical document IDs in the request's existing partition/collection. Null
@@ -21,52 +18,24 @@ Persisted authorization remains required even for an empty allowlist.
 | REQ-FILTER-001: allowlist is an output eligibility constraint | AC-FILTER-001: real-store text, vector and hybrid queries equal an independent exact oracle over the eligible authorized corpus; null/empty/duplicates/unknown IDs and stable ties pass. `FilteredSearchOracleTests` |
 | REQ-FILTER-002: one canonical policy/read cut remains authoritative | AC-FILTER-002: hidden/deleted/stale/reinserted/revoked hits never survive; field/capability denial remains explicit even for zero results. `FilteredSearchPolicyTests` |
 | REQ-FILTER-003: bounded exact fallback produces complete results | AC-FILTER-003: input/work/result limits and cancellation fail with the existing typed failure and no partial success; the next healthy read succeeds; no full JSON/vector retention beyond existing bounds. `FilteredSearchBudgetTests` |
-| REQ-FILTER-004: adaptive ANN uses the entire admissible graph | AC-FILTER-004: internal planner uses full-corpus ordinal eligibility, exact small-set, bounded expansion and fully charged fallback; 100/10/1/0.1 percent and correlated cohorts reach recall >=0.95 or fail explicitly. `AdaptiveFilteredPlannerTests`; F2 below |
-| REQ-FILTER-005: public approximation and RF3 are separately qualified | AC-FILTER-005: F3 proves declared versioned completeness/mode/cost metadata and actual .NET/official MCP RF3 results after faults. Planned `FilteredSearchRf3Tests`; existing array replies remain complete exact results in F1 |
+| REQ-FILTER-004: adaptive ANN uses the entire admissible graph | AC-FILTER-004: internal planner uses full-corpus ordinal eligibility, exact small-set, bounded expansion and fully charged fallback; 100/10/1/0.1 percent and correlated cohorts reach recall >=0.95 or fail explicitly. `AdaptiveFilteredPlannerTests`; adaptive planner below |
+| REQ-FILTER-005: public approximation and cluster are separately qualified | AC-FILTER-005: the public approximation proves declared versioned completeness/mode/cost metadata and actual .NET/official MCP cluster results after faults. Planned `FilteredSearchClusterTests`; existing array replies remain complete exact results in the public allowlist |
 
-## Ordered execution and ownership
+## Stages
 
-1. Root owns the appended shared SearchRequest field, JSON/native ingress and
-   negotiated contract epoch joins; no older peer may silently ignore a filter.
-2. Luna lifecycle_wave owns SearchEngine.cs, Features/Search/VectorRanker.cs,
-   new FilteredSearch/FilteredVectorPlanner helpers and named TUnit test files.
-   Apply eligibility before branch ranks and fusion; lexical corpus statistics
-   continue to use the authorized corpus, not a caller-controlled IDF corpus.
-   Reuse canonical visible-vector/document checks and rank/fusion contracts.
-3. F2 adds the computational adaptive planner over the existing packed ANN
-   candidate with actual charged eligibility/cardinality/expansion/fallback
-   counters. Do not rebuild a graph from the output-filtered set or silently
-   replace complete public exact rankings with an ANN/windowed reply.
-4. F3 depends on ADR-019's accepted durable generation/replay and explicit public
-   approximation contract. Root freezes that contract before its implementation;
-   F1/F2 do not close AC-ANN-007/008 or the complete KL-032/060 criteria.
-5. Root reviews/integrates, builds/formats, runs mapped cases and unit/scalar,
-   recovery and genuine RF3 through the actual Aspire AppHost, records original
-   source-bound outcomes, commits the stage and continues independent tasks.
+1. The public allowlist appends the shared SearchRequest field with JSON/native ingress; no older node may silently ignore a filter. SearchEngine, VectorRanker and the FilteredSearch/FilteredVectorPlanner helpers apply eligibility before branch ranks and fusion; lexical corpus statistics keep using the authorized corpus, not a caller-controlled IDF corpus, and the canonical visible-vector/document checks and rank/fusion contracts are reused.
+2. The adaptive planner layer adds the computational adaptive planner over the existing packed ANN candidate with actual charged eligibility/cardinality/expansion/fallback counters. A graph is never rebuilt from the output-filtered set and complete public exact rankings are not silently replaced by an ANN/windowed reply.
+3. The public approximation depends on ADR-019's accepted durable generation/replay and explicit public approximation contract; the allowlist and planner do not close AC-ANN-007/008.
 
-Baseline: build22/formatter22 passed; full unit18 passed3060/3060; scalar22
-passed3059/3060 with ComparisonHostCleanupTests startup/pipe-join failure. That
-unrelated failure remains recorded and does not block F1 implementation.
-Client/MCP transport reuse the existing typed search body; interactive UI N/A.
-No canonical stored record migration occurs in F1. F2 remains computational;
-rollback rejects filtered capability on older nodes rather than dropping IDs.
+The SDK and MCP transports reuse the existing typed search body; interactive UI is N/A. No canonical stored record migration occurs in the public allowlist, the adaptive planner is computational, and older nodes reject the filtered capability rather than dropping IDs.
 
-## F1 public RF3 test stage
+## Public allowlist cluster tests
 
-Luna query_wave owns new
-`tests/KeyLoad.IntegrationTests/Search/Cases/Filtered/FilteredSearchRf3Tests.cs`
-and uniquely named filtered-search `Helpers/` or `Assertions/` files. Map
-AC-FILTER-001/002/003 and the F1 portion of AC-FILTER-005 to actual shared
-Aspire Docker RF3 discovered endpoints, real .NET SDK and official MCP search
-calls, independent exact eligible result expectations, empty/duplicate/unknown
-IDs, current write/delete and persisted policy denial. No approximation or
-adaptive-planner qualification follows from these cases. Use unique resources,
-bounded cancellation and cleanup; do not edit the shared fixture, topology,
-contracts or production sources. Root integrates, builds and runs AppHost gates.
+The public tests (`FilteredSearchClusterTests`) map AC-FILTER-001/002/003 and the public-allowlist portion of AC-FILTER-005 to the Aspire replicated cluster with the real .NET SDK and official MCP search calls, independent exact eligible result expectations, empty/duplicate/unknown IDs, current write/delete and persisted policy denial, with unique resources, bounded cancellation and cleanup. No approximation or adaptive-planner qualification follows from these cases.
 
-## F2 computational planner contract
+## Computational planner contract
 
-F2 implements AC-FILTER-004 within the already real packed ANN executor. It adds
+The adaptive planner implements AC-FILTER-004 within the already real packed ANN executor. It adds
 no public approximate reply or persisted format. The full admitted graph remains
 the search graph; output eligibility never removes intermediate vertices. The
 caller supplies the existing canonical full-corpus ordinal bitmap, whose exact
@@ -93,18 +62,9 @@ init metrics EligibleCount, ExpansionPasses and FallbackDistanceEvaluations;
 ExpansionPasses counts actual level-zero SearchLayer calls, while fallback
 distances count only the exact fallback phase. Existing total work/distance/edge
 metrics and scratch reservations remain authoritative. These are computational
-values, not persistence or inter-grain contracts. Public Search remains the F1
-complete exact array; F3 still requires its separate accepted approximation,
-generation and RF3 contract before exposure.
-
-Luna lifecycle_wave owns a bounded F2 patch against Query/Search/Admission,
-Queries and Models, including PackedAnnSearch, PackedAnnApproximateSearch,
-PackedAnnExactSearch and AnnWorkBudget's result contract; it owns only new
-`AdaptiveFilteredPlannerTests` and uniquely named Search test helpers/cases.
-Root owns shared source integration, documentation, transport and all gates.
-While root verifies the frozen previous compilation, this worker authors the
-patch outside the checkout and changes no compiled source, outputs or Git state.
-Self-review and handoff precede root application.
+values, not persistence or inter-grain contracts. Public Search remains the public allowlist
+complete exact array; the public approximation still requires its separate accepted approximation,
+generation and cluster contract before exposure.
 
 Map AC-FILTER-004 to deterministic 100/10/1/0.1-percent eligibility cohorts,
 including eligibility correlated with nearest clusters and isolated endpoint
@@ -115,7 +75,7 @@ small/zero sets, malformed bitmap, overflow-safe bounds, expansion/fallback
 metrics, original scratch caps, work exhaustion/cancellation and a subsequent
 healthy query. Use actual packed indexes and existing real ZoneTree seed helpers,
 not a fake graph or authorization policy. Local quality fixtures are development
-evidence; KL-060's required scale/performance and F3/RF3 gates remain open.
+evidence; the required scale/performance and public approximation gates remain separate.
 
 ```mermaid
 flowchart LR
@@ -128,7 +88,7 @@ flowchart LR
 ```
 
 
-## TASK-FILTER-POLICY-COLD-001: retained policy refusal and same-root recovery
+## Retained policy refusal and same-root recovery
 
 REQ-FILTER-POLICY-COLD-001 refines REQ-FILTER-002/003: an empty output
 allowlist never bypasses persisted capability, field-use or revocation checks.
@@ -150,19 +110,8 @@ score, unredacted body, empty redaction fields and absent explanation, and
 queries must preserve every canonical byte and position. The oracle scan cap
 is test-local and must reject HasMore rather than accepting a partial image.
 
-Ownership: Unit Search/Cases/FilteredSearchPolicyTests and a uniquely named
-Search/Assertions/FilteredPolicyColdContinuation. No product code, fields,
-quotas, clocks, routing, projection generation or native authority changes.
-ADR-087 governs this stage; ADR-019 lifecycle and public F3 approximation/recall,
-process crashes and genuine SDK/MCP RF3 remain separate required gates.
-Root integrates exact guarded postimages, builds and executes the original
-normal native case plus existing filtered cases; fresh delivered-source Linux
-qualification remains mandatory. Private source/preview is not runtime proof.
-Rollback removes only this test continuation and its contract append; no stored
-format, public behavior, policy or original assertion changes.
 
-
-## TASK-FILTER-FALLBACK-ORACLE-001: independent full fallback after refusal
+## Independent full fallback after refusal
 
 REQ-FILTER-FALLBACK-ORACLE-001 refines REQ-FILTER-003/004: the exact fallback
 result after an exhausted adaptive traversal is compared with an independent
@@ -177,23 +126,6 @@ retain mode/expansion/fallback/total distance and work assertions. Capture the
 original native position and complete authorized canonical vector model before
 querying and compare after refusal and healthy continuation. No query effect
 or incomplete exact result is accepted.
-
-Move only this complete existing method body into the feature-local
-Search/Scenarios/Ann/Search/AdaptiveFallbackWholeFlow so its caller remains the same native
-case and the existing test type is within the 200-line bound. Each helper method
-stays within64 lines. Reuse the independent AdaptiveFilteredPlannerOracle,
-actual persisted native root and current WithVectors loader; no dispatcher,
-provider, projection generation, public reply, quota or serialization changes.
-Computational index health is not durable ANN generation or process/RF3 proof.
-
-This packet depends explicitly on TASK-FILTER-POLICY-COLD-001 document
-postimages; root appends in that order. Root owns guarded join, fresh Release,
-format/analyzer, original normal native execution and delivered-source Linux
-qualification. Private preview is not runtime evidence. Existing recall/F3,
-public SDK/MCP and KL031 lifecycle gates remain mandatory. Rollback restores
-only the method extraction/oracle continuation and additive contracts, keeping
-all original cases and assertions.
-## TASK-FILTER-PUBLIC-SPARSE-001 — native public eligibility continuation
 
 REQ-FILTER-PUBLIC-SPARSE-001 refines REQ-FILTER-001/003/004: the admitted
 public ANN operation must deduplicate an allowlist, ignore unknown IDs and
@@ -216,7 +148,6 @@ native fixture admission, publication, producer/lease cleanup and failure
 aggregation remain intact.
 
 This is a three-row functional control through SearchEngine.ApproximateSearchAsync,
-not RF3, actual100k/1M, public SDK/MCP interoperability, recall or performance
-qualification. Main owns guarded join, fresh compiler/native test execution and
-Linux evidence. The complete original cases remain selected. No product API,
+not cluster, actual100k/1M, public SDK/MCP interoperability, recall or performance
+qualification. The complete original cases remain selected. No product API,
 schema, quota, index algorithm or source mutation is introduced by this test.

@@ -10,11 +10,11 @@ using Microsoft.Extensions.Logging;
 
 namespace KeyLoad.IntegrationTests.Features.ClusterReplication;
 
-/// <summary>Owns RF3 resource log capture and bounded signed-discovery failure artifacts.</summary>
+/// <summary>Owns CLUSTER resource log capture and bounded signed-discovery failure artifacts.</summary>
 internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
 {
     private const string ResourceStateUnavailable = "Resource state unavailable";
-    private const string DiagnosticMessage = "Bounded RF3 diagnostics saved to {OutputPath} ({LineCount} lines).";
+    private const string DiagnosticMessage = "Bounded CLUSTER diagnostics saved to {OutputPath} ({LineCount} lines).";
     private const string ResourceStateFormat = "Resource {0}, state {1}, exit {2}, health {3}";
     private const string DiagnosticLineFormat = "{0}: {1}";
     private const int SavedEventId = 100;
@@ -50,7 +50,7 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
         this.app = app;
     }
 
-    /// <summary>Starts subscriptions to the three managed RF3 node resources.</summary>
+    /// <summary>Starts subscriptions to the three managed CLUSTER node resources.</summary>
     /// <param name="logs">Aspire's resource log subscription service.</param>
     internal void Start(ResourceLoggerService logs)
     {
@@ -59,18 +59,9 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
         resourceCapture = CaptureResourcesAsync(logs);
     }
 
-    /// <summary>Writes bounded resource states, signed discovery replies and recent node logs.</summary>
-    /// <param name="peerSecret">The fixture's private shared discovery credential.</param>
-    /// <param name="adminCredential">The actual persisted administrator credential for authenticated diagnostics.</param>
-    /// <param name="incarnation">The original configured RF3 incarnation bound to signed discovery.</param>
+    /// <summary>Writes bounded resource states, readiness replies and recent node logs.</summary>
     /// <param name="cancellationToken">The caller's test deadline, linked to the diagnostic request bound.</param>
-    internal Task<string> SaveAsync(ReadOnlyMemory<byte> peerSecret, string adminCredential, Guid incarnation, CancellationToken cancellationToken)
-        => SaveCoreAsync(peerSecret, adminCredential, incarnation, null, cancellationToken);
-
-    internal Task SaveOwnedAsync(ReadOnlyMemory<byte> peerSecret, string adminCredential, Guid incarnation, string output, CancellationToken cancellationToken)
-        => SaveCoreAsync(peerSecret, adminCredential, incarnation, output, cancellationToken);
-
-    private async Task<string> SaveCoreAsync(ReadOnlyMemory<byte> peerSecret, string adminCredential, Guid incarnation, string? ownedOutput, CancellationToken cancellationToken)
+    internal async Task<string> SaveAsync(CancellationToken cancellationToken)
     {
         var nodeGroups = new List<IEnumerable<string>>();
         foreach (var number in Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount))
@@ -80,12 +71,11 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
                 ? string.Format(CultureInfo.InvariantCulture, ResourceStateTemplate, current.ResourceId,
                     current.Snapshot.State?.Text, current.Snapshot.ExitCode, current.Snapshot.HealthStatus)
                 : ResourceStateUnavailable;
-            var evidence = await new ClusterNodeHttpEvidence(app).ReadAsync(name, peerSecret, adminCredential, incarnation, cancellationToken).ConfigureAwait(false);
+            var readiness = await new ClusterNodeHttpEvidence(app).ReadAsync(name, cancellationToken).ConfigureAwait(false);
             var lines = new List<string>
             {
                 string.Format(CultureInfo.InvariantCulture, DiagnosticLineTemplate, name, state),
-                string.Format(CultureInfo.InvariantCulture, DiagnosticLineTemplate, name, evidence.Readiness),
-                string.Format(CultureInfo.InvariantCulture, DiagnosticLineTemplate, name, evidence.Discovery)
+                string.Format(CultureInfo.InvariantCulture, DiagnosticLineTemplate, name, readiness)
             };
             lines.AddRange(logEvidence.Values.Where(entry => entry.NodeName == name)
                 .OrderByDescending(entry => entry.StartedAt).Take(1).Select(entry => entry.Snapshot()));
@@ -97,13 +87,9 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
         }
 
         var bounded = BoundedDiagnosticLog.BoundNodes(nodeGroups);
-        var output = ownedOutput ?? failureReceipts.RequireRunOutput(TestContext.ResultsDirectory);
-        if (ownedOutput is null)
-        {
-            Directory.CreateDirectory(output);
-        }
-        var path = ownedOutput is null ? failureReceipts.Save(output, bounded)
-            : ClusterFailureReceipts.SaveImmutable(ownedOutput, bounded);
+        var output = failureReceipts.RequireRunOutput(TestContext.ResultsDirectory);
+        Directory.CreateDirectory(output);
+        var path = failureReceipts.Save(output, bounded);
         app.Services.GetRequiredService<ClusterFixtureStartupEvidence>().Save(output);
         LogSaved(app.Services.GetRequiredService<ILogger<ClusterFixtureDiagnostics>>(), path, bounded.Length, null);
         return path;

@@ -37,7 +37,7 @@ internal static class ConnectionCallerFactoryFlow
     {
         var scenario = state.Scenario;
         var placement = scenario.Fixture.Database.Database.ReadAtomicPartitionPlacement(D.Root,
-            new(D.PlacementVersion, state.Original.Partition));
+            state.Original.Partition);
         var actual = calls.Start(state.First, state.OriginalRequest, state.Original, token);
         await gate.Arrived.Task.WaitAsync(token);
         await Assert.That(actual.IsCompleted).IsFalse();

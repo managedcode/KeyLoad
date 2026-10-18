@@ -4,11 +4,11 @@ namespace KeyLoad.IntegrationTests.Features.BlobStorage;
 
 internal static class BlobGlobalQuotaR49Replay
 {
-    internal static Task RefusedAsync(RequestCqrsRf3Callers callers, BlobGlobalQuotaR49State state, CancellationToken token)
+    internal static Task RefusedAsync(RequestCqrsClusterCallers callers, BlobGlobalQuotaR49State state, CancellationToken token)
         => BlobGlobalQuotaR49Results.FailureAsync(callers, "keyload_blobs_begin_upload", state.Attempt.Begin,
             ct => callers.Sdk.BeginBlobUploadAsync(state.Attempt.Begin, ct), ErrorCode.ResourceExhausted,
             "The blob reservation quota is exhausted.", state, token);
-    internal static async Task UploadAsync(RequestCqrsRf3Callers callers, BlobGlobalQuotaR49State state, BlobGlobalQuotaR49Upload upload, CancellationToken token)
+    internal static async Task UploadAsync(RequestCqrsClusterCallers callers, BlobGlobalQuotaR49State state, BlobGlobalQuotaR49Upload upload, CancellationToken token)
     {
         var begin = upload.AcceptedBegin ?? upload.Begin;
         if (upload.Removed)
@@ -45,7 +45,7 @@ internal static class BlobGlobalQuotaR49Replay
             await BlobGlobalQuotaR49Results.ReplayAsync(callers, "keyload_blobs_reclaim", reclaim, upload.Reclaimed!, ct => callers.Sdk.ReclaimBlobAsync(reclaim, ct), state, token);
         }
     }
-    internal static async Task AllAsync(RequestCqrsRf3Callers callers, BlobGlobalQuotaR49State state, CancellationToken token)
+    internal static async Task AllAsync(RequestCqrsClusterCallers callers, BlobGlobalQuotaR49State state, CancellationToken token)
     {
         await RefusedAsync(callers, state, token);
         foreach (var upload in state.CurrentUploads.Where(upload => state.ConfiguredResources.Contains(upload.Blob.Resource)))
@@ -54,7 +54,7 @@ internal static class BlobGlobalQuotaR49Replay
         }
         await BlobGlobalQuotaR49Current.WindowsAsync(callers, state, token);
     }
-    private static Task LostAsync<T>(RequestCqrsRf3Callers callers, string tool, object request,
+    private static Task LostAsync<T>(RequestCqrsClusterCallers callers, string tool, object request,
         Func<CancellationToken, Task<ManagedCode.Communication.Result<T>>> sdk, BlobGlobalQuotaR49State state, CancellationToken token)
         => BlobGlobalQuotaR49Results.FailureAsync(callers, tool, request, sdk, ErrorCode.TokenInvalidated,
             "The selected upload lifetime is unavailable.", state, token);

@@ -7,7 +7,7 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 internal sealed class AdapterVectorAttachmentWholeFlowTests
 {
     [Test]
-    public async Task AcKl051Vector001ActualNamedAttachmentAndTypedJsonRejectWrongDimensionThenReturnCompleteLiteralRanks()
+    public async Task ActualNamedAttachmentAndTypedJsonRejectWrongDimensionThenReturnCompleteLiteralRanks()
     {
         using var database = new TestDatabase();
         AdapterVectorWholeFlow.Seed(database);

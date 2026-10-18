@@ -1,6 +1,6 @@
 # SDK execution policy retention
 
-Status: source integrated; coherent compiler, census, runtime and Linux acceptance remain open. Canonical slice: ClientApi. Parent: docs/Features/ClientApi.md. Existing decisions: ADR-035 and ADR-113. This is a repair of the existing IOptions lifetime, with no public API, package, dynamic configuration or authorization change.
+Canonical slice: ClientApi. Parent: docs/Features/ClientApi.md. Existing decisions: ADR-035 and ADR-113. This is a repair of the existing IOptions lifetime, with no public API, package, dynamic configuration or authorization change.
 
 REQ-CLIENT-POLICY-SNAPSHOT-001 refines REQ-CLIENT-002 and REQ-CQ-013: the canonical ConfigurationOptions owner captures and validates all four supplied KeyLoadClientExecutionOptions values at construction and returns the private retained IOptions instance to the SDK transport. Its internal Snapshot method is the explicitly marked ConfigurationBinding owner for this copy, validation and IOptions publication; the SDK transport consumes that wrapper. Later mutation of the caller-owned object must not alter an existing client's retained error-body ceiling or conservative SQL classification. A newly constructed client consumes the caller's then-current valid values. No setting is replaced by an arbitrary default.
 
@@ -17,4 +17,4 @@ flowchart LR
   Client --> Kestrel[Existing real Kestrel fixture]
 ```
 
-Canonical map: existing src/KeyLoad.Client/ClientApi/Configuration/KeyLoadClientExecutionOptions.cs and Transport/KeyLoadClientTransport.cs; new tests/KeyLoad.UnitTests/ClientApi/Cases/SdkPolicy/SdkPolicySnapshotTests.cs and feature-local Helpers/SdkPolicySnapshotFlow.cs, Assertions/SdkPolicySnapshotAssertions.cs; docs/Features/ClientApi/SdkPolicySnapshot.md. Database, RF3, MCP, recovery, frontend and benchmarks: N/A to this local SDK configuration ownership repair; their existing whole-product gates remain mandatory and open. This real transport regression does not claim memory or throughput improvement. Compiler, native test UID, actual original runtime and delivered Linux qualification remain open until Main integrates and runs the exact source.
+Canonical map: existing src/KeyLoad.Client/ClientApi/Configuration/KeyLoadClientExecutionOptions.cs and Transport/KeyLoadClientTransport.cs; new tests/KeyLoad.UnitTests/ClientApi/Cases/SdkPolicy/SdkPolicySnapshotTests.cs and feature-local Helpers/SdkPolicySnapshotFlow.cs, Assertions/SdkPolicySnapshotAssertions.cs; docs/Features/ClientApi/SdkPolicySnapshot.md. This real transport regression does not claim memory or throughput improvement.

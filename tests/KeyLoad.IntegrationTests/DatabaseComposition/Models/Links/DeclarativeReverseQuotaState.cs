@@ -3,7 +3,7 @@ using KeyLoad.IntegrationTests.Features.RelationalStorage;
 
 namespace KeyLoad.IntegrationTests.Features.DatabaseComposition;
 
-internal sealed record DeclarativeReverseQuotaState(RelationalSqlRf3Scenario Scenario,
+internal sealed record DeclarativeReverseQuotaState(RelationalSqlClusterScenario Scenario,
     DeclarativeCompositionBudgetState Source, ResourceDefinition Target, CommandRequest Seed, CommitReceipt SeedReceipt,
     DocumentResult FirstDocument, DocumentResult SecondDocument, CommandRequest Refused,
     JsonElement Problem, CommandRequest Holder, CommitReceipt HolderReceipt, Guid ConfigureId,

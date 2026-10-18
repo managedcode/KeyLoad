@@ -11,7 +11,7 @@ internal static class FunctionalGateNodeAssertions
         var owners = new HashSet<string>(StringComparer.Ordinal);
         foreach (var node in fixture.NodeNames)
         {
-            var status = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, node, fixture.AdminKey, async caller =>
+            var status = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, node, fixture.AdminKey, async caller =>
             {
                 var sdk = await context.SdkAsync(caller.Sdk.StatusAsync(token));
                 var mcp = await context.McpWithoutBodyAsync<NodeStatus>(caller, McpCallerTools.AdminStatus, token);

@@ -23,13 +23,13 @@ internal static class FunctionalGateColdDrop
             var request = new DropTableRequest(context.Partition.TenantId, context.Partition.DatabaseId,
                 model.TableDefinition.Name);
             var dropped = await FunctionalGateDropCalls.InvokeAsync(context, parentId, request,
-                (DropLifecycleRf3Route)model.Index, token);
+                (DropLifecycleClusterRoute)model.Index, token);
             await FunctionalGateDropAssertions.ResultAsync(parentId, request, dropped);
             var create = model.TableCreate with
             {
                 CommandId = Guid.NewGuid()
             };
-            await SqlRf3Protocol.EqualAsync(model.TableDefinition,
+            await SqlClusterProtocol.EqualAsync(model.TableDefinition,
                 await FunctionalGateRelationalCalls.SqlSdkAsync<ResourceDefinition>(context,
                     context.Administrator, create, token));
             tables.Add(await RecreateAsync(context, model, oldReference, parentId, request, dropped, administrator, token));
@@ -52,7 +52,7 @@ internal static class FunctionalGateColdDrop
             McpCallerTools.DocumentsCommit, command, token);
         await FunctionalGateCompositionCalls.ReceiptAsync(context, receipt, command.CommandId,
             [new("putDocument", literal.Reference.Collection, literal.Reference.Id,
-                FunctionalGateColdDropRows.Initial)], token);
+                FunctionalGateColdDropRows.Initial)]);
         var reference = await FunctionalGateEntityReferences.CaptureRecreatedAsync(context,
             context.Administrator, oldReference, literal, token);
         var originalInsert = new CommandRequest(model.TableInsert.CommandId!.Value, context.Partition,
@@ -81,7 +81,7 @@ internal static class FunctionalGateColdDrop
             context.Administrator, query, token);
         var literal = FunctionalGateColdDropRows.Administrator(context, model);
         await FunctionalGateCompositionCalls.ReceiptAsync(context, receipt, query.CommandId!.Value,
-            [new("putDocument", model.TableDefinition.Name, literal.Reference.Id, FunctionalGateColdDropRows.Initial)], token);
+            [new("putDocument", model.TableDefinition.Name, literal.Reference.Id, FunctionalGateColdDropRows.Initial)]);
         await FunctionalGateEntityReferences.CaptureAsync(context, context.Administrator, literal, token);
         return (query, new(query.CommandId.Value, context.Partition,
             [new InsertTypedRow(model.TableDefinition.Name, literal.Json)]), receipt);

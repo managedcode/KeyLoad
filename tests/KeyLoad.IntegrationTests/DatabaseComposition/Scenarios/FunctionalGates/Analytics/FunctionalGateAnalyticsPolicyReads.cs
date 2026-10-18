@@ -57,7 +57,7 @@ internal static class FunctionalGateAnalyticsPolicyReads
             await Assert.That(sdk.Problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
             await McpCallerAssertions.ErrorAsync(await context.Reader.Mcp.CallAsync(
                 AnalyticsStoreProtocol.AggregateTool, request, token), ErrorCode.PermissionDenied, dispatched: true);
-            var sql = SqlRf3Protocol.Call(context.Partition, AnalyticsStoreProtocol.AggregateTool, request);
+            var sql = SqlClusterProtocol.Call(context.Partition, AnalyticsStoreProtocol.AggregateTool, request);
             var sqlSdk = await context.Reader.Sdk.ExecuteSqlAsync(sql, token);
             await Assert.That(sqlSdk.IsFailed).IsTrue();
             await Assert.That(sqlSdk.Value.ValueKind).IsEqualTo(JsonValueKind.Undefined);

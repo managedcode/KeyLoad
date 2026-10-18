@@ -24,8 +24,7 @@ public sealed partial class DatabaseEngine
         }
     }
 
-    private void ReauthorizeEffect(IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation effect,
-        BatchResourceAdmission admission = BatchResourceAdmission.CurrentPhysicalOwner)
+    private void ReauthorizeEffect(IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation effect)
     {
         if (effect is UpsertAnalyticsEvents or DeleteAnalyticsEvents)
         {
@@ -63,7 +62,7 @@ public sealed partial class DatabaseEngine
             return;
         }
         AuthorizeComposition(view, principal, partition, effect);
-        var resource = ReauthorizeEffectResource(view, partition, effect, admission);
+        var resource = ReauthorizeEffectResource(view, partition, effect);
         ReauthorizeEffectDocument(view, principal, partition, effect, resource);
         ReauthorizeEffectFields(principal, resource, effect);
         ReauthorizeEffectHeaders(principal, resource, effect);
@@ -101,9 +100,8 @@ public sealed partial class DatabaseEngine
         }
     }
 
-    private ResourceDefinition ReauthorizeEffectResource(IKeyValueView view, PartitionRef partition, Mutation effect,
-        BatchResourceAdmission admission)
-        => effect is InsertTypedRow ? BatchResource(view, partition, effect.Resource, admission)
+    private ResourceDefinition ReauthorizeEffectResource(IKeyValueView view, PartitionRef partition, Mutation effect)
+        => effect is InsertTypedRow ? BatchResource(view, partition, effect.Resource)
             : Resource(view, partition, effect.Resource);
 
     private void ReauthorizeEffectFields(PrincipalRecord principal, ResourceDefinition resource, Mutation effect)

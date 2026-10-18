@@ -7,7 +7,7 @@ namespace KeyLoad.IntegrationTests.Features.TimeSeries;
 internal sealed class ScopedSampleIdentityPublicTests(ClusterFixture fixture)
 {
     [Test]
-    public async Task SiblingSeriesSampleIdsDeduplicateExactContentAndRejectAtomicValueOrTagConflictsAcrossTwoRf3ColdCuts()
+    public async Task SiblingSeriesSampleIdsDeduplicateExactContentAndRejectAtomicValueOrTagConflictsAcrossTwoClusterColdCuts()
     {
         using var deadline = McpCallerDeadline.Create();
         await ScopedSampleIdentityPublicTrial.RunAsync(fixture, deadline.Token);

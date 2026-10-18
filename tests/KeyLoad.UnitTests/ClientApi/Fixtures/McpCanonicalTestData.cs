@@ -34,14 +34,12 @@ internal static class McpCanonicalTestData
         + "GRAPH_RETRIEVER('mcp-records',GRAPH_SEEDS(ENTITY('mcp-records','mcp-entity')),1,2,3,NULL,1), "
         + "NULL, NULL, 10, 60)";
     private const int ContractVersion = 1;
-    private const string PlacementShardIdText = "79214e37-a89c-431f-b4e2-202d5d967883";
     private const long Generation = 1;
     private const long WaitMinimumPosition = 1;
     private const long WaitPlacementEpoch = 1;
     private const long Position = 0;
     private const int Limit = 10;
     internal static readonly Guid StableId = Guid.Parse(StableIdText);
-    private static readonly Guid PlacementShardId = Guid.Parse(PlacementShardIdText);
     internal static readonly PartitionRef Partition = new(Tenant, Database, Domain, PartitionKey);
     internal static readonly EntityRef Reference = new(Partition, Resource, Entity);
     internal static readonly QueueLaneRef Lane = new(Partition, Resource);
@@ -80,9 +78,7 @@ internal static class McpCanonicalTestData
             new ProjectionConsumerDefinition(Generation, [Resource], [])), CommandKey),
         Case(McpCatalogExpectations.ProjectionsCommit, new CommitProjectionBatchRequest(StableId, Consumer, Token, Effects()), CommandKey),
         Case(McpCatalogExpectations.ProjectionsRelease, new ReleaseProjectionConsumerRequest(StableId, Consumer, Generation), CommandKey),
-        Case(McpCatalogExpectations.OutboxPurge, new PurgeOutboxRequest(StableId, Partition, Position), CommandKey),
-        Case(McpCatalogExpectations.AdminPartitionPlacementBind,
-            new BindAtomicPartitionPlacementRequest(ContractVersion, 0, Partition, PlacementShardId), null)
+        Case(McpCatalogExpectations.OutboxPurge, new PurgeOutboxRequest(StableId, Partition, Position), CommandKey)
     ];
 
     internal static ImmutableArray<McpDecodeCase> Reads() =>
@@ -107,8 +103,6 @@ internal static class McpCanonicalTestData
         Read(McpCatalogExpectations.GraphIncomingEdges, GraphIncomingMcpTestData.Request()),
         Read(McpCatalogExpectations.QueryGraphPath,
             new SqlGraphPathRequest(ContractVersion, new QueryRequest(Partition, GraphPathSql, AllowFullScan: true))),
-        Read(McpCatalogExpectations.AdminPartitionPlacementRead,
-            new AtomicPartitionPlacementReadRequest(ContractVersion, Partition)),
         Read(McpCatalogExpectations.SeriesRead, new ReadSamplesRequest(Partition, Resource, Entity, DateTimeOffset.UnixEpoch, DateTimeOffset.UnixEpoch)),
         Read(McpCatalogExpectations.QueryExecute, new QueryRequest(Partition, Sql)),
         Read(McpCatalogExpectations.QuerySearch, new SqlGraphSearchRequest(1, new(Partition, GraphSearchSql, AllowFullScan: true))),

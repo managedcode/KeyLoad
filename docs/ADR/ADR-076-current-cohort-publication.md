@@ -2,7 +2,7 @@
 
 Status: Accepted implementation contract; current measured-source qualification remains pending.
 Date: 2026-10-03; current publication contract updated 2026-10-06.
-Related: REQ/AC-BC-CURRENT-001..004, REQ/AC-BC-WEB-001..007, ADR-040, ADR-056, ADR-062, ADR-064, ADR-109, ADR-112; original mapped work items [KL-040](../Features/ResourceExecution.md), [KL-095](../Features/QueryExecution.md), [KL-096](../Features/Authorization.md) remain linked through the canonical coverage catalog.
+Related: REQ/AC-BC-CURRENT-001..004, REQ/AC-BC-WEB-001..007, ADR-040, ADR-056, ADR-062, ADR-064, ADR-109, ADR-112.
 
 ## Decision and authority
 
@@ -30,7 +30,7 @@ browser, freshness and provider failures remain failures of their owning gates.
 Benchmarks owns database preparation, isolated Linux workloads and one
 source-bound aggregate. It does not build or qualify the website. Its final
 bounded `Trigger Website` job dispatches the separate Website workflow after
-aggregate dependencies settle, only after every required preparation, build, database and aggregate gate succeeds (owner correction2026-10-08).
+aggregate dependencies settle, only after every required preparation, build, database and aggregate gate succeeds.
 Website also runs independently on trusted own-main push or manual dispatch.
 The Website workflow selects the newest ready completed own-main producer with a
 successful authenticated aggregate and valid current evidence. Failed, canceled,
@@ -86,7 +86,7 @@ immutable evidence references, not as active producer or workflow instructions.
    content-only and measured qualification, current archive/proof validation,
    original-input immutability, applicable TUnit/coverage/browser gates, and
    least-privilege Pages deployment.
-4. The integration owner joins source, feature/ADR mappings, four workflow
+4. Source, feature/ADR mappings, four workflow
    identities, workflow permissions, full native inventories and exact-source
    receipts. Verification includes static workflow/source checks, full build and
    formatting, complete Aspire-owned site tests with no skips, authenticated

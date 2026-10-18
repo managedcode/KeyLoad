@@ -21,9 +21,9 @@ internal static class FunctionalGateBlobAssertions
     internal static async Task HeadAsync(FunctionalGateContext context, BlobMetadata expected, CancellationToken token)
     {
         var request = new BlobMetadataRequest(expected.Blob);
-        await SqlRf3Protocol.EqualAsync(expected,
+        await SqlClusterProtocol.EqualAsync(expected,
             (await context.SdkAsync(context.Reader.Sdk.GetBlobMetadataAsync(request, token))).Metadata);
-        await SqlRf3Protocol.EqualAsync(expected, (await context.McpAsync<BlobMetadataReadResult>(
+        await SqlClusterProtocol.EqualAsync(expected, (await context.McpAsync<BlobMetadataReadResult>(
             context.Reader, "keyload_blobs_metadata", request, token)).Metadata);
     }
 
@@ -40,8 +40,8 @@ internal static class FunctionalGateBlobAssertions
             var expected = new BlobReadResult(metadata, offset, bytes.AsMemory(offset, count));
             var read = await context.SdkAsync(context.Reader.Sdk.ReadBlobRangeAsync(request, token));
             var official = await context.McpAsync<BlobReadResult>(context.Reader, "keyload_blobs_read_range", request, token);
-            await SqlRf3Protocol.EqualAsync(expected, read);
-            await SqlRf3Protocol.EqualAsync(expected, official);
+            await SqlClusterProtocol.EqualAsync(expected, read);
+            await SqlClusterProtocol.EqualAsync(expected, official);
             read.Bytes.CopyTo(sdk.AsMemory(offset));
             official.Bytes.CopyTo(mcp.AsMemory(offset));
         }
@@ -58,8 +58,8 @@ internal static class FunctionalGateBlobAssertions
     {
         var request = new BlobReadRequest(metadata.Blob, metadata.Revision, offset, count);
         var expected = new BlobReadResult(metadata, offset, bytes.AsMemory(offset, count));
-        await SqlRf3Protocol.EqualAsync(expected, await context.SdkAsync(context.Reader.Sdk.ReadBlobRangeAsync(request, token)));
-        await SqlRf3Protocol.EqualAsync(expected,
+        await SqlClusterProtocol.EqualAsync(expected, await context.SdkAsync(context.Reader.Sdk.ReadBlobRangeAsync(request, token)));
+        await SqlClusterProtocol.EqualAsync(expected,
             await context.McpAsync<BlobReadResult>(context.Reader, "keyload_blobs_read_range", request, token));
     }
 
@@ -81,15 +81,15 @@ internal static class FunctionalGateBlobAssertions
         var metadata = (await context.SdkAsync(context.Reader.Sdk.GetBlobMetadataAsync(new(blob), token))).Metadata;
         await Assert.That(metadata).IsNotNull();
         await Assert.That(metadata!.VersionId.HasValue).IsTrue();
-        var placement = await context.SdkAsync(context.Administrator.Sdk.ReadAtomicPartitionPlacementAsync(new(1, context.Partition), token));
+        var owner = await context.SdkAsync(context.Administrator.Sdk.StatusAsync(token));
         var bytes = FunctionalGateBlobUpload.Content(context, blob, -1 - index);
-        var initial = BlobIntegrity.InitialHash(placement.Incarnation, blob, metadata.VersionId!.Value, bytes.Length);
+        var initial = BlobIntegrity.InitialHash(owner.Incarnation, blob, metadata.VersionId!.Value, bytes.Length);
         var first = bytes.AsSpan(0, BlobLimits.RawPartBytes).ToArray();
         var last = bytes.AsSpan(BlobLimits.RawPartBytes).ToArray();
         var chain = BlobIntegrity.NextHash(initial, 0, first.Length, Convert.ToHexStringLower(SHA256.HashData(first)));
         chain = BlobIntegrity.NextHash(chain, 1, last.Length, Convert.ToHexStringLower(SHA256.HashData(last)));
         var expected = new BlobMetadata(blob, 1L, metadata.VersionId, bytes.Length, 2, chain, new RowAccess(), metadata.UpdatedAt);
-        await SqlRf3Protocol.EqualAsync(expected, metadata);
+        await SqlClusterProtocol.EqualAsync(expected, metadata);
         await ContentAsync(context, expected, bytes, token);
     }
 

@@ -14,7 +14,7 @@ internal static class FunctionalGateBlobs
             var name = $"gate_blobs_{index}";
             var definition = new ResourceDefinition(name, ResourceKind.BlobStore, context.Partition.TransactionDomainId);
             var configure = new ConfigureResourceRequest(context.Partition.TenantId, context.Partition.DatabaseId, definition);
-            await SqlRf3Protocol.EqualAsync(definition,
+            await SqlClusterProtocol.EqualAsync(definition,
                 await context.SdkAsync(context.Administrator.Sdk.ConfigureResourceAsync(Guid.NewGuid(), configure, token)));
             var baseline = await FunctionalGateBlobUpload.PublishAsync(context,
                 new BlobRef(context.Partition, name, "baseline"), -1 - index, token);
@@ -60,21 +60,21 @@ internal static class FunctionalGateBlobs
             Deleted = true,
             UpdatedAt = deleted.Value.UpdatedAt
         };
-        await SqlRf3Protocol.EqualAsync(expected, deleted.Value);
-        await SqlRf3Protocol.EqualAsync(deleted, await context.McpAsync<BlobCommitResult<BlobMetadata>>(
+        await SqlClusterProtocol.EqualAsync(expected, deleted.Value);
+        await SqlClusterProtocol.EqualAsync(deleted, await context.McpAsync<BlobCommitResult<BlobMetadata>>(
             context.Writer, "keyload_blobs_delete", delete, token));
         await FunctionalGateBlobAssertions.RetiredAsync(context, published, expected, token);
         var reclaim = new ReclaimBlobRequest(Guid.NewGuid(), delete.Blob, published.Begin.UploadId, 2);
         var reclaimed = await context.McpAsync<BlobCommitResult<BlobReclaimResult>>(
             context.Writer, "keyload_blobs_reclaim", reclaim, token);
         await FunctionalGateBlobAssertions.ReceiptAsync(reclaimed.Receipt, reclaim.CommandId, delete.Blob);
-        await SqlRf3Protocol.EqualAsync(new BlobReclaimResult(published.Begin.UploadId, 2, 0, published.Bytes.Length, true), reclaimed.Value);
-        await SqlRf3Protocol.EqualAsync(reclaimed,
+        await SqlClusterProtocol.EqualAsync(new BlobReclaimResult(published.Begin.UploadId, 2, 0, published.Bytes.Length, true), reclaimed.Value);
+        await SqlClusterProtocol.EqualAsync(reclaimed,
             await context.SdkAsync(context.Writer.Sdk.ReclaimBlobAsync(reclaim, token)));
         var info = new BlobUploadInfoRequest(delete.Blob, published.Begin.UploadId);
-        await SqlRf3Protocol.EqualAsync<BlobUploadInfo?>(null,
+        await SqlClusterProtocol.EqualAsync<BlobUploadInfo?>(null,
             (await context.SdkAsync(context.Writer.Sdk.GetBlobUploadInfoAsync(info, token))).Upload);
-        await SqlRf3Protocol.EqualAsync<BlobUploadInfo?>(null, (await context.McpAsync<BlobUploadInfoReadResult>(
+        await SqlClusterProtocol.EqualAsync<BlobUploadInfo?>(null, (await context.McpAsync<BlobUploadInfoReadResult>(
             context.Writer, "keyload_blobs_upload_info", info, token)).Upload);
         await FunctionalGateBlobAssertions.RetiredAsync(context, published, expected, token);
     }

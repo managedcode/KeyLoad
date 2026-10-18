@@ -8,11 +8,11 @@ internal static class SeriesFiniteOverflowPublicTrial
 {
     internal static async Task RunAsync(ClusterFixture fixture, CancellationToken token)
     {
-        var state = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
+        var state = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
             fixture.AdminKey, async administrator =>
             {
                 var prepared = await SeriesFiniteOverflowPublicPreparation.CreateAsync(fixture, administrator, token);
-                return await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node3,
+                return await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node3,
                     prepared.Reader.Secret, async reader =>
                     {
                         await SeriesFiniteOverflowPublicChecks.HealthyAsync(administrator, reader, prepared, token);
@@ -22,8 +22,8 @@ internal static class SeriesFiniteOverflowPublicTrial
                     }, token);
             }, token);
         await CredentialAuthorityCold.RestartAsync(fixture, token);
-        _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
-            fixture.AdminKey, administrator => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App,
+        _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
+            fixture.AdminKey, administrator => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App,
                 McpCallerProtocol.Node3, state.Reader.Secret, async reader =>
                 {
                     await SeriesFiniteOverflowPublicChecks.HealthyAsync(administrator, reader, state, token);
@@ -31,8 +31,7 @@ internal static class SeriesFiniteOverflowPublicTrial
                     await SeriesFiniteOverflowPublicChecks.ReplayAsync(administrator, reader, state, token);
                     var receipt = await McpCallerAssertions.SdkSuccessAsync(
                         await administrator.Sdk.CommitAsync(state.Expiry, token));
-                    await SdkProblemBudgetPublicAssertions.ReceiptAsync(receipt, state.Expiry, state.Placement,
-                        [new("expireSamples", TimeSeriesRf3Scenario.Set, SeriesFiniteOverflowPublicExpected.Series, 1L)]);
+                    await SdkProblemBudgetPublicAssertions.ReceiptAsync(receipt, state.Expiry, [new("expireSamples", TimeSeriesClusterScenario.Set, SeriesFiniteOverflowPublicExpected.Series, 1L)]);
                     state.ExpiryReceipt = receipt;
                     state.Purged = true;
                     state.CurrentOutbox = await McpCallerAssertions.SdkSuccessAsync(
@@ -43,8 +42,8 @@ internal static class SeriesFiniteOverflowPublicTrial
                     return true;
                 }, token), token);
         await CredentialAuthorityCold.RestartAsync(fixture, token);
-        _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
-            fixture.AdminKey, administrator => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App,
+        _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1,
+            fixture.AdminKey, administrator => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App,
                 McpCallerProtocol.Node3, state.Reader.Secret, async reader =>
                 {
                     await SeriesFiniteOverflowPublicChecks.CurrentAsync(administrator, state, token);

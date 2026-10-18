@@ -13,7 +13,7 @@ internal static class RemoteTransferPeerExchange
     {
         token.ThrowIfCancellationRequested();
         RemoteTransferPeerShape.Require(call);
-        var body = RemoteDocumentWire.Encode(new RemoteDocumentTransportEnvelope(null, null, QueueTransfer: call));
+        var body = RemoteDocumentWire.Encode(new RemoteDocumentTransportEnvelope(null, QueueTransfer: call));
         try
         {
             using var mac = RemoteDocumentMac.FromConfiguredSecret(options.PeerSecret);

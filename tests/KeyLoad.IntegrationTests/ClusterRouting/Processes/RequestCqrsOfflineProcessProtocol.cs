@@ -19,7 +19,7 @@ internal static class RequestCqrsOfflineProcessProtocol
 
     internal static ProcessStartInfo StartSuccess()
         => Start("process.stdout.write('A'.repeat(Number(process.argv[1]))); process.stderr.write('bounded-child-λ\\n');",
-            NodeEpochRf3OfflineProtocol.MaximumOutputBytes.ToString(CultureInfo.InvariantCulture));
+            NodeEpochClusterOfflineProtocol.MaximumOutputBytes.ToString(CultureInfo.InvariantCulture));
 
     internal static ProcessStartInfo StartWaitingChild(string marker, string nonce, bool oversized,
         string? release = null)
@@ -33,7 +33,7 @@ internal static class RequestCqrsOfflineProcessProtocol
                 : string.Empty)
             + "setInterval(() => {}, 1000); await new Promise(() => {});";
         var arguments = oversized
-            ? new[] { marker, nonce, (NodeEpochRf3OfflineProtocol.MaximumOutputBytes + 1)
+            ? new[] { marker, nonce, (NodeEpochClusterOfflineProtocol.MaximumOutputBytes + 1)
                 .ToString(CultureInfo.InvariantCulture), release
                 ?? throw new ArgumentNullException(nameof(release)) }
             : new[] { marker, nonce };

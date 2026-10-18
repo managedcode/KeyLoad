@@ -1,5 +1,5 @@
 $script:FcNativeTestImages = [ordered]@{
-    ExpectedSuites = @('unit','recovery','rf3')
+    ExpectedSuites = @('unit','recovery','cluster')
     Invalid = 'The original native test-image manifest is absent, changed or outside its suite binding.'
 }
 
@@ -69,19 +69,19 @@ function Add-FcNativeTestImageManifestFile([string] $Path, [object] $Read,
 
 function Assert-FcNativeTestImageSuiteRelationships([Collections.Generic.Dictionary[string, object]] $BySuite) {
     $unit = $BySuite['unit']
-    foreach ($suite in @('recovery','rf3')) {
+    foreach ($suite in @('recovery','cluster')) {
         if ($BySuite[$suite].path -ceq $unit.path) {
             throw $script:FcNativeMergeInput.InvalidSource
         }
     }
-    if ($BySuite['recovery'].path -ceq $BySuite['rf3'].path) { throw $script:FcNativeMergeInput.InvalidSource }
+    if ($BySuite['recovery'].path -ceq $BySuite['cluster'].path) { throw $script:FcNativeMergeInput.InvalidSource }
 }
 
 
 $script:FcNativeTestImageProjects = [ordered]@{
     'unit' = [ordered]@{ project = 'tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj'; assembly = 'KeyLoad.UnitTests.dll' }
     'recovery' = [ordered]@{ project = 'tests/KeyLoad.RecoveryTests/KeyLoad.RecoveryTests.csproj'; assembly = 'KeyLoad.RecoveryTests.dll' }
-    'rf3' = [ordered]@{ project = 'tests/KeyLoad.IntegrationTests/KeyLoad.IntegrationTests.csproj'; assembly = 'KeyLoad.IntegrationTests.dll' }
+    'cluster' = [ordered]@{ project = 'tests/KeyLoad.IntegrationTests/KeyLoad.IntegrationTests.csproj'; assembly = 'KeyLoad.IntegrationTests.dll' }
 }
 
 function Read-FcNativeTestIdentityManifest([string] $Path, [string] $Repository, [string] $Suite, [object] $Bounds) {

@@ -5,7 +5,7 @@ namespace KeyLoad.IntegrationTests.Features.Messaging;
 
 internal static class SubscriptionPhasePublicTrial
 {
-    internal static async Task RunAsync(Func<ClusterFixture, SubscriptionFilterRf3Seed, CancellationToken, Task> flow)
+    internal static async Task RunAsync(Func<ClusterFixture, SubscriptionFilterClusterSeed, CancellationToken, Task> flow)
     {
         var failures = new List<Exception>();
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
@@ -15,14 +15,14 @@ internal static class SubscriptionPhasePublicTrial
             {
                 await fixture.InitializeAsync();
                 using var deadline = McpCallerDeadline.Create();
-                var seed = await SubscriptionFilterRf3Setup.CreateAsync(fixture, deadline.Token);
+                var seed = await SubscriptionFilterClusterSetup.CreateAsync(fixture, deadline.Token);
                 await flow(fixture, seed, deadline.Token);
             }, failures).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    internal static async Task WithCallersAsync(ClusterFixture fixture, SubscriptionFilterRf3Seed seed,
+    internal static async Task WithCallersAsync(ClusterFixture fixture, SubscriptionFilterClusterSeed seed,
         Func<KeyLoadClient, McpOfficialClient, Task> flow, CancellationToken token)
     {
         var failures = new List<Exception>();

@@ -10,7 +10,7 @@ public sealed partial class DatabaseEngine
 {
     private byte[] CaptureResourceEffectAdmission(ReplicatedOperation operation, NativeCommandPayload payload)
     {
-        var fingerprint = NativeOperationFingerprint.Compute(operation, payload.Value);
+        var fingerprint = NativeOperationFingerprint.Compute(operation);
         if (payload.Error is not null)
         {
             return EncodeResourceEffectAdmission(new(ResourceEffectAdmissionProtocol.Version,
@@ -31,7 +31,7 @@ public sealed partial class DatabaseEngine
         ReadExecutionBudget work)
     {
         work.Check();
-        var fingerprint = NativeOperationFingerprint.Compute(operation, payload.Value);
+        var fingerprint = NativeOperationFingerprint.Compute(operation);
         if (payload.Error is not null)
         {
             return EncodeResourceEffectAdmission(new(ResourceEffectAdmissionProtocol.Version,

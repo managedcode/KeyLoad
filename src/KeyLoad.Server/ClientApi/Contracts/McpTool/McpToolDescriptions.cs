@@ -63,9 +63,6 @@ internal static class McpToolDescriptions
     private const string ProjectionsCommit = "Commit a projection batch acknowledgement and declared mutation effects with the original token.";
     private const string ProjectionsRelease = "Release an administrator-authorized projection consumer at its expected index generation.";
     private const string OutboxPurge = "Purge a bounded administrator-authorized outbox range. Existing retained data can be removed.";
-    private const string AdminPartitionMove = "Transfer, resume or abort one exact administrator-controlled partition movement; requires current persisted cluster administrator authority. Published movement cannot abort. Resume the same original move identity after an uncertain outcome.";
-    private const string AdminPartitionPlacementBind = "Bind one atomic partition to the current physical shard using the expected placement directory revision; requires persisted cluster administrator authority.";
-    private const string AdminPartitionPlacementRead = "Read one atomic partition placement and the committed default-shard identity from one authorized view; requires persisted cluster administrator authority.";
 
     internal static string For(string name) => ModelDescription(name) ?? name switch
     {
@@ -100,7 +97,6 @@ internal static class McpToolDescriptions
         McpToolNames.SearchGraph => SearchGraph,
         ClusterBackupProtocol.Tool => ClusterBackupProtocol.Description,
         McpToolNames.AdminBackup or McpToolNames.AdminAdmission or McpToolNames.AdminStatus
-            or McpToolNames.AdminPartitionMove or McpToolNames.AdminPartitionPlacementBind or McpToolNames.AdminPartitionPlacementRead
             => AdminDescription(name),
         McpToolNames.DocumentsCommit => DocumentsCommit,
         McpToolNames.SearchAnnMaintain => AnnMaintenanceProtocol.Description,
@@ -133,7 +129,7 @@ internal static class McpToolDescriptions
     };
 
     private static string? ModelDescription(string name)
-        => AnalyticsStoreMcpDescriptions.Find(name) ?? TenantPlacementMcpDescriptions.Find(name) ?? McpEventFeedDescriptions.Find(name)
+        => AnalyticsStoreMcpDescriptions.Find(name) ?? McpEventFeedDescriptions.Find(name)
             ?? global::KeyLoad.Server.Features.GraphTraversal.RemoteGraphMcpDescriptions.Find(name);
 
     private static string AdminDescription(string name) => name switch
@@ -141,9 +137,6 @@ internal static class McpToolDescriptions
         McpToolNames.AdminBackup => AdminBackup,
         McpToolNames.AdminAdmission => AdminAdmission,
         McpToolNames.AdminStatus => AdminStatus,
-        McpToolNames.AdminPartitionMove => AdminPartitionMove,
-        McpToolNames.AdminPartitionPlacementBind => AdminPartitionPlacementBind,
-        McpToolNames.AdminPartitionPlacementRead => AdminPartitionPlacementRead,
         _ => throw new ArgumentOutOfRangeException(nameof(name))
     };
 

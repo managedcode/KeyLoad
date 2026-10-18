@@ -1,133 +1,35 @@
 # StorageRecovery
 
-REQ-STORAGE-HOST-COMPOSITION-001 / AC-STORAGE-HOST-COMPOSITION-001: PartitionDatabaseComposition owns validation of the original host constructor inputs. PartitionHost invokes it at the same point before directory/storage acquisition, retaining the exact null checks and NodeOptions.Validate order. Ordered owner construction, rollback, materializer/verifier joins, store-close gate and all original failures remain unchanged. Existing host lifecycle, recovery and Aspire RF3 whole operations plus the unchanged type200/function64 build gates verify this responsibility move; it introduces no new lifetime, operational policy or storage contract.
+The silo-local ZoneTree owner (an Orleans Grain Service) opens and owns the node's ZoneTree stores, atomic WAL/journals, file locks and the ordered commit/apply gate; logical partition grains route commands to it and never open files. This feature specifies the canonical key codec, node-local ownership and lifetime, journal/checkpoint recovery, scoped read cuts, the current native format and the process-kill recovery qualification. Copying a write to other nodes is an ordinary Orleans call to the ZoneTree owners on `KeyLoad:ReplicaCount` silos, acknowledged once a majority has applied it durably ([ADR-136](../ADR/ADR-136-native-orleans-partition-ownership.md), [ADR-143](../ADR/ADR-143-independent-silo-replica-topology.md)); it adds no storage format here.
 
-## KL-007 v1 key and captured-envelope completion
+Detailed contracts by topic:
 
-The accepted [ADR-005 validation contract](../ADR/ADR-005-canonical-keyspace-codec.md#2026-10-04-v1-validation-and-ownership-completion)
-preserves valid durable key bytes and defines explicit normalization, arity and
-safe malformed-input errors. KL-007 maps to the four measurable criteria below,
-with19 exact KeyCodec cases and the owning codec/native storage source closure.
-Task closure requires all mapped cases on current-source Linux normal/scalar,
-matching identities and the ADR-005 recovery/open-existing-store CI check. A
-failure elsewhere remains a failed overall suite and cannot erase an independently
-verified mapped outcome. The StorageRecovery feature's Docker/Aspire RF3,
-endurance and power-loss gates remain separately mandatory and open; closing
-KL-007 cannot close or waive them. Current local normal/scalar operation results
-are supporting development evidence until the original Linux reports exist.
+- Format and identity: [CurrentFormat](StorageRecovery/CurrentFormat.md), [IdentityAuthorityAdmission](StorageRecovery/IdentityAuthorityAdmission.md), [DispatchIdentityPublication](StorageRecovery/DispatchIdentityPublication.md), [MetadataRegularFileReader](StorageRecovery/MetadataRegularFileReader.md), [OwnerLockRegularFile](StorageRecovery/OwnerLockRegularFile.md).
+- Journal and checkpoint: [NativeWriteThroughJournal](StorageRecovery/NativeWriteThroughJournal.md), [JournalOriginalFailure](StorageRecovery/JournalOriginalFailure.md), [CheckpointOriginalCause](StorageRecovery/CheckpointOriginalCause.md), [SeededNativeRedoCorruption](StorageRecovery/SeededNativeRedoCorruption.md), [RecoveryFaultRootRetention](StorageRecovery/RecoveryFaultRootRetention.md).
+- Read cuts: [NativeReadCuts](StorageRecovery/NativeReadCuts.md), [TransactionalReadViewOperation](StorageRecovery/TransactionalReadViewOperation.md), [CapturedReadSelectedCancellation](StorageRecovery/CapturedReadSelectedCancellation.md), [LiveRangeSelectedCancellation](StorageRecovery/LiveRangeSelectedCancellation.md), [NativeValueHeaderRefusal](StorageRecovery/NativeValueHeaderRefusal.md).
 
-TASK-KEYCODEC-NATIVE-IDENTITY binds that existing matching-identity gate to the
-original Build and Tests Linux job. Immediately after its Release build, prepare
-the existing CodeQuality production-source manifest and unit/recovery image
-sidecars in `TestResults/native-source-identity`; verify the same files after
-the unchanged full normal, scalar and recovery runs and retain them beside the
-original reports. Review the task's 33 owned source hashes against the matching
-Abstractions, Core, Storage.IO, Storage.ZoneTree, UnitTests and RecoveryTests
-source rows, original source/run/attempt/artifact provenance and executed
-DLL/PDB hashes, MVID and portable-PDB/compiler identities. These are native
-hash/identity receipts, not archived binaries. A manifest from the separately
-rebuilt RF3 job cannot bind these executions. Root owns the contract and final
-join; the workflow owner reuses the existing prepare/verify implementation in
-`scripts/Features/CodeQuality/functional-coverage.production-source-manifest.ps1`
-without a new collector, manifest schema, case subset or qualification gate.
-Retain failed suite outcomes; the complete recovery stage must still pass.
-Rollback removes only the additive receipt steps. Codec bytes, topology, suite
-scope, individual deadlines and all separately required product gates stay fixed.
+REQ-STORAGE-HOST-COMPOSITION-001 / AC-STORAGE-HOST-COMPOSITION-001: PartitionDatabaseComposition owns validation of the original host constructor inputs. PartitionHost invokes it at the same point before directory/storage acquisition, retaining the exact null checks and NodeOptions.Validate order. Ordered owner construction, rollback, materializer/verifier joins, store-close gate and all original failures remain unchanged. Existing host lifecycle, recovery and Aspire cluster whole operations plus the unchanged type200/function64 build gates verify this responsibility move; it introduces no new lifetime, operational policy or storage contract.
 
-TASK-KEYCODEC-COVERAGE-GAPS extends the existing REQ/AC-KEYCODEC-002/003 rejection
-flows without changing the supported bytes or adding a new acceptance gate.
-The source-bound local native R117 report executes all18 existing cases and
-records199/203 lines across the three executable codec files. Its four uncovered
-lines are nonfinite persisted doubles, escaped payload exhaustion, decimal digit
-overflow and the final decimal representability guard. The two token files contain
-compile-time constants only and have no executable coverage denominator. The
-native report contains no branch-outcome rows: branch coverage is unmeasured.
+## Key codec and captured envelopes
 
-Root owns the evidence and joins; cli_static_collection Luna owns only
-`tests/KeyLoad.UnitTests/StorageRecovery/Cases/KeyCodec/KeyCodecMalformedContractTests.cs`.
-Add a complete reject/unchanged-input/healthy-roundtrip flow using independent
-literal NaN/infinity, unterminated text/binary, invalid decimal digit and30-digit
-persisted vectors. Assert the existing exact typed safe error, unchanged input
-bytes and an exact valid composite roundtrip after rejection. Keep the final
-decimal guard and review the canonical digit/exponent/scale invariant; do not add
-private hooks or alter production code to force an unreachable defensive path.
-Root reviews the bounded test, builds, runs native normal/scalar and collects
-fresh native coverage with source/DLL/PDB identity. Obtain its actual case identity
-from the original runner and update the mapped case count; do not fabricate one.
-Current-source Linux normal/scalar and full recovery remain the closure gates.
-SDK/MCP/frontend/dependency changes are N/A. Rollback removes only this added
-regression flow; the original18 cases and all product gates remain mandatory.
+The [ADR-005 validation contract](../ADR/ADR-005-canonical-keyspace-codec.md#v1-validation-and-ownership) preserves valid durable key bytes and defines explicit normalization, arity and safe malformed-input errors. The four criteria below map to the exact KeyCodec cases and to the owning codec/native storage source. A failure elsewhere in a suite cannot erase an independently verified mapped KeyCodec outcome, and the Docker/Aspire replicated-cluster, endurance and power-loss gates stay separately mandatory.
 
-The added rejection/unchanged-bytes/healthy-roundtrip case passes in local native
-normal and scalar runs,19/19 in each with the same original identities and no
-source or DLL/PDB drift. Native scoped coverage records202/203 executable lines
-across the three codec files. The remaining line is the retained defensive decimal
-parse guard; the preceding canonical coefficient/exponent/scale checks imply an
-exact nonzero decimal with the required sign and scale. This is source reasoning,
-not an executed failure path. The two constant-only files remain executable N/A
-and branch coverage remains unmeasured.
-
-KL-007 is complete against AC-KEYCODEC-001..004. The
-[original Linux run37554329420](https://github.com/managedcode/KeyLoad/actions/runs/37554329420/job/112576973966)
-at source259a3fa5 passed all19 exact mapped identities in both normal and scalar,
-the full2,765-case unit census in each mode and235/235 process-recovery cases,
-without failures or skips. Same-job source/test-image verification passed after
-all three suites. All33 owned paths match the current checkout, the exact Git
-source and original compiled source/PDB or project-input rows. Original artifact
-IDs, ZIP/TRX/TUnit hashes and DLL/PDB/MVID identities are retained in
-[status.json](../implementation/status.json). Independent root verification
-rehashes the original ZIPs, binds every source row and checks all19 original
-identities. This closes this task's codec/envelope criteria; the separate
-StorageRecovery RF3, endurance, power-loss and performance gates remain open.
+The AC-KEYCODEC-002/003 rejection flows use independent literal malformed vectors (NaN and infinity doubles, unterminated text and binary, an invalid decimal digit, a 30-digit persisted decimal). Each asserts the exact typed safe error, unchanged input bytes and an exact valid composite roundtrip after the rejection. The final decimal representability guard is a defensive path implied by the canonical coefficient/exponent/scale checks; no private hook forces it.
 
 | Requirement | Measurable acceptance and owned TUnit mapping |
 |---|---|
-| REQ-KEYCODEC-001: preserve ordered v1 bytes and explicit type normalization | AC-KEYCODEC-001: original goldens and10,000 seeded decimals stay exact; an independent10,000 mixed-type/composite corpus roundtrips to the defined normalized values and sorts by a semantic oracle; negatives, valid Unicode/escaping, all type tags and extrema pass. Fractional decimal literal vectors retain their bytes and decode exactly under InvariantCulture and a custom CurrentCulture with a non-ASCII negative sign. New KeyCodecMixedCorpus/KeyCodecMixedCorpusTests, KeyCodecGoldenContractTests and KeyCodecCultureContractTests under UnitTests/Features/StorageRecovery. |
+| REQ-KEYCODEC-001: preserve ordered v1 bytes and explicit type normalization | AC-KEYCODEC-001: original goldens and10,000 seeded decimals stay exact; an independent10,000 mixed-type/composite corpus roundtrips to the defined normalized values and sorts by a semantic oracle; negatives, valid Unicode/escaping, all type tags and extrema pass. Fractional decimal literal vectors retain their bytes and decode exactly under InvariantCulture and a custom CurrentCulture with a non-ASCII negative sign. New KeyCodecMixedCorpus/KeyCodecMixedCorpusTests, KeyCodecGoldenContractTests and KeyCodecCultureContractTests under UnitTests/StorageRecovery. |
 | REQ-KEYCODEC-002: corrupted input fails through safe typed errors | AC-KEYCODEC-002: literal invalid/truncated UTF-8, escapes, scalars, bool/tags, timestamp extrema violations, decimal overflow/rounding/underflow and noncanonical numeric forms return exact Corruption; empty/unknown versions remain FormatUnsupported. New KeyCodecMalformedContractTests; no payload values in messages. |
 | REQ-KEYCODEC-003: writer and reader share finite component bounds | AC-KEYCODEC-003:0,1 and256 components encode/decode exactly;257 writer input fails ResourceExhausted before encoding an unsupported component and257 persisted components fail Corruption before decoding the final malformed component. Invalid UTF-16/nonfinite input gives Validation and unsupported CLR types UnsupportedCapability. New KeyCodecInputContractTests. |
 | REQ-KEYCODEC-004: native captured envelopes cannot alias canonical storage to caller-owned buffers | AC-KEYCODEC-004: actual ZoneTree staging copies input key/value before mutation/pool reuse; mutating a returned independently owned KeyValueRecord does not change committed bytes; generated existing envelope roundtrip and real reopen preserve the exact original content. New KeyCodecEnvelopeOwnershipTests, existing permanent native aliases/Ids, real provider only. |
 
-Canonical map: shared codec/storage carriers in Abstractions/Storage and new
-cohesive validation helpers in Abstractions/Features/StorageRecovery; provider
-ownership in Storage.ZoneTree/Features/StorageRecovery; matching real-provider
-UnitTests/Features/StorageRecovery. Root owns this spec, ADR/task graph and final
-evidence. Physical placement, apply/replication/native WAL authority and public
-JSON stay unchanged. UI/SDK/MCP schema work N/A: no new wire operation.
+Canonical map: shared codec/storage carriers in `Abstractions/Storage`, cohesive validation helpers in `Abstractions/StorageRecovery`, provider ownership in `Storage.ZoneTree/StorageRecovery`, and matching real-provider tests in `UnitTests/StorageRecovery`. Apply, native WAL authority and public JSON stay unchanged. UI/SDK/MCP schema work is N/A: no new wire operation.
 
-## KL-008 distinct-process storage ownership
+## Exclusive node-local storage ownership
 
-REQ-STORAGE-008 includes the KL-008 exclusive physical-owner requirement in the
-architecture backlog. AC-STORAGE-OWNER-001 makes that existing requirement
-measurable: while a parent owns a real current-format ZoneTreeStore, an actual
-Release CrashHost existing-store inspection in a separate process fails with the
-existing safe IOException receipt. The child and both original output readers
-must settle before inspection returns. Identity bytes, committed value and
-position remain exact, and the parent can commit and read a subsequent value.
-A second child is still denied while that parent is open. After actual parent
-disposal, child inspection and ordinary parent reopen succeed with the exact
-identity, updated value and position. Retain readable canonical journal bytes
-across denied opens; do not force reads through the active exclusive lock handle
-or require asynchronously maintained physical tree files to stay unchanged.
+REQ-STORAGE-008 includes the exclusive physical-owner requirement. AC-STORAGE-OWNER-001 makes it measurable: while a parent owns a real current-format ZoneTreeStore, an actual Release CrashHost existing-store inspection in a separate process fails with the existing safe IOException receipt. The child and both original output readers must settle before inspection returns. Identity bytes, committed value and position remain exact, and the parent can commit and read a subsequent value. A second child is still denied while that parent is open. After actual parent disposal, child inspection and ordinary parent reopen succeed with the exact identity, updated value and position. Readable canonical journal bytes are retained across denied opens; reads are not forced through the active exclusive lock handle and asynchronously maintained physical tree files are not required to stay unchanged.
 
-TASK-STORAGE-OWNER-PROCESS is test-first under
-[ADR-046](../ADR/ADR-046-storage-private-owners.md). Root owns this criterion,
-source/evidence joins and delivery. The unpack_atomicity Luna worker owns one new
-`tests/KeyLoad.UnitTests/StorageRecovery/Cases/StorageOwner/StorageOwnerProcessTests.cs`
-and reuses the existing ZoneTreeExistingStoreFixture, inspector process and safe
-receipt assertions. Keep its real30-second child deadline,8-KiB output bounds,
-strict protocol, outer node-owner lock and original exit/readers cleanup. No
-fake parent rejection, new child variant, production hook, swallowed failure or
-deadline increase. If existing APIs cannot express the flow, report the exact
-additional file scope before implementation.
-
-Root reviews and joins the bounded packet, builds, runs the original native
-normal/scalar ownership flows and collects actual storage-module coverage.
-Current-source Linux normal/scalar and complete recovery qualify this criterion;
-the other KL-008 lease/maintainer/pool requirements and full StorageRecovery RF3,
-endurance and power-loss gates remain mandatory. SDK/MCP/frontend/dependency,
-format and rollout changes are N/A: this adds regression evidence only. Rollback
-removes only the new test. This criterion does not mark the broad AC-SQ-001..008
-group or the whole task passed.
+Governed by [ADR-046](../ADR/ADR-046-storage-private-owners.md). The flow is `tests/KeyLoad.UnitTests/StorageRecovery/Cases/StorageOwner/StorageOwnerProcessTests.cs`, which reuses the existing ZoneTreeExistingStoreFixture, inspector process and safe-receipt assertions and keeps the real 30-second child deadline, 8-KiB output bounds, strict protocol, outer node-owner lock and original exit/readers cleanup. It adds no fake parent rejection, child variant, production hook, swallowed failure or deadline increase. The lease, maintainer and pool requirements of REQ-STORAGE-008 are specified below; the broad AC-SQ-001..008 group is not satisfied by this criterion alone.
 
 ## Current-format storage and restore contract
 
@@ -135,31 +37,22 @@ The single supported native format, current restore authority, strict rejection
 rules and their owning REQ/AC mappings are defined by
 [CurrentFormat](StorageRecovery/CurrentFormat.md), [ADR-011](../ADR/ADR-011-current-native-format.md)
 and [ADR-116](../ADR/ADR-116-first-release-current-format.md). Ordinary open,
-recovery, snapshot installation, backup and restore accept only that current
+recovery, checkpoint installation, backup and restore accept only that current
 contract. Unknown or corrupt mandatory data fails closed before publication;
 there is no alternate reader, conversion path or format fallback. Current-format
 backup restoration creates a new authority incarnation and completes its bounded
 blob-authority normalization before writable service. The source backup remains
-unchanged and an incomplete restore stays fenced.
+unchanged and an incomplete restore stays paused.
 
 The current-format positive and rejection operations map to the existing real
 ZoneTree, CrashHost, RecoveryTests and Docker/Aspire SDK/MCP cases named in those
-owning feature contracts. Preserve exact persisted bytes, authorization, RF3
+owning feature contracts. Preserve exact persisted bytes, authorization, node-local
 ownership and complete process/resource settlement. Source review and development
-receipts do not close the required Linux or RF3 qualification gates.
+receipts do not close the required Linux or replicated-cluster qualification gates.
 
 ## Retired checkpoint handle ownership
 
-REQ-STORAGE-020 / AC-DBHP-009 preserves one physical owner for each successfully
-retired native maintainer/tree. [ADR-046](../ADR/ADR-046-storage-private-owners.md)
-freezes the ordered three-file test-first repair after the real40f87 native
-InstallPrepared cleanup failure. The actual failed-install scenario must retain
-exact RecoveryRequired/warm rejection at InstallPrepared and JournalSwapped,
-then close the log/store and repeat actual Dispose without redisposing retired
-handles. New healthy handles and directory locks retain their original lifetime.
-No new interface/package/format, caught cleanup error or relaxed fault oracle.
-Root owns integration and full normal/scalar/recovery/RF3 GitHub qualification;
-development/source review alone does not close this requirement.
+REQ-STORAGE-020 / AC-DBHP-009 preserves one physical owner for each successfully retired native maintainer/tree ([ADR-046](../ADR/ADR-046-storage-private-owners.md)). The failed-install scenario retains exact RecoveryRequired/warm rejection at InstallPrepared and JournalSwapped, then closes the log/store and repeats actual Dispose without redisposing retired handles. New healthy handles and directory locks keep their original lifetime. No new interface, package, format, caught cleanup error or relaxed fault oracle is permitted.
 
 ```mermaid
 flowchart LR
@@ -173,18 +66,7 @@ flowchart LR
 
 ## Guarded original-store inspection
 
-REQ-STORAGE-015 maps AC-SG009-001..004 in ../ADR/ADR-059-isolated-intensive-timeseries.md to
-TASK-ISO-TS009C-G-W/I under [ADR-059](../ADR/ADR-059-isolated-intensive-timeseries.md).
-The private original-store guard rejects missing original files or changed
-identity before provider recovery, uses provider Open rather than OpenOrCreate,
-and preserves ordinary public open/codecs. Real native-file TUnit verifies
-identity/data/position, missing/mismatch/locked/invalid flows and normal reopen.
-Independent registered cleanup retains primary/cleanup failures. Every native
-proof requires a separately owned original inspector process and exit/readers
-join before restart because provider partial open cannot prove handle settlement.
-Source implementation/runtime qualification and parent control/ACK/copy remain
-pending; no power-loss or immutability claim. Rollback removes the additive private
-mode only. Exact ordered ownership/tests/exception evidence live in ADR-059.
+REQ-STORAGE-015 maps AC-SG009-001..004 ([ADR-059](../ADR/ADR-059-isolated-intensive-timeseries.md)). The private original-store guard rejects missing original files or changed identity before provider recovery, uses provider Open rather than OpenOrCreate, and preserves ordinary public open/codecs. Real native-file TUnit verifies identity/data/position, missing/mismatch/locked/invalid flows and normal reopen. Independent registered cleanup retains primary and cleanup failures. Every native proof uses a separately owned original inspector process and joins its exit and readers before restart, because provider partial open cannot prove handle settlement. Parent control/ACK/copy is outside this guard, and no power-loss or immutability claim is made. Ordered ownership, tests and exceptions are in ADR-059.
 
 ```mermaid
 flowchart LR
@@ -197,20 +79,7 @@ flowchart LR
 
 ## Bounded real crash-trial qualification
 
-REQ-STORAGE-014 maps AC-RC-001..004 in StorageRecovery.md
-to TASK-REC-ADMIT-002 under [ADR-035](../ADR/ADR-035-memory-performance.md).
-Exact c486/run37060131271 Windows reports19 seeded batch errors (0..18)
-and subscription MutationApplied3 cancellation; Linux/macOS recovery passes.
-Marker/receipt/input-read cancellations do not identify a storage defect. A shared
-test-only four-slot admission bounds each storage CrashHost launch through real
-reopen, assertions and cleanup. It starts before each unchanged15s/20s trial CTS,
-preserves20x50 seeded crashes and all checkpoint/projection/subscription cases,
-and leaves native replica-process fixtures unchanged. Success receipt rows follow
-atomic/durable assertions and add measured occupancy/peak fields. No fault point,
-assertion, readiness or job bound is reduced. The Linux-only GitHub recovery
-suite and 1000successful seeded rows in the Linux run must qualify the candidate;
-source/lifetime review explicitly covers rare exceptional permit/cleanup paths
-without doubles.
+REQ-STORAGE-014 maps AC-RC-001..004 ([ADR-035](../ADR/ADR-035-memory-performance.md)). A shared test-only four-slot admission bounds each storage CrashHost launch through real reopen, assertions and cleanup. It starts before each unchanged 15 s/20 s trial CTS, preserves 20x50 seeded crashes and all checkpoint/projection/subscription cases. Success receipt rows follow the atomic/durable assertions and add measured occupancy/peak fields. No fault point, assertion, readiness or job bound is reduced. The Linux GitHub recovery suite and 1000 successful seeded rows in that run qualify the harness; source and lifetime review explicitly cover rare exceptional permit/cleanup paths without doubles. Marker, receipt and input-read cancellations do not identify a storage defect.
 
 ```mermaid
 flowchart LR
@@ -222,20 +91,11 @@ flowchart LR
     Receipt --> Cleanup[Cleanup then release owned slot]
 ```
 
+REQ-STORAGE-014 / AC-RC-003 (also AC-AISQL-014): the unchanged receipt is written inside the original trial `try` immediately after the atomic/durable assertions, matching the receipt-before-cleanup order above. The original 15 s linked token, all 20x50 faults/trials, actual four-slot ownership and unconditional cleanup stay; the existing catch retains seed/trial/stage for receipt failures and any cleanup failure still fails qualification. This is test-harness ordering only: ADR-035 lifetime/test contracts suffice and no product, wire, persistence or topology change applies.
+
 ## Descending bounded borrowed ranges
 
-REQ-STORAGE-013 / AC-RANGE-REV-001..003 under
-[ADR-052](../ADR/ADR-052-timeseries-bounded-aggregates.md) accepts the additive
-VisitReverseRange contract with the same exclusive bounds/borrowed lifetime as
-VisitRange. TASK-SERIES-REVERSE-W8 owns only private cursor/bounds/merge behavior
-and new real-store ReverseRangeTests, ReverseTransactionRangeTests and
-ReverseRangeResourceTests. Root alone owns interface and facade/budget forwarding.
-Native prefix-bounded NoRefresh reverse seek and native SortedSet reverse
-enumeration preserve staged tombstones/replacements without complete buffering.
-Exact observer/lookahead/cancel/early-stop and healthy-following-operation tests
-remain mandatory, with all existing forward tests preserved. Native seek failure
-disposal is source/lifetime review, explicitly not an executed fake fault case.
-Source implementation and exact-SHA runtime evidence remain pending.
+REQ-STORAGE-013 / AC-RANGE-REV-001..003 ([ADR-052](../ADR/ADR-052-timeseries-bounded-aggregates.md)) accept the additive VisitReverseRange contract with the same exclusive bounds and borrowed lifetime as VisitRange. Private cursor, bounds and merge behavior are verified by real-store ReverseRangeTests, ReverseTransactionRangeTests and ReverseRangeResourceTests; interface and facade/budget forwarding stay unchanged. Native prefix-bounded NoRefresh reverse seek and native SortedSet reverse enumeration preserve staged tombstones/replacements without complete buffering. Exact observer/lookahead/cancel/early-stop and healthy-following-operation tests are mandatory, with all existing forward tests preserved. Native seek failure disposal is covered by source/lifetime review, not by an executed fake fault case.
 
 ```mermaid
 flowchart LR
@@ -247,131 +107,38 @@ flowchart LR
     Charge --> Visitor[Borrowed bounded visitor]
 ```
 
-REQ-STORAGE-012 / AC-STORAGE-012 (TASK-RUNTIME-WINDOWS-RECOVERY-W3) preserves
-the existing killed-child filesystem readiness bound. After actual process exit,
-exclusive readiness covers owner.lock, commands.wal and the actual ZoneTree
-tree/0.meta.wal when present, which failed to reopen in Windows CI37021991878. The prior receipt
-does not identify the sharing holder; this is a test-fixture observation gap,
-not proof of a storage/dependency defect. Keep the five-second bound and25ms poll,
-all50 seeded trials, original trial deadlines, WAL/snapshot/atomic assertions and
-permanent sharing failure. Cancellation stops before another probe; no retry of
-the recovery operation, default timeout increase or filesystem bypass is allowed.
+## Killed-child file readiness
 
-TASK-RUNTIME-RECOVERY-W4 refines this same criterion using exact main
-b533c80 / CI37032546228. During checkpoint installation the disposed live tree
-is moved aside before InstallPrepared and JournalSwapped callbacks; the child
-can therefore exit with no tree directory. Only FileNotFoundException and
-DirectoryNotFoundException while opening the optional metadata WAL mean that
-this file has no holder. owner.lock and commands.wal remain required exclusive
-probes; sharing violations and all other I/O errors retain the original bound.
-No readiness probe creates files or directories. Real missing-directory and
-missing-metadata-file regressions assert successful readiness without recreating
-either path, then restore the actual store files and prove subsequent reopen
-and commit. Missing required ownership/journal files must still fail, and the
-existing held-file/cancel/pre-cancel/permanent-lock tests remain intact.
+REQ-STORAGE-012 / AC-STORAGE-012 keep the killed-child filesystem readiness bound. After actual process exit, exclusive readiness covers `owner.lock`, `commands.wal` and the actual ZoneTree `tree/0.meta.wal` when present. The five-second bound, 25 ms poll, all 50 seeded trials, original trial deadlines, WAL/snapshot/atomic assertions and permanent sharing failure are unchanged. Cancellation stops before another probe; there is no retry of the recovery operation, default timeout increase or filesystem bypass.
 
-TASK-RUNTIME-WIN-ELAPSED-W6 refines AC-STORAGE-012 using exact323d60499 /
-CI37044499074. Both missing-required-file arguments catch the expected exact
-FileNotFoundException, then exceed the unchanged six-second observation cap.
-They overlap the concurrent native suite; the report does not identify the
-precise scheduler delay. Apply method-level keyless TUnit NotInParallel only to
-AcStorage012_MissingRequiredOwnershipFileStillFails, preserving both arguments,
-five-second lower/six-second upper assertions,25ms polling and no-file-creation
-checks. Existing permanent-holder timing isolation and every other case remain.
-No helper, timeout, retry or product change is authorized. Root owns accepted
-criteria/evidence; the disjoint worker owns only KilledProcessFileReadinessTests.
-Both formerly red native cases and full Linux recovery must pass at the
-delivered SHA; source isolation is not proof against external VM preemption.
-AC-REC-FUP-003 maps to these two argument cases and requires their unchanged
-exact exception/no-create/5s lower/6s upper assertions. A timing failure, broader
-serialization or weakened assertion fails this criterion.
-ADR035/036/033 lifetime/test contracts suffice; rollback removes only this
-attribute, retaining all failure evidence.
+During checkpoint installation the disposed live tree is moved aside before the InstallPrepared and JournalSwapped callbacks, so a child can exit with no tree directory. Only FileNotFoundException and DirectoryNotFoundException while opening the optional metadata WAL mean that file has no holder. `owner.lock` and `commands.wal` remain required exclusive probes; sharing violations and all other I/O errors keep the original bound. No readiness probe creates files or directories. Real missing-directory and missing-metadata-file cases assert successful readiness without recreating either path, then restore the actual store files and prove subsequent reopen and commit. Missing required ownership/journal files must still fail, and the held-file, cancel, pre-cancel and permanent-lock cases remain.
 
-The common synchronous probe is internal test infrastructure shared with
-ClusterReplication's existing store barrier. That caller retains one
-five-second deadline across target stores and, only at typed snapshot/transfer
-boundaries, both source stores, with its25ms poll; it does not perform consecutive
-independently bounded waits. Root owns that caller join;
-the StorageRecovery worker owns only the existing helper, real-file tests and
-fixture. All checkpoint process-kill, seeded trials and replica snapshot/tail
-assertions remain unchanged. Tests-first source hashes, numeric/lifetime review,
-enabled development build/format and full exact-SHA Linux GitHub recovery
-are the join; rollback reverts only the preserving helper/caller/test refinement.
+AC-REC-FUP-003 maps the two arguments of `AcStorage012_MissingRequiredOwnershipFileStillFails`. Each catches the expected exact FileNotFoundException, asserts no file creation and keeps the five-second lower / six-second upper observation assertions with 25 ms polling. Only that method carries a method-level keyless TUnit `NotInParallel`, so it does not overlap the concurrent native suite; permanent-holder timing isolation and every other case stay. A timing failure, broader serialization or weakened assertion fails the criterion. No helper, timeout or retry change is allowed.
 
-New real-file tests first hold the metadata WAL exclusively after an actual
-ZoneTree store closes: the shared barrier must remain pending, complete only
-after releasing that holder, reject cancellation and fail under the same bounded
-permanent lock. Root owns the existing RecoveryTests shared entry wrapper;
-one worker owns new cohesive StorageRecovery readiness helper/tests. Existing
-ADR035/041 owner/lifetime contracts suffice; product APIs/formats/permissions,
-frontend and dependency release are N/A. Root reviews every original caller and
-cleanup, builds/formats and qualifies full Linux-only GitHub recovery.
-Windows still fails if the real holder does not clear or original15-second trial
-bound is exceeded. Rollback reverts only the fixture helper/wrapper together.
+The synchronous probe is a shared internal test helper. New real-file tests hold the metadata WAL exclusively after an actual ZoneTree store closes: the barrier must remain pending, complete only after the holder is released, reject cancellation, and fail under the same bounded permanent lock. The shared entry wrapper in RecoveryTests is retained. Product APIs, formats and permissions, frontend and dependency release are N/A; ADR-035 and ADR-041 owner/lifetime contracts suffice.
 
-The preserving byte readback assertions in FrameBudgetTests and
-PreparedTransactionTests map additionally to AC-CQ-018. Pinned TUnit array equality
-is reference equality; ordered content equivalence must retain every exact byte,
-null failure, rejected-commit and reopen obligation. This test-source correction
-does not change storage behavior or establish runtime qualification.
+The byte readback assertions in FrameBudgetTests and PreparedTransactionTests map additionally to AC-CQ-018. Pinned TUnit array equality is reference equality, so ordered content equivalence must retain every exact byte, null failure, rejected-commit and reopen obligation.
 
-REQ-STORAGE-010 maps AC-CQ-015 and AC-SQ-002/003/004/006/007 plus AC-REP-004 to
-the accepted preserving seven-file storage test-source stage. These references
-preserve the named implementation/source constraints; they do not establish
-provider behavior or any behavioral AC-SQ criterion. REQ-STORAGE-008 owns the
-functional ZoneTree provider contract, including AC-SQ-008; a source-preservation
-stage under REQ-STORAGE-010 is not evidence that AC-SQ-008 has passed. Existing
-real frame/checkpoint/scoped read/partition-host/lock/reopen assertions remain
-complete; deterministic bytes, awaited equivalent file APIs and cancellation
-completion, standard marker-exception constructors and cohesive internal types
-satisfy the enabled policy. The journal repair retains its real synchronous
-Flush(true) barrier through an awaited complete truncate/flush/dispose operation.
-Explicit IAtomicStore dispatch and view identity remain tested. Exact scope,
-acceptance, method/assertion audit, rollback and required GitHub proof are in
-CQ015's [CodeQuality](CodeQuality.md) acceptance and execution contract. ADR033/032
-suffice for this test-source-only refinement; production/data/API/ownership
-contracts stay exact.
+REQ-STORAGE-010 maps AC-CQ-015 and AC-SQ-002/003/004/006/007 to the preserving storage test-source stage: the references keep the named implementation and source constraints but do not establish provider behavior or any behavioral AC-SQ criterion. REQ-STORAGE-008 owns the functional ZoneTree provider contract, including AC-SQ-008. Real frame, checkpoint, scoped-read, partition-host, lock and reopen assertions stay complete; deterministic bytes, awaited equivalent file APIs and cancellation completion satisfy the enabled policy. The journal repair retains its real synchronous `Flush(true)` barrier through an awaited truncate/flush/dispose. Explicit IAtomicStore dispatch and view identity remain tested. The exact scope and audit are in the [CodeQuality](CodeQuality.md) contract; ADR-033 and ADR-032 suffice for this test-source-only refinement.
 
-Node-local journals, owned values, committed read cuts, checkpoint/recovery and
-bounded provider work. [ADR-035](../ADR/ADR-035-memory-performance.md) defines the
-new scoped-read contract; ADR-032 records existing layout migration debt.
+## Requirements and acceptance map
+
+Node-local journals, owned values, committed read cuts, checkpoint/recovery and bounded provider work. [ADR-035](../ADR/ADR-035-memory-performance.md) defines the scoped-read contract; ADR-032 records existing layout migration debt.
 
 | Requirement | Acceptance | Tests / owner |
 |---|---|---|
-| REQ-STORAGE-001: budget before returned page copies; spans never escape the gate | AC-MP-002 | Real ZoneTree scoped point/range byte and lifetime cases; TASK-MP-005/005A |
-| REQ-STORAGE-002: exact prefix/exclusive-bound/order/overlay semantics without global overfetch | AC-MP-002 | Real transaction replacement/deletion/insert/out-of-range cases; TASK-MP-005A |
+| REQ-STORAGE-001: budget before returned page copies; spans never escape the gate | AC-MP-002 | Real ZoneTree scoped point/range byte and lifetime cases |
+| REQ-STORAGE-002: exact prefix/exclusive-bound/order/overlay semantics without global overfetch | AC-MP-002 | Real transaction replacement/deletion/insert/out-of-range cases |
 | REQ-STORAGE-003: cancellation/early stop release iterator and preserve canonical data | AC-MP-002/012 | Real store cancel/visitor failure, subsequent read/commit and recovery CI |
-| REQ-STORAGE-004: the physical node owns canonical and replica stores, locks, ordered apply and shutdown | AC-REP-002/004; AC-ROUTE-002 | CrashHost/Recovery and Docker RF3 reopen, failover and migration scenarios under ADR-036 |
-| REQ-STORAGE-008: cohesive private provider owners meet numeric gates without changing storage/caller contracts | AC-SQ-001..008 in StorageRecovery.md | ADR-046 TASK-MP-010AF-R/T/C/L/B; source join and real lifetime test source exist; enabled provider development build clean, complete exact-SHA runtime qualification pending |
-| REQ-STORAGE-009: validation and apply share one private mutation projection per staged generation | AC-PSW-001..004, AC-MP-006/012 | ADR-035 TASK-MP-016P-W/L; first-authored PreparedTransactionTests plus existing FrameBudget/recovery/RF3 proof; source and qualification pending |
-| REQ-STORAGE-011: startup identity metadata is finite and failed read releases physical ownership | AC-BSM-001/003/005 | [ADR-048](../ADR/ADR-048-bounded-storage-metadata.md), Metadata* real-file constructor/restore/reopen checks under BackupRestore; complete source and GitHub execution pending |
-| REQ-STORAGE-012: killed-child readiness includes the real metadata WAL when present, permits only precise sanctioned metadata absence, and preserves cancellation and the original failure bound | AC-STORAGE-012 | `tests/KeyLoad.RecoveryTests/StorageRecovery/Cases/KilledProcessFileReadinessTests.cs`: actual closed-store pending/release, cancellation, pre-cancellation, permanent-lock, missing optional directory/file without creation and missing required file cases; `RecoveryTests.cs` retains every process-kill scenario; TASK-RUNTIME-WINDOWS-RECOVERY-W3 and TASK-RUNTIME-RECOVERY-W4, Linux-only GitHub recovery qualification pending |
+| REQ-STORAGE-004: the silo-local ZoneTree owner owns the node's stores, locks, ordered apply and shutdown | AC-ROUTE-002 | CrashHost/Recovery and Docker replicated-cluster reopen, failover and activation-migration scenarios under [ADR-036](../ADR/ADR-036-orleans-foundation.md) and [ADR-136](../ADR/ADR-136-native-orleans-partition-ownership.md) |
+| REQ-STORAGE-008: cohesive private provider owners meet numeric gates without changing storage/caller contracts | AC-SQ-001..008 | [ADR-046](../ADR/ADR-046-storage-private-owners.md); real lifetime tests; exact-source runtime qualification is a separate gate |
+| REQ-STORAGE-009: validation and apply share one private mutation projection per staged generation | AC-PSW-001..004, AC-MP-006/012 | [ADR-035](../ADR/ADR-035-memory-performance.md); PreparedTransactionTests plus existing FrameBudget, recovery and replicated-cluster proof |
+| REQ-STORAGE-011: startup identity metadata is finite and failed read releases physical ownership | AC-BSM-001/003/005 | [ADR-048](../ADR/ADR-048-bounded-storage-metadata.md), Metadata* real-file constructor/restore/reopen checks under BackupRestore |
+| REQ-STORAGE-012: killed-child readiness includes the real metadata WAL when present, permits only precise sanctioned metadata absence, and preserves cancellation and the original failure bound | AC-STORAGE-012 | `tests/KeyLoad.RecoveryTests/StorageRecovery/Cases/KilledProcessFileReadinessTests.cs`: actual closed-store pending/release, cancellation, pre-cancellation, permanent-lock, missing optional directory/file without creation and missing required file cases; `RecoveryTests.cs` retains every process-kill scenario |
 
-Ownership: common public storage contracts stay in Abstractions/Storage;
-provider helpers in Storage.ZoneTree/Features/StorageRecovery, tests mirror that
-name in UnitTests/RecoveryTests. `src/KeyLoad.Server/StorageRecovery/Hosting/PartitionHost.cs`
-owns process composition of both independent stores and their protocol/materializer
-lifetimes under [ADR-036](../ADR/ADR-036-orleans-foundation.md). Grains receive
-non-owning engine/coordinator references and never dispose or reopen those files.
-ZoneTreeStore remains the public composition facade; replaced private partial
-behavior lives under StorageRecovery and BackupRestore according to ADR-046.
-No schema, UI or business-authorization change applies.
+Ownership: common public storage contracts stay in Abstractions/Storage; provider helpers in Storage.ZoneTree/StorageRecovery, with tests mirroring that name in UnitTests/RecoveryTests. The silo-local ZoneTree owner (Grain Service) composes the node's store and its journal/apply lifetimes under [ADR-036](../ADR/ADR-036-orleans-foundation.md) and [ADR-136](../ADR/ADR-136-native-orleans-partition-ownership.md). Grains receive non-owning engine/coordinator references and never dispose or reopen those files. ZoneTreeStore remains the public composition facade; private partial behavior lives under StorageRecovery and BackupRestore according to [ADR-046](../ADR/ADR-046-storage-private-owners.md), which accepts one runtime plus real StorageRecovery initialization, journal, view/transaction/range and checkpoint owners (BackupRestore owns the separate local backup component). No schema, UI, public, format or business-authorization change applies, and no numeric exception is authorized.
 
-[ADR-046](../ADR/ADR-046-storage-private-owners.md) accepts replacement of private
-facade partial behavior with one runtime plus real StorageRecovery initialization,
-journal, view/transaction/range and checkpoint owners. BackupRestore owns the
-separate local backup component. Exact signatures, file/task ownership, disposal
-orders, test matrix and join are in the [acceptance](StorageRecovery.md)
-and [plan](StorageRecovery.md). No public/format/placement change or
-numeric exception is authorized; source-only decomposition is not qualification.
-
-The [prepared-write contract](StorageRecovery.md) and
-[ordered plan](StorageRecovery.md) govern removal of the duplicate
-mutation projection. Only transaction-private prepared arrays are cached; accepted
-Stage/Reset invalidate them, rejected admission preserves the prior valid set,
-and Stage retains caller-array ownership copies. WAL/apply/fault order and bytes
-remain exact. No frontend/UI surface applies to this private storage optimization.
+The prepared-write contract removes the duplicate mutation projection. Only transaction-private prepared arrays are cached; accepted Stage/Reset invalidate them, rejected admission preserves the prior valid set, and Stage retains caller-array ownership copies. WAL/apply/fault order and bytes remain exact.
 
 ```mermaid
 flowchart LR
@@ -382,92 +149,39 @@ flowchart LR
     Visitor --> Owned[Caller selected owned output]
 ```
 
-Real ZoneTree tests precede provider repairs; TUnit/MTP, process recovery and RF3
-qualification execute only in GitHub Actions. Counters describe logical examined
-work; physical I/O/native allocation requires separate measurement. Gates and
-fault semantics cannot be relaxed for throughput.
+Real ZoneTree tests accompany provider repairs; TUnit/MTP, process recovery and replicated-cluster qualification come from exact-source Linux runs. Counters describe logical examined work; physical I/O and native allocation need separate measurement. Gates and fault semantics cannot be relaxed for throughput.
 
-## Null tombstone versus empty value repair
+## Null tombstone versus empty value
 
-REQ-STORAGE-006/009, AC-STORAGE-006, AC-PSW-002..004 and AC-ROC-002/004/005 retain
-the canonical nullable mutation distinction. The CLR byte
-array projection previously conflated Delete with a live empty value; exact candidate
-6949fa0 / GitHub run37005805424 contains failing WAL, absence, typed-read and
-transaction-range regressions. TASK-RUNTIME-STORAGE-W owns only the explicit-null
-projection in ZoneTreeTransaction.PrepareChanges and NEW
-UnitTests/Features/StorageRecovery/TombstoneValueTests.cs. Lead owns docs and joins.
+REQ-STORAGE-006/009, AC-STORAGE-006, AC-PSW-002..004 and AC-ROC-002/004/005 keep the canonical nullable mutation distinction: an empty value remains a value while Delete remains a tombstone, and no stored bytes are reclassified. The CLR byte-array projection in ZoneTreeTransaction.PrepareChanges uses an explicit null for Delete. `TombstoneValueTests` use an actual store and first prove staged/committed owned and borrowed reads, empty Put versus Delete, exact WAL/base64/null bytes, the frame limit, ordered range, WAL reopen and snapshot record count/reopen. Cache/copy/flush/apply order and NullValueOverheadBytes=2 (a four-byte null replaces two value quotes) are preserved ([ADR-035](../ADR/ADR-035-memory-performance.md) and ADR-041). Qualification requires exact-source unit, process recovery and replicated-cluster SDK/MCP evidence; the projection alone proves no power-loss guarantee or performance gain.
 
-The new actual-store tests first prove staged/committed owned and borrowed reads,
-empty Put versus Delete, exact WAL/base64/null bytes, frame limit, ordered range,
-WAL reopen and snapshot record count/reopen. Preserve cache/copy/flush/apply order
-and NullValueOverheadBytes=2 (four-byte null replaces two value quotes). ADR-035
-and ADR-041 record the preserving repair. The current format preserves the distinction: an empty value remains a value, while Delete remains a tombstone. No stored bytes are reclassified. Rollback
-reverts the projection but retains the regression source. Qualification requires
-complete exact-SHA GitHub unit/process recovery/RF3 SDK/MCP evidence; source repair
-alone proves no historical recovery, power-loss guarantee or performance gain.
+## Storage, journal and recovery contract
 
-## Повний storage, journal та recovery contract
+Actors: the node-local PartitionHost, canonical apply/read callers and the recovery/backup operator. Actual source: [ZoneTreeStore](../../src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs), [runtime](../../src/KeyLoad.Storage.ZoneTree/StorageRecovery/Execution/ZoneTreeStoreRuntime.cs), [checkpoint manager](../../src/KeyLoad.Storage.ZoneTree/StorageRecovery/Recovery/ZoneTreeCheckpointManager.cs), [KeyCodec](../../src/KeyLoad.Abstractions/Storage/Serialization/KeyCodec.cs), [storage contracts](../../src/KeyLoad.Abstractions/Storage/Contracts/). One physical owner holds the lock, the journal/read-apply gate and the immutable returned values; migrating grains never open the tree.
 
-Актори: node-local PartitionHost, canonical apply/read callers і recovery/backup operator. Actual source: [ZoneTreeStore](../../src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs), [runtime](../../src/KeyLoad.Storage.ZoneTree/StorageRecovery/Execution/ZoneTreeStoreRuntime.cs), [checkpoint manager](../../src/KeyLoad.Storage.ZoneTree/StorageRecovery/Recovery/ZoneTreeCheckpointManager.cs), [KeyCodec](../../src/KeyLoad.Abstractions/Storage/Serialization/KeyCodec.cs), [storage contracts](../../src/KeyLoad.Abstractions/Storage/Contracts/StorageContracts.cs). Один фізичний owner утримує lock, journal/read-apply gate та immutable returned values; migrating grains не відкривають tree.
-
-| Вимога | Acceptance / flows | Test mapping |
+| Requirement | Acceptance / flows | Test mapping |
 |---|---|---|
-| REQ-STORAGE-005: journal/checkpoint recovery зберігає один complete acknowledged process cut | AC-STORAGE-005: реальний process kill на prepare/publish/install boundaries відновлює цілий cut без partial transaction; torn tail має declared handling, corrupt complete frame fail closed; validated snapshot не змішується зі старим state | Existing `FiftySeededRealProcessCrashesPreserveAtomicTransactions`, `ProcessKillDuringCheckpointPublicationRecoversOneCompleteGeneration`, `CorruptCompleteFrameFailsClosedInsteadOfBeingDiscardedAsATornTail` у [RecoveryTests](../../tests/KeyLoad.RecoveryTests/StorageRecovery/Cases/RecoveryTests.cs) |
-| REQ-STORAGE-006: canonical key/envelope/owned-value format має stable ordering і scope | AC-STORAGE-006: golden keys, escaped UTF-8 components, signed/decimal ordering та scope не колідують; invalid/corrupt format відхиляється, borrowed spans не escape gate | Existing `GoldenKeysRemainStable`, `TenThousandSeededDecimalKeysRoundTripAndSortNumerically`, `StringsUseUtf8OrdinalOrderingAndEscapedComponentsDoNotCollide` у [KeyCodecTests](../../tests/KeyLoad.UnitTests/StorageRecovery/Cases/KeyCodec/KeyCodecTests.cs); scoped-read cases AC-MP-002 |
-| REQ-STORAGE-007: current-format readers reject unsupported or corrupt persisted data before effects | AC-STORAGE-007: real current-format open, recovery, snapshot install and backup/restore accept supported records; unknown/corrupt mandatory versions fail closed with original bytes and authority unchanged; no conversion or fallback reader is invoked | Existing current-format ZoneTree, RecoveryTests and BackupRestore real-operation cases under [CurrentFormat](StorageRecovery/CurrentFormat.md), [ADR-011](../ADR/ADR-011-current-native-format.md) and [ADR-116](../ADR/ADR-116-first-release-current-format.md) |
+| REQ-STORAGE-005: journal/checkpoint recovery preserves one complete acknowledged process cut | AC-STORAGE-005: a real process kill at the prepare/publish/install boundaries recovers one whole cut without a partial transaction; a torn tail has declared handling, a corrupt complete frame fails closed; a validated snapshot is never mixed with older state | Existing `FiftySeededRealProcessCrashesPreserveAtomicTransactions` (StorageRecoveryProcessTests), `ProcessKillDuringCheckpointPublicationRecoversOneCompleteGeneration`, `CorruptCompleteFrameFailsClosedInsteadOfBeingDiscardedAsATornTail` in [StoragePublicationRecoveryTests](../../tests/KeyLoad.RecoveryTests/StorageRecovery/Cases/StoragePublicationRecoveryTests.cs) |
+| REQ-STORAGE-006: the canonical key/envelope/owned-value format has stable ordering and scope | AC-STORAGE-006: golden keys, escaped UTF-8 components, signed/decimal ordering and scope do not collide; an invalid or corrupt format is rejected and borrowed spans never escape the gate | Existing `GoldenKeysRemainStable`, `TenThousandSeededDecimalKeysRoundTripAndSortNumerically`, `StringsUseUtf8OrdinalOrderingAndEscapedComponentsDoNotCollide` in [KeyCodecTests](../../tests/KeyLoad.UnitTests/StorageRecovery/Cases/KeyCodec/KeyCodecTests.cs); scoped-read cases AC-MP-002 |
+| REQ-STORAGE-007: current-format readers reject unsupported or corrupt persisted data before effects | AC-STORAGE-007: real current-format open, recovery, checkpoint install and backup/restore accept supported records; unknown/corrupt mandatory versions fail closed with original bytes and authority unchanged; no conversion or fallback reader is invoked | Existing current-format ZoneTree, RecoveryTests and BackupRestore real-operation cases under [CurrentFormat](StorageRecovery/CurrentFormat.md), [ADR-011](../ADR/ADR-011-current-native-format.md) and [ADR-116](../ADR/ADR-116-first-release-current-format.md) |
 
-ProcessDurable та QuorumProcessDurable описують перевірений declared process failure model історичного коду; `LocalDurable`/`QuorumDurable`, power-loss і endurance не приймаються із process-kill source/test names. Full ACK barrier — [ADR-003](../ADR/ADR-003-durability-ack-barrier.md); committed read views — [ADR-004](../ADR/ADR-004-committed-read-views.md); versioned keyspace — [ADR-005](../ADR/ADR-005-canonical-keyspace-codec.md); backup/log retention — [ADR-008](../ADR/ADR-008-backup-log-retention.md), [BackupRestore](BackupRestore.md).
+ProcessDurable and QuorumProcessDurable describe the verified declared process failure model; `LocalDurable`/`QuorumDurable`, power-loss and endurance are not accepted from process-kill source or test names. The full acknowledgement barrier is [ADR-003](../ADR/ADR-003-durability-ack-barrier.md); committed read views are [ADR-004](../ADR/ADR-004-committed-read-views.md); the versioned keyspace is [ADR-005](../ADR/ADR-005-canonical-keyspace-codec.md); backup/log retention is [ADR-008](../ADR/ADR-008-backup-log-retention.md), [BackupRestore](BackupRestore.md).
 
-Current-code journal, compaction, checkpoint and scoped-visitor changes require exact delivered-source evidence. Source and recovery evidence is qualified through the required TUnit, actual child-process recovery and RF3 suites. Maintenance automation and power-loss gates remain explicitly pending. Provider/container composition — один owner; нові helper/test scopes не міняють format без ADR contract.
-
-### Seeded receipt lifetime correction
-
-REQ-STORAGE-014 / AC-RC-003 also maps AC-AISQL-014 and TASK-AISQL-023. Exact
-run37070004864 Windows job111047630131 passed135/136, no skips; batch7/seed1708
-cancelled during receipt write after atomic assertions and cleanup completed.
-The log cannot identify the trial, deadline source or storage damage. Move the
-unchanged receipt into the original trial try immediately after atomic/durable
-assertions, matching the Receipt-before-Cleanup diagram above. Keep original15s
-linked token, all20x50 faults/trials, actual four-slot ownership and unconditional
-cleanup. The existing catch then retains seed/trial/stage for receipt failures;
-any cleanup failure still fails qualification. Owner: gates worker, RecoveryTests.cs
-RunSeededCrashTrialAsync call placement only; root joins exact Linux recovery
-and1000success receipts in the Linux run. Existing ADR-035 lifetime/test
-contracts suffice;
-ADR:N/A for additional architecture because this is test-harness ordering only,
-with no product/wire/persistence/topology change. Rollback reintroduces the
-post-cleanup receipt cancellation risk without altering production data.
+Current-code journal, compaction, checkpoint and scoped-visitor changes require exact delivered-source evidence. Source and recovery evidence is qualified through the required TUnit, actual child-process recovery and cluster suites. Maintenance automation and power-loss gates remain explicitly pending. Provider/container composition has one owner; new helper or test scopes do not change the format without an ADR contract.
 
 ## Orleans binary atomic WAL
 
-[ADR-057](../ADR/ADR-057-orleans-atomic-wal.md) accepts REQ-STORAGE-015..019 and AC-WAL-001..005. Current commands.wal mutation payloads use generated Orleans binary serialization with WAL signature4, identity epoch7 and checkpoint5 under [CurrentFormat](StorageRecovery/CurrentFormat.md). Native ZoneTree raw-byte Sync WAL and replication journals retain their current contracts. Unsupported or corrupt mandatory frames fail closed; no alternate decoder or fallback reader is used. The closed native ReadOnlyMemoryOfByteCodec registration keeps nullable value bytes raw rather than using the generic per-byte codec. The [original native receipt](https://github.com/managedcode/KeyLoad/actions/runs/37084177131) records verification of its exact source, cf630751e0f24e4d8183e55510add9c7207e377f. It is immutable historical evidence and does not qualify the changed current format or checkout. Fresh normal/scalar, process recovery, RF3, comparative performance, power-loss/endurance, numeric coverage and independent resource evidence remain required.
+[ADR-057](../ADR/ADR-057-orleans-atomic-wal.md) accepts REQ-STORAGE-015..019 and AC-WAL-001..005. Current commands.wal mutation payloads use generated Orleans binary serialization with WAL signature 4, identity epoch 7 and checkpoint 5 under [CurrentFormat](StorageRecovery/CurrentFormat.md). Native ZoneTree raw-byte Sync WAL and the atomic journals retain their current contracts. Unsupported or corrupt mandatory frames fail closed; no alternate decoder or fallback reader is used. The closed native ReadOnlyMemoryOfByteCodec registration keeps nullable value bytes raw rather than using the generic per-byte codec. Fresh normal/scalar, process recovery, replicated-cluster, comparative performance, power-loss/endurance, numeric coverage and independent resource evidence remain required.
 
 |Requirement|Acceptance/test trace|
 |---|---|
 |REQ-STORAGE-015 binary mutation codec|AC-WAL-001 real-store binary/empty/delete roundtrip and reopen|
 |REQ-STORAGE-016 exact bounded payload|AC-WAL-002 FrameBudgetTests plus PreparedTransactionTests cache/replacement/reset/rejected-stage|
 |REQ-STORAGE-017 safe replay|AC-WAL-003 checksum/full-consumption/shape/order and unsupported-format rejection; OrleansWalSuccessorTests verifies last legal sequence, terminal overflow rejection, unchanged journal/identity, no premature apply and released ownership; existing real commit crash cuts remain mandatory|
-|REQ-STORAGE-018 current-version fence and restore|AC-WAL-004 current checkpoint/empty/refusal and InstallSnapshot/restore identity preservation|
-|REQ-STORAGE-019 authentic qualification|AC-WAL-005 full Release/formatter/governance and exact-SHA GitHub unit/process-recovery/RF3 SDK+MCP; speed and power-loss unclaimed|
+|REQ-STORAGE-018 current-version admission and restore|AC-WAL-004 current checkpoint/empty/refusal and checkpoint install/restore identity preservation|
+|REQ-STORAGE-019 authentic qualification|AC-WAL-005 full Release/formatter/governance and exact-SHA GitHub unit/process-recovery/cluster SDK+MCP; speed and power-loss unclaimed|
 
-### TASK-WAL-LENGTH-MISMATCH complete-frame regression
-
-TASK-WAL-LENGTH-MISMATCH refines existing REQ-STORAGE-017 / AC-WAL-003 only.
-`NativeStoreOpenPreflightTests.R12Ac002CompleteCorruptionRejectsBeforeAnyProviderFileChanges`
-adds direct-open and real CrashHost-inspector arguments for an otherwise complete
-current WAL frame whose declared payload length is one byte shorter than its
-actual serialized payload. Both paths must return the existing exact
-`ErrorCode.Corruption`, preserve the complete provider file/tree hash inventory,
-and release the owner lock. The test begins with an actual committed ZoneTree
-record and a valid preceding frame; it does not add a frame-size limit or change
-reader behavior.
-
-The short-header case is already covered by
-`R12Ac002IncompleteCurrentTailIsOnlyTruncatedByOrdinaryRecovery`: it is an
-incomplete-tail recovery case, not a corruption oracle. Existing truncation and
-committed-prefix assertions remain unchanged. This proposal adds regression
-evidence only; fresh normal/scalar and required recovery/RF3 gates remain open
-until their actual reports are joined.
+Complete-frame length mismatch (REQ-STORAGE-017 / AC-WAL-003): `NativeStoreOpenPreflightTests.R12Ac002CompleteCorruptionRejectsBeforeAnyProviderFileChanges` has direct-open and real CrashHost-inspector arguments for an otherwise complete current WAL frame whose declared payload length is one byte shorter than its actual serialized payload. Both paths return the existing exact `ErrorCode.Corruption`, preserve the complete provider file/tree hash inventory and release the owner lock. The test begins with an actual committed ZoneTree record and a valid preceding frame; it adds no frame-size limit and changes no reader behavior. The short-header case is covered by `R12Ac002IncompleteCurrentTailIsOnlyTruncatedByOrdinaryRecovery`, an incomplete-tail recovery case rather than a corruption oracle; existing truncation and committed-prefix assertions are unchanged.
 
 ```mermaid
 flowchart LR
@@ -478,58 +192,45 @@ flowchart LR
     Validate --> Apply[Apply verified mutations]
 ```
 
-This feature and its linked ADRs define the precise pass/fail conditions, disjoint ownership, rollout, rollback and verification. No new UI/API/model format; no local tests; all runtime evidence comes from GitHub.
+No new UI/API/model format applies.
 
+### Case-to-acceptance clarifications
 
-### Current case-to-acceptance clarifications
+The protected-principal cases in `tests/KeyLoad.UnitTests/StorageRecovery/Cases/Partition/PartitionHostRecoveryTests.cs` exercise the real pending-image path, which rejects missing/modified protected state on repeated host-open attempts and accepts a valid protected principal after installation. These cases support REQ-STORAGE-004 for the silo-local owner's verified pending-image recovery and ownership path. They are local host/store evidence, not majority-acknowledgement or cluster evidence, and are not generic format-corruption cases.
 
-The protected-principal cases in `tests/KeyLoad.UnitTests/StorageRecovery/Cases/Partition/PartitionHostRecoveryTests.cs` map to REQ-AUTH-002 / AC-AUTH-002 in [Authorization](Authorization.md): the real pending-image path rejects missing/modified protected state on repeated host-open attempts and accepts a valid protected principal after installation. The same cases support REQ-STORAGE-004 / AC-REP-004 for the physical host's verified pending-image recovery and ownership path. They are local host/store evidence, not quorum or RF3 evidence, and are not generic format-corruption cases.
+`OfflineRegularFileEntryTypeTests`, `OfflineRegularFileIdentityTests`, `OfflineRegularFileLockTests` and `OfflineRegularFileDuplicateLockTests` carry the obsolete source label `AC-EPOCH-012`. Their observed regular-entry, identity, BCL lock-interoperation and native-handle lifetime behavior is supporting primitive evidence for REQ-STORAGE-015 / AC-SG009P-001..004. They do not invoke the guarded Release CrashHost protocol and cannot establish the complete AC-SG009P process, strict-request, receipt or original-reader settlement contract by themselves.
 
-`OfflineRegularFileEntryTypeTests`, `OfflineRegularFileIdentityTests`, `OfflineRegularFileLockTests` and `OfflineRegularFileDuplicateLockTests` carry the obsolete source label `AC-EPOCH-012`. Their observed regular-entry, identity, BCL lock-interoperation and native-handle lifetime behavior is supporting primitive evidence for current REQ-STORAGE-015 / AC-SG009P-001..004. These methods do not invoke the guarded Release CrashHost protocol; they cannot establish the complete AC-SG009P process, strict-request, receipt, or original-reader settlement contract by themselves. The exact method-by-method observed claims and this limitation are recorded in the case-level traceability proposal.
+REQ-STORAGE-015 also maps AC-SG009P-001..004 ([ADR-059](../ADR/ADR-059-isolated-intensive-timeseries.md)). The canonical directory is lexical normalized ordinal equality, without a symlink/rename resistance claim. Every guard test invokes the genuine Release CrashHost using bounded private JSON and actual failure/data facts; original process exit and both pipe drains precede outer-lock release and ordinary reopen. The cancellation case observes the original ready child, kills/reaps it and checks data after normal reopen. This helper is not the native benchmark inspector/control/copy oracle.
 
-REQ-STORAGE-015 also maps AC-SG009P-001..004 / TASK-ISO-SG009P-C/T/R/I under
-ADR-059. Canonical directory is lexical normalized ordinal equality, without a
-symlink/rename resistance claim. Every guard test invokes the genuine Release
-CrashHost using bounded private JSON and actual failure/data facts; original
-process exit and both pipe drains precede outer-lock release and ordinary reopen.
-The cancellation case observes the original ready child, kills/reaps it and
-checks data after normal reopen. Source and process qualification remain pending;
-this test helper is not the native benchmark inspector/control/copy oracle.
+## Event append seeded crash cuts
 
+REQ-STORAGE-006/007 and AC-STORAGE-006/007 are preserved through the exact seven native during-append process cuts and original child/readers/store-lock ownership frozen in [EventStreams](EventStreams.md) and ADR-002. The recovered doc/event/head/dedup/queue/outbox/receipt and same-ID/healthy-follow-up assertions use real ZoneTree and current serialization. No timeout change, multi-lane or power-loss claim follows.
 
-TASK-EVENT-APPEND-SEEDED-CRASH-001 preserves REQ-STORAGE-006/007 and AC-STORAGE-006/007 through the exact seven native during-append process cuts and original child/readers/store-lock ownership frozen in [EventStreams](EventStreams.md#task-event-append-seeded-crash-001) and ADR002. The new complete recovered doc/event/head/dedup/queue/outbox/receipt and same-ID/healthy-follow-up assertions use real ZoneTree and current serialization. No runtime qualification, timeout change, multi-lane or power-loss claim follows from source. Existing required Linux/RF3/coverage gates remain unchanged.
+## Native store gate diagnostic
 
-## TASK-KL026-REAL-LEASE-DROP-003
+REQ-SERIES-022 / AC-SERIES-022 and REQ-STORAGE-GATE-001 / AC-STORAGE-GATE-001 define a native per-open-store gate diagnostic. ZoneTreeGateSnapshot carries only the existing ephemeral read SessionId and the native ReaderWriterLockSlim.WaitingWriteCount as WaitingWriters. The scalar counts all pending write-gate users, not only commits; it is not a receipt, readiness/authority token, consistent multi-field cut or durability proof. No key, principal, credential, path, payload, callback, event handler, exported metric label or unbounded history exists. Sampling acquires no store gate, scans no records, mutates no storage and allocates no retained collection; the owner must remain open through sampling and cleanup. No HTTP/SDK/MCP diagnostic route is added. Native storage owns this observation; Orleans still owns actual requests and node-local storage/commit authority.
 
-REQ-SERIES-022 / AC-SERIES-022 and new REQ-STORAGE-GATE-001 / AC-STORAGE-GATE-001 freeze a native per-open-store gate diagnostic before implementation. ZoneTreeGateSnapshot carries only the existing ephemeral read SessionId and the native ReaderWriterLockSlim.WaitingWriteCount as WaitingWriters. The scalar counts all pending write-gate users, not only commits; it is not a receipt, readiness/authority token, consistent multi-field cut or durability proof. No key, principal, credential, path, payload, callback, event handler, exported metric label or unbounded history exists. Sampling acquires no store gate, scans no records, mutates no storage and allocates no retained collection; the owner must remain open through sampling and cleanup. No HTTP/SDK/MCP diagnostic route is added. Native storage owns this observation; Orleans still owns actual requests and node-local storage/commit authority.
+Whole flow: seed and refresh a literal real bucket; hold its existing authorized budgeted SampleRollupReader inside the actual store Read callback and retain only a detached literal result. Submit exactly one actual stable-ID Drop on a joined native worker. Under the unchanged five-second scope bound, observe same-session WaitingWriters>0 while the first read gate remains held; only then release and join the actual reader and writer. Verify the first complete literal bucket, the exact native drop receipt kind/revision, unchanged raw/ID/sequence/floor authority, the revision tombstone, stable-ID replay with unchanged full bytes/position, and a genuine CAS recreate/read healthy continuation. The condition is actual queued native writer work, not Task.IsCompleted, a pre-call signal or a scheduling delay. Full bytes inside the held gate equal the pre-drop cut. Native observations and controller/worker errors settle before owned store disposal; primary and cleanup failures are retained.
 
-Actual whole flow: seed and refresh a literal real bucket; hold its existing authorized budgeted SampleRollupReader inside the actual store Read callback, and retain only a detached literal result. Submit exactly one actual stable-ID Drop on a joined native worker. Under the unchanged original five-second scope bound, observe same-session WaitingWriters>0 while the first actual read gate remains held; only then release and join the actual reader and writer. Verify first complete literal bucket, exact native drop receipt kind/revision, raw/ID/sequence/floor authority unchanged, revision tombstone, stable-ID replay full bytes/position unchanged, and a genuine CAS recreate/read healthy continuation. The condition is actual native queued writer work, not Task.IsCompleted, a pre-call signal or a scheduling delay. Full bytes inside the held real gate remain equal to the pre-drop cut. Native observations and controller/worker errors must settle before owned store disposal; primary and cleanup failures are retained. No runtime proof or KL026 closure is claimed from authored source.
+## Topic purge crash cuts
 
+REQ-EVENT-RETENTION-004 / AC-EVENT-RETENTION-004: the real CrashHost first acknowledges purge through source position 1, then arms the existing native CanonicalCrashBoundary for exactly the next Store.Commit position of immutable purge-through 2. Two seeds admit either success (paused checkpoint 3) or exact ResourceExhausted rejection (paused checkpoint 1). Kill only the owned original process after its native phase marker; join original exit and both bounded readers, prove exclusive native locks and reopen the actual ZoneTree. HeaderWritten/PayloadWritten are pre-flush boundaries; JournalFlushed is after the native durable flush returns and before native apply, not inside an OS flush syscall; MutationApplied0 and ApplyCompleted are actual native apply cuts. A pre-flush cut may recover the old or the whole new cut; a post-flush cut must recover the complete success or rejected receipt, never partial model changes.
 
-### TASK-KL098-TOPIC-PURGE-CRASH-001: native admitted purge cuts
+The independent oracle requires literal head/events/source positions/digests/doc/queue/paused checkpoint plus the original acknowledged seed receipt, canonical command fingerprint/receipt, exact committed clock and stable same-ID replay with full-store byte equality. Fresh identical/conflicting EventID errors remain distinct. Appending, reading, queue claim and a final native reopen follow. No new product seam, provider, journal, format, whitelist, sleep, wider deadline or retry-to-green; process kill is not power-loss proof. The scenario lives in CrashHost EventStreams and RecoveryTests EventStreams with the existing process/readers/cleanup helpers.
 
-REQ-EVENT-RETENTION-004 / AC-EVENT-RETENTION-004: the real CrashHost first acknowledges purge through source position1, then arms the existing native CanonicalCrashBoundary for exactly the next Store.Commit position of immutable purge-through2. Two seeds admit either success (paused checkpoint3) or exact ResourceExhausted rejection (paused checkpoint1). Kill only the owned original process after its native phase marker; join original exit and both bounded readers, prove exclusive native locks, reopen actual ZoneTree. HeaderWritten/PayloadWritten are pre-flush boundaries; JournalFlushed is AFTER native durable flush returns and BEFORE native apply, not inside an OS flush syscall. MutationApplied0 and ApplyCompleted are actual native apply cuts. Pre-flush may recover old or whole new cut; post-flush must recover complete success/rejected receipt, never partial model changes.
+## Composite range and unique-index process cuts
 
-The independent oracle requires literal head/events/source positions/digests/doc/queue/paused checkpoint plus original acknowledged seed receipt, canonical command fingerprint/receipt, exact committed clock and stable same-ID replay with full-store byte equality. Fresh identical/conflicting EventID errors remain distinct. Follow with actual append/read/queue claim and final native reopen. No new product seam/provider/journal/format/whitelist, sleeps, wider deadlines or retry-to-green. Root native discovery/build/recovery execution and exact source/DLL/PDB receipts are pending; process kill is not power-loss proof. Historical identity-population/horizon/rebuild/transfer/remote retention and full KL098 gates remain open.
+REQ-DSTORE-002 / AC-DSTORE-002 and AC-DSTORE-COMPOSITE-PROCESS-001 preserve the equality/range/composite/partition-unique scope. A real four-process CrashHost matrix verifies inserted, replaced, patched, deleted and tombstoned documents, complete composite/ordered-score/unique native index images in two atomic partitions, literal membership and native exclusive-after-key ranges. Composite equality must report the genuine declared composite index; native range Scan proof is distinct from query-planner inequality seeks. A mixed document/event/enqueue unique conflict rolls back every effect; its persisted failure and the successful acknowledged receipt replay unchanged after the crash with complete store-byte and position invariance. A fresh command follows recovery and a fourth reopen preserves it.
 
-Ownership: CrashHost EventStreams Contracts/Helpers, existing CrashHostApplication mode join; RecoveryTests EventStreams Cases/Processes/Assertions. Contracts join after TASK-KL098-TOPIC-RETENTION-001, then child/oracle; existing original process/readers/cleanup helpers are reused unchanged. Rollback removes this scenario/tests only, preserving product retention contract and immutable historical results.
+The matrix reuses the JournalFlushed cut, acknowledged first kill, original child stdout/stderr and joined cleanup/deadlines. Parent literal tuples are independent of observed index values; the native public KeySpace encodes the specified literal keys and never calls the index mutation implementation. No provider doubles, fallback or retry-until-pass. ADR-002 owns command replay; ADR-011 owns atomic journal/recovery.
 
-### TASK-KL011-COMPOSITE-RANGE-PROCESS-001
+## Native maintenance lifetime
 
-REQ-DSTORE-002 / AC-DSTORE-002 and new AC-DSTORE-COMPOSITE-PROCESS-001: preserve original KL011 equality/range/composite/partition-unique scope. A real four-process CrashHost matrix verifies inserted, replaced, patched, deleted and tombstoned documents, complete composite/ordered-score/unique native index images in two atomic partitions, literal membership and native exclusive-after-key ranges. Composite equality must report the genuine declared composite index; native range Scan proof is distinct from KL013 query-planner inequality seeks. A mixed document/event/enqueue unique conflict must roll back every effect; its original persisted failure and successful acknowledged receipt replay unchanged after crash with complete store-byte and position invariance. A fresh command follows recovery and a fourth reopen preserves it.
+REQ-STORAGE-MAINTENANCE-JOIN-001: the node-local ZoneTree owner joins its actual tracked native merge thread before releasing tree/journal/owner file handles (disposal waits for jobs). Read-cut join alone does not prove maintenance completion. No product API, timer, dependency, format or public boundary changes.
 
-Reuse original JournalFlushed cut, acknowledged first kill, original child stdout/stderr and joined cleanup/deadlines. Parent literal tuples are independent of observed index values; native public KeySpace encodes the specified literal keys, never calls the index mutation implementation. No provider doubles, fallback, retry-until-pass, power-loss or closure claim. Existing scalar scenario is untouched. Ownership: CrashHost DocumentStorage Contracts/Scenarios owns new current-format private modes; Recovery DocumentStorage Cases/Helpers/Assertions owns actual process orchestration and independent oracle; only existing CrashHost application adds closed dispatch. Source-only packet requires full strict build, native discovery, focused process matrix and original full Linux recovery plus unchanged normal/scalar/RF3 gates. ADR002 owns command replay; ADR011 owns atomic journal/recovery.
+AC-STORAGE-MAINTENANCE-JOIN-001: NativeMaintenanceLifetimeTests seeds complete independent literal byte records through real atomic Commit, updates/deletes through another Commit, and starts the existing native maintainer EvictToDisk. Observe native OnDiskSegmentCreated (actual disk record serialization completed on the merger thread), hold only that native callback under the existing ten-second lifetime bound, start real owner Dispose, observe the actual same-owner queued writer under a real Read, then its acquired writer gate before releasing the merge callback. Dispose must remain incomplete only after those native observations. Release and join the original Dispose, observe the SUCCESS terminal native merge and stopped original thread, open every original file exclusively, reopen the same native owner with the same position and full literal scan, perform a healthy real Commit and reopen to its complete expected bytes. A pre-call Task state, native Start callback, sleep, padded corpus or getter-only check cannot substitute.
 
-
-## TASK-KL008-NATIVE-MAINTENANCE-JOIN-001 — actual native merge disposal
-
-REQ-STORAGE-MAINTENANCE-JOIN-001: the existing node-local ZoneTree owner must join its actual tracked native merge thread before releasing tree/journal/owner file handles. This retains original KL008 disposal-waits-jobs acceptance; read-cut join alone does not prove maintenance completion. No product API, timer, dependency, format or public boundary changes.
-
-AC-STORAGE-MAINTENANCE-JOIN-001: NativeMaintenanceLifetimeTests seeds complete independent literal byte records through real atomic Commit, updates/deletes through another Commit, and starts the existing native maintainer EvictToDisk. Observe native OnDiskSegmentCreated (actual disk record serialization completed on the merger thread), hold only that native callback under the existing ten-second lifetime bound, start real owner Dispose, observe actual same-owner queued writer under a real Read, then its acquired writer gate before releasing the merge callback. Dispose must remain incomplete only AFTER those native observations. Release and join original Dispose, observe SUCCESS terminal native merge and stopped original thread, open every original file exclusively, reopen same native owner/position/full literal scan, perform healthy real Commit and reopen its complete expected bytes. A pre-call Task state, native Start callback, sleep, padded corpus or getter-only check cannot substitute.
-
-Ordered ownership: UnitTests StorageRecovery Cases/Helpers/Assertions; current ZoneTreeStoreRuntime and ZoneTreeStore internal friend composition share one real physical runtime/maintainer, no second provider or storage owner. Actual ZoneTree1.9.8 package repository commit13ee11e19007301fdea72b9210de62f6257f4929 source defines OnMergeOperationStarted before thread creation; therefore that event is not the work oracle. OnDiskSegmentCreated runs after native disk creation on merge worker; original maintainer Dispose waits tracked threads. Native caller/cleanup must join before closing barriers or deleting files, preserve primary plus cleanup errors, and retain root on failure. Cancellation of the test does not skip joining or fabricate a successful merge.
-
-Root integrates guarded source then runs native focused/full normal/scalar and existing recovery/RF3 gates. No source-only PASS, power-loss/endurance, Linux delivery or original KL008 closure is claimed. Rollback removes only this authored test/doc addition.
+One real physical runtime/maintainer is used (ZoneTreeStoreRuntime and ZoneTreeStore internal composition); there is no second provider or storage owner. In the pinned ZoneTree 1.9.8 source OnMergeOperationStarted fires before the merge thread is created, so it is not the work oracle; OnDiskSegmentCreated runs on the merge worker after native disk creation, and the maintainer's Dispose waits for tracked threads. The native caller and cleanup join before closing barriers or deleting files, preserve primary plus cleanup errors and retain the root on failure. Test cancellation neither skips the join nor fabricates a successful merge.
 
 ```mermaid
 flowchart LR
@@ -540,369 +241,90 @@ flowchart LR
   Join --> Reopen[Exclusive original files and complete healthy reopen]
 ```
 
-Scope limitation of AC-STORAGE-MAINTENANCE-JOIN-001: pinned native Maintainer.Dispose joins merge threads, but its default periodic cache-cleanup Task is not retained/awaited. The merge case alone cannot qualify periodic-job completion. The following contract owns that remaining KL008 boundary; implementation and exact-source execution remain required.
+Pinned native Maintainer.Dispose joins merge threads, but its default periodic cache-cleanup Task is not retained or awaited, so the merge case alone cannot qualify periodic-job completion. The following contract owns that remaining boundary.
 
-### TASK-KL008-NATIVE-MAINTENANCE-JOIN-002: joined periodic native cleanup
+REQ-STORAGE-MAINTENANCE-JOIN-002: one node-local maintenance lifetime owns every periodic cleanup task and stops/joins it before retiring the original tree, journal or owner lock, including failed construction and snapshot tree replacement. The pinned native `ZoneTreeMaintainer` is instantiated with `startJobForCleaningInactiveBlockCaches: false` before any job can start; its native automatic merge policies and tracked merge join are retained. The caller-owned periodic task invokes the public native `ReleaseReadBuffers`, `ReleaseCircularKeyCacheRecords` and `ReleaseCircularValueCacheRecords` APIs. It does not implement cache internals or introduce another storage engine. The default interval is 30 seconds and the block lifetime 1 minute. Exactly one task and timer per physical tree execute sequential sweeps without queues, request identity, payloads, authoritative state or network calls.
 
-REQ-STORAGE-MAINTENANCE-JOIN-002: one node-local maintenance lifetime must own every periodic cleanup task and stop/join it before retiring the original tree, journal or owner lock, including failed construction and snapshot tree replacement. Instantiate the pinned native `ZoneTreeMaintainer` with `startJobForCleaningInactiveBlockCaches: false` before any job can start; retain its native automatic merge policies and tracked merge join. The caller-owned periodic task invokes the actual public native `ReleaseReadBuffers`, `ReleaseCircularKeyCacheRecords` and `ReleaseCircularValueCacheRecords` APIs. It does not implement cache internals or introduce another storage engine. Default interval30 seconds and block lifetime1 minute retain the native policy. Exactly one task and timer per physical tree execute sequential sweeps without queues, request identity, payloads, authoritative state or network calls.
+AC-STORAGE-MAINTENANCE-JOIN-002: a real ZoneTree operation commits independent literal records, updates/deletes them, completes native disk eviction and reads the exact disk-backed values. Observe a sweep only after all three native cleanup APIs return, then hold that completed sweep's owned callback. Start real store disposal, observe its queued writer under an actual read and its acquired write gate, and require it to remain pending until that task is released and joined. After release, require task success, exclusive access to every original file, unchanged incarnation/position and complete literal state after cold reopen, then a healthy commit and second cold reopen. Task-state inspection before the native operation, sleep, cancellation alone or a released lock does not qualify.
 
-AC-STORAGE-MAINTENANCE-JOIN-002: a real ZoneTree operation flow commits independent literal records, updates/deletes them, completes native disk eviction and reads the exact disk-backed values. Observe a sweep only after all three actual native cleanup APIs return, then hold that completed sweep's owned callback. Start real store disposal, observe its queued writer under an actual read and its acquired write gate, and require it to remain pending until that original task is released and joined. After release, require original task success, exclusive access to every original file, unchanged incarnation/position and complete literal state after cold reopen, then a healthy commit and second cold reopen. Task-state inspection before the native operation, sleep, cancellation alone or a released lock does not qualify.
+AC-STORAGE-MAINTENANCE-JOIN-003: inject a bounded failure at the same post-native-sweep callback, observe the original worker fault through actual store disposal, and require joined cleanup, exclusive original files, unchanged complete committed contents and a healthy cold-reopen operation. The first worker failure and any independent native merge/handle cleanup failures are retained. Cancellation ends only the timer wait; it cannot suppress a sweep failure or detach a running callback. Guarded original-store inspection starts no maintainer or periodic task.
 
-AC-STORAGE-MAINTENANCE-JOIN-003: inject a bounded failure at the same post-native-sweep callback, observe the original worker fault through actual store disposal, and require joined cleanup, exclusive original files, unchanged complete committed contents and a healthy cold-reopen operation. Retain the first worker failure and any independent native merge/handle cleanup failures. Cancellation ends only the timer wait; it cannot suppress a sweep failure or detach a running callback. Guarded original-store inspection starts no maintainer or periodic task.
+Traceability: disposal-waits-jobs -> REQ-STORAGE-MAINTENANCE-JOIN-002 -> AC-STORAGE-MAINTENANCE-JOIN-002/003 -> ADR-046 -> `NativeMaintenancePeriodicLifetimeTests` complete operation flows. The owner-process, read-cut lifetime/budget/cancellation, merge-thread and pooled-envelope flows remain required.
 
-Traceability: KL008 disposal-waits-jobs -> REQ-STORAGE-MAINTENANCE-JOIN-002 -> AC-STORAGE-MAINTENANCE-JOIN-002/003 -> ADR-046 -> `NativeMaintenancePeriodicLifetimeTests` complete operation flows. Existing owner-process, read-cut lifetime/budget/cancellation, merge-thread and pooled-envelope flows remain required. Full build/format, current native census/source-image binding, focused normal/scalar flows and mandatory Linux recovery/RF3 qualification are distinct gates; no local or authored result closes the task by itself.
+AC-STORAGE-MAINTENANCE-JOIN-004: each zero, negative, sub-millisecond or above-native-range maintenance interval, and each negative or above-native-range block lifetime, rejects before creating the directory or owning files. The same previously absent path then accepts a valid central policy, a real multi-record commit, complete literal cold-reopen state with unchanged incarnation/position, a healthy additional commit and a second complete cold reopen. `ZoneTreeMaintenancePolicyTests.InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen` owns all six operation flows.
 
-AC-STORAGE-MAINTENANCE-JOIN-004: each zero, negative, sub-millisecond or above-native-range maintenance interval, and each negative or above-native-range block lifetime, must reject before creating the directory or owning files. The same previously absent path then accepts valid central policy, a real multi-record commit, complete literal cold-reopen state with unchanged incarnation/position, a healthy additional commit and a second complete cold reopen. `ZoneTreeMaintenancePolicyTests.InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen` owns all six operation flows.
+Operational policy comes from the centrally bound and validated `ZoneTreeStorageExecutionOptions`: a native-range `NativeMaintenanceInterval` of at least one millisecond and a nonnegative native-range `NativeBlockCacheLifetime`, with 30-second / one-minute defaults. The typed snapshot is frozen before native ownership. Linux qualification uses `TimeProvider.System` monotonic elapsed milliseconds from its native zero epoch for the native read-buffer cutoff (.NET 10 high/low-resolution POSIX clocks share that epoch: Linux MONOTONIC/COARSE, macOS UPTIME_RAW). This disposable cache cutoff is independent of request/read-cut/commit clocks and has only native clock-resolution precision. No UTC clock, injected request clock, invented expiry or analyzer suppression is permitted. Windows epoch portability remains a distinct unqualified boundary.
 
-Operational policy comes from centrally bound/validated `ZoneTreeStorageExecutionOptions`: native-range `NativeMaintenanceInterval` of at least one millisecond, and nonnegative native-range `NativeBlockCacheLifetime`, with unchanged30-second/one-minute defaults. Freeze that typed snapshot before native ownership. Linux qualification uses `TimeProvider.System` monotonic elapsed milliseconds from its native zero epoch for the native read-buffer cutoff; .NET10 high/low-resolution POSIX clocks share that epoch (Linux MONOTONIC/COARSE; macOS UPTIME_RAW). This disposable cache cutoff is independent of request/read-cut/commit clocks and has only native clock-resolution precision. No UTC clock, injected request clock, invented expiry or analyzer suppression is permitted. Windows epoch portability remains a distinct unqualified provider/platform boundary, not Linux or power-loss evidence.
+REQ-STORAGE-MAINTENANCE-JOIN-003 / AC-STORAGE-MAINTENANCE-SNAPSHOT-005: every actual native store opening receives the complete centrally validated per-store execution policy, including maintenance interval and block lifetime. The direct restore authority owner therefore carries the original centrally bound IOptions from Restore into its private ApplyRestoreAuthorityState and calls the canonical public ResolveExecutionOptions before constructing the staging runtime, rather than the scalar-only WithExecutionSnapshot helper (only the resolver carries the maintenance policy). It must not manufacture an Options.Create wrapper or weaken configuration ownership (KLD0037). The maintenance lifetime freezes and validates that admitted policy before starting work. Explicit per-store frame/snapshot overrides, every effective scalar budget, validation-before-ownership, native maintenance lifetime, timer/task/merge joins, generation replacement and disposal order are preserved. No fallback or default policy, skipped maintenance, exception swallowing, new engine/provider, format, restored authority, public API or changed limit is permitted; the node-local owner and separate journals remain authoritative. The regressions are the whole native backup/restore, rejected-input then healthy restore, real CLI children, cold-reopen blob/eventing/metadata/identity flows and real recovery children; ADR-046 owns this private snapshot join and BackupRestore REQ/AC-BACKUP-001/002/003 are unchanged.
 
+## Rollup refresh and drop process cuts
 
-Stage XI native analyzer correction retains the existing REQ/AC contracts: the ephemeral native gate snapshot is exposed as `GateDiagnostics`, and the one-command purge ledger snapshots and validates the existing centrally bound `OperationLimitsOptions`. Limits, observer ordering, byte/scan accounting and authorization remain unchanged. Lowercase digest validation uses the same exact ASCII alphabet through native span classification. Original failed build diagnostics are retained; compilation and whole-operation regressions remain mandatory.
+REQ-SERIES-022 / AC-SERIES-022 and [ADR-120](../ADR/ADR-120-bounded-persisted-series-rollups.md) add two real process recovery cases for bounded rollup refresh/drop. The existing CrashHost canonical JournalFlushed hold, CommandIdempotencyProcessChild original output/drain/exit ownership, StorageTrialLease and native file-release proof own four distinct child lifetimes. Kill after acknowledged revision 1, then kill the actual in-flight refresh/drop at JournalFlushed; recover revision 2 statistics or tombstone from the native current journals. Retain the complete raw sample/identity/sequence/floor bytes, independent full literal samples/statistics/metadata, exact native same-ID receipts, a changed-payload Conflict without effects and stable failed replay; then run a healthy refresh/drop/recreate to revision 5 and a separate successful reopen child. No new product diagnostics, alias, limit, timeout or retry loop and no power-loss claim. Every child and both native pipe tasks settle before cleanup; primary plus cleanup failure remains observed.
 
-### TASK-STORAGE-MAINTENANCE-SNAPSHOT-003 (frozen before code, 2026-10-09)
+## Native ANN staged replay process ownership (AC-ANN-007)
 
-REQ-STORAGE-MAINTENANCE-JOIN-003 / AC-STORAGE-MAINTENANCE-SNAPSHOT-005 require every actual native store opening to receive the complete centrally validated per-store execution policy, including maintenance interval and block lifetime. Authentic source47 run37868406144/job113620582336 artifact11590685637 SHA2565f5586f89a4eb92ceff44090984cb521c0e83804c4c76b80843add1f25cf0efd contains51 restore-path failures in each complete3122-case unit profile and2 failures in the275-case recovery suite. All retain the same native unresolved-maintenance-policy initiating failure. Source shows the direct restore authority owner called the scalar WithExecutionSnapshot helper instead of the native opening's canonical ResolveExecutionOptions; only that resolver carries the original centrally bound IOptions maintenance policy.
+`NativeAnnProcessRecoveryTests` owns actual child processes through the existing Aspire recovery entry and finite child/pipe/file-lock settlement. The first stage covers an acknowledged durable pending-page publication before its canonical ACK, then an actual canonical ACK killed at the original JournalFlushed boundary, followed by cold pending-array load, same-ID original receipt recovery and bounded remaining-prefix replay. A later child cold-loads the completed native graph, verifies complete literal vector records and performs a genuine healthy explicit vector mutation and replay. Pending arrays never serve readers; recovered nonempty checkpoint receipts establish progress. These process-kill cuts do not establish power-loss durability, arbitrary partial-write coverage or AC-ANN-008 public approximate search qualification.
 
-Carry the original centrally bound IOptions from Restore into its private ApplyRestoreAuthorityState and call the existing ResolveExecutionOptions before constructing the original staging runtime. Retain the existing scalar-only WithExecutionSnapshot contract and the canonical public resolver; execution must not manufacture an Options.Create wrapper or weaken KLD0037 configuration ownership. The original native maintenance lifetime freezes and validates that admitted policy before starting its work. Preserve explicit per-store frame/snapshot overrides and every effective scalar budget, validation-before-ownership, native maintenance lifetime, timer/task/merge joins, generation replacement and original disposal order. No fallback/default policy, skipped maintenance, exception swallowing, new engine/provider, format, restored authority, public API or changed limit is permitted. Existing node-local owner and separate journals remain authoritative.
+## Native storage owner, lease and pooled-value acceptance
 
-Root owns only BackupRestore/Recovery/ZoneTreeBackupRestoreRestore.cs for product repair. Existing whole native backup/restore, rejected-input then healthy restore, real CLI children, cold-reopen blob/eventing/metadata/identity flows and real recovery children are the regressions; no property-only test is added. ADR046 owns this private snapshot join; BackupRestore REQ/AC-BACKUP-001/002/003 remain unchanged. Build/format, focused actual original failing class union in normal/scalar and recovery, original source/image binding, then exact current Linux complete suites precede qualification. Preserve the original failed archive and complete TRX; neither local passing flows nor metadata closes KL008 or backup acceptance. Rollback restores this one coherent restore-owner implementation and retains the regressions. The original r836 failed development build records KLD0037 for an attempted execution-side wrapper; that rejected uncommitted wrapper is removed before the corrected build, not suppressed or accepted.
+REQ-STORAGE-008, REQ-CUT-003, REQ-KEYCODEC-004 and REQ-STORAGE-MAINTENANCE-JOIN-001/002 retain the owner, lease, native maintainer/job and pooled-envelope criteria. AC-STORAGE-NATIVE-SUITE-001 binds the 27-case native union of KeyCodecEnvelopeOwnershipTests, NativeMaintenanceLifetimeTests, NativeReadCutBudgetTests/CancellationTests/ClockTests/ConsistencyTests/LifetimeTests/ReplacementTests, StorageOwnerProcessTests, StoreLifetimeTests, NativeMaintenancePeriodicLifetimeTests and ZoneTreeMaintenancePolicyTests. Normal and scalar each execute 27/27 without skips and settle their child exits/readers/disposal. These complete operations own real node-local files and the genuine separate CrashHost process; Docker replicated-cluster deployment is N/A to this unit lane, so the shared matrix must not build or start Docker resources for it. ADR-046 owns the storage boundary and ADR-117 the direct native TUnit entry and fixtures. The complete recovery and genuine replicated-cluster suites remain independently required.
 
-## TASK-KL009-NATIVE-APPLY-SCOPE-001 (follower-owner implementation contract, 2026-10-07)
+## Native encoded-frame limit detail
 
-### TASK-KL009-PERSISTED-POLICY-EPOCH-002 (frozen before code, 2026-10-09)
+REQ-SR-ENCODED-FRAME-DETAIL-001 / AC-SR-ENCODED-FRAME-DETAIL-001 retain the actual ResourceExhausted guard and limit in ZoneTreeJournalBufferWriter.Advance and use its fixed EncodedTransactionFrameLimitExceeded detail. Raw Stage keeps its original failure detail; no budget/format/recovery ordering changes. Existing FrameBudgetTests.AcWal002IncrementalFrameAccountingMatchesBinaryPayloadAtExactLimits retains every legal coalesced WAL/value/checksum and one-byte-short no-effect assertion, additionally checking the exact owning encoded detail (12 source trials). Ordinary required native recovery tests still qualify byte-identical partial-tail semantics.
 
-REQ-REP-APPLY-SCOPE-001 / AC-REP-APPLY-SCOPE-001 retain the actual follower-owned journal hold, independent authenticated replica Append progress, SDK/official-MCP full document/queue effects and original receipt replay/conflict/healthy continuation. Authentic sourcef80 run37861333290/job113597517356 artifact11588428430 SHA2561b12349298e2bcacfb442bff579b3b701677bfc26108121620ef2d9cd047ac73 failed the KL009 scenario while preparing ConfigurePrincipalAsync, before reaching those fault/effect boundaries. The fixture recreated its newly persisted epoch1 principal with additional queue grants and the same default epoch1; actual PrincipalConfiguration correctly rejects a policy update whose epoch does not advance.
+## Upstream ZoneTree WAL checksum defect
 
-The fresh private provisioning helper must explicitly create and assert the committed initial policy epoch1. CanonicalApplyNetworkData must advance that known original epoch exactly once to2 while preserving the same non-administrator identity, tenant and original document scope, adding only its actual queue publish/inspect scope. Require the complete returned principal to equal the complete intended record. Preserve all real persisted credential/resource operations, unique IDs, original caller paths, deadlines and post-fault state/receipt assertions. No product authorization validator, retry, fake client, new transport, limit or topology change is permitted. These are assertions inside the existing full operation scenario, not isolated property tests.
+REQ-STORAGE-008, AC-SQ-008 and native-WAL qualification retain the confirmed checksum findings for the pinned ZoneTree 1.9.8. The owner-authorized public report is [ZoneTree issue 182](https://github.com/ZoneTree/ZoneTree/issues/182): an ARM64 .NET 10 WAL create→dispose→software-read failure, the native byte-tail CRC overload defect and a proposed upstream patch. These are development facts, not Linux/x64, release, package, power-loss or KeyLoad acceptance proof. ZoneTree maintainers own the upstream compatibility and release decision. KeyLoad keeps its pinned published dependency and introduces no checksum fallback, migration, local package or consumer workaround; the affected WAL portability gate remains open. The report adds no implementation, schema, topology or dependency boundary (ADR-046 authority and fault contracts suffice).
 
-Root owns the two existing IntegrationTests ClusterRouting Helpers files, this spec and ADR003. Freeze, join, native full build/format and supporting related whole flows precede exact current Linux RF3 execution. The complete original KL009 whole RF3 case, current full normal/scalar/recovery/RF3 and other mandatory gates remain required; local compile or the repaired preparation does not close KL009. Rollback removes this coherent fixture-only amendment and preserves the original failed artifact.
+## Native WAL checksum dependency and normal-path process recovery
 
-REQ-REP-APPLY-SCOPE-001 / AC-REP-APPLY-SCOPE-001 binds original KL009 to a genuine node-local canonical apply owner and real independent replica-network progress. Preserve native ZoneTree, original ordered commit/apply gates, deterministic replay, bounded admission, RF3 acknowledgements and separate authenticated request grains. This is authored acceptance infrastructure; Linux/native execution and original task closure are not claimed.
+[ADR-126](../ADR/ADR-126-current-native-zonetree-checksums.md) selects the published ZoneTree 2.0.0 with the centrally pinned System.IO.Hashing 10.0.12 and retains ZoneTree.FullTextSearch 1.0.9. REQ/AC-NATIVE-WAL-PROFILE-001/002 (cross-profile graceful reopen) are superseded by REQ/AC-NATIVE-WAL-NORMAL-001 below. REQ-NATIVE-WAL-PROFILE-003 / AC-NATIVE-WAL-PROFILE-003 map to solution restore/build/analyzers/formatter plus actual full-text indexing, search, rebuild and reopen regressions; package availability alone closes no gate. This test does not read previous native WAL formats, migrate, accept legacy `.wal_crc` or fork checksums.
 
-Docs-first current private-format boundary: all RequestCqrsProbe owner/arm/release/marker producers/readers select version2 and reject version1 without fallback, migration or mixed records. Original request/read phases retain exact original semantics with nullable new arm fields all null and marker EntryIndex/EntryTerm null. CanonicalJournalFlushed is Hold-only and requires complete four-scalar Partition, nonempty SourceRequestId, distinct nonempty SourceArmId and exact TargetVoter. CanonicalOutboundObserved, CanonicalIndependentAppendCompleted and CanonicalOwnerDisposed are unarmable observation-only phases. Canonical markers contain positive real entry index/term and the genuine original request actor ID. Release still addresses the exact arm/request identity. Keep original 32-arm, 400-file, 8-marker, 8192-record-byte, 1048576-aggregate-byte and depth4 ceilings, original component/principal byte bounds, hold/poll/admission/shutdown deadlines and validated configurable lower bounds. No status/receipt is invented.
+REQ-NATIVE-WAL-NORMAL-001 / AC-NATIVE-WAL-NORMAL-001: SIMD execution is always on, so there is no disabled-intrinsics profile. The test requires native SIMD eligibility before opening its store and runs four real processes in seed → first-append → second-append → cold order. `NativeChecksumProfileRecoveryTests.CurrentNativeWalPreserves257RecordsAndBothAppendsAcrossFourProcesses` has zero parameters and retains the 257 exact native corpus rows, both acknowledged command/receipt/native outcome appends, original retry/conflicting-body refusal, complete persisted models/outbox, the byte-exact cold cut and the same-root identity. It is process recovery, not power-loss or performance qualification.
 
-Identity bridge is bounded test control, never authority: the original real BeforeSubmit Hold publishes its actual signed-voter request actor marker. While held, the fixture writes a distinct canonical arm referencing that source BeforeSubmit arm, principal, stable Batch CommandId, observed actor ID, complete partition and an explicitly observed nonleader voter. Both arms retain their original immutable bytes until joined shutdown. The actual Channel worker opens its own synchronous scope from the genuine ReplicaEntry Id/index/term and exact physical voter plus active source arm. No request ExecutionContext/AsyncLocal propagation across Channel is assumed and no synthetic actor ID is created. Actual Database.Apply retains original persisted authorization, identity/fingerprint/replay and strict clock validation; only its construction-owned native JournalFlushed FaultObserver may hold that owner. Unmatched bootstrap/recovery/job/store work has no hold and the replica store gets no callback.
+Seed commits 257 distinct short native UTF8 key/value rows through ZoneTreeStore.Commit and the independent document+event+queue mixed batch through the native DatabaseEngine, keeping its generated CommitReceipt/request/outbox evidence. It freezes every native key/value row in strict order, the count, committed Store.Position, NodeId/incarnation and read generation in one bounded native-generated test evidence envelope (alias `keyload.test.native.checksum-profile-cut.v1` with fields NodeId0/Incarnation1/Position2/ReadGeneration3/Rows4 and row alias `keyload.test.native.checksum-profile-row.v1` with Key0/Value1); it is test-only, not a database format or recovery authority. Each later phase reopens the same fresh current native root and verifies the exact store position, rows, node/incarnation and a non-decreasing read generation before any effect or replay; it then replays the original receipt and a changed-body Conflict, commits an independent fresh document operation (keeping its exact bytes) and freezes the new complete cut. The fourth child proves the whole cut and all 257 rows survive another same-root reopen and closes normally. Every non-seed phase verifies the entire 257-record corpus.
 
-Independent network evidence is produced only by actual PartitionReplicaGrainService.ExchangeAsync after peer request authentication, original readiness/admission/native endpoint validation and successful signed reply construction. Begin captures the same currently held follower owner; completion decodes only already-admitted request/result bytes and requires an accepted empty native Append, exact term and matched/next position, with prior/committed cuts covering the held genuine entry. Completion must still see that exact held scope. Failed/cancelled/rejected exchanges do not qualify. It emits one bounded presence marker, never credentials, payloads or invented counts. Actual ReplicaGrainServiceClient.InvokeAsync separately observes any external invocation originating in the explicit canonical apply scope; any such marker fails acceptance. The real native RPC boundary is used, not HTTP discovery or a replacement transport.
+The parent passes only mode/root/phase (three arguments) and never writes DOTNET/COMPlus intrinsics environment; the native `Vector.IsHardwareAccelerated && (Sse2.IsSupported || AdvSimd.IsSupported)` guard runs before storage acquisition, and unavailable or disabled hardware never counts as success. Old four-argument shapes fail the strict argument-count refusal with no compatibility reader. Completion is phase-only and emitted after native store close and failure-ledger settlement. The StorageTrialLease, 90-second execution / 30-second cleanup budgets, bounded pipe readers and initiating/fatal/cleanup exceptions are unchanged. Focused run: `node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=recovery '--KeyLoadTests:Filter=/*/*/NativeChecksumProfileRecoveryTests/*' --KeyLoadTests:ReportTrx=true --KeyLoadTests:Execution:MaximumParallelTests=50`, built with the ZoneTree 2.0.0 dependency closure.
 
-The leader-owned draft cannot qualify this operation: ReplicaLeader owns rounds through WaitForApplyAsync, and that waiter synchronously reads canonical LastApplied. The accepted proof therefore holds a follower, leaves leader semaphores/cancellation untouched, and avoids node Status/State calls while held (they may read LastApplied under ProtocolGate). Discovery/leader identity is captured before the hold. Original health/readiness routes remain unchanged.
+## Queue lease authority process cuts
 
-Lifetime: the physical host owns bridge, real materializer worker, storage callback and DI observer. Real GrainService construction resolves the observer before accepting replica RPC, including followers without a local public request. One exact scope owns hold, origin observation and callback admission, restores its prior execution context, writes canonical-owner disposal and joins original callback lifecycle. Synchronous apply errors and scope cleanup errors both propagate, preserving original failures; no second commit, retry, lock change, cancellation clamp or timeout increase. Existing host stop cancels hold and joins callbacks/materializer before store disposal. The fixture releases both arms, joins the actual SDK operation and original request producer plus canonical owner before deleting owned controls/resources.
+REQ/AC-MSG-001/004/005 and REQ/AC-MSG-RETRY-ORDER/JITTER ([ADR-026](../ADR/ADR-026-fenced-delivery-inbox.md), [ADR-028](../ADR/ADR-028-persisted-scheduling-time.md)): two QueueLeaseAuthorityProcessRecoveryTests cases reuse the ordered-retry CrashHost HeaderWritten cut after an acknowledged producer/Receive. The uncommitted sealed NACK must reject an absent or foreign selected lease reference with exact Corruption detail and no whole-store, identity, cut or outcome effect, including repeated and cold calls. A single-row native repair restores the complete pre-fault image at cut+2; the same original NACK then commits its recorded jitter and exact receipt. Complete independent original and healthy messages, full body/metadata/counter/order/index checks and replay of all delivery receipts after a second joined cold owner are verified. Process lifetime, cleanup, scan and policy contracts are unchanged; process-kill is not power-loss proof.
 
-Whole flow: actual Aspire current-image RF3, persisted non-admin principal and document+queue scope, original SDK atomic Batch, original signed BeforeSubmit marker, native follower JournalFlushed marker carrying real entry index/term, accepted authenticated Append settlement while held, and absent canonical-origin outbound evidence. Original leader SDK receipt must be successful under unchanged deadlines. Release the exact canonical arm and join its owner; verify independent literal complete document (reference/revision/JSON/redaction/empty fields) and queue inspection metadata/body/headers through SDK and official MCP. Assert exact receipt effects and native-byte same-ID SDK/MCP replay, changed-payload conflict with unchanged public state, then distinct healthy queue continuation. This proves the full scoped public projections, not a complete raw-store image or power-loss durability.
+## Blob process recovery
 
-Owned paths: Replication ClusterReplication real ApplyBatch/worker scope; Orleans ClusterReplication real GrainService incoming/outgoing transport; Server ClusterRouting existing private control codecs/lifecycle and observer composition; Server StorageRecovery physical host/native storage callback; AppHost ClusterRouting strict current owner reader; IntegrationTests ClusterRouting actual Aspire wave/probe/SDK/MCP helpers; UnitTests ClusterRouting bounded private codec-negative control. That unit codec case is supporting infrastructure, not a product coverage contributor. Root-only format/full build, genuine new census/source-image binding, focused native codec in normal/scalar, existing probe request/read/fault flows, new current-image RF3 operation and mandatory full normal/scalar/recovery/RF3 gates remain required. No numeric coverage or successful native execution is claimed. Rollback removes the same-current private diagnostics coherently; persisted database, replication/native binary/public JSON formats and authorities are unchanged.
+REQ-BLOB-001/002/004/005/007 and AC-BLOB-001/002/004/005/007 ([ADR-038](../ADR/ADR-038-chunked-blob-storage.md)). The first five scenarios preserve a previously acknowledged Blob publication (and deletion) across the unchanged independent same-store queue-lifecycle HeaderWritten kill. They prove prior-lifetime survival and reclaim integrity at an unrelated commit cut; the genuine Blob Complete/Delete commit cuts are the last scenario. The trial keeps the original 90 s trial / 30 s cleanup / 8192-byte output / 4096-row image bounds and the real joined child cleanup, runs on the normal SIMD path with the default 50-way native parallelism, and uses no mocks, shared fixture, protocol, format or bound change. Process-kill results do not establish Linux, replicated-cluster failover or power-loss qualification.
 
+### Prior publication survival
 
-### TASK-KL026-ROLLUP-PROCESS-001: actual canonical rollup process cuts
+Two native Recovery cases (missing current completed BlobState; current completed BlobState with Retired=true) preserve a previously acknowledged four-byte publication across an independent queue-lifecycle HeaderWritten process kill in the same physical ZoneTree store. The parent first creates the persisted authority; the unchanged child validates that same authority/incarnation/tenant and does not reset the store. Literal complete and partial bytes, metadata, chain hash, raw part/manifest/state and both quotas agree before and after the kill; the uncommitted queue batch has no outcome. Selected-state corruption refuses metadata/range/delete/reclaim and cached completion without any complete-store, cut or identity effect, repeatedly and after cold reopen. Repair restores exactly the one original row and the entire pre-fault image at cut+2. The original deletion/reclaim succeeds with exact receipts, counters and owned-row removal; the same upload identifier publishes fresh healthy bytes at revision 3 while old lifetime outcomes invalidate. A second cold owner preserves all final rows, bytes, identity, authority and replay receipts. Automated map: `KeyLoad.RecoveryTests.Features.BlobStorage.BlobPriorPublicationProcessRecoveryTests.PriorAcknowledgedPublicationSurvivesIndependentQueueCutThenLifetimeRepairAndReuse`, Arguments(true), Arguments(false).
 
-REQ-SERIES-022 / AC-SERIES-022 and ADR-120 add two real process recovery cases for bounded rollup refresh/drop. Existing CrashHost canonical JournalFlushed hold, CommandIdempotencyProcessChild original output/drain/exit ownership, StorageTrialLease and native file-release proof own four distinct child lifetimes. Kill after acknowledged revision1, then kill actual inflight refresh/drop JournalFlushed; recover revision2 statistics or tombstone from native current journals; retain complete raw sample/identity/sequence/floor bytes, independent full literal samples/statistics/metadata, exact native same-ID receipts, changed payload Conflict without effects and stable failed replay, healthy refresh/drop/recreate revision5, and a separate successful reopen child. No new product diagnostics, migration, aliases, limits, timeouts, retry loop or power-loss claim. Every child and both native pipe tasks must settle before cleanup; primary plus cleanup failure remains observed. Exact-source Linux recovery and RF3 product qualification remain required; authored tests are not a closure receipt.
+### Retired part integrity
 
+Three native Recovery cases preserve a previously acknowledged publication and deletion (revision 2 tombstone) across the same queue-lifecycle cut. Parent root principal/incarnation remain identical to the existing persisted authority; the child never resets the store. The selected faults are exactly one retired upload ordinal 0 row: missing raw part; missing part metadata; shape-valid part metadata with a SHA256 of different literal bytes. Before faults, the complete literal retired state, tombstone, raw part/manifest, both quotas and the publication/deletion receipts survive the stop. Reclaim(MaxParts 1) refuses Corruption with no partial deletion, quota, outcome, full-store, cut or identity effect, repeatedly and after the first cold reopen. Repair restores exactly that owned row and the complete pre-fault image at cut+2. The same Reclaim then releases 4 bytes / 1 version / 1 part, replays its complete receipt, leaves the tombstone and removes state/raw/manifest. Reusing the same upload identifier publishes fresh literal [9,10,11,12] bytes at revision 3 with independent hashes, full/partial/empty-tail reads, exact native state/quotas, fresh receipts and old-lifetime invalidation. A second cold owner preserves the final image, identity and the unrelated queue image / absent outcome. Map: `BlobRetiredPartProcessRecoveryTests.PriorAcknowledgedDeletionSurvivesIndependentQueueCutThenPartRepairReclaimAndReuse`, MissingRaw/MissingManifest/WrongManifestHash.
 
-## KL035 bounded replica-prefix GC contract (2026-10-08)
+### Retired part bytes
 
-TASK-REP-PREFIX-GC-001 / REQ-REP-GC-001 / AC-REP-GC-001 freezes actual prefix reclamation. A node-local Materializer holds its existing apply owner, then SnapshotStore gate, then native log ProtocolGate and log lock. CURRENT published snapshot is reverified against native complete image, incarnation, format, checksum and committed cut before any eligible key deletion. One batch deletes actual canonical replica-entry keys with absolute Index<=snapshot.Index using the native replica store atomic Commit; it changes neither hardstate snapshot/term/vote/LastIndex/CommittedIndex nor canonical apply/docs/receipts. Only existing MaxAppendEntries and MaxAppendBytes bound range/work/key retention, checked before allocation; cancellation before commit publishes no effects. The same verified immutable image remains and all suffix entries are retained. Unpublished/corrupt/missing image fails closed before deletion.
+Two cases extend retired-part integrity to an equal-length altered raw value and a shape-valid manifest declaring the wrong part length. The selected ordinal 0 raw row originally contains literal [1,2,3,4]; its equal-length alteration becomes [5,6,7,8] while the exact manifest remains. The alternative changes only the native manifest to format 1 / length 3 / the original four-byte SHA256, preserving raw bytes and every other row. Reclaim(MaxParts 1) must refuse exact Corruption repeatedly and after a cold owner with no partial deletion, quota, outcome, full-store, cut, identity or authority effect. One-row repair restores the complete image at cut+2; the same command then releases exactly 4 bytes / 1 part / 1 version with receipt replay, leaves the revision 2 tombstone, removes retired state/raw/manifest and permits same-upload-ID reuse with literal [9,10,11,12] at revision 3. Full/partial/empty-tail reads, an independent hash transcript, native counters/state/receipts and old-lifetime invalidation survive a second cold owner; the unrelated queue image and absent outcome stay exact. Map: `BlobRetiredPartBytesProcessRecoveryTests.PriorAcknowledgedDeletionSurvivesIndependentQueueCutThenByteRepairReclaimAndReuse`, AlteredRawBytes/WrongManifestLength.
 
-The GC batch then awaits the existing REPLICA store Compact publication under the same owner, rewriting replica commands.wal with surviving live keys; CANONICAL Compact is not called. Native ZoneTree derived segments may retain older deleted bytes, and eventual maintainer segment reclamation is explicitly separate/unmeasured. This is actual key deletion plus replica-journal live-key rewrite, not read visibility cutoff or immediate whole-tree byte reclamation. Native compaction failure/poison and original ownership cleanup propagate; snapshot+tail remains at every valid recovery cut. Existing journals/formats/aliases/term/index semantics are unchanged. No discarded atomic journal, migration or compatibility fallback.
+### Later part faults
 
-REQ-REP-GC-002 / AC-REP-GC-002: maintenance schedules at most one existing joined checkpoint/reclamation task. Bounded later ticks use actual remaining prefix keys as progress; no persisted/stale cursor and no unbounded reclaim loop. Reader results are existing independent native arrays; per-call image files are closed under snapshot gate. GC deletes no snapshot image or transfer file and never invalidates borrowed native read cuts. Compact uses its actual storage write gate/current-generation contract.
+Two cases preserve an acknowledged two-part publication and revision 2 deletion across the same cut. The 65553-byte payload is the deterministic byte at index i = i mod 239; ordinal 0 has 65536 bytes and ordinal 1 has 17. Bounded reads independently verify every byte through two legal ranges and a boundary-crossing range. Reclaim(MaxParts 2) meets healthy ordinal 0 then a missing or equal-length altered ordinal 1 raw row. Existing DeleteParts stages raw0/meta0 deletions before reading ordinal 1; quota mutation follows successful completion of that loop. The native refusal leaves every row, raw0/meta0, both quotas, retired state/cursor, tombstone, receipts, absent outcome, authority, identity and cut unchanged, repeatedly and after a first cold owner. Exact damaged-image closure changes exactly the selected ordinal 1 raw row; one-owned-row repair restores the complete image at cut+2. The same reclaim then removes state, both raw rows and both metadata rows and releases 65553 bytes / 2 parts / 1 version exactly once with receipt replay. Reusing the upload identifier publishes literal [9,10,11,12] at revision 3 with exact full/partial/tail bytes, independent hashes, native quotas/state, fresh receipts and old-lifetime invalidation; a second cold owner preserves the complete final image, root principal/incarnation, receipts and the unrelated queue image / absent outcome. Map: `BlobLaterPartProcessRecoveryTests.PriorAcknowledgedTwoPartDeletionSurvivesIndependentQueueCutThenLaterPartRepairReclaimAndReuse`, MissingSecondRaw/AlteredSecondRaw.
 
-REQ-REP-GC-003 / AC-REP-GC-003: real current-format store/CrashHost flows create committed snapshot+new retainedtail/full literal original receipts, reclaim actual eligible keys, inspect exact hardstate/terms/index/suffix/canonical state, native dispose/reopen, fresh-target complete install+tail and exact retry with healthy next command. Corrupt/missing snapshot and canceled GC preserve full native state; repair then healthy GC follows. Real owned child kills at existing publication and replica-store native checkpoint/journal fault boundaries prove at least one complete verified snapshot+tail path. All actual original children/readers/filelocks are joined. This proves process-kill recovery only; power-loss/endurance/current Linux RF3 remain separate pending gates.
+### Extra part faults
 
-Ownership: Replication ClusterReplication/Contracts existing interfaces; Storage native log prefix collector/reclaimer and snapshot owner; Execution Materializer/Maintenance. No new provider, public SDK/SQL/MCP operation or wire format is introduced: this is existing node-local housekeeping, never caller-authorized database mutation bypass. RecoveryTests/ClusterReplication and CrashHost/ClusterReplication own real native cuts and wholeflow assertions. Root joins/builds/native tests/records actual new census. ADR030 remains Accepted until exact required evidence exists.
+Two cases extend the same two-part retired-lifetime survival to an unexpected extra owned ordinal 2 row, and preserve the 65553-byte / 2-part publication and deletion, native root/incarnation, exact head/state/manifest/raw/quota and receipts. Insert exactly one previously absent ordinal 2 raw row with literal [77,78,79], or one native part manifest format 1 / length 3 / SHA256(literal 3); both original ordinals 0 and 1 remain healthy and the whole-store image differs only by that key/value at cut+1. Reclaim(MaxParts 2) reads both healthy parts, stages all four raw/manifest deletions and the resource/global quota decrement, then ProveEmpty refuses the unexpected raw or manifest row with exact Corruption (the existing owning staged order; no failpoint is fabricated). Repeated refusal and the first cold owner preserve the complete image, both parts, the extra row, quotas (65553 bytes / 1 object / 1 version / 0 uploads), retired state/cursor, tombstone, receipts, absent reclaim outcome, cut, identity and authority. Delete-only repair of exactly the injected key restores the original image at cut+2; the same reclaim releases 65553 bytes / 2 parts / 1 version once, removes state and all raw/manifest rows with exact quotas and receipt replay, and retains the revision 2 tombstone. Same-upload reuse publishes literal [9,10,11,12] at revision 3; the extra ordinal 2 families and old ordinal 1 stay absent after healthy reuse and a second cold owner. Map: `BlobExtraPartProcessRecoveryTests.PriorAcknowledgedTwoPartDeletionSurvivesIndependentQueueCutThenExtraPartRepairReclaimAndReuse`, ExtraRaw/ExtraManifest.
 
-```mermaid
-flowchart LR
- V[Verify current complete image] --> D[Atomic eligible key deletion]
- D --> R[Replica journal live-key rewrite]
- R --> N[Next bounded tick: remaining actual keys]
- V --> P[Keep snapshot and committed tail]
- D --> P
- R --> P
-```
+### Complete and Delete publication cuts
 
-### Exact private GC verification map
+REQ-BLOB-COMMIT-CUT-001 refines REQ-BLOB-001/002/003/004/005/007 under ADR-038 and the ADR-117 native TUnit entry. Genuine CompleteBlobUpload and DeleteBlob use their node-local ZoneTreeStoreOptions.FaultObserver stages, a selected exact next commit position, a real CrashHost child, persisted authority and joined native store ownership. A previously acknowledged literal four-byte publication and its seed receipts precede the selected command. Complete also acknowledges its new two-part 65553-byte upload before the cut; Delete targets the acknowledged published version. No unrelated queue mutation is the selected cut.
 
-`ReplicaPrefixGcProcessRecoveryTests.AcRepGc003ActualPrefixDeletionAndReplicaRewriteRetainVerifiedSnapshotTailRecovery` owns ten native argument rows: HeaderWritten/0, PayloadWritten/0, JournalFlushed/0, MutationApplied/0, MutationApplied/3, ApplyCompleted/0, SnapshotWritten/0, SnapshotFlushed/0, InstallPrepared/0, JournalSwapped/0. Existing synchronous native `CommitStage` observer pauses only the admitted replica-store deletion/rewrite position; the real original CrashHost child is killed and its readers joined before reopen. No new product fault callback is introduced. Original cuts before durable journal completion permit only complete prefix retained or complete prefix reclaimed; all later cuts require complete reclamation. Partial key deletion is rejected.
+AC-BLOB-COMMIT-CUT-001 maps four Complete whole flows: HeaderWritten stops after only the frame header; JournalFlushed stops after the entire frame's synchronous flush but before materialized apply; a deterministic IOException injected through the public native FaultObserver at the selected JournalFlushed stage yields the engine UnknownWriteOutcome; and an explicit ACK path observes the actual returned native receipt before stopping. AC-BLOB-COMMIT-CUT-002 maps the same four flows to Delete. Both require the exact prior ACK, command/content/scope authority, the same node incarnation and principal across genuine process stop/reopen. HeaderWritten preserves the complete pre-command raw image/cut, rejects ResolveOutcome with the existing RecoveryRequired missing-durable-outcome result and retains the original metadata/chunks/digest/quotas. JournalFlushed and ACK recover the complete atomic effect and identical durable receipt. A caller whose child stops before ACK has an unobserved write outcome; process termination does not return an engine UnknownWriteOutcome error. Fabricated domain exceptions/results and relabelled queue cuts are forbidden; the injected IOException is scoped I/O fault injection, not a physical disk or power-loss claim.
 
-Each actual row verifies snapshot cut4+term1, retained tail5, immutable complete hardstate bytes, canonical inventory equivalence, all literal original put mutation receipts2–5 and byte-identical replay without position changes. A fresh empty native target installs the retained complete snapshot and actual surviving tail entry, applies them, then commits independently specified healthy revision5/cut6 and reopens. The same owned trial additionally checks original-token cancellation, missing native image (FileNotFoundException) and hash-corrupt image (Corruption), full unchanged replica/canonical records and position, exact image repair, successful reclamation and healthy tail. Native images, stores, original child/readers and file locks remain trial-owned through cleanup; failures retain original root/evidence. New case discovery counts/compiled identities and all Linux qualification remain root-owned and unobserved for this packet.
+AC-BLOB-COMMIT-CUT-003: a same-original-command retry returns the exact result and durable receipt with no replay image/cut effect, and the full independently expected metadata/state/head/raw chunks/manifests/digests/counters are verified; a persisted unauthorized principal is refused without revealing bytes or changing state. Complete preserves the old retained version bytes while publishing the exact new multipart version; Delete publishes the exact revision 2 tombstone and retains the old version until bounded reclaim. Healthy new work and a second joined cold owner preserve the exact scoped authority, receipts and independent bytes. All selected child/pipe/native handles settle and owned roots are removed within the 90 s process / 30 s cleanup bounds.
 
-R573 retained ten original process-trial failures at the independent document-result oracle. The expected literal and recovered result are separate object graphs; their Orleans reference encoding is not the public value contract. Compare the complete public document result through exact JsonDefaults bytes, including the entire reference, revision, exact user JSON, redaction flag and ordered redacted fields. The independent literal mutation receipt comparison, byte-identical original native receipt replay, complete canonical and replica inventory bytes, hardstate and native snapshot/WAL checks remain unchanged. This changes no production serializer, persisted format or acceptance requirement; repaired native execution is still required.
+Fixture facts: the denied non-administrator principal is installed with no grants through the existing root-signed ConfigurePrincipal operation (not the initial-administrator-only Bootstrap), so these flows use direct persisted-principal authorization and do not qualify SDK credential authentication. After Blob reclamation ConfigurePrincipal retains its administrative receipt, so the continuation compares the full ConfigurePrincipal/ConfigureResource Apply and ResolveOutcome results with no row-image or cut effect, while the original Begin/Part/Complete still require TokenInvalidated. No new Core/API/storage format/dependency/provider, migration, fallback, bound or authorization change applies; ADR-038 is sufficient.
 
-R578 retained ten original failures at fresh-target append: the fixture created an independent random canonical signing key and correctly rejected the source's original signed native tail. A fresh receiving member must use the source RF3 cluster's actual configured canonical signing key, as production PartitionStores and existing real stored-cluster fixtures do. Pass that owned key through ZoneTreeStoreOptions at target creation and again at its genuine reopen; do not re-sign or re-normalize the original tail, copy an identity file, relax signature verification or substitute another operation. Native source-tail bytes and all receipt/state assertions remain unchanged. This fixture correction is not a production authority change or proof that the repaired flow passed.
+## Qualification gates
 
-R580 retained ten cleanup failures after the original operation assertions completed: the scalar-store cleanup searched for owner.lock at the trial root instead of its actual nested stores. GC cleanup must use existing bounded ReplicaProcessFiles ownership checks for all three known node roots (original, fresh target and negative boundary), including both canonical and replica stores of each, after original process/readers/materializers joined. Only after every exact owned file check succeeds may the existing bounded deletion remove the trial root. Observe every check/deletion failure and retain that original root; do not create a dummy root lock, skip missing store locks, relax file-release checks or expand cleanup deadlines.
-
-Code ownership adds feature-local `ReplicaPrefixReclaimer`, `ReplicaVerifiedPrefixReclamation`, `ReplicaCheckpointReclamation` and cohesive `ReplicaCheckpointPublication`; the latter moves existing state calculation only, preserving its original locks/guards. New crash/test types are under their actual ClusterReplication Contracts/Helpers/Processes/Assertions/Cases roles. No native aliases/field IDs, storage formats, public SDK/MCP/SQL routes, runtime deadlines or qualification statuses change.
-
-An explicit reclamation call with an already-deleted prefix still verifies the current complete image and joins one native replica WAL rewrite, returning zero without a no-op atomic commit. This settles process interruption between deletion and rewrite. Original cancellation is checked again before that zero-deletion rewrite; once a positive deletion commits, the original rewrite is joined despite later cancellation. The normal maintenance trigger remains actual remaining prefix keys or its unchanged snapshot threshold. No persistent cursor/new recovery format is added.
-
-R2 GC test ownership: each actual native node/materializer operation is observed to terminal completion before every original disposal; all primary and cleanup identities remain retained. Invalid-image restoration observes deletion and original-image rename separately, preserving either failure and attempting both. ReplicaCrashNode construction/disposal joins Log, replica store and canonical store independently. These source corrections do not change GC semantics, fault cuts, resource caps or qualification.
-
-Native GC negative-image setup drains actual FileStream buffers with caller-canceled FlushAsync, then joins RandomAccess.FlushToDisk on the same owned handle before testing corruption. This preserves the actual synchronous OS durability barrier; async buffer drain alone does not substitute for it. The API contract is documented by [Microsoft .NET10 RandomAccess](https://learn.microsoft.com/en-us/dotnet/api/system.io.randomaccess.flushtodisk?view=net-10.0) and [FileStream.FlushAsync](https://learn.microsoft.com/en-us/dotnet/api/system.io.filestream.flushasync?view=net-10.0). These are process-recovery fixture actions, not a power-loss qualification claim.
-
-### AC-ANN-007 native staged replay process ownership
-
-`NativeAnnProcessRecoveryTests` owns actual child processes through the existing Aspire recovery entry and original finite child/pipe/file-lock settlement. The declared first stage covers an acknowledged durable pending-page publication before its canonical ACK, then an actual canonical ACK killed at the original JournalFlushed boundary, followed by cold pending-array load, same-ID original receipt recovery and bounded remaining-prefix replay. A later child cold-loads the completed native graph, verifies complete literal vector records and performs a genuine healthy explicit vector mutation and replay. Pending arrays never serve readers; recovered original nonempty checkpoint receipts establish progress. These process-kill cuts do not establish power-loss durability, arbitrary partial-write coverage or AC-ANN-008 public approximate search qualification. Full original recovery and RF3 gates remain required.
-
-## Native ANN fixture applied authority (TASK-ANN-NATIVE-FIXTURE-001)
-
-REQ-ANN-001/007 and AC-ANN-007 require actual persisted applied authority. ANN
-Unit and CrashHost fixtures must submit original commands through independently
-owned native DurableReplicaLog and ReplicaMaterializer; embedded Apply does not
-establish a replicated cut. Every configure/seed/consumer/checkpoint command
-retains its exact identifier, payload, explicit time and outcome. The native
-materializer writes applied authority through original canonical Apply(index).
-After actual bounded WaitForApplyAsync the original operation is replayed only
-to retrieve its persisted outcome, with exact no-effect assertions unchanged.
-No manual AppliedBytes, no synthetic no-op authority, no collector weakening.
-
-The opt-in TestDatabase native admission preserves every default embedded and
-explicit-time caller. It owns its separate replica store/log/snapshots/materializer
-and joins the materializer before disposing log/replica/canonical owners. Local
-fixture commit is not a claim of RF3 quorum; public RF3 gates remain mandatory.
-Original validated ReplicaExecutionOptions.CommandTimeout bounds apply settlement;
-original caller cancellation remains linked. Native worker failure is propagated,
-not retried or hidden. Constructor and terminal cleanup retain primary plus owner
-failures. CrashHost keeps distinct acknowledged and JournalFlushed original cuts
-and reopens the same actual durable replica log before replay. Process-kill is
-not power-loss evidence. Original R4 defect receipt remains immutable history.
-
-Known native command IDs bind their ORIGINAL retained ReplicaEntry index. If a
-restart/canceled wait left that entry unsettled, admission publishes only its
-original commit index if not already committed, joins its original apply cut
-under the same existing timeout/caller token and resolves its fresh original
-outcome. RecoveryRequired cannot cause a second append for a retained ID. Native
-entry absence within LastIndex fails closed; no fabricated command authority.
-
-### TASK-PMOVE-FILE-READY-003: typed ownership readiness composition
-
-REQ-STORAGE-012 / AC-STORAGE-012 and REQ-PMOVE-PROCESS-001 / AC-PMOVE-PROCESS-001 retain the original five-second exclusive file-release bound and25ms poll for both actual canonical/replica roots after the producer/owned child has joined. Before execution, Recovery ResourceExecution owns validated `NativeProcessReadinessOptions` through its existing `RecoveryExecutionOptions` composition; configuration cannot extend either original readiness bound. The actual TUnit case selects the owning clock and passes typed settings/clock through ProcessOperation/ProcessTrial into ProcessOwnership, including cleanup. The whole-operation90s and cleanup30s deadlines remain unchanged. Existing exact owner.lock, commands.wal and optional native metadata WAL probes, actual process/stdout/stderr joins, required-file failures and original primary+cleanup aggregation are preserved. This is source-only fixture policy repair, not a new product/runtime PASS claim; ADR-017 and the existing process/readiness acceptance contracts suffice.
-
-## REQ-PMOVE-PROCESS-001 — admitted Fence four-child recovery
-
-AC-PMOVE-PROCESS-001 requires the genuine configured MAC/admission producer and native replica log/materializer to commit mixed documents/vector/topic/queue/blob, Prepare11 and Authorize12 before handing the immutable locally signed source Fence to four owned children. Actual atomic HeaderWritten, PayloadWritten, JournalFlushed, MutationApplied and ApplyCompleted cuts are separate authored cases. Parent must not open stores between fault kill and recovery child. Original Fence13/position14, full literal phase/control/journal, full bilingual model/vector rank/event/head/cursor/queue metadata, full+partial blob, exact original A seed receipt, native payload and unchanged target image must survive native reopen; original replay cannot append or change the full raw read cut. Actual configured ACK14/AcceptFence15 and both cold owners provide healthy continuation.
-
-One existing90s deadline spans producer, children and continuation; cleanup keeps30s and exact database/replica native file-release bounds. History64 remains unchanged (maximum15 entries), with original DB/cache/append caps. Every actual child/stdout/stderr/native node/listener is joined; failures retain all original roots and primary+cleanup outcomes. Native current-format files use CreateNew/Unix0600 and original bounded codec. No synthetic permit, target receipt, aliases for unavailable loopback addresses, skipped cases or expiry rewriting. Full Install/Retire/Abort process and public six-silo evidence, RF3, power-loss/endurance remain separate open gates.
-
-Trace: TASK-KL036; ADR-017; `ControlledPartitionMovementProcessRecoveryTests.OriginalAdmittedFenceSurvivesFourOwnedChildrenWithMixedStateExactReplayAndHealthySettlement` (five actual-cut Arguments). CrashHost ClusterRouting owns producer/contracts/native child; Recovery ClusterRouting owns literal assertions/whole-operation deadline/four-child runner and cleanup. Abstractions grants the existing owned CrashHost test process internal access to the unchanged server-derived registration input so its setup runs genuine registration admission; the record remains internal, with no new public route, wire shape or trusted client roles. Source-only authoring does not establish native PASS or close KL036.
-
-
-### TASK-PMOVE-FENCE-PROCESS-002: joined producer ownership
-
-REQ-PMOVE-PROCESS-001 / AC-PMOVE-PROCESS-001 requires the original parent producer to close both actual canonical/replica nodes, MAC/native admission and all discovered native/HTTP listeners before the first of the four original CrashHost children starts. The shared ProcessOperation preparation scope returns only frozen value/configuration/original signed operation evidence after joined disposal; original known source and target native owner locks are checked before child execution. Discovered owner/voter/silo/caller addresses remain immutable original metadata, never claims of a live six-silo deployment. Actual fixed11111 native identity and six distinct IP pins are unchanged; unavailable original host bindings fail and actual Linux process qualification remains necessary.
-
-The child consumes only the bounded current-format original typed CreateNew input, local native signature, persisted original owner/grant/placement/authorization and existing real journal/materializer. It does not issue a permit, configure live DNS/listener owners, create a dispatcher or reconnect to the parent producer. The post-child ACK14/Accept15 continuation invokes current configured MAC/native admission and its original DNS/IP address validation against frozen identities; DNS validation does not require an open original producer listener. No alias, different native port, deadline/expiry extension or bypass is admitted.
-
-The existing five atomic cuts each retain all four joined original children, strict bounded Unix0600 native CreateNew files, one90s parent deadline, original readers/owner checks/primary-plus-cleanup failures, complete literal document/vector/topic/queue/blob/original receipt and unchanged-target images. ProcessRecoveryTests.OriginalAdmittedFenceSurvivesFourOwnedChildrenWithMixedStateExactReplayAndHealthySettlement remains the complete mapped automated flow. Root alone reviews/applies/formats/builds and executes original native TUnit/MTP development and Linux delivered-source gates. This source-only correction has no runtime pass and does not qualify full Install/Retire/Abort process movement, public RF3, power-loss or endurance.
-
-The same Fence recovery flow also replays the genuine original CompleteBlob command, immutable request/evaluation time and complete original outcome in both recovered and final cold owners. Original published blob receipt/token/value are independently checked before handoff, then retained byte-identical after each replay. Existing complete raw-image/cut/index checks reject any new effect or journal entry. This activates the previously unused original blob replay assertion without changing the mixed corpus, canonical queue oracle or process stage.
-
-
-### TASK-PMOVE-FENCE-PROCESS-003: independent blob oracle
-
-REQ-PMOVE-PROCESS-001 / AC-PMOVE-PROCESS-001 also binds the blob expected reference, upload and original completion IDs, full bytes [1,2,3,4], partial bytes [2,3], part SHA256, published revision and part count to an independent literal recovery corpus. The parent compares the producer's original CompleteBlobUpload request against that corpus and recomputes its integrity from the actual persisted source incarnation plus literal input via the canonical native BlobIntegrity API. Parent, recovered and cold-owner assertions reuse this independent expected corpus, never the producer helper or its expected hash. Original outcome replay remains byte-exact and whole-store/journal-index oracles remain unchanged. This source repair addresses FENCE-PEER-001; it is not a compiler/native runtime pass or any Install/Retire/Abort/public/power-loss qualification.
-
-## TASK-KL008-EXACT-NATIVE-ACCEPTANCE-003
-
-REQ-STORAGE-008, REQ-CUT-003, REQ-KEYCODEC-004 and REQ-STORAGE-MAINTENANCE-JOIN-001/002 retain the original owner, lease, native maintainer/job and pooled-envelope criteria. AC-KL008-NATIVE-001 binds the actual27-case native union of KeyCodecEnvelopeOwnershipTests, NativeMaintenanceLifetimeTests, NativeReadCutBudgetTests/CancellationTests/ClockTests/ConsistencyTests/LifetimeTests/ReplacementTests, StorageOwnerProcessTests, StoreLifetimeTests, NativeMaintenancePeriodicLifetimeTests and ZoneTreeMaintenancePolicyTests to exact current UIDs/types/parameters/source paths and unchanged original source/DLL/PDB manifests. Normal/scalar must each execute27/27 without skips and settle their actual child exits/readers/disposal. These complete operations own real node-local files and the genuine separate CrashHost process; Docker/RF3 deployment is N/A to this selected unit lane. The shared matrix must not build/start fictitious Docker resources for KL008. ADR046 owns its storage boundary and ADR117 its direct native TUnit entry/fixtures. Root owns the exact union, bounded adapter/verifier/workflow and original artifact admission. Mandatory current-source complete recovery and genuine RF3 suites remain required independently before full KL008 closure; these focused local/task lanes are not full product, endurance or power-loss proof.
-
-
-### Original bounded task scope qualified at556c — 2026-10-09
-
-This scoped closeout accepts the original architecture task predicates at exact
-[source556c13ab](https://github.com/managedcode/KeyLoad/tree/556c13ab78c839df68b09dce1e9fc92bef576bfe),
-[run37891957916 attempt1](https://github.com/managedcode/KeyLoad/actions/runs/37891957916).
-It does not qualify the subsequently changed source. Every original API/ZIP digest,
-confined extracted file, raw native discovery UID/class/constructor/method/display/
-parameter/source identity, complete no-skip TRX/counters, source/PDB/Git hash and
-prepared/before/after image was authenticated. Original native20 argument, strict
-normal-null/scalar0 caller environment, child exits/readers/disposal and same-job
-source verification passed. No job-status inference or synthetic report is used.
-
-KL008 normal and scalar each executed the exact27-case union without failures
-or skips. The actual separate CrashHost owner rejection/release/reopen meets
-REQ-STORAGE-008 / AC-STORAGE-OWNER-001. Complete held native read traversal and
-shutdown/replacement/reopen meet REQ/AC-CUT-003. Actual native merge completion and
-periodic native cleanup success/fault, joined disposal, exclusive original files,
-literal cold state and healthy continuation meet REQ-STORAGE-MAINTENANCE-JOIN-001/002
-and AC-STORAGE-MAINTENANCE-JOIN-001..004. Real ArrayPool input return/mutation and
-caller-owned output mutation leave exact committed/envelope/cold bytes unchanged
-under REQ/AC-KEYCODEC-004. These are actual complete native operations, not Task
-state/getter assertions. The full architecture owner/leases/jobs/pooled-value
-predicates now have current original task evidence; no duplicate test is needed.
-
-Normal job113694642532 artifact11598737192 ZIP SHA
-`5bd75aca411ea68b2bcbd27e5bbbeadb487018441e6623cb5526b76084688457`;
-scalar job113694642493 artifact11599215356 ZIP SHA
-`aa9537dc048ab811c077a7c14b496e0f1c6e1d4a862dc37fd4f343dbd411b21a`.
-Both task cells correctly own native stores/CrashHost and no fictitious Docker
-resource; genuine full RF3 remains a separate mandatory feature gate.
-
-All existing mandatory full-feature/source-suite/coverage/RF3 and separate
-endurance/performance/power-loss gates remain OPEN or retain their own authentic
-status; this closes only the stated original bounded task predicates. It neither
-waives their contracts nor claims broad StorageRecovery/DocumentStorage/product
-readiness. Current source repairs and additional feature requirements require
-fresh exact-source evidence. Root alone joins durable status/README provenance.
-
-
-## Native final-Install frame observation (TASK-KL036-INSTALL-NATIVE-FRAME-EVIDENCE-001)
-
-REQ-SR-NATIVE-FRAME-OBSERVATION-001 / AC-SR-NATIVE-FRAME-OBSERVATION-001 reuse the actual stopped, exclusively file-locked ZoneTree owner and canonical native identity/checksummed redo journal. The internal read-only query factors the exact complete-frame reader used by recovery; only original recovery truncates incomplete tails and applies mutations. Inspection does not recover, apply, truncate, checkpoint or write. Partial/compacted/ambiguous/absent/checksum-invalid/scan-exhausted evidence fails explicitly under existing central bounds. No public API/new friend or copied codec is introduced. The private CrashHost child exposes scoped original command/owner/incarnation/format/local sequence/payload length/checksum/raw mutation/scan metadata and a closed actual encoded-failure outcome boolean, never user payload/outcome bytes or credentials. Replica applied index remains distinct from local WAL sequence.
-
-REQ-SR-ENCODED-FRAME-DETAIL-001 / AC-SR-ENCODED-FRAME-DETAIL-001 retain the actual ResourceExhausted guard and limit in ZoneTreeJournalBufferWriter.Advance and use its fixed EncodedTransactionFrameLimitExceeded detail. Raw Stage keeps its original failure detail; no budget/format/recovery ordering changes. Existing FrameBudgetTests.AcWal002IncrementalFrameAccountingMatchesBinaryPayloadAtExactLimits retains every legal coalesced WAL/value/checksum and one-byte-short no-effect assertion, additionally checking the exact owning encoded detail (12 source trials). Genuine final Install calibration/refusal/restore/healthy full models are separately mapped to PartitionMovementFinalInstallFrameRf3Tests.ActualFinalInstallNativeFrameLegalAndOneByteShortRetainEffectsThenSameMoveColdHealthyContinuation under ADR-106 and PartitionTransfer. Ordinary required native recovery tests still qualify byte-identical partial-tail semantics. Source authored only; native UID/build/normal+scalar/recovery/Linux/Docker evidence remains OPEN.
-
-
-Exact refused-length qualification remains OPEN: the actual failed StoredOutcome encoded-Advance detail proves serializer capacity refusal, while actual successful WAL payload F is inspected separately. It does not itself retain the attempted rejected prefix/full candidate length. Restored legal F alone must not be counted as proof that the denied candidate was exactly F. A separately reviewed owning observation of actual Advance bytes is required; no numeric public detail, synthetic serialization, tolerance or inferred +1 credit is introduced in this source checkpoint.
-
-
-### TASK-KL036-FINAL-FRAME-REPLICA-OBSERVATION-001 — distinct native receiver evidence
-
-REQ-MOVE-FINAL-FRAME-REPLICA-OBSERVATION-001 / AC-MOVE-FINAL-FRAME-REPLICA-OBSERVATION-001: the protected six-owner final-Install flow must retain the actual B3 encoded rejection prefix and cap from the original native writer, then independently reconcile the SAME original failed StoredOutcome after leaving the gate. CommitStage appends EncodedFrameRejected=9; old0..8 meanings stay unchanged. The existing observer carries attempted prefix(long) and actual cap(int) only for this stage. Original ResourceExhausted/EncodedTransactionFrameLimitExceeded and callback failures share the existing failure ledger; no IO/wait or authority enters the writer callback.
-
-The distinct fixture-only B observation uses closed private JSON owner/selection/refusal records, actual entry index/term/effect/nonce/expiry/receiver principal/owner/incarnation, and no ingress RequestId or phase/action reuse. Ordinary A3 probe/admission and production execution remain unchanged. The root-approved implementation contract is replica-owner-review-contract.md SHA8be15c8bc068282a57a61dcf4b37d2be60a0599a1f9249cba8658ba5b6e6cd34. Enrollment is explicit only in the protected final-frame six-owner profile using its original centrally bound record/file budgets.
-
-Qualification requires EACH B voter actual prefix==cap+1 and separately independent stopped legal native payload F==cap+1, historical frame fit and raw staging headroom; greater prefix or earlier refusal fails setup with no tolerance/cap adjustment. The original same-move denied→exact original database/replica restore→fresh previously-unissued signed final grant→SDK/MCP/Q1/full-model/cold replay remains the whole-operation test. Source-only implementation, native UID census/build/Linux normal+scalar RF3 and mandatory suites remain OPEN; diagnostic observations do not authorize effects or invent outcomes.
-
-
-Storage classification seam (root-approved): existing public ZoneTreeStore.IsEncodedFrameLimitRejection(OperationResult?) delegates to StorageRecovery/Validation/ZoneTreeEncodedFrameRejection. Pure exact ResourceExhausted plus the owning EncodedTransactionFrameLimitExceeded literal only; null/wrong detail/code/success returns false. It performs no IO/authorization/proof/retry and exposes no new protocol fields. Server still must freshly ResolveOutcome for SAME original native operation/entry/owner/operator/fingerprint/incarnation and match actual callback prefix/cap. Rollback removes this diagnostic seam/enrollment only; journal/effect format/authority and old execution remain unchanged. Automated assertion belongs the genuine failed final-frame→exact original cohort restore→fresh grant→same-move healthy/cold flow, not a synthetic DTO/property control.
-
-
-## TASK-ZONETREE-NATIVE-CRC-PUBLIC-001 — original upstream WAL portability defect
-
-REQ-STORAGE-008, AC-SQ-008 and KL-003 native-WAL qualification retain the confirmed checksum findings for pinned ZoneTree1.9.8 / official source46864afa36eed46e0cfe16828ff8f40cac85e369. The owner-authorized detailed public report is [ZoneTree issue182](https://github.com/ZoneTree/ZoneTree/issues/182), published and independently verified against the reviewed exact8307-byte body (SHA256 b9e8cb5d7d5d7ca0baec744466ad504c36ecef5ba9299926b8060a264c4f8864). Original ARM64 .NET10.0.401 actual WAL create→dispose→software-read failure, native byte-tail CRC overload defect, proposed upstream patch and separate local regression results are recorded there. These are original development facts, not Linux/x64, release, package, power-loss or KeyLoad acceptance proof. Official main111908be43b42d231db0926d4503e7f864b3a6cb changes the declared version to1.9.9.0 without changing those CRC files; that source was not runtime tested here.
-
-ZoneTree maintainers own the upstream compatibility and release decision. KeyLoad keeps its pinned published dependency and introduces no checksum fallback, migration, local package or consumer workaround; the affected WAL portability gate remains open. The public report is also linked in KL-015's existing canonicalZoneTreeRepairDelivery evidence without mistaking telemetry ownership for durability acceptance. Continue independent implementation and qualify every unaffected whole operation through its unchanged gates. This reporting-only record adds no implementation, schema, topology or dependency boundary; existing StorageRecovery/ADR-046 authority and fault contracts suffice (additional ADR: N/A).
-
-
-### TASK-KL036-FINAL-OUTCOME-CAPACITY-003 — finite actual final-Install outcome/witness reservation
-
-REQ-MOVE-PARENT-FINAL-OUTCOME-CAPACITY-003 maps to AC-MOVE-PARENT-FINAL-OUTCOME-CAPACITY-003 and ADR-106. The real outcome query returns `GrainValue.Value = PartitionMovementOutcomeWitness`, containing the full `OperationResult`, actual read counters and a nullable authenticated transport proof. The client attaches the ORIGINAL signed reply and measures the completed witness. Reserve that actual schema, both native success and the specific encoded-frame failure, the independent `NativeValue` field framing, both Version/Purpose proof scalars, all four retained phase occurrences, selected outcome, subsequent source read and complete Observe/checkpoint/native-operation wrappers BEFORE the final grant. Do not size a phase-result-only reply or infer an all-stage outcome bound.
-
-The fixed encoded-frame failure detail byte count is owned by `StorageRecovery.Validation/ZoneTreeEncodedFrameRejection` and exposed as the pure existing-owner `ZoneTreeStore.EncodedFrameLimitRejectionDetailBytes` delegate. It counts the exact owning constant with native UTF8 encoding. No consumer literal, remote frame-option assumption, arbitrary SafeDetail cap/truncation, copied serializer, IO or proof authority is introduced. The reserve is the maximum of actual success schema and this one fixed failed variant. Other transitive storage/serialization exceptions are NOT declared fixed or covered by a universal catalogue.
-
-For actual final Install only, after the original `ParentFinalInstallPreflight` and before first Admit/ControlAuthorize, the planned guard uses the actual original state, native intended phase, selected original resources and original work/current MaxBatch. The ordered native grant guard independently repeats with its actual fresh resources. Future local authorization is a component-only byte bound, never a synthesized record/grant/ACK. Both pending and last slots are normalized conservatively with actual retained sizes as floors and maximum pending-ID framing; all four future phase occurrences and the independent selected original outcome are reserved. Missing original descriptor fails closed.
-
-Automated whole-flow source: `PartitionMovementFinalOutcomeCapacityRf3Tests.ActualFinalInstallOutcomeCapacityLegalAndOneByteShortThenRealFailedObserveAbortAndColdHealthy()`. Real protected six-owner fixture reaches genuine settled page ACKs and original final preflight; all six resources/readers and 18 locks join; preserve the exact database+replica pre-final cohort with NO final grant. Calibrate the actual installed native frame F using unchanged original options, restore the exact cohort, and derive conservative reservation N using the exact pure planned predicate over the actual native final Install constructor. Independently require historical native frames and raw staging headroom to fit F-1, plus current descriptor/read/request/result bounds. Both fixture N and N-1 validate through actual DatabaseLimits; no production option/default/time change.
-
-Refused N-1 reaches actual final preflight and requires exact native BudgetExceeded plus the owning finite reservation detail through the real SDK; MCP and both Q1 routes refuse too. Full stopped native cuts prove no final grant, receiver issuance, original effect/outcome, cursor, parent or quota mutation; only independently decoded actual native membership/applied metadata deltas are permitted. Earlier generic BudgetExceeded, serializer/clock/expiry denial or absent marker is a failed oracle. Restore the exact original cohort before legal N, yielding genuinely fresh previously-unissued final grants. Legal N MUST pass the atomic fresh-resource gate, reach the actual B encoded-frame refusal, retain the full original native failed result and signed witness, and persist the genuine successful A Observe ACK. All three original B voter prefix records, actual failed outcome and unchanged business/model rows remain mandatory.
-
-Restore only fixture configuration after the genuine failed Apply/Observe has settled; retain that ORIGINAL outcome/ACK and charges across cold Resume, then actual target-first Abort and fresh healthy SDK/official MCP/Q1/full-blob/model/cold original-receipt continuation. The original existing deadline/token/options and failure+cleanup ledger remain; no retries, fabricated receipts, erased failed outcome or capability reassignment. N is a conservative joint native envelope admission threshold, NOT actual failure-message length or exact observed checkpoint size; success may dominate the maximum. This finite case therefore does not close universal future SafeDetail or an independent nested-error-only exact-byte criterion.
-
-Ownership: Server ClusterRouting Configuration capacity components/NativeStep and one fixed constants contract; StorageRecovery pure validation/owner delegate; existing final-frame producer/history and failed-state continuation test owners; four new Integration case/boundary/trial/stage roles. No generated aliases/Ids/persisted formats/public wire schema/transport authority changes. Rollback removes only these finite guards/observations and preserves immutable original evidence and every existing failure/auth/quota contract. This is PRIVATE SOURCE ONLY: root build/analyzers/native discovery/exact-source Linux normal+scalar Unit/Recovery/Docker RF3 evidence remain OPEN; strict native task selections, counts, UIDs and mandatory whole suites are unchanged.
-
-```mermaid
-flowchart LR
-  A[Real settled pages and final preflight] --> B[Joined exact six-owner pre-cut]
-  B --> C[Actual native F calibration and exact restore]
-  C --> D[N-1 original refusal with no final grant]
-  D --> E[Exact cohort restore and legal N]
-  E --> F[Real B failed Apply and A Observe ACK]
-  F --> G[Cold retained failure then Abort and fresh healthy callers]
-```
-
-
-## TASK-KL035-NATIVE-CHECKSUM-PROFILE-001 — current-format cross-profile graceful reopen
-
-REQ-STORAGE-004/007/010, AC-STORAGE-007 and supporting AC-REP-004 under original KL035 under ADR-071/003. Preserve authentic published641 KL035 scalar checksum refusal as immutable historical evidence. Published native ZoneTree2.0.0 availability and a source pin are prerequisites, not execution or acceptance. Integration owner verifies exact official source/package/dependencies/current-format contract and changes the central pin separately. This test does not read previous KeyLoad/native WAL formats, migrate, accept legacy .wal_crc, fork checksums, or disable SIMD on a server. The existing real RF3 snapshot-install/ordered-tail/full public replay/cold gate remains separately mandatory.
-
-Current dependency contract: [ADR-126](../ADR/ADR-126-current-native-zonetree-checksums.md) selects the published ZoneTree 2.0.0 and centrally pinned System.IO.Hashing 10.0.12, while retaining ZoneTree.FullTextSearch 1.0.9. REQ-NATIVE-WAL-PROFILE-001 maps to AC-NATIVE-WAL-PROFILE-001 and the two whole-operation NativeChecksumProfileRecoveryTests directions below. REQ-NATIVE-WAL-PROFILE-002 maps to AC-NATIVE-WAL-PROFILE-002 and the existing normal/scalar process-recovery and real Aspire RF3 snapshot/public replay/cold tests. REQ-NATIVE-WAL-PROFILE-003 maps to AC-NATIVE-WAL-PROFILE-003 and solution restore/build/analyzers/formatter plus actual full-text indexing, search, rebuild and reopen regressions. Record exact source, resolved packages, native test identities and original artifacts for each gate; package availability alone closes none of KL-035 or KL-043.
-
-Test-only source contract: reuse actual native CommandIdempotencyProcessChild, bounded pipe readers, original failure/cleanup owner, StorageTrialLease and existing original90-second execution/30-second cleanup budgets. The closed private CrashHost mode native-checksum-profile uses four phases seed/first-append/second-append/cold. The two source arguments choose enabled→disabled→enabled→disabled and disabled→enabled→disabled→enabled child environments, both actual DOTNET_EnableHWIntrinsic and COMPlus_EnableHWIntrinsic set only on those fixture-owned children. Disabled children require actual intrinsics to be disabled; enabled children require actual native hardware eligibility before storage opens, never an acceleration/throughput claim. The existing bounded original pipe reader requires the exact phase/profile completion signal emitted only after native store closure; it observes safe actual capability facts without exposing paths, credentials, bodies or exceptions. These consumed stdout lines are not claimed as independently uploaded telemetry.
-
-Seed genuinely commits257 distinct short native UTF8 key/value rows matching the upstream variable-length corpus through ZoneTreeStore.Commit, and the existing independent document+event+queue mixed batch through native DatabaseEngine and stores its original full generated CommitReceipt/request/outbox seed evidence. All existing independent canonical effect/receipt assertions remain. Freeze every actual native key/value row in strict order, full record bytes/count, committed Store.Position and NodeId/incarnation plus current read generation in one strictly bounded native-generated TEST EVIDENCE envelope. It is not a new database format/provider or recovery authority. Existing MaxScanRecords and64KiB evidence ceiling admit all rows; no truncated/hash-only corpus substitutes. A complete generated comparison proves actual raw row bytes. Save occurs before genuine owned graceful close; parent waits actual exit+both readers, checks original native handles/locks and never starts another open before settlement.
-
-Opposite-profile child reopens the SAME fresh current native root, verifies exact original store position/rows/node/incarnation and nondecreasing observed read generation before any effect/replay. Complete original receipt ResolveOutcome and public model/outbox literals are required. Actual original Apply replay and changed-body Conflict are then exercised; they may legitimately advance ordered applied metadata, so no old cut is copied as current authority. Commit the independent fresh follow-up document through an actual newly created native operation; retain that exact operation bytes before cold reuse, require its full effect and retained original receipt, replay that same native operation and its exact complete receipt and verify full healthy body/outbox result. Freeze the new actual complete native cut. The third child verifies that cut and all257 corpus rows before any replay, commits a second distinct fresh document operation, retains its exact complete request/receipt, verifies replay and changed-body Conflict plus both document effects, and freezes the resulting complete cut. The fourth child proves that whole cut, all257 corpus rows and original/both fresh receipts/literals survive another true same-root reopen, then closes normally. Every non-seed phase explicitly verifies the entire257-record corpus. No process kill/power-loss/performance claim. Initiating/reader/exit/native close/lock cleanup failures remain joined through existing owner; cleanup kill is solely settlement of an unexpectedly failed child.
-
-New private native test evidence identities: Alias keyload.test.native.checksum-profile-cut.v1 with fields NodeId0/Incarnation1/Position2/ReadGeneration3/Rows4; row alias keyload.test.native.checksum-profile-row.v1 with owned Key0/Value1. No product/signed/public/store IDs change or fallback reader. Owners: CrashHost StorageRecovery Contracts Protocol/Cut, Helpers Scenario, Assertions Evidence; existing CrashHostApplication only adds closed TryRun dispatch; Recovery StorageRecovery Cases NativeChecksumProfileRecoveryTests and Processes NativeChecksumProfileProcess. Docs first, root-only join/build/pin/discovery/runtime; no changes to existing modes, fixture defaults or qualification selectors. Rollback removes only this unqualified additive test mode/cases after exact guards.
-
-The test-only StorageRecovery Configuration owner binds both actual intrinsics environment selectors through validated native IOptions. Missing, malformed or mixed selectors refuse before opening storage; no defaults or server settings are introduced. The Scenario compares the typed values with its requested profile and verifies actual disabled hardware capabilities. Extracted phase execution retains the original initiating/cleanup failure ledger and joined native disposal, and named signal delimiters preserve the exact parent-consumed completion/capability bytes.
-
-Focused canonical selection: node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=recovery '--KeyLoadTests:Filter=/*/*/NativeChecksumProfileRecoveryTests/*' --KeyLoadTests:ReportTrx=true --KeyLoadTests:Execution:MaximumParallelTests=50. Source argument declarations are not compiled UIDs/counts. Actual Linux discovery, source/DLL/PDB/package/profile/process/cleanup receipts, complete focused directions and full recovery/RF3 gates remain OPEN. Only freshly built source with the verified ZoneTree2.0.0 dependency closure may execute this four-process regression; another compiled dependency cohort is not this evidence.
-
-
-### TASK-KL035-NATIVE-CHECKSUM-CORPUS-FORMAT-002
-
-REQ/AC-NATIVE-WAL-PROFILE-001 preserves every original UTF8 corpus key/value, index formatting, invariant culture, seed/append counts, whole raw native cut and all four genuine current-format profile reopens. Cache each existing native CorpusKeyFormat/CorpusValueFormat as one System.Text.CompositeFormat in the fixture-owned NativeChecksumProfileCorpus; reuse the native invariant String.Format overload with the same integer index. This changes repeated format parsing only, no corpus bytes, serialization, operation, runtime profile, deadlines or canonical store. The source R74 build reports CA1863 at those two actual calls and observed concurrent Scenario change; retain that failure and require a fresh coherent build before executing the original full process cases. Root owns this docs-first native correction, original full source/binary/TRX/runtime guards and subsequent checks; no recovery, performance or acceptance claim from compilation. Rollback restores only the two formatting calls and caches together.
-
-
-# TASK-NATIVE-WAL-SIMD-NORMAL-ONLY-001
-
-Owner 2026-10-11 SIMD-always correction supersedes the active cross-profile directions of REQ/AC-NATIVE-WAL-PROFILE-001/002. REQ-NATIVE-WAL-NORMAL-001 requires native SIMD eligibility before opening this test-owned store and four original real processes in seed → first-append → second-append → cold order. AC-NATIVE-WAL-NORMAL-001 maps to NativeChecksumProfileRecoveryTests.CurrentNativeWalPreserves257RecordsAndBothAppendsAcrossFourProcesses with zero parameters: retain the 257 exact native corpus rows, both acknowledged command/receipt/native outcome appends, original retry/conflicting-body refusal, complete persisted models/outbox, byte-exact cold cut and same-root identity. This is process recovery, not power-loss or performance qualification.
-
-The parent passes only existing mode/root/phase (three arguments), never writes DOTNET/COMPlus intrinsics environment or exposes a retired profile selector. The actual native Vector.IsHardwareAccelerated && (Sse2.IsSupported || AdvSimd.IsSupported) guard remains before storage acquisition. Ambient unavailable/disabled native hardware cannot count as success. Remove only exclusively retired options/binding/validator and protocol profile flags/index. Old four-argument shapes fail the unchanged strict argument-count refusal; no compatibility reader, migration or new authority. Capability output remains actual bounded native facts; completion is phase-only and emitted after genuine native store close and failure ledger settlement.
-
-Keep the original StorageTrialLease, 90-second original execution/30-second cleanup owners, bounded pipe readers, original initiating/fatal/cleanup exceptions, exact phase order/child count, each real process/task/handle join and original deadline/cancellation. Keep every independent corpus byte (including historically named scalar-append data), command ID, generated alias/field ID and complete receipt/effect/outcome/cut check. CrashHostApplication continues the same existing TryRun dispatch; no other mode or feature changes. ZoneTree issue182 and historical profile receipts remain immutable history; the existing genuine native checksums/dependency ownership are untouched.
-
-Ownership: existing Recovery StorageRecovery Cases/Processes; CrashHost StorageRecovery Protocol/Scenario and deletion of exclusively retired Configuration/Options+Binding. Append this superseding contract to StorageRecovery.md, Search.md and ADR035 before source. Root alone composes docs/current selectors, native full solution build/format/discovery and actual normal complete process execution. Audit task/contributor inventories for the renamed zero-argument method; do not create native UID or change strict counts before fresh original compiled census. No private broad build, new Docker, kernel/Server/Storage/Blob/Messaging/Graph/workflow/selector changes. Rollback is only the coherent current test/protocol admission tranche under owner direction; never restore active forced-scalar execution by silently accepting old arguments.
-
-
-## TASK-MSG-LEASE-AUTHORITY-PROCESS-001 — original stopped-process lease row repair
-
-REQ/AC-MSG-001/004/005, KL087/KL088 and REQ/AC-MSG-088-ORDER/JITTER retain ADR026/028. Two additive QueueLeaseAuthorityProcessRecoveryTests cases reuse the actual ordered-retry CrashHost HeaderWritten cut after acknowledged producer/Receive. The uncommitted sealed NACK must reject an absent or foreign selected lease reference with exact Corruption detail and no whole-store, identity, cut or outcome effect, including repeated and cold calls. Single-row native repair restores the complete pre-fault image at cut+2; the same original NACK then commits its recorded jitter and exact receipt. Complete independent original and healthy messages, retain full body/metadata/counter/order/index checks, and replay all delivery receipts after a second joined cold owner. Original process lifetime, cleanup, scan, policy and SIMD contracts are unchanged. Source declarations are not native execution or qualification; process-kill is not power-loss proof.
-
-### TASK-BLOB-PRIOR-PUBLICATION-PROCESS-001
-
-REQ-BLOB-001/002/004/005/007 and AC-BLOB-001/002/004/005/007 and ADR-038: two native Recovery cases (missing current completed BlobState; current completed BlobState with Retired=true) preserve a previously acknowledged four-byte publication across an independent queue-lifecycle HeaderWritten process kill in the same physical ZoneTree store. This is prior-publication survival across an unrelated same-store commit cut, not a Blob Complete commit-cut or complete Blob recovery qualification. The parent first creates native RF3 catalog authority; the unchanged child validates that same catalog/incarnation/tenant and does not reset the store.
-
-Acceptance: literal complete and partial bytes, metadata, chain hash, raw part/manifest/state and both quotas agree before and after the kill; the uncommitted queue batch has no outcome. Selected-state corruption refuses metadata/range/delete/reclaim and cached completion without any complete-store, cut or identity effect, repeatedly and after cold reopen. Repair restores exactly the one original row and entire pre-fault image at cut+2. The original deletion/reclaim succeeds with exact receipts, counters and owned-row removal; the same upload identifier publishes fresh healthy bytes with revision 3 while old lifetime outcomes invalidate. A second cold owner preserves all final rows, bytes, identity, catalog and replay receipts. Original 90-second trial, 30-second joined cleanup and 4096-row image bounds remain unchanged. Local native process-stop evidence does not establish Linux qualification, RF3 failover or power-loss durability.
-
-Automated map: KeyLoad.RecoveryTests.Features.BlobStorage.BlobPriorPublicationProcessRecoveryTests.PriorAcknowledgedPublicationSurvivesIndependentQueueCutThenLifetimeRepairAndReuse, Arguments(true), Arguments(false).
-
-### TASK-BLOB-RETIRED-PART-PROCESS-001
-
-REQ-BLOB-001/002/004/005/007 and AC-BLOB-001/002/004/005/007, ADR038: three native Recovery cases preserve a previously acknowledged Blob publication and deletion (revision2 tombstone) across the unchanged independent queue-lifecycle HeaderWritten kill in the same physical store. This is prior retired-lifetime survival and reclaim integrity at an unrelated commit cut, not Blob Complete/Delete/Reclaim commit-cut qualification. Parent catalog/root principal/incarnation remain identical to the existing native three-voter authority; the unchanged child never resets the store.
-
-Selected faults are exactly one retired upload ordinal0 row: missing raw part; missing part metadata; shape-valid part metadata with a SHA256 of different literal bytes. Before faults, complete literal retired state, tombstone, raw part/manifest, both quotas and original publication/deletion receipts survive the stop. Original Reclaim(MaxParts1) refuses Corruption with no partial deletion, quota, outcome, full-store, cut or identity effect, repeatedly and after first cold reopen. Repair restores exactly that owned row and complete pre-fault image at cut+2. The same original Reclaim releases4bytes/1version/1part and replays its complete receipt, leaves tombstone and removes state/raw/manifest. Reuse of the same upload identifier publishes fresh literal [9,10,11,12] bytes at revision3, with independent hashes, full/partial/empty-tail reads, exact native state/quotas, fresh receipts and old-lifetime invalidation. A second cold owner preserves final image, identity/catalog and original unrelated queue image/outcome absence.
-
-Original trial90s/cleanup30s/output8192/image4096 and real joined child cleanup remain mandatory; native normal SIMD50, no mocks/shared fixture/protocol/format/bounds changes. Local macOS development results do not establish Linux/full Recovery/RF3 failover or power-loss qualification. Automated map: KeyLoad.RecoveryTests.Features.BlobStorage.BlobRetiredPartProcessRecoveryTests.PriorAcknowledgedDeletionSurvivesIndependentQueueCutThenPartRepairReclaimAndReuse, MissingRaw/MissingManifest/WrongManifestHash.
-
-### TASK-BLOB-RETIRED-PART-BYTES-PROCESS-001
-
-Existing REQ-BLOB-001/002/004/005/007 and AC-BLOB-001/002/004/005/007, ADR-038: two native Recovery cases extend retired-part integrity to an actual equal-length altered raw value and a shape-valid manifest declaring the wrong part length. A previously acknowledged publication and deletion survive the unchanged independent queue-lifecycle HeaderWritten process kill in the same physical store. This is prior retired-lifetime survival at an unrelated commit cut; existing CrashHost controls do not target Blob Complete, Delete or Reclaim commits. The only CompleteBlob child seed precedes movement fault arming, whose input rejects operations other than PartitionMovementPhase. No Blob publication commit-cut qualification is claimed.
-
-The selected ordinal0 raw row originally contains literal [1,2,3,4]; its equal-length alteration becomes [5,6,7,8] while the exact original manifest remains. The alternative changes only the native manifest to format1/length3/the original four-byte SHA256, preserving raw bytes and every other row. Original Reclaim(MaxParts1) must refuse exact Corruption repeatedly and after a cold owner, with no partial deletion, quota, outcome, full-store, cut, identity or authority effect. One-row repair restores the original complete image at cut+2. The same original command then releases exactly4bytes/1part/1version with receipt replay, leaves revision2 tombstone, removes retired state/raw/manifest and permits same-upload-ID reuse with literal [9,10,11,12] publication at revision3. Full/partial/empty-tail reads, independent hash transcript, exact native counters/state/receipts and old-lifetime invalidation survive a second cold owner. The original unrelated queue image and absent outcome remain exact.
-
-Automated map: KeyLoad.RecoveryTests.Features.BlobStorage.BlobRetiredPartBytesProcessRecoveryTests.PriorAcknowledgedDeletionSurvivesIndependentQueueCutThenByteRepairReclaimAndReuse, AlteredRawBytes/WrongManifestLength. Reuses the accepted complete W6/W7 seed/receipt/image/reclaim oracles without modifying them. Original trial90s/cleanup30s/output8192/image4096, joined native child and normal SIMD50 remain unchanged. Candidate source alone is unqualified; local process results do not establish Linux/full Recovery/RF3 or power-loss gates.
-
-### TASK-BLOB-LATER-PART-PROCESS-001
-
-Existing REQ-BLOB-001/002/004/005/007 and AC-BLOB-001/002/004/005/007, ADR038: two actual native process cases preserve an acknowledged two-part publication and revision2 deletion across the unchanged independent same-store queue HeaderWritten cut. This remains prior Blob lifetime survival at an unrelated commit cut, not Blob Complete/Delete/Reclaim commit-cut qualification. Original payload65553 bytes is the deterministic literal byte at index i = i modulo239; ordinal0 has65536 bytes and ordinal1 has17 bytes. Bounded reads independently verify every byte through two legal ranges and a boundary-crossing range.
-
-Original Reclaim(MaxParts2) encounters healthy ordinal0 then a missing or equal-length altered ordinal1 raw row. Existing DeleteParts stages raw0/meta0 deletions before reading ordinal1; quota mutation follows successful completion of that loop. The native refusal must leave every row, raw0/meta0, both quotas, retired state/cursor, tombstone, receipts, outcome absence, authority, identity and cut unchanged, repeatedly and after a first cold owner. Exact damaged-image closure changes exactly selected ordinal1 raw row; one-owned-row repair restores the complete pre-fault image at cut+2. The same original reclaim then removes state/all2 raw/all2 metadata rows and releases65553bytes/2parts/1version exactly once with receipt replay.
-
-Reuse of the same upload identifier publishes literal [9,10,11,12] at revision3, with exact full/partial/tail bytes, independent hashes, native quotas/state, fresh receipts and old-lifetime invalidation. A second cold owner preserves complete final image, catalog/root principal/incarnation, receipts and the original unrelated queue image/outcome absence. Original90s trial/30s cleanup/8192 output/4096 image bound and joined real child remain unchanged; native normal SIMD50. No Core/protocol/shared fixture change. Automated map: KeyLoad.RecoveryTests.Features.BlobStorage.BlobLaterPartProcessRecoveryTests.PriorAcknowledgedTwoPartDeletionSurvivesIndependentQueueCutThenLaterPartRepairReclaimAndReuse, MissingSecondRaw/AlteredSecondRaw. Source is unqualified until original results exist; local process checks do not establish Linux/full Recovery/RF3 or power-loss gates.
-
-### TASK-BLOB-EXTRA-PART-PROCESS-001
-
-Existing REQ/AC-BLOB-001/002/004/005/007 and ADR038: two native process cases extend acknowledged two-part retired-lifetime survival at the unchanged independent same-store queue HeaderWritten cut to unexpected extra owned ordinal2 rows. This is not Blob Complete/Delete/Reclaim commit-cut qualification. Preserve the accepted independent65553-byte body/2-part publication and deletion, native catalog/root/incarnation, exact head/state/manifest/raw/quota and original receipts.
-
-Insert exactly one previously absent owned ordinal2 raw row with literal [77,78,79], or one native part manifest format1/length3/SHA256(literal3). Both original ordinals0/1 remain healthy. Exact whole-store image includes only that one inserted key/value at cut+1. Original Reclaim(MaxParts2) reads both healthy parts, stages all4 raw/manifest deletions and resource/global quota decrement, then ProveEmpty refuses the unexpected raw or manifest row with exact Corruption. Repeated refusal and first cold owner must preserve complete image, both original parts, extra row, quotas65553bytes/1object/1version/0uploads, retired state/cursor, tombstone, original receipts, absence of reclaim outcome, cut/identity/authority. This staged order is the existing actual owning implementation; no fabricated failpoint is used.
-
-Delete-only repair of exactly the injected owned key restores complete original image at cut+2. Same original reclaim then releases65553bytes/2parts/1version exactly once, removes state/all2 raw/all2 manifest with exact quotas and receipt replay, and retains revision2 tombstone. Same-upload reuse publishes literal [9,10,11,12] revision3 with whole/partial/tail bytes, independent hashes, native state/quotas, fresh receipt replay and original lifetime invalidation. Both extra ordinal2 families and old ordinal1 remain absent after healthy reuse and second cold owner; final whole image/cut/authority and unrelated queue image/outcome remain exact.
-
-Automated map: KeyLoad.RecoveryTests.Features.BlobStorage.BlobExtraPartProcessRecoveryTests.PriorAcknowledgedTwoPartDeletionSurvivesIndependentQueueCutThenExtraPartRepairReclaimAndReuse, ExtraRaw/ExtraManifest. Reuses unchanged W6/W7/W9 complete native helpers/oracles; Core0/protocol0. Original90s trial/30s cleanup/8192 output/4096 image and actual joined child/native SIMD50 remain mandatory. Source alone remains unqualified; local process checks do not establish Linux/full Recovery/RF3, actual Blob commit-cut or power-loss qualification.
-
-
-### TASK-BLOB-GENUINE-COMMIT-CUT-001 — native Complete and Delete publication cuts
-
-REQ-BLOB-COMMIT-CUT-001 refines existing REQ-BLOB-001/002/003/004/005/007 under ADR-038 and the ADR-117 native TUnit entry. Genuine CompleteBlobUpload and DeleteBlob use their original node-local ZoneTreeStoreOptions.FaultObserver stages, selected exact next commit position, real CrashHost child, persisted RF3 physical-shard authority and joined native store ownership. A previously acknowledged literal four-byte publication and original seed receipts precede the selected command. Complete also acknowledges its new two-part65553-byte upload before the cut; Delete targets the acknowledged published version. No unrelated queue mutation is the selected cut.
-
-AC-BLOB-COMMIT-CUT-001 maps to four Complete native wholeflows: HeaderWritten stops after only the frame header, JournalFlushed stops after the entire frame synchronous flush but before materialized apply, a deterministic IOException injected through the existing public native FaultObserver at the selected JournalFlushed stage must yield the actual engine UnknownWriteOutcome, and an explicit ACK path observes the actual returned native receipt before stopping. AC-BLOB-COMMIT-CUT-002 maps the same four flows to Delete. Both require exact prior ACK, command/content/scope authority, same catalog/node incarnation and principal across genuine process stop/reopen. HeaderWritten must preserve the complete pre-command raw image/cut, reject ResolveOutcome with the existing RecoveryRequired missing-durable-outcome result and retain original metadata/chunks/digest/quotas. JournalFlushed and ACK must recover the complete atomic effect and identical durable receipt. A caller whose child stops before ACK has an unobserved write outcome; this is not an assertion that process termination returned an engine UnknownWriteOutcome error. Fabricated domain exceptions/results and relabelled queue cuts are forbidden. The deterministic native-hook IOException is scoped I/O fault injection, not a physical disk or power-loss claim.
-
-AC-BLOB-COMMIT-CUT-003 requires same-original-command retry, exact result and durable receipt replay, full independently expected metadata/state/head/raw chunks/manifests/digests/counters and no replay image/cut effects; persisted unauthorized principal refusal must not reveal bytes or change state. Complete preserves old retained version bytes while publishing the exact new multipart version; Delete publishes the exact revision2 tombstone and retained old version until bounded reclaim. Healthy new work and second joined cold owner preserve exact scoped authority, receipts and independent bytes. All selected child/pipe/native handles settle and owned roots are removed under existing process90s/cleanup30s bounds.
-
-Ordered contract: freeze Main preimages and additive test protocol; shared native child seed/sidecars and exact Complete/Delete dispatch; independent operation assertions; canonical scoped formatting; strict full SDK Release Recovery build with every analyzer; actual native CLI UID census and original native50 run with all four SIMD-enable variables1; retain source/DLL/PDB/TRX/commands/failures/cleanup and read-only current canonical compiled-source binding. Blob Complete owner coordinates the sole private source/build lane; Delete owner writes disjoint Delete role files; CrashHost owner writes native protocol/seed/runner and the minimal owning mode dispatcher only. Root/Main alone join changes.
-
-Baseline: prior immutable W5–10 wholecohort actual13PASS with source8074/images329 is separate supporting evidence; it does not execute these new Blob cuts. No new Core/API/storage format/dependency/provider, migration, fallback, bounds or authorization changes. Existing ADR-038 architecture is sufficient; this is additive process acceptance, not power-loss/Linux/RF3/endurance qualification. Test8 source declarations remain pending until actual native discovery/report. Rollback removes only this additive protocol/tests, dispatcher arms and mapping.
-
-The first actual private native cohort discovered exactly eight cases and refused all eight before the selected publication boundary because the fixture attempted initial-administrator-only Bootstrap for its denied nonadministrator. The original failed source, compiled images and native reports remain immutable. The corrected fixture installs the no-grants principal through the existing root-signed ConfigurePrincipal operation and retains its original operation/result for independent value and replay/no-effect checks. These flows use direct persisted-principal authorization; they do not qualify SDK credential authentication. No Blob product guard, role, boundary, limit or deadline changes; the corrected exact-source native cohort remains pending.
-
-The second original exact-source private native cohort discovered eight cases: all four genuine Complete cut cases passed, while all four Delete cases reached their later reclaimed-lifetime oracle and exposed a fixture corpus classification error. ConfigurePrincipal retains its administrative receipt after Blob reclamation; the corrected continuation compares full original ConfigurePrincipal/ConfigureResource Apply and ResolveOutcome results with no row-image or cut effect, while original Begin/Part/Complete still require TokenInvalidated. Both original cohorts and compiled-source receipts remain evidence; the final joined eight-case cohort remains pending.
-
-Final local development evidence: the repaired private source completed the strict Release Recovery build with zero warnings/errors, and the canonical Aspire-owned runner freshly discovered eight distinct native cases (Complete four, Delete four) and passed all eight with no skip/cancel/timeout/flaky outcomes. Actual CLI UIDs, original TUnit report and TRX agree; all four native SIMD flags were enabled, maximum parallel tests remained50, source7868 and native images330 stayed byte-identical before/after, and all owned child/store roots were removed after joined cleanup. The CURRENT original canonical Read-FcCompiledIdentity observer bound Recovery and Core PE/PDB/MVID/document hashes completely across1147 source rows. Original45/2/1 compiler failures, the first8FAIL fixture-seed cohort and the second4CompletePASS/4DeleteFAIL fixture-oracle cohort remain immutable. This is macOS arm64 local development evidence only; Linux process recovery, RF3, endurance and physical disk/power-loss qualification remain required. The verification source and its documentation were frozen before the native run; this bounded post-run evidence appendix is authored separately and does not modify those source/image receipts.
-
-### Numeric responsibility extraction source candidate
-
-Native runtime embedded point-cache opening and failed-open disposal are a separate feature-local responsibility; the original constructor admission, gate, cache and handle lifecycle and exception ordering remain unchanged. Compiler and full existing operation qualification remain required.
+Source review, authored cases and local development runs are not qualification. The required evidence is the exact-source Linux run of the normal and scalar unit suites, the process-recovery suite and the Aspire replicated-cluster SDK/MCP suite through the native TUnit test entry, with original reports. Process-kill and restart tests do not establish power-loss durability; endurance, power-loss and performance gates remain separately open until their own evidence exists. A suite failure elsewhere does not erase an independently verified mapped criterion, and a mapped criterion does not close the whole feature.

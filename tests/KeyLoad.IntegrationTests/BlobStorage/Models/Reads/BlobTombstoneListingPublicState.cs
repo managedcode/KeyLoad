@@ -1,7 +1,6 @@
 namespace KeyLoad.IntegrationTests.Features.BlobStorage;
 
-internal sealed class BlobTombstoneListingPublicState(AtomicPartitionPlacementResolution placement,
-    BlobTombstoneListingPublicState.Retirement[] retired,
+internal sealed class BlobTombstoneListingPublicState(BlobTombstoneListingPublicState.Retirement[] retired,
     BlobBoundedRetirementPublicPublication.Published first,
     BlobBoundedRetirementPublicPublication.Published current,
     BeginBlobUploadRequest begin, BlobCommitResult<BlobUploadInfo> begun)
@@ -10,7 +9,6 @@ internal sealed class BlobTombstoneListingPublicState(AtomicPartitionPlacementRe
     internal const string SecondRetiredId = "b-retired";
     internal const string CurrentId = "c-current";
     internal const string UnpublishedId = "d-unpublished";
-    internal AtomicPartitionPlacementResolution Placement { get; } = placement;
     internal Retirement[] Retired { get; } = retired;
     internal BlobBoundedRetirementPublicPublication.Published First { get; } = first;
     internal BlobBoundedRetirementPublicPublication.Published Current { get; } = current;

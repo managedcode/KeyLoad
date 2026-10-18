@@ -20,10 +20,10 @@ internal static class FixtureOwnedNativeCoveragePreparationComposition
     {
         ArgumentNullException.ThrowIfNull(builder);
         var runtime = AppHostOptionsRegistration.Get(builder);
-        if (runtime.Control.Value.Tests is not { NativeCoverageRf3: not null, LocalRf3ImageEnabled: false }
-            || !runtime.NativeCoverageRf3Image.Value.IsOuterSelection)
+        if (runtime.Control.Value.Tests is not { NativeCoverageCluster: not null, LocalClusterImageEnabled: false }
+            || !runtime.NativeCoverageClusterImage.Value.IsOuterSelection)
         {
-            throw new InvalidOperationException(NativeCoverageRf3Protocol.InvalidSelection);
+            throw new InvalidOperationException(NativeCoverageClusterProtocol.InvalidSelection);
         }
         KeyLoadResources.AddKeyLoad(builder);
     }

@@ -255,7 +255,7 @@ jobs:
           marker="<!-- KeyLoad release run=$GITHUB_RUN_ID source=$GITHUB_SHA manifest=$(sha256sum artifacts/assets/release-manifest.json | cut -d ' ' -f 1) -->"
           if ! gh api "repos/$GH_REPO/releases/tags/$RELEASE_TAG" > artifacts/publication/release.json 2> artifacts/publication/release-error.txt; then
             rg -q 'HTTP 404' artifacts/publication/release-error.txt
-            printf '%s\n\nVersion `%s`; source `%s`.\n\nIncludes NuGet packages, the Linux x64 RF3 distribution and exported server/benchmark images. Packaging does not establish production readiness.\n\nCI: %s\n' "$marker" "$RELEASE_VERSION" "$GITHUB_SHA" "$(jq -er .runUrl artifacts/publication/ci-proof.json)" > artifacts/publication/release-notes.md
+            printf '%s\n\nVersion `%s`; source `%s`.\n\nIncludes NuGet packages, the Linux x64 CLUSTER distribution and exported server/benchmark images. Packaging does not establish production readiness.\n\nCI: %s\n' "$marker" "$RELEASE_VERSION" "$GITHUB_SHA" "$(jq -er .runUrl artifacts/publication/ci-proof.json)" > artifacts/publication/release-notes.md
             gh release create "$RELEASE_TAG" --repo "$GH_REPO" --verify-tag --target "$GITHUB_SHA" --title "KeyLoad $RELEASE_VERSION" --notes-file artifacts/publication/release-notes.md --draft --prerelease
             gh api "repos/$GH_REPO/releases/tags/$RELEASE_TAG" > artifacts/publication/release.json
           fi

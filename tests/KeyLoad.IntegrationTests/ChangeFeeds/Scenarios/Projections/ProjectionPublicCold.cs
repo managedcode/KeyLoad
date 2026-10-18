@@ -5,7 +5,7 @@ namespace KeyLoad.IntegrationTests.Features.ChangeFeeds;
 
 internal static class ProjectionPublicCold
 {
-    internal static async Task VerifyAsync(RequestCqrsRf3Callers root, RequestCqrsRf3Callers caller,
+    internal static async Task VerifyAsync(RequestCqrsClusterCallers root, RequestCqrsClusterCallers caller,
         ProjectionPublicSettlement settled, CancellationToken token)
     {
         var state = settled.Original;

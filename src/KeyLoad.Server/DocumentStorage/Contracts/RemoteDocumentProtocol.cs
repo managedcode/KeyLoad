@@ -4,7 +4,6 @@ internal static class RemoteDocumentProtocol
 {
     internal const string CallAlias = "keyload.internal.remote-document.call.v1";
     internal const string ReplyAlias = "keyload.internal.remote-document.reply.v1";
-    internal const string ControlledCallAlias = "keyload.internal.controlled-document.call.v1";
     internal const string EnvelopeAlias = "keyload.internal.remote-document.transport.v1";
     internal const int Version = 1;
     internal const int MaximumAdmissions = 8;

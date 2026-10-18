@@ -16,10 +16,10 @@ internal static class PartitionAuthorityImage
             (PartitionAuthorityProtocol.SecondLeaf, PartitionAuthorityProtocol.SecondId, PartitionAuthorityProtocol.SecondJson) })
         {
             var partition = state.Scenario.Partitions[row.Item1];
-            var reference = new EntityRef(partition, PartitionQueryRf3Protocol.Collection, row.Item2);
+            var reference = new EntityRef(partition, PartitionQueryClusterProtocol.Collection, row.Item2);
             var document = await PublicReadAssertions.DocumentAsync(await root.GetAsync(reference, token));
             await Assert.That(document).IsNotNull();
-            await SqlRf3Protocol.EqualAsync(new DocumentResult(reference, PartitionQueryRf3Protocol.RowRevision,
+            await SqlClusterProtocol.EqualAsync(new DocumentResult(reference, PartitionQueryClusterProtocol.RowRevision,
                 row.Item3, false, []), document);
             var outbox = await McpCallerAssertions.SdkSuccessAsync(await root.OutboxStatusAsync(partition, token));
             images.Add(JsonSerializer.SerializeToElement(new

@@ -22,8 +22,8 @@ internal static class PolicyEpochPublicCold
             await Assert.That(after[node].Node.Applied).IsGreaterThanOrEqualTo(before[node].Node.Applied);
             await Assert.That(after[node].PhysicalCut).IsGreaterThanOrEqualTo(before[node].PhysicalCut);
         }
-        await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, fixture.AdminKey,
-            root => RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, state.CurrentReader.Secret,
+        await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, fixture.AdminKey,
+            root => RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2, state.CurrentReader.Secret,
                 async reader =>
                 {
                     await PolicyEpochPublicRefusals.AllAsync(fixture, reader, root.Sdk, state, ErrorCode.CursorExpired, token);

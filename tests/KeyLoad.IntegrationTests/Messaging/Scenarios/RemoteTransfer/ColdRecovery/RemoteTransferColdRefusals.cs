@@ -29,15 +29,15 @@ internal static class RemoteTransferColdRefusals
             await RefusedAsync(sdk, mcp, tampered, ErrorCode.TokenInvalidated, token);
             await UnchangedAsync(sdk, mcp, seed, intent, token);
         }, token);
-        var revoked = MessagingRf3Identity.WithCapability(seed.Identity.Principal, seed.Scenario.DestinationQueue,
+        var revoked = MessagingClusterIdentity.WithCapability(seed.Identity.Principal, seed.Scenario.DestinationQueue,
             RemoteTransferColdProtocol.Target & ~Capability.QueuePublish);
-        await MessagingRf3Identity.UpdateAsync(fixture, revoked, token);
+        await MessagingClusterIdentity.UpdateAsync(fixture, revoked, token);
         await RemoteTransferColdCallers.WithAsync(fixture, seed, async (sdk, mcp) =>
         {
             await RefusedAsync(sdk, mcp, seed.Accept(intent), ErrorCode.PermissionDenied, token);
             await UnchangedAsync(sdk, mcp, seed, intent, token);
         }, token);
-        await MessagingRf3Identity.UpdateAsync(fixture, MessagingRf3Identity.WithCapability(revoked,
+        await MessagingClusterIdentity.UpdateAsync(fixture, MessagingClusterIdentity.WithCapability(revoked,
             seed.Scenario.DestinationQueue, RemoteTransferColdProtocol.Target), token);
     }
 
@@ -48,9 +48,9 @@ internal static class RemoteTransferColdRefusals
     private static async Task RefusedAsync(KeyLoadClient sdk, McpOfficialClient mcp, CommandRequest command,
         ErrorCode expected, CancellationToken token)
     {
-        await QueueProducerRf3Assertions.DeniedAsync(await sdk.CommitAsync(command, token), expected);
+        await QueueProducerClusterAssertions.DeniedAsync(await sdk.CommitAsync(command, token), expected);
         await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token), expected, true);
-        await AtomicProducerRf3Routes.RefusedAsync(sdk, mcp, command, expected, token);
+        await AtomicProducerClusterRoutes.RefusedAsync(sdk, mcp, command, expected, token);
     }
 
     private static async Task UnchangedAsync(KeyLoadClient sdk, McpOfficialClient mcp, RemoteTransferColdSeed seed,

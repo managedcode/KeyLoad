@@ -35,7 +35,7 @@ public sealed partial class DatabaseEngine
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, RemoteDocumentFenceChanged);
             }
-            var placement = ResolveRegisteredPlacement(view, reference.Partition, catalog.DefaultShard);
+            var placement = ResolveRegisteredPlacement(reference.Partition, catalog.DefaultShard);
             if (placement.PhysicalShardId == catalog.DefaultShard.PhysicalShardId)
             {
                 return null;

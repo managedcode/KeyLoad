@@ -8,10 +8,10 @@ internal static class BlobCompleteCasPublicTrial
 {
     internal static async Task RunAsync(ClusterFixture fixture, CancellationToken token)
     {
-        _ = await RequestCqrsRf3Callers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, async callers =>
+        _ = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node1, fixture.AdminKey, async callers =>
         {
-            var scenario = await RelationalSqlRf3Scenario.CreateAsync(callers.Sdk, token);
-            var blob = new BlobRef(scenario.Partition, RelationalSqlRf3Tokens.Blobs, "complete-cas-public");
+            var scenario = await RelationalSqlClusterScenario.CreateAsync(callers.Sdk, token);
+            var blob = new BlobRef(scenario.Partition, RelationalSqlClusterTokens.Blobs, "complete-cas-public");
             var winner = new BlobCompleteCasPublicUpload(blob, 0L, [11, 13, 17], "77fc4a93b8441879ca5e1feb952834f5f458605a594696ada07173f3b1131528");
             var loser = new BlobCompleteCasPublicUpload(blob, 0L, [19, 23], "7853e8856e95cdad7cea9b99eb08d7acf402204e63a83c672ea617492816660d");
             BlobCompleteCasPublicUpload[] initial = [winner, loser];

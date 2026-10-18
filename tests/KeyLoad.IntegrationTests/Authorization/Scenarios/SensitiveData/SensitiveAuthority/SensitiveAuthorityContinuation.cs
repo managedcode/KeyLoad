@@ -16,7 +16,7 @@ internal static class SensitiveAuthorityContinuation
             PolicyEpoch = SensitiveAuthorityProtocol.RepairedEpoch,
             FieldGrants = [SensitiveAuthorityProtocol.RawRead, SensitiveAuthorityProtocol.RawWrite]
         };
-        await SqlRf3Protocol.EqualAsync(repaired, await McpCallerAssertions.SdkSuccessAsync(
+        await SqlClusterProtocol.EqualAsync(repaired, await McpCallerAssertions.SdkSuccessAsync(
             await root.ConfigurePrincipalAsync(Guid.NewGuid(), repaired, token)));
         await SensitiveAuthorityAssertions.HealthyAsync(reader, session, scenario, false, token);
         await SensitiveAuthorityRefusals.PatchAsync(root, reader, session, scenario, identity, denied, false, token);
@@ -24,7 +24,7 @@ internal static class SensitiveAuthorityContinuation
         var receipt = await McpCallerAssertions.SdkSuccessAsync(await reader.CommitAsync(command, token));
         MutationReceipt[] expected = [new(SensitiveAuthorityProtocol.PatchKindName, McpDocumentProtocol.Collection,
             McpDocumentProtocol.Entity, SensitiveAuthorityProtocol.PatchedRevision)];
-        await SqlRf3Protocol.EqualAsync(expected, receipt.Mutations.ToArray());
+        await SqlClusterProtocol.EqualAsync(expected, receipt.Mutations.ToArray());
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
         var state = new SensitiveAuthorityState(scenario, identity, denied, command, receipt);
         await CurrentAsync(root, reader, session, state, token);
@@ -41,12 +41,12 @@ internal static class SensitiveAuthorityContinuation
     {
         await SensitiveAuthorityAssertions.HealthyAsync(reader, session, state.Scenario, true, token);
         var before = await SensitiveAuthorityAssertions.ImageAsync(root, state.Scenario, true, token);
-        await SqlRf3Protocol.EqualAsync(state.Receipt,
+        await SqlClusterProtocol.EqualAsync(state.Receipt,
             await McpCallerAssertions.SdkSuccessAsync(await reader.CommitAsync(state.Healthy, token)));
         var replay = await McpCallerAssertions.SuccessAsync<CommitReceipt>(await session.CallAsync(
             McpCallerTools.DocumentsCommit, state.Healthy, token));
-        await SqlRf3Protocol.EqualAsync(state.Receipt, replay.Value);
-        await SqlRf3Protocol.EqualAsync(before,
+        await SqlClusterProtocol.EqualAsync(state.Receipt, replay.Value);
+        await SqlClusterProtocol.EqualAsync(before,
             await SensitiveAuthorityAssertions.ImageAsync(root, state.Scenario, true, token));
         await SensitiveAuthorityRefusals.PatchAsync(root, reader, session, state.Scenario, state.Identity,
             state.Denied, true, token);

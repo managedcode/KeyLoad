@@ -11,13 +11,13 @@ internal static class ProductionSourceManifestImageAssertions
     private const int CentralInputCount = 6;
     private const int UnitIndex = 0;
     private const int RecoveryIndex = 1;
-    private const int Rf3Index = 2;
+    private const int ClusterIndex = 2;
     private const string UnitSuite = "unit";
     private const string RecoverySuite = "recovery";
-    private const string Rf3Suite = "rf3";
+    private const string ClusterSuite = "cluster";
     private const string UnitFileName = "functional-coverage.test-image.unit.json";
     private const string RecoveryFileName = "functional-coverage.test-image.recovery.json";
-    private const string Rf3FileName = "functional-coverage.test-image.rf3.json";
+    private const string ClusterFileName = "functional-coverage.test-image.cluster.json";
     private const string SettingsFileName = "functional-coverage.production.settings.xml";
     private const string SettingsSourcePath = "scripts/Features/CodeQuality/functional-coverage.production.settings.xml";
     private const string SchemaVersionProperty = "schemaVersion";
@@ -57,12 +57,12 @@ internal static class ProductionSourceManifestImageAssertions
         await Assert.That(references.GetArrayLength()).IsEqualTo(ExpectedReferenceCount);
         await AssertReferenceAsync(references[UnitIndex], UnitSuite, UnitFileName);
         await AssertReferenceAsync(references[RecoveryIndex], RecoverySuite, RecoveryFileName);
-        await AssertReferenceAsync(references[Rf3Index], Rf3Suite, Rf3FileName);
+        await AssertReferenceAsync(references[ClusterIndex], ClusterSuite, ClusterFileName);
         await Assert.That(references[RecoveryIndex].GetProperty(FileNameProperty).GetString()).IsNotEqualTo(
-            references[Rf3Index].GetProperty(FileNameProperty).GetString());
+            references[ClusterIndex].GetProperty(FileNameProperty).GetString());
         await AssertImageAsync(evidenceRoot, references[UnitIndex], "tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj");
         await AssertImageAsync(evidenceRoot, references[RecoveryIndex], "tests/KeyLoad.RecoveryTests/KeyLoad.RecoveryTests.csproj");
-        await AssertImageAsync(evidenceRoot, references[Rf3Index], "tests/KeyLoad.IntegrationTests/KeyLoad.IntegrationTests.csproj");
+        await AssertImageAsync(evidenceRoot, references[ClusterIndex], "tests/KeyLoad.IntegrationTests/KeyLoad.IntegrationTests.csproj");
         await AssertSettingsAsync(evidenceRoot, settingsHash);
     }
 

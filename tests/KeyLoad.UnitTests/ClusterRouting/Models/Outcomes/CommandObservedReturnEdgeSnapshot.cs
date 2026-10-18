@@ -2,7 +2,7 @@ using KeyLoad.UnitTests.Features.Authorization;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
-/// <summary>Captures the actual complete canonical source owner after its native RF3 barrier.</summary>
+/// <summary>Captures the actual complete canonical source owner after its native CLUSTER barrier.</summary>
 internal sealed record CommandObservedReturnEdgeSnapshot(string[] Rows, byte[] Identity,
     long Position, long Applied, (long LastIndex, long CommittedIndex, long Term) Journal)
 {

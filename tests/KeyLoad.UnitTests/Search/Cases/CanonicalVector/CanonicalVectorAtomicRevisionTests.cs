@@ -3,7 +3,7 @@ using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
-/// <summary>KL027: canonical vector failure and successful replacement share the document revision boundary.</summary>
+/// <summary>canonical vector failure and successful replacement share the document revision boundary.</summary>
 internal sealed class CanonicalVectorAtomicRevisionTests
 {
     private const string Collection = "canonical-vectors";
@@ -18,7 +18,7 @@ internal sealed class CanonicalVectorAtomicRevisionTests
     [Test]
     [Arguments(true)]
     [Arguments(false)]
-    public async Task Kl027LateVectorFailureRollsBackDocumentAndHealthyUpdatePublishesRevisionTogether(bool dimensionFailure)
+    public async Task LateVectorFailureRollsBackDocumentAndHealthyUpdatePublishesRevisionTogether(bool dimensionFailure)
     {
         using var database = new TestDatabase();
         database.Configure(Collection, ResourceKind.Collection);

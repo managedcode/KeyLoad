@@ -2,9 +2,9 @@ using System.Collections.Immutable;
 
 namespace KeyLoad.IntegrationTests.Features.GraphTraversal;
 
-internal sealed class GraphLabelFrontierPublicState(GraphIncomingRf3Seed seed)
+internal sealed class GraphLabelFrontierPublicState(GraphIncomingClusterSeed seed)
 {
-    internal GraphIncomingRf3Seed Seed { get; } = seed;
+    internal GraphIncomingClusterSeed Seed { get; } = seed;
     internal EntityRef Start => Vertex("r43-s");
     internal EntityRef A => Vertex("r43-a");
     internal EntityRef B => Vertex("r43-b");
@@ -14,7 +14,6 @@ internal sealed class GraphLabelFrontierPublicState(GraphIncomingRf3Seed seed)
     {
         get; set;
     }
-    internal AtomicPartitionPlacementResolution Placement { get; set; } = null!;
     internal OutboxStatus Outbox { get; set; } = null!;
     internal List<(CommandRequest Command, CommitReceipt Receipt)> Originals { get; } = [];
     internal EdgeRecord[] Edges =>
@@ -112,5 +111,5 @@ internal sealed class GraphLabelFrontierPublicState(GraphIncomingRf3Seed seed)
         6 => ["KEEP"],
         _ => throw new ArgumentOutOfRangeException(nameof(profile))
     };
-    private EntityRef Vertex(string id) => new(Seed.TargetPartition, GraphIncomingRf3Scenario.Collection, id);
+    private EntityRef Vertex(string id) => new(Seed.TargetPartition, GraphIncomingClusterScenario.Collection, id);
 }

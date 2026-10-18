@@ -1,6 +1,6 @@
 # ADR-136: Orleans is the cluster; every silo owns its own ZoneTree
 
-Status: Accepted by owner direction 2026-10-18 (supersedes the 2026-10-15 text of this ADR). Implementation pending: the current source still contains self-written cluster mechanisms that must be removed. Canonical slices: ClusterRouting, ClusterReplication, StorageRecovery. Related: [ADR-036](ADR-036-orleans-foundation.md), [ADR-125](ADR-125-connection-owned-execution.md), [ADR-143](ADR-143-independent-silo-replica-topology.md), [ADR-110](ADR-110-native-orleans-execution-primitives.md), [ADR-003](ADR-003-durability-ack-barrier.md).
+Status: Accepted. Implementation and exact-source runtime qualification are in progress.
 
 ## Decision
 
@@ -44,18 +44,18 @@ flowchart LR
 5. Grains that need locality use the native `[Immovable]` attribute; all other grains keep native migration.
 6. Every operation still checks fresh persisted authorization, runs within bounded admission and cancellation, keeps idempotent command outcomes and emits OpenTelemetry through the native integrations.
 
-## Implementation contract
+## Verification
 
-| Stage | Work | Verification |
-|---|---|---|
-| 1 | Keep the native clustering provider, distributed directory and repartitioner configuration ([ADR-036](ADR-036-orleans-foundation.md)); one silo-local ZoneTree Grain Service registered first and opened in its native `Init` | Release build; Aspire host starts the configured silos; restart reopens the same files |
-| 2 | Connection grain → partition grain → ZoneTree owner calls for every public operation; copies to ReplicaCount owners through Orleans with majority acknowledgement | TUnit operations through the real .NET SDK and official MCP client against the Aspire-owned cluster: write, read back, restart a silo, read again |
-| 3 | Remove the self-written cluster code and its tests, routes, SDK/MCP surfaces and options in the same change as the replacement | Build, unit, process-recovery and Aspire cluster suites green; no references remain |
-
-Process-kill tests do not prove power-loss durability. Exact-source Linux CI remains the qualification gate.
+Verify native provider, directory and repartitioner configuration; silo-local
+ZoneTree ownership; and connection-grain calls through the real .NET SDK and
+MCP clients against the Aspire-owned topology. Writes, reads, cancellation,
+silo restart, duplicate commands and joined shutdown must preserve their
+observable contracts. Build, TUnit, process recovery and exact-source Linux
+cluster qualification are separate gates. Process-kill tests do not prove
+power-loss durability.
 
 ## Consequences
 
-The design is small enough to read in one sitting. Availability and placement of activations follow Orleans behaviour. Features that previously depended on custom placement or movement (physical rebalancing, split/merge) are out of scope.
+The design is small enough to read in one sitting. Availability and placement of activations follow Orleans behaviour. Physical file rebalancing, split and merge are outside this design.
 
 Open question for the owner: which silos store the copies of a partition when `SiloCount` is larger than `ReplicaCount`. Today the copies live on the configured replica silos (by default all three silos of a three-silo cluster, see ADR-143). Any answer must stay inside Orleans and must not reintroduce a placement or movement protocol.

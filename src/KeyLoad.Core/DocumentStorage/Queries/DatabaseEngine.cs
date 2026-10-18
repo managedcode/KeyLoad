@@ -1,4 +1,3 @@
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.DocumentStorage;
 using KeyLoad.Core.Features.ResourceExecution;
 
@@ -18,20 +17,5 @@ public sealed partial class DatabaseEngine
     {
         work.RequireResourceLifetimeBinding(binding);
         ValidateRemoteDocumentReadV2(original, work);
-    }
-
-    internal PartitionControlDocumentReadFrameV2? TryCaptureControlledDocumentReadV2Bound(string principalId,
-        EntityRef reference, CommitToken? minimumToken, DateTimeOffset expiry, ReadExecutionBudget work,
-        IResourceLifetimeWorkBinding binding)
-    {
-        work.AttachResourceLifetimeBinding(binding);
-        return TryCaptureControlledDocumentReadV2(principalId, reference, minimumToken, expiry, work);
-    }
-
-    internal void ValidateControlledDocumentReadV2Bound(PartitionControlDocumentReadFrameV2 original,
-        ReadExecutionBudget work, IResourceLifetimeWorkBinding binding)
-    {
-        work.RequireResourceLifetimeBinding(binding);
-        ValidateControlledDocumentReadV2(original, work);
     }
 }

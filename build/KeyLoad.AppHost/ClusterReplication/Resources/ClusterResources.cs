@@ -1,7 +1,6 @@
 using System.Globalization;
 using System.Text;
 using KeyLoad.AppHost.Features.ClusterReplication;
-using KeyLoad.AppHost.Features.ClusterRouting;
 using KeyLoad.AppHost.Features.CodeQuality;
 using KeyLoad.AppHost.Features.StorageRecovery;
 using KeyLoad.AppHost.Hosting;
@@ -57,16 +56,16 @@ internal static class ClusterResources
             AppHostOptionsRegistration.Get(builder).Cluster.Value.SiloCount);
         ClusterProfileStore.Validate(profile);
         var root = Path.GetFullPath(dataRoot);
-        var imageOptions = AppHostOptionsRegistration.Get(builder).NativeCoverageRf3Image;
-        var coverageImage = NativeCoverageRf3ClusterImage.Read(imageOptions, ephemeral, benchmarkNodeCount);
-        var (localImage, images, probes) = ClusterRuntimeImages.Read(builder, root, ephemeral, benchmarkNodeCount,
+        var imageOptions = AppHostOptionsRegistration.Get(builder).NativeCoverageClusterImage;
+        var coverageImage = NativeCoverageClusterClusterImage.Read(imageOptions, ephemeral, benchmarkNodeCount);
+        var (localImage, images) = ClusterRuntimeImages.Read(builder, ephemeral, benchmarkNodeCount,
             coverageImage, nodeNames);
         ClusterProfileStore.PrepareDirectory(root);
         var identity = AddIdentityParameters(builder, profile);
         var sourceImage = localImage is null && coverageImage is null && images is null
             ? SdkContainerImage.Add(builder, profile.Incarnation) : null;
         var (nodes, contenders) = AddNodes(builder, profile, root, ephemeral, benchmarkNodeCount, nodeNames, coverageImage,
-            localImage, images, probes, sourceImage, identity);
+            localImage, images, sourceImage, identity);
         if (functionalNodeCount == SingleFunctionalNodeCount)
         {
             nodes[FirstNodeIndex].WithEnvironment(DevelopmentSingleVoterEnvironment, TrueValue);
@@ -82,8 +81,8 @@ internal static class ClusterResources
     private static (IResourceBuilder<ContainerResource>[] Nodes, IResourceBuilder<ContainerResource>[] Contenders)
         AddNodes(IDistributedApplicationBuilder builder,
         LocalProfile profile, string root, bool ephemeral, int? benchmarkNodeCount, string[] nodeNames,
-        NativeCoverageRf3ClusterImage? coverageImage, LocalDevelopmentContainerImage? localImage,
-        IReadOnlyDictionary<string, RuntimeContainerImage>? images, RequestCqrsProbeProfile? probes, SdkContainerImage? sourceImage,
+        NativeCoverageClusterClusterImage? coverageImage, LocalDevelopmentContainerImage? localImage,
+        IReadOnlyDictionary<string, RuntimeContainerImage>? images, SdkContainerImage? sourceImage,
         (IResourceBuilder<ParameterResource> Signing, IResourceBuilder<ParameterResource> Peer,
             IResourceBuilder<ParameterResource> Admin, IResourceBuilder<ParameterResource> Incarnation) identity)
     {
@@ -96,13 +95,13 @@ internal static class ClusterResources
         {
             var name = nodeNames[index];
             nodes[index] = AddNode(builder, profile, root, ephemeral, benchmarkNodeCount, nodeNames,
-                coverageImage, localImage, images, probes, sourceImage, identity, name, index, physicalShardId, containerUser,
+                coverageImage, localImage, images, sourceImage, identity, name, index, physicalShardId, containerUser,
                 firstPublicPort);
         }
         var contenders = ExclusiveOwnerContentionResources.Add(
             AppHostOptionsRegistration.Get(builder).Control.Value.ExclusiveOwnerContention, nodes[FirstNodeIndex],
             resourceName => AddNode(builder, profile, root, ephemeral, benchmarkNodeCount, nodeNames,
-                coverageImage, localImage, images, probes, sourceImage, identity, ExclusiveOwnerContentionResources.OwnerName,
+                coverageImage, localImage, images, sourceImage, identity, ExclusiveOwnerContentionResources.OwnerName,
                 FirstNodeIndex, physicalShardId, containerUser, firstPublicPort, resourceName,
                 Path.GetFullPath(Path.Combine(root, ExclusiveOwnerContentionResources.OwnerName))));
         return (nodes, contenders);
@@ -110,8 +109,8 @@ internal static class ClusterResources
 
     private static IResourceBuilder<ContainerResource> AddNode(IDistributedApplicationBuilder builder,
         LocalProfile profile, string root, bool ephemeral, int? benchmarkNodeCount, string[] nodeNames,
-        NativeCoverageRf3ClusterImage? coverageImage, LocalDevelopmentContainerImage? localImage,
-        IReadOnlyDictionary<string, RuntimeContainerImage>? images, RequestCqrsProbeProfile? probes, SdkContainerImage? sourceImage,
+        NativeCoverageClusterClusterImage? coverageImage, LocalDevelopmentContainerImage? localImage,
+        IReadOnlyDictionary<string, RuntimeContainerImage>? images, SdkContainerImage? sourceImage,
         (IResourceBuilder<ParameterResource> Signing, IResourceBuilder<ParameterResource> Peer,
             IResourceBuilder<ParameterResource> Admin, IResourceBuilder<ParameterResource> Incarnation) identity,
         string name, int index, string physicalShardId, string? containerUser, int firstPublicPort,
@@ -128,7 +127,7 @@ internal static class ClusterResources
                 ? images is null
                     ? sourceImage!.AddNode(builder, resourceName)
                     : images[name].Add(builder, resourceName)
-                : builder.AddContainer(resourceName, NativeCoverageRf3Protocol.CoverageImageRepository,
+                : builder.AddContainer(resourceName, NativeCoverageClusterProtocol.CoverageImageRepository,
                     coverageImage.Tag)
             : builder.AddContainer(resourceName, LocalDevelopmentContainerImage.Repository, localImage.Tag);
         resource
@@ -146,7 +145,7 @@ internal static class ClusterResources
             .WithHttpHealthCheck(ReadyPath, endpointName: HttpEndpoint);
         if (coverageImage is not null)
         {
-            resource.WithBindMount(coverageDirectory!, NativeCoverageRf3Protocol.CoverageOutputDirectory);
+            resource.WithBindMount(coverageDirectory!, NativeCoverageClusterProtocol.CoverageOutputDirectory);
             coverageImage.Apply(resource, resourceName);
         }
         if (ownsReplica)
@@ -161,7 +160,6 @@ internal static class ClusterResources
             ApplyPeers(resource, nodeNames.Take(replicaCount).ToArray(), benchmarkNodeCount.HasValue);
         }
         ClusterResourceSettings.Apply(builder, resource, containerUser);
-        probes?.Apply(resource, name);
         ContainerKillCommand.Apply(builder, resource, ephemeral, benchmarkNodeCount);
         if (!ownsReplica)
         {

@@ -83,10 +83,10 @@ internal sealed class NativeOperationSemanticsTests
         foreach (var kind in Enum.GetValues<OperationKind>())
         {
             if (kind is OperationKind.ReceiveAcrossLanes or OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex
-                or OperationKind.MovePartition or OperationKind.MaintainOnlineTextIndex
+                or OperationKind.MaintainOnlineTextIndex
                 or OperationKind.EventFeedControl or OperationKind.EventFeedSourcePhase
                 or OperationKind.UpsertRemoteGraphEdge or OperationKind.DeleteRemoteGraphEdge or OperationKind.DeliverRemoteGraphEdge
-                or OperationKind.PersistPlacementIntent or OperationKind.ApplyPlacementIntent or OperationKind.DropTable)
+                or OperationKind.DropTable)
             {
                 await Assert.That(DatabaseEngine.NativeOperationPayloadType(kind)).IsNull();
             }
@@ -101,16 +101,12 @@ internal sealed class NativeOperationSemanticsTests
     [Arguments(OperationKind.ReceiveAcrossLanes)]
     [Arguments(OperationKind.MaintainAnnIndex)]
     [Arguments(OperationKind.MaintainTextIndex)]
-    [Arguments(OperationKind.MovePartition)]
     [Arguments(OperationKind.MaintainOnlineTextIndex)]
     [Arguments(OperationKind.EventFeedControl)]
     [Arguments(OperationKind.EventFeedSourcePhase)]
     [Arguments(OperationKind.UpsertRemoteGraphEdge)]
     [Arguments(OperationKind.DeleteRemoteGraphEdge)]
     [Arguments(OperationKind.DeliverRemoteGraphEdge)]
-    [Arguments(OperationKind.PersistPlacementIntent)]
-    [Arguments(OperationKind.ApplyPlacementIntent)]
-    [Arguments(OperationKind.PlacementIntentPhase)]
     [Arguments(OperationKind.DropTable)]
     public async Task GenericUnsupportedOperationCannotBecomeOneCoreAtomicCommandOrChangeCanonicalState(OperationKind kind)
     {

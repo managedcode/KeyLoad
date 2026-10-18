@@ -1,10 +1,10 @@
 # Native analytics policy refusal and healthy same-root continuation
 
-This SourceN operation targets REQ-ANALYTICS-005/008 and
+This operation targets REQ-ANALYTICS-005/008 and
 AC-ANALYTICS-004/005/008 in [OperationalAnalytics](OperationalAnalytics.md), under
 [ADR-134](../../ADR/ADR-134-node-owned-derived-analytics.md). It does not activate
-production analytics or qualify native queue saturation, a timeout, scheduler/kernel
-admission, a primitive close fault, physical quota, RF3 or performance.
+production analytics or qualify native queue saturation, a timeout, scheduler
+admission, a primitive close fault, physical quota, cluster or performance.
 
 ```mermaid
 flowchart TD
@@ -79,8 +79,7 @@ retains the root; it does not become known release merely because no owner retur
 ## Qualification boundary
 
 Existing three analytics cases and product/options/registration/helper sources are
-unchanged. This packet adds one coherent operation and test-local inputs/snapshots
-only. Native compilation/analyzers/formatting and actual original operation execution
-remain OPEN until Root runs them. Earlier R288 coverage and successes do not transfer
-to these new bodies. Linux/RF3, deterministic native queue-full/timeout, production
-activation and all resource/scheduler/kernel gates remain separately OPEN.
+unchanged. This operation adds one coherent test and test-local inputs/snapshots
+only. Native compilation/analyzers/formatting and actual original operation
+execution remain OPEN. Linux/cluster, deterministic native queue-full/timeout,
+production activation and all resource/scheduler gates remain separately OPEN.

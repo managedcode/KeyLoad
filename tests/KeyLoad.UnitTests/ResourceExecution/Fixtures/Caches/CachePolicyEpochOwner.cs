@@ -43,8 +43,7 @@ internal sealed class CachePolicyEpochOwner : IDisposable
     internal CachePolicyEpochOwner()
     {
         createDatabase = TestDatabaseEngineFactory.Capture(UnitExecutionOptions.DatabaseLimits(),
-            UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), null,
-            UnitExecutionOptions.MovementCheckpoints(), TimeProvider.System);
+            UnitExecutionOptions.BlobExecution(), UnitExecutionOptions.NativeClaimsExecution(), null, TimeProvider.System);
     }
 
     internal void Open(bool first)

@@ -10,30 +10,30 @@ internal static class BlobEmptySlotPublicAssertions
     private const string Detail = "detail";
     private const string Capacity = "The blob reservation quota is exhausted.";
     private const string SafeCapacity = "The operation exceeds the available resource capacity.";
-    internal static async Task CurrentAsync(RequestCqrsRf3Callers callers, BlobEmptySlotPublicState state, CancellationToken token)
+    internal static async Task CurrentAsync(RequestCqrsClusterCallers callers, BlobEmptySlotPublicState state, CancellationToken token)
     {
         var upload = new BlobUploadInfoRequest(state.Blob, state.First.UploadId);
-        await SqlRf3Protocol.EqualAsync(state.OriginalCurrent, await PublicReadAssertions.UploadAsync(await callers.Sdk.GetBlobUploadInfoAsync(upload, token)));
-        await SqlRf3Protocol.EqualAsync(state.OriginalCurrent, (await PublicReadAssertions.UploadAsync(await callers.Mcp.CallAsync("keyload_blobs_upload_info", upload, token))).Value);
+        await SqlClusterProtocol.EqualAsync(state.OriginalCurrent, await PublicReadAssertions.UploadAsync(await callers.Sdk.GetBlobUploadInfoAsync(upload, token)));
+        await SqlClusterProtocol.EqualAsync(state.OriginalCurrent, (await PublicReadAssertions.UploadAsync(await callers.Mcp.CallAsync("keyload_blobs_upload_info", upload, token))).Value);
         if (state.Healthy is { } healthy)
         {
             var current = new BlobUploadInfoRequest(state.Blob, healthy.UploadId);
-            await SqlRf3Protocol.EqualAsync(state.HealthyCurrent, await PublicReadAssertions.UploadAsync(await callers.Sdk.GetBlobUploadInfoAsync(current, token)));
-            await SqlRf3Protocol.EqualAsync(state.HealthyCurrent, (await PublicReadAssertions.UploadAsync(await callers.Mcp.CallAsync("keyload_blobs_upload_info", current, token))).Value);
+            await SqlClusterProtocol.EqualAsync(state.HealthyCurrent, await PublicReadAssertions.UploadAsync(await callers.Sdk.GetBlobUploadInfoAsync(current, token)));
+            await SqlClusterProtocol.EqualAsync(state.HealthyCurrent, (await PublicReadAssertions.UploadAsync(await callers.Mcp.CallAsync("keyload_blobs_upload_info", current, token))).Value);
         }
         var metadata = new BlobMetadataRequest(state.Blob);
-        await SqlRf3Protocol.EqualAsync(state.Published?.Value, await PublicReadAssertions.MetadataAsync(await callers.Sdk.GetBlobMetadataAsync(metadata, token)));
-        await SqlRf3Protocol.EqualAsync(state.Published?.Value, (await PublicReadAssertions.MetadataAsync(await callers.Mcp.CallAsync("keyload_blobs_metadata", metadata, token))).Value);
+        await SqlClusterProtocol.EqualAsync(state.Published?.Value, await PublicReadAssertions.MetadataAsync(await callers.Sdk.GetBlobMetadataAsync(metadata, token)));
+        await SqlClusterProtocol.EqualAsync(state.Published?.Value, (await PublicReadAssertions.MetadataAsync(await callers.Mcp.CallAsync("keyload_blobs_metadata", metadata, token))).Value);
         if (state.Published is { } published)
         {
             var read = new BlobReadRequest(state.Blob, 1L, 0L, 0);
             var expected = new BlobReadResult(published.Value, 0L, Array.Empty<byte>());
-            await SqlRf3Protocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ReadBlobRangeAsync(read, token)));
-            await SqlRf3Protocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<BlobReadResult>(await callers.Mcp.CallAsync("keyload_blobs_read_range", read, token))).Value);
+            await SqlClusterProtocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ReadBlobRangeAsync(read, token)));
+            await SqlClusterProtocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<BlobReadResult>(await callers.Mcp.CallAsync("keyload_blobs_read_range", read, token))).Value);
         }
     }
 
-    internal static async Task RefusedAsync(RequestCqrsRf3Callers callers, BlobEmptySlotPublicState state,
+    internal static async Task RefusedAsync(RequestCqrsClusterCallers callers, BlobEmptySlotPublicState state,
         BeginBlobUploadRequest request, CancellationToken token)
     {
         var denied = await callers.Sdk.BeginBlobUploadAsync(request, token);
@@ -54,13 +54,10 @@ internal static class BlobEmptySlotPublicAssertions
         }
     }
 
-    internal static async Task ReceiptAsync(RequestCqrsRf3Callers callers, CommitReceipt receipt,
-        Guid commandId, BlobRef blob, CancellationToken token)
+    internal static async Task ReceiptAsync(CommitReceipt receipt,
+        Guid commandId, BlobRef blob)
     {
-        var placement = await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ReadAtomicPartitionPlacementAsync(new(1, blob.Partition), token));
         await Assert.That(receipt.CommandId).IsEqualTo(commandId);
-        await Assert.That(receipt.Token.Incarnation).IsEqualTo(placement.Incarnation);
-        await Assert.That(receipt.Token.OwnershipEpoch).IsEqualTo(placement.PlacementEpoch);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(blob.Partition.AtomicPartitionId);
         await Assert.That(receipt.Token.Position).IsGreaterThan(0L);
         await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.QuorumProcessDurable);

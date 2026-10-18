@@ -58,8 +58,8 @@ internal static class NativeCoverageImagePreparationFlow
     private static void RequireSelectedTemplate(byte[] contextBytes, int maximumBytes)
     {
         var path = Path.Combine(NativeCoverageImageFixture.RepositoryRoot,
-            NativeCoverageRf3TemplateIdentity.SourceRelativePath);
+            NativeCoverageClusterTemplateIdentity.SourceRelativePath);
         var selected = NativeCoverageImageOracleSupport.ReadBounded(path, maximumBytes);
-        NativeCoverageRf3TemplateIdentity.ReadAndRequire(contextBytes, selected);
+        NativeCoverageClusterTemplateIdentity.ReadAndRequire(contextBytes, selected);
     }
 }

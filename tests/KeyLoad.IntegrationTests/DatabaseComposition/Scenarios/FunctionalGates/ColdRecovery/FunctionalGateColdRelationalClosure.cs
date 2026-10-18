@@ -77,9 +77,9 @@ internal static class FunctionalGateColdRelationalClosure
             FunctionalGateRelationalCalls.Commit(command), token);
         await McpCallerAssertions.ErrorAsync(official, ErrorCode.Validation, dispatched: true);
         await VerifyAsync(context, state, token);
-        await SqlRf3Protocol.EqualAsync(first.TableReceipt,
+        await SqlClusterProtocol.EqualAsync(first.TableReceipt,
             await FunctionalGateRelationalCalls.SqlSdkAsync<CommitReceipt>(context, context.Writer, first.TableInsert, token));
-        await SqlRf3Protocol.EqualAsync(first.TableReceipt,
+        await SqlClusterProtocol.EqualAsync(first.TableReceipt,
             await FunctionalGateRelationalCalls.SqlMcpAsync<CommitReceipt>(context, context.Writer, first.TableInsert, token));
     }
 

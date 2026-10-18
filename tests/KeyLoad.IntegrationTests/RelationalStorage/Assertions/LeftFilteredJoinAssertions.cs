@@ -11,14 +11,14 @@ internal static class LeftFilteredJoinAssertions
     private const string OrderIdFieldKey = "order_id";
     private const string TotalFieldKey = "total";
     private const string CustomerNameFieldKey = "customer_name";
-    internal static async Task PageAsync(RequestCqrsRf3Callers callers, LeftFilteredJoinState state,
+    internal static async Task PageAsync(RequestCqrsClusterCallers callers, LeftFilteredJoinState state,
         bool masked, CancellationToken token)
     {
         var direct = await McpCallerAssertions.SdkSuccessAsync(
             await callers.Sdk.QueryAsync(LeftFilteredJoinProtocol.Query(state.Partition), token));
-        var unified = await SqlRf3Protocol.SdkAsync<QueryPage>(callers.Sdk,
+        var unified = await SqlClusterProtocol.SdkAsync<QueryPage>(callers.Sdk,
             LeftFilteredJoinProtocol.Request(state.Partition), token);
-        var official = await SqlRf3Protocol.McpAsync<QueryPage>(callers.Mcp,
+        var official = await SqlClusterProtocol.McpAsync<QueryPage>(callers.Mcp,
             LeftFilteredJoinProtocol.Request(state.Partition), token);
         var queryReply = (await McpCallerAssertions.SuccessAsync<QueryPage>(await callers.Mcp.CallAsync(
             McpCallerTools.QueryExecute, LeftFilteredJoinProtocol.Query(state.Partition), token))).Value;
@@ -39,15 +39,15 @@ internal static class LeftFilteredJoinAssertions
         await Assert.That(json.RootElement.GetProperty(OrderIdFieldKey).GetString()).IsEqualTo("a");
         await Assert.That(json.RootElement.GetProperty(TotalFieldKey).GetInt32()).IsEqualTo(7);
         await Assert.That(json.RootElement.GetProperty(CustomerNameFieldKey).GetString()).IsEqualTo(masked ? null : "Ada");
-        await RelationalSqlRf3JoinPageAssertions.SameRowsAsync(direct, unified);
-        await RelationalSqlRf3JoinPageAssertions.SameRowsAsync(direct, official);
-        await RelationalSqlRf3JoinPageAssertions.SameRowsAsync(direct, queryReply);
+        await RelationalSqlClusterJoinPageAssertions.SameRowsAsync(direct, unified);
+        await RelationalSqlClusterJoinPageAssertions.SameRowsAsync(direct, official);
+        await RelationalSqlClusterJoinPageAssertions.SameRowsAsync(direct, queryReply);
         var literal = LeftFilteredJoinProtocol.Query(state.Partition) with
         {
             Sql = LeftFilteredJoinProtocol.Prefix + "WHERE l.total = 7 " + LeftFilteredJoinProtocol.Order,
             Parameters = null
         };
-        await RelationalSqlRf3JoinPageAssertions.SameRowsAsync(direct,
+        await RelationalSqlClusterJoinPageAssertions.SameRowsAsync(direct,
             await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.QueryAsync(literal, token)));
     }
 }

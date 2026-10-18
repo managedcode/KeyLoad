@@ -17,7 +17,6 @@ internal static class FunctionalColdReopenProfileProtocol
     internal const string Suite = "KeyLoadTests:Suite";
     internal const string LoggerControl = "KeyLoadTests:LoggerModelControl";
     internal const string Benchmark = "Benchmarks:Enabled";
-    internal const string TwoRf3 = "KeyLoadTests:ClusterRouting:Profile";
     private const string GuidFormat = "N";
     private const string Prefix = "keyload-functional-cold-profile-";
     private const string Image = "ghcr.io/managedcode/keyload:current@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";

@@ -9,20 +9,13 @@ public sealed partial class DatabaseEngine
 {
     internal static AtomicPartitionPlacementResolution ReadAtomicPartitionPlacementForAuthorizedQuery(
         IKeyValueView view, PartitionRef partition, ReadExecutionBudgetReadGrant grant)
-    {
-        var (local, placement) = ReadAuthorizedQueryPlacement(view, partition, grant);
-        if (placement.PhysicalShardId != local.PhysicalShardId)
-        {
-            throw Errors.Fail(ErrorCode.OwnershipLost, ForeignPlacementExecution);
-        }
-        return placement;
-    }
+        => ReadAuthorizedQueryPlacement(view, partition, grant);
 
     internal static AtomicPartitionPlacementResolution ReadAtomicPartitionPlacementForAuthorizedRouting(
         IKeyValueView view, PartitionRef partition, ReadExecutionBudgetReadGrant grant)
-        => ReadAuthorizedQueryPlacement(view, partition, grant).Placement;
+        => ReadAuthorizedQueryPlacement(view, partition, grant);
 
-    private static (PhysicalShardRecord Local, AtomicPartitionPlacementResolution Placement) ReadAuthorizedQueryPlacement(
+    private static AtomicPartitionPlacementResolution ReadAuthorizedQueryPlacement(
         IKeyValueView view, PartitionRef partition, ReadExecutionBudgetReadGrant grant)
     {
         const string ReadAtomicPartitionPlacementForAuthorizedQueryDetailText = "The physical shard catalog is not initialized.";
@@ -35,21 +28,6 @@ public sealed partial class DatabaseEngine
         var catalog = PhysicalShardCatalogRecordSerialization.Read(view, grant)
             ?? throw Errors.Fail(ErrorCode.NotFound, ReadAtomicPartitionPlacementForAuthorizedQueryDetailText);
         PhysicalShardCatalogValidation.ValidateCatalog(catalog);
-        var directory = AtomicPartitionPlacementSerialization.ReadDirectory(view, grant);
-        if (directory is not null)
-        {
-            AtomicPartitionPlacementValidation.ValidateDirectory(directory);
-        }
-        var row = AtomicPartitionPlacementSerialization.ReadRow(view, partition, grant);
-        if (row is not null)
-        {
-            AtomicPartitionPlacementValidation.ValidateRowShape(row, partition);
-        }
-        var owner = row is null ? catalog.DefaultShard
-            : ResolveRegisteredPlacementOwner(view, catalog.DefaultShard, row.PhysicalShardId,
-                ErrorCode.Corruption, grant);
-        owner = ResolveMovementPlacementOwner(view, partition, owner, row, grant);
-        var placement = ResolvePlacement(partition, owner, directory, row);
-        return (catalog.DefaultShard, placement);
+        return ResolvePlacement(partition, catalog.DefaultShard);
     }
 }

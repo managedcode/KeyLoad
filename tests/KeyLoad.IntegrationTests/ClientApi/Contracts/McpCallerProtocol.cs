@@ -3,7 +3,7 @@ namespace KeyLoad.IntegrationTests.Features.ClientApi;
 /// <summary>Named public wire and qualification bounds for genuine official MCP callers.</summary>
 internal static class McpCallerProtocol
 {
-    internal const string FixtureKey = "rf3";
+    internal const string FixtureKey = "cluster";
     internal const string Node1 = "node1";
     internal const string Node2 = "node2";
     internal const string Node3 = "node3";
@@ -20,8 +20,6 @@ internal static class McpCallerProtocol
     internal const string Matches = "matches";
     internal const string Tool = "tool";
     internal const string MissingDiscoveredTool = "The native graph did not return the exact canonical tool.";
-    internal const string AdminPartitionPlacementBind = "keyload_admin_partition_placement_bind";
-    internal const string AdminPartitionPlacementRead = "keyload_admin_partition_placement_read";
     internal const string HttpEndpoint = "http";
     internal const string Endpoint = "/mcp";
     internal const string ProtocolVersion = "2026-07-28";
@@ -48,7 +46,7 @@ internal static class McpCallerProtocol
     internal const string ProblemStatus = "status";
     internal const string ProblemDetail = "detail";
     internal const string ProblemCode = "errorCode";
-    internal const int ToolCount = 102;
+    internal const int ToolCount = 93;
     internal const int InitialToolCount = 3;
     internal const int MaximumSearchResults = 4;
     internal const int AstVersion = 1;

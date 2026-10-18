@@ -18,12 +18,12 @@ internal sealed class RequestCqrsNativeCaptureEvidence
         first ??= now;
         last = now;
         Increment(ref lines);
-        if (line.Length > RequestCqrsRf3McpRejectionNodeCapture.MaximumLineCharacters)
+        if (line.Length > RequestCqrsClusterMcpRejectionNodeCapture.MaximumLineCharacters)
         {
             Increment(ref oversized);
             return;
         }
-        if (line.Contains(RequestCqrsRf3McpRejectionNodeCapture.MessagePrefix, StringComparison.Ordinal))
+        if (line.Contains(RequestCqrsClusterMcpRejectionNodeCapture.MessagePrefix, StringComparison.Ordinal))
         {
             Increment(ref candidates);
             if (!parsed)

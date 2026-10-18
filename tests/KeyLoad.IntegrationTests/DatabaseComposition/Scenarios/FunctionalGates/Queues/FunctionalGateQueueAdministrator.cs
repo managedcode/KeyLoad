@@ -12,8 +12,8 @@ internal static class FunctionalGateQueueAdministrator
     private const string Prefix = "gate_queue_";
     private const Capability Grants = Capability.QueueInspect | Capability.DeadLettersRead | Capability.DeadLettersRedrive;
 
-    internal static async Task<RequestCqrsRf3Callers> CreateAsync(FunctionalGateFixture fixture,
-        RequestCqrsRf3Callers administrator, PartitionRef partition, CancellationToken token)
+    internal static async Task<RequestCqrsClusterCallers> CreateAsync(FunctionalGateFixture fixture,
+        RequestCqrsClusterCallers administrator, PartitionRef partition, CancellationToken token)
     {
         var identity = await McpPersistedIdentity.CreateAsync(administrator.Sdk, partition,
             Prefix + "0", Capability.None, token);
@@ -26,7 +26,7 @@ internal static class FunctionalGateQueueAdministrator
         };
         var actual = await McpCallerAssertions.SdkSuccessAsync(
             await administrator.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), expected, token));
-        await SqlRf3Protocol.EqualAsync(expected, actual);
-        return await RequestCqrsRf3Callers.ConnectAsync(fixture.App, fixture.NodeNames[0], identity.Secret, token);
+        await SqlClusterProtocol.EqualAsync(expected, actual);
+        return await RequestCqrsClusterCallers.ConnectAsync(fixture.App, fixture.NodeNames[0], identity.Secret, token);
     }
 }
