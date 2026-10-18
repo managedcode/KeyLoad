@@ -2,8 +2,6 @@ using System.Security.Cryptography;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
 using KeyLoad.Core.Features.DocumentStorage;
-using KeyLoad.RecoveryHost;
-using KeyLoad.RecoveryHost.Features.Search;
 using KeyLoad.Query;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Server.Features.Search;

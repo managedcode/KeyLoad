@@ -1,7 +1,6 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
-using KeyLoad.RecoveryHost;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.RecoveryTests.Features.Messaging;
@@ -50,9 +49,9 @@ internal static class QueueEnqueueProcessRecovery
         await Assert.That(store.Position).IsEqualTo(target.Position);
         await QueueEnqueueProcessAssertions.ReceiptAsync(result, command, target);
         await QueueEnqueueProcessAssertions.InitialAsync(owner, store, command);
-        if (outcome is not null)
+        if (outcome is { } retained)
         {
-            await QueueClaimAckRecoveryAssertions.EqualAsync(result, outcome);
+            await QueueClaimAckRecoveryAssertions.EqualAsync(result, retained);
         }
         await QueueClaimAckRecovery.ReplayAsync(owner, store, operation, result, token);
         await ColdAsync(root, store, operation, result, command, token);

@@ -1,8 +1,7 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using KeyLoad.Core;
-using KeyLoad.RecoveryHost;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.RecoveryTests.Features.Messaging;
@@ -22,11 +21,12 @@ internal static class QueueEnqueueProcessTerminalRefusal
         var result = owner.Apply(operation);
         await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(result.Problem?.Detail).IsEqualTo(QueueEnqueueCrashProtocol.ExpectedDuplicateMessageDetail);
-        
+
         await Assert.That(result.Value).IsNull();
         await Assert.That(Domain(store)).IsEquivalentTo(domain, CollectionOrdering.Matching);
         await Assert.That(owner.GetDocument(CrashFixtureValues.Principal, new(command.Partition, QueueEnqueueCrashProtocol.Collection, refused), cancellationToken: token)).IsNull();
-        var retained = OutcomeStoreOracle.ReadPartition(store, command.Partition, CrashFixtureValues.Principal, command.CommandId)!;
+        var retained = OutcomeStoreOracle.ReadPartition(store, command.Partition, CrashFixtureValues.Principal, command.CommandId)
+            ?? throw new InvalidOperationException("The rejected queue command outcome is missing.");
         await QueueClaimAckRecoveryAssertions.EqualAsync(retained, result);
         await QueueClaimAckRecovery.ReplayAsync(owner, store, operation, result, token);
         return (operation, result);

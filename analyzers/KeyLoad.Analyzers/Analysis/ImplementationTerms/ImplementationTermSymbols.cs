@@ -104,7 +104,7 @@ internal static class ImplementationTermSymbols
     }
 
     internal static bool Measurement(ISymbol? symbol) =>
-        symbol is IFieldSymbol or IPropertySymbol && symbol.ContainingAssembly.Name is "KeyLoad.Comparisons" or "KeyLoad.AppHost" &&
+        symbol is IFieldSymbol or IPropertySymbol or IMethodSymbol && symbol.ContainingAssembly.Name is "KeyLoad.Comparisons" or "KeyLoad.AppHost" &&
         Array.Exists(ImplementationTermCatalog.MeasurementMembers, member => member == symbol.ToDisplayString()) ||
         symbol is IFieldSymbol { Name: "Samples", ContainingType: { } owner } &&
         owner.ToDisplayString() == "KeyLoad.SiteTests.Features.BenchmarkComparisons.SiteIsolatedFields" ||

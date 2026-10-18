@@ -1,12 +1,11 @@
-using ManagedCode.Communication.Commands;
 using System.Diagnostics;
 using System.Globalization;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
-using KeyLoad.RecoveryHost;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.RecoveryTests.Features.DatabaseComposition;
 
@@ -59,7 +58,7 @@ internal sealed class DatabaseCompositionProcessRecoveryTests
             RedirectStandardError = true,
             UseShellExecute = false
         };
-        foreach (var argument in new[] { typeof(RecoveryHostMarker).Assembly.Location, root, stage.ToString(),
+        foreach (var argument in new[] { typeof(CrashScenarioDispatcher).Assembly.Location, CrashFixtureValues.ProcessMode, root, stage.ToString(),
                      index.ToString(CultureInfo.InvariantCulture), DatabaseCompositionCrashScenario.Mode })
         {
             start.ArgumentList.Add(argument);

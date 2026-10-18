@@ -1,6 +1,5 @@
 using System.Text.Json;
 using KeyLoad.Core;
-using KeyLoad.RecoveryHost.Features.DocumentStorage;
 
 namespace KeyLoad.RecoveryTests.Features.DocumentStorage;
 

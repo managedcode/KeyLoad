@@ -1,9 +1,8 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using KeyLoad.Core;
-using KeyLoad.RecoveryHost.Features.EventStreams;
 using KeyLoad.Storage;
-using static KeyLoad.RecoveryHost.Features.EventStreams.SharedDomainProtocol;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
+using static KeyLoad.RecoveryTests.Features.EventStreams.SharedDomainProtocol;
 
 namespace KeyLoad.RecoveryTests.Features.EventStreams;
 
@@ -71,7 +70,7 @@ internal static class SharedDomainRecoverySeed
         await Assert.That(operation.Value!.Kind).IsEqualTo(OperationKind.Delivery);
         await Assert.That(Errors.Code(result.Problem)).IsNull();
         await Assert.That(result.Problem?.Detail).IsNull();
-        
+
         await SharedDomainRecoveryValues.ReceiptValueAsync(result.Get<CommitReceipt>(), new CommitReceipt(operation.CommandId, new(incarnation, scope.Partition.AtomicPartitionId, position), [new(nameof(DeliveryAction.Ack), scope.Queue!, Item, AckVersion)], DurabilityProfile.ProcessDurable, 1));
     }
 

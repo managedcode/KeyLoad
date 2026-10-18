@@ -1,8 +1,7 @@
 using System.Security.Cryptography;
 using KeyLoad.Core;
-using KeyLoad.RecoveryHost.Features.EventStreams;
 using KeyLoad.Storage;
-using static KeyLoad.RecoveryHost.Features.EventStreams.SharedDomainProtocol;
+using static KeyLoad.RecoveryTests.Features.EventStreams.SharedDomainProtocol;
 
 namespace KeyLoad.RecoveryTests.Features.EventStreams;
 
@@ -33,7 +32,8 @@ internal static class SharedDomainRecoveryImage
         var expected = WithoutScope(input.SeedImage, original).Select(row =>
             row.StartsWith(appliedKey, StringComparison.Ordinal)
                 ? appliedKey + Convert.ToHexString(NativeSerialization.Serialize(expectedApplied)) : row);
-        await Assert.That(store.Read(view => view.GetRecord<long>(KeySpace.AppliedBytes))).IsEqualTo(expectedApplied);
+        await Assert.That(store.Read(view => NativeSerialization.Deserialize<long>(view.ReadOwnedValue(KeySpace.AppliedBytes)
+            ?? throw new InvalidOperationException(MissingNative)))).IsEqualTo(expectedApplied);
         await Assert.That(WithoutScope(SharedDomainStoredImage.Capture(store), original))
             .IsEquivalentTo(expected, TUnit.Assertions.Enums.CollectionOrdering.Matching);
     }

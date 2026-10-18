@@ -72548,7 +72548,7 @@
         "AC-SG009P-004"
       ],
       "nonContributorReason": "required-control",
-      "reviewBasis": "StorageRecovery current primitive supporting crosswalk explicitly maps these four classes to REQ-STORAGE-015/AC-SG009P-001..004; no guarded RecoveryHost protocol or full acceptance proof; ordinary-only primitive control."
+      "reviewBasis": "StorageRecovery current primitive supporting crosswalk explicitly maps these four classes to REQ-STORAGE-015/AC-SG009P-001..004; no guarded RecoveryProcess protocol or full acceptance proof; ordinary-only primitive control."
     },
     {
       "className": "KeyLoad.UnitTests.Features.StorageRecovery.OfflineRegularFileDuplicateLockTests",
@@ -72571,7 +72571,7 @@
         "AC-SG009P-004"
       ],
       "nonContributorReason": "required-control",
-      "reviewBasis": "StorageRecovery current primitive supporting crosswalk explicitly maps these four classes to REQ-STORAGE-015/AC-SG009P-001..004; no guarded RecoveryHost protocol or full acceptance proof; ordinary-only primitive control."
+      "reviewBasis": "StorageRecovery current primitive supporting crosswalk explicitly maps these four classes to REQ-STORAGE-015/AC-SG009P-001..004; no guarded RecoveryProcess protocol or full acceptance proof; ordinary-only primitive control."
     },
     {
       "className": "KeyLoad.UnitTests.Features.StorageRecovery.OfflineRegularFileDuplicateLockTests",
@@ -72594,7 +72594,7 @@
         "AC-SG009P-004"
       ],
       "nonContributorReason": "required-control",
-      "reviewBasis": "StorageRecovery current primitive supporting crosswalk explicitly maps these four classes to REQ-STORAGE-015/AC-SG009P-001..004; no guarded RecoveryHost protocol or full acceptance proof; ordinary-only primitive control."
+      "reviewBasis": "StorageRecovery current primitive supporting crosswalk explicitly maps these four classes to REQ-STORAGE-015/AC-SG009P-001..004; no guarded RecoveryProcess protocol or full acceptance proof; ordinary-only primitive control."
     },
     {
       "className": "KeyLoad.UnitTests.Features.StorageRecovery.OfflineRegularFileDuplicateLockTests",
@@ -72617,7 +72617,7 @@
         "AC-SG009P-004"
       ],
       "nonContributorReason": "required-control",
-      "reviewBasis": "StorageRecovery current primitive supporting crosswalk explicitly maps these four classes to REQ-STORAGE-015/AC-SG009P-001..004; no guarded RecoveryHost protocol or full acceptance proof; ordinary-only primitive control."
+      "reviewBasis": "StorageRecovery current primitive supporting crosswalk explicitly maps these four classes to REQ-STORAGE-015/AC-SG009P-001..004; no guarded RecoveryProcess protocol or full acceptance proof; ordinary-only primitive control."
     },
     {
       "className": "KeyLoad.UnitTests.Features.StorageRecovery.OfflineRegularFileDuplicateLockTests",
@@ -72640,7 +72640,7 @@
         "AC-SG009P-004"
       ],
       "nonContributorReason": "required-control",
-      "reviewBasis": "StorageRecovery current primitive supporting crosswalk explicitly maps these four classes to REQ-STORAGE-015/AC-SG009P-001..004; no guarded RecoveryHost protocol or full acceptance proof; ordinary-only primitive control."
+      "reviewBasis": "StorageRecovery current primitive supporting crosswalk explicitly maps these four classes to REQ-STORAGE-015/AC-SG009P-001..004; no guarded RecoveryProcess protocol or full acceptance proof; ordinary-only primitive control."
     },
     {
       "className": "KeyLoad.UnitTests.Features.StorageRecovery.OfflineRegularFileDuplicateLockTests",
@@ -72663,7 +72663,7 @@
         "AC-SG009P-004"
       ],
       "nonContributorReason": "required-control",
-      "reviewBasis": "StorageRecovery current primitive supporting crosswalk explicitly maps these four classes to REQ-STORAGE-015/AC-SG009P-001..004; no guarded RecoveryHost protocol or full acceptance proof; ordinary-only primitive control."
+      "reviewBasis": "StorageRecovery current primitive supporting crosswalk explicitly maps these four classes to REQ-STORAGE-015/AC-SG009P-001..004; no guarded RecoveryProcess protocol or full acceptance proof; ordinary-only primitive control."
     },
     {
       "className": "KeyLoad.UnitTests.Features.StorageRecovery.OfflineRegularFileDuplicateLockTests",
@@ -72686,7 +72686,7 @@
         "AC-SG009P-004"
       ],
       "nonContributorReason": "required-control",
-      "reviewBasis": "StorageRecovery current primitive supporting crosswalk explicitly maps these four classes to REQ-STORAGE-015/AC-SG009P-001..004; no guarded RecoveryHost protocol or full acceptance proof; ordinary-only primitive control."
+      "reviewBasis": "StorageRecovery current primitive supporting crosswalk explicitly maps these four classes to REQ-STORAGE-015/AC-SG009P-001..004; no guarded RecoveryProcess protocol or full acceptance proof; ordinary-only primitive control."
     },
     {
       "className": "KeyLoad.UnitTests.Features.StorageRecovery.OfflineRegularFileDuplicateLockTests",
@@ -72709,7 +72709,7 @@
         "AC-SG009P-004"
       ],
       "nonContributorReason": "required-control",
-      "reviewBasis": "StorageRecovery current primitive supporting crosswalk explicitly maps these four classes to REQ-STORAGE-015/AC-SG009P-001..004; no guarded RecoveryHost protocol or full acceptance proof; ordinary-only primitive control."
+      "reviewBasis": "StorageRecovery current primitive supporting crosswalk explicitly maps these four classes to REQ-STORAGE-015/AC-SG009P-001..004; no guarded RecoveryProcess protocol or full acceptance proof; ordinary-only primitive control."
     },
     {
       "className": "KeyLoad.UnitTests.Features.StorageRecovery.OfflineRegularFileEntryTypeTests",
@@ -72732,7 +72732,7 @@
         "AC-SG009P-004"
       ],
       "nonContributorReason": "required-control",
-      "reviewBasis": "StorageRecovery current primitive supporting crosswalk explicitly maps these four classes to REQ-STORAGE-015/AC-SG009P-001..004; no guarded RecoveryHost protocol or full acceptance proof; ordinary-only primitive control."
+      "reviewBasis": "StorageRecovery current primitive supporting crosswalk explicitly maps these four classes to REQ-STORAGE-015/AC-SG009P-001..004; no guarded RecoveryProcess protocol or full acceptance proof; ordinary-only primitive control."
     },
     {
       "className": "KeyLoad.UnitTests.Features.StorageRecovery.OfflineRegularFileIdentityTests",
@@ -72755,7 +72755,7 @@
         "AC-SG009P-004"
       ],
       "nonContributorReason": "required-control",
-      "reviewBasis": "StorageRecovery current primitive supporting crosswalk explicitly maps these four classes to REQ-STORAGE-015/AC-SG009P-001..004; no guarded RecoveryHost protocol or full acceptance proof; ordinary-only primitive control."
+      "reviewBasis": "StorageRecovery current primitive supporting crosswalk explicitly maps these four classes to REQ-STORAGE-015/AC-SG009P-001..004; no guarded RecoveryProcess protocol or full acceptance proof; ordinary-only primitive control."
     },
     {
       "className": "KeyLoad.UnitTests.Features.StorageRecovery.OfflineRegularFileIdentityTests",
@@ -72778,7 +72778,7 @@
         "AC-SG009P-004"
       ],
       "nonContributorReason": "required-control",
-      "reviewBasis": "StorageRecovery current primitive supporting crosswalk explicitly maps these four classes to REQ-STORAGE-015/AC-SG009P-001..004; no guarded RecoveryHost protocol or full acceptance proof; ordinary-only primitive control."
+      "reviewBasis": "StorageRecovery current primitive supporting crosswalk explicitly maps these four classes to REQ-STORAGE-015/AC-SG009P-001..004; no guarded RecoveryProcess protocol or full acceptance proof; ordinary-only primitive control."
     },
     {
       "className": "KeyLoad.UnitTests.Features.StorageRecovery.OfflineRegularFileLockTests",
@@ -72801,7 +72801,7 @@
         "AC-SG009P-004"
       ],
       "nonContributorReason": "required-control",
-      "reviewBasis": "StorageRecovery current primitive supporting crosswalk explicitly maps these four classes to REQ-STORAGE-015/AC-SG009P-001..004; no guarded RecoveryHost protocol or full acceptance proof; ordinary-only primitive control."
+      "reviewBasis": "StorageRecovery current primitive supporting crosswalk explicitly maps these four classes to REQ-STORAGE-015/AC-SG009P-001..004; no guarded RecoveryProcess protocol or full acceptance proof; ordinary-only primitive control."
     },
     {
       "className": "KeyLoad.UnitTests.Features.StorageRecovery.StorageRecordContractTests",

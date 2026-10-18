@@ -1,5 +1,4 @@
 using KeyLoad.Core;
-using KeyLoad.RecoveryHost.Features.Messaging;
 using KeyLoad.Storage;
 using TUnit.Assertions.Enums;
 

@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Runtime.ExceptionServices;
-using KeyLoad.RecoveryHost;
 
 namespace KeyLoad.RecoveryTests.Features.DocumentStorage;
 
@@ -46,7 +45,7 @@ internal sealed class CommandIdempotencyProcessChild
             launched = Process.Start(start);
             if (launched is null)
             {
-                startupFailure = new InvalidOperationException("Could not start the document command RecoveryHost.");
+                startupFailure = new InvalidOperationException("Could not start the document command RecoveryProcess.");
             }
         }
         catch (Exception failure) when (CommandIdempotencyProcessFailureHandling.IsNonFatal(failure))

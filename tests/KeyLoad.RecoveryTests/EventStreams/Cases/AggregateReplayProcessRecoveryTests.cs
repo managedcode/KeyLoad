@@ -1,10 +1,9 @@
-using ManagedCode.Communication.Commands;
 using System.Diagnostics;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
-using KeyLoad.RecoveryHost;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.RecoveryTests.Features.EventStreams;
 
@@ -44,7 +43,7 @@ internal sealed class AggregateReplayProcessRecoveryTests
             RedirectStandardError = true,
             UseShellExecute = false
         };
-        foreach (var argument in new[] { typeof(RecoveryHostMarker).Assembly.Location, root, stage.ToString(),
+        foreach (var argument in new[] { typeof(CrashScenarioDispatcher).Assembly.Location, CrashFixtureValues.ProcessMode, root, stage.ToString(),
                      index.ToString(System.Globalization.CultureInfo.InvariantCulture), AggregateReplayCrashScenario.Mode })
         {
             start.ArgumentList.Add(argument);

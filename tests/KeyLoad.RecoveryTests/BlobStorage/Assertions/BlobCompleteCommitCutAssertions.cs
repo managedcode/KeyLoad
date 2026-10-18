@@ -1,10 +1,8 @@
-using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
-using KeyLoad.Core.Features.InternalSerialization;
-using KeyLoad.RecoveryHost.Features.BlobStorage;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.RecoveryTests.Features.BlobStorage;
 
@@ -45,7 +43,7 @@ internal static class BlobCompleteCommitCutAssertions
         await PartsAsync(owner, blob, BlobCommitCutProtocol.NewUpload, newBytes);
         await QuotasAsync(owner, TotalBytes + (healthy ? OriginalLength : 0), healthy ? 2 : 1, healthy ? 3 : 2, committed ? 0 : 1);
         await RangeAsync(operations, expected, committed ? newBytes : oldBytes);
-        await BlobCommitCutNativeProof.AssertAuthorityAsync((ZoneTreeStore)owner.Store, owner, proof);
+        await BlobCommitCutNativeProof.AssertAuthorityAsync((ZoneTreeStore)owner.Store, proof);
     }
 
     private static async Task StateAsync(DatabaseEngine owner, BlobCommitCutSeedProof proof, Guid upload,
@@ -120,7 +118,7 @@ internal static class BlobCompleteCommitCutAssertions
             new DateTimeOffset(selected.Timestamp), NativeSerialization.Serialize(NativeSerialization.Deserialize<CompleteBlobUploadRequest>((selected).Value!.Input.Span)));
         var outcome = owner.ResolveOutcome(denied);
         await Assert.That(Errors.Code(outcome.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
-        
+
         await Assert.That(metadata.Code).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(range.Code).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(BlobCommitCutNativeProof.Image(store)).IsEqualTo(image);

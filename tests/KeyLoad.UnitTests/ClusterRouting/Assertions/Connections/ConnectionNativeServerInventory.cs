@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 using KeyLoad.Clustering;
-using KeyLoad.RecoveryHost.Features.ClusterRouting;
+using KeyLoad.RecoveryTests.Features.ClusterRouting;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 

@@ -1,5 +1,3 @@
-using KeyLoad.RecoveryHost.Features.Search;
-
 namespace KeyLoad.RecoveryTests.Features.Search;
 
 internal static class NativeTextOnlineProcessAssertions

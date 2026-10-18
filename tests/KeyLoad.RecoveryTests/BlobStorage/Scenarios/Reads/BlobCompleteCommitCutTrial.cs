@@ -1,8 +1,7 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using KeyLoad.Core;
-using KeyLoad.RecoveryHost.Features.BlobStorage;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.RecoveryTests.Features.BlobStorage;
 
@@ -75,7 +74,7 @@ internal static class BlobCompleteCommitCutTrial
         {
             await Assert.That(Errors.Code(resolved.Problem)).IsEqualTo(ErrorCode.RecoveryRequired);
             await Assert.That(resolved.Problem?.Detail).IsEqualTo(MissingOutcome);
-            
+
             await Assert.That(BlobCommitCutNativeProof.Image(store)).IsEqualTo(image);
             await Assert.That(store.Position).IsEqualTo(position);
         }

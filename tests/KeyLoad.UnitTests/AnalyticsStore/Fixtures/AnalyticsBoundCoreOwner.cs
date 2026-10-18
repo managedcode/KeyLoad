@@ -1,7 +1,7 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.RecoveryHost.Features.ResourceExecution;
+using KeyLoad.RecoveryTests.Features.ResourceExecution;
 using KeyLoad.Server;
 using D = KeyLoad.UnitTests.Features.AnalyticsStore.AnalyticsStoreNativeTestData;
 

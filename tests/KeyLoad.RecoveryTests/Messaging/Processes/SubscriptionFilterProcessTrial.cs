@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Globalization;
-using KeyLoad.RecoveryHost;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
@@ -49,7 +48,7 @@ internal static class SubscriptionFilterProcessTrial
     private static ProcessStartInfo Start(string root, CommitStage stage, int index)
     {
         var start = new ProcessStartInfo(Dotnet) { RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false };
-        foreach (var argument in new[] { typeof(RecoveryHostMarker).Assembly.Location, root, stage.ToString(),
+        foreach (var argument in new[] { typeof(CrashScenarioDispatcher).Assembly.Location, CrashFixtureValues.ProcessMode, root, stage.ToString(),
             index.ToString(CultureInfo.InvariantCulture), SubscriptionFilterCrashScenario.Mode })
         {
             start.ArgumentList.Add(argument);

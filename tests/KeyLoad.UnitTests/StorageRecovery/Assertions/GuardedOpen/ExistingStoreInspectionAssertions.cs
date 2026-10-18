@@ -1,4 +1,4 @@
-using KeyLoad.RecoveryHost;
+using KeyLoad.RecoveryTests;
 using KeyLoad.Storage;
 using TUnit.Assertions.Enums;
 

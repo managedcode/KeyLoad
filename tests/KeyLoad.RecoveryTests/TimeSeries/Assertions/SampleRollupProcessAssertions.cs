@@ -1,6 +1,5 @@
 using System.Text.Json;
-using KeyLoad.RecoveryHost;
-using KeyLoad.RecoveryHost.Features.DocumentStorage;
+using KeyLoad.RecoveryTests.Features.DocumentStorage;
 
 namespace KeyLoad.RecoveryTests.Features.TimeSeries;
 

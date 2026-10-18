@@ -1,6 +1,6 @@
 using System.Text;
 
-using KeyLoad.RecoveryHost;
+using KeyLoad.RecoveryTests;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 

@@ -1,8 +1,6 @@
-using ManagedCode.Communication.Commands;
-using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Messaging;
-using KeyLoad.RecoveryHost;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.RecoveryTests.Features.Messaging;
 
@@ -18,7 +16,7 @@ internal static class QueueOrderedRetryRecovery
             Path.Combine(root, QueueOrderedRetryCrashProtocol.DeliveryFile), token));
         var payload = operation.Value!;
         var decisions = NativeSerialization.Deserialize<QueueRetryDecisions>(payload.RetryDecisions.Span);
-        await QueueOrderedRetryRecoveryChoice.AssertAsync(store, operation, payload, decisions);
+        await QueueOrderedRetryRecoveryChoice.AssertAsync(store, operation, decisions);
         var outcome = OutcomeStoreOracle.Read(store, operation);
         if (stage >= CommitStage.JournalFlushed)
         {
@@ -26,9 +24,9 @@ internal static class QueueOrderedRetryRecovery
         }
         await QueueOrderedRetryRecoveryImage.AssertAsync(database, delivery, decisions.Items.Single(), outcome is not null);
         var receipt = database.Apply(operation).Get<CommitReceipt>();
-        if (outcome is not null)
+        if (outcome is { } retained)
         {
-            await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(outcome.Get<CommitReceipt>(), receipt);
+            await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(retained.Get<CommitReceipt>(), receipt);
         }
         await QueueOrderedRetryRecoveryImage.AssertAsync(database, delivery, decisions.Items.Single(), committed: true);
         await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(receipt, database.Apply(operation).Get<CommitReceipt>());

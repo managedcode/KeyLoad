@@ -60,10 +60,10 @@ cohort is not converted or presented as this current-format evidence.
 ## Implementation and verification
 
 1. Directory.Packages.props and this ADR/index carry the dependency pin.
-2. RecoveryHost StorageRecovery Contracts/Helpers/Assertions and RecoveryTests StorageRecovery Cases/Processes strengthen the bounded current-only profile operation through the existing child/StorageTrialLease/failure/cleanup owners. Existing budgets, 50 native TUnit slots and test-owned Aspire remain unchanged.
+2. RecoveryProcess StorageRecovery Contracts/Helpers/Assertions and RecoveryTests StorageRecovery Cases/Processes strengthen the bounded current-only profile operation through the existing child/StorageTrialLease/failure/cleanup owners. Existing budgets, 50 native TUnit slots and test-owned Aspire remain unchanged.
 3. Commit/push the scoped dependency and regression stage, preserving unrelated working-tree changes. Original Linux CI then exercises all required normal/scalar/recovery/cluster and full-text gates. Update canonical task qualification only from those exact original artifacts.
 
-Integration joins: the closed RecoveryHost mode dispatch, original native child pipe
+Integration joins: the closed RecoveryProcess mode dispatch, original native child pipe
 owner, central transitive dependency resolution, full current-image Docker build
 and existing snapshot/backup/restore qualification. No new application endpoint,
 server SIMD setting, database policy or storage authority is introduced.

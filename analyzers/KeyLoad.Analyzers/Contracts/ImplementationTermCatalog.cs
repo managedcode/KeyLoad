@@ -127,7 +127,9 @@ internal static class ImplementationTermCatalog
         "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceOptions.MaxSampleMetadataBytes",
         "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceOptions.MaxSamples",
         "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceBounds.MinimumSamples",
-        "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceBounds.SamplingMissing"
+        "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceBounds.SamplingMissing",
+        "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceProcess.ReadBoundedAsync(System.IO.Stream, int, int, System.Threading.CancellationToken)",
+        "KeyLoad.AppHost.Features.BenchmarkComparisons.ScaleServerResourceProcess.DrainBoundedAsync(System.IO.Stream, int, System.Threading.CancellationToken)"
     ];
 
     private static readonly Regex Words = new("[A-Z]?[a-z]+|[A-Z]+(?![a-z])", RegexOptions.CultureInvariant);

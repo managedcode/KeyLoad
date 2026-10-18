@@ -1,6 +1,5 @@
 using KeyLoad.Core.Features.ResourceExecution;
-using KeyLoad.RecoveryHost.Features.EventStreams;
-using static KeyLoad.RecoveryHost.Features.EventStreams.SharedDomainProtocol;
+using static KeyLoad.RecoveryTests.Features.EventStreams.SharedDomainProtocol;
 
 namespace KeyLoad.RecoveryTests.Features.EventStreams;
 

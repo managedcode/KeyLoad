@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Globalization;
-using KeyLoad.RecoveryHost;
 using KeyLoad.RecoveryTests.Features.DocumentStorage;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Storage.ZoneTree;
@@ -72,7 +71,7 @@ internal static class EventAppendCrashTrial
             RedirectStandardError = true,
             UseShellExecute = false
         };
-        foreach (var argument in new[] { typeof(RecoveryHostMarker).Assembly.Location, root, stage.ToString(),
+        foreach (var argument in new[] { typeof(CrashScenarioDispatcher).Assembly.Location, CrashFixtureValues.ProcessMode, root, stage.ToString(),
             index.ToString(CultureInfo.InvariantCulture), EventAppendCrashContract.Mode })
         {
             start.ArgumentList.Add(argument);

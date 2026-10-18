@@ -7,7 +7,7 @@ internal static class NativeDropPageRecoveryImages
     internal static async Task<NativeDropPageRecoveryImage[]> CaptureAsync(NativeDropRuntimeProfile profile, CancellationToken token)
     {
         var barriers = profile.Hosts.Nodes.Select(node => node.Partition.Coordinator.ReadBarrierAsync(token)).ToArray();
-        await KeyLoad.RecoveryHost.Features.ClusterRouting.ControlledPartitionMovementNativeHosts.JoinOriginalAsync(
+        await KeyLoad.RecoveryTests.Features.ClusterRouting.ControlledPartitionMovementNativeHosts.JoinOriginalAsync(
             Task.WhenAll(barriers)).ConfigureAwait(false);
         return profile.Hosts.Nodes.Select(node => new NativeDropPageRecoveryImage(
             ControlledPartitionMovementRawImage.Bytes(node.Store), node.Store.Position, node.Log.State.LastIndex,

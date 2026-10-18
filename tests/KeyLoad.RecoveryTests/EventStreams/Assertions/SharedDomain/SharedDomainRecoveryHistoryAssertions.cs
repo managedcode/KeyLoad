@@ -1,7 +1,6 @@
 using KeyLoad.Core;
-using KeyLoad.RecoveryHost.Features.EventStreams;
 using KeyLoad.Storage;
-using static KeyLoad.RecoveryHost.Features.EventStreams.SharedDomainProtocol;
+using static KeyLoad.RecoveryTests.Features.EventStreams.SharedDomainProtocol;
 
 namespace KeyLoad.RecoveryTests.Features.EventStreams;
 
@@ -22,7 +21,7 @@ internal static class SharedDomainRecoveryHistoryAssertions
                 var refused = database.ResolveOutcome(entry.Operation);
                 await Assert.That(Errors.Code(refused.Problem)).IsEqualTo(ErrorCode.StaleLease);
                 await Assert.That(refused.Problem?.Detail).IsEqualTo(Stale);
-                
+
                 await Assert.That(refused.Value).IsNull();
             }
             else

@@ -1,9 +1,8 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
-using KeyLoad.RecoveryHost.Features.BlobStorage;
 using KeyLoad.Storage;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.RecoveryTests.Features.BlobStorage;
 
@@ -57,9 +56,9 @@ internal static class BlobCompleteCommitCutHealthy
             owner.EvaluationClock.GetUtcNow(), NativeSerialization.Serialize(command));
         var position = owner.Store.Position;
         var result = owner.Apply(operation);
-        if (Errors.Code(result.Problem) is not null)
+        if (Errors.Code(result.Problem) is { } error)
         {
-            throw Errors.Fail(Errors.Code(result.Problem).Value, result.Problem?.Detail!);
+            throw Errors.Fail(error, result.Problem?.Detail!);
         }
         var receipt = kind == OperationKind.CompleteBlobUpload
             ? result.Get<BlobCommitResult<BlobMetadata>>().Receipt : result.Get<BlobCommitResult<BlobUploadInfo>>().Receipt;

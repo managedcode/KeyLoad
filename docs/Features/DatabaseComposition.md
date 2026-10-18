@@ -29,7 +29,7 @@ flowchart LR
 | REQ-COMP-006: honest syntax, qualification, performance and publication | AC-COMP-001/008 | Content tests, integrated checks and exact-source Actions receipts |
 | REQ-COMP-007: README and landing present one AI-native product thesis | AC-COMP-009 | SiteProductThesisTests and lead prose review |
 
-Canonical slice map: Abstractions/Core/UnitTests/IntegrationTests/RecoveryTests/RecoveryHost
+Canonical slice map: Abstractions/Core/UnitTests/IntegrationTests/RecoveryTests/RecoveryProcess
 `Features/DatabaseComposition/`; shared Mutation/ApplyMutations/authorization joins
 remain genuine shared primitives. Existing QueryExecution SQL CALL, ClientApi SDK
 CommitAsync and MCP catalog need no alternate executor. Frontend product copy

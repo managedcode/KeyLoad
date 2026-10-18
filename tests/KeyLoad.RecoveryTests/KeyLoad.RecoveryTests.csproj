@@ -3,17 +3,21 @@
     <OutputType>Exe</OutputType>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <GenerateTestingPlatformEntryPoint>false</GenerateTestingPlatformEntryPoint>
+    <GenerateTestingPlatformApplicationHelper>true</GenerateTestingPlatformApplicationHelper>
   </PropertyGroup>
   <ItemGroup>
     <Using Include="KeyLoad.Features.InternalSerialization" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Orleans.TestingHost" PrivateAssets="all" />
+    <InternalsVisibleTo Include="KeyLoad.UnitTests" />
+    <InternalsVisibleTo Include="KeyLoad.IntegrationTests" />
+    <ProjectReference Include="../../src/KeyLoad.Cli/KeyLoad.Cli.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Core/KeyLoad.Core.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Query/KeyLoad.Query.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Server/KeyLoad.Server.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" />
-    <ProjectReference Include="../KeyLoad.RecoveryHost/KeyLoad.RecoveryHost.csproj" />
     <PackageReference Include="TUnit" />
   </ItemGroup>
 </Project>

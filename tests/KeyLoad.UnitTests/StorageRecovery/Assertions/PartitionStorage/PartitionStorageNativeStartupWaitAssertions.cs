@@ -1,4 +1,4 @@
-using KeyLoad.RecoveryHost.Features.ClusterRouting;
+using KeyLoad.RecoveryTests.Features.ClusterRouting;
 using KeyLoad.Server;
 using KeyLoad.Server.Features.ClusterRouting;
 using Microsoft.Extensions.DependencyInjection;

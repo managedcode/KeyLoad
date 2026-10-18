@@ -5,7 +5,8 @@
 - Owns real-process recovery of canonical ZoneTree WAL/files, persisted command outcomes, projections, subscriptions and derived indexes.
 - Main suites include `StorageRecovery/Cases/StorageRecoveryProcessTests.cs`, `StorageRecovery/Cases/StoragePublicationRecoveryTests.cs`, `DocumentStorage/Cases/CommandIdempotencyProcessRecoveryTests.cs`, `EventStreams/Cases/SharedDomainProcessRecoveryTests.cs`, `EventStreams/Cases/ProjectionProcessRecoveryTests.cs` and `Messaging/Cases/Subscription/SubscriptionFilterProcessRecoveryTests.cs`.
 - Feature cases belong under matching canonical `<SliceName>/` paths; real process-host and shared recovery fixture infrastructure may remain shared.
-- Use the real `KeyLoad.RecoveryHost` process where required. Preserve node-local ZoneTree storage ownership (files never move with activations; Orleans does all clustering, ADR-136).
+- `Program.cs` delegates ordinary arguments to the native generated Microsoft.Testing.Platform application helper. The explicit `--recovery-process` argument runs the owning fault scenario in this same test assembly; its native exit code, original markers, real abrupt termination, process readers and file-release checks remain part of the test.
+- Use the real `KeyLoad.RecoveryTests` process where required. Preserve node-local ZoneTree storage ownership (files never move with activations; Orleans does all clustering, ADR-136).
 - These tests establish process-recovery behavior only. They must never be presented as power-loss durability, endurance or complete production qualification; do not substitute mocks/fakes or weaken fault assertions.
 - Use the installed Orleans skill for Orleans decisions and the relevant installed skill for formatting, Aspire or diagnostics. Follow the owner's explicit installation and dependency scope.
 - Treat recovery ordering, atomic file publication and filesystem durability as critical contracts. Report unconfigured coverage/complexity gates honestly.

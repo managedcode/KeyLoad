@@ -1,5 +1,4 @@
 using System.Text.Json;
-using KeyLoad.RecoveryHost.Features.Search;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.RecoveryTests.Features.Search;

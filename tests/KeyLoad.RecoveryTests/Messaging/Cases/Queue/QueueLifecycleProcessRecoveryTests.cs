@@ -1,4 +1,3 @@
-using KeyLoad.RecoveryHost;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.RecoveryTests.Features.Messaging;

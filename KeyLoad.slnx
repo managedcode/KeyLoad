@@ -16,7 +16,6 @@
     <Project Path="tests/KeyLoad.IntegrationTests/KeyLoad.IntegrationTests.csproj" />
     <Project Path="tests/KeyLoad.RecoveryTests/KeyLoad.RecoveryTests.csproj" />
     <Project Path="tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj" />
-    <Project Path="tests/KeyLoad.RecoveryHost/KeyLoad.RecoveryHost.csproj" />
     <Project Path="tests/KeyLoad.ComparisonTests/KeyLoad.ComparisonTests.csproj" />
   </Folder>
   <Folder Name="/benchmarks/">

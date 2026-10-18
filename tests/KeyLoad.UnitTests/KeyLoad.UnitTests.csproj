@@ -17,7 +17,7 @@
     <ProjectReference Include="../../src/KeyLoad.Server/KeyLoad.Server.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Query/KeyLoad.Query.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Core/KeyLoad.Core.csproj" />
-    <ProjectReference Include="../KeyLoad.RecoveryHost/KeyLoad.RecoveryHost.csproj" />
+    <ProjectReference Include="../KeyLoad.RecoveryTests/KeyLoad.RecoveryTests.csproj" />
     <PackageReference Include="TUnit" />
     <PackageReference Include="Microsoft.Orleans.CodeGenerator" PrivateAssets="all" />
     <PackageReference Include="Microsoft.Orleans.TestingHost" PrivateAssets="all" />

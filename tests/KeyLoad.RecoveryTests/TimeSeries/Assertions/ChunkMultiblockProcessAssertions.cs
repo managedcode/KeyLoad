@@ -1,12 +1,10 @@
-using ManagedCode.Communication;
 using System.Text.Json;
-using KeyLoad.RecoveryHost;
+using ManagedCode.Communication;
 
 namespace KeyLoad.RecoveryTests.Features.TimeSeries;
 
 internal static class ChunkMultiblockProcessAssertions
 {
-    private const long OwnershipEpoch = 1;
     internal static async Task VerifyAsync(string root, string mode, bool merge, CancellationToken token)
     {
         if (ChunkMultiblockCrashProtocol.IsFault(mode))

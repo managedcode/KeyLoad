@@ -1,6 +1,5 @@
-using ManagedCode.Communication.Commands;
-using KeyLoad.RecoveryHost;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.RecoveryTests.Features.Messaging;
 
@@ -23,9 +22,9 @@ internal static class QueueDeadlineRecoveryAssertions
         }
         await QueueDeadlineRecoveryImage.RequireAsync(database, committed, condition.ExpectedDeadline);
         var receipt = database.Apply(operation).Get<CommitReceipt>();
-        if (committed)
+        if (outcome is { } retained)
         {
-            await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(outcome!.Get<CommitReceipt>(), receipt);
+            await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(retained.Get<CommitReceipt>(), receipt);
         }
         await QueueDeadlineRecoveryImage.RequireAsync(database, true, condition.ExpectedDeadline);
         var expectedReceipt = new MutationReceipt(QueueDeadlineCrashProtocol.ReceiptKind,

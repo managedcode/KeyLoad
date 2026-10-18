@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-using KeyLoad.RecoveryHost.Features.EventStreams;
+using KeyLoad.RecoveryTests.Features.EventStreams;
 
 namespace KeyLoad.UnitTests.Features.EventStreams;
 

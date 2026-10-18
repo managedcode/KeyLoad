@@ -1,7 +1,5 @@
 using System.Diagnostics;
 using System.Globalization;
-using KeyLoad.RecoveryHost;
-using KeyLoad.RecoveryHost.Features.Search;
 using KeyLoad.RecoveryTests.Features.DocumentStorage;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Storage.ZoneTree;
@@ -77,7 +75,7 @@ internal static class NativeAnnProcessRecovery
             RedirectStandardError = true,
             UseShellExecute = false
         };
-        foreach (var argument in new[] { typeof(RecoveryHostMarker).Assembly.Location, root,
+        foreach (var argument in new[] { typeof(CrashScenarioDispatcher).Assembly.Location, CrashFixtureValues.ProcessMode, root,
             CommitStage.JournalFlushed.ToString(), MutationIndex.ToString(CultureInfo.InvariantCulture), mode })
         {
             start.ArgumentList.Add(argument);

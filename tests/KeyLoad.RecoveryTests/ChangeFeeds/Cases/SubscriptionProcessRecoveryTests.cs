@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using KeyLoad.RecoveryHost;
 using KeyLoad.RecoveryTests.Features.DocumentStorage;
 using KeyLoad.RecoveryTests.Features.Messaging;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
@@ -80,7 +79,7 @@ internal sealed class SubscriptionProcessRecoveryTests
         };
         foreach (var argument in new[]
         {
-            typeof(RecoveryHostMarker).Assembly.Location, root, stage.ToString(),
+            typeof(CrashScenarioDispatcher).Assembly.Location, CrashFixtureValues.ProcessMode, root, stage.ToString(),
             index.ToString(System.Globalization.CultureInfo.InvariantCulture), CrashFixtureValues.SubscriptionMode
         })
         {

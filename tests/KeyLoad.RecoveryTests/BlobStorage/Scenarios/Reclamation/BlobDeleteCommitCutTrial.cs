@@ -1,8 +1,7 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using KeyLoad.Core;
-using KeyLoad.RecoveryHost.Features.BlobStorage;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.RecoveryTests.Features.BlobStorage;
 
@@ -54,7 +53,7 @@ internal static class BlobDeleteCommitCutTrial
         var final = BlobCommitCutNativeProof.Database(finalStore);
         await Assert.That(BlobCommitCutNativeProof.Image(finalStore)).IsEqualTo(image);
         await Assert.That(finalStore.Position).IsEqualTo(position);
-        await BlobCommitCutNativeProof.AssertAuthorityAsync(finalStore, final, proof);
+        await BlobCommitCutNativeProof.AssertAuthorityAsync(finalStore, proof);
         await BlobDeleteCommitCutContinuation.ReplayAsync(final, original, result);
         await BlobDeleteCommitCutContinuation.ReplayAsync(final, reclaim.Operation, reclaim.Result);
         await BlobDeleteCommitCutContinuation.InvalidatedSeedsAsync(final, proof);
@@ -78,7 +77,7 @@ internal static class BlobDeleteCommitCutTrial
         {
             await Assert.That(Errors.Code(resolved.Problem)).IsEqualTo(ErrorCode.RecoveryRequired);
             await Assert.That(resolved.Problem?.Detail).IsEqualTo(MissingOutcome);
-            
+
             await Assert.That(BlobCommitCutNativeProof.Image(store)).IsEqualTo(image);
             await Assert.That(store.Position).IsEqualTo(position);
         }

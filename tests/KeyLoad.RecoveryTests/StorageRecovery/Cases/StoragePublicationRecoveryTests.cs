@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using KeyLoad.RecoveryHost;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -29,7 +28,10 @@ internal sealed class StoragePublicationRecoveryTests
         }
         finally
         {
-            await DeleteCheckpointTrialAsync(root, cancellationToken);
+            if (Directory.Exists(root))
+            {
+                await DeleteTrialAsync(root, cancellationToken);
+            }
         }
     }
 
@@ -42,7 +44,7 @@ internal sealed class StoragePublicationRecoveryTests
             RedirectStandardError = true,
             UseShellExecute = false,
         };
-        foreach (var argument in new[] { typeof(RecoveryHostMarker).Assembly.Location, root, stage.ToString(), "0", mode })
+        foreach (var argument in new[] { typeof(CrashScenarioDispatcher).Assembly.Location, CrashFixtureValues.ProcessMode, root, stage.ToString(), "0", mode })
         {
             start.ArgumentList.Add(argument);
         }
@@ -110,13 +112,6 @@ internal sealed class StoragePublicationRecoveryTests
         await Assert.That(next).IsEqualTo(3);
     }
 
-    private static async Task DeleteCheckpointTrialAsync(string root, CancellationToken cancellationToken)
-    {
-        if (Directory.Exists(root))
-        {
-            await DeleteTrialAsync(root, cancellationToken);
-        }
-    }
     internal static async Task DeleteTrialAsync(string root, CancellationToken cancellationToken)
     {
         var clock = TimeProvider.System;
@@ -162,7 +157,8 @@ internal sealed class StoragePublicationRecoveryTests
     [Test]
     public async Task VerifiedBackupRestoresDataWithNewIdentityAndPausedDispatch()
     {
-        var root = Path.Combine(Path.GetTempPath(), "keyload-backup-" + Guid.NewGuid().ToString("N"));
+        var temporaryDirectory = ResolveExistingDirectory(new(Path.GetTempPath()));
+        var root = Path.Combine(temporaryDirectory, "keyload-backup-" + Guid.NewGuid().ToString("N"));
         var backup = root + "-backup";
         var restored = root + "-restored";
         try
@@ -205,6 +201,16 @@ internal sealed class StoragePublicationRecoveryTests
     private static void OpenCorruptStore(string root)
     {
         using var rejected = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+    }
+
+    private static string ResolveExistingDirectory(DirectoryInfo directory)
+    {
+        if (directory.Parent is null)
+        {
+            return directory.FullName;
+        }
+        var entry = new DirectoryInfo(Path.Combine(ResolveExistingDirectory(directory.Parent), directory.Name));
+        return entry.ResolveLinkTarget(returnFinalTarget: true)?.FullName ?? entry.FullName;
     }
 
 }

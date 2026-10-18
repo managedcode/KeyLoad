@@ -1,5 +1,5 @@
 using System.Text.Json;
-using static KeyLoad.RecoveryHost.Features.EventStreams.SharedDomainProtocol;
+using static KeyLoad.RecoveryTests.Features.EventStreams.SharedDomainProtocol;
 using static KeyLoad.IntegrationTests.Features.EventStreams.SharedDomainPublicProtocol;
 
 namespace KeyLoad.IntegrationTests.Features.EventStreams;

@@ -89,7 +89,7 @@ AC-NATIVE-002/006 observe that inventory with an internal read-only handle in `K
 
 ## Current node-root admission
 
-REQ/AC-NATIVE-007 under ADR-116 define one strict current root inventory: optional regular `node.owner.lock` and optional non-link directories `database`, `replica`, `snapshots`, `search-indexes` and `backups`. Their internal contents remain owned by their existing native owners; valid partial prefixes after interruption are admitted. No unused names are added, authority is not inferred from directory presence, and native snapshot/index/store validation is not replaced by a server filename list.
+REQ/AC-NATIVE-007 under ADR-116 define one strict current root inventory: optional regular `node.owner.lock` and optional non-link directories `database`, `search-indexes`, `ann-indexes`, `text-projections`, `native-text-online`, `derived-user-analytics` and `backups`. `PartitionRootAdmission` owns that inventory; each directory's internal contents remain with its actual native owner. Valid partial prefixes after interruption are admitted. Authority is not inferred from directory presence, and native snapshot/index/store validation is not replaced by a server filename list.
 
 An existing root and its entries are inspected without create, chmod, delete or provider open. Unknown entries, wrong entry kinds and links reject FormatUnsupported with a static safe detail. An absent root may be created only for fresh ownership. After exclusive node ownership, the root is inspected again before opening the stores; the first-failure/cleanup aggregation is retained. Cooperating writers use the same exclusive lock. Arbitrary concurrent external filesystem replacement is not qualified by enumeration and no such protection is advertised. A race found on the second check rejects and settles the acquired owner without deleting foreign state or claiming that a newly acquired lock never existed.
 
@@ -103,13 +103,13 @@ REQ-STORAGE-021 and AC-NATIVE-002: an explicit zero property or JSON omission do
 
 REQ-ANN-GEN-001/002/005 / AC-ANN-GEN-001/002/005: the current first-release node root admits one optional owned `ann-indexes` directory, separate from canonical ZoneTree, atomic WAL, snapshots and native text ownership. No authoritative canonical file/reader epoch/WAL/checkpoint format is rewritten. The ANN provider has its own generated native v1 root/manifest/node/header aliases, bounded framed native index file and SHA-256 checksums. There is no historical ANN reader, migration, runtime fallback, JSON persistence or rebuild hidden under Load. A source without this admitted owner path fails closed; old images are not advertised as readers of this new disposable format.
 
-Each closed generation has exactly the source/owner/consumer-generation manifest and native index file under an opaque generated leaf. Exclusive root owner receipt/lock, every regular-file/directory ancestor and reparse denial, bounded count/depth/bytes, create-new stage files, native Flush(true), atomic same-root publication, digest-before/after-load, obsolete-generation fences and pinned-reader retirement remain mandatory. File metadata grants no persisted role, canonical acknowledgement, read authority or outcome receipt. Canonical projection pins/checkpoints remain actual signed admin operations through the normal authorized grain path; crash recovery verifies source/consumer authority before native restore/replay. Required native child-kill cuts are index write, flush, manifest write, publication and canonical checkpoint acknowledgement, each with original child/pipe/file lock settlement and independent full canonical state/receipt/healthy oracles. Process-kill evidence is not power-loss proof.
+Each closed generation has exactly the source/owner/consumer-generation manifest and native index file under an opaque generated leaf. Exclusive root owner receipt/lock, every regular-file/directory ancestor and reparse denial, bounded count/depth/bytes, create-new stage files, native Flush(true), atomic same-root publication, digest-before/after-load, obsolete-generation fences and pinned-reader retirement remain mandatory. File metadata grants no persisted role, canonical acknowledgement, read authority or outcome receipt. Projection pins/checkpoints use actual freshly authorized native commands through Orleans; crash recovery verifies source/consumer authority before native restore/replay. Required native child-kill cuts are index write, flush, manifest write, publication and checkpoint acknowledgement, each with original child/pipe/file lock settlement and independent full canonical state/receipt/healthy oracles. Process-kill evidence is not power-loss proof.
 
 Owning contract: Search/ManagedAnn and ADR-019. Format and provider tests alone do not satisfy the global fault, endurance, replicated-cluster, coverage and performance gates.
 
 ### Native multi-page staged replay ownership
 
-Before each real nonempty page checkpoint submission the node owner persists a bounded generated-native pending replay record containing the actual immutable records after that page, original admitted canonical upper cut U, exact page Through P, native corpus digest of those pending arrays, and the original signed empty-effects checkpoint intent. P is replay progress, never relabeled as an observed canonical source cut. Pending records cannot serve readers or replace a completed generation. Resume first validates current persisted consumer/generation and reconciles the exact original nonempty checkpoint receipt through a fresh signed authorized grain call; only after canonical checkpoint equals P may loaded arrays resume P..U. No checkpoint ACK can precede its durable pending record. A malformed/partial pending record fails closed; load never builds missing state. Original U must remain verifiable through a fresh actual canonical view before completion; changed dependency identity, missing history, or an unavailable original upper corpus yields explicit HistoryUnavailable/rebuild-required without partial output. Publication occurs only after the complete replay arrays match that real admitted upper corpus/digest. Actual multi-page process interruption before/after checkpoint ACK and reopen/resume are mandatory proof, not inferred from serialization.
+Before each real nonempty page checkpoint submission the node owner persists a bounded generated-native pending replay record containing the actual immutable records after that page, original admitted canonical upper cut U, exact page Through P, native corpus digest of those pending arrays, and the original stable-ID empty-effects checkpoint intent. P is replay progress, never relabeled as an observed canonical source cut. Pending records cannot serve readers or replace a completed generation. Resume first validates current persisted consumer/generation and reconciles the exact original nonempty checkpoint receipt through a freshly authorized Orleans call; only after the consumer checkpoint equals P may loaded arrays resume P..U. No checkpoint ACK can precede its durable pending record. A malformed/partial pending record fails closed; load never builds missing state. Original U must remain verifiable through a fresh actual canonical view before completion; changed dependency identity, missing history, or an unavailable original upper corpus yields explicit HistoryUnavailable/rebuild-required without partial output. Publication occurs only after the complete replay arrays match that real admitted upper corpus/digest. Actual multi-page process interruption before/after checkpoint ACK and reopen/resume are mandatory proof, not inferred from serialization.
 
 ## AC-ANN-008 generated public vector page contracts
 
@@ -119,9 +119,12 @@ Id3 IndexGeneration, Id4 RequestedMode. AnnSearchPage: Id0 Version, Id1 Document
 Id2 Position, Id3 actual Mode, Id4 CompleteTopK, Id5 IndexGeneration,
 Id6 RequestedMode. AnnPageMode has its own stable generated alias. JSON remains
 public HTTP/MCP/Q1; inter-grain request/reply remains native generated binary.
-RequestedMode is Approximate only; actual completed search may be Exact,
-Approximate or ExactFallback. Empty eligible search retains truthful same-cut
-mode/completeness. No public corpus/candidate count, digest or maintainer authority.
+RequestedMode is Approximate only; the completed mode is Exact or Approximate.
+The existing small-set exact plan remains bounded. An approximate
+search that cannot satisfy its candidate requirement within the admitted graph
+budget refuses with BudgetExceeded; it does not switch to a full exact scan.
+Empty eligible search retains truthful same-cut mode/completeness. No public
+corpus/candidate count, digest or maintainer authority is exposed.
 
 This additive transport changes no PackedAnn snapshot/manifest/pending v1,
 canonical storage, signed outbox/fault v2 or ordinary exact Search identity.
@@ -156,10 +159,30 @@ The same restore operation retains its complete manifest/archive refusal, exact-
 
 ## Native archive cancellation
 
-REQ-STORAGE-007/021 and AC-NATIVE-001/005, together with REQ/AC-BACKUP-001/002, require an owning cancelled catalog backup, verified archive read or restore to stop before the next bounded file chunk/frame/record rather than finish a whole WAL copy and hash first. Tokens were dropped at CatalogBackupPublication -> BackupRestoreFiles.Create, both catalog reader overloads -> archive verification, and Restore -> BackupRestoreFiles.ReadAndVerify.
+REQ-STORAGE-007/021 and AC-NATIVE-001/005, together with REQ/AC-BACKUP-001/002,
+retain bounded archive cancellation, integrity and unpublished-destination
+requirements. The current local storage entry points are CreateBackup,
+VerifyBackup and Restore. They operate on the owning ZoneTree runtime
+and its actual identity/WAL manifest, lengths, checksums and validated records.
+They do not capture a second cluster catalog.
 
-Propagate the original existing CancellationToken through those native internal calls only. Use the original validated FileBufferBytes (at most 65536) for exact stream copies and SHA256 reads; reuse one buffer for the copy and destination re-read, preserve lower-case complete SHA256 and original length/end-of-stream checks. Each source remains under its original owner gate. Destination CreateNew, synchronous Flush(true), manifest/catalog metadata, same-owner unpublished staging and atomic directory publication stay mandatory. Cancellation checks run between bounded copy/hash chunks, WAL frames and checkpoint records. A synchronous filesystem call, durability barrier or bounded native frame decode is not interruptible mid-call. Cleanup uses the original cancellation-independent owner and retains original plus cleanup failures. No public signature, persisted field/alias, format/version, authority, policy, option/default/limit, dependency, migration or fallback changes.
+The internal file-copy, checksum, WAL-frame and checkpoint-record loops retain
+their cancellation checks and validated byte bounds. Native filesystem calls,
+Flush(true) and bounded frame decoding are synchronous and cannot be interrupted
+mid-call. CreateNew, exact length/end-of-stream verification, lowercase SHA256,
+unpublished staging and joined cleanup remain required. Original and cleanup
+failures must both remain visible.
 
-CurrentArchiveCancellationTests has four declared TUnit arguments: WAL-only/checkpoint-and-tail crossed with absent/existing-empty restore destination. It uses real native fixture data and archives: cancelled catalog capture has no callback/publication, followed by successful same-path capture and actual public verified catalog read with exact identity/position/metadata/full row image. Both public catalog read overloads refuse the original pre-cancelled token. The real archive-copy and journal-verification owners refuse that same token before any staged file or journal-read position advance. Restore repeats the original cancellation refusal with no target/staging publication, retains every archive byte and complete source identity/cut/rows, then the same original path/archive restores normally. The returned new paused identity and complete literal restored image are checked, a new actual native commit adds one literal healthy value, and two further sequential cold owners retain the complete three-row image, exact current format7/capability1, identity and position. All fixture/source/target/stream/cancellation owners join and retain initiating/cleanup failures.
+CurrentArchiveCancellationTests still requires adaptation to the current public
+storage entry points before its four WAL-only/checkpoint-and-tail and
+absent/existing-empty destination combinations can be executed. Required oracles
+remain unchanged source/archive bytes and identity, no rejected target/staging
+publication, exact original token where admitted, healthy same-path retry, new
+paused restore identity, complete literal records and two joined cold owners.
+No token propagation through an unexecuted public path is claimed here.
 
-These are before-work cancellation regressions and source-derived propagation review, not deterministic cancellation during I/O, power-loss, cluster or performance proof. Deterministic mid-I/O cancellation remains OPEN because no existing native hook provides it; do not add a timing fake or production observer solely for that proof. Existing NativeMetadataFormatTests, RuntimeJournalReaderFenceTests, current WAL/checkpoint/root no-mutation controls, the real recovery suite and real SDK/official MCP callers remain mandatory.
+Before-work and deterministic mid-I/O cancellation, Linux execution, real process
+recovery, Aspire SDK/MCP, power-loss and performance qualification remain distinct
+open gates. Existing metadata, reader-capability, WAL/checkpoint/root no-mutation
+and owned-file controls remain mandatory. No timing fake or production observer
+is introduced to manufacture a cancellation witness.

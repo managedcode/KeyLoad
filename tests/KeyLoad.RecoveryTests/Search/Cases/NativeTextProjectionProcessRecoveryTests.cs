@@ -1,6 +1,4 @@
 using System.Diagnostics;
-using KeyLoad.RecoveryHost;
-using KeyLoad.RecoveryHost.Features.Search;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Server.Features.Search;
 
@@ -78,7 +76,7 @@ internal sealed class NativeTextProjectionProcessRecoveryTests
         };
         foreach (var argument in new[]
         {
-            typeof(RecoveryHostMarker).Assembly.Location,
+            typeof(CrashScenarioDispatcher).Assembly.Location, CrashFixtureValues.ProcessMode,
             source,
             receiptPath,
             stage.ToString(),
@@ -88,7 +86,7 @@ internal sealed class NativeTextProjectionProcessRecoveryTests
         {
             start.ArgumentList.Add(argument);
         }
-        return Process.Start(start) ?? throw new InvalidOperationException("Could not start native text RecoveryHost.");
+        return Process.Start(start) ?? throw new InvalidOperationException("Could not start native text RecoveryProcess.");
     }
 
     private static async Task JoinOutputReadersAsync(Process process, CancellationToken cancellationToken)

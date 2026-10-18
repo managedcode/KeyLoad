@@ -1,4 +1,3 @@
-using KeyLoad.RecoveryHost.Features.EventStreams;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.RecoveryTests.Features.EventStreams;

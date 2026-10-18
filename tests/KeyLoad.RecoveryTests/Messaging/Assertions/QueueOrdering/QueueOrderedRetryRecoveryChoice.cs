@@ -1,11 +1,9 @@
-using ManagedCode.Communication.Commands;
 using System.Buffers.Binary;
 using System.Collections.Immutable;
 using System.Security.Cryptography;
-using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Messaging;
-using KeyLoad.RecoveryHost;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication.Commands;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.RecoveryTests.Features.Messaging;
@@ -13,7 +11,7 @@ namespace KeyLoad.RecoveryTests.Features.Messaging;
 internal static class QueueOrderedRetryRecoveryChoice
 {
     internal static async Task AssertAsync(ZoneTreeStore store, Command<DatabaseCommand> operation,
-        DatabaseCommand payload, QueueRetryDecisions actual)
+        QueueRetryDecisions actual)
     {
         var lane = new QueueLaneRef(QueueOrderedRetryCrashProtocol.Partition, QueueOrderedRetryCrashProtocol.Queue);
         var policy = new QueuePolicy { OrderingProfile = QueueOrderingProfile.StrictPerKey, RetryJitter = QueueRetryJitter.Full };

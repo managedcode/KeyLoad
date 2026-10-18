@@ -1,9 +1,8 @@
 using System.Diagnostics;
-using KeyLoad.RecoveryHost;
 using KeyLoad.RecoveryTests.Features.DocumentStorage;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Server;
-using P = KeyLoad.RecoveryHost.Features.AnalyticsStore.UserAnalyticsProcessProtocol;
+using P = KeyLoad.RecoveryTests.Features.AnalyticsStore.UserAnalyticsProcessProtocol;
 
 namespace KeyLoad.RecoveryTests.Features.AnalyticsStore;
 
@@ -70,7 +69,7 @@ internal static class UserAnalyticsDerivedProcessTrial
             RedirectStandardError = true,
             UseShellExecute = false
         };
-        foreach (var argument in new[] { typeof(RecoveryHostMarker).Assembly.Location, root, mode })
+        foreach (var argument in new[] { typeof(CrashScenarioDispatcher).Assembly.Location, CrashFixtureValues.ProcessMode, root, mode })
         {
             start.ArgumentList.Add(argument);
         }

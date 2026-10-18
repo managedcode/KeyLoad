@@ -1,5 +1,5 @@
 using KeyLoad.Client;
-using KeyLoad.RecoveryHost.Features.ClusterRouting;
+using KeyLoad.RecoveryTests.Features.ClusterRouting;
 
 namespace KeyLoad.IntegrationTests.Features.Authorization;
 

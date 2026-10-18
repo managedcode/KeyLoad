@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using KeyLoad.RecoveryHost;
 
 namespace KeyLoad.RecoveryTests.Features.StorageRecovery;
 

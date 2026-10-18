@@ -58,7 +58,7 @@ unit/process/cluster and current resource evidence exists.
 
 This is a test-only requirement under REQ-STORAGE-017 / AC-WAL-003. The
 existing preflight operation test adds one-byte-short declared payload-length
-arguments to both direct ZoneTree open and the real RecoveryHost inspector. The
+arguments to both direct ZoneTree open and the real RecoveryProcess inspector. The
 frame remains physically complete and follows a real committed prefix; both
 paths must return the existing Corruption category, leave the entire provider
 file/tree inventory unchanged, and settle owner-lock cleanup. No production

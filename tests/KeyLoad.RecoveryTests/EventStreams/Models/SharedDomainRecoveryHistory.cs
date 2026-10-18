@@ -1,5 +1,5 @@
-using ManagedCode.Communication.Commands;
 using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 namespace KeyLoad.RecoveryTests.Features.EventStreams;
 
 internal sealed record SharedDomainRecoveryHistory(Command<DatabaseCommand> Operation, Result<object> Result, PartitionRef Partition,

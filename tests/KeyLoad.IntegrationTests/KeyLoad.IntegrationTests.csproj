@@ -9,7 +9,7 @@
     <ProjectReference Include="../../build/KeyLoad.AppHost/KeyLoad.AppHost.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Client/KeyLoad.Client.csproj" />
     <ProjectReference Include="../../src/KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" />
-    <ProjectReference Include="../KeyLoad.RecoveryHost/KeyLoad.RecoveryHost.csproj" IsAspireProjectResource="false" />
+    <ProjectReference Include="../KeyLoad.RecoveryTests/KeyLoad.RecoveryTests.csproj" IsAspireProjectResource="false" />
     <ProjectReference Include="../../src/KeyLoad.Server/KeyLoad.Server.csproj" IsAspireProjectResource="false" />
     <PackageReference Include="Aspire.Hosting.Testing" />
     <PackageReference Include="ModelContextProtocol.Core" />

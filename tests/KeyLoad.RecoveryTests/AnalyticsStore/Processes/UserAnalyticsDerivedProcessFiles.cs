@@ -1,6 +1,6 @@
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Server;
-using P = KeyLoad.RecoveryHost.Features.AnalyticsStore.UserAnalyticsProcessProtocol;
+using P = KeyLoad.RecoveryTests.Features.AnalyticsStore.UserAnalyticsProcessProtocol;
 
 namespace KeyLoad.RecoveryTests.Features.AnalyticsStore;
 

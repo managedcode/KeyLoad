@@ -1,4 +1,3 @@
-using KeyLoad.RecoveryHost.Features.Search;
 using KeyLoad.Server.Features.Search;
 
 namespace KeyLoad.RecoveryTests.Features.Search;

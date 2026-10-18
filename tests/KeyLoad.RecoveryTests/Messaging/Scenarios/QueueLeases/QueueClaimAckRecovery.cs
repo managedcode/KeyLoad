@@ -1,8 +1,7 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using KeyLoad.Core;
-using KeyLoad.RecoveryHost;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.RecoveryTests.Features.Messaging;
@@ -57,16 +56,16 @@ internal static class QueueClaimAckRecovery
         var delivery = original;
         if (!ack && outcome is not null)
         {
-            delivery = outcome.Get<ReceiveResult>().Deliveries.Single();
+            delivery = outcome.Value.Get<ReceiveResult>().Deliveries.Single();
         }
         await QueueClaimAckRecoveryAssertions.ImageAsync(database, QueueClaimAckCrashProtocol.Message,
             RecoveredState(ack, outcome is not null), delivery, 1);
         token.ThrowIfCancellationRequested();
         var result = database.Apply(operation);
         await Assert.That(store.Position).IsEqualTo(target.Position);
-        if (outcome is not null)
+        if (outcome is { } retained)
         {
-            await QueueClaimAckRecoveryAssertions.EqualAsync(result, outcome);
+            await QueueClaimAckRecoveryAssertions.EqualAsync(result, retained);
         }
         if (ack)
         {

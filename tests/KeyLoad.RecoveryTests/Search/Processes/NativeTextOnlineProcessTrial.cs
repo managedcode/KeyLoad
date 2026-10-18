@@ -1,6 +1,4 @@
 using System.Diagnostics;
-using KeyLoad.RecoveryHost;
-using KeyLoad.RecoveryHost.Features.Search;
 using KeyLoad.RecoveryTests.Features.DocumentStorage;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Server;
@@ -86,7 +84,7 @@ internal static class NativeTextOnlineProcessTrial
             RedirectStandardError = true,
             UseShellExecute = false
         };
-        foreach (var argument in new[] { typeof(RecoveryHostMarker).Assembly.Location, root,
+        foreach (var argument in new[] { typeof(CrashScenarioDispatcher).Assembly.Location, CrashFixtureValues.ProcessMode, root,
             Incarnation.ToString("D"), stage.ToString(), mode })
         {
             start.ArgumentList.Add(argument);

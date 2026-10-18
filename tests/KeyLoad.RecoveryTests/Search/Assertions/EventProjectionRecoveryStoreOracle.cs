@@ -1,9 +1,8 @@
-using ManagedCode.Communication.Commands;
 using System.Text;
 using KeyLoad.Core;
-using KeyLoad.RecoveryHost.Features.Search;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.RecoveryTests.Features.Search;
 
@@ -12,7 +11,7 @@ internal static class EventProjectionRecoveryStoreOracle
     internal static ProjectionCrashCut CaptureCut(ZoneTreeStore store, Command<DatabaseCommand> operation,
         ApplyVectorProjection projection, long priorOutboxTail)
     {
-        var outcomeKey = OutcomeStoreOracle.Key(store, operation);
+        var outcomeKey = OutcomeStoreOracle.Key(operation);
         return store.Read(view => new ProjectionCrashCut(
             view.ReadOwnedValue(EventProjectionCrashScenario.VectorKey(EventProjectionCrashScenario.TargetId)),
             view.ReadOwnedValue(EventProjectionCrashScenario.LineageKey()),
@@ -136,7 +135,7 @@ internal static class EventProjectionRecoveryStoreOracle
     internal static ProjectionCommittedBytes CaptureCommittedBytes(ZoneTreeStore store,
         Command<DatabaseCommand> operation, ApplyVectorProjection projection)
     {
-        var outcomeKey = OutcomeStoreOracle.Key(store, operation);
+        var outcomeKey = OutcomeStoreOracle.Key(operation);
         return store.Read(view => new ProjectionCommittedBytes(
             Required(view.ReadOwnedValue(EventProjectionCrashScenario.VectorKey(EventProjectionCrashScenario.TargetId))),
             Required(view.ReadOwnedValue(EventProjectionCrashScenario.LineageKey())),

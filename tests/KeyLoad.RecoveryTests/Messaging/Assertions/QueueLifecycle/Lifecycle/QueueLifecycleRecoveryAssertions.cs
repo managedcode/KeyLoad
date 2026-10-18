@@ -1,8 +1,7 @@
-using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
-using KeyLoad.RecoveryHost;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.RecoveryTests.Features.Messaging;
 
@@ -22,9 +21,9 @@ internal static class QueueLifecycleRecoveryAssertions
         }
         await QueueLifecycleRecoveryImage.AssertAsync(database, store, committed);
         var receipt = database.Apply(operation).Get<CommitReceipt>();
-        if (committed)
+        if (outcome is { } retained)
         {
-            await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(outcome!.Get<CommitReceipt>(), receipt);
+            await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(retained.Get<CommitReceipt>(), receipt);
         }
         await QueueLifecycleRecoveryImage.AssertAsync(database, store, true);
         await MessagingRecoveryReceiptAssertions.AssertSameNativeValueAsync(receipt, database.Apply(operation).Get<CommitReceipt>());

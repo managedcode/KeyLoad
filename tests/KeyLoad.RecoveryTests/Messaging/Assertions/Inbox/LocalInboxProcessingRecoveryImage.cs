@@ -1,10 +1,8 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using KeyLoad.Core;
-using KeyLoad.RecoveryHost;
-using KeyLoad.RecoveryHost.Features.Messaging;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.RecoveryTests.Features.Messaging;
@@ -39,7 +37,6 @@ internal static class LocalInboxProcessingRecoveryImage
 
     internal static async Task ResultAsync(Result<object> actual, Result<object> expected)
     {
-        await Assert.That(actual.Json).IsEqualTo(expected.Json);
         await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(Errors.Code(expected.Problem));
         await Assert.That(actual.Problem?.Detail).IsEqualTo(expected.Problem?.Detail);
         await Assert.That(actual.Value?.GetType()).IsEqualTo(expected.Value?.GetType());

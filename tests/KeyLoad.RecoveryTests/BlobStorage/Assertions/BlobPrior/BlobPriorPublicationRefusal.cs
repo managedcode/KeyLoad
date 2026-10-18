@@ -1,7 +1,7 @@
-using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.RecoveryTests.Features.BlobStorage;
 
@@ -20,7 +20,7 @@ internal static class BlobPriorPublicationRefusal
         var replay = owner.ResolveOutcome(seed.Commands[2].Operation);
         await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(replay.Problem?.Detail).IsEqualTo("The persisted blob records are inconsistent.");
-        
+
         await Assert.That(replay.Value).IsNull();
         await BlobPriorPublicationImage.SameAsync(store, image, position, seed.Identity);
         await BlobPriorPublicationAssertions.AuthorityAsync(owner, seed);
@@ -38,7 +38,7 @@ internal static class BlobPriorPublicationRefusal
         var result = owner.ResolveOutcome(command.Operation);
         await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
         await Assert.That(result.Problem?.Detail).IsEqualTo("The selected upload lifetime is unavailable.");
-        
+
         await Assert.That(result.Value).IsNull();
     }
 }

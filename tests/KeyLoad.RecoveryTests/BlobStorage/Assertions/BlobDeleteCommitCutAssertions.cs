@@ -1,9 +1,8 @@
-using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.BlobStorage;
-using KeyLoad.RecoveryHost.Features.BlobStorage;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.RecoveryTests.Features.BlobStorage;
 
@@ -42,7 +41,7 @@ internal static class BlobDeleteCommitCutAssertions
         {
             await BlobDeleteCommitCutOracle.ExactAsync(operations.Read(BlobCommitCutProtocol.Principal, new(blob, 1, 0, 4)), new BlobReadResult(metadata, 0, bytes));
         }
-        await BlobCommitCutNativeProof.AssertAuthorityAsync((ZoneTreeStore)owner.Store, owner, proof);
+        await BlobCommitCutNativeProof.AssertAuthorityAsync((ZoneTreeStore)owner.Store, proof);
     }
 
     private static async Task RetainedAsync(DatabaseEngine owner, BlobCommitCutSeedProof proof, string hash, bool retired, bool reclaimed)

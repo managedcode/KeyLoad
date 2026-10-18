@@ -1,5 +1,5 @@
 using KeyLoad.Clustering;
-using KeyLoad.RecoveryHost.Features.ClusterRouting;
+using KeyLoad.RecoveryTests.Features.ClusterRouting;
 using KeyLoad.Server;
 using Microsoft.Extensions.Options;
 

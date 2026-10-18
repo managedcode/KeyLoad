@@ -1,5 +1,3 @@
-using KeyLoad.RecoveryHost.Features.BlobStorage;
-
 namespace KeyLoad.RecoveryTests.Features.BlobStorage;
 
 internal sealed class BlobCompleteCommitCutProcessRecoveryTests

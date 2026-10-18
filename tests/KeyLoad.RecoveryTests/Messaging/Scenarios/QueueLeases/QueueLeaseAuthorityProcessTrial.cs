@@ -1,10 +1,8 @@
-using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
-using KeyLoad.Core.Features.InternalSerialization;
 using KeyLoad.Core.Features.Messaging;
-using KeyLoad.RecoveryHost;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.RecoveryTests.Features.Messaging;
 
@@ -23,7 +21,7 @@ internal static class QueueLeaseAuthorityProcessTrial
             1, delivery.LeaseUntil, 1, 1));
         var payload = original.Value!;
         var decisions = NativeSerialization.Deserialize<QueueRetryDecisions>(payload.RetryDecisions.Span);
-        await QueueOrderedRetryRecoveryChoice.AssertAsync(store, original, payload, decisions);
+        await QueueOrderedRetryRecoveryChoice.AssertAsync(store, original, decisions);
         await Assert.That(OutcomeStoreOracle.Read(store, original)).IsNull();
         await QueueOrderedRetryRecoveryImage.AssertAsync(database, delivery, decisions.Items.Single(), committed: false);
         var key = KeySpace.Partition("lease", QueueOrderedRetryCrashProtocol.Partition,

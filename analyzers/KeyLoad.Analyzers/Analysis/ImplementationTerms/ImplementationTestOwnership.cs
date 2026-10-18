@@ -13,6 +13,7 @@ internal static class ImplementationTestOwnership
     {
         var owners = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
         var pending = new Queue<INamedTypeSymbol>();
+        var nativeAspire = compilation.AssemblyName == "KeyLoad.AppHost" && NativeAspireEntry(compilation, token);
         AddProcessEntry(compilation, pending, token);
         foreach (var tree in compilation.SyntaxTrees.Where(tree => ExecutionPath(tree.FilePath)))
         {
@@ -22,7 +23,8 @@ internal static class ImplementationTestOwnership
                 token.ThrowIfCancellationRequested();
                 if (model.GetDeclaredSymbol(declaration, token) is INamedTypeSymbol type &&
                     (ImplementationTermSymbols.HasPath(type, ImplementationTermCatalog.TestPath) &&
-                     ImplementationTermSymbols.HasPath(type, ImplementationTermCatalog.TestOwnerPath) || NativeExecution(type)))
+                     ImplementationTermSymbols.HasPath(type, ImplementationTermCatalog.TestOwnerPath) || NativeExecution(type) ||
+                     nativeAspire && NativeAspireCallback(type)))
                 {
                     pending.Enqueue(type);
                 }
@@ -58,11 +60,26 @@ internal static class ImplementationTestOwnership
          type.Name is "BenchmarkAttribute" or "GlobalSetupAttribute" or "GlobalCleanupAttribute" &&
          type.ContainingNamespace.ToDisplayString() == "BenchmarkDotNet.Attributes");
 
+    private static bool NativeAspireCallback(INamedTypeSymbol type) =>
+        ImplementationTermSymbols.HasPath(type, ImplementationTermCatalog.AspireHostPath) &&
+        type.GetMembers().OfType<IMethodSymbol>().Any(static method => NativeAspireBuilder(method.ReturnType) ||
+            method.Parameters.Any(static parameter => NativeAspireBuilder(parameter.Type)));
+
+    private static bool NativeAspireBuilder(ITypeSymbol type) => type switch
+    {
+        ITypeParameterSymbol parameter => parameter.ConstraintTypes.Any(NativeAspireBuilder),
+        INamedTypeSymbol named => NativeAspireBuilderContract(named) || named.AllInterfaces.Any(NativeAspireBuilderContract),
+        _ => false
+    };
+
+    private static bool NativeAspireBuilderContract(INamedTypeSymbol type) =>
+        ImplementationTermSymbols.Native(type) && type.ToDisplayString() == "Aspire.Hosting.IDistributedApplicationBuilder";
+
     private static void AddProcessEntry(Compilation compilation, Queue<INamedTypeSymbol> pending, CancellationToken token)
     {
         var path = compilation.AssemblyName switch
         {
-            "KeyLoad.RecoveryHost" => ImplementationTermCatalog.TestPath,
+            "KeyLoad.RecoveryTests" => ImplementationTermCatalog.TestPath,
             "KeyLoad.AppHost" when NativeAspireEntry(compilation, token) => ImplementationTermCatalog.AspireHostPath,
             _ => null
         };

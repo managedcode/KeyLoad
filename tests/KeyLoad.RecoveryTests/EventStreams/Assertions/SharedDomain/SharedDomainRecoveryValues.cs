@@ -1,7 +1,6 @@
-using ManagedCode.Communication;
 using System.Text.Json;
-using KeyLoad.RecoveryHost.Features.EventStreams;
-using static KeyLoad.RecoveryHost.Features.EventStreams.SharedDomainProtocol;
+using ManagedCode.Communication;
+using static KeyLoad.RecoveryTests.Features.EventStreams.SharedDomainProtocol;
 
 namespace KeyLoad.RecoveryTests.Features.EventStreams;
 
@@ -46,7 +45,7 @@ internal static class SharedDomainRecoveryValues
     {
         await Assert.That(Errors.Code(actual.Problem)).IsNull();
         await Assert.That(actual.Problem?.Detail).IsNull();
-        
+
         var command = SharedDomainCorpus.Producer(scope, id, item);
         var mutations = command.Mutations.Select(mutation => mutation switch
         {

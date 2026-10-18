@@ -53,7 +53,7 @@ source declarations and prepared-source previews are not execution receipts.
 
 Join order: this contract, shared immutable corpus, native operations/oracles,
 process child and recovery oracle, actual public client flow, reviewed ordinary
-RecoveryHost dispatch addition, then sole main coordinator formatting/build/full
+RecoveryProcess dispatch addition, then sole main coordinator formatting/build/full
 required unit/recovery/cluster checks. No product change is presently justified by a
 confirmed defect. The implementation remains unadoptable until the complete packet and peers
 are ready; rollback removes additive test/contract source only, never data.

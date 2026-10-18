@@ -1,7 +1,7 @@
 using ManagedCode.Communication.Commands;
 using KeyLoad.Core;
 using KeyLoad.Storage;
-using static KeyLoad.RecoveryHost.Features.EventStreams.SharedDomainProtocol;
+using static KeyLoad.RecoveryTests.Features.EventStreams.SharedDomainProtocol;
 
 namespace KeyLoad.UnitTests.Features.EventStreams;
 

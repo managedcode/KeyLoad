@@ -1,7 +1,6 @@
 using KeyLoad.Core;
-using KeyLoad.RecoveryHost.Features.EventStreams;
 using KeyLoad.Storage.ZoneTree;
-using static KeyLoad.RecoveryHost.Features.EventStreams.SharedDomainProtocol;
+using static KeyLoad.RecoveryTests.Features.EventStreams.SharedDomainProtocol;
 
 namespace KeyLoad.RecoveryTests.Features.EventStreams;
 

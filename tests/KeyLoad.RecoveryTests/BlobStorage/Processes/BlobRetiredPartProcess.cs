@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using KeyLoad.RecoveryHost;
 using KeyLoad.RecoveryTests.Features.DocumentStorage;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Storage.ZoneTree;
@@ -49,7 +48,7 @@ internal static class BlobRetiredPartProcess
             RedirectStandardError = true,
             UseShellExecute = false
         };
-        foreach (var argument in new[] { typeof(RecoveryHostMarker).Assembly.Location, root,
+        foreach (var argument in new[] { typeof(CrashScenarioDispatcher).Assembly.Location, CrashFixtureValues.ProcessMode, root,
             CommitStage.HeaderWritten.ToString(), "0", QueueLifecycleCrashProtocol.Mode })
         {
             start.ArgumentList.Add(argument);

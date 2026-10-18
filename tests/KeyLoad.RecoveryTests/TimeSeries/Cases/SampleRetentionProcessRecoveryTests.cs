@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Globalization;
-using KeyLoad.RecoveryHost;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Storage.ZoneTree;
 
@@ -52,7 +51,7 @@ internal sealed class SampleRetentionProcessRecoveryTests
         };
         foreach (var argument in new[]
         {
-            typeof(RecoveryHostMarker).Assembly.Location,
+            typeof(CrashScenarioDispatcher).Assembly.Location, CrashFixtureValues.ProcessMode,
             root,
             stage.ToString(),
             MutationIndex.ToString(CultureInfo.InvariantCulture),
@@ -61,7 +60,7 @@ internal sealed class SampleRetentionProcessRecoveryTests
         {
             start.ArgumentList.Add(argument);
         }
-        return Process.Start(start) ?? throw new InvalidOperationException("Could not start sample-retention RecoveryHost.");
+        return Process.Start(start) ?? throw new InvalidOperationException("Could not start sample-retention RecoveryProcess.");
     }
 
     private static async Task StopAndDeleteAsync(Process process, string root, CancellationToken cancellationToken)

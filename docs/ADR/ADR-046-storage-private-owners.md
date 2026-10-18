@@ -33,7 +33,7 @@ qualify power-loss durability.
 ## Distinct-process owner regression
 
 REQ-STORAGE-008 maps to the measurable AC-STORAGE-OWNER-001 in StorageRecovery. Current same-process
-StoreLifetime contention and sequential RecoveryHost reopen tests do not establish
+StoreLifetime contention and sequential RecoveryProcess reopen tests do not establish
 simultaneous distinct-process exclusion. The new StorageRecovery/Cases/
 StorageOwnerProcessTests.cs reuses the existing real Release inspector.
 

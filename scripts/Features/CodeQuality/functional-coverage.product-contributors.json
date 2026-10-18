@@ -1003,7 +1003,7 @@
         "KeyLoad.Replication",
         "KeyLoad.Storage.ZoneTree"
       ],
-      "operationOutcomeAndState": "Two distinct actual RecoveryHost processes execute the same command around process termination and restart; complete receipt and single document/event/queue/outbox effects survive retries, changed content conflicts without replacing outcome or effects, and an authorized healthy follow-up persists."
+      "operationOutcomeAndState": "Two distinct actual RecoveryProcess processes execute the same command around process termination and restart; complete receipt and single document/event/queue/outbox effects survive retries, changed content conflicts without replacing outcome or effects, and an authorized healthy follow-up persists."
     },
     {
       "suite": "unit",

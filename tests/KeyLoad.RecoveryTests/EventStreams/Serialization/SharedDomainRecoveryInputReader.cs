@@ -1,8 +1,7 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
-using KeyLoad.RecoveryHost.Features.DocumentStorage;
-using KeyLoad.RecoveryHost.Features.EventStreams;
+using KeyLoad.RecoveryTests.Features.DocumentStorage;
 using KeyLoad.Storage;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.RecoveryTests.Features.EventStreams;
 

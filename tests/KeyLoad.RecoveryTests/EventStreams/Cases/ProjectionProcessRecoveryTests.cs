@@ -1,11 +1,10 @@
-using ManagedCode.Communication.Commands;
 using System.Diagnostics;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
-using KeyLoad.RecoveryHost;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.RecoveryTests;
 
@@ -58,7 +57,7 @@ internal sealed class ProjectionProcessRecoveryTests
     private static Process StartCrashProcess(string root, CommitStage stage, int index)
     {
         var start = new ProcessStartInfo("dotnet") { RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false };
-        foreach (var argument in new[] { typeof(RecoveryHostMarker).Assembly.Location, root, stage.ToString(),
+        foreach (var argument in new[] { typeof(CrashScenarioDispatcher).Assembly.Location, CrashFixtureValues.ProcessMode, root, stage.ToString(),
                      index.ToString(System.Globalization.CultureInfo.InvariantCulture), "projection-processing" })
         {
             start.ArgumentList.Add(argument);
@@ -99,9 +98,9 @@ internal sealed class ProjectionProcessRecoveryTests
         var request = NativeSerialization.Deserialize<CommitProjectionBatchRequest>(original.Value!.Input.Span, NativeValidationProfile.PublicInputElements);
         var retryId = Guid.NewGuid();
         var retried = database.Apply(database.CreateCommand(OperationKind.CommitProjectionBatch, retryId, "root", TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(request with
-            {
-                CommandId = retryId
-            }, JsonDefaults.Options))).Get<ProjectionBatchResult>();
+        {
+            CommandId = retryId
+        }, JsonDefaults.Options))).Get<ProjectionBatchResult>();
         var status = database.GetOutboxStatus("root", ProjectionCrashScenario.Partition);
         await Assert.That(retried.AlreadyProcessed).IsTrue();
         await Assert.That(retried.Receipt.Token).IsEqualTo(recovered.Receipt.Token);

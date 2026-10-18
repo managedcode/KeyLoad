@@ -1,5 +1,4 @@
 using KeyLoad.Core;
-using KeyLoad.RecoveryHost;
 using KeyLoad.Storage;
 
 namespace KeyLoad.RecoveryTests.Features.Messaging;

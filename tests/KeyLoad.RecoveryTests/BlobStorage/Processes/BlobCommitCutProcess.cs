@@ -1,6 +1,4 @@
 using System.Diagnostics;
-using KeyLoad.RecoveryHost;
-using KeyLoad.RecoveryHost.Features.BlobStorage;
 using KeyLoad.RecoveryTests.Features.DocumentStorage;
 using KeyLoad.RecoveryTests.Features.StorageRecovery;
 using KeyLoad.Server;
@@ -68,11 +66,11 @@ internal static class BlobCommitCutProcess
             RedirectStandardError = true,
             UseShellExecute = false
         };
-        foreach (var argument in new[] { typeof(RecoveryHostMarker).Assembly.Location, root, cut.ToString(), "0", mode })
+        foreach (var argument in new[] { typeof(CrashScenarioDispatcher).Assembly.Location, CrashFixtureValues.ProcessMode, root, cut.ToString(), "0", mode })
         {
             start.ArgumentList.Add(argument);
         }
-        return Process.Start(start) ?? throw new InvalidOperationException("The genuine blob RecoveryHost could not start.");
+        return Process.Start(start) ?? throw new InvalidOperationException("The genuine blob RecoveryProcess could not start.");
     }
 
     private static async Task AwaitMarkerAsync(Process process, BlobCommitCutKind cut,

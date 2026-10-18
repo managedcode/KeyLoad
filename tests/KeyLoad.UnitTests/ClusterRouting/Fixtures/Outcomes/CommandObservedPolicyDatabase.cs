@@ -1,6 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.RecoveryHost.Features.ClusterRouting;
+using KeyLoad.RecoveryTests.Features.ClusterRouting;
 using KeyLoad.Storage.ZoneTree;
 using P = KeyLoad.UnitTests.Features.ClusterRouting.CommandObservedPolicyProtocol;
 

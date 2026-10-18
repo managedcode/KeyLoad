@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Text.Json;
-using KeyLoad.RecoveryHost;
 using KeyLoad.RecoveryTests.Features.DocumentStorage;
 using KeyLoad.Server;
 
@@ -169,7 +168,7 @@ internal static class RecoveryFaultRootRetentionFlow
             RedirectStandardError = true,
             UseShellExecute = false
         };
-        foreach (var argument in new[] { typeof(RecoveryHostMarker).Assembly.Location,
+        foreach (var argument in new[] { typeof(CrashScenarioDispatcher).Assembly.Location, CrashFixtureValues.ProcessMode,
             NativeChecksumProfileProtocol.Mode, root, NativeChecksumProfileProtocol.FirstAppend })
         {
             start.ArgumentList.Add(argument);

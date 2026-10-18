@@ -1,11 +1,10 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using KeyLoad.Core;
-using KeyLoad.RecoveryHost;
 using KeyLoad.Storage;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 using TUnit.Assertions.Enums;
 namespace KeyLoad.RecoveryTests.Features.EventStreams;
 
@@ -43,7 +42,8 @@ internal static class TopicPurgeReceiptAssertions
         await EventAppendReceiptAssertions.SameResultAsync(outcome, stored.Result);
         await Assert.That(store.Read(view => NativeSerialization.Deserialize<DateTimeOffset>(view.ReadOwnedValue(KeySpace.Clock.ToArray())!))).IsEqualTo(new DateTimeOffset(operation.Timestamp));
         await Assert.That(stored.CanonicalSequence).IsGreaterThan(0L);
-        await Assert.That(store.Read(view => view.GetRecord<long>(KeySpace.AppliedBytes))).IsEqualTo(stored.CanonicalSequence);
+        await Assert.That(store.Read(view => NativeSerialization.Deserialize<long>(view.ReadOwnedValue(KeySpace.AppliedBytes)
+            ?? throw new InvalidOperationException("The canonical applied position is missing.")))).IsEqualTo(stored.CanonicalSequence);
     }
     internal static async Task StableReplayAsync(DatabaseEngine database, Command<DatabaseCommand> operation, Result<object> expected)
     {

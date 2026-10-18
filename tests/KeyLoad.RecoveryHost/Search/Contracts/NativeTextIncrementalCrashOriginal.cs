@@ -1,7 +1,0 @@
-namespace KeyLoad.RecoveryHost.Features.Search;
-
-[global::Orleans.GenerateSerializer, global::Orleans.Alias(NativeTextIncrementalCrashProtocol.OriginalAlias)]
-internal sealed record NativeTextIncrementalCrashOriginal(
-    [property: global::Orleans.Id(0)] TextIndexMaintenanceRequest Request,
-    [property: global::Orleans.Id(1)] CommandRequest Mutation,
-    [property: global::Orleans.Id(2)] CommitReceipt Receipt);

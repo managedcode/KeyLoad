@@ -1,12 +1,9 @@
-using ManagedCode.Communication.Commands;
-using ManagedCode.Communication;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Core.Features.Authorization;
-using KeyLoad.Core.Features.InternalSerialization;
-using KeyLoad.RecoveryHost;
-using KeyLoad.RecoveryHost.Features.BlobStorage;
 using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.RecoveryTests.Features.BlobStorage;
 
@@ -30,7 +27,7 @@ internal static class BlobCommitCutNativeProof
         return Convert.ToHexString(JsonDefaults.Serialize(page.Records));
     });
 
-    internal static async Task AssertAuthorityAsync(ZoneTreeStore store, DatabaseEngine database, BlobCommitCutSeedProof proof)
+    internal static async Task AssertAuthorityAsync(ZoneTreeStore store, BlobCommitCutSeedProof proof)
     {
         await Assert.That(store.Identity.NodeId).IsEqualTo(proof.NodeId);
         await Assert.That(store.Identity.Incarnation).IsEqualTo(proof.Incarnation);
