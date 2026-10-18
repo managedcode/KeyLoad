@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Core.Features.ClusterRouting.Validation;
+using KeyLoad.Core.Features.ResourceExecution;
 
 namespace KeyLoad.Core.Features.Search;
 
@@ -16,13 +16,13 @@ internal sealed record AnnReadLifetimeMetadata(ResourceDefinition Definition,
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, Invalid);
         }
-        PartitionControlLifetimeCoverage.Require(Coverage, partition, Definitions, maximumBytes);
+        ResourceLifetimeCoverage.Require(Coverage, partition, Definitions, maximumBytes);
         if (NativeSerialization.Measure(Definitions) > maximumBytes || NativeSerialization.Measure(Definition) > maximumBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, Invalid);
         }
         var primary = Definitions.FirstOrDefault(value => value.Name == Definition.Name);
-        if (primary is null || !PartitionControlLifetimeProofValidation.Same(primary, Definition))
+        if (primary is null || !NativeSerialization.Serialize(primary).AsSpan().SequenceEqual(NativeSerialization.Serialize(Definition)))
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, Invalid);
         }

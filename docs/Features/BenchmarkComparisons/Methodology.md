@@ -112,7 +112,7 @@ Record exact source/run/attempt/job/artifact identities, Linux/runtime/CPU,
 DLL/PDB hashes, native images, observed membership/data copies, resource limits,
 filesystem, transport, read consistency, index settings and effective ACK/durability.
 A node count alone does not establish equivalent guarantees. A KeyLoad write is
-acknowledged by a majority of its ReplicaCount copies (two of three by default). The
+acknowledged by every configured copy (three of three by default). The
 one-node KeyLoad arm has a single copy. Unequal contracts prohibit a
 performance-winner claim.
 

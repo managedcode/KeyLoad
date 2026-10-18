@@ -28,7 +28,7 @@ little-endian WAL header and exact key/value bytes. Use the published provider
 unchanged. KeyLoad owns no substitute checksum implementation or alternate
 reader. Its own current identity epoch7, atomic WAL4, checkpoint5, generated
 aliases/field IDs, native raw-byte serializers, Sync WAL, uncompressed provider,
-node-local locks/apply ownership, replication journals and majority ACK barriers remain
+node-local locks/apply ownership, canonical outcomes and required-copy ACK barriers remain
 the existing contract. New qualification creates current stores and reopens those
 same stores with the same published dependency cohort. An earlier development
 cohort is not converted or presented as this current-format evidence.

@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using KeyLoad.Core.Features.ClusterRouting.Contracts;
 using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.ResourceExecution.Execution;
 using KeyLoad.Storage;
@@ -49,7 +48,7 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.Validation, DatabaseEngineResourceHasADifferentKindDetail);
         }
-        var actualLifetime = lifetime ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
+        var actualLifetime = lifetime ?? throw Errors.Fail(ErrorCode.Corruption, ResourceLifetimeValidationMessages.MissingAuthority);
         work?.ObserveResourceLifetime(partition, resource, actualLifetime);
         return read(view, principal, resource, digest);
     }

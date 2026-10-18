@@ -30,7 +30,7 @@ flowchart TD
     Decode --> Conn[Client connection grain]
     Conn --> Parts[Table partition grains]
     Parts --> Owners[ZoneTree owners remove data and catalog entry]
-    Owners --> Commit[Terminal catalog and outcome commit by majority of copies]
+    Owners --> Commit[Atomic metadata, cleanup and outcome on every configured copy]
     Commit --> Result[Finalized DropTableResult]
     Commit --> Recreate[New creator operation and new lifetime]
 ```

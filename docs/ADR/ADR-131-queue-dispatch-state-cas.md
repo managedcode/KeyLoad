@@ -39,7 +39,7 @@ sequenceDiagram
     Caller->>Owner: Stable command ID and queue version CAS
     Owner->>Meta: Fresh persisted administrator and native typed command
     Meta->>Meta: Read full queue, validate version, copy pause and next version
-    Meta->>Meta: Existing ordered commit, outcome and majority acknowledgment
+    Meta->>Meta: Existing ordered commit, outcome and required-copy acknowledgement
     Meta-->>Caller: Complete committed definition
     Caller->>Owner: Replay old pause after later resume
     Owner->>Meta: Reauthorize and return original outcome

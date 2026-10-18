@@ -22,7 +22,7 @@ flowchart LR
 
 ## Preservation contract
 
-The canonical phase inventory and exact source boundaries are in DatabasePhaseProfiling. Existing provider gates, lock order, native operation calls, RPC deadlines, cancellation classification, majority/apply semantics and original task ownership stay unchanged. In particular, a scheduling batch is not a group commit; a transport await is not isolated network time; and process resource deltas are not attributed to one request.
+The canonical phase inventory and exact source boundaries are in DatabasePhaseProfiling. Existing provider gates, lock order, native operation calls, RPC deadlines, cancellation classification, required-copy apply semantics and original task ownership stay unchanged. In particular, a scheduling batch is not a group commit; a transport await is not isolated network time; and process resource deltas are not attributed to one request.
 
 Every update is callback-free and bounded. No logger, listener, exporter, async-ambient value, allocation, task or database gate is introduced into a producer's hot path. Snapshot counters are cumulative/non-atomic; all overflow and dropped-update quality indicators remain visible. The cold exporter uses bounded snapshots/buffers/files and cannot change healthy database results.
 

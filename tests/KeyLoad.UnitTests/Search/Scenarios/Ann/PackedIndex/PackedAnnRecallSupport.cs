@@ -79,8 +79,7 @@ internal static class PackedAnnRecallSupport
         var expectedMode = eligibleCount <= 256
             ? AnnSearchMode.ExactSmallSet
             : AnnSearchMode.Approximate;
-        await Assert.That(observed.Modes.Contains(expectedMode)
-            || observed.Modes.Contains(AnnSearchMode.ExactAfterInsufficientCandidates)).IsTrue();
+        await Assert.That(observed.Modes.Contains(expectedMode)).IsTrue();
     }
 
     private static void WriteCellObservation(PackedAnnRecallObservation observed, DistanceMetric metric,

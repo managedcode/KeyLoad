@@ -7,21 +7,26 @@ internal sealed class AnnPublicWholeFlowTests
     private const int ExactThreshold = 3;
     private const int ApproximateThreshold = 0;
     private const int FullBreadth = 3;
-    private const int FallbackBreadth = 1;
+    private const int NarrowBreadth = 1;
     private const int TooSmallResult = 1;
     private const long MissingGeneration = 2;
 
     [Test]
     [Arguments(ExactThreshold, FullBreadth, AnnPageMode.Exact)]
     [Arguments(ApproximateThreshold, FullBreadth, AnnPageMode.Approximate)]
-    [Arguments(ApproximateThreshold, FallbackBreadth, AnnPageMode.ExactFallback)]
-    public Task ActualProvisionedSearchReportsRequestedAndNativeModeWithFullLiteralPageAndEmptyCut(int threshold, int breadth, AnnPageMode mode)
+    [Arguments(ApproximateThreshold, NarrowBreadth, AnnPageMode.Approximate)]
+    public Task ActualProvisionedSearchReportsModeOrBoundedRefusalThenHealthyAndEmptyPages(int threshold, int breadth, AnnPageMode mode)
         => AnnPublicWholeFlow.RunAsync(threshold, breadth, async (database, runtime, pin) =>
         {
             var image = NativeAnnMaintenanceTestData.Snapshot(database);
             var cut = database.Store.Position;
             var request = AnnPublicWholeFlow.Request(database, pin);
             var engine = AnnPublicWholeFlow.Engine(database, runtime);
+            if (threshold == ApproximateThreshold && breadth == NarrowBreadth)
+            {
+                await BoundedThenHealthyAsync(database, runtime, pin, request);
+                return;
+            }
             var actual = await engine.ApproximateSearchAsync(AnnProjectionPinTestSupport.Principal, request);
             await AnnPublicWholeFlow.PageAsync(actual, database, cut, mode);
             await AnnPublicWholeFlow.UnchangedAsync(database, image, cut);
@@ -66,8 +71,8 @@ internal sealed class AnnPublicWholeFlowTests
 
     [Test]
     [Arguments(FullBreadth, AnnPageMode.Approximate)]
-    [Arguments(FallbackBreadth, AnnPageMode.ExactFallback)]
-    public Task ActualProvisionedFilteredSearchDeduplicatesUnknownIdsWithoutReturningNavigationNodesAndRemainsHealthy(int breadth, AnnPageMode mode)
+    [Arguments(NarrowBreadth, AnnPageMode.Approximate)]
+    public Task ActualFilteredSearchDeduplicatesIdsOrRefusesInsufficientBreadthThenRemainsHealthy(int breadth, AnnPageMode mode)
         => AnnPublicWholeFlow.RunAsync(ApproximateThreshold, breadth, async (database, runtime, pin) =>
         {
             var image = NativeAnnMaintenanceTestData.Snapshot(database);
@@ -81,6 +86,11 @@ internal sealed class AnnPublicWholeFlowTests
                     AllowedIds = ["seed-00000", "missing-ann-id", "seed-00000"]
                 }
             };
+            if (breadth == NarrowBreadth)
+            {
+                await BoundedThenHealthyAsync(database, runtime, pin, request);
+                return;
+            }
             var expected = new AnnSearchPage(AnnPublicWholeFlow.Version,
                 [new RankedDocument(new DocumentResult(
                     new EntityRef(database.Partition, AnnSeedTestSupport.Collection, "seed-00000"),
@@ -100,6 +110,27 @@ internal sealed class AnnPublicWholeFlowTests
             await Assert.That(NativeAnnFixtureFileSnapshot.Capture(database.Directory))
                 .IsEquivalentTo(files, CollectionOrdering.Matching);
         });
+
+    private static async Task BoundedThenHealthyAsync(TestDatabase database, NativeAnnMaintenanceTestRuntime runtime,
+        AnnMaintenanceRequest pin, ApproximateSearchRequest request)
+    {
+        var image = NativeAnnMaintenanceTestData.Snapshot(database);
+        var cut = database.Store.Position;
+        var engine = AnnPublicWholeFlow.Engine(database, runtime);
+        await FailureAsync(() => engine.ApproximateSearchAsync(AnnProjectionPinTestSupport.Principal, request), ErrorCode.BudgetExceeded);
+        await AnnPublicWholeFlow.UnchangedAsync(database, image, cut);
+        var healthy = request with { Search = request.Search with { Limit = 1, AllowedIds = null } };
+        var actual = await engine.ApproximateSearchAsync(AnnProjectionPinTestSupport.Principal, healthy);
+        var expected = new AnnSearchPage(AnnPublicWholeFlow.Version,
+            [new(new(new(database.Partition, AnnSeedTestSupport.Collection, "seed-00002"), 1, "{}", false, []), 1d / 61d)],
+            cut, AnnPageMode.Approximate, false, pin.IndexGeneration, AnnPageMode.Approximate);
+        await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
+        await AnnPublicWholeFlow.UnchangedAsync(database, image, cut);
+        var empty = healthy with { Search = healthy.Search with { AllowedIds = [] } };
+        await AnnPublicWholeFlow.PageAsync(await engine.ApproximateSearchAsync(AnnProjectionPinTestSupport.Principal, empty),
+            database, cut, AnnPageMode.Exact, empty: true);
+        await AnnPublicWholeFlow.UnchangedAsync(database, image, cut);
+    }
 
     private static async Task FailureAsync(Func<Task<AnnSearchPage>> operation, ErrorCode code)
     {

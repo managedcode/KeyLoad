@@ -56,7 +56,7 @@ internal sealed class PackedAnnFilterTests
     }
 
     [Test, NotInParallel]
-    public async Task AcAnn004InsufficientFilteredCandidatesFallBackToCompleteExactEligibleTopK()
+    public async Task AcAnn004InsufficientFilteredCandidatesRefuseWithoutPartialAndHealthyQueryContinues()
     {
         using var database = new TestDatabase();
         PackedAnnTestData.Configure(database);
@@ -73,29 +73,27 @@ internal sealed class PackedAnnFilterTests
             Seed = PackedAnnTestData.CorpusSeed
         };
         var budget = PackedAnnIndexTestSupport.Budget(database);
-        var index = PackedAnnBuildObservationRunner.Build(PackedAnnBuildScenario.FilteredFallback,
+        var index = PackedAnnBuildObservationRunner.Build(PackedAnnBuildScenario.FilteredCandidateBound,
             space, records, options, budget);
         var selected = Enumerable.Range(0, records.Length).Where(ordinal => ordinal % 100 == 0).ToArray();
         var bitmap = Bits(records.Length, selected);
         var query = PackedAnnTestData.Vector(901, space.Dimension, PackedAnnTestData.CorpusSeed);
-        var result = index.Search(query, selected.Length, bitmap, PackedAnnIndexTestSupport.Budget(database));
-        var exact = records.Select((record, ordinal) => (record, ordinal))
-            .Where(item => Array.BinarySearch(selected, item.ordinal) >= 0)
-            .Select(item => new AnnCandidate(item.ordinal, item.record.DocumentId, item.record.DocumentRevision,
-                SearchEngine.Similarity(query, item.record.Values.ToArray(), metric)))
-            .OrderByDescending(candidate => candidate.Score)
-            .ThenBy(candidate => candidate.DocumentId, StringComparer.Ordinal).ToArray();
+        var position = database.Store.Position;
+        var original = JsonDefaults.Serialize(records);
+        AnnSearchResult? partial = null;
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => partial = index.Search(query, selected.Length,
+            bitmap, PackedAnnIndexTestSupport.Budget(database)));
+        await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
+        await Assert.That(failure.Message).IsEqualTo("The bounded ANN graph did not supply the requested eligible candidates.");
+        await Assert.That(partial).IsNull();
+        var healthy = index.Search(query, 1, null, PackedAnnIndexTestSupport.Budget(database));
+        await Assert.That(healthy.Mode).IsEqualTo(AnnSearchMode.Approximate);
+        await Assert.That(healthy.Candidates.Length).IsEqualTo(1);
+        await AdaptiveFilteredPlannerOracle.AssertReturnedCandidatesAsync(healthy, records, query,
+            Enumerable.Range(0, records.Length).ToArray());
         await Assert.That(records.Length).IsEqualTo(PackedAnnTestData.QualityRecordCount);
-        await Assert.That(result.Mode).IsEqualTo(AnnSearchMode.ExactAfterInsufficientCandidates);
-        await Assert.That(result.Candidates.Select(candidate => candidate.DocumentId))
-            .IsEquivalentTo(exact.Select(candidate => candidate.DocumentId), CollectionOrdering.Matching);
-        for (var ordinal = 0; ordinal < exact.Length; ordinal++)
-        {
-            await Assert.That(result.Candidates[ordinal].DocumentId).IsEqualTo(exact[ordinal].DocumentId);
-            await Assert.That(result.Candidates[ordinal].SourceOrdinal).IsEqualTo(exact[ordinal].SourceOrdinal);
-            await Assert.That(result.Candidates[ordinal].DocumentRevision).IsEqualTo(exact[ordinal].DocumentRevision);
-            await Assert.That(result.Candidates[ordinal].Score).IsEqualTo(exact[ordinal].Score);
-        }
+        await Assert.That(database.Store.Position).IsEqualTo(position);
+        await Assert.That(JsonDefaults.Serialize(PackedAnnTestData.Load(database, metric)).AsSpan().SequenceEqual(original)).IsTrue();
     }
 
     private static ulong[] Bits(int count, params int[] ordinals)

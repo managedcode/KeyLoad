@@ -6,7 +6,7 @@ Stress admission hardening owns feature-local typed HeavyLoad options, native ar
 
 ## Context and decision
 
-The methodology requires meaningful pure/mixed measurements, actual one-million-record ingestion with 1/10/500 independent clients and only native one-node/three-node comparison topologies. Existing setup seeding and shared client wrappers cannot prove these ingestion claims. Follow the primary-source-backed [Methodology](../Features/BenchmarkComparisons/Methodology.md), REQ/AC-METH-001..005 and REQ/AC-SCALE-024..029. The active inventory contains one-node and three-node configurations only (ADR-034/056/103/109); majority ACKs and persisted state are unchanged.
+The methodology requires meaningful pure/mixed measurements, actual one-million-record ingestion with 1/10/500 independent clients and only native one-node/three-node comparison topologies. Existing setup seeding and shared client wrappers cannot prove these ingestion claims. Follow the primary-source-backed [Methodology](../Features/BenchmarkComparisons/Methodology.md), REQ/AC-METH-001..005 and REQ/AC-SCALE-024..029. The active inventory contains one-node and three-node configurations only (ADR-034/056/103/109); required-copy ACKs and persisted state are unchanged.
 
 ## Implementation contract
 

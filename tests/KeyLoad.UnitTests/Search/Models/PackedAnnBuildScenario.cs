@@ -3,8 +3,8 @@ namespace KeyLoad.UnitTests.Features.Search;
 internal enum PackedAnnBuildScenario
 {
     AdaptiveSelectivity,
-    AdaptiveFallback,
+    AdaptiveCandidateBound,
     WideSearchSetup,
     RecallMetric,
-    FilteredFallback
+    FilteredCandidateBound
 }

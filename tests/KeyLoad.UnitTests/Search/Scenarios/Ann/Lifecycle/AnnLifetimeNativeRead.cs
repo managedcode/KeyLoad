@@ -1,5 +1,5 @@
 using KeyLoad.Core.Features.ClusterRouting.Queries;
-using KeyLoad.Core.Features.ClusterRouting.Validation;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.Search;
 
 namespace KeyLoad.UnitTests.Features.Search;
@@ -14,7 +14,7 @@ internal static class AnnLifetimeNativeRead
             var principal = source.Database.Principal(bounded, AnnLifetimeNativeProtocol.Reader, source.Database.EvaluationClock.GetUtcNow());
             var definition = source.Database.Resource(bounded, source.Partition, AnnSeedTestSupport.Collection, ResourceKind.Collection);
             var definitions = PartitionResourceCatalog.Capture(bounded, source.Partition, source.Database.Limits);
-            var coverage = PartitionControlLifetimeCoverage.Capture(bounded, source.Partition, definitions, source.Database.Limits.MaxBatchBytes);
+            var coverage = ResourceLifetimeCoverage.Capture(bounded, source.Partition, definitions, source.Database.Limits.MaxBatchBytes);
             return new(definition, coverage, principal, definitions);
         });
 

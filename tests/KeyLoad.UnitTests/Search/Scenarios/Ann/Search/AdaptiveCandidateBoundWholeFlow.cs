@@ -3,7 +3,7 @@ using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Features.Search;
 
-internal static class AdaptiveFallbackWholeFlow
+internal static class AdaptiveCandidateBoundWholeFlow
 {
     private const int QueryOrdinal = 22_917;
     private const int EligibleCount = 100;
@@ -17,7 +17,7 @@ internal static class AdaptiveFallbackWholeFlow
         var records = PackedAnnTestData.Load(database, metric);
         var options = new PackedAnnOptions { ExactThreshold = 0, EfSearch = 1 };
         var budget = PackedAnnIndexTestSupport.Budget(database);
-        var index = PackedAnnBuildObservationRunner.Build(PackedAnnBuildScenario.AdaptiveFallback,
+        var index = PackedAnnBuildObservationRunner.Build(PackedAnnBuildScenario.AdaptiveCandidateBound,
             space, records, options, budget);
         var query = PackedAnnTestData.Vector(QueryOrdinal, space.Dimension, PackedAnnTestData.CorpusSeed);
         var bottom = AdaptiveFilteredPlannerOracle.Rank(records, query,
@@ -25,32 +25,29 @@ internal static class AdaptiveFallbackWholeFlow
         var bitmap = AdaptiveFilteredPlannerOracle.Bitmap(records.Length, bottom);
         var position = database.Store.Position;
         var original = JsonDefaults.Serialize(records);
-        var measured = index.Search(query, bottom.Length, bitmap, PackedAnnIndexTestSupport.Budget(database));
-
-        await Assert.That(measured.Mode).IsEqualTo(AnnSearchMode.ExactAfterInsufficientCandidates);
-        await Assert.That(measured.EligibleCount).IsEqualTo(bottom.Length);
-        await Assert.That(measured.ExpansionPasses).IsGreaterThan(0);
-        await Assert.That(measured.FallbackDistanceEvaluations).IsEqualTo(bottom.Length);
-        await Assert.That(measured.DistanceEvaluations >= measured.FallbackDistanceEvaluations).IsTrue();
-        await AssertExactAsync(measured, records, query, bottom);
-        await AssertBudgetExceededAsync(() => index.Search(query, bottom.Length, bitmap,
-            PackedAnnIndexTestSupport.Budget(database, measured.WorkUnits - 1)));
+        AnnSearchResult? partial = null;
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => partial = index.Search(query, bottom.Length,
+            bitmap, PackedAnnIndexTestSupport.Budget(database)));
+        await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
+        await Assert.That(failure.Message).IsEqualTo("The bounded ANN graph did not supply the requested eligible candidates.");
+        await Assert.That(partial).IsNull();
         await UnchangedAsync(database, metric, position, original);
-        var healthy = index.Search(query, bottom.Length, bitmap, PackedAnnIndexTestSupport.Budget(database));
-        await AssertExactAsync(healthy, records, query, bottom);
-        await UnchangedAsync(database, metric, position, original);
-    }
-
-    private static async Task AssertExactAsync(AnnSearchResult result, VectorRecord[] records,
-        float[] query, int[] eligible)
-    {
-        var expected = AdaptiveFilteredPlannerOracle.Rank(records, query, eligible);
-        await Assert.That(result.Mode).IsEqualTo(AnnSearchMode.ExactAfterInsufficientCandidates);
-        await Assert.That(result.Candidates.Length).IsEqualTo(expected.Length);
-        await Assert.That(result.EligibleCount).IsEqualTo(eligible.Length);
-        await Assert.That(result.Candidates.Select(candidate => candidate.SourceOrdinal).ToArray())
+        var exactIndex = PackedAnnIndexTestSupport.Build(space, records,
+            options with { ExactThreshold = EligibleCount }, PackedAnnIndexTestSupport.Budget(database));
+        var exact = exactIndex.Search(query, bottom.Length, bitmap, PackedAnnIndexTestSupport.Budget(database));
+        await Assert.That(exact.Mode).IsEqualTo(AnnSearchMode.ExactSmallSet);
+        var expected = AdaptiveFilteredPlannerOracle.Rank(records, query, bottom);
+        await Assert.That(exact.Candidates.Select(candidate => candidate.SourceOrdinal).ToArray())
             .IsEquivalentTo(expected.Select(candidate => candidate.SourceOrdinal).ToArray(), CollectionOrdering.Matching);
-        await AdaptiveFilteredPlannerOracle.AssertReturnedCandidatesAsync(result, records, query, eligible);
+        await AdaptiveFilteredPlannerOracle.AssertReturnedCandidatesAsync(exact, records, query, bottom);
+        await AssertBudgetExceededAsync(() => exactIndex.Search(query, bottom.Length, bitmap,
+            PackedAnnIndexTestSupport.Budget(database, exact.WorkUnits - 1)));
+        var healthy = index.Search(query, 1, null, PackedAnnIndexTestSupport.Budget(database));
+        await Assert.That(healthy.Mode).IsEqualTo(AnnSearchMode.Approximate);
+        await Assert.That(healthy.Candidates.Length).IsEqualTo(1);
+        await AdaptiveFilteredPlannerOracle.AssertReturnedCandidatesAsync(healthy, records, query,
+            Enumerable.Range(0, records.Length).ToArray());
+        await UnchangedAsync(database, metric, position, original);
     }
 
     private static async Task UnchangedAsync(TestDatabase database, DistanceMetric metric,

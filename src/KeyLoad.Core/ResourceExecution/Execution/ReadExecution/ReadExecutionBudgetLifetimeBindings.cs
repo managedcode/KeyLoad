@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Core.Features.ClusterRouting.Validation;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.Features.ResourceExecution.Execution;
@@ -91,12 +90,12 @@ internal sealed class ReadExecutionBudgetLifetimeBindings(ReadExecutionBudget wo
         {
             if (!local.TryGetValue((partition, definition.Name), out var lifetime))
             {
-                throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
+                throw Errors.Fail(ErrorCode.Corruption, ResourceLifetimeValidationMessages.MissingAuthority);
             }
             values.Add(lifetime);
         }
         var coverage = new ResourceLifetimeCoverageV1(partition, values.MoveToImmutable());
-        PartitionControlLifetimeCoverage.Require(coverage, partition, definitions, database.Limits.MaxBatchBytes);
+        ResourceLifetimeCoverage.Require(coverage, partition, definitions, database.Limits.MaxBatchBytes);
         binding?.Bind(coverage);
         work.Check();
         return coverage;
@@ -112,9 +111,9 @@ internal sealed class ReadExecutionBudgetLifetimeBindings(ReadExecutionBudget wo
         }
         if (coverage is null)
         {
-            throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
+            throw Errors.Fail(ErrorCode.Corruption, ResourceLifetimeValidationMessages.MissingAuthority);
         }
-        PartitionControlLifetimeCoverage.Require(coverage, coverage.Partition, definitions, database.Limits.MaxBatchBytes);
+        ResourceLifetimeCoverage.Require(coverage, coverage.Partition, definitions, database.Limits.MaxBatchBytes);
         var bindingView = new AuthenticatedResourceLifetimeReadView(authorizedLocalView, this);
         for (var index = FirstDefinitionIndex; index < definitions.Length; index++)
         {

@@ -1,5 +1,5 @@
 using KeyLoad.Core;
-using KeyLoad.Core.Features.ClusterRouting.Validation;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.ResourceExecution.Execution;
 using KeyLoad.Query;
 using KeyLoad.Query.Features.QueryExecution;
@@ -84,7 +84,7 @@ internal sealed class QueryNativePartitionFlow(QueryNativeFixture fixture, TimeP
     private PartitionQueryLifetimeMetadata Capture(PartitionQueryLeafPlanV1 plan, ReadExecutionBudgetReadGrant grant)
         => fixture.Source.Database.WithPartitionQueryFenceView(QueryNativeFixture.Reader, plan.Partition,
             QueryNativeFixture.Collection, grant, (view, principal, resource, _) => new(resource,
-                PartitionControlLifetimeCoverage.Capture(grant.CreateView(view), plan.Partition, [resource],
+                ResourceLifetimeCoverage.Capture(grant.CreateView(view), plan.Partition, [resource],
                     fixture.Source.Database.Limits.MaxBatchBytes), principal));
 
     private Task RevalidateAsync(CancellationToken token)

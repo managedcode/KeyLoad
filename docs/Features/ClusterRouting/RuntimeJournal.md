@@ -14,7 +14,7 @@ flowchart LR
   Jobs --> Journal[Native Journaling provider]
   Journal --> Conn[Signed request via connection grain]
   Conn --> Owner[Silo-local ZoneTree owner]
-  Owner --> Copies[ReplicaCount copies majority ack]
+  Owner --> Copies[Every configured copy acknowledges]
   Jobs --> Handler[Job handler reloads saga and creator]
   Handler --> Conn
 ```

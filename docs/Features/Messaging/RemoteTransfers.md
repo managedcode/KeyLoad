@@ -7,7 +7,7 @@ A remote transfer is a durable queue-to-queue output within one tenant/database.
 Source and destination atomic partitions differ, and each side commits on its own.
 The feature provides separate source and destination commits delivered through
 ordinary Orleans grain calls, never a distributed atomic commit or exactly-once
-external handler execution. Each commit is acknowledged by a majority of the
+external handler execution. Each commit is acknowledged by every configured
 `KeyLoad:ReplicaCount` copies of its own partition.
 
 ## Frozen source and destination protocol

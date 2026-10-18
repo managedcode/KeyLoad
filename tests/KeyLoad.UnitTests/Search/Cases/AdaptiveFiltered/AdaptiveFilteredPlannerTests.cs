@@ -77,7 +77,6 @@ internal sealed class AdaptiveFilteredPlannerTests
             .IsEquivalentTo(exact.Select(candidate => candidate.SourceOrdinal).ToArray(), CollectionOrdering.Matching);
         await Assert.That(small.DistanceEvaluations).IsEqualTo(selected.Length);
         await Assert.That(small.ExpansionPasses).IsEqualTo(0);
-        await Assert.That(small.FallbackDistanceEvaluations).IsEqualTo(0);
         await Assert.That(empty.Candidates).IsEmpty();
         await Assert.That(empty.EligibleCount).IsZero();
         await Assert.That(empty.DistanceEvaluations).IsZero();
@@ -85,8 +84,8 @@ internal sealed class AdaptiveFilteredPlannerTests
     }
 
     [Test, NotInParallel]
-    public async Task AcFilter004InsufficientAdaptiveCandidatesUseChargedExactFallbackThenHealthySearch()
-        => await AdaptiveFallbackWholeFlow.RunAsync();
+    public async Task AcFilter004InsufficientAdaptiveCandidatesRefuseThenExplicitExactAndHealthyGraphSearch()
+        => await AdaptiveCandidateBoundWholeFlow.RunAsync();
 
     [Test]
     public async Task AcFilter004AdaptiveWalkMayNavigateIneligibleVerticesToAnIsolatedEligibleEndpoint()
@@ -104,15 +103,13 @@ internal sealed class AdaptiveFilteredPlannerTests
         var result = index.Search(records[endpoint].Values.AsMemory(), 1, eligibility,
             PackedAnnIndexTestSupport.Budget(database));
 
-        await Assert.That(result.Mode is AnnSearchMode.Approximate or AnnSearchMode.ExactAfterInsufficientCandidates).IsTrue();
+        await Assert.That(result.Mode).IsEqualTo(AnnSearchMode.Approximate);
         await Assert.That(result.Candidates.Select(candidate => candidate.SourceOrdinal).ToArray())
             .IsEquivalentTo([endpoint], CollectionOrdering.Matching);
         await Assert.That(result.Candidates[0].DocumentId).IsEqualTo(records[endpoint].DocumentId);
         await Assert.That(result.EligibleCount).IsEqualTo(1);
         await Assert.That(result.EdgeVisits).IsGreaterThan(0);
         await Assert.That(result.ExpansionPasses).IsGreaterThan(0);
-        await Assert.That(result.FallbackDistanceEvaluations == 0
-            || result.FallbackDistanceEvaluations == 1).IsTrue();
     }
 
     [Test]
@@ -163,16 +160,10 @@ internal sealed class AdaptiveFilteredPlannerTests
         {
             await Assert.That(result.Mode).IsEqualTo(AnnSearchMode.ExactSmallSet);
             await Assert.That(result.ExpansionPasses).IsZero();
-            await Assert.That(result.FallbackDistanceEvaluations).IsZero();
             return;
         }
         await Assert.That(result.ExpansionPasses).IsGreaterThan(0);
         await Assert.That(result.ExpansionPasses).IsLessThanOrEqualTo(8);
-        var fallback = result.Mode == AnnSearchMode.ExactAfterInsufficientCandidates;
-        await Assert.That(result.FallbackDistanceEvaluations > 0).IsEqualTo(fallback);
-        if (fallback)
-        {
-            await Assert.That(result.FallbackDistanceEvaluations).IsEqualTo(eligibleCount);
-        }
+        await Assert.That(result.Mode).IsEqualTo(AnnSearchMode.Approximate);
     }
 }

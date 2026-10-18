@@ -11,7 +11,7 @@ internal sealed class NativeTextWaitForIndexTests
     private const string Root = "root";
     private const string TextField = "/text";
     private const string WrongIncarnationDetail = "The index wait token belongs to another incarnation, atomic partition or placement.";
-    private const string FutureDetail = "The index wait token is beyond the current quorum-applied cut.";
+    private const string FutureDetail = "The index wait token is beyond the current committed storage cut.";
     private const long NextPosition = 1;
 
     [Test]

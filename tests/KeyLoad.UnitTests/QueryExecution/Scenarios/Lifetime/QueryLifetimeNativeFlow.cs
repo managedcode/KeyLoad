@@ -1,6 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Features.ClusterRouting.Contracts;
-using KeyLoad.Core.Features.ClusterRouting.Validation;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Query;
 using KeyLoad.Query.Features.QueryExecution;
 using KeyLoad.Storage;
@@ -63,7 +63,7 @@ internal sealed class QueryLifetimeNativeFlow(QueryNativeFixture fixture, bool s
         return database.WithPartitionQueryFenceView<PartitionQueryLifetimeMetadata>(QueryNativeFixture.Reader,
             QueryNativeFixture.Partition, QueryNativeFixture.Collection, grant,
             (view, principal, resource, _) => new(resource,
-                PartitionControlLifetimeCoverage.Capture(work.CreateView(view, grant),
+                ResourceLifetimeCoverage.Capture(work.CreateView(view, grant),
                     QueryNativeFixture.Partition, [resource], database.Limits.MaxBatchBytes), principal));
     }
 
@@ -74,7 +74,7 @@ internal sealed class QueryLifetimeNativeFlow(QueryNativeFixture fixture, bool s
         _ = fixture.Source.Database.Apply(QueryNativeFixture.Operation(fixture.Source,
             OperationKind.ConfigureResource, Guid.NewGuid(), new ConfigureResourceRequest(QueryNativeFixture.Tenant,
                 QueryNativeFixture.Partition.DatabaseId, definition))).Get<ResourceDefinition>();
-        return fixture.Source.Store.Read(view => PartitionControlLifetimeCoverage.Capture(view,
+        return fixture.Source.Store.Read(view => ResourceLifetimeCoverage.Capture(view,
             QueryNativeFixture.Partition, [definition], fixture.Source.Database.Limits.MaxBatchBytes));
     }
 

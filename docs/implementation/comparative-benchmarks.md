@@ -78,7 +78,7 @@ them visible instead of hiding them.
 ## Topology and guarantees
 
 KeyLoad's one-node arm keeps a single copy. Its three-node arm is a replicated
-cluster of three copies in which a write is acknowledged once a majority of the
+cluster of three copies in which a write is acknowledged once all configured
 copies confirm durable local apply. Other databases run their own native
 configuration (for example synchronous commit, append-only fsync or quorum queues
 where the engine offers them), and the exact settings are part of each report. A node

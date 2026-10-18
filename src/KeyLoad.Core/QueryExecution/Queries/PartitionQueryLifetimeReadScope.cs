@@ -1,4 +1,4 @@
-using KeyLoad.Core.Features.ClusterRouting.Validation;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.Core.Features.ResourceExecution.Execution;
 using KeyLoad.Storage;
 
@@ -14,7 +14,7 @@ public sealed partial class DatabaseEngine
     {
         ArgumentNullException.ThrowIfNull(metadata);
         budget.Check();
-        PartitionControlLifetimeCoverage.Require(metadata.Coverage, partition, [metadata.Definition], Limits.MaxBatchBytes);
+        ResourceLifetimeCoverage.Require(metadata.Coverage, partition, [metadata.Definition], Limits.MaxBatchBytes);
         if (metadata.Principal is null || metadata.Principal.Id != principalId
             || metadata.Definition.Name != collection || metadata.Definition.Kind != ResourceKind.Collection)
         {

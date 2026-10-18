@@ -50,7 +50,7 @@ sequenceDiagram
     alt Same original command
         CatalogHost-->>Caller: Original complete outcome, no reapplication
     else Absent resource
-        CatalogHost->>CatalogHost: Canonical resource + original outcome through majority barriers
+        CatalogHost->>CatalogHost: Canonical resource + original outcome through required-copy barriers
         CatalogHost-->>Caller: Complete ResourceDefinition
     else Different original command, existing resource
         CatalogHost-->>Caller: Conflict; original failed outcome retained

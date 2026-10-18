@@ -55,7 +55,7 @@ internal static class NativeTextWaitObservationTrial
                 search.WaitForIndexAsync(principal, invalid, token)) ?? throw new InvalidOperationException();
             await Assert.That(failure.Code).IsEqualTo(future is null ? ErrorCode.PermissionDenied : ErrorCode.TokenInvalidated);
             var expectedDetail = future is null ? "The query requires a protected field-use grant."
-                : future.Value ? "The index wait token is beyond the current quorum-applied cut."
+                : future.Value ? "The index wait token is beyond the current committed storage cut."
                 : "The index wait token belongs to another incarnation, atomic partition or placement.";
             await Assert.That(failure.Message).IsEqualTo(expectedDetail);
             await Assert.That(observer.Count).IsEqualTo(0);

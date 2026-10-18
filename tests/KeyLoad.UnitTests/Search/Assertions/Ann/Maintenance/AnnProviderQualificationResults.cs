@@ -56,7 +56,6 @@ internal static class AnnProviderQualificationResults
         await Assert.That(actual.Mode).IsEqualTo(AnnSearchMode.Approximate);
         await Assert.That(actual.EligibleCount).IsEqualTo(expected.Length);
         await Assert.That(actual.ExpansionPasses).IsEqualTo(FirstExpansion);
-        await Assert.That(actual.FallbackDistanceEvaluations).IsEqualTo(NoWork);
         await Assert.That(actual.WorkUnits).IsGreaterThan(NoWork);
         await Assert.That(actual.DistanceEvaluations).IsGreaterThan(NoWork);
         await Assert.That(actual.EdgeVisits).IsGreaterThan(NoWork);
