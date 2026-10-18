@@ -4,7 +4,6 @@ using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Server;
 using ManagedCode.Orleans.Graph;
-using ManagedCode.Orleans.Graph.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
@@ -18,7 +17,8 @@ internal sealed class RequestCqrsHostedProfile(TimeProvider clock, IOptions<Grai
     IGrainRequestPhaseObserver? observer, IGrainRequestPurposeObserver? purposeObserver,
     bool nativeText, bool nativeAnn, DatabaseLimits? limits, RequestCqrsHostedClusterNode? clusterNode = null,
     Func<IServiceProvider, ILifecycleParticipant<ISiloLifecycle>>? lifecycleParticipantFactory = null,
-    IDatabaseAuthenticationExecutionObserver? authenticationExecutionObserver = null)
+    IDatabaseAuthenticationExecutionObserver? authenticationExecutionObserver = null,
+    Action<IServiceCollection, NodeOptions>? configureServices = null)
 {
     internal const string Root = "root";
     private const string Credential = "root.unit-test-credential-32-characters";
@@ -69,7 +69,6 @@ internal sealed class RequestCqrsHostedProfile(TimeProvider clock, IOptions<Grai
 
     internal void Register(IServiceCollection services, NodeOptions node)
     {
-        _ = node;
         services.Replace(ServiceDescriptor.Singleton(Clock));
         services.Replace(ServiceDescriptor.Singleton(Routing));
         var configuredLimits = limits ?? new DatabaseLimits();
@@ -85,6 +84,7 @@ internal sealed class RequestCqrsHostedProfile(TimeProvider clock, IOptions<Grai
             provider.GetRequiredService<GrainClassMap>(), provider));
         services.AddSerializer(serialization => serialization.AddAssembly(typeof(RequestCqrsProbeResult).Assembly));
         ExtendProbePolicy(services);
+        configureServices?.Invoke(services, node);
     }
 
     private static void ExtendProbePolicy(IServiceCollection services)

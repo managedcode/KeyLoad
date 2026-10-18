@@ -3,9 +3,8 @@ using KeyLoad.RecoveryTests.Features.ClusterRouting;
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 /// <summary>Borrows the real Server silo's factory and serializers; it owns no replacement cluster.</summary>
-internal sealed class ConnectionNativeServerCluster(Func<ControlledPartitionMovementNativeHost> source)
+internal sealed class ConnectionNativeServerCluster(Func<RequestCqrsHostedRuntimeFixture> source)
 {
-    internal IGrainFactory Client => source().Silo.Grains
-        ?? throw new InvalidOperationException(ConnectionNativeServerRuntime.NotStarted);
-    internal IServiceProvider ServiceProvider => source().Application.Services;
+    internal IGrainFactory Client => source().Grains;
+    internal IServiceProvider ServiceProvider => source().Services;
 }

@@ -7,11 +7,11 @@ using Orleans.TestingHost.Logging;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
-/// <summary>Reads original native Server logs only after their actual six host owners have joined.</summary>
+/// <summary>Reads original native Server logs only after both production host owners have joined.</summary>
 internal sealed class ConnectionNativeServerEvidence
 {
     private const int FirstNode = 0;
-    internal const int ExpectedNativeFiles = 6;
+    internal const int ExpectedNativeFiles = 2;
     private const string NodePrefix = "Node";
     private const string MissingOwner = "The actual native Server log owner is absent or inconsistent.";
     private readonly string?[] paths = new string?[ExpectedNativeFiles];
@@ -31,6 +31,7 @@ internal sealed class ConnectionNativeServerEvidence
         Directory.CreateDirectory(directory);
         var path = Path.Combine(directory, actual + "_" + Role(index) + ".log");
         services.AddSingleton<ILoggerProvider>(_ => new FileLoggerProvider(path));
+        services.AddLogging(logging => logging.AddFilter<FileLoggerProvider>("Orleans.Runtime.Silo", LogLevel.Information));
         // The native container creates and owns this provider for its complete host lifetime.
         paths[index] = path;
     }

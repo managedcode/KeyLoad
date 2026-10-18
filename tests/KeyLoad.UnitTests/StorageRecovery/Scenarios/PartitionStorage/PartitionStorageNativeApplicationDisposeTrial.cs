@@ -1,4 +1,3 @@
-using KeyLoad.RecoveryTests.Features.ClusterRouting;
 using KeyLoad.Server;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,12 +6,11 @@ namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
 internal static class PartitionStorageNativeApplicationDisposeTrial
 {
-    private const int FirstOwner = 0;
     private const int NoFailures = 0;
 
     internal static async Task<PartitionStorageNativePartialStart> RunAsync(
-        ControlledPartitionMovementNativeHostSettings settings, NativeLocalhostClusteringOptions localhost,
-        ControlledPartitionMovementNativeHostEndpoints endpoints, CancellationToken token)
+        string[] arguments, NativeLocalhostClusteringOptions localhost,
+        RequestCqrsHostedProfile profile, CancellationToken token)
     {
         var failures = new List<Exception>();
         WebApplication? application = null;
@@ -22,14 +20,15 @@ internal static class PartitionStorageNativeApplicationDisposeTrial
         long maximumBytes = NoFailures;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            application = await ServerConfiguration.BuildAsync(settings.Arguments(FirstOwner),
+            using var deadline = new CancellationTokenSource(profile.Timing.StartupTimeout, TimeProvider.System);
+            using var startup = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, token);
+            application = await ServerConfiguration.BuildAsync(arguments,
                 localhostClustering: localhost,
                 lifecycleParticipantFactory: provider => observation = new(
                     provider.GetRequiredService<PartitionHostApplicationOwner>()),
-                startupCancellation: token).ConfigureAwait(false);
+                configureServices: profile.Register, startupCancellation: startup.Token).ConfigureAwait(false);
             var owner = application.Services.GetRequiredService<PartitionHostApplicationOwner>();
-            endpoints.Dispose();
-            var starting = application.StartAsync(token);
+            var starting = application.StartAsync(startup.Token);
             var expected = new List<Exception>();
             await ServerFailureObserver.ObserveAsync(() => starting, expected).ConfigureAwait(false);
             var proof = new List<Exception>();
@@ -42,7 +41,7 @@ internal static class PartitionStorageNativeApplicationDisposeTrial
             }
             captured = PartitionStorageNativeApplicationDisposeCapture.Read(application.Services);
             await Assert.That(owner.Closing is null).IsTrue();
-            await Assert.That(owner.StorageProducerJoins is null).IsTrue();
+            await Assert.That(captured.Node.Closing is null).IsTrue();
             maximumBytes = owner.Borrow().Database.Limits.MaxQueryReadBytes;
             files = await PartitionStorageNativeApplicationDisposeFiles.ReadAsync(captured.Directory,
                 maximumBytes, token).ConfigureAwait(false);

@@ -15,7 +15,6 @@ internal sealed class ConnectionNativeColdSource
     private readonly string directory;
     private readonly ServerRuntimeOptions options;
     private readonly IAuthorizationPolicy authorization;
-    private readonly PhysicalShardRecord physicalOwner;
     private readonly DurabilityProfile durability;
     internal StoreIdentity Identity
     {
@@ -28,14 +27,13 @@ internal sealed class ConnectionNativeColdSource
     internal DatabaseLimits Limits => options.Core.DatabaseLimits.Value;
     internal IOptions<GrainRoutingOptions> RoutingOptions => options.GrainRouting;
 
-    internal ConnectionNativeColdSource(ControlledPartitionMovementNativeHost source)
+    internal ConnectionNativeColdSource(RequestCqrsHostedRuntimeFixture source)
     {
-        directory = source.Partition.DirectoryPath;
-        options = source.Runtime;
-        authorization = source.Database.Authorization;
-        physicalOwner = source.Application.Services.GetRequiredService<IPhysicalRequestPlacement>().Owner;
-        durability = source.Database.Durability;
-        Identity = source.Store.Identity;
+        directory = source.Database.Directory;
+        options = source.Services.GetRequiredService<ServerRuntimeOptions>();
+        authorization = source.Database.Database.Authorization;
+        durability = source.Database.Database.Durability;
+        Identity = source.Database.Store.Identity;
         Clock = source.Clock;
     }
 
@@ -48,7 +46,7 @@ internal sealed class ConnectionNativeColdSource
         var database = new DatabaseEngine(store, authorization, core.DatabaseLimits,
             core.DueWork, core.EventSource, core.Messaging, core.GraphExecution, core.ChangeFeedExecution,
             core.BlobExecution, core.NativeClaimsExecution, core.TimeSeriesExecution,
-            Clock, physicalOwner)
+            Clock)
         {
             Durability = durability
         };

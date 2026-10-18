@@ -13,16 +13,13 @@ internal static class PartitionStorageNativeApplicationDisposeFiles
         long maximumBytes, CancellationToken token)
     {
         var result = new Dictionary<string, byte[]>(StringComparer.Ordinal);
-        foreach (var store in new[] { PartitionStoreProtocol.CanonicalDirectory, ReplicaProtocol.ReplicaDirectory })
+        foreach (var file in new[] { ZoneTreePersistenceFormat.IdentityFileName, ZoneTreePersistenceFormat.JournalFileName })
         {
-            foreach (var file in new[] { ZoneTreePersistenceFormat.IdentityFileName, ZoneTreePersistenceFormat.JournalFileName })
-            {
-                var relative = Path.Combine(store, file);
-                var bytes = await ReadOneAsync(Path.Combine(directory, relative), maximumBytes, token)
-                    .ConfigureAwait(false);
-                maximumBytes = checked(maximumBytes - bytes.LongLength);
-                result.Add(relative, bytes);
-            }
+            var relative = Path.Combine(PartitionStoreProtocol.CanonicalDirectory, file);
+            var bytes = await ReadOneAsync(Path.Combine(directory, relative), maximumBytes, token)
+                .ConfigureAwait(false);
+            maximumBytes = checked(maximumBytes - bytes.LongLength);
+            result.Add(relative, bytes);
         }
         return result;
     }

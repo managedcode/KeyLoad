@@ -6,23 +6,8 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 internal static class CommandObservedPolicyCalls
 {
-    internal static async Task<GrainOperationReply> ReceiveAsync(CommandObservedPolicyScenario scenario,
+    internal static Task<GrainOperationReply> ReceiveAsync(CommandObservedPolicyScenario scenario,
         Guid requestId, ReceiveRequest request, CancellationToken token)
-    {
-        var source = scenario.Fixture.Source;
-        var signed = source.Silo.CatalogRequestCodec().CreateCommand(requestId, scenario.Worker.Id,
-            OperationKind.Receive, request.RequestId, NativeSerialization.Serialize(request));
-        var failures = new List<Exception>();
-        GrainOperationReply? reply = null;
-        await ServerFailureObserver.ObserveAsync(async () =>
-        {
-            using var identity = source.Silo.OpenRequestContext(scenario.Worker, requestId, request.RequestId, token);
-            await ServerFailureObserver.ObserveAsync(async () =>
-            {
-                reply = await source.Silo.ExecuteAsync(requestId, signed, command: true, token).ConfigureAwait(false);
-            }, failures).ConfigureAwait(false);
-        }, failures).ConfigureAwait(false);
-        ServerFailureObserver.ThrowIfAny(failures);
-        return reply ?? throw new InvalidOperationException(P.WrongReply);
-    }
+        => scenario.Fixture.Database.SubmitAsync(OperationKind.Receive, request, token,
+            principal: scenario.Worker.Id, id: request.RequestId, requestId: requestId);
 }

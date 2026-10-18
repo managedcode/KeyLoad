@@ -24,7 +24,6 @@ internal sealed class RequestCqrsHostedRuntimeFixture : IAsyncInitializer, IAsyn
     private readonly TestClusterPortAllocator ports = new();
     private readonly string directory = Path.Combine(Path.GetTempPath(), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
     private WebApplication? application;
-    private OrleansNode? node;
     private string[]? arguments;
     private int? reservedSiloPort;
     private Task? stopping;
@@ -36,10 +35,12 @@ internal sealed class RequestCqrsHostedRuntimeFixture : IAsyncInitializer, IAsyn
         bool nativeTextMaintenance = false, bool nativeAnnMaintenance = false, DatabaseLimits? limits = null,
         RequestCqrsHostedClusterNode? clusterNode = null,
         Func<IServiceProvider, ILifecycleParticipant<ISiloLifecycle>>? lifecycleParticipantFactory = null,
-        IDatabaseAuthenticationExecutionObserver? authenticationExecutionObserver = null)
+        IDatabaseAuthenticationExecutionObserver? authenticationExecutionObserver = null,
+        Action<IServiceCollection, NodeOptions>? configureServices = null)
     {
         profile = new(clock ?? TimeProvider.System, RequestCqrsHostedProfile.ValidateRouting(routing), observer, purposeObserver,
-            nativeTextMaintenance, nativeAnnMaintenance, limits, clusterNode, lifecycleParticipantFactory, authenticationExecutionObserver);
+            nativeTextMaintenance, nativeAnnMaintenance, limits, clusterNode, lifecycleParticipantFactory,
+            authenticationExecutionObserver, configureServices);
     }
 
     internal IGrainFactory Grains => Services.GetRequiredService<IGrainFactory>();
@@ -50,7 +51,7 @@ internal sealed class RequestCqrsHostedRuntimeFixture : IAsyncInitializer, IAsyn
     internal IServiceProvider Services => application?.Services ?? throw new InvalidOperationException(NotInitialized);
     private PartitionHost Local => Services.GetRequiredService<PartitionHostApplicationOwner>().Borrow();
     internal GrainRequestCodec Codec => Services.GetRequiredService<GrainRequestCodec>();
-    internal NativeRequestWorkOwner RequestWork => (node ?? throw new InvalidOperationException(NotInitialized)).RequestWork;
+    internal NativeRequestWorkOwner RequestWork => Services.GetRequiredService<OrleansNode>().RequestWork;
     internal NativeTextIncrementalMaintenanceService? NativeMaintenance => profile.NativeText ? Local.TextMaintenance : null;
     internal NativeAnnMaintenanceService? NativeAnnMaintenance => profile.NativeAnn ? Local.AnnMaintenance : null;
     internal RequestCqrsHostedDatabase Database { get; private set; } = null!;
@@ -128,7 +129,7 @@ internal sealed class RequestCqrsHostedRuntimeFixture : IAsyncInitializer, IAsyn
             lifecycleParticipantFactory: profile.LifecycleParticipantFactory,
             phaseObserver: profile.Observer, purposeObserver: profile.PurposeObserver,
             configureServices: profile.Register, startupCancellation: startup.Token).ConfigureAwait(false);
-        node = Services.GetRequiredService<OrleansNode>();
+        var node = Services.GetRequiredService<OrleansNode>();
         await application.StartAsync(startup.Token).ConfigureAwait(false);
         await node.StartAsync(startup.Token).ConfigureAwait(false);
         await Local.Coordinator.ReadBarrierAsync(startup.Token).ConfigureAwait(false);
@@ -149,7 +150,18 @@ internal sealed class RequestCqrsHostedRuntimeFixture : IAsyncInitializer, IAsyn
         await ServerFailureObserver.ObserveAsync(() => StopAsync(CancellationToken.None), failures).ConfigureAwait(false);
         if (failures.Count == NoFailures)
         {
-            ServerFailureObserver.Observe(ports.Dispose, failures);
+            try
+            {
+                ports.Dispose();
+            }
+            catch (Exception error) when (NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failures.Add(error);
+            }
+            catch (Exception error) when (!NativeCqrsBoundaryErrors.IsNonFatal(error))
+            {
+                failures.Add(error);
+            }
             if (!Volatile.Read(ref retainDirectory) && Directory.Exists(directory))
             {
                 ServerFailureObserver.Observe(() => Directory.Delete(directory, recursive: true), failures);
@@ -168,7 +180,6 @@ internal sealed class RequestCqrsHostedRuntimeFixture : IAsyncInitializer, IAsyn
         await CloseApplicationAsync(application, failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);
         application = null;
-        node = null;
         Database = null!;
     }
 
@@ -178,15 +189,13 @@ internal sealed class RequestCqrsHostedRuntimeFixture : IAsyncInitializer, IAsyn
         var connections = Services.GetRequiredService<ServerConnectionRegistry>();
         await ServerFailureObserver.ObserveAsync(() => connections.ShutdownAsync(deadline.Token), failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(() => connections.ShutdownAsync(CancellationToken.None), failures).ConfigureAwait(false);
-        if (node is not null)
+        var node = app.Services.GetRequiredService<OrleansNode>();
+        await ServerFailureObserver.ObserveAsync(() => node.StopAsync(deadline.Token), failures).ConfigureAwait(false);
+        await ServerFailureObserver.ObserveAsync(() => node.StopAsync(CancellationToken.None), failures).ConfigureAwait(false);
+        if (!node.HasJoinedRequestWork)
         {
-            await ServerFailureObserver.ObserveAsync(() => node.StopAsync(deadline.Token), failures).ConfigureAwait(false);
-            await ServerFailureObserver.ObserveAsync(() => node.StopAsync(CancellationToken.None), failures).ConfigureAwait(false);
-            if (!node.HasJoinedRequestWork)
-            {
-                failures.Add(new InvalidOperationException(Unjoined));
-                return;
-            }
+            failures.Add(new InvalidOperationException(Unjoined));
+            return;
         }
         await ServerFailureObserver.ObserveAsync(() => app.StopAsync(deadline.Token), failures).ConfigureAwait(false);
         await ServerFailureObserver.ObserveAsync(() => Services.GetRequiredService<PartitionStorageLifecycle>()

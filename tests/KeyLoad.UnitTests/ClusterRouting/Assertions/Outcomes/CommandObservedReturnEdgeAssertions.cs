@@ -17,7 +17,7 @@ internal static class CommandObservedReturnEdgeAssertions
     {
         await scenario.Fixture.Database.Coordinator.ReadBarrierAsync(token);
         var retained = CommandObservedPolicyAssertions.Outcome(scenario, request.RequestId);
-        await Assert.That(retained.Error).IsNull();
+        await Assert.That(Errors.Code(retained.Problem)).IsNull();
         var value = retained.Get<ReceiveResult>();
         await CommandObservedPolicyAssertions.LiteralAsync(scenario, request, value, P.First);
         return value;

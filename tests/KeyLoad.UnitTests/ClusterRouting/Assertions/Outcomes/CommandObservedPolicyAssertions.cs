@@ -42,20 +42,20 @@ internal static class CommandObservedPolicyAssertions
         var fixture = scenario.Fixture;
         var delivery = await Assert.That(actual.Deliveries).HasSingleItem();
         await Assert.That(delivery.Token).IsNotEmpty();
-        var entry = fixture.Source.Log.ReadEntry(actual.Token.Position)
-            ?? throw new InvalidOperationException(P.Missing);
-        var operation = entry.Operation ?? throw new InvalidOperationException(P.Missing);
+        var entry = fixture.Database.ReadStoredOutcome(request.RequestId);
+        await Assert.That(entry.CanonicalSequence).IsEqualTo(actual.Token.Position);
+        var operation = entry.PreparedCommand;
         await Assert.That(operation.Value!.Kind).IsEqualTo(OperationKind.Receive);
         await Assert.That(operation.CommandId).IsEqualTo(request.RequestId);
         await Assert.That(operation.UserId!).IsEqualTo(P.Worker);
-        _ = fixture.Source.Database.OwnCommand(operation);
+        _ = fixture.Database.Database.OwnCommand(operation);
         await EqualAsync(request, NativeSerialization.Deserialize<ReceiveRequest>((operation).Value!.Input.Span));
         var expected = new ReceiveResult(request.RequestId,
             [new(messageId, P.Payload, P.Headers, delivery.Token, P.Initial,
                 new DateTimeOffset(operation.Timestamp).AddSeconds(scenario.Resource.QueuePolicy.MaxLeaseSeconds),
                 P.One, P.Initial)],
             new(fixture.Database.Store.Identity.Incarnation, fixture.Database.Partition.AtomicPartitionId,
-                entry.Index));
+                entry.CanonicalSequence));
         await EqualAsync(expected, actual);
     }
 
@@ -64,8 +64,7 @@ internal static class CommandObservedPolicyAssertions
             ? result : throw new InvalidOperationException(P.WrongReply);
 
     internal static byte[] NativePayloadBytes(CommandObservedPolicyScenario scenario, ReceiveResult actual)
-        => scenario.Fixture.Source.Log.ReadEntry(actual.Token.Position)?.Operation?.NativePayload.ToArray()
-            ?? throw new InvalidOperationException(P.Missing);
+        => scenario.Fixture.Database.ReadStoredOutcome(actual.RequestId).PreparedCommand.Value!.Input.ToArray();
 
     internal static async Task UnchangedAsync(CommandObservedPolicyScenario scenario,
         Guid commandId, Func<Task> execute, CancellationToken token)

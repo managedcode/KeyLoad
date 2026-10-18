@@ -4,6 +4,6 @@ internal sealed class PartitionStorageNativeApplicationDisposeTests
 {
     [Test]
     [NotInParallel]
-    public Task ActualGenericApplicationDisposeAfterNativePartialStartupRetainsOwnersThenSignedReceiptThroughTwoColdStarts()
+    public Task ActualGenericApplicationDisposeAfterNativePartialStartupRetainsOwnersThenCanonicalReceiptThroughTwoColdStarts()
         => PartitionStorageNativeApplicationDisposeFlow.RunAsync(TestContext.Current!.Execution.CancellationToken);
 }

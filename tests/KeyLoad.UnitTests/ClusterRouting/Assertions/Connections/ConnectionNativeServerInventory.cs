@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using KeyLoad.Clustering;
 using KeyLoad.RecoveryTests.Features.ClusterRouting;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -10,24 +11,25 @@ internal sealed class ConnectionNativeServerInventory
     private const int NoActivations = 0;
     private const long ManagementKey = 0;
     private const string InvalidInventory = "The native connection inventory has an unknown owner or a wrong service silo.";
-    private readonly Dictionary<GrainId, SiloAddress> services = [];
+    private readonly HashSet<GrainId> services = [];
+    private readonly HashSet<SiloAddress> silos = [];
     private readonly ConcurrentDictionary<GrainId, byte> consumers = new();
     private readonly IGrainFactory grains;
 
-    internal ConnectionNativeServerInventory(ControlledPartitionMovementNativeHosts hosts,
+    internal ConnectionNativeServerInventory(RequestCqrsHostedCluster hosts,
         IGrainFactory grains, Guid consumer)
     {
         this.grains = grains;
         foreach (var node in hosts.Nodes)
         {
-            var id = ((GrainReference)grains.GetGrain<IConnectionGrain>(node.Silo.InternalConnectionId)).GrainId;
-            var actual = SiloAddress.FromParsableString(node.CallerSiloAddress);
-            if (!services.TryAdd(id, actual))
+            var id = ((GrainReference)grains.GetGrain<IConnectionGrain>(node.ConnectionId)).GrainId;
+            var actual = node.Services.GetRequiredService<ILocalSiloDetails>().SiloAddress;
+            if (!services.Add(id) || !silos.Add(actual))
             {
                 throw new InvalidOperationException(InvalidInventory);
             }
         }
-        if (services.Count != ControlledPartitionMovementNativeHostEndpoints.OwnerCount)
+        if (services.Count != ConnectionNativeServerEvidence.ExpectedNativeFiles)
         {
             throw new InvalidOperationException(InvalidInventory);
         }
@@ -37,7 +39,7 @@ internal sealed class ConnectionNativeServerInventory
     internal void RegisterConsumer(Guid id)
     {
         var grain = ((GrainReference)grains.GetGrain<IConnectionGrain>(id)).GrainId;
-        if (id == Guid.Empty || services.ContainsKey(grain))
+        if (id == Guid.Empty || services.Contains(grain))
         {
             throw new InvalidOperationException(InvalidInventory);
         }
@@ -55,16 +57,12 @@ internal sealed class ConnectionNativeServerInventory
         foreach (var row in all.Where(row => row.GrainId.Type == GrainType.Create(GrainRoutingProtocol.RequestAlias)))
         {
             total++;
-            if (!seen.Add(row.GrainId))
+            if (!seen.Add(row.GrainId) || !silos.Contains(row.SiloAddress))
             {
                 throw new InvalidOperationException(InvalidInventory);
             }
-            if (services.TryGetValue(row.GrainId, out var expected))
+            if (services.Contains(row.GrainId))
             {
-                if (!expected.Equals(row.SiloAddress))
-                {
-                    throw new InvalidOperationException(InvalidInventory);
-                }
                 serviceCount++;
             }
             else if (!consumers.ContainsKey(row.GrainId) || !active.Add(row.GrainId))

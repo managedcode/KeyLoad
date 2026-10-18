@@ -5,6 +5,7 @@ namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
 internal sealed class CommandObservedPolicyScenario(bool header)
 {
+    private const int PersistedCopies = 2;
     internal ConnectionOperationObservation Observation { get; } = new();
     internal CommandObservedPolicyRuntime Fixture { get; private set; } = null!;
     internal ResourceDefinition Resource { get; private set; } = null!;
@@ -43,7 +44,7 @@ internal sealed class CommandObservedPolicyScenario(bool header)
         var index = checked(Fixture.Database.ReadCanonicalCut().AppliedPosition + P.Step);
         var actual = CommandObservedPolicyAssertions.Value<CommitReceipt>(await Fixture.Database.SubmitAsync(
             OperationKind.Batch, command, token, id: id));
-        var expected = new CommitReceipt(id, new(Fixture.Database.Store.Identity.Incarnation, partition.AtomicPartitionId, index), [new(P.EnqueueKind, P.Queue, P.First, P.Initial), new(P.EnqueueKind, P.Queue, P.Second, P.Initial)], DurabilityProfile.ProcessDurable, 1);
+        var expected = new CommitReceipt(id, new(Fixture.Database.Store.Identity.Incarnation, partition.AtomicPartitionId, index), [new(P.EnqueueKind, P.Queue, P.First, P.Initial), new(P.EnqueueKind, P.Queue, P.Second, P.Initial)], DurabilityProfile.ProcessDurable, PersistedCopies);
         await CommandObservedPolicyAssertions.EqualAsync(expected, actual);
     }
 

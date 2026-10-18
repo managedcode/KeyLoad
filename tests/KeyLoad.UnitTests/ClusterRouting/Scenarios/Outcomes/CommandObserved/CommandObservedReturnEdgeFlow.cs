@@ -1,5 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Server;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
@@ -126,11 +127,10 @@ internal static class CommandObservedReturnEdgeFlow
         if (business)
         {
             expected = await CommandObservedReturnEdgeAssertions.OriginalAsync(scenario, request, token);
-            await Assert.That(expected.Token.Position).IsEqualTo(checked(before.Journal.LastIndex
+            await Assert.That(expected.Token.Position).IsEqualTo(checked(before.Applied
                 + CommandObservedPolicyProtocol.Step));
             var cut = scenario.Fixture.Database.ReadCanonicalCut();
-            await Assert.That(cut.LastIndex).IsEqualTo(expected.Token.Position);
-            await Assert.That(cut.CommittedIndex).IsEqualTo(expected.Token.Position);
+            await Assert.That(cut.AppliedPosition).IsEqualTo(expected.Token.Position);
             await Assert.That(scenario.Fixture.Database.Database.LastApplied).IsEqualTo(expected.Token.Position);
         }
         else
@@ -159,6 +159,7 @@ internal static class CommandObservedReturnEdgeFlow
         if (scenario.Fixture is not null)
         {
             var source = scenario.Fixture.Source;
+            var node = source.Services.GetRequiredService<OrleansNode>();
             if (failures.Count != 0)
             {
                 scenario.Fixture.RetainRoots();
@@ -166,8 +167,8 @@ internal static class CommandObservedReturnEdgeFlow
             await ServerFailureObserver.ObserveAsync(() => scenario.Fixture.DisposeAsync().AsTask(), failures);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                await Assert.That(source.IsJoined).IsTrue();
-                await Assert.That(source.Silo.HasJoinedRequestWork).IsTrue();
+                await Assert.That(source.IsStopJoined).IsTrue();
+                await Assert.That(node.HasJoinedRequestWork).IsTrue();
             }, failures);
         }
     }

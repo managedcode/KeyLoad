@@ -4,21 +4,22 @@ using P = KeyLoad.UnitTests.Features.ClusterRouting.CommandObservedPolicyProtoco
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
-/// <summary>Borrows the existing six actual Server application owners and their unchanged native options.</summary>
+/// <summary>Borrows the shared production Orleans cluster and its original native options.</summary>
 internal sealed class CommandObservedPolicyRuntime : IAsyncDisposable
 {
-    private readonly ControlledPartitionMovementNativeHosts hosts;
+    private const int SourceIndex = 0;
+    private readonly RequestCqrsHostedCluster hosts;
     private readonly ConnectionOperationObservation observation;
     private readonly Lock lifecycle = new();
     private Task? disposal;
-    internal ControlledPartitionMovementNativeHost Source => hosts.Source;
+    internal RequestCqrsHostedRuntimeFixture Source => hosts.Nodes[SourceIndex];
     internal CommandObservedPolicyDatabase Database
     {
         get;
     }
     internal NativeRuntimeTestOptions Timing { get; } = new();
 
-    private CommandObservedPolicyRuntime(ControlledPartitionMovementNativeHosts hosts,
+    private CommandObservedPolicyRuntime(RequestCqrsHostedCluster hosts,
         ConnectionOperationObservation observation)
     {
         this.hosts = hosts;
@@ -29,7 +30,7 @@ internal sealed class CommandObservedPolicyRuntime : IAsyncDisposable
     internal static async Task<CommandObservedPolicyRuntime> CreateAsync(ConnectionOperationObservation observation,
         CancellationToken token)
     {
-        var hosts = await ControlledPartitionMovementNativeHosts.CreateWithPhaseObserverAsync(_ => observation, token).ConfigureAwait(false);
+        var hosts = await RequestCqrsHostedCluster.CreateAsync(token, observer: observation).ConfigureAwait(false);
         var profile = new CommandObservedPolicyRuntime(hosts, observation);
         try
         {
@@ -50,7 +51,7 @@ internal sealed class CommandObservedPolicyRuntime : IAsyncDisposable
     {
         foreach (var node in hosts.Nodes)
         {
-            var codec = node.Silo.CatalogRequestCodec();
+            var codec = node.Codec;
             if (!ReferenceEquals(codec.PhaseObserver, observation))
             {
                 throw new InvalidOperationException(P.ObserverOwned);

@@ -5,14 +5,16 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
-/// <summary>Reuses the existing six actual Server owners: two CLUSTER groups, with original joined shutdown.</summary>
+/// <summary>Borrows two production Server silos from the shared native Orleans fixture.</summary>
 internal sealed class ConnectionNativeServerRuntime : IAsyncDisposable
 {
-    internal const string NotStarted = "The actual native Server cohort is not started.";
+    internal const string NotStarted = "The actual native Server cluster is not started.";
+    private const int SourceIndex = 0;
     private const string FailureRoot = "KeyLoad.ConnectionNative.ServerRoot";
     private readonly IGrainRequestPhaseObserver observer;
     private readonly IGrainRequestPurposeObserver? purposeObserver;
-    private ControlledPartitionMovementNativeHosts? hosts;
+    private RequestCqrsHostedCluster? hosts;
+    private string[] directories = [];
     private CancellationToken originalToken;
     private ConnectionNativeServerInventory? inventory;
     internal Guid ConnectionId { get; } = Guid.NewGuid();
@@ -31,14 +33,12 @@ internal sealed class ConnectionNativeServerRuntime : IAsyncDisposable
         get;
     }
     internal TimeProvider Clock => Source.Clock;
-    internal GrainRequestCodec Codec => Source.Silo.CatalogRequestCodec();
-    internal NativeRequestWorkOwner RequestWork => Source.Silo.RequestWork;
-    internal bool IsDisposalJoined => hosts is not null && hosts.Nodes.All(node => node.IsJoined);
-    internal ControlledPartitionMovementNativeHosts Hosts => hosts
+    internal GrainRequestCodec Codec => Source.Codec;
+    internal NativeRequestWorkOwner RequestWork => Source.RequestWork;
+    internal bool IsDisposalJoined => hosts is not null && hosts.Nodes.All(node => node.IsDisposalJoined);
+    internal RequestCqrsHostedCluster Hosts => hosts
         ?? throw new InvalidOperationException(NotStarted);
-    internal Task JoinOwnedResourcesAsync() => Hosts.DisposeAsync().AsTask();
-    internal ControlledPartitionMovementNativeHost Source => hosts?.Source
-        ?? throw new InvalidOperationException(NotStarted);
+    internal RequestCqrsHostedRuntimeFixture Source => Hosts.Nodes[SourceIndex];
 
     internal ConnectionNativeServerRuntime(GrainRoutingOptions? routing, IGrainRequestPhaseObserver observer,
         IGrainRequestPurposeObserver? purposeObserver = null)
@@ -55,8 +55,10 @@ internal sealed class ConnectionNativeServerRuntime : IAsyncDisposable
         originalToken = token;
         using var deadline = new CancellationTokenSource(Timing.StartupTimeout, TimeProvider.System);
         using var startup = CancellationTokenSource.CreateLinkedTokenSource(token, deadline.Token);
-        hosts = await ControlledPartitionMovementNativeHostFactory.CreateWithRoutingAsync(RoutingOptions,
-            _ => observer, purposeObserver, Evidence.Configure, beforeStart: null, startup.Token).ConfigureAwait(false);
+        hosts = await RequestCqrsHostedCluster.CreateAsync(startup.Token, observer: observer,
+            routing: RoutingOptions.Value, purposeObserver: purposeObserver,
+            configureServices: Evidence.Configure).ConfigureAwait(false);
+        directories = hosts.Nodes.Select(node => node.Database.Directory).ToArray();
         inventory = new(hosts, Cluster.Client, ConnectionId);
     }
 
@@ -72,11 +74,11 @@ internal sealed class ConnectionNativeServerRuntime : IAsyncDisposable
     {
         RetainRoots();
         ServerFailureObserver.Observe(() => Evidence.SaveOperationFailure(IsDisposalJoined, failures), failures);
-        if (hosts is { } actual)
+        if (hosts is not null)
         {
             foreach (var failure in failures.ToArray())
             {
-                ServerFailureObserver.Observe(() => failure.Data[FailureRoot] = actual.Root, failures);
+                ServerFailureObserver.Observe(() => failure.Data[FailureRoot] = directories, failures);
             }
         }
     }

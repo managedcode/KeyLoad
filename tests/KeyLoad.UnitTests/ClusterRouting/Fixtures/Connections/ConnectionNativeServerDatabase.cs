@@ -7,29 +7,28 @@ using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
-/// <summary>Borrows the actual source journal and canonical database; all setup writes use its CLUSTER coordinator.</summary>
-internal sealed class ConnectionNativeServerDatabase(Func<ControlledPartitionMovementNativeHost> source,
+/// <summary>Borrows the actual canonical database and submits setup through its native Orleans coordinator.</summary>
+internal sealed class ConnectionNativeServerDatabase(Func<RequestCqrsHostedRuntimeFixture> source,
     Func<CancellationToken> originalToken)
 {
     private const string Tenant = "tenant";
     private const string DatabaseName = "database";
     private const string Domain = "orders";
     private const string PartitionKey = "customer-1";
-    private const string LeaderTime = "The native coordinator owns evaluation time.";
+    private const string CoordinatorTime = "The native coordinator owns evaluation time.";
     private const string MissingEntry = "The original native command entry is absent or outside the bounded retained image.";
-    private const long FirstEntry = 1;
-    internal DatabaseEngine Database => source().Database;
-    internal ZoneTreeStore Store => (ZoneTreeStore)source().Store;
-    internal string Directory => source().Partition.DirectoryPath;
+    internal DatabaseEngine Database => source().Database.Database;
+    internal ZoneTreeStore Store => source().Database.Store;
+    internal string Directory => source().Database.Directory;
     internal PartitionRef Partition { get; } = new(Tenant, DatabaseName, Domain, PartitionKey);
-    internal ICommitCoordinator Coordinator => source().Partition.Coordinator;
+    internal ICommitCoordinator Coordinator => source().Database.Coordinator;
 
     internal Result<object> Submit<T>(OperationKind kind, T payload,
         string principal = ConnectionNativeProtocol.Root, Guid? id = null, DateTimeOffset? time = null)
     {
         if (time is not null)
         {
-            throw new ArgumentException(LeaderTime, nameof(time));
+            throw new ArgumentException(CoordinatorTime, nameof(time));
         }
         var token = originalToken();
         var work = new ReadExecutionBudget(Database.OperationLimitsOptions, source().Clock, token);
@@ -61,44 +60,11 @@ internal sealed class ConnectionNativeServerDatabase(Func<ControlledPartitionMov
             .Get<CommitReceipt>();
     }
 
-    internal (long LastIndex, long CommittedIndex, long Term) ReadCanonicalCut()
-    {
-        var actual = source().Log.State;
-        return (actual.LastIndex, actual.CommittedIndex, actual.Term);
-    }
+    internal (long AppliedPosition, long StorePosition) ReadCanonicalCut()
+        => source().Database.ReadCanonicalCut();
 
     internal StoredOutcome ReadStoredOutcome(Guid id)
-    {
-        var log = source().Log;
-        var limits = Database.Limits;
-        var token = originalToken();
-        log.ProtocolGate.Wait(token);
-        try
-        {
-            var last = log.State.LastIndex;
-            if (last < FirstEntry || last > limits.MaxScanRecords)
-            {
-                throw new InvalidOperationException(MissingEntry);
-            }
-            var entries = new List<StoredOutcome>();
-            for (var index = FirstEntry; index <= last; index++)
-            {
-                token.ThrowIfCancellationRequested();
-                var entry = log.ReadEntry(index) ?? throw new InvalidOperationException(MissingEntry);
-                entries.Add(entry);
-                if (entry.Index != index || ReplicaProtocolCodec.MeasureEntries(entries) > limits.MaxBatchBytes)
-                {
-                    throw new InvalidOperationException(MissingEntry);
-                }
-            }
-            return entries.SingleOrDefault(entry => entry.Operation?.Id == id)
-                ?? throw new InvalidOperationException(MissingEntry);
-        }
-        finally
-        {
-            log.ProtocolGate.Release();
-        }
-    }
+        => OutcomeStoreOracle.ReadStored(Database, id, originalToken());
 
     internal EntityRef Reference(Guid creation, string collection, string id)
     {

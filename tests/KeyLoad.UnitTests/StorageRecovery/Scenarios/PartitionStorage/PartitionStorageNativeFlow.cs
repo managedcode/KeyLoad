@@ -54,7 +54,7 @@ internal static class PartitionStorageNativeFlow
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task<PartitionStorageNativeCommit> RunOwnerAsync(string[] arguments,
+    internal static async Task<PartitionStorageNativeCommit> RunOwnerAsync(string[] arguments,
         NativeLocalhostClusteringOptions localhost, RequestCqrsHostedProfile profile, StoreIdentity identity,
         PartitionStorageNativeCommit? original, CancellationToken token)
     {

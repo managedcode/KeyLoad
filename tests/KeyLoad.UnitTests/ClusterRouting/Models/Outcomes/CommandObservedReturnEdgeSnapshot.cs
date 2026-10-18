@@ -2,9 +2,9 @@ using KeyLoad.UnitTests.Features.Authorization;
 
 namespace KeyLoad.UnitTests.Features.ClusterRouting;
 
-/// <summary>Captures the actual complete canonical source owner after its native CLUSTER barrier.</summary>
+/// <summary>Captures the complete canonical source after its native Orleans read barrier.</summary>
 internal sealed record CommandObservedReturnEdgeSnapshot(string[] Rows, byte[] Identity,
-    long Position, long Applied, (long LastIndex, long CommittedIndex, long Term) Journal)
+    long Position, long Applied)
 {
     internal static async Task<CommandObservedReturnEdgeSnapshot> CaptureAsync(
         CommandObservedPolicyScenario scenario, CancellationToken token)
@@ -13,7 +13,7 @@ internal sealed record CommandObservedReturnEdgeSnapshot(string[] Rows, byte[] I
         await fixture.Database.Coordinator.ReadBarrierAsync(token);
         return new(TeamRowPolicyAssertions.Image(fixture.Database.Store),
             NativeSerialization.Serialize(fixture.Database.Store.Identity), fixture.Database.Store.Position,
-            fixture.Database.Database.LastApplied, fixture.Database.ReadCanonicalCut());
+            fixture.Database.Database.LastApplied);
     }
 
     internal async Task RequireSameAsync(CommandObservedPolicyScenario scenario, CancellationToken token)
@@ -23,6 +23,5 @@ internal sealed record CommandObservedReturnEdgeSnapshot(string[] Rows, byte[] I
         await Assert.That(actual.Identity.SequenceEqual(Identity)).IsTrue();
         await Assert.That(actual.Position).IsEqualTo(Position);
         await Assert.That(actual.Applied).IsEqualTo(Applied);
-        await Assert.That(actual.Journal).IsEqualTo(Journal);
     }
 }

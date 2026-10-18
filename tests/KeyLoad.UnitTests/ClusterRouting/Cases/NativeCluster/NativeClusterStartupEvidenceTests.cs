@@ -8,7 +8,7 @@ internal sealed class NativeClusterStartupEvidenceTests
     private const string KindKey = "kind";
     private const string MissingNativeFilesKey = "missingNativeFiles";
     private const string EventsKey = "events";
-    private const int ExpectedServerFiles = 6;
+    private const int ExpectedServerFiles = 2;
     private const int FirstServerFile = 0;
 
     [Test]
