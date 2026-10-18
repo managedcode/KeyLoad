@@ -9,21 +9,6 @@ internal static class OrleansNodeRuntimeAccess
 
     internal static GrainRequestCodec CatalogRequestCodec(this OrleansNode node) => node.RuntimeServices.GetRequiredService<GrainRequestCodec>();
 
-    internal static global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeClient BorrowRemoteModelClient(this OrleansNode node)
-        => node.RuntimeServices.GetRequiredService<global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeClient>();
-
-    internal static global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeRuntime BorrowRemoteModelRuntime(this OrleansNode node)
-        => node.RuntimeServices.GetRequiredService<global::KeyLoad.Server.Features.DocumentStorage.RemoteModelNativeRuntime>();
-
-    internal static PartitionMovementGrainServiceClient BorrowPartitionMovementTransport(this OrleansNode node)
-        => node.RuntimeServices.GetRequiredService<PartitionMovementGrainServiceClient>();
-
-    internal static PhysicalOwnerProbeNativeClient BorrowPhysicalOwnerProbeTransport(this OrleansNode node)
-        => node.RuntimeServices.GetRequiredService<PhysicalOwnerProbeNativeClient>();
-
-    internal static System.Collections.Immutable.ImmutableArray<ReplicaNativeMembershipEntry> ReadActiveNativeMembership(this OrleansNode node)
-        => node.RuntimeServices.GetRequiredService<ReplicaNativeDiscoveryRuntime>().ReadActiveMembership();
-
     /// <summary>Admits and scopes persisted identity with this running silo's native serializers.</summary>
     /// <param name="node">Original running native silo and borrowed service owner.</param>
     /// <param name="principal">The persisted subject, absent only for credential authentication.</param>

@@ -7,11 +7,10 @@ namespace KeyLoad.Server;
 internal sealed class PartitionHostApplicationOwner(ServerRuntimeOptions options, IAuthorizationPolicy authorization,
     CommandAdmissionGovernor admission, TimeProvider clock, ILogger<PartitionHost> logger, IGrainFactory grains, OrleansNode? node = null,
     ServerConnectionRegistry? connections = null,
-    OperationalAnalyticsRuntime? analytics = null, UserAnalyticsRuntime? userAnalytics = null)
+    UserAnalyticsRuntime? userAnalytics = null)
     : IPartitionStoragePublication, IAsyncDisposable
 {
     private const string NativeBorrowersUnjoined = "The original native storage borrowers have not joined; retain the physical owner.";
-    private const string ProducersAlreadyCaptured = "Native storage producers were already captured.";
     private const string Unpublished = "The original physical host opening has not completed successfully.";
     private readonly Lock lifecycle = new();
     private readonly PartitionHostOwnership ownership = new();
@@ -21,10 +20,7 @@ internal sealed class PartitionHostApplicationOwner(ServerRuntimeOptions options
     private Task? shutdown;
     private bool published;
     private bool stopping;
-    private Func<Task>[]? storageProducerCallbacks;
-    private Task[]? storageProducerJoins;
     private bool connectionsJoined = connections is null;
-    private bool storageProducersJoined = true;
 
     /// <inheritdoc />
     public Task? Opening
@@ -50,25 +46,8 @@ internal sealed class PartitionHostApplicationOwner(ServerRuntimeOptions options
     }
 
     internal bool CanReleaseRoot => Volatile.Read(ref connectionsJoined)
-        && Volatile.Read(ref storageProducersJoined)
-        && (analytics?.CanReleasePhysical ?? true) && (userAnalytics?.CanReleasePhysical ?? true)
+        && (userAnalytics?.CanReleasePhysical ?? true)
         && (node?.HasJoinedRequestWork ?? true) && ownership.CanReleaseRoot;
-
-    internal IReadOnlyList<Task>? StorageProducerJoins => Volatile.Read(ref storageProducerJoins);
-
-    internal void CaptureStorageProducers(Func<Task> recurring, Func<Task> chunks, Func<Task> ann)
-    {
-        lock (lifecycle)
-        {
-            ObjectDisposedException.ThrowIf(stopping, this);
-            if (storageProducerCallbacks is not null)
-            {
-                throw new InvalidOperationException(ProducersAlreadyCaptured);
-            }
-            storageProducerCallbacks = [recurring, chunks, ann];
-            Volatile.Write(ref storageProducersJoined, false);
-        }
-    }
 
     /// <inheritdoc />
     public async Task WaitForOpenAsync(CancellationToken cancellationToken)
@@ -110,10 +89,6 @@ internal sealed class PartitionHostApplicationOwner(ServerRuntimeOptions options
         {
             host = opened;
         }
-        if (analytics is not null)
-        {
-            await analytics.OpenAsync(opened).ConfigureAwait(false);
-        }
         userAnalytics?.Open(opened);
         lock (lifecycle)
         {
@@ -154,20 +129,13 @@ internal sealed class PartitionHostApplicationOwner(ServerRuntimeOptions options
         {
             await ServerFailureObserver.ObserveAsync(() => node.StopAsync(CancellationToken.None), failures).ConfigureAwait(false);
         }
-        // Node stop closes the actual journal scheduling token before these original producers are joined.
-        await JoinStorageProducersAsync(failures).ConfigureAwait(false);
-
-        if (analytics is not null)
-        {
-            await ServerFailureObserver.ObserveAsync(() => analytics.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
-        }
         if (userAnalytics is not null)
         {
             await ServerFailureObserver.ObserveAsync(() => userAnalytics.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         }
-        if (!(analytics?.CanReleasePhysical ?? true) || !(userAnalytics?.CanReleasePhysical ?? true)
+        if (!(userAnalytics?.CanReleasePhysical ?? true)
             || !Volatile.Read(ref connectionsJoined)
-            || !Volatile.Read(ref storageProducersJoined) || node is { HasJoinedRequestWork: false })
+            || node is { HasJoinedRequestWork: false })
         {
             failures.Add(Errors.Fail(ErrorCode.OwnershipLost, NativeBorrowersUnjoined));
             ServerFailureObserver.ThrowIfAny(failures);
@@ -190,24 +158,4 @@ internal sealed class PartitionHostApplicationOwner(ServerRuntimeOptions options
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private async Task JoinStorageProducersAsync(List<Exception> failures)
-    {
-        if (storageProducerCallbacks is not { } callbacks)
-        {
-            // Native Active follows the capture stage; before capture no producer can have started.
-            return;
-        }
-        var prior = failures.Count;
-        var originals = new List<Task>(callbacks.Length);
-        foreach (var captureOriginal in callbacks)
-        {
-            ServerFailureObserver.Observe(() => originals.Add(captureOriginal()), failures);
-        }
-        Volatile.Write(ref storageProducerJoins, originals.ToArray());
-        foreach (var original in originals)
-        {
-            await ServerFailureObserver.ObserveAsync(() => original, failures).ConfigureAwait(false);
-        }
-        Volatile.Write(ref storageProducersJoined, failures.Count == prior && originals.Count == callbacks.Length);
-    }
 }

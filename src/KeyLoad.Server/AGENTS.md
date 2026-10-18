@@ -6,8 +6,7 @@
 - Entry point: `Program.cs`; API routes: `ClientApi/Transport/ApiEndpoints.cs`; Orleans node setup: `ClusterRouting/Hosting/SiloHosting/OrleansNode.cs`; configuration: `NodeOptions.cs`.
 - Server routes public requests to database/grain behavior. New endpoint behavior belongs under `<SliceName>/` and matching `docs/Features/<SliceName>.md`; keep the process entry point as composition.
 - Microsoft Orleans does all clustering (membership, discovery, failure detection, directory, placement, activation migration, communication); the server hosts the silo and adds none of its own. Public API → one grain per connected client → grains call the silo-local ZoneTree owner (node-local `PartitionHost`/Grain Service, which owns storage, journals, file locks and the apply gate) on their own or another node through Orleans, gather and return. See [ADR-136](../../docs/ADR/ADR-136-native-orleans-partition-ownership.md).
-- Owner-authorized applicable skill: Orleans 3.1.1 at `/Users/ksemenenko/.codex/skills/orleans/SKILL.md`; apply it to silo startup, provider configuration, directory/migration and shutdown. The prior bootstrap prohibition remains for other unapproved installations.
-- Applicable skills: none installed; skill installation is prohibited by owner direction.
+- Apply the installed Orleans skill at `/Users/ksemenenko/.codex/skills/orleans/SKILL.md` to silo startup, provider configuration, directory, activation movement and shutdown.
 - Authentication, authorization, endpoint limits, cancellation and health/readiness are protected. Never log secrets or claim deployment/production qualification from a build alone.
 
 ## Boundaries and protected risks

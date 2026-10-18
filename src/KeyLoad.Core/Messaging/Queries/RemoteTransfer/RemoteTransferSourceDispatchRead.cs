@@ -42,7 +42,6 @@ public sealed partial class DatabaseEngine
         {
             return null;
         }
-        RequireLocalResourceOwner(view, claims.Source.Partition);
         var intent = view.GetRecord<RemoteTransferIntentRecord>(RemoteTransferStorage.IntentKey(claims.Source, claims.TransferId))
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteTransferPeerProtocol.Unavailable);
         ValidateIntentRecord(view, intent, claims.Source, claims.TransferId);

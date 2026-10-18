@@ -6,8 +6,8 @@
 - Entry point: `Program.cs`; benchmark resource composition: `BenchmarkComparisons/Resources/SessionTopology/BenchmarkResources.cs`.
 - Keep host wiring and genuinely shared infrastructure composition here. Feature-specific deployment behavior belongs under `<SliceName>/` and the matching `docs/Features/<SliceName>.md`.
 - Aspire owns resource orchestration, not database storage state. Each silo's ZoneTree owner (node-local `PartitionHost`) owns its storage, journals, file locks and the apply gate; Microsoft Orleans does all clustering and Orleans grains route commands (ADR-136).
-- ClusterResources composes actual Docker cluster resources. Do not replace the required Docker/Aspire cluster topology with an in-memory or single-node demonstration. The accepted ADR-082 protocol-cohort test seam preserves the three-node native Orleans cluster and node-local storage ownership.
-- Applicable skills: none installed; skill installation is prohibited by owner direction.
+- ClusterResources composes real Aspire container resources. Every configured silo owns ZoneTree storage; data copy count is independent of silo count. Native Orleans owns membership and communication. Do not retain a second peer protocol or coordination-only database nodes.
+- Apply the installed Orleans and Aspire skills within their actual ownership boundaries.
 - Owner correction2026-10-03 explicitly permits local development through the same Aspire-owned entry. Preserve secret boundaries, resource health dependencies, scoped fault injection, complete resource shutdown and the required Orleans cluster topology; local results do not qualify delivered-source Linux or public performance gates.
 
 ## Boundaries and protected risks

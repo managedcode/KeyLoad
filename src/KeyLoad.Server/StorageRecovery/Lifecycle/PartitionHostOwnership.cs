@@ -7,10 +7,9 @@ internal sealed class PartitionHostOwnership
 {
     private bool nodeOwnershipReleased = true;
     internal NativeStorageOwnerSettlement Canonical { get; } = new();
-    internal NativeStorageOwnerSettlement Replica { get; } = new();
     internal NativeStorageOwnerSettlement Host { get; } = new();
     internal bool CanReleaseRoot => nodeOwnershipReleased && Canonical.IsReleased
-        && Replica.IsReleased && Host.IsReleased;
+        && Host.IsReleased;
     internal void NodeOwnershipAcquired() => nodeOwnershipReleased = false;
     internal void NodeOwnershipReleased() => nodeOwnershipReleased = true;
 }

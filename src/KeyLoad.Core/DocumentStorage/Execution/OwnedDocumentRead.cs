@@ -51,8 +51,6 @@ public sealed partial class DatabaseEngine
             var placement = ReadPlacementWitness(view, request.Reference.Partition);
             if (placement.PhysicalShardId != expectedOwner.PhysicalShardId
                 || placement.Incarnation != expectedOwner.Incarnation
-                || placement.PlacementEpoch != expectedOwner.PlacementEpoch
-                || !placement.VoterIds.SequenceEqual(expectedOwner.VoterIds, StringComparer.Ordinal))
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, DocumentOwnerNodeMismatch);
             }

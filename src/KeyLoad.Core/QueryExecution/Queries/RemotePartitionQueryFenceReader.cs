@@ -31,8 +31,6 @@ public sealed partial class DatabaseEngine
         var destination = directory.Owners.SingleOrDefault(entry => entry.Owner.PhysicalShardId == resolution.PhysicalShardId)
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteQueryFenceInvalid);
         if (destination.Owner.Incarnation != resolution.Incarnation
-            || destination.Owner.PlacementEpoch != resolution.PlacementEpoch
-            || !destination.Owner.VoterIds.SequenceEqual(resolution.VoterIds, StringComparer.Ordinal))
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, RemoteQueryFenceInvalid);
         }

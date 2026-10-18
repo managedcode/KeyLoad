@@ -12,7 +12,7 @@ internal sealed class OrleansNodeStartupWait
     internal async Task WaitAsync(CancellationToken cancellationToken)
     {
         var original = await publication.Task.WaitAsync(cancellationToken).ConfigureAwait(false)
-            ?? throw Errors.Fail(ErrorCode.OwnershipLost, PhysicalOwnerProbeProtocol.Unavailable);
+            ?? throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable);
         var failures = new List<Exception>();
         var awaited = original.WaitAsync(cancellationToken);
         await ServerFailureObserver.ObserveAsync(() => awaited, failures).ConfigureAwait(false);

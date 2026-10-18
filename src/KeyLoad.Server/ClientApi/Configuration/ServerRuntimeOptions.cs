@@ -1,6 +1,5 @@
 using KeyLoad.Clustering;
 using KeyLoad.Server.Features.ClusterRouting;
-using KeyLoad.Server.Features.DocumentStorage;
 using KeyLoad.Server.Features.Search;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.Storage.ZoneTree.Features.ResourceExecution;
@@ -22,10 +21,7 @@ internal sealed record ServerRuntimeOptions(
     IOptions<ZoneTreePointCacheExecutionOptions> PointCache,
     IOptions<OrleansMembershipOptions> Membership,
     IOptions<GrainRoutingOptions> GrainRouting,
-    IOptions<PhysicalOwnerExecutionOptions> PhysicalOwners,
-    IOptions<RemoteDocumentExecutionOptions> RemoteDocuments,
     IOptions<AdminObservationOptions> AdminObservation,
-    IOptions<OperationalAnalyticsOptions> OperationalAnalytics,
     IOptions<NativeTextExecutionOptions> NativeText,
     IOptions<NativeAnnExecutionOptions> NativeAnn,
     IOptions<ServerExecutionOptions> ServerExecution,
@@ -46,10 +42,7 @@ internal sealed record ServerRuntimeOptions(
         _ = PointCache.Value;
         _ = Membership.Value;
         _ = GrainRouting.Value;
-        _ = PhysicalOwners.Value;
-        _ = RemoteDocuments.Value;
         _ = AdminObservation.Value;
-        _ = OperationalAnalytics.Value;
         _ = NativeText.Value;
         _ = NativeAnn.Value;
         _ = ServerExecution.Value;

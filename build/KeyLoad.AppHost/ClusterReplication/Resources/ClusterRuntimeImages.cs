@@ -1,4 +1,3 @@
-using KeyLoad.AppHost.Features.ClusterRouting;
 using KeyLoad.AppHost.Features.CodeQuality;
 using KeyLoad.AppHost.Hosting;
 
@@ -24,12 +23,13 @@ internal static class ClusterRuntimeImages
         }
         var runtime = AppHostOptionsRegistration.Get(builder);
         if (localImage is null && coverageImage is null && benchmarkNodeCount is null && !ephemeral
-            && runtime.Images.Value.Server is null && !runtime.Control.Value.ProtocolCohortConfigured)
+            && runtime.Images.Value.Server is null)
         {
             return (null, null);
         }
         var images = localImage is null && coverageImage is null
-            ? ProtocolCohortImages.Read(builder, ephemeral, benchmarkNodeCount, nodeNames) : null;
+            ? nodeNames.ToDictionary(static name => name,
+                _ => RuntimeContainerImage.Read(builder, RuntimeContainerImage.ServerConfiguration), StringComparer.Ordinal) : null;
         return (localImage, images);
     }
 }

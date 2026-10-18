@@ -10,7 +10,6 @@ internal readonly record struct McpToolHints(bool ReadOnly, bool Idempotent, boo
 {
     internal static McpToolHints ForRead(GrainReadKind kind) => kind switch
     {
-        GrainReadKind.FollowerDocument => new(true, true, false),
         GrainReadKind.Document => new(true, true, false),
         GrainReadKind.Stream => new(true, true, false),
         GrainReadKind.AggregateReplay => new(true, true, false),
@@ -21,7 +20,7 @@ internal readonly record struct McpToolHints(bool ReadOnly, bool Idempotent, boo
             or GrainReadKind.RecurringSchedule or GrainReadKind.Saga
             => new(true, true, false),
         GrainReadKind.Traverse or GrainReadKind.GraphShortestPath or GrainReadKind.GraphIncomingEdges
-            or GrainReadKind.RemoteGraphIncomingParent or GrainReadKind.SqlGraphPath
+            or GrainReadKind.SqlGraphPath
             => new(true, true, false),
         GrainReadKind.AnalyticsEvents or GrainReadKind.AnalyticsAggregate => new(true, true, false),
         GrainReadKind.Samples => new(true, true, false),
@@ -54,10 +53,7 @@ internal readonly record struct McpToolHints(bool ReadOnly, bool Idempotent, boo
 
     internal static McpToolHints ForCommand(OperationKind kind) => kind switch
     {
-        OperationKind.UpsertRemoteGraphEdge or OperationKind.DeleteRemoteGraphEdge or OperationKind.DeliverRemoteGraphEdge
-            => new(false, true, true),
         OperationKind.Batch => new(false, true, true),
-        OperationKind.EventFeedControl => new(false, false, true),
         OperationKind.MaintainAnnIndex or OperationKind.MaintainTextIndex => new(false, false, true),
         OperationKind.MaintainOnlineTextIndex => new(false, true, true),
         OperationKind.ReceiveAcrossLanes => new(false, false, true),

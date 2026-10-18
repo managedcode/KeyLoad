@@ -39,7 +39,6 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, ConfiguredOutcomeLifetimeChanged);
         }
-        ResourceRetirementStorage.RequireOpen(view, lifetime, Limits);
         work.ObserveAuthenticatedResourceLifetimes([lifetime]);
     }
 }

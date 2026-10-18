@@ -29,27 +29,6 @@ internal static class NativeCommandWorkAdmission
         database.ValidateResourceEffectSubmission(operation, clock.GetUtcNow(), work);
     }
 
-    internal static void BindObserved(DatabaseEngine database, DecodedGrainRequest request,
-        PrincipalRecord principal, TimeProvider clock, NativeCapabilityWorkLifetime commandWork,
-        ReplicatedOperation originalIntent, ReadExecutionBudget budget)
-    {
-        budget.Check();
-        var kind = request.Envelope.CommandKind
-            ?? throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
-        if (originalIntent.Kind != kind || originalIntent.Id != request.Envelope.CommandId
-            || originalIntent.PrincipalId != principal.Id)
-        {
-            throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
-        }
-        if (kind == OperationKind.DropTable || DatabaseEngine.IsResourceFreeCommandWork(kind))
-        {
-            commandWork.Bind([]);
-            return;
-        }
-        database.ValidateResourceEffectSubmission(originalIntent, clock.GetUtcNow(), commandWork, budget);
-        budget.Check();
-    }
-
     internal static NativeCommandWorkProofV1 Capture(DecodedGrainRequest request,
         NativeCapabilityWorkLifetime work, long policyEpoch)
     {

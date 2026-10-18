@@ -17,11 +17,10 @@ internal static class ClusterProfileStore
     private const int Base64Characters = 44;
     private const int MinimumAdminCharacters = 32;
     private const int MaximumAdminCharacters = 256;
-    private const int RequiredFields = 6;
+    private const int RequiredFields = 4;
     private static readonly string[] CurrentFields =
     [
-        nameof(LocalProfile.Version), nameof(LocalProfile.PhysicalShardId), nameof(LocalProfile.Incarnation),
-        nameof(LocalProfile.SigningKey), nameof(LocalProfile.PeerSecret), nameof(LocalProfile.AdminKey)
+        nameof(LocalProfile.Version), nameof(LocalProfile.Incarnation), nameof(LocalProfile.SigningKey), nameof(LocalProfile.AdminKey)
     ];
     internal static JsonSerializerOptions CreateJson(IOptions<ClusterProfileExecutionOptions> executionOptions) => new()
     {
@@ -43,8 +42,7 @@ internal static class ClusterProfileStore
         {
             return Read(path, executionOptions);
         }
-        var profile = new LocalProfile(CurrentVersion, Guid.NewGuid(), Guid.NewGuid(),
-            Convert.ToBase64String(RandomNumberGenerator.GetBytes(SecretBytes)),
+        var profile = new LocalProfile(CurrentVersion, Guid.NewGuid(),
             Convert.ToBase64String(RandomNumberGenerator.GetBytes(SecretBytes)),
             AdminPrefix + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(SecretBytes)));
         Validate(profile);
@@ -100,17 +98,16 @@ internal static class ClusterProfileStore
     internal static void Validate(LocalProfile profile)
     {
         ArgumentNullException.ThrowIfNull(profile);
-        if (profile.Version != CurrentVersion || profile.PhysicalShardId == Guid.Empty)
+        if (profile.Version != CurrentVersion)
         {
             throw new InvalidOperationException(InvalidProfile);
         }
-        ValidateCredentials(profile.Incarnation, profile.SigningKey, profile.PeerSecret, profile.AdminKey);
+        ValidateCredentials(profile.Incarnation, profile.SigningKey, profile.AdminKey);
     }
 
-    internal static void ValidateCredentials(Guid incarnation, string? signingKey,
-        string? peerSecret, string? adminKey)
+    internal static void ValidateCredentials(Guid incarnation, string? signingKey, string? adminKey)
     {
-        if (incarnation == Guid.Empty || !ValidSecret(signingKey) || !ValidSecret(peerSecret)
+        if (incarnation == Guid.Empty || !ValidSecret(signingKey)
             || adminKey is null || adminKey.Length is < MinimumAdminCharacters or > MaximumAdminCharacters
             || !adminKey.StartsWith(AdminPrefix, StringComparison.Ordinal))
         {

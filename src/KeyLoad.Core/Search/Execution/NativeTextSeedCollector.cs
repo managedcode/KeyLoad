@@ -150,8 +150,6 @@ internal static partial class NativeTextSeedCollector
         if (database.Store.Identity.NodeId != pin.NodeId
             || database.Store.Identity.Incarnation != expected.Incarnation
             || actual.PhysicalShardId != expected.PhysicalShardId || actual.Incarnation != expected.Incarnation
-            || actual.PlacementEpoch != expected.PlacementEpoch
-            || !actual.VoterIds.SequenceEqual(expected.VoterIds, StringComparer.Ordinal))
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, OwnerLost);
         }

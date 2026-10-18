@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Query;
@@ -35,6 +34,11 @@ internal static class OrleansPartitionServiceRegistration
         });
         services.AddSingleton<SiloDatabaseClient>();
         services.AddSingleton<SiloStorageIdentityProvider>();
+        services.AddSingleton(provider =>
+        {
+            var identity = Host(provider).Database.Store.Identity;
+            return new PhysicalShardRecord(identity.NodeId, identity.Incarnation);
+        });
         services.AddSingleton<QueryEngine>();
         services.AddSingleton(provider => new SearchEngine(Host(provider).Database,
             provider.GetRequiredService<ServerRuntimeOptions>().Core.QueryExecution, Host(provider).TextProjection,

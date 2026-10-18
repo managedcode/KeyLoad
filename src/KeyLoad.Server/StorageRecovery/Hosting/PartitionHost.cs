@@ -15,14 +15,6 @@ internal sealed class PartitionHost : IAsyncDisposable
     private readonly Lock lifecycle = new();
     private Task? shutdown;
 
-    internal Features.Messaging.RemoteTransferPeerVerificationOwner? TransferVerification
-    {
-        get; private set;
-    } = null!;
-
-    private void RequireTransferVerifierClosed()
-        => PartitionHostDisposal.RequireTransferVerifierClosed(TransferVerification);
-
     private PartitionHost(PartitionHostOwnership ownership) => this.ownership = ownership;
 
     internal static async Task<PartitionHost> OpenAsync(ServerRuntimeOptions runtimeOptions,
@@ -70,9 +62,6 @@ internal sealed class PartitionHost : IAsyncDisposable
         ownership.Host.NativeConstructorReturned();
         Database = opened.Database;
         rowVisibility = opened.Visibility;
-        ownership.Host.BeginNativeConstructor();
-        TransferVerification = Features.Messaging.RemoteTransferPeerVerificationOwner.Create(Database, runtimeOptions);
-        ownership.Host.NativeConstructorReturned();
     }
 
     private void OpenSearch(ServerRuntimeOptions runtimeOptions, TimeProvider clock)
@@ -90,8 +79,7 @@ internal sealed class PartitionHost : IAsyncDisposable
     private async Task CleanupFailedConstructionAsync(Exception error)
     {
         await PartitionHostConstructionCleanup.RunAsync(error, OnlineTextMaintenance, TextMaintenance, AnnMaintenance,
-            TextProjection, CacheMemory,
-            TransferVerification, rowVisibility, stores, RequireTransferVerifierClosed).ConfigureAwait(false);
+            TextProjection, CacheMemory, rowVisibility, stores).ConfigureAwait(false);
         ownership.Host.ReleaseReturned();
     }
 
@@ -113,7 +101,7 @@ internal sealed class PartitionHost : IAsyncDisposable
     {
         get; private set;
     } = null!;
-    /// <summary>Single node-owned retention ledger borrowed by derived cache families and movement images.</summary>
+    /// <summary>Single node-owned retention ledger borrowed by derived cache families.</summary>
     internal CacheMemoryBudget CacheMemory
     {
         get; private set;
@@ -137,7 +125,7 @@ internal sealed class PartitionHost : IAsyncDisposable
     private void DisposeRowVisibility(List<Exception> failures)
         => PartitionHostConstructionCleanup.DisposeRowVisibility(rowVisibility, failures);
 
-    /// <summary>Drains protocol and apply before releasing either physical store, once.</summary>
+    /// <summary>Joins derived storage users before releasing the canonical store, once.</summary>
     public ValueTask DisposeAsync()
     {
         lock (lifecycle)

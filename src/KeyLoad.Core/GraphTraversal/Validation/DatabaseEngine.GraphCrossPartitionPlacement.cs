@@ -22,8 +22,6 @@ public sealed partial class DatabaseEngine
             : ResolvePlacement(destination, catalog.DefaultShard);
         if (sourcePlacement.PhysicalShardId != destinationPlacement.PhysicalShardId
             || sourcePlacement.Incarnation != destinationPlacement.Incarnation
-            || sourcePlacement.PlacementEpoch != destinationPlacement.PlacementEpoch
-            || !sourcePlacement.VoterIds.SequenceEqual(destinationPlacement.VoterIds, StringComparer.Ordinal))
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, DifferentPhysicalOwner);
         }

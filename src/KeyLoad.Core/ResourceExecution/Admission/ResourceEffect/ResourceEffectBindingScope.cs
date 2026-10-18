@@ -88,7 +88,6 @@ internal sealed class ResourceEffectBindingScope(IOptions<DatabaseLimits> option
             {
                 throw Errors.Fail(ErrorCode.TokenInvalidated, ResourceEffectAdmissionProtocol.Changed);
             }
-            ResourceRetirementStorage.RequireOpen(view, lifetime, limits);
         }
         admitted = value;
     }
@@ -110,7 +109,6 @@ internal sealed class ResourceEffectBindingScope(IOptions<DatabaseLimits> option
         }
         foreach (var lifetime in value.Bindings)
         {
-            ResourceRetirementStorage.RequireOpen(view, lifetime, limits);
         }
         admitted = value;
     }

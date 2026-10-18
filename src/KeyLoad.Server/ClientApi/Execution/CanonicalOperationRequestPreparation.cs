@@ -5,7 +5,7 @@ namespace KeyLoad.Server;
 internal static class CanonicalOperationRequestPreparation
 {
     internal readonly record struct Prepared(PrincipalRecord Principal, Guid RequestId,
-        string SignedRequest, bool Command, bool ReceivingOnly);
+        string SignedRequest, bool Command);
 
     internal static Prepared Create(HttpContext context, GrainReadKind? readKind,
         OperationKind? commandKind, Guid commandId, ReadOnlyMemory<byte> payload,
@@ -16,10 +16,6 @@ internal static class CanonicalOperationRequestPreparation
         if (context.Items[ServerProtocol.PrincipalItem] is not PrincipalRecord principal)
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential);
-        }
-        if (readKind == GrainReadKind.FollowerDocument)
-        {
-            payload = FollowerReadCredentialCapability.Wrap(context, payload);
         }
         if (readKind == GrainReadKind.ClusterBackupOwner)
         {

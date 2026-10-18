@@ -169,7 +169,6 @@ internal static class ServerConfiguration
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton<ServerConnectionRegistry>();
         services.AddSingleton<AdminHttpMetrics>();
-        services.AddSingleton<OperationalAnalyticsRuntime>();
         services.AddSingleton<UserAnalyticsRuntime>();
         services.AddSingleton<INativeUserAnalytics>(provider => provider.GetRequiredService<UserAnalyticsRuntime>());
         services.AddSingleton(provider => ActivatorUtilities.CreateInstance<AdminNodeObserver>(provider,
@@ -182,7 +181,6 @@ internal static class ServerConfiguration
         services.AddSingleton<PartitionHostApplicationOwner>();
         services.AddSingleton<INodeAdministration>(provider => ActivatorUtilities.CreateInstance<NodeAdministration>(provider,
             provider.GetRequiredService<PartitionHostApplicationOwner>().Borrow()));
-        PhysicalOwnerRegistrationServices.Add(services);
         services.AddSingleton(provider => ActivatorUtilities.CreateInstance<OrleansNode>(provider));
     }
 

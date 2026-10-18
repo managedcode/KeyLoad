@@ -12,10 +12,6 @@ internal static class McpReadCatalog
         get;
     } =
     [
-        McpOperationFactory.Read<ReadRemoteIncomingGraphEdgesRequestV1, RemoteIncomingGraphEdgesPageV1>(
-            RemoteGraphPublicProtocol.IncomingTool, RemoteGraphPublicProtocol.IncomingRoute, GrainReadKind.RemoteGraphIncomingParent),
-        McpOperationFactory.Read<ReadFollowerDocumentRequestV1, FollowerDocumentReadResultV1>(
-            McpToolNames.DocumentsReadFollower, McpToolRoutes.DocumentsReadFollower, GrainReadKind.FollowerDocument),
         McpOperationFactory.Read<GetDocumentRequest, DocumentReadResult>(McpToolNames.DocumentsGet, McpToolRoutes.DocumentsGet, GrainReadKind.Document),
         McpOperationFactory.Read<ReadStreamRequest, StreamPage>(McpToolNames.StreamsRead, McpToolRoutes.StreamsRead, GrainReadKind.Stream),
         McpOperationFactory.Read<ReadAggregateReplayRequest, AggregateReplayPage>(McpToolNames.StreamsReplay,

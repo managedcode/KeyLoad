@@ -35,7 +35,6 @@ public sealed partial class DatabaseEngine
             EntityReferenceLifetime.RequireAdmitted(frame.Reference, request.Request.Reference, sourceLifetime);
             var placement = ReadPlacementWitness(charged, frame.Reference.Partition);
             if (placement.PhysicalShardId != request.Owner.PhysicalShardId || placement.Incarnation != request.Owner.Incarnation
-                || placement.PlacementEpoch != request.Owner.PlacementEpoch || !placement.VoterIds.SequenceEqual(request.Owner.VoterIds, StringComparer.Ordinal)
                 || frame.Route.Placement.Partition != placement.Partition
                 || frame.Route.Placement.PhysicalShardId != placement.PhysicalShardId
                 || frame.Route.Placement.Incarnation != placement.Incarnation

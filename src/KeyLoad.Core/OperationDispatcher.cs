@@ -16,11 +16,6 @@ public sealed partial class DatabaseEngine
         long position, AtomicPartitionPlacementResolution? placement)
         => operation.Kind switch
         {
-            OperationKind.RemoteGraphSource => ExecuteRemoteGraphSource(transaction, principal, operation, position),
-            OperationKind.RemoteGraphReceive => ExecuteRemoteGraphReceive(transaction, operation, position),
-            OperationKind.RemoteGraphComplete => ExecuteRemoteGraphComplete(transaction, operation, position),
-            OperationKind.EventFeedControl => ExecuteEventVectorControl(transaction, principal, operation, position, placement),
-            OperationKind.EventFeedSourcePhase => ExecuteEventVectorSource(transaction, principal, operation, position, placement),
             OperationKind.Bm25CorpusPublicationPhase => ExecuteBm25CorpusPublication(transaction, principal, operation, position),
             OperationKind.OnlineTextPublicationPhase => ExecuteOnlineTextPublication(transaction, principal, operation),
             OperationKind.Batch => ExecuteBatch(transaction, principal, operation, position, placement),
@@ -38,12 +33,9 @@ public sealed partial class DatabaseEngine
             OperationKind.CommitProjectionBatch => ExecuteProjectionBatch(transaction, principal, operation, position),
             OperationKind.ReleaseProjectionConsumer => ExecuteReleaseProjection(transaction, operation),
             OperationKind.PurgeOutbox => ExecutePurgeOutbox(transaction, operation),
-            OperationKind.ResourceRetirementPhase => ExecuteResourceRetirementPhase(transaction, principal, operation, position),
             OperationKind.ConfigureResource => ExecuteConfigureResource(transaction, operation),
             OperationKind.CreateTable => ExecuteCreateTable(transaction, operation),
             OperationKind.SetQueueDispatch => ExecuteQueueDispatchControl(transaction, operation),
-            OperationKind.BootstrapPhysicalShardCatalog => ExecuteBootstrapPhysicalShardCatalog(transaction, operation),
-            OperationKind.RegisterPhysicalOwner => ExecuteRegisterPhysicalOwner(transaction, principal, Payload<RegisterPhysicalOwnerV1>(operation)),
             OperationKind.ConfigurePrincipal => ExecuteConfigurePrincipal(transaction, operation),
             OperationKind.ConfigureApiKey => ExecuteConfigureApiKey(transaction, operation),
             OperationKind.RuntimeJournal => Result(RuntimeJournal.Execute(transaction, principal, Payload<RuntimeJournalMutation>(operation))),
@@ -65,8 +57,7 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.Corruption, OperationDispatcherBatchPlacementWitnessDoesNotMatchItsTransactionDetail);
         }
-        var token = new CommitToken(placement.Incarnation, batch.Partition.AtomicPartitionId, position,
-            placement.PlacementEpoch);
+        var token = new CommitToken(placement.Incarnation, batch.Partition.AtomicPartitionId, position);
         return Result(new CommitReceipt(batch.CommandId, token,
             ApplyMutations(transaction, principal, batch.Partition, batch.Mutations, operation.EvaluatedAt, position,
                 commitToken: token, operation: operation), Durability));

@@ -5,7 +5,7 @@ namespace KeyLoad.AppHost.Features.TestInfrastructure.Validation;
 [ConfigurationBinding]
 internal sealed record LocalClusterImageRequest
 {
-    private const int HasProtocolCohortSelectorCountValue = 1;
+    private const int SectionPresenceCount = 1;
 
     private const string EnabledValue = "true";
     private const string DisabledValue = "false";
@@ -23,11 +23,6 @@ internal sealed record LocalClusterImageRequest
     private const string LocalSectionSetting = "KeyLoadTests:LocalClusterImage";
     private const string GithubRevisionSetting = "GITHUB_SHA";
     private const string GithubActionsSetting = "GITHUB_ACTIONS";
-    private const string ProtocolCohortEnabledSetting = "KeyLoadTests:ProtocolCohort:Enabled";
-    private const string ProtocolNode1Setting = "KeyLoadTests:ProtocolCohort:Voters:node1";
-    private const string ProtocolNode2Setting = "KeyLoadTests:ProtocolCohort:Voters:node2";
-    private const string ProtocolNode3Setting = "KeyLoadTests:ProtocolCohort:Voters:node3";
-    private const string ProtocolSectionSetting = "KeyLoadTests:ProtocolCohort";
     private const string ComparisonEnabledSetting = "Benchmarks:Enabled";
     private const string ComparisonTargetSetting = "Benchmarks:Target";
     private const string ComparisonNodeCountSetting = "Benchmarks:NodeCount";
@@ -72,7 +67,7 @@ internal sealed record LocalClusterImageRequest
             || string.IsNullOrWhiteSpace(configuration[ServerImageSetting])
             || HasValue(configuration, GithubReceiptSetting) || HasValue(configuration, GithubRevisionSetting)
             || HasValue(configuration, GithubActionsSetting)
-            || HasProtocolCohortSelector(configuration) || HasComparisonSelector(configuration))
+            || HasComparisonSelector(configuration))
         {
             throw new InvalidOperationException(Invalid);
         }
@@ -96,7 +91,6 @@ internal sealed record LocalClusterImageRequest
             || HasValue(configuration, ServerImageSetting)
             || HasValue(configuration, GithubRevisionSetting)
             || HasValue(configuration, GithubActionsSetting)
-            || HasProtocolCohortSelector(configuration)
             || HasComparisonSelector(configuration))
         {
             throw new InvalidOperationException(Invalid);
@@ -117,19 +111,12 @@ internal sealed record LocalClusterImageRequest
         var localSection = configuration.GetSection(LocalSectionSetting);
         var localChildren = localSection.GetChildren().Take(CountValue).ToArray();
         if (localSection.Value is not null || localChildren.Length > BoundaryValue
-            || localChildren.Any(child => child.Key != EnabledKey || child.GetChildren().Take(HasProtocolCohortSelectorCountValue).Any())
+            || localChildren.Any(child => child.Key != EnabledKey || child.GetChildren().Take(SectionPresenceCount).Any())
             || configuration.GetSection(EnabledSetting).GetChildren().Any())
         {
             throw new InvalidOperationException(Invalid);
         }
     }
-
-    private static bool HasProtocolCohortSelector(IConfiguration configuration)
-        => HasValue(configuration, ProtocolCohortEnabledSetting)
-            || HasValue(configuration, ProtocolNode1Setting)
-            || HasValue(configuration, ProtocolNode2Setting)
-            || HasValue(configuration, ProtocolNode3Setting)
-            || configuration.GetSection(ProtocolSectionSetting).GetChildren().Take(HasProtocolCohortSelectorCountValue).Any();
 
     private static bool HasComparisonSelector(IConfiguration configuration)
         => HasValue(configuration, ComparisonEnabledSetting)

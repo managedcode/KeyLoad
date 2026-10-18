@@ -38,8 +38,6 @@ public sealed partial class DatabaseEngine
             || source.ResourceSha256 != resourceSha
             || placement.PhysicalShardId != request.Placement.PhysicalShardId
             || placement.Incarnation != request.Placement.Incarnation
-            || placement.PlacementEpoch != request.Placement.PlacementEpoch
-            || !placement.VoterIds.SequenceEqual(request.Placement.VoterIds, StringComparer.Ordinal))
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, OnlineTextPublicationProtocol.InvalidPublication);
         }

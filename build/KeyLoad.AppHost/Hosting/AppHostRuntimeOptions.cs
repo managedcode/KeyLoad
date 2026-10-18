@@ -11,9 +11,8 @@ internal sealed record AppHostRuntimeOptions(IOptions<TestExecutionOptions> Test
     IOptions<AppHostControlOptions> Control, IOptions<ContainerImageOptions> Images,
     IOptions<ContainerImageExecutionOptions> ImageExecution, IOptions<LocalImageOptions> LocalImage,
     IOptions<ClusterDeploymentOptions> Cluster, IOptions<CommandAdmissionLimits> CommandAdmission,
-    IOptions<HttpAdmissionLimits> HttpAdmission, IOptions<KeyLoad.Clustering.ReplicaReplayLimits> ReplayAdmission, IOptions<ClusterProfileExecutionOptions> Profile, IOptions<BenchmarkDeploymentOptions> Deployment,
+    IOptions<HttpAdmissionLimits> HttpAdmission, IOptions<ClusterProfileExecutionOptions> Profile, IOptions<BenchmarkDeploymentOptions> Deployment,
     IOptions<BenchmarkRelayOptions> BenchmarkRelay,
-    IOptions<KeyLoad.Clustering.ReplicaReplayLimits> IsolatedReplayAdmission,
     IOptions<KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions> IsolatedAdmission,
     IOptions<NativeCoverageExecutionOptions> NativeCoverage,
     IOptions<NativeCoverageClusterImageOptions> NativeCoverageClusterImage);

@@ -72,7 +72,6 @@ public sealed partial class DatabaseEngine
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteAnnReadInvalid);
         if (destination.Owner.PhysicalShardId != original.Placement.PhysicalShardId
             || destination.Owner.Incarnation != original.Placement.Incarnation
-            || !destination.Owner.VoterIds.SequenceEqual(original.Placement.VoterIds, StringComparer.Ordinal))
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, RemoteAnnReadInvalid);
         }

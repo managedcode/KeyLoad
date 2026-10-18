@@ -9,7 +9,7 @@ internal static class NativeAdministratorAuthenticationScope
             return false;
         }
         if (request.ReadKind != GrainReadKind.Authenticate || request.CommandKind is not null
-            || request.CommandId != Guid.Empty || request.PrincipalId is not null || request.Observation is not null)
+            || request.CommandId != Guid.Empty || request.PrincipalId is not null)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }

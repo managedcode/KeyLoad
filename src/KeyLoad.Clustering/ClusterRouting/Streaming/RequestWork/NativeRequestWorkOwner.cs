@@ -18,10 +18,6 @@ public sealed class NativeRequestWorkOwner : IAsyncDisposable, IResourceLifetime
     private readonly NativeRequestWorkAdmissions admissions;
     private readonly NativeResourceWorkRetentions retentions;
     private readonly NativeRequestWorkChildren children;
-    internal NativeCommandObservationGate Observations
-    {
-        get;
-    }
     private Task? drainTask;
     private Task? disposeTask;
     private bool admissionClosed;
@@ -35,7 +31,6 @@ public sealed class NativeRequestWorkOwner : IAsyncDisposable, IResourceLifetime
         admissions = new(options);
         retentions = new(options);
         children = new(gate, this, physical, admissions, retentions, () => admissionClosed);
-        Observations = new(gate, this, physical, admissions);
         shutdownToken = shutdown.Token;
     }
 
@@ -65,36 +60,6 @@ public sealed class NativeRequestWorkOwner : IAsyncDisposable, IResourceLifetime
             return admissions.Acquire(this, requestId, kind);
         }
     }
-
-    internal Task<NativeCommandObservation> ReserveCommandObservationAsync(DecodedGrainRequest verified,
-        NativeCommandObservationAdmissionV1 admission, NativeCapabilityWorkLifetime commandWork, PhysicalShardRecord actualOwner, SiloStorageIdentity actualRuntime,
-        DatabaseEngine database, TimeProvider clock, CancellationToken originalCallerToken)
-        => NativeCommandObservationAdmission.ReserveAsync(this, verified, admission, commandWork,
-            actualOwner, actualRuntime, database, clock, originalCallerToken);
-
-    internal NativeRequestWorkLease AcquireCommandObservation(Guid id, NativeRequestWorkLease command,
-        PhysicalShardRecord actualOwner, SiloStorageIdentity actualRuntime, DatabaseEngine database,
-        NativeCommandObservationResources resources)
-        => Observations.AcquireCommandObservation(id, command, actualOwner, actualRuntime, database, resources);
-
-    internal NativeCommandObservation ConsumeCommandObservation(NativeCommandObservationHandleV1 handle,
-        PhysicalShardRecord actualOwner, SiloStorageIdentity actualRuntime, DatabaseEngine database)
-        => Observations.ConsumeCommandObservation(handle, actualOwner, actualRuntime, database);
-
-    internal NativeCommandObservation BeginCommandExecution(NativeCommandObservationHandleV1 handle,
-        PhysicalShardRecord actualOwner, SiloStorageIdentity actualRuntime, DatabaseEngine database)
-        => Observations.BeginCommandExecution(handle, actualOwner, actualRuntime, database);
-
-    internal Task AbortCommandObservationByHandleAsync(NativeCommandObservationHandleV1 handle,
-        PhysicalShardRecord actualOwner, SiloStorageIdentity actualRuntime, DatabaseEngine database)
-        => Observations.AbortCommandObservationByHandleAsync(handle, actualOwner, actualRuntime, database);
-
-    internal void MarkCommandObservationSettled(NativeCommandObservation observation)
-        => Observations.MarkCommandObservationSettled(observation);
-
-    internal Task SettleCommandObservation(NativeCommandObservation observation,
-        Exception? original, Exception? cleanup, bool abort)
-        => Observations.SettleCommandObservation(observation, original, cleanup, abort);
 
     internal NativeRequestWorkLease RequireOriginalParentBinding(NativeRequestWorkLease child)
         => children.RequireOriginalParentBinding(child);

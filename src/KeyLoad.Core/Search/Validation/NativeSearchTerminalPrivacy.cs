@@ -17,7 +17,7 @@ internal static class NativeSearchTerminalPrivacy
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, Missing);
         return new(identity.NodeId, identity.Incarnation, identity.FormatVersion, identity.ReadGeneration,
             database.Store.Position, NativeSerialization.Deserialize<long>(applied), principal.PolicyEpoch,
-            resource.SchemaVersion, ResourceHash(resource, budget), DatabaseEngine.ReadPlacementWitness(view, partition));
+            resource.SchemaVersion, ResourceHash(resource, budget), database.ReadPlacementWitness(view, partition));
     }
 
     internal static void Verify(DatabaseEngine database, string principalId, PartitionRef partition,
@@ -52,15 +52,13 @@ internal static class NativeSearchTerminalPrivacy
         ResourceDefinition resource, PartitionRef partition, NativeSearchReadAuthority original, ReadExecutionBudget budget)
     {
         var identity = database.Store.Identity;
-        var placement = DatabaseEngine.ReadPlacementWitness(raw, partition);
+        var placement = database.ReadPlacementWitness(raw, partition);
         if (identity.NodeId != original.NodeId || identity.Incarnation != original.Incarnation
             || identity.FormatVersion != original.DataEpoch || identity.ReadGeneration != original.ReadGeneration
             || principal.PolicyEpoch != original.PolicyEpoch || resource.SchemaVersion != original.SchemaVersion
             || ResourceHash(resource, budget) != original.ResourceSha256
             || placement.PhysicalShardId != original.Placement.PhysicalShardId
             || placement.Incarnation != original.Placement.Incarnation
-            || placement.PlacementEpoch != original.Placement.PlacementEpoch
-            || !placement.VoterIds.SequenceEqual(original.Placement.VoterIds, StringComparer.Ordinal))
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, Changed);
         }

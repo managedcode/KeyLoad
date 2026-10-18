@@ -30,15 +30,6 @@ public sealed partial class DatabaseEngine
         DateTimeOffset evaluatedAt, ReadOnlyMemory<byte> payload, ReadExecutionBudget? work)
     {
         RequireNativeBudget(payload.Length);
-        if (kind == OperationKind.BootstrapPhysicalShardCatalog)
-        {
-            PhysicalShardCatalogValidation.ValidateEncodedRequestLength(payload.Length);
-        }
-        if (kind == OperationKind.RegisterPhysicalOwner
-            && payload.Length > KeyLoad.Core.Features.ClusterRouting.Contracts.PhysicalOwnerDirectoryProtocol.MaximumRegistrationBytes)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, KeyLoad.Core.Features.ClusterRouting.Contracts.PhysicalOwnerDirectoryProtocol.Capacity);
-        }
         payload = payload.ToArray();
         var identity = kind switch
         {
@@ -50,8 +41,6 @@ public sealed partial class DatabaseEngine
             OperationKind.ConfigureResource => Identity<ConfigureResourceRequest>(payload),
             OperationKind.CreateTable => Identity<CreateTableRequest>(payload),
             OperationKind.SetQueueDispatch => Identity<QueueDispatchControlRequest>(payload),
-            OperationKind.BootstrapPhysicalShardCatalog => Identity<BootstrapPhysicalShardCatalogRequest>(payload),
-            OperationKind.RegisterPhysicalOwner => Identity<RegisterPhysicalOwnerV1>(payload),
             OperationKind.ConfigurePrincipal => Identity<ConfigurePrincipalRequest>(payload),
             OperationKind.ConfigureApiKey => Identity<ConfigureApiKeyRequest>(payload),
             OperationKind.SetDispatch => Identity<bool>(payload),

@@ -17,7 +17,6 @@ internal readonly record struct GrainRequestProbeIdentity(
         => new(envelope.RequestId, envelope.CommandId, envelope.PrincipalId,
             envelope.ReadKind, envelope.CommandKind)
         {
-            OriginalExpiresAt = envelope.CommandKind == OperationKind.EventFeedControl
-                                && envelope.Purpose == EventVectorRequestScope.ParentPurpose ? envelope.ExpiresAt : default
+            OriginalExpiresAt = envelope.ExpiresAt
         };
 }

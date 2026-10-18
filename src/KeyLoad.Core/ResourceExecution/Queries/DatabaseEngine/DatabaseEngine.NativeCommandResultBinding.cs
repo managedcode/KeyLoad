@@ -28,7 +28,6 @@ public sealed partial class DatabaseEngine
             foreach (var lifetime in lifetimes)
             {
                 ResourceOwnerInventoryValidation.Lifetime(lifetime);
-                ResourceRetirementStorage.RequireOpen(charged, lifetime, Limits);
             }
             work.ObserveAuthenticatedResourceLifetimes(lifetimes);
             return true;

@@ -24,7 +24,6 @@ public sealed partial class DatabaseEngine
     /// <param name="blobOptions">Centrally validated blob restore and catalog proof policy.</param>
     /// <param name="claimsOptions">Centrally validated native signed-claim decoding limits.</param>
     /// <param name="timeSeriesOptions">Centrally validated time-series append admission.</param>
-    /// <param name="physicalOwner">Optional immutable configured owner enabling explicit multi-owner local execution fences.</param>
     /// <param name="timeProvider">Optional business clock; hosting runtime time is unaffected.</param>
     public DatabaseEngine(IAtomicStore store, IAuthorizationPolicy authorization, IOptions<DatabaseLimits> limits,
         IOptions<DueWorkExecutionOptions> dueWorkOptions, IOptions<EventSourceExecutionOptions> eventSourceOptions,
@@ -32,7 +31,7 @@ public sealed partial class DatabaseEngine
         IOptions<ChangeFeedExecutionOptions> changeFeedOptions, IOptions<BlobExecutionOptions> blobOptions,
         IOptions<NativeClaimsExecutionOptions> claimsOptions,
         IOptions<TimeSeriesExecutionOptions> timeSeriesOptions,
-        TimeProvider? timeProvider = null, PhysicalShardRecord? physicalOwner = null)
+        TimeProvider? timeProvider = null)
     {
         ArgumentNullException.ThrowIfNull(store);
         ArgumentNullException.ThrowIfNull(authorization);
@@ -67,11 +66,6 @@ public sealed partial class DatabaseEngine
         dueExecution.Validate();
         eventSourceExecution.Validate();
         Store = store;
-        configuredPhysicalOwner = physicalOwner;
-        if (physicalOwner is not null && physicalOwner.Incarnation != store.Identity.Incarnation)
-        {
-            throw Errors.Fail(ErrorCode.OwnershipLost, ForeignPlacementExecution);
-        }
         Authorization = authorization;
         Limits = operationLimits;
         analyticalReadGate = new(operationLimits.MaxConcurrentQueries);
@@ -81,7 +75,6 @@ public sealed partial class DatabaseEngine
         Durability = store.Identity.Durability;
     }
 
-    private readonly PhysicalShardRecord? configuredPhysicalOwner;
     private readonly ChangeFeedExecutionOptions changeFeedExecution;
     internal BlobExecutionOptions BlobExecution
     {
@@ -154,24 +147,23 @@ public sealed partial class DatabaseEngine
     {
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(partition);
-        RequireLocalResourceOwner(view, partition);
         return BindResourceDefinition(view, partition, name, kind);
     }
 
-    /// <summary>Creates a commit token from the placement witness in the command's existing native view.</summary>
+    /// <summary>Creates a commit token from the local storage identity in the command's existing native view.</summary>
     /// <param name="view">The command's already-owned transaction or committed read view.</param>
     /// <param name="partition">Complete atomic partition identity.</param>
     /// <param name="position">Applied commit position.</param>
-    /// <returns>The token bound to the resolved incarnation and placement epoch.</returns>
-    internal static CommitToken Token(IKeyValueView view, PartitionRef partition, long position)
+    /// <returns>The token bound to the resolved storage incarnation.</returns>
+    internal CommitToken Token(IKeyValueView view, PartitionRef partition, long position)
     {
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(partition);
         var owner = ReadPlacementWitness(view, partition);
-        return new(owner.Incarnation, partition.AtomicPartitionId, position, owner.PlacementEpoch);
+        return new(owner.Incarnation, partition.AtomicPartitionId, position);
     }
 
-    internal static void ValidateCommitToken(IKeyValueView view, PartitionRef partition, CommitToken token,
+    internal void ValidateCommitToken(IKeyValueView view, PartitionRef partition, CommitToken token,
         ErrorCode failureCode, string safeDetail)
     {
         ArgumentNullException.ThrowIfNull(view);
@@ -179,7 +171,7 @@ public sealed partial class DatabaseEngine
         ArgumentNullException.ThrowIfNull(token);
         var owner = ReadPlacementWitness(view, partition);
         if (token.Incarnation != owner.Incarnation || token.AtomicPartitionId != partition.AtomicPartitionId
-            || token.Position < DatabaseEngineMinimumPositiveCount || token.OwnershipEpoch != owner.PlacementEpoch)
+            || token.Position < DatabaseEngineMinimumPositiveCount)
         {
             throw Errors.Fail(failureCode, safeDetail);
         }

@@ -66,7 +66,6 @@ public static class ClusterRestoreMappingValidation
     {
         if (target is null || target.PhysicalShardId == Guid.Empty || target.Incarnation == Guid.Empty
             || target.VoterIds.IsDefaultOrEmpty
-            || target.PlacementEpoch != PhysicalShardCatalogProtocol.InitialPlacementEpoch
             || sources.ContainsKey(target.PhysicalShardId) || originalIncarnations.Contains(target.Incarnation)
             || !targetIds.Add(target.PhysicalShardId) || !incarnations.Add(target.Incarnation))
         {

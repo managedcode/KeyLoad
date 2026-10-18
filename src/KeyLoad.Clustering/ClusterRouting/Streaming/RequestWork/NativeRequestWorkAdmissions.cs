@@ -133,19 +133,6 @@ internal sealed class NativeRequestWorkAdmissions(IOptions<GrainRoutingOptions> 
         return parent;
     }
 
-    internal NativeCommandObservation FindObservation(NativeCommandObservationHandleV1 handle,
-        PhysicalShardRecord actualOwner, SiloStorageIdentity actualRuntime, KeyLoad.Core.DatabaseEngine database)
-    {
-        if (!active.TryGetValue((handle.ObservationId, NativeRequestWorkKind.ReadCapability), out var lease)
-            || lease.CommandObservation is not { } observation)
-        {
-            throw Errors.Fail(ErrorCode.OwnershipLost, NativeRequestWorkLimits.LeaseIdentityMessage);
-        }
-        RequireActive(lease);
-        observation.RequireIdentity(handle, actualOwner, actualRuntime, database);
-        return observation;
-    }
-
     internal bool HasReservedChild(Guid requestId)
         => active.TryGetValue((requestId, NativeRequestWorkKind.RequestProducer), out var frame)
             && frame.ChildReservation is not null;

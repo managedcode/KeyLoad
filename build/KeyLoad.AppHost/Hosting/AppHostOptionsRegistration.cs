@@ -29,7 +29,6 @@ internal static class AppHostOptionsRegistration
         var cluster = Bind<ClusterDeploymentOptions>(builder.Configuration, value => value.IsValid(), ClusterDeploymentOptions.ValidationMessage);
         var command = Bind<CommandAdmissionLimits>(builder.Configuration.GetSection(CommandAdmissionLimits.SectionName), value => Validate(value.Validate), CommandAdmissionLimits.ValidationMessage);
         var http = Bind<HttpAdmissionLimits>(builder.Configuration.GetSection(HttpAdmissionLimits.SectionName), value => Validate(value.Validate), HttpAdmissionLimits.ValidationMessage);
-        var replay = Bind<KeyLoad.Clustering.ReplicaReplayLimits>(builder.Configuration.GetSection(ClusterDeploymentOptions.ReplaySection), value => Validate(() => value.Validate(cluster.Value.ReplicaCount)), ClusterDeploymentOptions.ValidationMessage);
         var profile = BindProfileExecution(builder.Configuration);
         var deployment = Bind<BenchmarkDeploymentOptions>(builder.Configuration.GetSection(BenchmarkDeploymentOptions.SectionName), value => value.IsValid(), BenchmarkDeploymentOptions.ValidationMessage);
         var relay = Bind<BenchmarkRelayOptions>(builder.Configuration, _ => true, BenchmarkDeploymentOptions.ValidationMessage);
@@ -43,12 +42,11 @@ internal static class AppHostOptionsRegistration
         var imageExecution = Bind<ContainerImageExecutionOptions>(builder.Configuration.GetSection(ContainerImageExecutionOptions.SectionName),
             options => options.IsValid(), ContainerImageExecutionOptions.ValidationMessage);
         var provenance = BenchmarkProvenanceRegistration.Bind();
-        var isolatedReplay = IsolatedKeyLoadReplayOptionsRegistration.Bind(builder.Configuration);
         var isolatedAdmission = Bind<KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions>(
             builder.Configuration.GetSection(KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions.SectionName),
             value => value.IsValid(), KeyLoad.Comparisons.IsolatedKeyLoadAdmissionOptions.ValidationMessage);
         var runtime = new AppHostRuntimeOptions(execution, startup, resources, provenance, control, images, imageExecution, localImage,
-            cluster, command, http, replay, profile, deployment, relay, isolatedReplay,
+            cluster, command, http, profile, deployment, relay,
             isolatedAdmission, coverage, coverageImage);
         Register(builder.Services, runtime);
         return runtime;
@@ -59,7 +57,6 @@ internal static class AppHostOptionsRegistration
         services.AddSingleton(runtime.Cluster);
         services.AddSingleton(runtime.CommandAdmission);
         services.AddSingleton(runtime.HttpAdmission);
-        services.AddSingleton(runtime.ReplayAdmission);
         services.AddSingleton(runtime.Profile);
         services.AddSingleton(runtime.Deployment);
         services.AddSingleton(runtime.BenchmarkRelay);

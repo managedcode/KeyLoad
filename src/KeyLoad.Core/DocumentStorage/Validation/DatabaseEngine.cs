@@ -18,7 +18,6 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, DocumentTokenWrongIncarnation);
         }
-        if (token.AtomicPartitionId != partition.AtomicPartitionId || token.OwnershipEpoch != owner.PlacementEpoch)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, DocumentTokenOutOfScope);
         }

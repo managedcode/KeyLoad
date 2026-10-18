@@ -17,18 +17,13 @@ internal static class NativeConnectionCommandExecution
             // Execution expiry remains an admission check before any new command invocation.
             codec.ValidateScope(request.Envelope);
             GrainIdentityContext.Validate(request.Envelope, request.Envelope.RequestId);
-            var partition = PhysicalCommandActorKey.Resolve(request, services.GetService<IPhysicalRequestPlacement>());
+            var partition = GrainPartitionResolver.Resolve(request);
             stage = GrainFailureStage.CapabilityExecution;
             var database = services.GetRequiredService<DatabaseEngine>();
             var work = new ReadExecutionBudget(database.OperationLimitsOptions, clock, token);
             work.ConstrainLifetime(request.Envelope.ExpiresAt);
             work.AttachResourceLifetimeBinding(binding);
             var target = grains.GetGrain<ICommandPartitionGrain>(partition);
-            if (NativeCommandObservationScope.IsEligible(request))
-            {
-                return await NativeCommandObservationSourceExecution.ExecuteAsync(request, target, services,
-                    codec, clock, work, binding, token).ConfigureAwait(true);
-            }
             var reply = await target.ExecuteAsync(signed, token).ConfigureAwait(true);
             await NativeCommandResultWorkBinding.BindBeforePublicationAsync(services, clock, request, reply,
                 work, binding, token).ConfigureAwait(true);

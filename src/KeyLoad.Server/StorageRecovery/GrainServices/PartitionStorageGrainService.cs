@@ -1,4 +1,6 @@
 using OpenTelemetry;
+using KeyLoad.Clustering;
+using ManagedCode.Communication.CQRS;
 
 namespace KeyLoad.Server;
 
@@ -8,7 +10,7 @@ namespace KeyLoad.Server;
 /// <param name="loggerFactory">The borrowed native logger factory.</param>
 /// <param name="owner">The same silo-local owner retained through opening and eventual joined physical close.</param>
 internal sealed class PartitionStorageGrainService(GrainId grainId, Silo silo, ILoggerFactory loggerFactory,
-    PartitionHostApplicationOwner owner) : GrainService(grainId, silo, loggerFactory), ISiloDatabaseService
+    PartitionHostApplicationOwner owner, IGrainFactory grains) : GrainService(grainId, silo, loggerFactory), ISiloDatabaseService
 {
     private readonly PartitionHostApplicationOwner owner = owner;
 
@@ -24,6 +26,16 @@ internal sealed class PartitionStorageGrainService(GrainId grainId, Silo silo, I
 
     public Task<OperationResult> ApplyAsync(ReplicatedOperation operation, CancellationToken cancellationToken)
         => Task.FromResult(owner.Borrow().Database.ApplyStorageOperation(operation, cancellationToken));
+
+    public IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> ExecuteStreamAsync(
+        string signedRequest, CancellationToken cancellationToken)
+        => grains.GetGrain<IRequestWorkerGrain>(RequestWorkerIdentity.ForRequests())
+            .ExecuteStreamAsync(signedRequest, cancellationToken);
+
+    public Task<GrainOperationReply> ExecuteCommandAsync(string signedRequest, string actorKey,
+        CancellationToken cancellationToken)
+        => grains.GetGrain<IRequestWorkerGrain>(RequestWorkerIdentity.ForCommands())
+            .ExecuteCommandAsync(signedRequest, actorKey, cancellationToken);
 
     /// <inheritdoc />
     public override async Task Init(IServiceProvider serviceProvider)

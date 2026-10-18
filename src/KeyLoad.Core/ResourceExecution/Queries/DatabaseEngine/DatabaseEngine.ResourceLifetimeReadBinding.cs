@@ -11,7 +11,6 @@ public sealed partial class DatabaseEngine
     {
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(partition);
-        RequireLocalResourceOwner(view, partition);
         var pair = ReadBoundResourcePair(view, partition, name, kind);
         BindAuthenticatedReadResourceLifetime(view, partition, pair.Definition, pair.Lifetime);
         return pair.Definition;
@@ -30,7 +29,6 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, ResourceEffectAdmissionProtocol.Changed);
         }
-        ResourceRetirementStorage.RequireOpen(view, lifetime, Limits);
         if (view is IResourceLifetimeReadBindingView binding)
         {
             binding.BindResourceLifetime(partition, definition, lifetime);

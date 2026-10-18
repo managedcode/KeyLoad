@@ -94,6 +94,5 @@ public sealed partial class DatabaseEngine
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, TopicPurgeScanExhausted);
         }
-        EventVectorRetentionPins.Require(view, source, tail, cut, OperationLimitsOptions, budget.ObserveBytes);
     }
 }

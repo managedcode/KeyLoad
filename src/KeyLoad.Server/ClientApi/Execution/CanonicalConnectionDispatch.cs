@@ -24,8 +24,6 @@ internal static class CanonicalConnectionDispatch
                     var reply = await node.ExecuteAsync(actual.RequestId, actual.SignedRequest, actual.Command,
                         connection.Token).ConfigureAwait(false);
                     var value = NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value;
-                    global::KeyLoad.Server.Features.GraphTraversal.RemoteGraphPublicResult.RequireComplete(
-                        operation.CommandKind, operation.CommandId, reply, value);
                     connection.Token.ThrowIfCancellationRequested();
                     result = PublicReadResponse.Create(operation.ReadKind, operation.CommandKind, value);
                 }, failures).ConfigureAwait(false);

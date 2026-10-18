@@ -10,10 +10,6 @@ internal sealed class AppHostControlOptions
     {
         get; set;
     }
-    internal bool ProtocolCohortEnabled
-    {
-        get; set;
-    }
     internal bool Ephemeral
     {
         get; set;
@@ -23,10 +19,6 @@ internal sealed class AppHostControlOptions
         get; set;
     }
     internal bool TargetSelected
-    {
-        get; set;
-    }
-    internal bool ProtocolCohortConfigured
     {
         get; set;
     }

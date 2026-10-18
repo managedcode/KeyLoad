@@ -23,7 +23,6 @@ public sealed partial class DatabaseEngine
         var placement = ResolveRegisteredPlacement(destination.Partition, catalog.DefaultShard);
         if (placement.PhysicalShardId == configuredPhysicalOwner.PhysicalShardId)
         {
-            RequireLocalResourceOwner(view, destination.Partition);
             return null;
         }
         var directory = PhysicalOwnerDirectorySerialization.Read(view)
@@ -35,7 +34,6 @@ public sealed partial class DatabaseEngine
         var selected = directory.Owners.SingleOrDefault(entry => entry.Owner.PhysicalShardId == placement.PhysicalShardId)
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, RemoteTransferPeerProtocol.Invalid);
         if (placement.Incarnation != selected.Owner.Incarnation
-            || !placement.VoterIds.SequenceEqual(selected.Owner.VoterIds, StringComparer.Ordinal))
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, RemoteTransferPeerProtocol.Invalid);
         }

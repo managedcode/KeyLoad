@@ -77,7 +77,6 @@ public sealed partial class DatabaseEngine
             }
             return ApplyCommittedCommand(transaction, admitted, position, replicationIndex);
         });
-        ClosePublishedResourceRetirementFence(committed);
         return committed;
     }
 
@@ -92,13 +91,13 @@ public sealed partial class DatabaseEngine
         }
         var fingerprint = CommandFingerprint(operation);
         var outcome = ExecuteAndBuildOutcome(rosterTransaction, operation, position, replicationIndex, fingerprint,
-            partitionScope, out var replayed, out var selection, out var persistOutcome, out var eventVectorEligibility);
+            partitionScope, out var replayed, out var selection, out var persistOutcome);
         if (replayed)
         {
             return outcome.Result;
         }
         PersistCommandOutcome(rosterTransaction, operation, selection.Key, outcome, replicationIndex, persistOutcome);
-        return ValidateCompiledCommand(rosterTransaction, operation, selection.Key, outcome, replicationIndex, persistOutcome, Store.Identity.Incarnation, eventVectorEligibility, OperationLimitsOptions);
+        return ValidateCompiledCommand(rosterTransaction, operation, selection.Key, outcome, replicationIndex, persistOutcome, Store.Identity.Incarnation);
     }
 
     private static OperationResult? ReadAlreadyAppliedOutcome(AtomicPartitionRosterTransaction transaction, ReplicatedOperation operation,
@@ -120,11 +119,9 @@ public sealed partial class DatabaseEngine
 
     private StoredOutcome ExecuteAndBuildOutcome(AtomicPartitionRosterTransaction transaction, ReplicatedOperation operation,
         long position, long replicationIndex, string fingerprint, CommandOutcomePartitionScope partitionScope,
-        out bool replayed, out CommandOutcomeSelection selection, out bool persistOutcome,
-        out EventVectorFailedParentEligibility? eventVectorEligibility)
+        out bool replayed, out CommandOutcomeSelection selection, out bool persistOutcome)
     {
         replayed = false;
-        eventVectorEligibility = null;
         selection = CommandOutcomeKeyResolver.ForNew(operation.PrincipalId, operation.Id, partitionScope);
         persistOutcome = true;
         long policyEpoch = AtomicCommandCommitInitialSequence;
@@ -147,15 +144,11 @@ public sealed partial class DatabaseEngine
                 return previous;
             }
             RequireOriginalEffectAdmission(transaction, principal, operation);
-            if (!RequirePreparedResourceRetirementClock(transaction, operation))
-            {
-                ValidateCommandClock(transaction, operation.EvaluatedAt);
-            }
+            ValidateCommandClock(transaction, operation.EvaluatedAt);
             ValidateQueueRetryDecisions(transaction, principal, operation);
             blobAuthority = CaptureBlobOutcomeAuthority(transaction, principal, operation);
             transferFailure = CaptureRemoteTransferFailureAuthority(transaction, principal, operation);
             remoteTransferAuthority = CaptureRemoteTransferOutcomeAuthority(transaction, principal, operation);
-            eventVectorEligibility = EventVectorFailedParentLocator.Capture(transaction, principal, operation, Store.Identity.Incarnation, Authorization, OperationLimitsOptions);
             result = Execute(transaction, principal, operation, replicationIndex > AtomicCommandCommitInitialSequence ? replicationIndex : position,
                 placement);
             compositionAuthority = CaptureCompositionOutcome(transaction, principal, operation, result);
@@ -176,10 +169,6 @@ public sealed partial class DatabaseEngine
         persistOutcome = selection.Outcome is null;
         var actualOutcome = BuildStoredOutcome(fingerprint, policyEpoch, result, blobAuthority, compositionAuthority,
             partitionScope, onlineTextAuthority, transferFailure, remoteTransferAuthority);
-        if (persistOutcome)
-        {
-            EventVectorFailedParentLocator.Write(transaction, eventVectorEligibility, actualOutcome, OperationLimitsOptions);
-        }
         return actualOutcome;
     }
 
@@ -269,8 +258,7 @@ public sealed partial class DatabaseEngine
     }
 
     private static OperationResult ValidateCompiledCommand(AtomicPartitionRosterTransaction transaction, ReplicatedOperation operation,
-        byte[] resultKey, StoredOutcome outcome, long replicationIndex, bool persistOutcome, Guid currentIncarnation, EventVectorFailedParentEligibility? eventVectorEligibility,
-        Microsoft.Extensions.Options.IOptions<DatabaseLimits> operationLimitsOptions)
+        byte[] resultKey, StoredOutcome outcome, long replicationIndex, bool persistOutcome, Guid currentIncarnation)
     {
         try
         {
@@ -292,10 +280,6 @@ public sealed partial class DatabaseEngine
                 RemoteTransferFailureAuthority = null,
                 RemoteTransferAuthority = null
             };
-            if (persistOutcome)
-            {
-                EventVectorFailedParentLocator.Write(transaction, eventVectorEligibility, actualFailure, operationLimitsOptions);
-            }
             PersistCommandOutcome(transaction, operation, resultKey, actualFailure, replicationIndex, persistOutcome);
             transaction.PersistCandidates(currentIncarnation);
             transaction.ValidateCommit();

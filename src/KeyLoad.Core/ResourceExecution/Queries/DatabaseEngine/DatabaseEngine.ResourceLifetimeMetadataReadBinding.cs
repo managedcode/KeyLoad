@@ -18,7 +18,6 @@ public sealed partial class DatabaseEngine
         JsonData.Identifier(resourceName);
         var pair = ReadBoundResourceMetadataPair(alreadyChargedView, tenantId, databaseId,
             transactionDomainId, resourceName, expectedKind);
-        ResourceRetirementStorage.RequireOpen(alreadyChargedView, pair.Lifetime, Limits);
         if (alreadyChargedView is IResourceEffectObservation observation)
         {
             observation.ObserveLifetime(pair.Lifetime);

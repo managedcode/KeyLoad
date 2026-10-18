@@ -7,9 +7,7 @@ internal static class ClusterBackupMetadataEquality
     internal static bool Placement(AtomicPartitionPlacementResolution expected, AtomicPartitionPlacementResolution actual)
         => expected.Version == actual.Version && expected.Partition == actual.Partition
             && expected.PhysicalShardId == actual.PhysicalShardId && expected.Incarnation == actual.Incarnation
-            && expected.PlacementEpoch == actual.PlacementEpoch && expected.DirectoryRevision == actual.DirectoryRevision
             && expected.Revision == actual.Revision && expected.IsFallback == actual.IsFallback
-            && !expected.VoterIds.IsDefault && expected.VoterIds.SequenceEqual(actual.VoterIds, StringComparer.Ordinal);
 
     internal static bool Registered(PhysicalOwnerDirectoryV1? expected, PhysicalOwnerDirectoryV1? actual)
     {

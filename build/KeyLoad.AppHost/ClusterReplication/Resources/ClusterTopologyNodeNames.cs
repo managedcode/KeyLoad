@@ -1,18 +1,14 @@
 namespace KeyLoad.AppHost.Features.ClusterReplication;
 
-/// <summary>Selects the exact physical voter resource names for ordinary, benchmark and functional topologies.</summary>
+/// <summary>Creates native silo resource names for configured and explicitly qualified comparison topologies.</summary>
 internal static class ClusterTopologyNodeNames
 {
-    private const string FirstVoterName = "node1";
-    private const string SecondVoterName = "node2";
-    private const string ThirdVoterName = "node3";
     private const string FunctionalEphemeralOwnershipRequired = "Functional topology requires explicit ephemeral ownership.";
     private const string NodeNamePrefix = "node";
     private const int FirstNodeOrdinal = 1;
     private const int DefaultSiloCount = 3;
-    private const int SingleFunctionalNodeCount = 1;
     private const int MinimumBenchmarkNodes = 1;
-    private static readonly string[] NodeNames = [FirstVoterName, SecondVoterName, ThirdVoterName];
+    private const int DistributedBenchmarkNodes = 3;
 
     internal static string[] Read(int? benchmarkNodeCount, int? functionalNodeCount, bool ephemeral, int siloCount = DefaultSiloCount)
     {
@@ -20,24 +16,20 @@ internal static class ClusterTopologyNodeNames
         {
             throw new ArgumentException(FunctionalEphemeralOwnershipRequired, nameof(functionalNodeCount));
         }
-        if (functionalNodeCount is not null)
+        if (functionalNodeCount is not null && benchmarkNodeCount is not null)
         {
-            if (benchmarkNodeCount is not null
-                || functionalNodeCount.Value != SingleFunctionalNodeCount && functionalNodeCount.Value != NodeNames.Length)
-            {
-                throw new ArgumentOutOfRangeException(nameof(functionalNodeCount));
-            }
-            return [.. NodeNames.Take(functionalNodeCount.Value)];
+            throw new ArgumentException(FunctionalEphemeralOwnershipRequired, nameof(functionalNodeCount));
         }
-        if (benchmarkNodeCount is null)
-        {
-            return Enumerable.Range(FirstNodeOrdinal, siloCount).Select(index => NodeNamePrefix + index.ToString(
-                System.Globalization.CultureInfo.InvariantCulture)).ToArray();
-        }
-        if (benchmarkNodeCount.Value != MinimumBenchmarkNodes && benchmarkNodeCount.Value != NodeNames.Length)
+        if (benchmarkNodeCount is not null && benchmarkNodeCount.Value is not (MinimumBenchmarkNodes or DistributedBenchmarkNodes))
         {
             throw new ArgumentOutOfRangeException(nameof(benchmarkNodeCount));
         }
-        return [.. NodeNames.Take(benchmarkNodeCount.Value)];
+        var selectedCount = benchmarkNodeCount ?? functionalNodeCount ?? siloCount;
+        if (selectedCount < FirstNodeOrdinal)
+        {
+            throw new ArgumentOutOfRangeException(nameof(siloCount));
+        }
+        return Enumerable.Range(FirstNodeOrdinal, selectedCount).Select(index => NodeNamePrefix + index.ToString(
+            System.Globalization.CultureInfo.InvariantCulture)).ToArray();
     }
 }

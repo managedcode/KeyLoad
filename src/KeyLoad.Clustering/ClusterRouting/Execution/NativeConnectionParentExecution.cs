@@ -15,19 +15,6 @@ internal static class NativeConnectionParentExecution
         IOptions<GrainRoutingOptions> options, ILogger diagnostics, global::Orleans.Runtime.IGrainContext context,
         ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, NativeCqrsStreamPurpose purpose)
     {
-        if (request.Envelope.Purpose == ResourceRetirementCommandScope.Purpose)
-        {
-            return await NativeResourceRetirementParentExecution.ExecuteAsync(request, services, clock, codec,
-                context, writer, purpose.WorkBinding, purpose.RecordFailure).ConfigureAwait(true);
-        }
-        if (request.Envelope.Purpose == RemoteGraphRequestScope.ParentPurpose)
-        {
-            return await RemoteGraphParentExecution.ExecuteAsync(request, services, clock, codec, context, writer, purpose.WorkBinding).ConfigureAwait(true);
-        }
-        if (request.Envelope.Purpose == EventVectorRequestScope.ParentPurpose)
-        {
-            return await EventVectorParentExecution.ExecuteAdmitAsync(request, services, clock, codec, context, writer, purpose.WorkBinding).ConfigureAwait(true);
-        }
         if (request.Envelope.CommandKind == OperationKind.MaintainOnlineTextIndex)
         {
             var result = await OnlineTextExecution.ExecuteAsync(request, executeChild, services, codec,

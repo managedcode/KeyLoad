@@ -9,13 +9,13 @@ internal sealed class PartitionStorageLifecycle(PartitionHostApplicationOwner ow
 {
     private const string LifecycleName = "KeyLoad.PartitionStorage";
     private const int NoOriginalFailures = 0;
-    private const int AfterReplicaDrainStage = ServiceLifecycleStage.RuntimeStorageServices - 1;
+    private const int AfterRequestDrainStage = ServiceLifecycleStage.RuntimeStorageServices - 1;
     private readonly Lock gate = new();
     private Task? closing;
 
     public void Participate(ISiloLifecycle lifecycle)
     {
-        lifecycle.Subscribe(LifecycleName, AfterReplicaDrainStage, _ => Task.CompletedTask, StopAsync);
+        lifecycle.Subscribe(LifecycleName, AfterRequestDrainStage, _ => Task.CompletedTask, StopAsync);
     }
 
     internal Task StopAsync(CancellationToken cancellationToken)

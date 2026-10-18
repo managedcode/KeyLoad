@@ -1,7 +1,6 @@
 using System.Text.Json;
 using KeyLoad.Clustering;
 using KeyLoad.Query;
-using KeyLoad.Server.Features.EventStreams;
 using Microsoft.Extensions.Options;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
@@ -29,7 +28,6 @@ internal sealed class McpToolDispatcher(HttpContext context, McpRequestState sta
                 throw Errors.Fail(ErrorCode.Validation, McpGatewayMetaProtocol.InvalidArguments);
             }
             var meta = McpGatewayMetaArgumentReader.Read(state.MetaOperation, parameters.Arguments, state.ExecutionOptions);
-            using var progress = EventFeedTailMcpProgressOwner.Acquire(context, request, state);
             return state.MetaOperation switch
             {
                 McpGatewayMetaOperation.Search => await SearchAsync(meta, cancellationToken).ConfigureAwait(false),
@@ -71,10 +69,6 @@ internal sealed class McpToolDispatcher(HttpContext context, McpRequestState sta
                     context.RequestServices.GetRequiredService<IOptions<DatabaseLimits>>(),
                     context.RequestServices.GetRequiredService<IOptions<QueryExecutionOptions>>(), cancellationToken)
                 : descriptor.Decode(arguments, state.MaximumPayloadBytes);
-            if (descriptor.Name == EventFeedTailPublicProtocol.Tool)
-            {
-                return await EventFeedTailMcpOperation.ExecuteAsync(context, state, operation, cancellationToken).ConfigureAwait(false);
-            }
             var reply = await CanonicalOperationGateway.ExecuteAsync(context, operation.ReadKind,
                 operation.CommandKind, operation.CommandId, operation.Payload, cancellationToken).ConfigureAwait(false);
             return state.Success(reply, cancellationToken);

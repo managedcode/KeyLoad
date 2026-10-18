@@ -7,7 +7,6 @@ namespace KeyLoad.Core;
 public sealed partial class DatabaseEngine
 {
     private const string ClusterAdministrationRequiredMessage = "Cluster administration is required.";
-    private const string StalePartitionOwnershipMessage = "The partition ownership epoch is stale.";
     private const string MutationCountBudgetMessage = "The mutation count exceeds its budget.";
     private const string UnsupportedBatchMutationMessage = "This mutation is unsupported.";
     private const string CompositionBatchRequiredMessage = "Database composition requires a standalone atomic command.";
@@ -43,14 +42,6 @@ public sealed partial class DatabaseEngine
             case OperationKind.Bm25CorpusPublicationPhase:
                 AuthorizeBm25CorpusPublication(view, principal, operation);
                 return null;
-            case OperationKind.RemoteGraphSource:
-            case OperationKind.RemoteGraphReceive:
-            case OperationKind.RemoteGraphComplete:
-                return AuthorizeRemoteGraphPhase(view, principal, operation);
-            case OperationKind.EventFeedControl:
-                return AuthorizeEventVectorControl(view, principal, operation);
-            case OperationKind.EventFeedSourcePhase:
-                return AuthorizeEventVectorSource(view, principal, operation);
             case OperationKind.Batch:
                 var transferProof = ReadRemoteTransferNativeProof(operation);
                 return transferProof is null
@@ -125,11 +116,6 @@ public sealed partial class DatabaseEngine
     private AtomicPartitionPlacementResolution AuthorizeBatch(IKeyValueView view, PrincipalRecord principal, CommandRequest request, bool allowEmpty = false)
     {
         var placement = ReadPlacementWitness(view, request.Partition);
-        if (request.OwnershipEpoch != placement.PlacementEpoch)
-        {
-            throw Errors.Fail(ErrorCode.OwnershipLost, StalePartitionOwnershipMessage);
-        }
-
         AuthorizeBatchMutations(view, principal, request, allowEmpty);
         return placement;
     }
@@ -177,13 +163,4 @@ public sealed partial class DatabaseEngine
         }
     }
 
-    private AtomicPartitionPlacementResolution? AuthorizeRemoteGraphPhase(IKeyValueView view,
-        PrincipalRecord principal, ReplicatedOperation operation)
-        => operation.Kind switch
-        {
-            OperationKind.RemoteGraphSource => AuthorizeRemoteGraphSource(view, principal, operation),
-            OperationKind.RemoteGraphReceive => AuthorizeRemoteGraphReceive(view, principal, operation),
-            OperationKind.RemoteGraphComplete => AuthorizeRemoteGraphComplete(view, principal, operation),
-            _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedOperationMessage)
-        };
 }

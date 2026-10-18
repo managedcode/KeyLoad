@@ -21,10 +21,4 @@ public sealed record AdminNodeSnapshot([property: Orleans.Id(0)] DateTimeOffset 
     [Orleans.Id(6)]
     public ImmutableArray<string> ActiveSilos { get; init; } = [];
 
-    /// <summary>Gets bounded native derived history of this physical node; null when the embedding host provides none.</summary>
-    [Orleans.Id(7)]
-    public OperationalAnalyticsReport? OperationalAnalytics
-    {
-        get; init;
-    }
 }

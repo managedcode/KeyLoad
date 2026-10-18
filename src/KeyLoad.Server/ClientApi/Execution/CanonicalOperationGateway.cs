@@ -17,35 +17,26 @@ internal static class CanonicalOperationGateway
     /// <returns>The exact canonical reply and actual execution identity.</returns>
     internal static Task<DispatchedOperationReply> ExecuteAsync(HttpContext context, GrainReadKind? readKind,
         OperationKind? commandKind, Guid commandId, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
-        => ExecuteCoreAsync(context, readKind, commandKind, commandId, payload, null, cancellationToken);
-
-    internal static Task<DispatchedOperationReply> ExecuteTailWithProgressAsync(HttpContext context,
-        Guid commandId, ReadOnlyMemory<byte> payload, Func<GrainRequestProgress, CancellationToken, ValueTask> progress,
-        CancellationToken cancellationToken)
-        => ExecuteCoreAsync(context, null, OperationKind.EventFeedControl, commandId, payload, progress, cancellationToken);
+        => ExecuteCoreAsync(context, readKind, commandKind, commandId, payload, cancellationToken);
 
     private static async Task<DispatchedOperationReply> ExecuteCoreAsync(HttpContext context, GrainReadKind? readKind,
-        OperationKind? commandKind, Guid commandId, ReadOnlyMemory<byte> payload,
-        Func<GrainRequestProgress, CancellationToken, ValueTask>? progress, CancellationToken cancellationToken)
+        OperationKind? commandKind, Guid commandId, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
     {
         var execution = await ExecuteNativeAsync(context, readKind, commandKind, commandId, payload,
-            progress, cancellationToken).ConfigureAwait(false);
+            cancellationToken).ConfigureAwait(false);
         var requestId = execution.RequestId;
         var reply = execution.Reply;
         try
         {
             var value = NativeSerialization.Deserialize<GrainValue>(reply.Payload.Span);
-            global::KeyLoad.Server.Features.GraphTraversal.RemoteGraphPublicResult.RequireComplete(commandKind, commandId, reply, value.Value);
             cancellationToken.ThrowIfCancellationRequested();
             return new(requestId, McpBoundedJson.Serialize(PublicReadResponse.Create(readKind, commandKind, value.Value),
                 context.RequestServices.GetRequiredService<IOptions<McpExecutionOptions>>().Value.MaximumDataReplyBytes));
         }
         catch (Exception failure) when (
-            (global::KeyLoad.Server.Features.GraphTraversal.RemoteGraphGatewaySigning.HandlesCommand(commandKind)
-                && NativeCqrsBoundaryErrors.IsNonFatal(failure))
-            || (commandKind is OperationKind.ReceiveAcrossLanes or OperationKind.MaintainAnnIndex
+            commandKind is OperationKind.ReceiveAcrossLanes or OperationKind.MaintainAnnIndex
                 or OperationKind.MaintainTextIndex or OperationKind.MaintainOnlineTextIndex
-                && failure is KeyLoadException or System.Text.Json.JsonException or ArgumentException))
+                && failure is KeyLoadException or System.Text.Json.JsonException or ArgumentException)
         {
             GrainFailureDiagnostics.Log(context.RequestServices.GetRequiredService<ILogger<OrleansNode>>(),
                 failure, requestId, GrainFailureStage.ReplyEncoding, ErrorCode.UnknownWriteOutcome);
@@ -53,27 +44,11 @@ internal static class CanonicalOperationGateway
         }
     }
 
-    internal static async Task<EventFeedControlResult> ExecuteTailResultAsync(HttpContext context, Guid commandId,
-        ReadOnlyMemory<byte> payload, Func<GrainRequestProgress, CancellationToken, ValueTask> progress,
-        CancellationToken cancellationToken)
-    {
-        var execution = await ExecuteNativeAsync(context, null, OperationKind.EventFeedControl, commandId,
-            payload, progress, cancellationToken).ConfigureAwait(false);
-        cancellationToken.ThrowIfCancellationRequested();
-        return NativeSerialization.Deserialize<GrainValue>(execution.Reply.Payload.Span).Value is EventFeedControlResult value
-            ? value : throw Errors.Fail(ErrorCode.RecoveryRequired, GrainRoutingProtocol.InvalidRequest);
-    }
-
     private static async Task<NativeDispatch> ExecuteNativeAsync(HttpContext context, GrainReadKind? readKind,
-        OperationKind? commandKind, Guid commandId, ReadOnlyMemory<byte> payload,
-        Func<GrainRequestProgress, CancellationToken, ValueTask>? progress, CancellationToken cancellationToken)
+        OperationKind? commandKind, Guid commandId, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
     {
         var actual = CanonicalOperationRequestPreparation.Create(context, readKind, commandKind,
             commandId, payload, cancellationToken);
-        if (progress is not null && !actual.ReceivingOnly)
-        {
-            throw Errors.Fail(ErrorCode.Validation, GrainRoutingProtocol.InvalidRequest);
-        }
         var requestId = actual.RequestId;
         var started = DatabasePhaseTelemetry.Begin();
         var outcome = DatabasePhaseOutcome.Faulted;
@@ -84,9 +59,7 @@ internal static class CanonicalOperationGateway
             using var connection = ServerConnectionFeature.Acquire(context, cancellationToken);
             using var requestContext = node.OpenRequestContext(actual.Principal, requestId,
                 commandId, connection.Token, connection.Id);
-            reply = progress is null
-                ? await node.ExecuteAsync(requestId, actual.SignedRequest, actual.Command, connection.Token).ConfigureAwait(false)
-                : await node.ExecuteTailWithProgressAsync(requestId, actual.SignedRequest, progress, connection.Token).ConfigureAwait(false);
+            reply = await node.ExecuteAsync(requestId, actual.SignedRequest, actual.Command, connection.Token).ConfigureAwait(false);
             outcome = DatabasePhaseOutcome.Completed;
         }
         catch (Exception failure) when (failure is OperationCanceledException or KeyLoadException { Code: ErrorCode.Cancelled })
@@ -98,7 +71,6 @@ internal static class CanonicalOperationGateway
         {
             DatabasePhaseTelemetry.End(DatabasePhaseKind.PublicOperationDispatch, outcome, started);
         }
-        global::KeyLoad.Server.Features.EventStreams.EventVectorGatewaySigning.RefuseIncompleteOpen(commandKind, payload, reply);
         return new(requestId, reply);
     }
 
@@ -106,8 +78,6 @@ internal static class CanonicalOperationGateway
 
     private static string Interrupted(OperationKind? commandKind) => commandKind switch
     {
-        OperationKind.UpsertRemoteGraphEdge or OperationKind.DeleteRemoteGraphEdge
-            or OperationKind.DeliverRemoteGraphEdge => global::KeyLoad.Server.Features.GraphTraversal.RemoteGraphGatewaySigning.Interrupted,
         OperationKind.MaintainTextIndex => TextIndexMaintenanceProtocol.Interrupted,
         OperationKind.MaintainOnlineTextIndex => TextIndexMaintenanceProtocol.Interrupted,
         OperationKind.MaintainAnnIndex => AnnMaintenanceProtocol.Interrupted,

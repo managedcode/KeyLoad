@@ -1,5 +1,4 @@
 using KeyLoad.AppHost.Features.ClusterReplication;
-using KeyLoad.AppHost.Features.ClusterRouting;
 using KeyLoad.AppHost.Features.CodeQuality;
 using KeyLoad.AppHost.Features.StorageRecovery;
 using KeyLoad.AppHost.Features.TestInfrastructure;
@@ -15,7 +14,6 @@ namespace KeyLoad.AppHost.Hosting;
 internal static class AppHostControlOptionsRegistration
 {
     internal const string InvalidContainerFaultSelection = "Container fault commands require an explicit ephemeral CLUSTER test profile.";
-    private const string ProtocolSection = "KeyLoadTests:ProtocolCohort";
     private const string BenchmarkSection = "Benchmarks";
     private const string LoggerModelControlSetting = "KeyLoadTests:LoggerModelControl";
     private const string LoggerModelControlEnabledValue = "true";
@@ -24,11 +22,8 @@ internal static class AppHostControlOptionsRegistration
     private const string DataRootSetting = "KeyLoad:DataRoot";
     private const string InvalidLoggerModelControl = "The C1 logger model control selection is invalid.";
     private const string FunctionalNodeCountSetting = "KeyLoadTests:FunctionalNodeCount";
-    private const string SingleFunctionalNode = "1";
-    private const string ThreeFunctionalNodes = "3";
-    private const int SingleFunctionalNodeCount = 1;
-    private const int ThreeFunctionalNodeCount = 3;
-    private const string InvalidFunctionalTopology = "Functional topology requires one or three real ephemeral nodes and an exclusive owned data root.";
+    private const int MinimumFunctionalNodes = 1;
+    private const string InvalidFunctionalTopology = "Functional topology requires a positive number of real ephemeral silos and an exclusive owned data root.";
     private const int SectionPresenceCount = 1;
 
     internal static IOptions<AppHostControlOptions> Bind(IConfiguration configuration, IOptions<TestExecutionOptions> execution,
@@ -38,12 +33,9 @@ internal static class AppHostControlOptionsRegistration
             new OptionsFactory<AppHostControlOptions>([new ConfigureOptions<AppHostControlOptions>(value =>
             {
                 value.Tests = TestSuiteSettings.Read(configuration, execution, coverage);
-                ProtocolCohortImages.ValidateMode(configuration);
-                value.ProtocolCohortEnabled = configuration.GetValue<bool>(ProtocolCohortImages.EnabledSetting);
                 value.Ephemeral = configuration.GetValue<bool>(EphemeralSetting);
                 value.BenchmarksEnabled = configuration.GetValue<bool>(BenchmarksEnabledSetting);
                 value.TargetSelected = configuration[BenchmarkSessionSelection.TargetSetting] is not null;
-                value.ProtocolCohortConfigured = configuration.GetSection(ProtocolSection).GetChildren().Take(SectionPresenceCount).Any();
                 value.ComparisonSelectorsPresent = HasSection(configuration, BenchmarkSection);
                 value.ContainerFaults = ReadContainerFaults(configuration, value);
                 value.LoggerModelControl = ReadLoggerModelControl(configuration, value);
@@ -63,20 +55,20 @@ internal static class AppHostControlOptionsRegistration
         {
             return null;
         }
-        if (selected is not (SingleFunctionalNode or ThreeFunctionalNodes) || nested
+        if (!int.TryParse(selected, System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture,
+                out var count) || count < MinimumFunctionalNodes || nested
             || configuration[EphemeralSetting] != LoggerModelControlEnabledValue
             || string.IsNullOrWhiteSpace(configuration[DataRootSetting])
             || !Path.IsPathFullyQualified(configuration[DataRootSetting]!)
             || options.Tests is not null || options.BenchmarksEnabled
             || options.TargetSelected || options.ComparisonSelectorsPresent
-            || options.ProtocolCohortEnabled || options.ProtocolCohortConfigured
             || options.ContainerFaults && !options.FunctionalColdReopen
             || options.LoggerModelControl
             || TestSuiteSelectionValidator.HasRetiredBenchmarkSelection(configuration))
         {
             throw new InvalidOperationException(InvalidFunctionalTopology);
         }
-        return selected == SingleFunctionalNode ? SingleFunctionalNodeCount : ThreeFunctionalNodeCount;
+        return count;
     }
 
     private static bool ReadContainerFaults(IConfiguration configuration, AppHostControlOptions options)
@@ -103,7 +95,7 @@ internal static class AppHostControlOptionsRegistration
         if (selected != LoggerModelControlEnabledValue
             || hasNestedSelection
             || options.Tests is not null
-            || options.ProtocolCohortEnabled || options.ProtocolCohortConfigured || options.BenchmarksEnabled
+            || options.BenchmarksEnabled
             || options.TargetSelected || options.ComparisonSelectorsPresent
             || TestSuiteSelectionValidator.HasRetiredBenchmarkSelection(configuration)
             || configuration[LocalClusterImageRequest.EnabledSetting] == LoggerModelControlEnabledValue

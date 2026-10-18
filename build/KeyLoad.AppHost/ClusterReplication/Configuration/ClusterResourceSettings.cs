@@ -1,14 +1,11 @@
 using System.Globalization;
 using KeyLoad;
 using KeyLoad.AppHost.Hosting;
-using KeyLoad.Clustering;
 
 internal static class ClusterResourceSettings
 {
-    private const string SnapshotEnvironment = "KeyLoad__SnapshotThreshold";
     private const string CommandEnvironment = "KeyLoad__CommandAdmission__";
     private const string HttpEnvironment = "KeyLoad__HttpAdmission__";
-    private const string ReplayEnvironment = "KeyLoad__ReplayAdmission__";
     private const string LogEnvironment = "Logging__LogLevel__Default";
     private const string ContainerUserArgument = "--user";
     private static readonly string[] CommandOptions =
@@ -28,21 +25,13 @@ internal static class ClusterResourceSettings
         nameof(HttpAdmissionLimits.MaxBodyBytes), nameof(HttpAdmissionLimits.MaxControlBodyBytes),
         nameof(HttpAdmissionLimits.HeavyReadReservedBytes), nameof(HttpAdmissionLimits.OtherReservedBytes)
     ];
-    private static readonly string[] ReplayOptions =
-    [
-        nameof(ReplicaReplayLimits.CriticalPerVoter), nameof(ReplicaReplayLimits.ForwardPerVoter),
-        nameof(ReplicaReplayLimits.ReadBarrierPerVoter), nameof(ReplicaReplayLimits.DataAppendPerVoter)
-    ];
-
     internal static void Apply(IDistributedApplicationBuilder builder, IResourceBuilder<ContainerResource> resource, string? containerUser)
     {
         KeyLoad.AppHost.Features.ClusterRouting.ClusterTelemetryResources.Apply(resource);
         var options = AppHostOptionsRegistration.Get(builder);
-        resource.WithEnvironment(SnapshotEnvironment, options.Cluster.Value.SnapshotThreshold.ToString(CultureInfo.InvariantCulture))
-            .WithEnvironment(LogEnvironment, options.Cluster.Value.LoggingLevel);
+        resource.WithEnvironment(LogEnvironment, options.Cluster.Value.LoggingLevel);
         Copy(resource, options.CommandAdmission.Value, CommandOptions, CommandEnvironment);
         Copy(resource, options.HttpAdmission.Value, HttpOptions, HttpEnvironment);
-        Copy(resource, options.ReplayAdmission.Value, ReplayOptions, ReplayEnvironment);
         if (containerUser is not null)
         {
             resource.WithContainerRuntimeArgs(ContainerUserArgument, containerUser);

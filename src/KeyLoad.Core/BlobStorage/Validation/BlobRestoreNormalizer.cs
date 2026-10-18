@@ -57,9 +57,6 @@ internal sealed class BlobRestoreNormalizer(DatabaseEngine database)
             {
                 return null;
             }
-            ResourceRetirementStorage.RequireNoRetirement(tx, database.Limits);
-            ResourceRetirementPreparationStorage.RequireNoPreparation(tx, database.Limits);
-            ResourceRetirementPreparedOperationStorage.RequireNoReplacement(tx, database.Limits);
             var marker = new BlobRestoreMarker(BlobKeys.FormatVersion, global.Incarnation,
                 database.Store.Identity.Incarnation, BlobRestorePhase.States, null, ReservedBytesEmptyCount, ObjectKeysEmptyCount, VersionsEmptyCount, ActiveUploadsEmptyCount, ResourcesEmptyCount);
             tx.PutRecord(BlobRestoreFence.MarkerKey, marker);
@@ -71,9 +68,6 @@ internal sealed class BlobRestoreNormalizer(DatabaseEngine database)
     {
         const int EmptyPageCount = 0;
 
-        ResourceRetirementStorage.RequireNoRetirement(tx, database.Limits);
-        ResourceRetirementPreparationStorage.RequireNoPreparation(tx, database.Limits);
-        ResourceRetirementPreparedOperationStorage.RequireNoReplacement(tx, database.Limits);
         RequireMarker(tx, expected);
         var marker = expected;
         foreach (var record in page)
@@ -146,9 +140,6 @@ internal sealed class BlobRestoreNormalizer(DatabaseEngine database)
 
         database.Store.Commit((tx, _) =>
         {
-            ResourceRetirementStorage.RequireNoRetirement(tx, database.Limits);
-            ResourceRetirementPreparationStorage.RequireNoPreparation(tx, database.Limits);
-            ResourceRetirementPreparedOperationStorage.RequireNoReplacement(tx, database.Limits);
             RequireMarker(tx, marker);
             if (marker.Resources != EmptyRestoreAccountingCount || marker.ActiveUploads != EmptyRestoreAccountingCount
                 || tx.VisitRange(BlobRestoreFence.Accounts, MaxRecordsSingleItemCount, static (_, _) => false).Records != EmptyRestoreAccountingCount)

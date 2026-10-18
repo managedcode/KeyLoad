@@ -29,7 +29,7 @@ internal static class ConnectionGrainGraphRegistration
                 .MethodByName(nameof(IConnectionGrain.ExecuteStreamAsync), nameof(IConnectionGrain.ExecuteStreamAsync)).And()
                 .AddGrainTransition<IConnectionGrain, ICommandPartitionGrain>()
                 .MethodByName(nameof(IConnectionGrain.ExecuteStreamAsync), nameof(ICommandPartitionGrain.ExecuteAsync))
-                .MethodByName(nameof(IConnectionGrain.ExecuteStreamAsync), nameof(ICommandPartitionGrain.PrepareOriginalCommandAsync)).And();
+                .And();
         });
     }
 }

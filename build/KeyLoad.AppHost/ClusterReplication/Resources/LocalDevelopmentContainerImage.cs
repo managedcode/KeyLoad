@@ -70,7 +70,7 @@ internal sealed partial record LocalDevelopmentContainerImage(string Reference, 
         var runtime = AppHostOptionsRegistration.Get(builder);
         var local = runtime.LocalImage.Value;
         return !string.IsNullOrWhiteSpace(local.GithubReceipt) || !string.IsNullOrWhiteSpace(local.GithubRevision)
-            || !string.IsNullOrWhiteSpace(local.GithubActions) || runtime.Control.Value.ProtocolCohortConfigured
+            || !string.IsNullOrWhiteSpace(local.GithubActions)
             || runtime.Control.Value.ComparisonSelectorsPresent;
     }
 }

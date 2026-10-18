@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.Clustering;
 
 internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoordinator coordinator, TimeProvider clock,
-    IOptions<GrainRoutingOptions> options, GrainRequestCodec? codec = null, NativeRequestWorkOwner? workOwner = null, IPhysicalRequestPlacement? physical = null,
+    IOptions<GrainRoutingOptions> options, GrainRequestCodec? codec = null, NativeRequestWorkOwner? workOwner = null,
     INativeOnlineTextMaintenance? onlineText = null, Func<INativeDropTableExecution>? borrowDropTable = null)
 {
     private readonly GrainRoutingOptions settings = options.Value;
@@ -44,7 +44,7 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
         try
         {
             var principal = await NativeCommandCapabilityAuthorization.AuthorizeAsync(database, coordinator,
-                clock, settings, codec, physical, request, null, context, operationToken).ConfigureAwait(true);
+                clock, settings, codec, request, context, operationToken).ConfigureAwait(true);
             var kind = request.Envelope.CommandKind
                 ?? throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
             await NativeCommandCapabilityAuthorization.ObserveAndValidateAsync(database, clock, settings,
@@ -83,10 +83,6 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
                 ?? throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest))
                 .ExecuteAsync(request.Envelope.RequestId, request.Envelope.CommandId, principal.Id,
                     GrainNativePayload.Read<DropTableRequest>(request.Payload), request.Envelope.ExpiresAt, operationToken).ConfigureAwait(true),
-            OperationKind.RemoteGraphSource or OperationKind.RemoteGraphReceive or OperationKind.RemoteGraphComplete
-                => await GrainRemoteGraphCommand.SubmitAsync(database, coordinator, request, principal, operationToken).ConfigureAwait(true),
-            OperationKind.EventFeedControl or OperationKind.EventFeedSourcePhase => await GrainEventVectorSourceCommand.SubmitAsync(
-                database, coordinator, request, principal, operationToken).ConfigureAwait(true),
             OperationKind.Batch => await SubmitBatchAsync(request, principal, operationToken).ConfigureAwait(true),
             OperationKind.CommitProjectionBatch => await SubmitCheckpointAsync(request, principal,
                 operationToken).ConfigureAwait(true),
@@ -129,13 +125,11 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
     private void ValidateRoute(DecodedGrainRequest request, string actorKey, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        if (request.Envelope.Observation is not null || request.Envelope.Metadata is not null
-            || request.Envelope.CommandKind == OperationKind.ResourceRetirementPhase)
+        GrainIdentityContext.Validate(request.Envelope, request.Envelope.RequestId);
+        if (!string.Equals(GrainPartitionResolver.Resolve(request), actorKey, StringComparison.Ordinal))
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }
-        GrainIdentityContext.Validate(request.Envelope, request.Envelope.RequestId);
-        PhysicalCommandActorKey.Validate(request, actorKey, physical);
     }
 
     private ValueTask ObservePhaseAsync(DecodedGrainRequest request, GrainRequestPhase phase,

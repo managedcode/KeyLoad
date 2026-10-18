@@ -38,6 +38,14 @@ public sealed class DatabaseCommitGrain(SiloDatabaseClient storage, IClusterMemb
     public Task<SiloStorageCut> ReadCutAsync(CancellationToken cancellationToken)
         => RequireMatchingCutsAsync(Owners(), cancellationToken);
 
+    /// <inheritdoc />
+    public async Task<SiloAddress> GetReadOwnerAsync(CancellationToken cancellationToken)
+    {
+        var owners = Owners();
+        await RequireMatchingCutsAsync(owners, cancellationToken).ConfigureAwait(true);
+        return owners[StorageCopyContract.FirstOwner];
+    }
+
     private SiloAddress[] Owners()
     {
         var settings = options.Value;

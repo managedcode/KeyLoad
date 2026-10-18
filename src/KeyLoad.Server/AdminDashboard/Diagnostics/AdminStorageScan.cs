@@ -148,7 +148,6 @@ internal sealed class AdminStorageScan
         return parent switch
         {
             PartitionStoreProtocol.CanonicalDirectory => Canonical,
-            ReplicaProtocol.ReplicaDirectory => Replica,
             BackupDirectory => Backup,
             _ => Other
         };

@@ -41,7 +41,7 @@ internal static class IsolatedKeyLoadResources
         IsolatedKeyLoadAdmission.ForwardSelection(context.Runner, selectedAdmission);
         for (var index = IndexInitialValue; index < nodes.Length; index++)
         {
-            IsolatedKeyLoadAdmission.Apply(nodes[index], admission, runtime.IsolatedReplayAdmission);
+            IsolatedKeyLoadAdmission.Apply(nodes[index], admission);
             DocumentResourceBounds.ApplyKeyLoad(nodes[index], context.Runner, runtime.Deployment.Value);
             context.BindEndpoint(index, nodes[index], HttpEndpoint);
         }

@@ -35,20 +35,6 @@ internal static class NativeCommandResultWorkBinding
         }
     }
 
-    internal static async Task BindObservedBeforeEncodingAsync(IServiceProvider services,
-        TimeProvider clock, DecodedGrainRequest request, GrainOperationReply first,
-        NativeCommandObservationResultV1 observed, ReadExecutionBudget work,
-        IResourceLifetimeWorkBinding binding, CancellationToken token)
-    {
-        var proof = RequireProof(request, first);
-        work.CheckResult(proof);
-        var lifetimes = proof.Lifetimes.Union(observed.Lifetimes).ToImmutableArray();
-        await BindCurrentAsync(services, clock, request, proof, lifetimes,
-            work, binding, token).ConfigureAwait(true);
-        work.CheckResult(observed.Result.NativeValue);
-        work.Check();
-    }
-
     private static async Task BindCurrentAsync(IServiceProvider services, TimeProvider clock,
         DecodedGrainRequest request, NativeCommandWorkProofV1 proof,
         ImmutableArray<ResourceLifetimeV1> lifetimes, ReadExecutionBudget work,

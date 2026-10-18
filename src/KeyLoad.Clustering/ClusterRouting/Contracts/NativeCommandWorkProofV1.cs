@@ -13,11 +13,6 @@ internal sealed record NativeCommandWorkProofV1(
     [property: Orleans.Id(5)] ImmutableArray<ResourceLifetimeV1> Lifetimes,
     [property: Orleans.Id(6)] long PolicyEpoch)
 {
-    [Orleans.Id(7)]
-    internal string? ObservationToken
-    {
-        get; init;
-    }
 
     internal const int CurrentVersion = 2;
     internal const long MinimumPolicyEpoch = 0;

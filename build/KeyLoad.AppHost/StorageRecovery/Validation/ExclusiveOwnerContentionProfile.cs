@@ -27,7 +27,7 @@ internal static class ExclusiveOwnerContentionProfile
             || !options.FunctionalColdReopen || !options.ContainerFaults || options.Tests is not null
             || options.BenchmarksEnabled || options.TargetSelected
             || options.ComparisonSelectorsPresent
-            || options.ProtocolCohortEnabled || options.ProtocolCohortConfigured || options.LoggerModelControl)
+            || options.LoggerModelControl)
         {
             throw new InvalidOperationException(Invalid);
         }

@@ -46,8 +46,6 @@ public sealed partial class DatabaseEngine
             var current = ReadPlacementWitness(bounded, original.Consumer.Partition);
             if (current.PhysicalShardId != original.Placement.PhysicalShardId
                 || current.Incarnation != original.Placement.Incarnation
-                || current.PlacementEpoch != original.Placement.PlacementEpoch
-                || !current.VoterIds.SequenceEqual(original.Placement.VoterIds, StringComparer.Ordinal))
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, RemoteAnnReadInvalid);
             }

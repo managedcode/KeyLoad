@@ -1,5 +1,4 @@
 using System.Globalization;
-using KeyLoad.Clustering;
 using KeyLoad.Comparisons;
 using Microsoft.Extensions.Options;
 
@@ -10,8 +9,7 @@ internal static class IsolatedKeyLoadAdmission
     private const string Prefix = "KeyLoad__HttpAdmission__";
     private const string SelectionPrefix = IsolatedKeyLoadAdmissionOptions.SectionName + "__";
 
-    internal static void Apply(IResourceBuilder<ContainerResource> node, IOptions<HttpAdmissionLimits> http,
-        IOptions<ReplicaReplayLimits> replay)
+    internal static void Apply(IResourceBuilder<ContainerResource> node, IOptions<HttpAdmissionLimits> http)
     {
         var limits = http.Value;
         Set(node, nameof(limits.MaxRequests), limits.MaxRequests);
@@ -21,7 +19,6 @@ internal static class IsolatedKeyLoadAdmission
         Set(node, nameof(limits.MaxTenantControlRequests), limits.MaxTenantControlRequests);
         Set(node, nameof(limits.MaxPrincipalControlRequests), limits.MaxPrincipalControlRequests);
         Set(node, nameof(limits.MaxReservedBytes), limits.MaxReservedBytes);
-        IsolatedKeyLoadReplayProfile.Apply(node, replay);
     }
 
     internal static void ForwardSelection(IResourceBuilder<ContainerResource> runner, IOptions<IsolatedKeyLoadAdmissionOptions> options)

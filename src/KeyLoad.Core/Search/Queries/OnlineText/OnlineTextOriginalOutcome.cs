@@ -111,8 +111,6 @@ public sealed partial class DatabaseEngine
         var current = ReadAtomicPartitionPlacement(view, principal.Id, request.Consumer.Partition);
         if (current.PhysicalShardId != request.Placement.PhysicalShardId
             || current.Incarnation != request.Placement.Incarnation
-            || current.PlacementEpoch != request.Placement.PlacementEpoch
-            || !current.VoterIds.SequenceEqual(request.Placement.VoterIds, StringComparer.Ordinal))
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, OnlineTextPublicationProtocol.MissingAuthority);
         }

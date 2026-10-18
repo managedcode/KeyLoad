@@ -48,8 +48,6 @@ internal static class ClusterBackupPartitionVectorValidation
 
     private static bool SameOwner(AtomicPartitionPlacementResolution left, AtomicPartitionPlacementResolution right) =>
         left.PhysicalShardId == right.PhysicalShardId && left.Incarnation == right.Incarnation
-        && left.PlacementEpoch == right.PlacementEpoch
-        && left.VoterIds.SequenceEqual(right.VoterIds, StringComparer.Ordinal);
 
     private const char FirstDigit = '0';
     private const char LastDigit = '9';

@@ -10,17 +10,12 @@ internal static class PartitionHostConstructionCleanup
     internal static async Task RunAsync(Exception error, NativeTextOnlineMaintenanceService? openedOnlineText,
         NativeTextIncrementalMaintenanceService? openedTextMaintenance, NativeAnnMaintenanceService? openedAnnMaintenance,
         ITextProjection? openedText, CacheMemoryBudget? openedCacheMemory,
-        Features.Messaging.RemoteTransferPeerVerificationOwner? TransferVerification, RowVisibilityCache? rowVisibility,
-        PartitionStores? stores, Action requireTransferVerifierClosed)
+        RowVisibilityCache? rowVisibility, PartitionStores? stores)
     {
         const int FailuresCountValidationBoundary = 1;
         var failures = new List<Exception> { error };
         await DisposeDerivedOwnersAsync(openedOnlineText, openedTextMaintenance, openedAnnMaintenance,
             failures).ConfigureAwait(false);
-        if (TransferVerification is not null)
-        {
-            ServerFailureObserver.Observe(TransferVerification.Dispose, failures);
-        }
         if (openedText is not null)
         {
             ServerFailureObserver.Observe(openedText.Dispose, failures);
@@ -30,11 +25,7 @@ internal static class PartitionHostConstructionCleanup
         {
             ServerFailureObserver.Observe(openedCacheMemory.Dispose, failures);
         }
-        ServerFailureObserver.Observe(() =>
-        {
-            requireTransferVerifierClosed();
-            stores?.Dispose();
-        }, failures);
+        ServerFailureObserver.Observe(() => stores?.Dispose(), failures);
         if (failures.Count > FailuresCountValidationBoundary)
         {
             throw new AggregateException(failures);

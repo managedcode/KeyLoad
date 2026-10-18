@@ -75,7 +75,6 @@ public static class ClusterBackupOwnerClosureValidation
                 entry.Owner.PhysicalShardId == placement.PhysicalShardId)?.Owner;
         if (owner is null || placement.Incarnation != owner.Incarnation
             || placement.PlacementEpoch < owner.PlacementEpoch
-            || !placement.VoterIds.SequenceEqual(owner.VoterIds, StringComparer.Ordinal))
         {
             throw Errors.Fail(ErrorCode.Corruption, Incomplete);
         }

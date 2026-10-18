@@ -19,7 +19,6 @@ internal sealed class GrainRequestIdentityScope : IDisposable
         Guid requestId, Guid commandId, CancellationToken cancellationToken,
         global::Orleans.Runtime.SiloAddress? placement = null, Guid connectionId = default)
     {
-        placement ??= runtimeServices.GetService<IPhysicalRequestPlacement>()?.Current;
         var state = new GrainRequestContextState(requestId, commandId, connectionId);
         var claims = principal is null ? null : GrainIdentityContext.CreatePrincipal(principal.Id);
         NativeRequestContextAdmission.Admit(runtimeServices, claims, state, cancellationToken, placement);

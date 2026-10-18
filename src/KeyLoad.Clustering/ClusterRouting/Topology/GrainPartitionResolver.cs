@@ -7,10 +7,6 @@ internal static class GrainPartitionResolver
 {
     internal static string Resolve(DecodedGrainRequest request) => request.Envelope.CommandKind switch
     {
-        OperationKind.RemoteGraphSource or OperationKind.RemoteGraphReceive or OperationKind.RemoteGraphComplete
-            => GrainRemoteGraphCommand.Resolve(request),
-        OperationKind.EventFeedControl or OperationKind.EventFeedSourcePhase => GrainEventVectorSourceCommand.Resolve(request),
-        OperationKind.ResourceRetirementPhase => GrainResourceRetirementCommand.Resolve(request),
         OperationKind.OnlineTextPublicationPhase => GrainOnlineTextPublicationCommand.Resolve(request),
         OperationKind.Bm25CorpusPublicationPhase => GrainBm25CorpusPublicationCommand.Resolve(request),
         OperationKind.Batch when request.Envelope.Purpose == RemoteTransferPeerProtocol.GrainPurpose

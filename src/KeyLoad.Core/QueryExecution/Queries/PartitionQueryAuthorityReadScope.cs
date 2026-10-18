@@ -50,7 +50,6 @@ public sealed partial class DatabaseEngine
             throw Errors.Fail(ErrorCode.Validation, DatabaseEngineResourceHasADifferentKindDetail);
         }
         var actualLifetime = lifetime ?? throw Errors.Fail(ErrorCode.Corruption, PartitionMoveProtocol.MissingAuthority);
-        ResourceRetirementStorage.RequireOpen(charged, actualLifetime, Limits);
         work?.ObserveResourceLifetime(partition, resource, actualLifetime);
         return read(view, principal, resource, digest);
     }

@@ -19,6 +19,9 @@ dotnet_diagnostic.PST0029.severity = error
 indent_size = 4
 dotnet_sort_system_directives_first = true
 
+# Native Orleans checks resolved field IDs, including constants and partial models.
+dotnet_diagnostic.ORLEANS0012.severity = error
+
 # Don't use this. qualifier
 dotnet_style_qualification_for_field = false:warning
 dotnet_style_qualification_for_property = false:warning

@@ -19,10 +19,6 @@ internal sealed class NativeRequestWorkLease : IDisposable, IAsyncDisposable, IN
     {
         get; set;
     }
-    internal NativeCommandObservation? CommandObservation
-    {
-        get; set;
-    }
     public NativeRequestWorkLease OriginalProducer => this;
     internal bool OwnsResultRetention => ChildReservation is null;
     internal ImmutableArray<Exception> ChildCleanupFailures { get; set; } = [];

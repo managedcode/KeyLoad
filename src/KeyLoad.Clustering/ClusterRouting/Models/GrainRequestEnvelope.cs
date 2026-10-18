@@ -46,7 +46,7 @@ public sealed record GrainRequestEnvelope
     {
         get; init;
     }
-    /// <summary>Exact native typed operation payload; retired field 7 is never reused.</summary>
+    /// <summary>Exact native typed operation payload.</summary>
     [Orleans.Id(GrainNativeContracts.PayloadField)]
     public required ReadOnlyMemory<byte> Payload
     {
@@ -55,12 +55,6 @@ public sealed record GrainRequestEnvelope
     /// <summary>Bounded server-issued expiration evaluated with the runtime system clock.</summary>
     [Orleans.Id(GrainNativeContracts.ExpiresAtField)]
     public required DateTimeOffset ExpiresAt
-    {
-        get; init;
-    }
-    /// <summary>Pre-effect bounds for the original command's separate readonly observation.</summary>
-    [Orleans.Id(GrainNativeContracts.ObservationField)]
-    internal NativeCommandObservationAdmissionV1? Observation
     {
         get; init;
     }

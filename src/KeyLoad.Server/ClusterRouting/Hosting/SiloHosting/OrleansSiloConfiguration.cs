@@ -13,10 +13,9 @@ internal static class OrleansSiloConfiguration
     {
         var options = nodeOptions.Value;
         options.Validate();
-        OrleansNativePeerServices.RegisterSiloOwners(builder, localhostClustering);
-        OrleansMovementServiceRegistration.Register(builder.Services, options);
+        OrleansApplicationServices.RegisterSiloOwners(builder, localhostClustering);
+        global::KeyLoad.Server.Features.ResourceExecution.NativeDropTableRegistration.Register(builder.Services);
         OrleansPartitionServiceRegistration.Register(builder.Services, options);
-        OrleansPartitionRuntimeRegistration.Register(builder.Services);
         OrleansRequestServiceRegistration.Register(builder.Services);
         builder.UseOrleans(silo => Configure(silo, options, address, localhostClustering));
         OrleansNativeHostedServiceRegistration.Guard(builder.Services);
@@ -33,9 +32,6 @@ internal static class OrleansSiloConfiguration
         OrleansNativeClustering.Configure(silo, options, address, localhostClustering);
         ConfigureMessaging(silo.Services);
         PartitionStorageRegistration.Register(silo);
-        silo.AddGrainService<PartitionMovementGrainService>();
-        silo.AddGrainService<global::KeyLoad.Server.Features.DocumentStorage.RemoteModelGrainService>();
-        silo.AddGrainService<global::KeyLoad.Server.Features.GraphTraversal.RemoteGraphGrainService>();
         silo.Services.AddSingleton<OrleansNodeLifecycle>();
         silo.Services.AddSingleton<ILifecycleParticipant<ISiloLifecycle>>(provider => provider.GetRequiredService<OrleansNodeLifecycle>());
         silo.AddActivityPropagation();

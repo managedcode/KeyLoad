@@ -7,8 +7,9 @@ using KeyLoad.AppHost.Hosting;
 
 internal static class ClusterResources
 {
-    private const string CoordinationOnlyEnvironment = "KeyLoad__CoordinationOnly";
     private const string SiloCountEnvironment = "KeyLoad__SiloCount";
+    private const string ReplicaCountEnvironment = "KeyLoad__ReplicaCount";
+    private const string SiloNameEnvironment = "KeyLoad__SiloName";
     private const string ContainerDirectory = "/data";
     private const string HttpEndpoint = "http";
     private const string SiloEndpoint = "silo";
@@ -16,7 +17,6 @@ internal static class ClusterResources
     private const string OriginFormat = "{0}://{1}:{2}";
     private const string ReadyPath = "/health/ready";
     private const string SigningParameter = "signing-key";
-    private const string PeerParameter = "peer-secret";
     private const string AdminParameter = "admin-key";
     private const string IncarnationParameter = "incarnation";
     private const string GuidFormat = "D";
@@ -28,21 +28,14 @@ internal static class ClusterResources
     private const string DataEnvironment = "KeyLoad__DataDirectory";
     private const string ClusterEnvironment = "KeyLoad__ClusterId";
     private const string IncarnationEnvironment = "KeyLoad__Incarnation";
-    private const string PhysicalShardEnvironment = "KeyLoad__PhysicalShardId";
     private const string SigningEnvironment = "KeyLoad__SigningKey";
-    private const string PeerEnvironment = "KeyLoad__PeerSecret";
     private const string AdminEnvironment = "KeyLoad__AdminKey";
-    private const string PrivateHttpEnvironment = "KeyLoad__AllowPrivateNetworkHttp";
     private const string PublicEnvironment = "KeyLoad__PublicEndpoint";
     private const string SiloAddressEnvironment = "KeyLoad__SiloAddress";
     private const string SiloPortEnvironment = "KeyLoad__SiloPort";
     private const string HttpPortEnvironment = "ASPNETCORE_HTTP_PORTS";
-    private const string PeerEnvironmentPrefix = "KeyLoad__Peers__";
-    private const string BenchmarkTopologyEnvironment = "KeyLoad__BenchmarkTopology";
-    private const string DevelopmentSingleVoterEnvironment = "KeyLoad__DevelopmentSingleVoter";
     private const int SingleFunctionalNodeCount = 1;
     private const int FirstNodeIndex = 0;
-    private const string TrueValue = "true";
     private const int HttpPort = 8080;
     private const int SiloPort = 11111;
 
@@ -66,10 +59,6 @@ internal static class ClusterResources
             ? SdkContainerImage.Add(builder, profile.Incarnation) : null;
         var (nodes, contenders) = AddNodes(builder, profile, root, ephemeral, benchmarkNodeCount, nodeNames, coverageImage,
             localImage, images, sourceImage, identity);
-        if (functionalNodeCount == SingleFunctionalNodeCount)
-        {
-            nodes[FirstNodeIndex].WithEnvironment(DevelopmentSingleVoterEnvironment, TrueValue);
-        }
         var tables = KeyLoad.AppHost.Features.ClusterRouting.NativeClusteringResources.Add(builder);
         foreach (var node in nodes.Concat(contenders))
         {
@@ -83,11 +72,10 @@ internal static class ClusterResources
         LocalProfile profile, string root, bool ephemeral, int? benchmarkNodeCount, string[] nodeNames,
         NativeCoverageClusterClusterImage? coverageImage, LocalDevelopmentContainerImage? localImage,
         IReadOnlyDictionary<string, RuntimeContainerImage>? images, SdkContainerImage? sourceImage,
-        (IResourceBuilder<ParameterResource> Signing, IResourceBuilder<ParameterResource> Peer,
-            IResourceBuilder<ParameterResource> Admin, IResourceBuilder<ParameterResource> Incarnation) identity)
+        (IResourceBuilder<ParameterResource> Signing, IResourceBuilder<ParameterResource> Admin,
+            IResourceBuilder<ParameterResource> Incarnation) identity)
     {
         const int IndexInitialValue = 0;
-        var physicalShardId = profile.PhysicalShardId.ToString(GuidFormat);
         var firstPublicPort = AppHostOptionsRegistration.Get(builder).Cluster.Value.FirstPublicPort;
         var containerUser = ClusterContainerUser.Resolve(builder, TimeProvider.System);
         var nodes = new IResourceBuilder<ContainerResource>[nodeNames.Length];
@@ -95,14 +83,14 @@ internal static class ClusterResources
         {
             var name = nodeNames[index];
             nodes[index] = AddNode(builder, profile, root, ephemeral, benchmarkNodeCount, nodeNames,
-                coverageImage, localImage, images, sourceImage, identity, name, index, physicalShardId, containerUser,
+                coverageImage, localImage, images, sourceImage, identity, name, index, containerUser,
                 firstPublicPort);
         }
         var contenders = ExclusiveOwnerContentionResources.Add(
             AppHostOptionsRegistration.Get(builder).Control.Value.ExclusiveOwnerContention, nodes[FirstNodeIndex],
             resourceName => AddNode(builder, profile, root, ephemeral, benchmarkNodeCount, nodeNames,
                 coverageImage, localImage, images, sourceImage, identity, ExclusiveOwnerContentionResources.OwnerName,
-                FirstNodeIndex, physicalShardId, containerUser, firstPublicPort, resourceName,
+                FirstNodeIndex, containerUser, firstPublicPort, resourceName,
                 Path.GetFullPath(Path.Combine(root, ExclusiveOwnerContentionResources.OwnerName))));
         return (nodes, contenders);
     }
@@ -111,16 +99,20 @@ internal static class ClusterResources
         LocalProfile profile, string root, bool ephemeral, int? benchmarkNodeCount, string[] nodeNames,
         NativeCoverageClusterClusterImage? coverageImage, LocalDevelopmentContainerImage? localImage,
         IReadOnlyDictionary<string, RuntimeContainerImage>? images, SdkContainerImage? sourceImage,
-        (IResourceBuilder<ParameterResource> Signing, IResourceBuilder<ParameterResource> Peer,
-            IResourceBuilder<ParameterResource> Admin, IResourceBuilder<ParameterResource> Incarnation) identity,
-        string name, int index, string physicalShardId, string? containerUser, int firstPublicPort,
+        (IResourceBuilder<ParameterResource> Signing, IResourceBuilder<ParameterResource> Admin,
+            IResourceBuilder<ParameterResource> Incarnation) identity,
+        string name, int index, string? containerUser, int firstPublicPort,
         string? resourceName = null, string? directoryOverride = null)
     {
         resourceName ??= name;
-        var replicaCount = benchmarkNodeCount ?? AppHostOptionsRegistration.Get(builder).Control.Value.FunctionalNodeCount
-            ?? AppHostOptionsRegistration.Get(builder).Cluster.Value.ReplicaCount;
-        var ownsReplica = index < replicaCount;
-        var directory = ownsReplica ? directoryOverride ?? PrepareVoterDirectory(root, name) : null;
+        var options = AppHostOptionsRegistration.Get(builder);
+        var replicaCount = benchmarkNodeCount ?? (options.Control.Value.FunctionalNodeCount == SingleFunctionalNodeCount
+            ? SingleFunctionalNodeCount : options.Cluster.Value.ReplicaCount);
+        if (replicaCount > nodeNames.Length)
+        {
+            throw new InvalidOperationException(ClusterDeploymentOptions.ValidationMessage);
+        }
+        var directory = directoryOverride ?? PrepareSiloDirectory(root, name);
         var coverageDirectory = coverageImage?.PrepareOutputDirectory(resourceName);
         var resource = localImage is null
             ? coverageImage is null
@@ -139,6 +131,9 @@ internal static class ClusterResources
             .WithEndpoint(targetPort: SiloPort, name: SiloEndpoint, scheme: TcpScheme, isExternal: false, isProxied: false)
             .WithEnvironment(ClusterEnvironment, ClusterPrefix + profile.Incarnation.ToString(ClusterGuidFormat))
             .WithEnvironment(PublicEnvironment, Origin(name))
+            .WithEnvironment(SiloNameEnvironment, resourceName)
+            .WithEnvironment(SiloCountEnvironment, nodeNames.Length.ToString(CultureInfo.InvariantCulture))
+            .WithEnvironment(ReplicaCountEnvironment, replicaCount.ToString(CultureInfo.InvariantCulture))
             .WithEnvironment(SiloAddressEnvironment, resourceName)
             .WithEnvironment(SiloPortEnvironment, SiloPort.ToString(CultureInfo.InvariantCulture))
             .WithEnvironment(HttpPortEnvironment, HttpPort.ToString(CultureInfo.InvariantCulture))
@@ -148,57 +143,32 @@ internal static class ClusterResources
             resource.WithBindMount(coverageDirectory!, NativeCoverageClusterProtocol.CoverageOutputDirectory);
             coverageImage.Apply(resource, resourceName);
         }
-        if (ownsReplica)
-        {
-            resource.WithBindMount(directory!, ContainerDirectory)
-                .WithEnvironment(DataEnvironment, ContainerDirectory)
-                .WithEnvironment(PhysicalShardEnvironment, physicalShardId)
-                .WithEnvironment(IncarnationEnvironment, identity.Incarnation)
-                .WithEnvironment(SigningEnvironment, identity.Signing).WithEnvironment(PeerEnvironment, identity.Peer)
-                .WithEnvironment(AdminEnvironment, identity.Admin).WithEnvironment(PrivateHttpEnvironment, TrueValue);
-            KeyLoad.AppHost.Features.ClientApi.ClusterConnectionEndpointResources.Apply(resource);
-            ApplyPeers(resource, nodeNames.Take(replicaCount).ToArray(), benchmarkNodeCount.HasValue);
-        }
+        resource.WithBindMount(directory, ContainerDirectory)
+            .WithEnvironment(DataEnvironment, ContainerDirectory)
+            .WithEnvironment(IncarnationEnvironment, identity.Incarnation)
+            .WithEnvironment(SigningEnvironment, identity.Signing)
+            .WithEnvironment(AdminEnvironment, identity.Admin);
+        KeyLoad.AppHost.Features.ClientApi.ClusterConnectionEndpointResources.Apply(resource);
         ClusterResourceSettings.Apply(builder, resource, containerUser);
         ContainerKillCommand.Apply(builder, resource, ephemeral, benchmarkNodeCount);
-        if (!ownsReplica)
-        {
-            resource.WithEnvironment(CoordinationOnlyEnvironment, TrueValue)
-                .WithEnvironment(SiloCountEnvironment, nodeNames.Length.ToString(CultureInfo.InvariantCulture));
-        }
         return resource;
     }
 
-    private static (IResourceBuilder<ParameterResource> Signing, IResourceBuilder<ParameterResource> Peer,
-        IResourceBuilder<ParameterResource> Admin, IResourceBuilder<ParameterResource> Incarnation)
+    private static (IResourceBuilder<ParameterResource> Signing, IResourceBuilder<ParameterResource> Admin,
+        IResourceBuilder<ParameterResource> Incarnation)
         AddIdentityParameters(IDistributedApplicationBuilder builder, LocalProfile profile)
     {
         var signing = builder.AddParameter(SigningParameter, profile.SigningKey, secret: true);
-        var peer = builder.AddParameter(PeerParameter, profile.PeerSecret, secret: true);
         var admin = builder.AddParameter(AdminParameter, profile.AdminKey, secret: true);
         var incarnation = builder.AddParameter(IncarnationParameter, profile.Incarnation.ToString(GuidFormat), secret: true);
-        return (signing, peer, admin, incarnation);
+        return (signing, admin, incarnation);
     }
 
-    private static string PrepareVoterDirectory(string root, string name)
+    private static string PrepareSiloDirectory(string root, string name)
     {
         var directory = Path.Combine(root, name);
         ClusterProfileStore.PrepareDirectory(directory);
         return directory;
-    }
-
-    private static void ApplyPeers(IResourceBuilder<ContainerResource> resource, string[] nodeNames, bool benchmark)
-    {
-        const int IndexInitialValue = 0;
-
-        if (benchmark)
-        {
-            resource.WithEnvironment(BenchmarkTopologyEnvironment, TrueValue);
-        }
-        for (var index = IndexInitialValue; index < nodeNames.Length; index++)
-        {
-            resource.WithEnvironment(PeerEnvironmentPrefix + index.ToString(CultureInfo.InvariantCulture), Origin(nodeNames[index]));
-        }
     }
 
     internal static string Origin(string node) => string.Format(CultureInfo.InvariantCulture, OriginCompositeFormat,

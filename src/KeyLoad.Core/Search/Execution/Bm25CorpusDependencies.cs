@@ -19,8 +19,6 @@ internal static class Bm25CorpusDependencies
             && current.SourceOutboxTail == database.ReadOutboxHead(view, current.Partition).Tail
             && current.Incarnation == owner.Incarnation
             && current.SourceOwner.PhysicalShardId == owner.PhysicalShardId
-            && current.SourceOwner.PlacementEpoch == owner.PlacementEpoch
-            && current.SourceOwner.VoterIds.SequenceEqual(owner.VoterIds, StringComparer.Ordinal)
             && current.PayloadDigest == (work is null ? Bm25CorpusDigest.Compute(current, placement, maximumBytes)
                 : Bm25CorpusDigest.Compute(current, placement, work));
     }
