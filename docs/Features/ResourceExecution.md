@@ -1,11 +1,10 @@
 # ResourceExecution
 
-ZoneTree.Analytics adoption is specified in
-[OperationalAnalytics](ResourceExecution/OperationalAnalytics.md) and
-[ADR-134](../ADR/ADR-134-node-owned-derived-analytics.md). It provides
-node-owned disposable operational history alongside OpenTelemetry. The published1.0.0 package uses the existing physical silo owner and administrator Dashboard; new production/public execution remains OPEN. The original whole native component operations
-and remaining runtime/resource gates are recorded in the linked feature contract.
-Orleans owns the hosting/lifecycle integration.
+ResourceExecution owns bounded operation admission, canonical resource lifetimes,
+shared result retention and joined ownership. Orleans owns cluster and activation
+lifecycle; the silo-local ZoneTree owner retains files and native engine handles.
+[AnalyticsStore](AnalyticsStore.md) owns user analytics requirements and its
+bounded derived native generations. Native OpenTelemetry owns instrumentation.
 
 Actual database phase diagnostics are specified in
 [DatabasePhaseProfiling](ResourceExecution/DatabasePhaseProfiling.md) under

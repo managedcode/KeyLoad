@@ -14,7 +14,7 @@ internal static class OutcomeStoreOracle
     private const string GlobalOutcomeScope = "global";
     private const string UnknownOutcomeScope = "unknown";
 
-    internal static byte[] Key(IAtomicStore store, Command<DatabaseCommand> operation)
+    internal static byte[] Key(Command<DatabaseCommand> operation)
     {
         if (operation.Value is null || operation.Value.Input.IsEmpty)
         {
@@ -44,7 +44,7 @@ internal static class OutcomeStoreOracle
 
     internal static StoredOutcome? ReadStored(IAtomicStore store, Command<DatabaseCommand> operation)
     {
-        var key = Key(store, operation);
+        var key = Key(operation);
         return store.Read(view => view.GetRecord<StoredOutcome>(key));
     }
 

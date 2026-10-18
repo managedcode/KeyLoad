@@ -46,11 +46,12 @@ contract; it is not evidence of cluster durability.
 
 Create three named resources of each supported catalog model: typed relational
 tables, documents, event stream sets, work queues, topics, graphs, time-series
-sets, blob stores, vector-profile collections and full-text-search collections.
+sets, blob stores, vector-profile collections, full-text-search collections and
+AnalyticsStore resources.
 Time-series reads and aggregate operations use the three persisted time-series
-sets. Native operational analytics is separate derived node-local history: each
-node owns one native analytics engine, observed through the administrator
-dashboard. It is not a catalog model or three independent user analytics stores.
+sets. User analytics uses three independent canonical AnalyticsStore resources,
+with each bounded native aggregate built from currently authorized event rows.
+The complete contract remains [AnalyticsStore](../AnalyticsStore.md).
 Use independent data and canonical entity references between models in one database.
 Create eight persisted workload users with writer and reader permissions. A
 separate persisted tenant-local operator has the native administrative role and

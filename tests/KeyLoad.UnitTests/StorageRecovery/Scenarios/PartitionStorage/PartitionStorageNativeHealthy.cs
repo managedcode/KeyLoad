@@ -1,28 +1,30 @@
 using KeyLoad.Core;
-using KeyLoad.UnitTests.Features.ClusterRouting;
+using KeyLoad.Server;
 using ManagedCode.Communication;
+using Microsoft.Extensions.DependencyInjection;
 using P = KeyLoad.UnitTests.Features.StorageRecovery.PartitionStorageNativeProtocol;
 
 namespace KeyLoad.UnitTests.Features.StorageRecovery;
 
 internal static class PartitionStorageNativeHealthy
 {
-    internal static async Task<PartitionStorageNativeCommit> ExecuteAsync(RequestCqrsHostedRuntimeFixture source,
+    internal static async Task<PartitionStorageNativeCommit> ExecuteAsync(IServiceProvider source,
         CancellationToken token)
     {
+        var owner = source.GetRequiredService<PartitionHostApplicationOwner>().Borrow();
         var definition = new ConfigureResourceRequest(P.Partition.TenantId, P.Partition.DatabaseId,
             new(P.Collection, ResourceKind.Collection, P.Partition.TransactionDomainId));
-        var configured = await source.Database.Coordinator.SubmitNativeAsync(OperationKind.ConfigureResource,
+        var configured = await owner.Coordinator.SubmitNativeAsync(OperationKind.ConfigureResource,
             P.Configure, P.Root, NativeSerialization.Serialize(definition), cancellationToken: token).ConfigureAwait(false);
         await Assert.That(Errors.Code(configured.Problem)).IsNull();
         await Assert.That(JsonDefaults.Serialize(configured.Get<ResourceDefinition>()).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(definition.Definition))).IsTrue();
-        await source.Database.Coordinator.ReadBarrierAsync(token).ConfigureAwait(false);
-        var before = source.Database.ReadCanonicalCut();
-        var reply = await source.Database.Coordinator.SubmitNativeAsync(OperationKind.Batch, P.Command, P.Root,
+        await owner.Coordinator.ReadBarrierAsync(token).ConfigureAwait(false);
+        var before = PartitionStorageNativeReplay.ReadCut(source);
+        var reply = await owner.Coordinator.SubmitNativeAsync(OperationKind.Batch, P.Command, P.Root,
             NativeSerialization.Serialize(P.Request()), cancellationToken: token).ConfigureAwait(false);
         var expected = new CommitReceipt(P.Command,
-            new(source.Database.Store.Identity.Incarnation, P.Partition.AtomicPartitionId,
+            new(owner.Database.Store.Identity.Incarnation, P.Partition.AtomicPartitionId,
                 checked(before.AppliedPosition + P.CanonicalStep)),
             [new(P.PutKind, P.Collection, P.Document, P.InitialRevision)], DurabilityProfile.ProcessDurable, P.PersistedCopies);
         await RequireReceiptAsync(reply, expected).ConfigureAwait(false);
@@ -33,12 +35,13 @@ internal static class PartitionStorageNativeHealthy
         return committed;
     }
 
-    internal static async Task ReplayAsync(RequestCqrsHostedRuntimeFixture source,
+    internal static async Task ReplayAsync(IServiceProvider source,
         PartitionStorageNativeCommit original, CancellationToken token)
     {
         await PartitionStorageNativeReplay.RequireOriginalAsync(source, original, token).ConfigureAwait(false);
-        var before = source.Database.ReadCanonicalCut();
-        var reply = await source.Database.Coordinator.SubmitNativeAsync(OperationKind.Batch, P.Command, P.Root,
+        var before = PartitionStorageNativeReplay.ReadCut(source);
+        var owner = source.GetRequiredService<PartitionHostApplicationOwner>().Borrow();
+        var reply = await owner.Coordinator.SubmitNativeAsync(OperationKind.Batch, P.Command, P.Root,
             NativeSerialization.Serialize(P.Request()), cancellationToken: token).ConfigureAwait(false);
         await RequireReceiptAsync(reply, original.Receipt).ConfigureAwait(false);
         await PartitionStorageNativeReplay.RequireOriginalAsync(source, original, token).ConfigureAwait(false);

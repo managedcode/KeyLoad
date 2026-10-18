@@ -26,7 +26,7 @@ internal static class CommandOutcomePartitionScopeTestData
     {
         var scope = CommandOutcomePartitionIdentity.Resolve(database.Database.OwnCommand(operation));
         var partition = scope.Partition ?? throw new InvalidOperationException("The corruption oracle requires a partition operation.");
-        var outcomeKey = OutcomeStoreOracle.Key(database.Store, operation);
+        var outcomeKey = OutcomeStoreOracle.Key(operation);
         var locatorKey = KeySpace.OutcomeLocatorV2(partition, operation.UserId!, operation.CommandId);
         var position = database.Store.Position;
         var outcome = database.Store.Read(view => view.ReadOwnedValue(outcomeKey));

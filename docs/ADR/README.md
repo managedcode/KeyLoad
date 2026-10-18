@@ -121,7 +121,6 @@ source artifacts own those checks.
 | [ADR-130: Microsoft ScriptDOM owns T-SQL syntax](ADR-130-microsoft-scriptdom-tsql.md) |
 | [ADR-131: Explicit queue dispatch-state compare-and-set](ADR-131-queue-dispatch-state-cas.md) |
 | [ADR-132: Native CREATE TABLE and caller-stable SQL command identity](ADR-132-native-create-table-command-identity.md) |
-| [ADR-134: Node-owned derived operational analytics](ADR-134-node-owned-derived-analytics.md) |
 | [ADR-135: Native write-through journal admission](ADR-135-native-write-through-journal-admission.md) |
 | [ADR-136: Orleans is the cluster; every silo owns its own ZoneTree](ADR-136-native-orleans-partition-ownership.md) |
 | [ADR-137: Schema-visible safe projection and restricted field binding](ADR-137-schema-visible-projection.md) |

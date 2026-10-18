@@ -3,9 +3,9 @@
 ## Purpose, entry points and ownership
 
 - Owns the Orleans background workers for due and recurring queue work and remote queue transfers, and their typed internal contracts.
-- Entry points: the `GrainServices/` and `Grains/` folders of this feature (currently `GrainServices/RecurringDueGrainService.cs` and `Grains/RecurringDueCoordinatorGrain.cs`).
-- Background work uses Orleans `[StatelessWorker]` grains: each worker accepts events, buffers them and flushes the batch on a typed-option Orleans timer through the normal grain → ZoneTree owner path as a fresh signed native operation, draining the existing native Communication CQRS stream. No `IsLeaderAsync()` or any other leader/consensus gate.
-- Never call `DatabaseEngine.Apply` or `ICommitCoordinator.SubmitNativeAsync` from this feature. Do not create a scheduler principal, trust roles in hints, or move node-local storage handles with activations.
+- Entry points: `Grains/RecurringDueWorkerGrain.cs` buffers events and scans persisted due work; `Grains/RecurringDueCoordinatorGrain.cs` owns partition-specific scheduling. `GrainServices/` contains the queue and transfer cycle helpers used by the worker.
+- Background work uses Orleans `[StatelessWorker]` grains: each worker accepts events, buffers them and flushes the batch on a typed-option Orleans timer through the normal grain → ZoneTree owner path as a fresh signed native operation, draining the existing native Communication CQRS stream. Leadership never gates worker execution.
+- Issue writes through the authorized connection-owned native CQRS path. Do not create a scheduler principal, trust roles in hints, or move node-local storage handles with activations.
 - Preserve full partition identity, persisted creator revalidation, per-operation isolation, one five-second dispatch deadline, and stable command identity across the single uncertainty retry.
 
 ## Boundaries and protected risks

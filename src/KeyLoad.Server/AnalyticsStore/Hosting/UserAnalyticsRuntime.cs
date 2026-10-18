@@ -57,6 +57,10 @@ internal sealed class UserAnalyticsRuntime(IOptions<DatabaseLimits> options) : I
             var physical = host ?? throw new InvalidOperationException(Unavailable);
             operations.RemoveAll(work => work.Original.IsCompleted && !work.Execution.HasUnjoinedEngine
                 && work.Execution.CleanupFailures.Count == NoCleanupFailures);
+            if (operations.Any(work => work.Original.IsCompleted && work.Execution.HasUnjoinedEngine))
+            {
+                throw Errors.Fail(ErrorCode.OwnershipLost, Unavailable);
+            }
             if (operations.Count >= options.Value.MaxConcurrentQueries)
             {
                 throw Errors.Fail(ErrorCode.ResourceExhausted, Busy);

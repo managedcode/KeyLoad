@@ -42,7 +42,7 @@ internal static class QueueDeadlineCapacityRefusal
 
     internal static string[] Domain(ZoneTreeStore store, QueueLaneRef lane, Command<DatabaseCommand> operation)
     {
-        var outcome = Convert.ToHexString(OutcomeStoreOracle.Key(store, operation)) + QueueDeadlineCapacityProtocol.ByteSeparator;
+        var outcome = Convert.ToHexString(OutcomeStoreOracle.Key(operation)) + QueueDeadlineCapacityProtocol.ByteSeparator;
         var locator = Convert.ToHexString(KeySpace.OutcomeLocatorV2(lane.Partition, operation.UserId!,
             operation.CommandId)) + QueueDeadlineCapacityProtocol.ByteSeparator;
         var clock = Convert.ToHexString(KeySpace.ClockBytes) + QueueDeadlineCapacityProtocol.ByteSeparator;

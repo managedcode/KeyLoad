@@ -4,7 +4,7 @@ REQ-ANN-JOB-GRAPH-001: ANN projection work is performed by Orleans `[StatelessWo
 
 AC-ANN-JOB-GRAPH-001 requires a genuine hosted persisted configure, projection event, timer flush, signed connection command, canonical vector build/publication and a following authorized search. Denied unrelated callers, current policy revocation, cancellation, original replay and a following healthy execution retain complete independent state and cleanup checks.
 
-The graph admission adds only the concrete worker-to-connection transition; the existing client, grain-service, connection, command-partition and private-probe edges are retained. It supplies no database authority: signed server identity, fresh persisted authorization, bounded work, node-local storage and acknowledgement from every configured copys remain mandatory. Frontend and additional public contracts are N/A for this internal graph edge.
+The graph admission adds only the concrete worker-to-connection transition; the existing client, grain-service, connection, command-partition and private-probe edges are retained. It supplies no database authority: signed server identity, fresh persisted authorization, bounded work, node-local storage and acknowledgement from every configured copy remain mandatory. Frontend and additional public contracts are N/A for this internal graph edge.
 
 ```mermaid
 flowchart LR

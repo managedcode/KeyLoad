@@ -1,9 +1,9 @@
 # Optional authoritative-model cold-reopen gate
 
-This gate covers the authoritative database models. Public operational analytics
-exposes the current hour only: its fresh-report checks are mandatory, while a
-changed public window leaves retained derived history explicitly UNQUALIFIED.
-An overall case PASS does not qualify durable public analytics history.
+This gate covers the authoritative database models, original command outcomes,
+current persisted authorization and actual native node identities after restart.
+User AnalyticsStore event rows remain canonical; each aggregate is derived from
+a fresh authorized capture under the current owner.
 
 ## Requirements
 
@@ -11,8 +11,8 @@ REQ-DBCOLD-001 defines a separate selected recovery gate after the working
 single-instance/cluster pair. It does not change either existing FunctionalDatabaseGateTests
 case, their 10,000-success minimum, their three-resource rotation or their current
 execution flow. Both optional cases use the existing 30-minute cancellation bound.
-The original current local compiler and runtime gates passed as recorded above;
-exact-source Linux delivery remains a separate open gate.
+Current-source build, complete native TUnit/process recovery, actual Aspire
+SDK/MCP execution and exact-source Linux delivery remain separate gates.
 
 REQ-DBCOLD-002 requires the same original Aspire application, physical roots,
 container names and verified source/image selection. ContainerRuntimeControl owns
@@ -112,21 +112,17 @@ receipts, limits and deadlines remain unchanged. This scope is the current cold
 eight-user scenario, not future user Analytics, DROP or broader lifecycle work.
 Source alone does not qualify either cold topology, Linux delivery or performance.
 
-REQ-DBCOLD-006 checks native operational analytics separately: each actual node owns
-one derived native engine. Both real SDK and official MCP dashboard reads always
-verify complete fresh plans, counter consistency, same node/incarnation identity
-and changed process instance after cold. Retained sample count, AppliedSum and
-CommittedSum are compared only when both actual From and To equal the original
-public window. Otherwise one bounded structured scenario observation per node records
-analyticsHistory=UNQUALIFIED and PublicDashboardWindowChanged with both original and
-current windows. A changed current-hour window is an observability limitation, not a
-database failure or a TUnit skip. All three authoritative TimeSeries sets and every
-other model, original replay, authorization, healthy-write and cleanup assertion remain
-mandatory. This gate does not qualify unobservable old-hour public history; explicit
-captured-range native engine recovery belongs to the separate
-OperationalAnalyticsRootReopenFlow component scope and its own original evidence.
-Derived analytics is not a user catalog model, three independent analytics stores,
-authoritative database state or a replacement for native OpenTelemetry.
+REQ-DBCOLD-006 retains the actual per-node SDK and official MCP dashboard checks.
+Both clients must observe the same NodeId, incarnation and process instance for
+the executing silo. After a genuine cold restart, NodeId/incarnation and silo
+name remain stable, the process instance changes, and the canonical position
+cannot regress. Native membership must report the fixture's actual active silos;
+the configured copy count is an observation, while real command receipts carry
+the persisted-copy acknowledgement. Every original authoritative TimeSeries and
+AnalyticsStore row, complete model read, command replay, authorization refusal,
+healthy-write and joined-cleanup oracle remains mandatory. These current-source
+checks require actual execution and do not replace native OpenTelemetry or the
+separate Linux qualification gates.
 
 AC-DBCOLD-001 maps to
 `FunctionalDatabaseColdReopenTests.SingleInstanceColdReopensAllModelsAndReplaysOriginalPublicCommands`.

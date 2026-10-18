@@ -13,7 +13,7 @@ internal sealed class DatabaseCompositionReplayIntegrityTests
         db.Commit(new EnqueueMessage(CompositionReplayFixture.Queue, CompositionReplayFixture.Message, CompositionReplayFixture.Link(db, CompositionReplayFixture.First, CompositionReplayFixture.Second)));
         var operation = CompositionReplayFixture.Forward(db);
         db.Database.Apply(operation).Get<CommitReceipt>();
-        var key = OutcomeStoreOracle.Key(db.Store, operation);
+        var key = OutcomeStoreOracle.Key(operation);
         var outcome = db.Store.Read(view => view.GetRecord<StoredOutcome>(key))!;
         await Assert.That(outcome.CompositionAuthority).IsNotNull();
 

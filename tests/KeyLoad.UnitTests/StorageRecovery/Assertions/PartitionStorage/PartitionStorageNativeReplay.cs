@@ -1,5 +1,6 @@
 using KeyLoad.Core;
-using KeyLoad.UnitTests.Features.ClusterRouting;
+using KeyLoad.Server;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using P = KeyLoad.UnitTests.Features.StorageRecovery.PartitionStorageNativeProtocol;
 
@@ -9,25 +10,27 @@ internal static class PartitionStorageNativeReplay
 {
     private const string Missing = "The original committed native command outcome is not retained.";
 
-    internal static byte[] ReadBytes(RequestCqrsHostedRuntimeFixture source,
+    internal static byte[] ReadBytes(IServiceProvider source,
         CancellationToken token)
     {
-        var work = new ReadExecutionBudget(Options.Create(source.Database.Database.Limits), source.Clock, token);
+        var database = source.GetRequiredService<PartitionHostApplicationOwner>().Borrow().Database;
+        var work = new ReadExecutionBudget(Options.Create(database.Limits), source.GetRequiredService<TimeProvider>(), token);
         work.Check();
         byte[]? bytes = null;
-        source.Database.Store.Read(view => view.ReadValue(KeySpace.PartitionOutcome(P.Partition, P.Root, P.Command),
+        database.Store.Read(view => view.ReadValue(KeySpace.PartitionOutcome(P.Partition, P.Root, P.Command),
             value => bytes = value.ToArray(), work.ChargeBytes));
         work.Check();
         return bytes ?? throw new InvalidOperationException(Missing);
     }
 
-    internal static async Task RequireOriginalAsync(RequestCqrsHostedRuntimeFixture source,
+    internal static async Task RequireOriginalAsync(IServiceProvider source,
         PartitionStorageNativeCommit original, CancellationToken token)
     {
-        await source.Database.Coordinator.ReadBarrierAsync(token).ConfigureAwait(false);
-        var database = source.Database.Database;
+        var owner = source.GetRequiredService<PartitionHostApplicationOwner>().Borrow();
+        await owner.Coordinator.ReadBarrierAsync(token).ConfigureAwait(false);
+        var database = owner.Database;
         var request = database.CreateCommand(OperationKind.Batch, P.Command, P.Root,
-            source.Clock.GetUtcNow(), NativeSerialization.Serialize(P.Request()));
+            source.GetRequiredService<TimeProvider>().GetUtcNow(), NativeSerialization.Serialize(P.Request()));
         var retained = database.ReadStoredCommand(request, token) ?? throw new InvalidOperationException(Missing);
         await Assert.That(database.LastApplied).IsGreaterThanOrEqualTo(original.Receipt.Token.Position);
         await Assert.That(retained.Sequence).IsEqualTo(original.Receipt.Token.Position);
@@ -42,10 +45,17 @@ internal static class PartitionStorageNativeReplay
         await Assert.That(ReadBytes(source, token).AsSpan().SequenceEqual(original.Bytes)).IsTrue();
     }
 
-    internal static async Task RequireUnchangedCutAsync(RequestCqrsHostedRuntimeFixture source,
+    internal static async Task RequireUnchangedCutAsync(IServiceProvider source,
         (long AppliedPosition, long StorePosition) expected, CancellationToken token)
     {
-        await source.Database.Coordinator.ReadBarrierAsync(token).ConfigureAwait(false);
-        await Assert.That(source.Database.ReadCanonicalCut()).IsEqualTo(expected);
+        await source.GetRequiredService<PartitionHostApplicationOwner>().Borrow().Coordinator
+            .ReadBarrierAsync(token).ConfigureAwait(false);
+        await Assert.That(ReadCut(source)).IsEqualTo(expected);
+    }
+
+    internal static (long AppliedPosition, long StorePosition) ReadCut(IServiceProvider source)
+    {
+        var database = source.GetRequiredService<PartitionHostApplicationOwner>().Borrow().Database;
+        return database.Store.Read(_ => (database.LastApplied, database.Store.Position));
     }
 }
