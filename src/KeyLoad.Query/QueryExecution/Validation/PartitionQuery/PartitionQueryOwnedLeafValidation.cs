@@ -17,7 +17,7 @@ internal static class PartitionQueryOwnedLeafValidation
         var leaf = request.Plan;
         if (request.Owner is null || leaf is null || leaf.Version != Version || leaf.Partition is null || leaf.Request is null
             || leaf.Request.Partition != leaf.Partition || leaf.Request.Query is null
-            || string.IsNullOrEmpty(request.Tenant)
+            || string.IsNullOrEmpty(request.Tenant) || request.Tenant != leaf.Partition.TenantId
             || leaf.Request.Cursor is not null || leaf.Request.Query.Explain
             || leaf.Request.Query.ModelSource is not null || leaf.MaxCandidates != leaf.Request.Query.Limit)
         {

@@ -32,7 +32,6 @@ internal static class ClusterFixtureApplicationShutdown
             await ServerFailureObserver.ObserveAsync(
                 () => WriteJoinedAsync(owned, observed, output, token), failures).ConfigureAwait(false);
         }
-        await ServerFailureObserver.ObserveAsync(() => owned.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
         return stopped;
     }
 
@@ -53,6 +52,8 @@ internal static class ClusterFixtureApplicationShutdown
                 original.ProcessId,
                 original.StartedAtUtc,
                 original.AspireStartedAtUtc,
+                original.AspireProcessId,
+                original.AspireProcessStartedAtUtc,
                 actual.Snapshot.ExitCode,
                 actual.Snapshot.StartTimeStamp,
                 actual.Snapshot.StopTimeStamp,

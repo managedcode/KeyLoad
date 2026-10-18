@@ -30,7 +30,7 @@ if ([Environment]::GetEnvironmentVariable('DOTNET_EnableHWIntrinsic') -ceq '0') 
     throw 'Disabled hardware intrinsics are not an admitted current qualification profile.'
 }
 foreach ($suite in @('unit')) {
-    Invoke-WorkflowUnit ($suite + '-census') $suite '' $false
+    Invoke-WorkflowUnit ($suite + '-census') $suite $script:FcNativeContributors.FullUnitSelector $false
     foreach ($group in $inventory.coverageGroups) {
         $id = $group.groupId
         Invoke-WorkflowUnit $id $suite ([string] $group.selector) $true

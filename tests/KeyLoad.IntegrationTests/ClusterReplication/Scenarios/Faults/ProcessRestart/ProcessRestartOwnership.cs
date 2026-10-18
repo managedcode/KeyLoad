@@ -12,11 +12,11 @@ internal sealed class ProcessRestartOwnership
     internal const string PendingFailure = "An unsettled native restart owner must be retained.";
     private const string UnknownStartFailure = "The original native Start outcome is unobserved; owned shutdown is required.";
     private bool attempted;
-    private ProcessFaultCommandProtocol.Identity? replacement;
+    private ProcessFaultCommandProtocol.LaunchIdentity? replacement;
     internal bool StartAccepted { get; private set; }
     internal string? StartMessage { get; private set; }
 
-    internal async Task<ProcessFaultCommandProtocol.Identity> AcceptAsync(DistributedApplication app,
+    internal async Task<ProcessFaultCommandProtocol.LaunchIdentity> AcceptAsync(DistributedApplication app,
         ProcessRuntimeKillReceipt receipt, ProcessRestartFailureCapture capture, CancellationToken cancellationToken)
     {
         if (StartAccepted)
@@ -53,7 +53,7 @@ internal sealed class ProcessRestartOwnership
         return observed;
     }
 
-    internal void RequireSameReplacement(ProcessFaultCommandProtocol.Identity observed)
+    internal void RequireSameReplacement(ProcessFaultCommandProtocol.LaunchIdentity observed)
     {
         if (replacement is null || replacement != observed)
         {

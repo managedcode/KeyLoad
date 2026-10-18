@@ -23,9 +23,6 @@ internal static class ConnectionGrainGraphRegistration
                     nameof(IPartitionQueryGrain.ResolveOwnerAsync), nameof(IPartitionQueryGrain.ExecuteAsync));
             graph.AddGrainTransition<IPartitionQueryGrain, IDatabaseCommitGrain>()
                 .MethodByName(nameof(IPartitionQueryGrain.ResolveOwnerAsync), nameof(IDatabaseCommitGrain.GetReadOwnerAsync));
-            graph.AddGrainTransition<IDatabaseCommitGrain, IPartitionQueryGrain>()
-                .MethodsByName((nameof(IDatabaseCommitGrain.ExecuteSharedAsync), nameof(IPartitionQueryGrain.ResolveOwnerAsync)),
-                    (nameof(IDatabaseCommitGrain.ExecuteSharedAsync), nameof(IPartitionQueryGrain.ExecuteAsync)));
         });
     }
 }

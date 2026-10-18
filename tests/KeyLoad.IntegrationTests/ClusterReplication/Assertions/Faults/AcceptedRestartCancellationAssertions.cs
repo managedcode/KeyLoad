@@ -24,11 +24,11 @@ internal static class AcceptedRestartCancellationAssertions
         await fixture.SaveFailureDiagnosticsAsync(cancellationToken);
     }
 
-    internal static async Task SameReplacementAsync(ClusterFixture fixture, ProcessFaultCommandProtocol.Identity accepted,
+    internal static async Task SameReplacementAsync(ClusterFixture fixture, ProcessFaultCommandProtocol.LaunchIdentity accepted,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var actual = ProjectProcessIdentity.Read(fixture.App.ResourceNotifications, accepted.ResourceName);
+        var actual = ProjectProcessIdentity.ReadLaunch(fixture.App.ResourceNotifications, accepted.ResourceName);
         await Assert.That(actual).IsEqualTo(accepted);
     }
 }

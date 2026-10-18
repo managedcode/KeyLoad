@@ -23,19 +23,19 @@ internal static class PartitionQueryMcpTestData
         new SelectQuery(Collection, null, [new Selection("/name", "name")], null, [], 4),
         null, true, 1);
 
-    internal static void Seed(TestDatabase fixture, PartitionQueryRequestV1 request,
+    internal static ResourceLifetimeV1 Seed(TestDatabase fixture, PartitionQueryRequestV1 request,
         string entityId = EntityId)
     {
         var partition = request.Partitions.Single();
         var resource = new ResourceDefinition(request.Query.Collection, ResourceKind.Collection,
             partition.TransactionDomainId);
-        _ = fixture.Submit(OperationKind.ConfigureResource,
-            new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, resource))
-            .Get<ResourceDefinition>();
+        var creation = PartitionQueryCreationOracle.Configure(fixture,
+            new(partition.TenantId, partition.DatabaseId, resource));
         var id = Guid.NewGuid();
         _ = fixture.Submit(OperationKind.Batch,
             new CommandRequest(id, partition, [new PutDocument(request.Query.Collection, entityId, Json)]),
             id: id).Get<CommitReceipt>();
+        return creation;
     }
 
     internal static PartitionQueryRequestV1 Decode(PartitionQueryRequestV1 request)
@@ -53,20 +53,20 @@ internal static class PartitionQueryMcpTestData
     }
 
     internal static async Task<PartitionQueryPageV1> ExecuteAsync(TestDatabase fixture,
-        PartitionQueryRequestV1 request, string entityId = EntityId)
+        PartitionQueryRequestV1 request, ResourceLifetimeV1 creation, string entityId = EntityId)
     {
         var position = fixture.Store.Position;
         var page = new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution()).QueryPartitions(Root, request,
             Owner(fixture.Database));
-        await VerifyPageAsync(fixture, request, page, position, entityId);
+        await VerifyPageAsync(fixture, request, page, position, creation, entityId);
         return page;
     }
 
     internal static async Task VerifyPageAsync(TestDatabase fixture, PartitionQueryRequestV1 request,
-        PartitionQueryPageV1 page, long position, string entityId = EntityId)
+        PartitionQueryPageV1 page, long position, ResourceLifetimeV1 creation, string entityId = EntityId)
     {
         var partition = request.Partitions.Single();
-        var reference = new EntityRef(partition, request.Query.Collection, entityId);
+        var reference = PartitionQueryCreationOracle.Reference(creation, partition, entityId);
         var stored = fixture.Database.GetDocument(Root, reference)!;
         await Assert.That(page.Version).IsEqualTo(1);
         await Assert.That(page.Complete).IsTrue();

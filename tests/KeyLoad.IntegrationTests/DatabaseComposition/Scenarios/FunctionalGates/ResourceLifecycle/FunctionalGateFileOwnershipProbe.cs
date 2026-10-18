@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Aspire.Hosting.ApplicationModel;
 using KeyLoad.AppHost.Features.StorageRecovery;
 using KeyLoad.IntegrationTests.Features.ClusterReplication;
@@ -28,8 +29,11 @@ internal static class FunctionalGateFileOwnershipProbe
                 var owner = await FunctionalGateFileOwnershipAssertions.RuntimeAsync(fixture,
                     ExclusiveOwnerContentionResources.OwnerName, refused: false, token);
                 var saved = fixture.PhysicalFiles!.Owners.Single(value => value.Resource == ExclusiveOwnerContentionResources.OwnerName);
-                await Assert.That(owner.ProcessId).IsEqualTo(saved.Runtime.ProcessId);
-                await Assert.That(owner.Executable).IsEqualTo(saved.Runtime.Binary.ExecutablePath);
+                await Assert.That(owner.ProcessId).IsEqualTo(saved.Runtime.AspireProcessId);
+                using var launch = Process.GetProcessById(owner.ProcessId);
+                await Assert.That(launch.StartTime.ToUniversalTime()).IsEqualTo(saved.Runtime.AspireProcessStartedAtUtc);
+                await Assert.That(Path.GetFileNameWithoutExtension(launch.MainModule!.FileName))
+                    .IsEqualTo(Path.GetFileNameWithoutExtension(owner.Executable));
                 await Assert.That(owner.Source).IsEqualTo(saved.Directory);
                 var output = new ClusterFailureReceipts().RequireRunOutput(TestContext.ResultsDirectory);
                 var names = ExclusiveOwnerContentionResources.ResourceNames;

@@ -1,7 +1,12 @@
 using System.Collections.Immutable;
+using System.Text.Json;
 using KeyLoad.Client;
+using KeyLoad.Core.Features.InternalSerialization;
+using KeyLoad.Core.Features.ResourceExecution;
 using KeyLoad.IntegrationTests.Features.ClientApi;
 using KeyLoad.Query;
+using KeyLoad.Server;
+using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 
@@ -9,7 +14,8 @@ namespace KeyLoad.IntegrationTests.Features.QueryExecution;
 internal sealed record PartitionQueryClusterScenario(
     ImmutableArray<PartitionRef> Partitions,
     ImmutableArray<PartitionQueryClusterInputRow> Inputs,
-    SelectQuery Query)
+    SelectQuery Query,
+    ImmutableDictionary<(string TenantId, string DatabaseId, string ResourceName), EntityRefLifetimeV1> ResourceLifetimes)
 {
     private const string Tenant = "pquery-cluster-tenant";
     private const string Domain = "pquery-cluster-domain";
@@ -23,9 +29,9 @@ internal sealed record PartitionQueryClusterScenario(
         var inputs = CreateInputs(partitions);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
         var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
-        await ConfigureResourcesAsync(administrator, partitions, cancellationToken).ConfigureAwait(false);
+        var lifetimes = await ConfigureResourcesAsync(administrator, partitions, cancellationToken).ConfigureAwait(false);
         await CommitInputsAsync(administrator, inputs, cancellationToken).ConfigureAwait(false);
-        return new(partitions, inputs, CreateQuery());
+        return new(partitions, inputs, CreateQuery(), lifetimes);
     }
 
     internal static async Task<PartitionQueryClusterScenario> CreateAuthorizationAsync(ClusterFixture fixture,
@@ -40,15 +46,22 @@ internal sealed record PartitionQueryClusterScenario(
             new PartitionQueryClusterInputRow(partitions[1], "denied-row", 1, "denied"));
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
         var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
-        await ConfigureResourcesAsync(administrator, partitions, cancellationToken).ConfigureAwait(false);
+        var lifetimes = await ConfigureResourcesAsync(administrator, partitions, cancellationToken).ConfigureAwait(false);
         await CommitInputsAsync(administrator, inputs, cancellationToken).ConfigureAwait(false);
-        return new(partitions, inputs, CreateQuery());
+        return new(partitions, inputs, CreateQuery(), lifetimes);
     }
 
     internal PartitionQueryRequestV1 Request(ImmutableArray<PartitionRef>? partitions = null,
         SelectQuery? query = null)
         => new(PartitionQueryClusterProtocol.Version, partitions ?? Partitions, query ?? Query,
             Parameters: null, AllowFullScan: true, AstVersion: PartitionQueryClusterProtocol.AstVersion);
+
+    internal EntityRef ExpectedReference(PartitionQueryClusterInputRow row)
+        => new(row.Partition, PartitionQueryClusterProtocol.Collection, row.Id)
+        {
+            Lifetime = ResourceLifetimes[(row.Partition.TenantId, row.Partition.DatabaseId,
+                PartitionQueryClusterProtocol.Collection)]
+        };
 
     internal ImmutableArray<PartitionQueryClusterInputRow> ExpectedRows(IEnumerable<PartitionRef> selected)
     {
@@ -88,9 +101,10 @@ internal sealed record PartitionQueryClusterScenario(
             null, [new(PartitionQueryClusterProtocol.RankField, Descending: false)],
             PartitionQueryClusterProtocol.Limit);
 
-    private static async Task ConfigureResourcesAsync(KeyLoadClient administrator,
+    private static async Task<ImmutableDictionary<(string TenantId, string DatabaseId, string ResourceName), EntityRefLifetimeV1>> ConfigureResourcesAsync(KeyLoadClient administrator,
         ImmutableArray<PartitionRef> partitions, CancellationToken cancellationToken)
     {
+        var lifetimes = ImmutableDictionary.CreateBuilder<(string TenantId, string DatabaseId, string ResourceName), EntityRefLifetimeV1>();
         foreach (var partition in partitions)
         {
             var definition = new ResourceDefinition(PartitionQueryClusterProtocol.Collection,
@@ -98,10 +112,30 @@ internal sealed record PartitionQueryClusterScenario(
             {
                 Indexes = [new(PartitionQueryClusterProtocol.RankIndex, [PartitionQueryClusterProtocol.RankField], Unique: false)]
             };
-            await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureResourceAsync(Guid.NewGuid(),
-                new(partition.TenantId, partition.DatabaseId, definition), cancellationToken).ConfigureAwait(false))
+            var commandId = Guid.NewGuid();
+            var request = new ConfigureResourceRequest(partition.TenantId, partition.DatabaseId, definition);
+            await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigureResourceAsync(commandId,
+                request, cancellationToken).ConfigureAwait(false))
                 .ConfigureAwait(false);
+            var scope = (request.TenantId, request.DatabaseId, definition.Name);
+            if (!lifetimes.ContainsKey(scope))
+            {
+                lifetimes.Add(scope, ExpectedLifetime(commandId, request));
+            }
         }
+        return lifetimes.ToImmutable();
+    }
+
+    private static EntityRefLifetimeV1 ExpectedLifetime(Guid commandId, ConfigureResourceRequest request)
+    {
+        var principalId = PartitionStoreProtocol.AdministratorId;
+        var fingerprint = DatabaseCommandFingerprint.Compute(commandId, OperationKind.ConfigureResource,
+            principalId, JsonSerializer.Serialize(request, JsonDefaults.Options));
+        var original = Command<DatabaseCommand>.Create(nameof(DatabaseCommand),
+            new DatabaseCommand(OperationKind.ConfigureResource, NativeSerialization.Serialize(request), fingerprint), commandId);
+        original.UserId = principalId;
+        var lifetime = ResourceLifetimeIdentity.Create(original, request.TenantId, request.DatabaseId, request.Definition);
+        return new(lifetime.Incarnation.Value);
     }
 
     private static async Task CommitInputsAsync(KeyLoadClient administrator,

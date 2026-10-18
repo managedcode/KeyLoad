@@ -12,20 +12,21 @@ internal static class QueryHostedSearchDeadline
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         var observer = new QueryHostedReadObserver();
-        var receivingClock = new QueryObservedWorkClock();
-        return RequestCqrsHostedCluster.RunAsync(cluster => ExecuteAsync(cluster, observer, receivingClock, token),
-            token, observer, index => index == ReceivingNode ? receivingClock : TimeProvider.System);
+        var clocks = Enumerable.Range(0, QueryHostedSearchDataset.Copies)
+            .Select(_ => new QueryObservedWorkClock()).ToArray();
+        return RequestCqrsHostedCluster.RunAsync(cluster => ExecuteAsync(cluster, observer, clocks, token),
+            token, observer, index => clocks[index]);
     }
 
     private static async Task ExecuteAsync(RequestCqrsHostedCluster cluster, QueryHostedReadObserver observer,
-        QueryObservedWorkClock clock, CancellationToken token)
+        QueryObservedWorkClock[] clocks, CancellationToken token)
     {
         var data = new QueryHostedSearchDataset(cluster);
         await data.SeedAsync(token).ConfigureAwait(false);
         var images = QueryHostedSearchAssertions.Capture(cluster);
         var node = cluster.Nodes[ReceivingNode];
         var requestId = Guid.NewGuid();
-        var read = observer.Hold(requestId, node);
+        var read = observer.Hold(requestId, node, data);
         using var caller = CancellationTokenSource.CreateLinkedTokenSource(token);
         using var deadline = new CancellationTokenSource(node.Timing.CompletionTimeout, TimeProvider.System);
         using var completion = CancellationTokenSource.CreateLinkedTokenSource(token, deadline.Token);
@@ -34,10 +35,12 @@ internal static class QueryHostedSearchDeadline
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             await read.Entered.Task.WaitAsync(completion.Token).ConfigureAwait(false);
-            await Assert.That(read.NodeId).IsEqualTo(node.Database.Store.Identity.NodeId);
-            await Assert.That(read.ObservedBytes).IsGreaterThan(read.BeforeBytes);
-            clock.Arm(() => node.Database.Store.GetReadDiagnostics().RangeExaminedBytes > read.BeforeBytes,
-                () => clock.Advance(TimeSpan.FromSeconds(node.Database.Database.Limits.QueryDeadlineSeconds + PastDeadlineSeconds)));
+            await QueryHostedReadAssertions.ProgressAsync(cluster, read).ConfigureAwait(false);
+            var owner = cluster.Nodes.Single(candidate => ReferenceEquals(candidate.Database.Store, read.Coordinator.Store));
+            var clock = (QueryObservedWorkClock)read.Coordinator.Clock;
+            await Assert.That(clocks.Contains(clock)).IsTrue();
+            clock.Arm(() => read.PhysicalReads.All(physical => physical.HasProgress),
+                () => clock.Advance(TimeSpan.FromSeconds(owner.Database.Database.Limits.QueryDeadlineSeconds + PastDeadlineSeconds)));
             read.Release.TrySetResult();
             var reply = await operation.WaitAsync(completion.Token).ConfigureAwait(false);
             await read.Disposed.Task.WaitAsync(completion.Token).ConfigureAwait(false);
@@ -49,7 +52,10 @@ internal static class QueryHostedSearchDeadline
             await QueryHostedSearchAssertions.StateAsync(cluster, images).ConfigureAwait(false);
             await QueryHostedSearchAssertions.HealthyAsync(cluster, data, images, token).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
-        clock.Disarm();
+        foreach (var clock in clocks)
+        {
+            clock.Disarm();
+        }
         await caller.CancelAsync().ConfigureAwait(false);
         observer.ReleaseAll();
         using var cleanup = new CancellationTokenSource(node.Timing.ShutdownTimeout, TimeProvider.System);

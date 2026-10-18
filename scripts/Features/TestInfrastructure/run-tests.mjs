@@ -12,6 +12,7 @@ const nativeSimdOptions = ['DOTNET_EnableHWIntrinsic', 'COMPlus_EnableHWIntrinsi
 const heavyLoadEnabledOption = 'HeavyLoad:Enabled';
 const heavyLoadFilter = '/*/*/HeavyDocumentLoadClusterTests/*';
 const ordinaryClusterFilter = '/*/*/*/*[Category!=HeavyLoad]';
+const ordinaryUnitFilter = '/KeyLoad.UnitTests/*/*/*';
 const projects = new Map([
   ['analyzers', 'KeyLoad.Analyzers.Tests'], ['unit', 'KeyLoad.UnitTests'],
   ['recovery', 'KeyLoad.RecoveryTests'],
@@ -53,6 +54,7 @@ export function nativeSelection(input, inherited = process.env) {
     throw new Error('Comparison measurements and heavy load require exactly one native test at a time.');
   }
   if (suite === 'cluster' && !values.has('Filter')) values.set('Filter', ordinaryClusterFilter);
+  if (suite === 'unit' && !values.has('Filter')) values.set('Filter', ordinaryUnitFilter);
   const environment = { ...inherited };
   if (process.platform === 'darwin') {
     // Storage roots reject symlink ancestors; MTP pipes need a short existing Unix base.

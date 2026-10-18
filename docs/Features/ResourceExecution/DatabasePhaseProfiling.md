@@ -43,17 +43,19 @@ tested through the actual replicated cluster.
 
 ## Closed phase inventory
 
+Ten current boundaries retain IDs 0–4 and 27–31 within the bank's fixed capacity
+of32 phase slots. Undefined phase slots are rejected without recording counters;
+the six outcomes,16 buckets and128KiB startup ceiling are unchanged.
+
 A replicated write is ordinary Orleans calls to the ZoneTree owners on ReplicaCount silos with acknowledgement from every configured copy after durable local apply; its profiling boundaries are not part of this inventory yet.
 
 |ID/name|Actual timing boundary; preservation|
 |---|---|
 |00 PublicAuthenticationDispatch|CredentialResolver actual node ExecuteRead await; exclude next middleware.|
 |01 PublicOperationDispatch|CanonicalOperationGateway actual node Execute await.|
+|02 AuthorizedAuthenticationBarrier|Verified authentication's native coordinator ReadBarrierAsync await.|
+|03 AuthorizedOperationBarrier|Verified operation's separate native coordinator ReadBarrierAsync await.|
 |04 AuthorizedReadCapability|Verified grain capability call/result; excludes encoding.|
-|23 CanonicalApplyWait|Original materializer watermark wait; not CPU or gate wait.|
-|24 CanonicalApplyGateWait|Existing actual worker/checkpoint/snapshot/install gate wait.|
-|25 CanonicalApplyGateHold|Successful corresponding acquire through actual release; maintenance included.|
-|26 CanonicalApplyBatch|Actual scheduling batch, including per-entry commits; not group commit.|
 |27 ProviderReadGateWait|Actual Store.Read EnterReadLock to acquire/failure.|
 |28 ProviderWriteGateWait|Actual Store.Commit EnterWriteLock to acquire/failure.|
 |29 ProviderWriteGateHold|Commit acquire through original ExitWriteLock; no-change calls included.|
@@ -81,7 +83,10 @@ oversize/default schema and degraded profiles instead of fabricating numbers.
 
 The primitive bank, arithmetic and immutable process-mode facade are
 implemented in source with acceptance-derived TUnit cases. Default mode remains
-off. Direct enabled counter, private capture, trusted process-mode startup and
+off; server composition uses `TimeProvider.System` for the physical-process bank
+independently of silo or request clocks, preserving strict repeated-initialization
+settings checks.
+Direct enabled counter, private capture, trusted process-mode startup and
 actual replicated-cluster profile qualification remain open; source and build
 checks establish no actual phase counts, allocations or performance.
 

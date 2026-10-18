@@ -23,7 +23,11 @@ internal static class ProcessRuntimeKilledOwnerValidation
             if (receipt.ResourceName != name || killed.ResourceName != name || killed.ProcessId != before.ProcessId
                 || killed.AspireStartTimeUtcTicks != before.AspireStartTimeUtcTicks
                 || killed.ProcessStartTimeUtcTicks != before.ProcessStartTimeUtcTicks || IsOriginalAlive(before.ProcessId,
-                    before.ProcessStartTimeUtcTicks))
+                    before.ProcessStartTimeUtcTicks) || killed.LaunchProcessId != before.LaunchProcessId
+                || killed.LaunchProcessStartTimeUtcTicks != before.LaunchProcessStartTimeUtcTicks
+                || IsOriginalAlive(before.LaunchProcessId, before.LaunchProcessStartTimeUtcTicks)
+                || killed.LaunchExitCode == 0
+                || (OperatingSystem.IsWindows() ? killed.ExitCode is null or 0 : killed.ExitCode is not null))
             {
                 throw new InvalidOperationException(ProcessRestartOwnership.PendingFailure);
             }
@@ -33,7 +37,9 @@ internal static class ProcessRuntimeKilledOwnerValidation
 
     internal static void RequireExited(NativeProcessEvidence original)
     {
-        if (IsOriginalAlive(original.ProcessId, original.StartedAtUtc.Ticks))
+        if (IsOriginalAlive(original.ProcessId, original.StartedAtUtc.Ticks)
+            || original.AspireProcessId is not { } launch || original.AspireProcessStartedAtUtc is not { } started
+            || IsOriginalAlive(launch, started.Ticks))
         {
             throw new InvalidOperationException("The original native process has not joined its shutdown.");
         }

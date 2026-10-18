@@ -12,7 +12,7 @@ internal sealed class PartitionQueryMergeTests
     [Test]
     public async Task RealZoneTreeLeavesMatchIndependentGlobalOrderBeforeProjection()
     {
-        using var database = PartitionQueryTestSupport.Create();
+        using var database = PartitionQueryTestSupport.Create(out var creation);
         var partitions = PartitionQueryTestSupport.Partitions(database);
         PartitionQuerySeed[][] seeds =
         [
@@ -42,8 +42,7 @@ internal sealed class PartitionQueryMergeTests
             .Take(PartitionQueryTestSupport.ResultLimit).ToArray();
 
         var actualReferences = actual.Rows.Select(row => row.Reference).ToArray();
-        var expectedReferences = expected.Select(item => new EntityRef(item.Partition,
-            PartitionQueryTestSupport.Collection, item.Seed.Id)).ToArray();
+        var expectedReferences = expected.Select(item => PartitionQueryCreationOracle.Reference(creation, item.Partition, item.Seed.Id)).ToArray();
         await Assert.That(actual.Complete).IsTrue();
         await Assert.That(actualReferences.SequenceEqual(expectedReferences)).IsTrue();
         for (var index = 0; index < expected.Length; index++)
@@ -66,7 +65,7 @@ internal sealed class PartitionQueryMergeTests
     [Test]
     public async Task FullReferenceTiesUseOrdinalUnicodePartitionOrder()
     {
-        using var database = PartitionQueryTestSupport.Create();
+        using var database = PartitionQueryTestSupport.Create(out var creation);
         PartitionRef[] partitions =
         [
             database.Partition with { PartitionKey = "unicode-\uE000" },
@@ -78,7 +77,7 @@ internal sealed class PartitionQueryMergeTests
         var result = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).ExecutePartitionQuery(PartitionQueryTestSupport.Principal,
             PartitionQueryTestSupport.Request(database, 2), [.. partitions]);
         var expected = partitions.OrderBy(static item => item.PartitionKey, StringComparer.Ordinal)
-            .Select(item => new EntityRef(item, PartitionQueryTestSupport.Collection, "same")).ToArray();
+            .Select(item => PartitionQueryCreationOracle.Reference(creation, item, "same")).ToArray();
 
         await Assert.That(result.Rows.Select(static row => row.Reference).SequenceEqual(expected)).IsTrue();
         await Assert.That(result.Rows.Select(static row => row.Row.Json)

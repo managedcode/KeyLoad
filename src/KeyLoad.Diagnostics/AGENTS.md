@@ -7,7 +7,7 @@
 - BCL-only shared implementation; no ASP.NET/Orleans/provider/product/package dependency except the existing centrally attached analyzer.
 - Keep diagnostic implementation in its actual role folder; shared assembly friend metadata belongs to the project composition owner.
 - Preserve both authorized cuts, node-local ZoneTree ownership, all existing gates/async originals/ACK/WAL. This project owns no database state, file, credential, role or protocol.
-- Fixed32/6/16 schema/four stripes, startup bank128KiB, record maximum4 CAS attempts and sticky degradation; no hot callbacks, logging/export, allocations, gates, ambient state, per-request identifiers, reset or live mode changes.
+- Ten current phase boundaries retain their native IDs within a fixed32-slot capacity, with6 outcomes/16 buckets/four stripes, startup bank128KiB, record maximum4 CAS attempts and sticky degradation; undefined phase slots are invalid inputs. No hot callbacks, logging/export, allocations, gates, ambient state, per-request identifiers, reset or live mode changes.
 - Only root freezes public shared signatures/project references and mode/export composition; workers may not invent broader telemetry/control architecture.
 - No project-local skill installed; do not install tools/skills or modify global configuration. Installed authorized Orleans guidance applies to unchanged producer lifecycles outside this BCL project.
 - Unknown/partial/degraded measurements are unavailable evidence, never zero or a performance winner. Snapshot reads are non-atomic; overlapping phases and whole-process samples are not request attribution.

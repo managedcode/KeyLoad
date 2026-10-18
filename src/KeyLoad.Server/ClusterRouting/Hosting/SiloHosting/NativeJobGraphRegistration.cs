@@ -65,6 +65,16 @@ internal static class NativeJobGraphRegistration
             nameof(IRequestWorkerGrain.ExecuteAsync));
         Add<ICommandPartitionGrain, IRequestWorkerGrain>(graph, nameof(ICommandPartitionGrain.ExecuteAsync),
             nameof(IRequestWorkerGrain.ExecuteCommandAsync));
+        AddSharedQueries(graph);
+    }
+
+    private static void AddSharedQueries(DirectedGraph graph)
+    {
+        foreach (var target in new[] { nameof(IPartitionQueryGrain.ResolveOwnerAsync), nameof(IPartitionQueryGrain.ExecuteAsync) })
+        {
+            graph.AddTransition(typeof(IDatabaseCommitGrain).FullName!, typeof(IPartitionQueryGrain).FullName!,
+                new GrainTransition(nameof(IDatabaseCommitGrain.ExecuteSharedAsync), target, IsReentrant: true));
+        }
     }
 
     private static void AddBackgroundWorkers(DirectedGraph graph)

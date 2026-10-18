@@ -6,7 +6,7 @@ namespace KeyLoad.Server;
 
 /// <summary>Borrows native Orleans hosting and the silo-local storage owner for public operations.</summary>
 internal sealed partial class OrleansNode(IServiceProvider applicationServices, IOptions<NodeOptions> nodeOptions,
-    ILoggerFactory loggerFactory, ServerRuntimeOptions runtimeOptions) : IAsyncDisposable
+    ILoggerFactory loggerFactory, ServerRuntimeOptions runtimeOptions, RuntimeJournalAdmission journalAdmission) : IAsyncDisposable
 {
     private readonly Lock lifecycle = new();
     private readonly OrleansNodeRequestLifetime requestLifetime = new(runtimeOptions.GrainRouting);

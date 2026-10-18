@@ -4,6 +4,7 @@ using Aspire.Hosting.ApplicationModel;
 using KeyLoad.AppHost.Features.ClusterReplication;
 using KeyLoad.AppHost.Features.TestInfrastructure;
 using KeyLoad.Comparisons;
+using KeyLoad.Diagnostics.Features.ResourceExecution;
 using KeyLoad.LoadTests.AppHost.Features.BenchmarkComparisons;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -39,9 +40,13 @@ internal static class BenchmarkSessionClientRuntime
         if (selection.Target == KeyLoad)
         {
             var model = application.Services.GetRequiredService<DistributedApplicationModel>();
-            var processes = model.Resources.OfType<ProjectResource>().Select(resource =>
-                ProjectProcessEvidence.Read(application.ResourceNotifications, resource.Name)).ToArray();
-            if (processes.Length != selection.NodeCount)
+            var processes = new List<NativeProcessEvidence>();
+            foreach (var resource in model.Resources.OfType<ProjectResource>())
+            {
+                processes.Add(await ProjectProcessEvidence.ReadAsync(application.ResourceNotifications,
+                    resource.Name, application.Services.GetRequiredService<IOptions<TestExecutionOptions>>(), token));
+            }
+            if (processes.Count != selection.NodeCount)
             {
                 throw new InvalidDataException("The selected database does not expose the required native server processes.");
             }

@@ -48,7 +48,7 @@ internal static class ServerConfiguration
             runtime.ValidateBeforePhysicalOwnership();
             var phases = runtime.DatabasePhaseExecution.Value;
             DatabasePhaseTelemetry.Initialize(phases.Enabled, phases.StripeCount, phases.MaximumCasAttempts,
-                app.Services.GetRequiredService<TimeProvider>());
+                TimeProvider.System);
             ConfigureApplication(app);
             return app;
         }

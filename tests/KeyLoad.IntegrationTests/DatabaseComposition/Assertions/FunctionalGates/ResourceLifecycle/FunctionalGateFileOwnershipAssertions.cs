@@ -80,7 +80,7 @@ internal static class FunctionalGateFileOwnershipAssertions
         if (!int.TryParse(Convert.ToString(value, CultureInfo.InvariantCulture), NumberStyles.None,
                 CultureInfo.InvariantCulture, out var processId) || processId <= 0
             || snapshot.StartTimeStamp is not { } started
-            || !Path.IsPathFullyQualified(project) || !Path.IsPathFullyQualified(executable)
+            || !Path.IsPathFullyQualified(project) || string.IsNullOrWhiteSpace(executable)
             || !string.Equals(Path.GetFullPath(project),
                 Path.GetFullPath(((ProjectResource)actual.Resource).GetProjectMetadata().ProjectPath), StringComparison.Ordinal))
         {

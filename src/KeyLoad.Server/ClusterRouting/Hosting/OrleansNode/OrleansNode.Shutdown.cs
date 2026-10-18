@@ -1,4 +1,3 @@
-using KeyLoad.Clustering;
 using KeyLoad.Server.Features.ClusterRouting;
 
 namespace KeyLoad.Server;
@@ -10,7 +9,7 @@ internal sealed partial class OrleansNode
         await Task.Yield();
         var failures = new List<Exception>();
         var startupFailures = new List<Exception>();
-        applicationServices.GetRequiredService<RuntimeJournalAdmission>().CloseScheduling();
+        journalAdmission.CloseScheduling();
         await requestLifetime.CancelAndJoinStartupAsync(null, startup, startupFailures, failures).ConfigureAwait(false);
         await OrleansNodeHostShutdown.JoinAsync(RequestWork, null, failures).ConfigureAwait(false);
         await requestLifetime.JoinAsync(failures).ConfigureAwait(false);

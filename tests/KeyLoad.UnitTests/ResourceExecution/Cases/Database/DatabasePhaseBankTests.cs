@@ -91,7 +91,7 @@ internal sealed class DatabasePhaseBankTests
     public async Task EveryClosedOutcomeRecordsExactlyOneIndependentLane()
     {
         var bank = DatabasePhaseTestComposition.Create(true);
-        var phase = DatabasePhaseKind.QuorumFollowerAwait;
+        var phase = DatabasePhaseKind.AuthorizedReadCapability;
         var outcomes = Enum.GetValues<DatabasePhaseOutcome>();
 
         foreach (var outcome in outcomes)
@@ -144,7 +144,7 @@ internal sealed class DatabasePhaseBankTests
     {
         var first = DatabasePhaseTestComposition.Create(true);
         var second = DatabasePhaseTestComposition.Create(true);
-        first.RecordBusy(DatabasePhaseKind.HeartbeatRoundsHold);
+        first.RecordBusy(DatabasePhaseKind.ProviderWriteGateWait);
         var firstSnapshot = first.Capture();
         var secondSnapshot = second.Capture();
 
@@ -163,12 +163,18 @@ internal sealed class DatabasePhaseBankTests
         var started = bank.Begin();
         bank.End((DatabasePhaseKind)InvalidPhase, DatabasePhaseOutcome.Completed, started);
         bank.End((DatabasePhaseKind)PhaseCount, DatabasePhaseOutcome.Completed, started);
-        bank.End(DatabasePhaseKind.ReadRoundsWait, (DatabasePhaseOutcome)InvalidOutcome, started);
-        bank.End(DatabasePhaseKind.ReadRoundsWait, (DatabasePhaseOutcome)OutcomeCount, started);
-        bank.End(DatabasePhaseKind.ReadRoundsWait, DatabasePhaseOutcome.Completed, InvalidElapsed);
-        bank.End(DatabasePhaseKind.ReadRoundsWait, DatabasePhaseOutcome.Completed, FutureTimestamp);
+        bank.End(DatabasePhaseKind.ProviderReadGateWait, (DatabasePhaseOutcome)InvalidOutcome, started);
+        bank.End(DatabasePhaseKind.ProviderReadGateWait, (DatabasePhaseOutcome)OutcomeCount, started);
+        bank.End(DatabasePhaseKind.ProviderReadGateWait, DatabasePhaseOutcome.Completed, InvalidElapsed);
+        bank.End(DatabasePhaseKind.ProviderReadGateWait, DatabasePhaseOutcome.Completed, FutureTimestamp);
         bank.RecordBusy((DatabasePhaseKind)InvalidPhase);
         bank.RecordBusy((DatabasePhaseKind)PhaseCount);
+        foreach (var phase in Enumerable.Range(0, PhaseCount)
+            .Select(index => (DatabasePhaseKind)index).Where(phase => !Enum.IsDefined(phase)))
+        {
+            bank.End(phase, DatabasePhaseOutcome.Completed, started);
+            bank.RecordBusy(phase);
+        }
         var snapshot = bank.Capture();
         var expected = DatabaseProfileQuality.InvalidDimension | DatabaseProfileQuality.InvalidElapsed;
 

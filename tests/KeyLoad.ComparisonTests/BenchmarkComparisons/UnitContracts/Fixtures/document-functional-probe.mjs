@@ -13,14 +13,15 @@ const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const originalsRoot = 'TestResults/cluster-heavy-load/qualification/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/';
 const entries = ['TestResults/cluster-heavy-load/original.trx', ...FUNCTIONAL.files.slice(1).map(file => originalsRoot + path.basename(file))];
 const binary = { executablePath: '/usr/share/dotnet/dotnet', executableSha256: '1'.repeat(64),
-  assemblyPath: '/workspace/src/KeyLoad.Server/bin/Release/net10.0/KeyLoad.Server.dll', assemblySha256: '2'.repeat(64),
-  pdbPath: '/workspace/src/KeyLoad.Server/bin/Release/net10.0/KeyLoad.Server.pdb', pdbSha256: '3'.repeat(64),
+  assemblyPath: '/workspace/src/KeyLoad.Server/bin/Debug/net10.0/KeyLoad.Server.dll', assemblySha256: '2'.repeat(64),
+  pdbPath: '/workspace/src/KeyLoad.Server/bin/Debug/net10.0/KeyLoad.Server.pdb', pdbSha256: '3'.repeat(64),
   sourceCount: 12, sourceCompositionSha256: '4'.repeat(64) };
 const processes = Array.from({length: 3}, (_, index) => ({ name: 'node' + (index + 1), processId: 100 + index,
-  startedAtUtc: '2026-10-09T10:01:00Z', aspireStartedAtUtc: '2026-10-09T10:00:59Z', binary }));
+  startedAtUtc: '2026-10-09T10:01:00Z', aspireStartedAtUtc: '2026-10-09T10:00:59Z',
+  aspireProcessId: 200 + index, aspireProcessStartedAtUtc: '2026-10-09T10:00:59Z', binary }));
 const runtimeIdentity = { descriptor: { workspace: '/workspace', assemblies: [{role: 'server',
-  path: 'src/KeyLoad.Server/bin/Release/net10.0/KeyLoad.Server.dll', sha256: binary.assemblySha256,
-  pdbPath: 'src/KeyLoad.Server/bin/Release/net10.0/KeyLoad.Server.pdb', pdbSha256: binary.pdbSha256}] } };
+  path: 'src/KeyLoad.Server/bin/Debug/net10.0/KeyLoad.Server.dll', sha256: binary.assemblySha256,
+  pdbPath: 'src/KeyLoad.Server/bin/Debug/net10.0/KeyLoad.Server.pdb', pdbSha256: binary.pdbSha256}] } };
 const pascal = value => Object.fromEntries(Object.entries(value).map(([key, item]) =>
   [key[0].toUpperCase() + key.slice(1), key === 'binary' ? pascal(item) : item]));
 export function controlledFunctionalProof(cohort) {
@@ -79,6 +80,7 @@ async function probe() {
     const closed = { JoinedAtUtc: '2026-10-09T10:59:01Z', Processes: started, Resources: started.map(value => ({
       Name: value.Name, ProcessId: value.ProcessId, StartedAtUtc: value.StartedAtUtc,
       AspireStartedAtUtc: value.AspireStartedAtUtc, ExitCode: 0, StartTimeStamp: value.AspireStartedAtUtc,
+      AspireProcessId: value.AspireProcessId, AspireProcessStartedAtUtc: value.AspireProcessStartedAtUtc,
       StopTimeStamp: '2026-10-09T10:59:00Z', State: 'Exited' })) };
     const originals = [Buffer.from(originalTrx()), Buffer.from(JSON.stringify(started)),
       Buffer.from(JSON.stringify(started)), Buffer.from(JSON.stringify(closed))];

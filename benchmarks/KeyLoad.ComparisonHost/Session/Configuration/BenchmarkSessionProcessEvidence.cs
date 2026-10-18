@@ -16,6 +16,7 @@ internal static class BenchmarkSessionProcessEvidence
     private const string KeyLoad = "KeyLoad";
     private const string NativeServersRequired = "The KeyLoad workload requires observed native server processes.";
     private const string NativeServerTopologyMismatch = "The observed native server process set does not match the selected topology.";
+    private const int MinimumProcessId = 1;
     private const int MaximumCharacters = 131_072;
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
 
@@ -35,7 +36,10 @@ internal static class BenchmarkSessionProcessEvidence
         if (servers.IsDefault || servers.Length != selection.NodeCount
             || servers.Select(server => server.Name).Distinct(StringComparer.Ordinal).Count() != servers.Length
             || servers.Select(server => server.ProcessId).Distinct().Count() != servers.Length
-            || servers.Any(server => server.AspireStartedAtUtc is null))
+            || servers.Select(server => server.AspireProcessId).Distinct().Count() != servers.Length
+            || servers.Any(server => server.AspireStartedAtUtc is null || server.AspireProcessId is not >= MinimumProcessId
+                || server.AspireProcessStartedAtUtc is null
+                || server.AspireProcessStartedAtUtc > server.StartedAtUtc))
         {
             throw new InvalidDataException(NativeServerTopologyMismatch);
         }

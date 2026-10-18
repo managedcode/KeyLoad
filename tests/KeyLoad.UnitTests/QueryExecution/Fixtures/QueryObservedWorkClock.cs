@@ -3,7 +3,6 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 /// <summary>Operation clock observing actual work in the owning native store.</summary>
 internal sealed class QueryObservedWorkClock : TimeProvider
 {
-    private readonly DateTimeOffset epoch = TimeProvider.System.GetUtcNow();
     private Func<bool>? observedWork;
     private Action? afterWork;
     private long timestamp;
@@ -12,7 +11,7 @@ internal sealed class QueryObservedWorkClock : TimeProvider
         get; private set;
     }
     public override long TimestampFrequency => TimeSpan.TicksPerSecond;
-    public override DateTimeOffset GetUtcNow() => epoch.AddTicks(timestamp);
+    public override DateTimeOffset GetUtcNow() => TimeProvider.System.GetUtcNow();
     public override long GetTimestamp()
     {
         if (observedWork is { } predicate && predicate())

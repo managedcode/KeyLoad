@@ -67,7 +67,7 @@ public sealed class UnauthorizedImplementationTermAnalyzer : DiagnosticAnalyzer
     private static void AnalyzeText(SyntaxTreeAnalysisContext context, ImplementationTermPermissions permissions,
         SyntaxNode node, string text, Location location)
     {
-        foreach (var match in ImplementationTermCatalog.Read(text).Distinct())
+        foreach (var match in ImplementationTermReader.Read(text).Distinct())
         {
             context.CancellationToken.ThrowIfCancellationRequested();
             if (!permissions.Allows(match.Term, text, node, context.CancellationToken))

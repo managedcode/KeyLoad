@@ -1,6 +1,6 @@
 namespace KeyLoad.AppHost.Features.StorageRecovery;
 
-/// <summary>Adds three explicit competing processes without adding voters or independent database directories.</summary>
+/// <summary>Adds three explicit processes competing for the existing owner's physical database files.</summary>
 internal static class ExclusiveOwnerContentionResources
 {
     internal const string OwnerName = "node1";

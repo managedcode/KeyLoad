@@ -318,7 +318,7 @@
       "PartitionQueryPublicContractTests",
       "PartitionQueryPublicMergeTests"
     ],
-    "filter": "/*/*/PartitionQuery*/*",
+    "filter": "/KeyLoad.UnitTests/*/PartitionQuery*/*",
     "testNamespace": "KeyLoad.UnitTests.Features.QueryExecution",
     "exactCases": [
       {

@@ -112,7 +112,7 @@ internal static class NativeCoverageCliCollector
         if (!assembly.Exists || assembly.Length <= 0 || assembly.Length > limits.MaximumFileBytes
             || assembly.LinkTarget is not null || (assembly.Attributes & FileAttributes.ReparsePoint) != 0)
         {
-            failures.Add(new InvalidDataException("The copied Release KeyLoad CLI assembly is missing or unsafe."));
+            failures.Add(new InvalidDataException("The copied KeyLoad CLI assembly is missing or unsafe."));
             return null;
         }
         var start = CreateCollectStart(options, copiedDirectory, cli, cliArguments, reportPath);

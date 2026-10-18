@@ -29,7 +29,7 @@ internal sealed class PartitionQueryContractTests
     [Test]
     public async Task MismatchedLeafRequestPartitionFailsBeforeAnyStorageRead()
     {
-        using var database = PartitionQueryTestSupport.Create();
+        using var database = PartitionQueryTestSupport.Create(out var creation);
         var partitions = PartitionQueryTestSupport.Partitions(database)[..2];
         PartitionQueryTestSupport.AddRows(database, partitions[0], new PartitionQuerySeed("valid-leaf", 1, "healthy"));
         var limits = database.Database.Limits;
@@ -54,14 +54,14 @@ internal sealed class PartitionQueryContractTests
         await Assert.That(database.Store.Position).IsEqualTo(position);
         var healthy = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).ExecutePartitionQuery(
             PartitionQueryTestSupport.Principal, PartitionQueryTestSupport.Request(database, 1), [partitions[0]]);
-        await PartitionQueryWholeFlowAssertions.AssertNativeRowAsync(healthy, partitions[0], "valid-leaf", "healthy");
+        await PartitionQueryWholeFlowAssertions.AssertNativeRowAsync(healthy, partitions[0], "valid-leaf", "healthy", creation);
         await Assert.That(database.Store.Position).IsEqualTo(position);
     }
 
     [Test]
     public async Task EmptyOversizedAndNullPartitionSetsFailAsValidation()
     {
-        using var database = PartitionQueryTestSupport.Create();
+        using var database = PartitionQueryTestSupport.Create(out var creation);
         PartitionQueryTestSupport.AddRows(database, database.Partition, new PartitionQuerySeed("valid-leaf", 1, "healthy"));
         var request = QueryValidation.Normalize(PartitionQueryTestSupport.Request(database, 1),
             database.Database.Limits, UnitExecutionOptions.QueryExecution().Value);
@@ -83,7 +83,7 @@ internal sealed class PartitionQueryContractTests
         await Assert.That(database.Store.Position).IsEqualTo(position);
         var healthy = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).ExecutePartitionQuery(
             PartitionQueryTestSupport.Principal, PartitionQueryTestSupport.Request(database, 1), [database.Partition]);
-        await PartitionQueryWholeFlowAssertions.AssertNativeRowAsync(healthy, database.Partition, "valid-leaf", "healthy");
+        await PartitionQueryWholeFlowAssertions.AssertNativeRowAsync(healthy, database.Partition, "valid-leaf", "healthy", creation);
         await Assert.That(database.Store.Position).IsEqualTo(position);
     }
 }

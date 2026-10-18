@@ -42,7 +42,7 @@ function Get-FcNativeExactUnitSelector([object] $Group, [object] $Inventory, [st
     $patterns = Get-FcNativeConfinedClassPrefixes $Leaves $Inventory
     $classes = '(' + ($patterns -join ')|(') + ')'
     $methods = if ($excluded.Count -eq 0) { '*' } else { '(*)&(!' + ($excluded -join '*)&(!') + '*)' }
-    '/*/*/' + $classes + '/' + $methods
+    '/' + $script:FcNativeContributors.UnitAssemblyName + '/*/' + $classes + '/' + $methods
 }
 
 

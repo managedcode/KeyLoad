@@ -19,5 +19,7 @@ internal static class ProcessRuntimeProtocol
     internal static ProcessFaultCommandProtocol.Identity Identity(NativeProcessEvidence evidence)
         => new(evidence.Name, evidence.ProcessId,
             (evidence.AspireStartedAtUtc ?? throw new InvalidOperationException(ReplacedFailure)).Ticks,
-            evidence.StartedAtUtc.Ticks);
+            evidence.StartedAtUtc.Ticks,
+            evidence.AspireProcessId ?? throw new InvalidOperationException(ReplacedFailure),
+            (evidence.AspireProcessStartedAtUtc ?? throw new InvalidOperationException(ReplacedFailure)).Ticks);
 }

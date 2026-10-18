@@ -1,5 +1,7 @@
 using System.Diagnostics;
 using System.Globalization;
+using KeyLoad.AppHost.Features.TestInfrastructure;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.AppHost.Features.ClusterReplication;
 
@@ -8,7 +10,7 @@ internal static class ProjectProcessIdentity
 {
     private const int MinimumProcessId = 1;
 
-    internal static ProcessFaultCommandProtocol.Identity Read(ResourceNotificationService notifications, string resourceName)
+    internal static ProcessFaultCommandProtocol.LaunchIdentity ReadLaunch(ResourceNotificationService notifications, string resourceName)
     {
         ArgumentNullException.ThrowIfNull(notifications);
         if (!notifications.TryGetCurrentState(resourceName, out var current)
@@ -31,5 +33,25 @@ internal static class ProjectProcessIdentity
             throw new InvalidOperationException(ProcessFaultCommandProtocol.Refused);
         }
         return new(resourceName, processId, started.ToUniversalTime().Ticks, process.StartTime.ToUniversalTime().Ticks);
+    }
+
+    internal static async Task<ProcessFaultCommandProtocol.Identity> ReadAsync(ResourceNotificationService notifications,
+        string resourceName, int serverProcessId, IOptions<TestExecutionOptions> options, CancellationToken token)
+    {
+        var launch = ReadLaunch(notifications, resourceName);
+        using var server = Process.GetProcessById(serverProcessId);
+        var started = server.StartTime.ToUniversalTime().Ticks;
+        if (server.HasExited || started < launch.ProcessStartTimeUtcTicks)
+        {
+            throw new InvalidOperationException(ProcessFaultCommandProtocol.Refused);
+        }
+        await ProjectProcessParent.RequireOwnedAsync(serverProcessId, launch.ProcessId, options, token).ConfigureAwait(false);
+        if (server.HasExited || server.StartTime.ToUniversalTime().Ticks != started
+            || ReadLaunch(notifications, resourceName) != launch)
+        {
+            throw new InvalidOperationException(ProcessFaultCommandProtocol.Refused);
+        }
+        return new(resourceName, serverProcessId, launch.AspireStartTimeUtcTicks, started,
+            launch.ProcessId, launch.ProcessStartTimeUtcTicks);
     }
 }

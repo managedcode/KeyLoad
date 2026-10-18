@@ -104,13 +104,6 @@ internal sealed class StreamReadResourceFixture : IDisposable
 
     internal DatabaseEngine Database { get; private set; } = null!;
 
-    internal AtomicPartitionPlacementResolution Placement
-        => Database.ReadAtomicPartitionPlacement(AdministratorId, Partition);
-
-    internal StreamPage TraverseConfigured(ReadStreamRequest request, PhysicalShardRecord owner)
-        => (StreamPage)new KeyLoad.Clustering.GrainCoreReadCapabilities(Database).Execute(
-            KeyLoad.Clustering.GrainReadKind.Stream, ReaderId, NativeSerialization.Serialize(request), default, owner)!;
-
     internal TimeSpan CursorLifetime => eventSourceOptions.Value.CursorLifetime;
 
     internal PartitionRef Partition { get; } = new(TenantId, DatabaseId, TransactionDomainId, PartitionKey);

@@ -1,5 +1,5 @@
-using KeyLoad.AppHost.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.ClientApi;
+using KeyLoad.IntegrationTests.Features.ClusterReplication;
 using KeyLoad.IntegrationTests.Features.ClusterRouting;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.Storage.ZoneTree.IO;
@@ -18,7 +18,7 @@ internal static class FunctionalGatePhysicalFileAssertions
         foreach (var name in fixture.NodeNames)
         {
             token.ThrowIfCancellationRequested();
-            var runtime = ProjectProcessEvidence.Read(fixture.App.ResourceNotifications, name);
+            var runtime = await ClusterFixtureApplicationStartup.ReadAsync(fixture.App, name, token);
             var directory = FunctionalGateFileOwnershipAssertions.Directory(fixture, name);
             RequireDirectory(directory);
             var status = await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, name, fixture.AdminKey,

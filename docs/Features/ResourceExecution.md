@@ -391,31 +391,55 @@ REQ-RESOURCE-003/004 and AC-DBPROF-002 map `DatabasePhaseExecutionOptionsTests.S
 After both real rejected constructions, centrally bound valid disabled/enabled banks execute native Begin/End and RecordBusy and capture concrete counters: disabled remains empty/unavailable; enabled records exactly one completed scope and one admission rejection in the actual phase, with unchanged quality and detached cumulative capture. This is the invalid-to-healthy bank subflow only, not production startup, cluster, measured overhead or full AC qualification. ADR-063/113 retain the original ownership and fixed bounds.
 
 
-## Tenant turns
+## Bounded tenant admission
 
-REQ-RESOURCE-TENANT-001 / AC-RESOURCE-TENANT-001 replaces global FIFO between tenants with per-tenant FIFO: the existing two-lane inbox preserves FIFO within each authenticated tenant and dispatches one command per tenant turn in each lane. The original configured control burst, reservation ceilings, fresh persisted principal, single consumer/commit gate, original cancellation and consumer-owned completion/release remain unchanged. Tenant comes from the immutable actual admitted lease, never caller roles or payload claims. Empty tenant queues are removed, and queue owners are bounded by outstanding admitted commands. No public/persisted contract, default, provider or dispatcher changes. Modeled bytes are not process RSS.
+REQ-RESOURCE-TENANT-001 / AC-RESOURCE-TENANT-001 requires the node-local
+`CommandAdmissionGovernor` to enforce its configured node, tenant, principal and
+retained-byte ceilings atomically. A reservation uses the current persisted
+principal and its tenant. Refused or already-cancelled admission preserves the
+complete capacity snapshot, canonical records and native journal cut. Each
+accepted lease remains owned until its actual operation settles and the owner
+disposes that lease. Disposing a lease again releases no additional capacity.
+Orleans owns activation scheduling and request execution.
 
-The finite native operation flow queues busy A and B, proves B's independent literal fair turn and A's per-tenant order, cap-refusal complete no-effects, accepted-response cancellation retaining ownership, joined real producer release, healthy subsequent work, exact original receipt replay and same-root cold records. Existing control-burst/single-tenant FIFO/shutdown/cancellation operation tests remain mandatory. SDK/official MCP sustained overload, physical CPU/RSS/disk liveness, compaction/reindex/transitive budgets remain open.
+`TenantAdmissionWholeFlowTests.TenantBoundsRefusalCancellationReleaseReplayAndSameRootColdPreserveOriginalOutcomes`
+uses real persisted A/B principals and two actual tenant partitions. Its explicit
+node capacity is five and its per-tenant and per-principal capacities are three.
+Three A reservations and one B reservation coexist. A further A reservation is
+refused with `ResourceExhausted`; a pre-cancelled B reservation throws the original
+`OperationCanceledException`. Both failures preserve the full governor snapshot,
+raw canonical image and applied/store positions and leave their documents absent.
+The original four native commands then commit under their owned leases; releasing
+them admits a healthy subsequent command and returns every reservation counter
+to zero. These are bounds and effect oracles, not a measured scheduling guarantee.
 
+The receipt oracle independently checks every native mutation field:
+Kind/Resource/Id/Revision and complete CompositionReferences. Document results and
+canonical records retain their complete Reference/Revision/Json, redaction and
+access fields, native command timestamp and deletion state. The exact commit
+token, durability and persisted copy count are checked against the owning native
+store. The stored prepared command retains its stable ID, subject, input bytes and
+fingerprint. Same-ID replay preserves the original full receipt and canonical
+image without advancing the physical position. Failures retain their original
+native problem before any result-value assertion.
 
-Wait oracle: a pre-cancelled original Task.WaitAsync must throw exact TaskCanceledException with the same original caller token, while synchronous admission cancellation remains exact OperationCanceledException. The admitted completion stays pending and the complete reservation/raw state/journal image remains unchanged until the original native producer settles. No product cancellation, deadline, lease, result or cold contract changes.
+REQ-RESOURCE-TENANT-SHUTDOWN-001 / AC-RESOURCE-TENANT-SHUTDOWN-001 requires the
+operation owner to settle all accepted native commands, dispose their leases and
+join the actual storage owner before reopening that same root. The same existing
+case checks a zero governor snapshot, verifies complete warm replay, calls
+`TestDatabase.JoinOwnedResources`, then opens a new native store at the original
+path. Complete original receipts, literal A/B documents and immutable replay
+survive that close/reopen, and a fresh command commits a healthy literal document.
+No public contract, capacity value, deadline or persisted format is changed by
+this ownership contract.
 
-
-Receipt oracle: MutationReceipt native record equality also compares its private ImmutableArray backing state, so default-versus-empty representation can reject an otherwise equal logical receipt. The whole tenant operation therefore independently checks every native field: mutation Kind/Resource/Id/Revision plus complete CompositionReferences; DocumentResult Reference/Revision/Json/Redacted/RedactedFields; canonical DocumentRecord Reference/Revision/Json/Access OwnerId/ProjectId/TeamId/UpdatedAt/Deleted. Literal records, original signed timestamps, complete original commit token/durability, exact native original outcome replay, raw no-effect image/journal cut and cold healthy assertions remain. No observed value becomes an expected value and no field is omitted.
-
-Failure oracle: the whole operation decodes its original native result before the full replay oracle, preserving the actual returned ErrorCode/SafeDetail exception on rejection rather than replacing it with a missing-value assertion. Every existing full result/model/raw-cut assertion remains.
-
-REQ-RESOURCE-TENANT-SHUTDOWN-001 / AC-RESOURCE-TENANT-SHUTDOWN-001: the existing complete tenant operation now additionally owns an independent native fixture proving Stop releases queued A/B leases with exact UnknownWriteOutcome/503/original detail and no storage/journal effects while retaining the selected original reservation. The selected genuine native producer ACKs; a fresh inbox re-admits the unchanged never-applied IDs, proves full literal receipts/models/replay, joins both inboxes and reopens the same native root for complete cold replay and healthy continuation. No new product policy, clock, budget or timeout is introduced.
-
-## Queue-owned command reservation transfer
-
-This refines REQ-RESOURCE-001 / AC-RESOURCE-001, REQ-ADM-001/002 / AC-ADM-001/002 and REQ-RESOURCE-TENANT-001 / AC-RESOURCE-TENANT-001. The current inbox returns its command before actual dequeue; premature public finalization currently returns governor capacity while the original command/TCS/tenant turn and signal remain queued.
-
-The existing actual CommandTenantLane.Dequeue marks transfer only after removing that command. Before transfer, Complete/Fail reject InvalidOperationException without result/finalization/lease mutation. Dispose from an awaiting submitting scope leaves queue-owned work and reservation intact, just as response cancellation cannot release accepted ownership; the consumer or Stop still owns settlement. After actual transfer, the original Complete/Fail/Dispose once-only result/error/release stays unchanged. Stop already removes each queued entry before failing it; no new queue, lock, provider, dispatcher, quota, numeric default, caller role or wire/persistence contract exists. Native mark-transfer is internal to the existing queue, not authority supplied by a caller. A disposal racing dequeue may finalize only after removal, when queue retention no longer requires that lease.
-
-Extend the EXISTING TenantAdmissionWholeFlowTests operation through TenantAdmissionRefusals: queued Dispose twice, premature Complete and Fail must preserve pending completion, the FULL governor snapshot and genuine raw storage/journal cuts. The original capacity refusal, principal mismatch and original response cancellation remain; actual subsequent dequeue must return the same original IDs in the existing tenant order. Genuine ordered native submit retains every literal receipt/model/outcome, known same-ID replay, healthy following command, joined inbox shutdown and same-root cold receipt/model assertions. No new test declaration/UID, fake completion, arbitrary root, forced scalar, deadline or healthy clock change. Existing inbox FIFO/control-burst, dispatched disposal, tenant shutdown and reader-drain cases remain mandatory.
-
-Core public valid consumer calls and the connection grain's admit-and-execute calls toward the partition grain remain unchanged: authenticated pending response cancellation does not dispose a queued command; the actual consumer completes only a removed command. Existing using scopes in whole tests can dispose still-queued work on assertion failure, so queued Dispose is deferred, not a cleanup-throw workaround.
+The source maps these oracles to `TenantAdmissionWholeFlow`,
+`TenantAdmissionRefusals`, `TenantAdmissionAssertions` and `TenantAdmissionCold`.
+An actual native run is required to qualify them. Sustained SDK/MCP overload,
+Orleans request shutdown under in-flight distributed work, physical CPU/RSS/disk
+liveness and delivered-source qualification remain open; this focused local
+operation alone establishes none of those gates. Modeled retained bytes are not
+process RSS.
 
 
 ## Native failed-reader grant settlement

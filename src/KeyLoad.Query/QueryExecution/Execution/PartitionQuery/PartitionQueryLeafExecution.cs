@@ -21,7 +21,7 @@ internal static class PartitionQueryLeafExecution
         var normalized = QueryValidation.Normalize(plan.Request, database.Limits, engine.Execution);
         var grant = budget.CreateReadGrant(plan.MaxReadBytes, plan.MaxExaminedRecords);
         using var admission = database.AdmitQuery(token);
-        var result = new PartitionQueryLeafExecutor(engine, database, budget, owner, request.Tenant)
+        var result = new PartitionQueryLeafExecutor(engine, database, budget, owner, receivingLeaf: true)
             .Execute(principalId, plan, normalized, grant);
         budget.CheckResult(result);
         return result;

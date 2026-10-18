@@ -1,7 +1,5 @@
 using System.Collections.Concurrent;
 using KeyLoad.Clustering;
-using KeyLoad.Core;
-using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
@@ -9,15 +7,18 @@ namespace KeyLoad.UnitTests.Features.QueryExecution;
 /// <summary>Holds actual native search after canonical range reads and joins its original producer.</summary>
 internal sealed class QueryHostedReadObserver : IGrainRequestPhaseObserver
 {
-    private const string ChangedOwner = "The native query ran outside its expected original silo and producer.";
     private readonly ConcurrentDictionary<Guid, QueryHostedReadObservation> reads = new();
 
-    internal QueryHostedReadObservation Hold(Guid requestId, RequestCqrsHostedRuntimeFixture node)
+    internal QueryHostedReadObservation Hold(Guid requestId, RequestCqrsHostedRuntimeFixture node,
+        QueryHostedSearchDataset data)
     {
-        var observation = new QueryHostedReadObservation(node.Database.Store);
+        var observation = new QueryHostedReadObservation(node.ConnectionId,
+            node.Services.GetRequiredService<ILocalSiloDetails>().SiloAddress,
+            node.Grains.GetGrain<IConnectionGrain>(node.ConnectionId).GetGrainId(),
+            data.Principal.Id, data.Request.Partitions.Length);
         if (!reads.TryAdd(requestId, observation))
         {
-            throw new InvalidOperationException(ChangedOwner);
+            throw new InvalidOperationException(QueryHostedReadObservation.ChangedOwner);
         }
         return observation;
     }
@@ -27,29 +28,21 @@ internal sealed class QueryHostedReadObserver : IGrainRequestPhaseObserver
     {
         if (!reads.TryGetValue(identity.RequestId, out var read))
         {
+            ObserveChild(identity, phase, context);
             return;
         }
-        var services = context.ActivationServices.GetRequiredService<PartitionHostApplicationOwner>().Session.Services;
-        var database = services.GetRequiredService<DatabaseEngine>();
-        if (!ReferenceEquals(database.Store, read.Store))
-        {
-            throw new InvalidOperationException(ChangedOwner);
-        }
+        var state = RequireContext(identity);
         if (phase == GrainRequestPhase.RequestStarted)
         {
-            read.Identity = identity;
-            read.GrainId = context.GrainId;
-            read.ActivationId = context.ActivationId;
-            read.NodeId = database.Store.Identity.NodeId;
+            read.Start(identity, context, state);
+        }
+        if (phase == GrainRequestPhase.AuthorizationReload)
+        {
+            read.BindCoordinator(identity, context, state);
         }
         if (phase == GrainRequestPhase.DistributedSearchStatisticsCaptured)
         {
-            RequireOriginal(read, identity, context);
-            read.ObservedBytes = read.Store.GetReadDiagnostics().RangeExaminedBytes;
-            if (read.ObservedBytes <= read.BeforeBytes)
-            {
-                throw new InvalidOperationException("The native query reached statistics without reading canonical records.");
-            }
+            read.CaptureStatistics(identity, context, state);
             read.Entered.TrySetResult();
             await read.Release.Task.WaitAsync(token).ConfigureAwait(true);
         }
@@ -59,7 +52,7 @@ internal sealed class QueryHostedReadObserver : IGrainRequestPhaseObserver
     {
         if (reads.TryGetValue(identity.RequestId, out var read))
         {
-            RequireOriginal(read, identity, context);
+            read.RequireProducer(identity, context);
             read.Disposed.TrySetResult();
         }
     }
@@ -72,12 +65,28 @@ internal sealed class QueryHostedReadObserver : IGrainRequestPhaseObserver
         }
     }
 
-    private static void RequireOriginal(QueryHostedReadObservation read, GrainRequestProbeIdentity identity,
-        IGrainContext context)
+    internal static SiloAddress LocalSilo(IGrainContext context)
+        => context.ActivationServices.GetRequiredService<ILocalSiloDetails>().SiloAddress;
+
+    private void ObserveChild(GrainRequestProbeIdentity identity, GrainRequestPhase phase, IGrainContext context)
     {
-        if (read.Identity != identity || read.GrainId != context.GrainId || read.ActivationId != context.ActivationId)
+        if (phase != GrainRequestPhase.AuthorizationReload || identity.ReadKind != GrainReadKind.DistributedSearchLeafV2)
         {
-            throw new InvalidOperationException(ChangedOwner);
+            return;
         }
+        var state = RequireContext(identity);
+        var selected = reads.Values.SingleOrDefault(read => !read.Disposed.Task.IsCompleted
+            && read.Identity.RequestId != Guid.Empty && read.ConnectionId == state.ConnectionId);
+        selected?.BindChild(identity, context, state);
+    }
+
+    private static GrainRequestContextState RequireContext(GrainRequestProbeIdentity identity)
+    {
+        if (RequestContext.Get(GrainRequestStreamProtocol.ContextKey) is not GrainRequestContextState state
+            || state.RequestId != identity.RequestId || state.CommandId != identity.CommandId)
+        {
+            throw new InvalidOperationException(QueryHostedReadObservation.ChangedOwner);
+        }
+        return state;
     }
 }

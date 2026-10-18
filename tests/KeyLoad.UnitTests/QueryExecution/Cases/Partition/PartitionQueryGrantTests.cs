@@ -81,23 +81,23 @@ internal sealed class PartitionQueryGrantTests
         await Assert.That(measuredResult.Leaves[0].AccessPath).IsEqualTo("index:by-status");
         await Assert.That(measuredResult.ExaminedRecords).IsGreaterThan(3);
 
-        using var exact = PartitionQueryTestSupport.CreateIndexed(new()
+        using var exact = PartitionQueryTestSupport.CreateIndexed();
+        PartitionQueryTestSupport.AddIndexedRows(exact, exact.Partition);
+        var exactLimits = new DatabaseLimits
         {
             MaxScanRecords = measuredResult.ExaminedRecords,
             MaxQueryReadBytes = measuredResult.ReadBytes
-        });
-        PartitionQueryTestSupport.AddIndexedRows(exact, exact.Partition);
-        var exactResult = RunIndexed(exact);
+        };
+        var exactResult = RunIndexed(exact, exactLimits);
         await Assert.That(exactResult.ExaminedRecords).IsEqualTo(measuredResult.ExaminedRecords);
         await Assert.That(exactResult.ReadBytes).IsEqualTo(measuredResult.ReadBytes);
 
-        using var below = PartitionQueryTestSupport.CreateIndexed(new()
-        {
-            MaxScanRecords = measuredResult.ExaminedRecords - 1,
-            MaxQueryReadBytes = measuredResult.ReadBytes
-        });
+        using var below = PartitionQueryTestSupport.CreateIndexed();
         PartitionQueryTestSupport.AddIndexedRows(below, below.Partition);
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => RunIndexed(below));
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => RunIndexed(below, exactLimits with
+        {
+            MaxScanRecords = measuredResult.ExaminedRecords - 1
+        }));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
 
@@ -112,8 +112,8 @@ internal sealed class PartitionQueryGrantTests
         => new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).ExecutePartitionQuery(PartitionQueryTestSupport.Principal,
             PartitionQueryTestSupport.Request(database, SeedCount), [.. partitions]);
 
-    private static PartitionQueryResultV1 RunIndexed(TestDatabase database)
-        => new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).ExecutePartitionQuery(PartitionQueryTestSupport.Principal,
+    private static PartitionQueryResultV1 RunIndexed(TestDatabase database, DatabaseLimits? limits = null)
+        => PartitionQueryTestSupport.ReadEngine(database, limits).ExecutePartitionQuery(PartitionQueryTestSupport.Principal,
             PartitionQueryTestSupport.IndexedRequest(database, 2), [database.Partition]);
 
     private static async Task AssertBudgetExceeded(int maxScanRecords, long maxReadBytes, int partitionCount)

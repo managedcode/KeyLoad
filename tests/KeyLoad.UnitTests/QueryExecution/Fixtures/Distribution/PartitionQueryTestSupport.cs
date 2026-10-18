@@ -15,9 +15,19 @@ internal static class PartitionQueryTestSupport
     internal const int ResultLimit = 4;
 
     internal static TestDatabase Create(DatabaseLimits? limits = null, SensitiveFieldPolicy[]? fields = null)
+        => Create(out _, limits, fields);
+
+    internal static TestDatabase Create(out ResourceLifetimeV1 creation, DatabaseLimits? limits = null,
+        SensitiveFieldPolicy[]? fields = null)
     {
         var database = new TestDatabase(limits);
-        database.Configure(Collection, ResourceKind.Collection, fields: fields);
+        var definition = new ResourceDefinition(Collection, ResourceKind.Collection, database.Partition.TransactionDomainId)
+        {
+            FieldPolicies = [.. fields ?? []],
+            QueuePolicy = new()
+        };
+        creation = PartitionQueryCreationOracle.Configure(database,
+            new(database.Partition.TenantId, database.Partition.DatabaseId, definition));
         return database;
     }
 
@@ -65,6 +75,14 @@ internal static class PartitionQueryTestSupport
         var query = new SelectQuery(Collection, null, [new("/label", "label")], null,
             [new("/score", true)], limit);
         return new(database.Partition, query, AllowFullScan: true);
+    }
+
+    internal static QueryEngine ReadEngine(TestDatabase database, DatabaseLimits? limits)
+    {
+        var engine = limits is null ? database.Database : TestDatabaseEngineFactory.Capture(
+            UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.BlobExecution(),
+            UnitExecutionOptions.NativeClaimsExecution(), null, database.Database.EvaluationClock)(database.Store);
+        return new(engine, UnitExecutionOptions.QueryExecution());
     }
 
     internal static AstQueryRequest IndexedRequest(TestDatabase database, int limit)

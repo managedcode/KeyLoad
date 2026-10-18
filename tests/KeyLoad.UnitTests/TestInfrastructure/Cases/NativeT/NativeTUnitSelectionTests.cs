@@ -11,6 +11,11 @@ internal sealed class NativeTUnitSelectionTests
     private const string SuiteEnvironment = "KeyLoadTests__Suite";
     private const string IntrinsicEnvironment = "DOTNET_EnableHWIntrinsic";
     private const string ParallelismArgument = "--maximum-parallel-tests";
+    private const string FilterArgument = "--treenode-filter";
+    private const string UnitSuite = "unit";
+    private const string ClusterSuite = "cluster";
+    private const string OrdinaryUnitFilter = "/KeyLoad.UnitTests/*/*/*";
+    private const string OrdinaryClusterFilter = "/*/*/*/*[Category!=HeavyLoad]";
     private const string ExpectedDefaultParallelism = "50";
     private const string ExpectedExplicit20Parallelism = "20";
     private const string Explicit20Property = "explicit20";
@@ -32,11 +37,11 @@ internal sealed class NativeTUnitSelectionTests
         await Assert.That(args[2]).IsEqualTo("tests/" + project);
         await Assert.That(args[Array.IndexOf(args, "--output") + 1]).IsEqualTo("Detailed");
         await Assert.That(args[Array.IndexOf(args, ParallelismArgument) + 1]).IsEqualTo(ExpectedDefaultParallelism);
-        await AssertParallelismAsync(selection.RootElement.GetProperty(Explicit20Property), ExpectedExplicit20Parallelism)
+        await AssertDefaultSelectionAsync(selection.RootElement.GetProperty(Explicit20Property), ExpectedExplicit20Parallelism, suite)
             .ConfigureAwait(false);
-        await AssertParallelismAsync(selection.RootElement.GetProperty(Tuned50Property), ExpectedTunedParallelism)
+        await AssertDefaultSelectionAsync(selection.RootElement.GetProperty(Tuned50Property), ExpectedTunedParallelism, suite)
             .ConfigureAwait(false);
-        await Assert.That(args[Array.IndexOf(args, "--treenode-filter") + 1]).IsEqualTo("/*/*/ActualCase/*");
+        await Assert.That(args[Array.IndexOf(args, FilterArgument) + 1]).IsEqualTo("/*/*/ActualCase/*");
         await Assert.That(args).Contains("--report-trx");
         await Assert.That(args).Contains("--coverage");
         await Assert.That(args).DoesNotContain("build/KeyLoad.AppHost");
@@ -45,10 +50,21 @@ internal sealed class NativeTUnitSelectionTests
         await Assert.That(environment.TryGetProperty(IntrinsicEnvironment, out _)).IsFalse();
     }
 
-    private static async Task AssertParallelismAsync(JsonElement selection, string expected)
+    private static async Task AssertDefaultSelectionAsync(JsonElement selection, string expected, string suite)
     {
         var arguments = selection.GetProperty(ArgumentsProperty).EnumerateArray().Select(value => value.GetString()).ToArray();
         await Assert.That(arguments[Array.IndexOf(arguments, ParallelismArgument) + 1]).IsEqualTo(expected);
+        var filter = suite switch
+        {
+            UnitSuite => OrdinaryUnitFilter,
+            ClusterSuite => OrdinaryClusterFilter,
+            _ => null
+        };
+        await Assert.That(arguments.Count(argument => argument == FilterArgument)).IsEqualTo(filter is null ? 0 : 1);
+        if (filter is not null)
+        {
+            await Assert.That(arguments[Array.IndexOf(arguments, FilterArgument) + 1]).IsEqualTo(filter);
+        }
     }
 
 }

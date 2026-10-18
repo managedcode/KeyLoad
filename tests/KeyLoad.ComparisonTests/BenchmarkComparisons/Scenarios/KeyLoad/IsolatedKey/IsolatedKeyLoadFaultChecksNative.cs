@@ -127,8 +127,8 @@ internal sealed class IsolatedKeyLoadFaultChecksNative(DistributedApplication ap
 
     private static void ValidateExited(IsolatedKeyLoadFaultChecksNativeReceipt receipt, IsolatedKeyLoadFaultChecksNativeIdentity current)
         => IsolatedKeyLoadFaultChecksProtocol.Require(receipt.Killed is { } killed && current.Process is null
-            && current.ExitCode == killed.ExitCode && current.Resource == receipt.Before.Resource
-            && (current.ProcessId is null || current.ProcessId == killed.ProcessId)
+            && current.ExitCode == killed.LaunchExitCode && current.Resource == receipt.Before.Resource
+            && (current.LaunchProcessId is null || current.LaunchProcessId == killed.LaunchProcessId)
             && (current.AspireStartedAtUtc is null || current.AspireStartedAtUtc == receipt.Before.AspireStartedAtUtc)
             && current.DataDirectorySha256 == receipt.Before.DataDirectorySha256);
 

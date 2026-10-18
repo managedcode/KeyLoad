@@ -30,8 +30,7 @@ internal sealed class AspireProcessFaultCommandTests(ClusterFixture fixture)
             .Select(resource => resource.Name).ToArray();
         await Assert.That(resources).IsEquivalentTo(new[]
             { McpCallerProtocol.Node1, McpCallerProtocol.Node2, McpCallerProtocol.Node3 });
-        var before = resources.ToDictionary(name => name,
-            name => ProjectProcessIdentity.Read(fixture.App.ResourceNotifications, name), StringComparer.Ordinal);
+        var before = await ReadIdentitiesAsync(resources, token);
         var selected = before[McpCallerProtocol.Node1];
         var rejected = new[]
         {
@@ -45,7 +44,8 @@ internal sealed class AspireProcessFaultCommandTests(ClusterFixture fixture)
             await RefuseAsync(rejectedIdentity, token);
             foreach (var resource in resources)
             {
-                var actual = ProjectProcessIdentity.Read(fixture.App.ResourceNotifications, resource);
+                var observed = await ClusterFixtureApplicationStartup.ReadAsync(fixture.App, resource, token);
+                var actual = ProcessRuntimeProtocol.Identity(observed);
                 await Assert.That(actual).IsEqualTo(before[resource]);
                 var status = ClusterReplicationTestSupport.Success(await fixture.Client(resource).StatusAsync(token));
                 await Assert.That(status.ProcessId).IsEqualTo(actual.ProcessId);
@@ -67,6 +67,18 @@ internal sealed class AspireProcessFaultCommandTests(ClusterFixture fixture)
         await Assert.That(JsonDefaults.Serialize(ClusterReplicationTestSupport.Success(
             await sdk.GetAsync(scenario.Reference, token)).Document)
             .SequenceEqual(JsonDefaults.Serialize(original.Document))).IsTrue();
+    }
+
+    private async Task<Dictionary<string, ProcessFaultCommandProtocol.Identity>> ReadIdentitiesAsync(
+        IEnumerable<string> resources, CancellationToken token)
+    {
+        var result = new Dictionary<string, ProcessFaultCommandProtocol.Identity>(StringComparer.Ordinal);
+        foreach (var name in resources)
+        {
+            var observed = await ClusterFixtureApplicationStartup.ReadAsync(fixture.App, name, token);
+            result.Add(name, ProcessRuntimeProtocol.Identity(observed));
+        }
+        return result;
     }
 
     private async Task RefuseAsync(ProcessFaultCommandProtocol.Identity expected, CancellationToken token)

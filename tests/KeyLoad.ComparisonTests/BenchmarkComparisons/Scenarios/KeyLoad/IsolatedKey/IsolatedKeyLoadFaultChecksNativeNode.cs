@@ -4,6 +4,10 @@ using System.Text;
 using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using KeyLoad.AppHost.Features.ClusterReplication;
+using KeyLoad.AppHost.Features.TestInfrastructure;
+using KeyLoad.Diagnostics.Features.ResourceExecution;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonTests.Features.BenchmarkComparisons;
 
@@ -35,8 +39,12 @@ internal sealed record IsolatedKeyLoadFaultChecksNativeNode(ProjectResource Mode
             property.Name == ProcessFaultCommandProtocol.ProcessIdProperty).Select(property => property.Value).SingleOrDefault();
         var pid = int.TryParse(Convert.ToString(value, CultureInfo.InvariantCulture), NumberStyles.None,
             CultureInfo.InvariantCulture, out var parsed) && parsed > 0 ? (int?)parsed : null;
-        var process = state == KnownResourceStates.Running
-            ? ProjectProcessEvidence.Read(app.ResourceNotifications, Resource) : null;
+        NativeProcessEvidence? process = null;
+        if (state == KnownResourceStates.Running)
+        {
+            process = await ProjectProcessEvidence.ReadAsync(app.ResourceNotifications, Resource,
+                app.Services.GetRequiredService<IOptions<TestExecutionOptions>>(), token);
+        }
         var authority = Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(Path.GetFullPath(directory))));
         return new(Resource, pid, current.Snapshot.StartTimeStamp?.ToUniversalTime(), state,
             current.Snapshot.ExitCode, authority, process);

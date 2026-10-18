@@ -52,7 +52,8 @@ function Invoke-WorkflowDiscovery([string] $Root, [string] $Evidence, [object] $
     $dll = Resolve-FcPath $Root $script:FcTestIdentity.Dll
     $arguments = @($dll,'--list-tests','json','--disable-logo','--ansi','off','--progress','off',
         '--output','Detailed','--results-directory',(Join-Path $directory 'native'))
-    if ($null -ne $Group) { $arguments += @('--treenode-filter',[string] $Group.selector) }
+    $selector = if ($null -eq $Group) { $script:FcNativeContributors.FullUnitSelector } else { [string] $Group.selector }
+    $arguments += @('--treenode-filter', [string] $selector)
     $original = Invoke-FcCoverageProcess 'dotnet' ([string[]] $arguments) 1800 33554432
     $censusPath = Join-Path $directory 'native-list.json'
     Write-WorkflowOriginal $censusPath ([string] $original.stdout)

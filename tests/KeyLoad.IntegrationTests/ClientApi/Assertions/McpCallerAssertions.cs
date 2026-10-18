@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using System.Globalization;
 using System.Text;
 using System.Text.Json;
+using KeyLoad.Clustering;
 using ManagedCode.Communication;
 using ModelContextProtocol.Protocol;
 
@@ -12,6 +13,8 @@ internal static class McpCallerAssertions
 {
     private const int FailureReasonUtf8ByteLimit = 128;
     private const string UnclassifiedMcpError = "MCP error Unclassified.";
+    private const string ReadResponseUnavailable = "The read response is unavailable.";
+    private const string ServerResponseUnavailable = "The server response is unavailable.";
     internal static ImmutableArray<string> ProblemFields
     {
         get;
@@ -25,15 +28,13 @@ internal static class McpCallerAssertions
     /// <returns>The actual typed value, including an allowed null result.</returns>
     internal static async Task<T> SdkSuccessAsync<T>(Result<T> result)
     {
-        await Assert.That(result.IsSuccess).IsTrue().Because("The canonical SDK outcome reported "
-            + ClosedErrorCode(result.Problem?.ErrorCode) + ".");
+        await Assert.That(result.IsSuccess).IsTrue().Because(SafeSdkFailureReason(result.Problem));
         return result.Value!;
     }
 
     internal static async Task<ManagedCode.Communication.Result> SdkStatusAsync(ManagedCode.Communication.Result result)
     {
-        await Assert.That(result.IsSuccess).IsTrue().Because("The canonical SDK outcome reported "
-            + ClosedErrorCode(result.Problem?.ErrorCode) + ".");
+        await Assert.That(result.IsSuccess).IsTrue().Because(SafeSdkFailureReason(result.Problem));
         await Assert.That(result.Problem).IsNull();
         return result;
     }
@@ -48,6 +49,19 @@ internal static class McpCallerAssertions
         await Assert.That(id).IsNotEqualTo(Guid.Empty);
         await VerifySummaryAsync(reply);
         return id;
+    }
+
+    private static string SafeSdkFailureReason(Problem? problem)
+    {
+        var boundary = problem?.Detail switch
+        {
+            ReadResponseUnavailable => "ReadTransport",
+            ServerResponseUnavailable => "ServerTransport",
+            GrainRoutingProtocol.InvalidRequest => "NativeEnvelope",
+            _ => "ServerOrUnknown"
+        };
+        return "The canonical SDK outcome reported " + ClosedErrorCode(problem?.ErrorCode)
+            + ". Boundary " + boundary + ".";
     }
 
     private static string ClosedErrorCode(string? actual)

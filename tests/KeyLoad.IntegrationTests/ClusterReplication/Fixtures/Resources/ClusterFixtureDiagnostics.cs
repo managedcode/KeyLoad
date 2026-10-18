@@ -24,6 +24,8 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
         LogLevel.Information, new EventId(SavedEventId), DiagnosticMessage);
 
     private readonly DistributedApplication app;
+    private readonly Action<string> saveStartupEvidence;
+    private readonly ILogger<ClusterFixtureDiagnostics> logger;
     private readonly ClusterFailureReceipts failureReceipts = new();
     private readonly CancellationTokenSource lifetime = new();
     private readonly ConcurrentDictionary<string, ConcurrentQueue<string>> nodeLogs = new(StringComparer.Ordinal);
@@ -48,6 +50,9 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
     {
         ArgumentNullException.ThrowIfNull(app);
         this.app = app;
+        // AppHost owns the observer; its retained snapshot writer remains usable after joined stop.
+        saveStartupEvidence = app.Services.GetRequiredService<ClusterFixtureStartupEvidence>().Save;
+        logger = app.Services.GetRequiredService<ILogger<ClusterFixtureDiagnostics>>();
     }
 
     /// <summary>Starts subscriptions to the three managed Orleans node resources.</summary>
@@ -55,7 +60,6 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
     internal void Start(ResourceLoggerService logs)
     {
         ArgumentNullException.ThrowIfNull(logs);
-        _ = app.Services.GetRequiredService<ClusterFixtureStartupEvidence>();
         resourceCapture = CaptureResourcesAsync(logs);
     }
 
@@ -90,8 +94,8 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
         var output = failureReceipts.RequireRunOutput(TestContext.ResultsDirectory);
         Directory.CreateDirectory(output);
         var path = failureReceipts.Save(output, bounded);
-        app.Services.GetRequiredService<ClusterFixtureStartupEvidence>().Save(output);
-        LogSaved(app.Services.GetRequiredService<ILogger<ClusterFixtureDiagnostics>>(), path, bounded.Length, null);
+        saveStartupEvidence(output);
+        LogSaved(logger, path, bounded.Length, null);
         return path;
     }
 

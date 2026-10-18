@@ -149,7 +149,7 @@ function Read-FcContract([string] $Path) {
         $contract.contributors.testClasses.Count -ne $t.ContributorClassCount -or
         $contract.contributors.testNamespace -cne $t.TestNamespace -or
         $contract.contributors.testNamePrefix -cne 'PartitionQuery' -or
-        $contract.contributors.filter -cne '/*/*/PartitionQuery*/*' -or
+        $contract.contributors.filter -cne '/KeyLoad.UnitTests/*/PartitionQuery*/*' -or
         (@($contract.contributors.suiteNames) -join ',') -cne 'unit' -or
         (@($contract.contributors.testClasses | Sort-Object) -join ',') -cne 'PartitionQueryAuthorizationTests,PartitionQueryCancellationTests,PartitionQueryContractTests,PartitionQueryGrantTests,PartitionQueryMcpContractTests,PartitionQueryMergeTests,PartitionQueryPublicAuthorizationTests,PartitionQueryPublicBudgetTests,PartitionQueryPublicContractTests,PartitionQueryPublicMergeTests' -or
         $contract.contributors.exactCases.Count -ne $t.ContributorCaseCount -or

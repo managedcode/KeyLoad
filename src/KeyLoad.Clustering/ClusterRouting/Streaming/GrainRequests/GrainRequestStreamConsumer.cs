@@ -34,10 +34,30 @@ internal static class GrainRequestStreamConsumer
         NativeCqrsStreamPurpose? purpose, Func<GrainRequestProgress, CancellationToken, ValueTask>? progress,
         CancellationToken cancellationToken)
     {
-        GrainOperationReply? terminal = null;
+        GrainOperationReply? terminal;
         var bounded = NativeCqrsStreamLifetime.RunWithPurpose(
             createStream: token => createStream(token).WithBatchSize(GrainRequestStreamProtocol.BatchSize),
             serializer: serializer, requestId: requestId, clock: clock, settled: static () => { }, cancellationToken: cancellationToken, options: options, owner: null, purpose: purpose ?? new NativeCqrsStreamPurpose());
+        try
+        {
+            terminal = await ReadTerminalAsync(bounded, options, progress, cancellationToken).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException error) when (cancellationToken.IsCancellationRequested
+            && error.CancellationToken != cancellationToken && NativeCqrsBoundaryErrors.IsNonFatal(error))
+        {
+            throw new OperationCanceledException(error.Message, error, cancellationToken);
+        }
+
+        cancellationToken.ThrowIfCancellationRequested();
+        return terminal ?? throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
+    }
+
+    private static async Task<GrainOperationReply?> ReadTerminalAsync(
+        IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> bounded,
+        IOptions<GrainRoutingOptions> options, Func<GrainRequestProgress, CancellationToken, ValueTask>? progress,
+        CancellationToken cancellationToken)
+    {
+        GrainOperationReply? terminal = null;
         await foreach (var chunk in bounded.ConfigureAwait(false))
         {
             if (chunk.Kind == CqrsStreamChunkKind.Progress && progress is not null)
@@ -58,8 +78,6 @@ internal static class GrainRequestStreamConsumer
                 };
             }
         }
-
-        cancellationToken.ThrowIfCancellationRequested();
-        return terminal ?? throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
+        return terminal;
     }
 }

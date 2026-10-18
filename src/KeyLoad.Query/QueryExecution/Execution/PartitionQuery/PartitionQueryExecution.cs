@@ -64,10 +64,14 @@ internal static class PartitionQueryExecution
         for (var index = FirstElementIndex; index < plan.Leaves.Length; index++)
         {
             budget.Check();
-            results.Add(executor.Execute(principalId, plan.Leaves[index], normalized with
+            using (budget.EnterReadGrant(grants[index]))
             {
-                Partition = plan.Leaves[index].Partition
-            }, grants[index]));
+                results.Add(executor.Execute(principalId, plan.Leaves[index], normalized with
+                {
+                    Partition = plan.Leaves[index].Partition
+                }, grants[index]));
+            }
+            budget.CompleteReadGrant(grants[index]);
         }
         var result = PartitionQueryMerge.Complete(plan, results.MoveToImmutable(), identity, database.Limits, budget, engine.Execution);
         if (measureInternalResult)

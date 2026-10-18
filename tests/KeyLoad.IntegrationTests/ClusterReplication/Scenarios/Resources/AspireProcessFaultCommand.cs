@@ -22,7 +22,9 @@ internal static class AspireProcessFaultCommand
         => new([
             Input(ProcessFaultCommandProtocol.ExpectedProcessIdArgument, expected.ProcessId),
             Input(ProcessFaultCommandProtocol.ExpectedAspireStartArgument, expected.AspireStartTimeUtcTicks),
-            Input(ProcessFaultCommandProtocol.ExpectedProcessStartArgument, expected.ProcessStartTimeUtcTicks)
+            Input(ProcessFaultCommandProtocol.ExpectedProcessStartArgument, expected.ProcessStartTimeUtcTicks),
+            Input(ProcessFaultCommandProtocol.ExpectedLaunchProcessIdArgument, expected.LaunchProcessId),
+            Input(ProcessFaultCommandProtocol.ExpectedLaunchProcessStartArgument, expected.LaunchProcessStartTimeUtcTicks)
         ]);
 
     private static InteractionInput Input(string name, long value) => new()
@@ -50,7 +52,11 @@ internal static class AspireProcessFaultCommand
             ?? throw new InvalidOperationException(ProcessFaultCommandProtocol.Refused);
         if (actual.ResourceName != expected.ResourceName || actual.ProcessId != expected.ProcessId
             || actual.AspireStartTimeUtcTicks != expected.AspireStartTimeUtcTicks
-            || actual.ProcessStartTimeUtcTicks != expected.ProcessStartTimeUtcTicks)
+            || actual.ProcessStartTimeUtcTicks != expected.ProcessStartTimeUtcTicks
+            || actual.LaunchProcessId != expected.LaunchProcessId
+            || actual.LaunchProcessStartTimeUtcTicks != expected.LaunchProcessStartTimeUtcTicks
+            || actual.LaunchExitCode == 0
+            || (OperatingSystem.IsWindows() ? actual.ExitCode is null or 0 : actual.ExitCode is not null))
         {
             throw new InvalidOperationException(ProcessFaultCommandProtocol.Refused);
         }

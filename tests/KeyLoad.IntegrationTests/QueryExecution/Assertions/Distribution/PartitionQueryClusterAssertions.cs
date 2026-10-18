@@ -15,7 +15,7 @@ internal static class PartitionQueryClusterAssertions
         await Assert.That(page.Rows.Length).IsEqualTo(expected.Length);
         for (var index = 0; index < expected.Length; index++)
         {
-            await AssertRowAsync(page.Rows[index], expected[index]);
+            await AssertRowAsync(page.Rows[index], expected[index], scenario.ExpectedReference(expected[index]));
         }
         await AssertLeavesAsync(page.Leaves, selected);
         var expectedDuplicates = expected.Where(row => row.Id == PartitionQueryClusterProtocol.DuplicateTextId)
@@ -55,10 +55,9 @@ internal static class PartitionQueryClusterAssertions
     }
 
     private static async Task AssertRowAsync(PartitionQueryRowV1 actual,
-        PartitionQueryClusterInputRow expected)
+        PartitionQueryClusterInputRow expected, EntityRef expectedReference)
     {
-        await Assert.That(actual.Reference).IsEqualTo(new EntityRef(expected.Partition,
-            PartitionQueryClusterProtocol.Collection, expected.Id));
+        await Assert.That(actual.Reference).IsEqualTo(expectedReference);
         await Assert.That(actual.Row.EntityId).IsEqualTo(expected.Id);
         await Assert.That(actual.Row.Revision).IsEqualTo(PartitionQueryClusterProtocol.RowRevision);
         await Assert.That(actual.Row.Redacted).IsFalse();

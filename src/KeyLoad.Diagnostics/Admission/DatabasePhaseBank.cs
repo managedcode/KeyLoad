@@ -60,7 +60,7 @@ public sealed class DatabasePhaseBank
 
         var phaseIndex = (int)phase;
         var outcomeIndex = (int)outcome;
-        if ((uint)phaseIndex >= PhaseCount || (uint)outcomeIndex >= OutcomeCount)
+        if ((uint)phaseIndex >= PhaseCount || !Enum.IsDefined(phase) || (uint)outcomeIndex >= OutcomeCount)
         {
             MarkQuality(DatabaseProfileQuality.InvalidDimension);
             return;
@@ -95,7 +95,7 @@ public sealed class DatabasePhaseBank
         }
 
         var phaseIndex = (int)phase;
-        if ((uint)phaseIndex >= PhaseCount)
+        if ((uint)phaseIndex >= PhaseCount || !Enum.IsDefined(phase))
         {
             MarkQuality(DatabaseProfileQuality.InvalidDimension);
             return;

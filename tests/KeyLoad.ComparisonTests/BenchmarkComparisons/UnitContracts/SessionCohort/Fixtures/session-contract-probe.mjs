@@ -16,9 +16,11 @@ const binary = { executablePath: '/usr/share/dotnet/dotnet', executableSha256: '
   assemblyPath: '/workspace/runtime.dll', assemblySha256: '2'.repeat(64), pdbPath: '/workspace/runtime.pdb',
   pdbSha256: '3'.repeat(64), sourceCount: 12, sourceCompositionSha256: '4'.repeat(64) };
 const processes = (target, count) => ({ client: { name: 'comparison-client', processId: 500,
-  startedAtUtc: '2026-10-09T10:02:00Z', aspireStartedAtUtc: null, binary },
+  startedAtUtc: '2026-10-09T10:02:00Z', aspireStartedAtUtc: null,
+  aspireProcessId: null, aspireProcessStartedAtUtc: null, binary },
   servers: target === 'KeyLoad' ? Array.from({length: count}, (_, index) => ({name: 'node' + (index + 1),
-    processId: 100 + index, startedAtUtc: '2026-10-09T10:01:00Z', aspireStartedAtUtc: '2026-10-09T10:00:59Z', binary })) : [] });
+    processId: 100 + index, startedAtUtc: '2026-10-09T10:01:00Z', aspireStartedAtUtc: '2026-10-09T10:00:59Z',
+    aspireProcessId: 200 + index, aspireProcessStartedAtUtc: '2026-10-09T10:00:59Z', binary })) : [] });
 const pendingResources = { id: 'matched-native-process-resources', status: 'notExecuted', failureType: 'MatchedProcessResourceQualificationOpen' };
 const cohort = { sourceRevision: 'a'.repeat(40), runId: 12345, attempt: 2,
   repository: contract.SESSION.repository, ref: contract.SESSION.ref,

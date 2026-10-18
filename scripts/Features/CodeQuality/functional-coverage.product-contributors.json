@@ -1149,8 +1149,8 @@
     {
       "suite": "unit",
       "className": "KeyLoad.UnitTests.Features.ResourceExecution.TenantAdmissionWholeFlowTests",
-      "methodName": "BusyTenantFairTurnsRefusalCancellationReleaseReplayAndSameRootColdPreserveOriginalOutcomes",
-      "instanceName": "BusyTenantFairTurnsRefusalCancellationReleaseReplayAndSameRootColdPreserveOriginalOutcomes",
+      "methodName": "TenantBoundsRefusalCancellationReleaseReplayAndSameRootColdPreserveOriginalOutcomes",
+      "instanceName": "TenantBoundsRefusalCancellationReleaseReplayAndSameRootColdPreserveOriginalOutcomes",
       "requirements": [
         "REQ-RESOURCE-TENANT-001",
         "REQ-RESOURCE-TENANT-SHUTDOWN-001"
@@ -1162,7 +1162,7 @@
       "executedModules": [
         "KeyLoad.Core"
       ],
-      "operationOutcomeAndState": "Actual native tenant fair turns with persisted principals and ordered journal apply; full literal receipts/models/cuts; capacity/cancellation/stop refusal with unchanged state, original producer settlement, same-ID immutable replay, joined shutdown and same-root cold healthy continuation."
+      "operationOutcomeAndState": "Actual bounded tenant/principal/node admission with fresh persisted principals and native canonical commits; capacity and cancellation refusals preserve complete state/cuts/reservations, released leases admit healthy work, literal receipts/models and same-ID replay survive joined native owner close and same-root cold continuation."
     }
   ]
 }

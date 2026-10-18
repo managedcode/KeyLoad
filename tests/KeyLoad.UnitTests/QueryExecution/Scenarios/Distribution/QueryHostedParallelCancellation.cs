@@ -19,8 +19,8 @@ internal static class QueryHostedParallelCancellation
         var images = QueryHostedSearchAssertions.Capture(cluster);
         var firstId = Guid.NewGuid();
         var secondId = Guid.NewGuid();
-        var first = observer.Hold(firstId, cluster.Nodes[0]);
-        var second = observer.Hold(secondId, cluster.Nodes[1]);
+        var first = observer.Hold(firstId, cluster.Nodes[0], data);
+        var second = observer.Hold(secondId, cluster.Nodes[1], data);
         using var firstCaller = CancellationTokenSource.CreateLinkedTokenSource(token);
         using var secondCaller = CancellationTokenSource.CreateLinkedTokenSource(token);
         using var deadline = new CancellationTokenSource(cluster.Nodes[0].Timing.CompletionTimeout, TimeProvider.System);
@@ -31,15 +31,18 @@ internal static class QueryHostedParallelCancellation
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             await Task.WhenAll(first.Entered.Task, second.Entered.Task).WaitAsync(completion.Token).ConfigureAwait(false);
-            await Assert.That(first.NodeId).IsNotEqualTo(second.NodeId);
-            await Assert.That(first.ObservedBytes).IsGreaterThan(first.BeforeBytes);
-            await Assert.That(second.ObservedBytes).IsGreaterThan(second.BeforeBytes);
+            await Assert.That(first.Identity.RequestId).IsEqualTo(firstId);
+            await Assert.That(second.Identity.RequestId).IsEqualTo(secondId);
+            await Assert.That(first.Identity.RequestId).IsNotEqualTo(second.Identity.RequestId);
+            await Assert.That(first.GrainId).IsNotEqualTo(second.GrainId);
+            await QueryHostedReadAssertions.ProgressAsync(cluster, first).ConfigureAwait(false);
+            await QueryHostedReadAssertions.ProgressAsync(cluster, second).ConfigureAwait(false);
             await Assert.That(firstCall.IsCompleted).IsFalse();
             await Assert.That(secondCall.IsCompleted).IsFalse();
             await firstCaller.CancelAsync().ConfigureAwait(false);
             var error = await Assert.ThrowsExactlyAsync<OperationCanceledException>(async () => await firstCall)
                 ?? throw new InvalidOperationException("The original native caller cancellation is unavailable.");
-            await Assert.That(error.CancellationToken).IsEqualTo(firstCaller.Token);
+            await Assert.That(error.CancellationToken == firstCaller.Token).IsTrue();
             await first.Disposed.Task.WaitAsync(completion.Token).ConfigureAwait(false);
             await Assert.That(secondCall.IsCompleted).IsFalse();
             await Assert.That(second.Disposed.Task.IsCompleted).IsFalse();

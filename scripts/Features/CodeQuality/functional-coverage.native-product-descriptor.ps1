@@ -251,7 +251,8 @@ function Get-UnitCensusRun([string] $StatusId, [object] $Status, [object] $Sourc
     [object] $ImageBySuite, [object] $Bounds, [string] $ResultsRoot) {
     $suite = [string] $Status.suite
     if ($Status.id -cne $StatusId -or $Status.exitCode -ne $script:FcNativeProductDescriptor.ExitSuccess -or
-        $Status.coverageEnabled -ne $false -or $Status.suite -cne $suite -or $Status.filter -cne '' -or
+        $Status.coverageEnabled -ne $false -or $Status.suite -cne $suite -or
+        $Status.filter -cne $script:FcNativeContributors.FullUnitSelector -or
         $Status.resultsDirectory -cne $StatusId) {
         throw "The full uninstrumented $suite census did not complete successfully."
     }
@@ -262,7 +263,7 @@ function Get-UnitCensusRun([string] $StatusId, [object] $Status, [object] $Sourc
     if ([IO.File]::Exists((Join-Path $directory $script:FcNativeProductDescriptor.UnitCensusCoverageName))) {
         throw $script:FcNativeProductDescriptor.Invalid
     }
-    [ordered]@{ statusId = $StatusId; suite = $suite; runId = $StatusId; filter = ''
+    [ordered]@{ statusId = $StatusId; suite = $suite; runId = $StatusId; filter = $script:FcNativeContributors.FullUnitSelector
         coverageEnabled = $false; resultsDirectory = $directoryName
         sourceRevision = $Source.value.sourceRevision; sourceManifestSha256 = $Source.file.sha256
         testImageManifestSha256 = $ImageBySuite[$suite].sha256; nativeExitCode = $Status.exitCode

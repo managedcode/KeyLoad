@@ -15,7 +15,8 @@ internal sealed class SiloOwnerPurposeRegistrationTests
         using var fixture = new PartitionHostRecoveryFixture();
         var runtime = ServerRuntimeTestOptions.Runtime(fixture.Options);
         await using var applicationServices = new ServiceCollection().BuildServiceProvider();
-        await using var node = new OrleansNode(applicationServices, runtime.Node, NullLoggerFactory.Instance, runtime);
+        using var admission = new RuntimeJournalAdmission();
+        await using var node = new OrleansNode(applicationServices, runtime.Node, NullLoggerFactory.Instance, runtime, admission);
         var builder = WebApplication.CreateBuilder([]);
         builder.Services.AddSingleton(node);
         OrleansApplicationServices.RegisterSiloOwners(builder, null);

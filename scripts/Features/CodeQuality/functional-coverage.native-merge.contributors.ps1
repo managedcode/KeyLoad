@@ -6,7 +6,9 @@ $script:FcNativeContributors = [ordered]@{
     UnitGroupPrefix = 'unit-functional-'
     UnitGroupIdFormat = 'D2'
     UnitRunStatusMaximumBytes = 65536
-    UnitFilterPrefix = '/*/*/('
+    UnitAssemblyName = 'KeyLoad.UnitTests'
+    FullUnitSelector = '/KeyLoad.UnitTests/*/*/*'
+    UnitFilterPrefix = '/KeyLoad.UnitTests/*/('
     UnitFilterSuffix = ')/*'
     MaximumUnitFilterCharacters = 4096
     HistoricalInventoryFailure = 'The functional unit inventory has not been reconciled to current native test reports.'
@@ -87,7 +89,7 @@ function Assert-FcNativeUnitRunStatus([object] $Status, [object] $Inventory, [st
         throw $script:FcNativeContributors.Invalid
     }
     $expected = [Collections.Generic.Dictionary[string, object]]::new([StringComparer]::Ordinal)
-    $expected.Add('unit-census', [ordered]@{ suite = 'unit'; filter = ''; coverageEnabled = $false })
+    $expected.Add('unit-census', [ordered]@{ suite = 'unit'; filter = $script:FcNativeContributors.FullUnitSelector; coverageEnabled = $false })
     foreach ($prefix in @($script:FcNativeContributors.UnitGroupPrefix)) {
         for ($index = 1; $index -le $script:FcNativeContributors.UnitGroupCount; $index++) {
             $id = $prefix + $index.ToString($script:FcNativeContributors.UnitGroupIdFormat,

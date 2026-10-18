@@ -52,7 +52,7 @@ internal sealed class AggregateReplayClusterSiloRestartTests(ClusterFixture fixt
             var frozen = scenario.FailoverCommand(Guid.NewGuid());
             await ClusterReplicationTestSupport.MissingCopiesAsync(await clients[survivorIndex].CommitAsync(frozen, cancellationToken));
 
-            ProcessFaultCommandProtocol.Identity? accepted = null;
+            ProcessFaultCommandProtocol.LaunchIdentity? accepted = null;
             if (interruptAcceptedRestart)
             {
                 accepted = await fixture.BeginProcessRestartAsync(stoppedNode, cancellationToken);

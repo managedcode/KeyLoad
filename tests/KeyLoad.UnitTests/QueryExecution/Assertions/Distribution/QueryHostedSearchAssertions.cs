@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using System.Security.Cryptography;
+using KeyLoad.Core;
 
 namespace KeyLoad.UnitTests.Features.QueryExecution;
 
@@ -21,7 +22,9 @@ internal static class QueryHostedSearchAssertions
             }
             var records = page.Records.Select(record => Convert.ToHexString(record.Key.Span) + ":" +
                 Convert.ToHexString(record.Value.Span)).ToArray();
-            return new QueryHostedStoreImage(node.Database.Database.LastApplied, node.Database.Store.Position, records);
+            var applied = view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
+                ? NativeSerialization.Deserialize<long>(bytes) : default(long);
+            return new QueryHostedStoreImage(applied, node.Database.Store.Position, records);
         })).ToArray();
 
     internal static async Task StateAsync(RequestCqrsHostedCluster cluster, QueryHostedStoreImage[] expected)
@@ -56,10 +59,10 @@ internal static class QueryHostedSearchAssertions
             new(data.First, image.StorePosition, QueryHostedSearchDataset.Version, QueryHostedSearchDataset.Version, AccessPath),
             new(data.Second, image.StorePosition, QueryHostedSearchDataset.Version, QueryHostedSearchDataset.Version, AccessPath)
         ];
-        await Assert.That(NativeSerialization.Serialize(page.Hits).AsSpan()
-            .SequenceEqual(NativeSerialization.Serialize(expected.ToImmutableArray()))).IsTrue();
-        await Assert.That(NativeSerialization.Serialize(page.Leaves).AsSpan()
-            .SequenceEqual(NativeSerialization.Serialize(leaves.ToImmutableArray()))).IsTrue();
+        await Assert.That(JsonDefaults.Serialize(page.Hits).AsSpan()
+            .SequenceEqual(JsonDefaults.Serialize(expected.ToImmutableArray()))).IsTrue();
+        await Assert.That(JsonDefaults.Serialize(page.Leaves).AsSpan()
+            .SequenceEqual(JsonDefaults.Serialize(leaves.ToImmutableArray()))).IsTrue();
         await Assert.That(page.Version).IsEqualTo(QueryHostedSearchDataset.Version);
         await Assert.That(page.Complete).IsTrue();
         await Assert.That(page.StatisticsEpoch.Length).IsEqualTo(SHA256.HashSizeInBytes * HexCharactersPerByte);

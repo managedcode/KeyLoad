@@ -19,9 +19,16 @@ internal sealed class PartitionQueryPublicTestSupport : IDisposable
     internal PartitionQueryPublicTestSupport(DatabaseLimits? limits = null, SensitiveFieldPolicy[]? fields = null)
     {
         fixture = new TestDatabase(limits);
-        fixture.Configure(Collection, ResourceKind.Collection, fields: fields);
+        var definition = new ResourceDefinition(Collection, ResourceKind.Collection, fixture.Partition.TransactionDomainId)
+        {
+            FieldPolicies = [.. fields ?? []],
+            QueuePolicy = new()
+        };
+        Creation = PartitionQueryCreationOracle.Configure(fixture,
+            new(fixture.Partition.TenantId, fixture.Partition.DatabaseId, definition));
     }
 
+    internal ResourceLifetimeV1 Creation { get; }
     internal DatabaseEngine Database => fixture.Database;
     internal PartitionRef First => fixture.Partition with { PartitionKey = FirstKey };
     internal PartitionRef Second => fixture.Partition with { PartitionKey = SecondKey };

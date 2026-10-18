@@ -6,9 +6,8 @@ using KeyLoad.Storage;
 namespace KeyLoad.Query.Features.QueryExecution;
 
 internal sealed class PartitionQueryLeafExecutor(QueryEngine engine, DatabaseEngine database,
-    ReadExecutionBudget budget, PhysicalShardRecord? expectedOwner = null, string? expectedTenant = null)
+    ReadExecutionBudget budget, PhysicalShardRecord? expectedOwner = null, bool receivingLeaf = false)
 {
-    private const string ReceivingIdentityChangedDetail = "The partition query receiving identity changed.";
     private const int EmptyElementCount = 0;
     private const int VersionOne = 1;
 
@@ -19,7 +18,7 @@ internal sealed class PartitionQueryLeafExecutor(QueryEngine engine, DatabaseEng
         var retention = new PartitionQueryLeafRetention(plan.MaxRetainedBytes, plan.MaxCandidates);
         PartitionQueryLeafResultV1 Read(IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource)
             => Capture(view, principal, resource, plan, normalized, leafGrant, retention);
-        return expectedTenant is null
+        return !receivingLeaf
             ? database.WithQueryView(principalId, plan.Partition, normalized.Query.Collection, Capability.None, Read, budget)
             : database.WithPartitionQueryView(principalId, plan.Partition, normalized.Query.Collection,
                 grant, Read, budget);
@@ -40,10 +39,6 @@ internal sealed class PartitionQueryLeafExecutor(QueryEngine engine, DatabaseEng
         PartitionQueryLeafReadGrant grant, PartitionQueryLeafRetention retention, PartitionQueryLifetimeMetadata? metadata = null)
     {
         budget.Check();
-        if (expectedTenant is not null && principal.TenantId != expectedTenant)
-        {
-            throw Errors.Fail(ErrorCode.PermissionDenied, ReceivingIdentityChangedDetail);
-        }
         QueryFieldAuthorization.RequireSchema(database, principal, resource, request);
         if (metadata is not null)
         {

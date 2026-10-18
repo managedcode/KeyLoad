@@ -49,7 +49,7 @@ internal sealed class PartitionQueryPublicAuthorizationTests
         await Assert.That(ownerFixture.Position).IsEqualTo(ownerPosition);
         var ownerRetry = new QueryEngine(ownerFixture.Database, UnitExecutionOptions.QueryExecution()).QueryPartitions(
             "root", PartitionQueryPublicTestSupport.Request([ownerFixture.First]), ownerFixture.ExpectedOwner);
-        await PartitionQueryWholeFlowAssertions.AssertPublicRowAsync(ownerRetry, ownerFixture.First, "one", "visible");
+        await PartitionQueryWholeFlowAssertions.AssertPublicRowAsync(ownerRetry, ownerFixture.First, "one", "visible", ownerFixture.Creation);
         await Assert.That(ownerFixture.Position).IsEqualTo(ownerPosition);
 
         using var protectedFixture = new PartitionQueryPublicTestSupport(fields:
@@ -70,7 +70,7 @@ internal sealed class PartitionQueryPublicAuthorizationTests
         var healthyQuery = PartitionQueryPublicTestSupport.Request([protectedFixture.First], 1);
         var healthy = new QueryEngine(protectedFixture.Database, UnitExecutionOptions.QueryExecution())
             .QueryPartitions(PartitionQueryPublicTestSupport.ReaderId, healthyQuery, protectedFixture.ExpectedOwner);
-        await PartitionQueryWholeFlowAssertions.AssertPublicRowAsync(healthy, protectedFixture.First, "secret-row", "visible");
+        await PartitionQueryWholeFlowAssertions.AssertPublicRowAsync(healthy, protectedFixture.First, "secret-row", "visible", protectedFixture.Creation);
         await Assert.That(healthy.Rows[0].Row.Redacted).IsFalse();
         await Assert.That(healthy.Rows[0].Row.RedactedFields!.Value).IsEmpty();
         var selectedQuery = healthyQuery with

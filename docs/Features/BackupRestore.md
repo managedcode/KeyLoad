@@ -57,6 +57,40 @@ flowchart LR
     Identity --> Resume[Explicit reconciliation and resume]
 ```
 
+## Local partition-roster preservation
+
+REQ-BACKUP-004 retains its complete multi-silo qualification boundary above.
+The current local roster is also part of the canonical files: successful scoped
+writes register their first-seen partition coordinates, rejected commands retain
+their proper outcome scope, and reset retains only the final staged writes.
+Candidate count, encoded bytes, native frame bounds, exact key grammar and
+persisted coordinates must be validated without publishing a partial mutation.
+The existing `AtomicPartitionRosterBudgetTests`,
+`AtomicPartitionRosterFrameBudgetTests`, `AtomicPartitionRosterPlacementTests`,
+`AtomicPartitionRosterRegistrationTests` and
+`AtomicPartitionRosterValidationTests` exercise these real local commit, refusal,
+reset, replay and reopen oracles. These are supporting local cases for
+REQ/AC-BACKUP-004; they cannot establish its complete replicated-cluster acceptance.
+
+REQ-BACKUP-ROSTER-RESTORE-001 requires a native local backup/restore to preserve
+historical canonical roster rows while the restored owner accepts new current
+commands. Each new owner uses its actual canonical sequence and native apply
+path. Existing archive bytes and the source cut remain unchanged. The two
+instances of
+`AtomicPartitionRosterRestoreTests.AcBackupRoster001ReplicatedHistoricalRowsSurviveFirstWriteColdAndSecondRestore`
+select ordinary local apply or the next ordered native storage sequence after a
+real `ZoneTreeStore.Restore`.
+
+| Existing acceptance ID | Current local observable oracle |
+|---|---|
+| AC-BACKUP-ROSTER-RESTORE-001 | The historical literal document, complete resource-bound reference and original roster bytes survive the first native restore. A fresh current command commits its literal document and full receipt; same-ID replay before and after a joined cold reopen adds no effect or physical position. A second native backup/restore preserves the historical document, admits a fresh command and retains that complete document after another joined reopen. |
+| AC-BACKUP-ROSTER-RESTORE-002 | Reusing the pre-restore command returns `TokenInvalidated`, preserves the complete canonical digest and physical position and leaves the original persisted outcome bytes unchanged. Fresh current-command replay preserves its complete receipt. Every checked literal document retains the original roster bytes; the first source archive keeps its full file hash inventory and the source store retains its captured cut. |
+
+The cases use actual local native owners, generated commands and synchronous
+ZoneTree backup/restore APIs. Source traceability is not execution evidence.
+Current-source native execution, delivered-source Linux artifacts, coordinated
+multi-silo restore and power-loss qualification remain separate open gates.
+
 ## Negative and boundary flows
 
 Reject checksum mismatch, missing canonical files, malformed catalog entries, path traversal/reparse points, nonempty destinations, and a restore whose manifest/version is unsupported. Preserve the last known materialized state when a restore fails. A process-kill or local round trip is not evidence of power-loss durability, a globally consistent multi-silo cut, or recovery of every optional capability.
@@ -81,7 +115,7 @@ AC-CQ-018 preserves the complete ManagedCode file-storage transfer byte oracle i
 
 `BackupRestoreStagingJoinTests.AcSqlc011AbsentTargetPublishesNativeCutAndPreservesEveryBackupByte` and `AcSqlc011ExistingEmptyTargetPublishesNativeCheckpointAndPreservesEveryBackupByte` each have two trailing-separator cases. Their bodies directly call the native restore API, reopen the target, verify new identity/incarnation, paused dispatch, restored data and exact archive bytes. They map to REQ-BACKUP-002 / AC-BACKUP-002 and the identity/pause portion of REQ-BACKUP-003 / AC-BACKUP-003 only; they do not exercise SQL and do not close the cursor/lease fencing and operator reconciliation parts of AC-BACKUP-003.
 
-REQ/AC-BACKUP-001/002/003 and AC-CQ-031 map to genuine Release CLI child-process flows in `tests/KeyLoad.UnitTests/Restore/Cases/Cli/CliBackupRestoreFlowTests.cs` with feature-local Processes/ and Fixtures/ helpers. The Aspire-owned unit and unit-scalar runners own every child, exit, bounded pipe drain, temporary file and cleanup; validated test execution options supply the bounds; no alternate entry point or fake CLI is permitted. The positive flow commits and closes real ZoneTree storage, then runs backup, pack-backup, inspect-artifact, copy-artifact, unpack-backup and restore through the actual CLI dispatch and verifies copied archive bytes, reopened canonical data, a new incarnation and paused dispatch. Negative flows pass corrupted artifacts or nonempty destinations through the same CLI boundary, observe the nonzero exit, preserve existing destination bytes and storage state, and complete a healthy follow-up operation.
+REQ/AC-BACKUP-001/002/003 and AC-CQ-031 map to genuine default Debug CLI child-process flows in `tests/KeyLoad.UnitTests/Restore/Cases/Cli/CliBackupRestoreFlowTests.cs` with feature-local Processes/ and Fixtures/ helpers. The native TUnit fixtures own every CLI child, exit, bounded pipe drain, temporary file and cleanup; validated test execution options supply the bounds; no alternate entry point or fake CLI is permitted. The positive flow commits and closes real ZoneTree storage, then runs backup, pack-backup, inspect-artifact, copy-artifact, unpack-backup and restore through the actual CLI dispatch and verifies copied archive bytes, reopened canonical data, a new incarnation and paused dispatch. Negative flows pass corrupted artifacts or nonempty destinations through the same CLI boundary, observe the nonzero exit, preserve existing destination bytes and storage state, and complete a healthy follow-up operation.
 
 The standalone CLI binds `KEYLOAD_STORAGE__` and `KEYLOAD_POINTCACHE__` through the native environment configuration provider. Missing variables preserve the typed defaults; supplied values are validated before opening storage. An invalid-budget backup child leaves the committed source unchanged and the backup destination absent, and is followed by a successful backup and restore. Overrides are confined to that child process.
 
@@ -209,7 +243,7 @@ flowchart LR
 
 ### Actual CLI native-frame refusal and repair
 
-REQ-BACKUP-CLI-JOURNAL-001 / AC-BACKUP-CLI-JOURNAL-001 refine REQ/AC-BACKUP-002: the `NativeBackupCutFixture` with checkpoint false/true creates a native archive and closed source. Change only the last WAL frame's checksum byte and update its manifest hash. The Release CLI restore must twice report exit 1, Corruption and the `JournalChecksumInvalid` detail, with empty stdout, joined child/stdout/stderr/disposal, no destination, unchanged damaged archive and source cut. Native frame verification is not weakened merely because the archive file hash matches.
+REQ-BACKUP-CLI-JOURNAL-001 / AC-BACKUP-CLI-JOURNAL-001 refine REQ/AC-BACKUP-002: the `NativeBackupCutFixture` with checkpoint false/true creates a native archive and closed source. Change only the last WAL frame's checksum byte and update its manifest hash. The default Debug CLI restore must twice report exit 1, Corruption and the `JournalChecksumInvalid` detail, with empty stdout, joined child/stdout/stderr/disposal, no destination, unchanged damaged archive and source cut. Native frame verification is not weakened merely because the archive file hash matches.
 
 REQ-BACKUP-CLI-JOURNAL-002 / AC-BACKUP-CLI-JOURNAL-002 refine REQ/AC-BACKUP-002/003: after all child joins, repair the exact journal and manifest under the ordered failure ledger. A fresh CLI restore must return NodeId/Incarnation/DispatchPaused bound to the reopened target, new authority and the literal restored rows at the original backup cut plus the single authority-reset commit. Two further joined close/reopens retain every identity field, the canonical image and the physical cut; source and repaired archive remain exact. No failed branch continues to a healthy restore. Tests: `CliBackupJournalRepairTests`, `CliBackupJournalRepairTrial`, `CliBackupJournalRepairAssertions` (reusing the `NativeBackupJournalRepairAssertions` archive/row reader); the two bool arguments select the checkpoint mode.
 
@@ -224,7 +258,7 @@ flowchart LR
 
 ### Open-owner refusal and joined continuation
 
-REQ-BACKUP-CLI-OWNER-001 / AC-BACKUP-CLI-OWNER-001 refine REQ/AC-BACKUP-001/002. Reopen the closed `NativeBackupCutFixture` source with its actual `ZoneTreeStore` owning the exclusive `owner.lock`. While the owner remains open, two Release CLI backup attempts must fail with a nonzero exit, nonempty stderr and empty stdout, with exit/stdout/stderr/disposal joined, no backup destination and exact same-view source identity/physical cut/rows; the existing archive remains exact. No synthetic lock, delay, owner flag, store copy, detached child or network is used.
+REQ-BACKUP-CLI-OWNER-001 / AC-BACKUP-CLI-OWNER-001 refine REQ/AC-BACKUP-001/002. Reopen the closed `NativeBackupCutFixture` source with its actual `ZoneTreeStore` owning the exclusive `owner.lock`. While the owner remains open, two default Debug CLI backup attempts must fail with a nonzero exit, nonempty stderr and empty stdout, with exit/stdout/stderr/disposal joined, no backup destination and exact same-view source identity/physical cut/rows; the existing archive remains exact. No synthetic lock, delay, owner flag, store copy, detached child or network is used.
 
 REQ-BACKUP-CLI-OWNER-002 / AC-BACKUP-CLI-OWNER-002 refine REQ/AC-BACKUP-001/002/003: the borrowed source owner always disposes in its lexical scope, with body and cleanup failures ordered in the ServerFailureObserver ledger. Only after that close and with no failures may the same CLI backup succeed at the attempted path; verify its native identity and cut, restore through the CLI, bind the identity receipt, and require literal new paused-authority rows. Two joined cold reopens retain identity/position/rows, the repaired source stays unchanged, and both archives keep exact bytes. The CLI catches only `KeyLoadException` while a FileStream sharing refusal can surface as `IOException`, so the test retains the actual native process failure through the existing `RejectedProcessAsync` contract and does not invent a typed Problem, portable exit number or OS-specific sharing detail. Tests: `CliBackupOwnerExclusionTests` and `CliBackupOwnerExclusionTrial`.
 

@@ -16,6 +16,7 @@ internal sealed class DatabasePhaseBankConcurrencyTests
     private const int BusyLength = PhaseCount;
     private const int DeadlineMilliseconds = 30_000;
     private const long TotalAttempts = UpdateCount + ConcurrentWorkCount - ConcurrentCaptureCount;
+    private static readonly DatabasePhaseKind[] Kinds = Enum.GetValues<DatabasePhaseKind>();
 
     [Test]
     [Arguments(1, 1)]
@@ -60,6 +61,7 @@ internal sealed class DatabasePhaseBankConcurrencyTests
         await Assert.That(liveCaptures.All(IsValidConcurrentCapture)).IsTrue();
         await Assert.That(observed).IsLessThanOrEqualTo(TotalAttempts);
         await Assert.That(dropped || observed == TotalAttempts).IsTrue();
+        await Assert.That(final.Quality & DatabaseProfileQuality.InvalidDimension).IsEqualTo(DatabaseProfileQuality.None);
     }
 
     private static void RunUpdates(DatabasePhaseBank bank, ParallelOptions options, int start, int end) =>
@@ -121,7 +123,7 @@ internal sealed class DatabasePhaseBankConcurrencyTests
 
     private static void RecordOne(DatabasePhaseBank bank, int index)
     {
-        var kind = (DatabasePhaseKind)(index % PhaseCount);
+        var kind = Kinds[index % Kinds.Length];
         var started = bank.Begin();
         bank.End(kind, DatabasePhaseOutcome.Completed, started);
     }

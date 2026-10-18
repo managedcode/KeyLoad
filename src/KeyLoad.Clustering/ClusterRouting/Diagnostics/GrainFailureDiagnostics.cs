@@ -15,6 +15,15 @@ internal static partial class GrainFailureDiagnostics
     private const int PrimaryExceptionIndex = 0;
     private const string FailureMessage = "Orleans request rejected: {RequestId} at {Stage} ({Category}) with {ErrorCode}. Closed cause {CauseKind}.";
     private const string StageMetadataKeyValue = "KeyLoad.Orleans.ClusterRouting.GrainFailureStage";
+    private const string PartitionQueryLifetimeRequest = "The partition query lifetime request is invalid.";
+    private const string PartitionQueryReceivingOwner = "The partition query receiving owner changed.";
+    private const string PartitionQueryPlacementOwner = "The partition query owner no longer matches this server.";
+    private const string PartitionQueryLeafOwner = "Partition query leaves do not share one owner and policy epoch.";
+    private const string PartitionQueryIncomplete = "A partition query leaf did not complete.";
+    private const string PartitionQuerySourceMetadata = "The query source metadata is invalid.";
+    private const string PartitionQueryPhysicalOwner = "The server physical owner identity is invalid.";
+    private const string PhysicalStorageOwner = "The operation targets a different physical storage owner.";
+    private const string EntityResourceLifetime = "The entity reference belongs to another resource lifetime.";
     [LoggerMessage(EventId = FailureEventId, Message = FailureMessage)]
     private static partial void LogFailure(ILogger logger, LogLevel level, Guid requestId,
         GrainFailureStage stage, GrainFailureCategory category, ErrorCode errorCode,
@@ -73,6 +82,10 @@ internal static partial class GrainFailureDiagnostics
 
     private static GrainFailureCauseKind CauseKind(Exception error, GrainFailureCategory category)
     {
+        if (category == GrainFailureCategory.Domain && error is KeyLoadException { Code: ErrorCode.OwnershipLost })
+        {
+            return OwnershipCause(error.Message);
+        }
         if (category != GrainFailureCategory.Unexpected)
         {
             return GrainFailureCauseKind.Unobserved;
@@ -105,6 +118,20 @@ internal static partial class GrainFailureDiagnostics
             _ => GrainFailureCauseKind.Other
         };
     }
+
+    private static GrainFailureCauseKind OwnershipCause(string message) => message switch
+    {
+        PartitionQueryLifetimeRequest => GrainFailureCauseKind.PartitionQueryLifetimeRequest,
+        PartitionQueryReceivingOwner => GrainFailureCauseKind.PartitionQueryReceivingOwner,
+        PartitionQueryPlacementOwner => GrainFailureCauseKind.PartitionQueryPlacementOwner,
+        PartitionQueryLeafOwner => GrainFailureCauseKind.PartitionQueryLeafOwner,
+        PartitionQueryIncomplete => GrainFailureCauseKind.PartitionQueryIncomplete,
+        PartitionQuerySourceMetadata => GrainFailureCauseKind.PartitionQuerySourceMetadata,
+        PartitionQueryPhysicalOwner => GrainFailureCauseKind.PartitionQueryPhysicalOwner,
+        PhysicalStorageOwner => GrainFailureCauseKind.PhysicalStorageOwner,
+        EntityResourceLifetime => GrainFailureCauseKind.EntityResourceLifetime,
+        _ => GrainFailureCauseKind.Unobserved
+    };
 
     private static GrainFailureStage ValidStage(GrainFailureStage stage) => Enum.IsDefined(stage) ? stage : GrainFailureStage.EnvelopeVerification;
 

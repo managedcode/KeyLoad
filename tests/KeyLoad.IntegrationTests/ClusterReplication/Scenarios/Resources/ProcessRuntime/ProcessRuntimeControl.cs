@@ -23,7 +23,7 @@ internal sealed class ProcessRuntimeControl(DistributedApplication app, IReadOnl
         {
             throw new InvalidOperationException(ProcessRestartOwnership.PendingFailure);
         }
-        var before = ProjectProcessEvidence.Read(app.ResourceNotifications, resourceName);
+        var before = await ClusterFixtureApplicationStartup.ReadAsync(app, resourceName, cancellationToken);
         var started = TimeProvider.System.GetUtcNow();
         var killed = await AspireProcessFaultCommand.KillAsync(app, ProcessRuntimeProtocol.Identity(before), cancellationToken);
         var receipt = new ProcessRuntimeKillReceipt(scenario, resourceName, before, killed)
@@ -70,8 +70,8 @@ internal sealed class ProcessRuntimeControl(DistributedApplication app, IReadOnl
         await app.ResourceNotifications.WaitForResourceHealthyAsync(resourceName,
             WaitBehavior.WaitOnResourceUnavailable, cancellationToken);
         progress.Stage = ProcessRestartStage.RuntimeInspection;
-        var after = ProjectProcessEvidence.Read(app.ResourceNotifications, resourceName);
-        owner.RequireSameReplacement(ProcessRuntimeProtocol.Identity(after));
+        var after = await ClusterFixtureApplicationStartup.ReadAsync(app, resourceName, cancellationToken);
+        owner.RequireSameReplacement(ProcessRuntimeProtocol.Identity(after).Launch);
         progress.Stage = ProcessRestartStage.IdentityValidation;
         if (after.Binary != receipt.Before.Binary)
         {
@@ -87,7 +87,7 @@ internal sealed class ProcessRuntimeControl(DistributedApplication app, IReadOnl
         await ProcessRuntimeReceiptStore.WriteAsync(completed, cancellationToken);
     }
 
-    internal async Task<ProcessFaultCommandProtocol.Identity> BeginRestartAsync(string resourceName,
+    internal async Task<ProcessFaultCommandProtocol.LaunchIdentity> BeginRestartAsync(string resourceName,
         CancellationToken cancellationToken)
     {
         if (!pendingReceipts.TryGetValue(resourceName, out var receipt))

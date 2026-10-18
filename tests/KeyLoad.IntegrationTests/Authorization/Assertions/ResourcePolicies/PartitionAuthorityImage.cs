@@ -16,7 +16,8 @@ internal static class PartitionAuthorityImage
             (PartitionAuthorityProtocol.SecondLeaf, PartitionAuthorityProtocol.SecondId, PartitionAuthorityProtocol.SecondJson) })
         {
             var partition = state.Scenario.Partitions[row.Item1];
-            var reference = new EntityRef(partition, PartitionQueryClusterProtocol.Collection, row.Item2);
+            var input = state.Scenario.Inputs.Single(input => input.Partition == partition && input.Id == row.Item2);
+            var reference = state.Scenario.ExpectedReference(input);
             var document = await PublicReadAssertions.DocumentAsync(await root.GetAsync(reference, token));
             await Assert.That(document).IsNotNull();
             await SqlClusterProtocol.EqualAsync(new DocumentResult(reference, PartitionQueryClusterProtocol.RowRevision,

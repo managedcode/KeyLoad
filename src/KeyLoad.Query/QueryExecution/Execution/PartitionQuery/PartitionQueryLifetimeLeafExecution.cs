@@ -23,8 +23,7 @@ internal static class PartitionQueryLifetimeLeafExecution
     {
         var database = engine.PartitionQueryOwner;
         if (request is null || request.Original is null || request.Definition is null || request.Coverage is null
-            || request.Principal is null || request.Principal.Id != principalId
-            || request.Principal.TenantId != request.Original.Tenant)
+            || request.Principal is null || request.Principal.Id != principalId)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, Invalid);
         }
@@ -45,7 +44,7 @@ internal static class PartitionQueryLifetimeLeafExecution
         var normalized = QueryValidation.Normalize(original.Plan.Request, database.Limits, engine.Execution);
         var grant = budget.CreateReadGrant(original.Plan.MaxReadBytes, original.Plan.MaxExaminedRecords);
         using var admission = database.AdmitQuery(token);
-        var result = new PartitionQueryLeafExecutor(engine, database, budget, actualOwner, original.Tenant)
+        var result = new PartitionQueryLeafExecutor(engine, database, budget, actualOwner, receivingLeaf: true)
             .ExecuteLifetime(principalId, original.Plan, normalized, grant,
                 new(request.Definition, request.Coverage, request.Principal));
         budget.CheckResult(result);

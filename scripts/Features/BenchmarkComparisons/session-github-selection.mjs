@@ -12,7 +12,7 @@ export function selectSessionEvidence(capture, cohort) {
   const rows = sessionRows();
   requireSession(Array.isArray(jobs) && Array.isArray(artifacts)
     && jobs.filter(job => job.name?.includes(' / Session / ')).length === SESSION.workers
-    && artifacts.filter(artifact => /^comparison-session-[a-z]+-n[0-9]+$/.test(artifact.name ?? '')).length === SESSION.workers
+    && artifacts.filter(artifact => rows.some(row => row.artifactName === artifact.name)).length === SESSION.workers
     && !artifacts.some(artifact => /^comparison-(?:worker|open-loop-worker|document-worker)-/.test(artifact.name ?? ''))
     && artifacts.filter(artifact => artifact.name?.startsWith(SESSION.artifactPrefix))
       .every(artifact => rows.some(row => row.artifactName === artifact.name)

@@ -75,7 +75,7 @@ internal sealed class PartitionQueryPublicContractTests
         await Assert.That(badVersion.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(fixture.Position).IsEqualTo(position);
         var healthy = Run(fixture, valid);
-        await PartitionQueryWholeFlowAssertions.AssertPublicRowAsync(healthy, fixture.First, "valid-leaf", "healthy");
+        await PartitionQueryWholeFlowAssertions.AssertPublicRowAsync(healthy, fixture.First, "valid-leaf", "healthy", fixture.Creation);
         await Assert.That(fixture.Position).IsEqualTo(position);
     }
 

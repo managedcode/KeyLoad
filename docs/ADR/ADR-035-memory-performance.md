@@ -8,10 +8,12 @@ REQ-MP-001..006 / AC-MP-001..012 in
 
 ## Decision and invariant
 
-The atomic partition remains the business consistency identity. A silo-local
-ZoneTree owner (an Orleans Grain Service) owns mutable ZoneTree state, journals,
-file locks and apply gates; Orleans activation state may move but cannot own open
-storage handles or become committed truth. Every resource optimization preserves
+The atomic partition remains the business consistency identity. A local physical
+session owns mutable ZoneTree state, journals, file locks and apply gates. Isolated
+storage binds it to a silo-local Grain Service; shared storage binds it to one
+ordinary owner's activation lifetime. Orleans can move an activation only by
+closing and reopening its session; file handles never move between processes.
+Activation memory cannot become committed truth. Every resource optimization preserves
 authorization, committed cuts, atomic outcomes, signatures, cancellation, exact
 public bytes and replicated-cluster, recovery and restart guarantees.
 
@@ -94,8 +96,8 @@ warmup, concurrency and acknowledgement/read guarantees. Unknown data is
 unavailable, not zero. Neither source limits nor local runs establish a maximum
 performance claim.
 
-The required delivered-source gates remain the Release build, TUnit normal and
-scalar suites, process recovery, Aspire cluster SDK/MCP flows, formatter, governance,
+The required delivered-source gates remain the strict default-configuration build,
+native TUnit suites with SIMD enabled, process recovery, Aspire cluster SDK/MCP flows, formatter, governance,
 coverage and complexity artifacts, plus applicable fault, resource and endurance
 work. A process-kill test does not prove power-loss durability. No acceptance
 criterion is complete until its actual operation test and required qualification

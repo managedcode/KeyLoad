@@ -109,10 +109,10 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
             var repository = ClusterFixtureDiagnostics.FindRepositoryRoot();
             ClusterFixtureComposition.ConfigureLogging(builder);
             App = await builder.BuildAsync(timeout.Token);
+            AdminKey = ClusterFixtureProfile.ReadProfile(Root).AdminKey;
             processRuntime = new(App, resourceNames, repository.FullName);
             diagnostics = new(App);
             diagnostics.Start(App.Services.GetRequiredService<ResourceLoggerService>());
-            AdminKey = ClusterFixtureProfile.ReadProfile(Root).AdminKey;
             processEvidenceDirectory = await ClusterFixtureApplicationStartup.StartAsync(App, resourceNames, timeout.Token).ConfigureAwait(false);
         }
         catch (Exception startupFailure)
@@ -157,6 +157,12 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
             TimeProvider.System);
         var failures = new List<Exception>();
         await SaveDiagnosticsAsync(diagnostics, failures, cleanup.Token).ConfigureAwait(false);
+        var ownedApp = App;
+        App = null!;
+        var stopped = await ClusterFixtureApplicationShutdown.CollectAsync(ownedApp, resourceNames, processEvidenceDirectory,
+            failures, cleanup.Token)
+            .ConfigureAwait(false);
+        await SaveDiagnosticsAsync(diagnostics, failures, cleanup.Token).ConfigureAwait(false);
         if (diagnostics is not null)
         {
             try
@@ -173,11 +179,10 @@ internal sealed class ClusterFixture : IAsyncInitializer, IAsyncDisposable, IKey
             }
             diagnostics = null;
         }
-        var ownedApp = App;
-        App = null!;
-        var stopped = await ClusterFixtureApplicationShutdown.CollectAsync(ownedApp, resourceNames, processEvidenceDirectory,
-            failures, cleanup.Token)
-            .ConfigureAwait(false);
+        if (ownedApp is not null)
+        {
+            await ServerFailureObserver.ObserveAsync(() => ownedApp.DisposeAsync().AsTask(), failures).ConfigureAwait(false);
+        }
         _ = await Features.QueryExecution.PostgresClusterFixtureOwnership.ReleaseRootAsync(!stopped, failures,
             () => ClusterFixtureFailureRootRetention.For(this).ReleaseAsync(
                 () => DeleteOwnedRootAsync(Root, failures))).ConfigureAwait(false);

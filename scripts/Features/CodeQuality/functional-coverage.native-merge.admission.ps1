@@ -85,7 +85,7 @@ function Read-FcNativeUnitCensusRun([string] $Root, [string] $Repository, [objec
         ($Run.nativeExitCode -isnot [int] -and $Run.nativeExitCode -isnot [long]) -or $Run.nativeExitCode -ne 0 -or
         $Run.coverageEnabled -isnot [bool] -or $Run.coverageEnabled -or
         $status.suite -cne $Suite -or $status.coverageEnabled -ne $false -or $status.exitCode -ne 0 -or
-        $status.filter -cne '' -or $status.resultsDirectory -cne $StatusId) {
+        $status.filter -cne $script:FcNativeContributors.FullUnitSelector -or $status.resultsDirectory -cne $StatusId) {
         throw $script:FcNativeMergeInput.InvalidDescriptor
     }
     Assert-FcNativeRunEvidenceDirectory $Run $status

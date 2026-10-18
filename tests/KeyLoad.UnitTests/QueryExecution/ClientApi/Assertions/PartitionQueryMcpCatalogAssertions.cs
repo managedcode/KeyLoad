@@ -11,6 +11,7 @@ internal static class PartitionQueryMcpCatalogAssertions
     private const string Route = "/v1/query/partitions";
     private const string Result = "result";
     private const string Reference = "reference";
+    private const string Lifetime = "lifetime";
     private const string Row = "row";
     private const string EntityId = "entityId";
     private const string Json = "json";
@@ -126,8 +127,9 @@ internal static class PartitionQueryMcpCatalogAssertions
     private static async Task VerifyEntityAsync(JsonElement root, JsonElement schema)
     {
         schema = Resolve(root, schema);
-        await VerifyObjectAsync(schema, [PartitionQueryMcpProtocol.Partition, PartitionQueryMcpProtocol.Collection,
-            PartitionQueryMcpProtocol.Id]);
+        var required = ImmutableArray.Create(PartitionQueryMcpProtocol.Partition,
+            PartitionQueryMcpProtocol.Collection, PartitionQueryMcpProtocol.Id);
+        await VerifyObjectAsync(schema, [.. required, Lifetime], required);
         await VerifyPartitionAsync(root, schema.GetProperty(McpSchemaInspector.Properties)
             .GetProperty(PartitionQueryMcpProtocol.Partition));
     }

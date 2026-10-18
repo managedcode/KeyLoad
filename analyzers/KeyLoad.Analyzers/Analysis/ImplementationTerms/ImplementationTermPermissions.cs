@@ -55,8 +55,9 @@ internal sealed class ImplementationTermPermissions(SemanticModel model,
              nameof(ImplementationTermCatalog.DataRuntimeTypes) or nameof(ImplementationTermCatalog.MeasurementTypes) or
              nameof(ImplementationTermCatalog.MeasurementMembers) or nameof(ImplementationTermCatalog.DataControlTypes) or
              nameof(ImplementationTermCatalog.DataControlMembers)
-         } ||
-         symbol is IMethodSymbol { Name: nameof(ImplementationTermCatalog.Read) or "Classify" or "Compound" });
+         }) ||
+        symbol?.ContainingType?.ToDisplayString() == ImplementationTermCatalog.RuleReaderType &&
+        symbol is IMethodSymbol { Name: nameof(ImplementationTermReader.Read) or "Classify" or "Compound" };
 
     private static bool NativeMovement(string text) =>
         text.Contains(ImplementationTermCatalog.OrleansWord, StringComparison.Ordinal) &&

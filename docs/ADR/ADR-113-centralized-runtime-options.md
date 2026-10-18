@@ -466,7 +466,8 @@ idempotence compares all three values; any different later value is rejected.
 The initially unpublished facade remains disabled without constructing policy.
 
 This owner-requested join refines ADR-063's fixed-four source defaults and API,
-preserving four as the qualified ceiling/default, its fixed32/6/16 public schema,
+preserving four as the qualified ceiling/default, its32-slot bank capacity with
+ten current phase boundaries, six outcomes and16 buckets,
 128KiB startup ceiling, saturation/sticky degradation, no hot allocation/callback
 or gate, and no live reconfiguration/reset. It adds no request, wire or stored
 field. The options owner, Server registration/preflight/startup, Diagnostics bank,

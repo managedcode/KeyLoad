@@ -28,11 +28,9 @@ internal static class PartitionAuthorityResults
         await Assert.That(actual.Version).IsEqualTo(PartitionQueryClusterProtocol.Version);
         await Assert.That(actual.Complete).IsTrue();
         ImmutableArray<PartitionQueryRowV1> rows = [
-            new(new(state.Scenario.Partitions[PartitionAuthorityProtocol.FirstLeaf], PartitionQueryClusterProtocol.Collection,
-                PartitionAuthorityProtocol.FirstId), new(PartitionAuthorityProtocol.FirstId,
+            new(Reference(state, PartitionAuthorityProtocol.FirstLeaf, PartitionAuthorityProtocol.FirstId), new(PartitionAuthorityProtocol.FirstId,
                 PartitionQueryClusterProtocol.RowRevision, PartitionAuthorityProtocol.FirstProjection, false, [])),
-            new(new(state.Scenario.Partitions[PartitionAuthorityProtocol.SecondLeaf], PartitionQueryClusterProtocol.Collection,
-                PartitionAuthorityProtocol.SecondId), new(PartitionAuthorityProtocol.SecondId,
+            new(Reference(state, PartitionAuthorityProtocol.SecondLeaf, PartitionAuthorityProtocol.SecondId), new(PartitionAuthorityProtocol.SecondId,
                 PartitionQueryClusterProtocol.RowRevision, PartitionAuthorityProtocol.SecondProjection, false, []))];
         await SqlClusterProtocol.EqualAsync(rows, actual.Rows);
         await Assert.That(actual.Leaves.Length).IsEqualTo(PartitionAuthorityProtocol.LeafCount);
@@ -46,4 +44,8 @@ internal static class PartitionAuthorityResults
             await Assert.That(leaf.AccessPath).IsEqualTo(PartitionAuthorityProtocol.FullScan);
         }
     }
+
+    private static EntityRef Reference(PartitionAuthorityState state, int index, string id)
+        => state.Scenario.ExpectedReference(state.Scenario.Inputs.Single(input =>
+            input.Partition == state.Scenario.Partitions[index] && input.Id == id));
 }
